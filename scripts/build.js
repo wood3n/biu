@@ -1,6 +1,6 @@
 const path = require('path');
 const { build } = require('vite');
-const baseConfig = require('./vite.config');
+const baseConfig = require('./vite/vite.config');
 
 process.env.NODE_ENV === 'production';
 
@@ -30,5 +30,5 @@ process.env.NODE_ENV === 'production';
     process.exit(1);
   }
 
-  console.log(`build web successfully!`);
+  console.log('build web successfully!');
 })();

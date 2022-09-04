@@ -7,7 +7,7 @@
       "es2020",
       "dom"
     ] /* Specify a set of bundled library declaration files that describe the target runtime environment. */,
-    "jsx": "react" /* Specify what JSX code is generated. */,
+    "jsx": "react-jsx" /* Specify what JSX code is generated. */,
     /* Modules */
     "module": "es2020" /* Specify what module code is generated. */,
     "rootDir": "./" /* Specify the root folder within your source files. */,
@@ -17,7 +17,7 @@
     "allowJs": true /* Allow JavaScript files to be a part of your program. Use the `checkJS` option to get errors from these files. */,
     "noEmit": true /* Disable emitting files from a compilation. */,
     /* Interop Constraints */
-    "isolatedModules": true,
+    // "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
@@ -30,5 +30,5 @@
     }
   },
   "include": ["./src"],
-  "exclude": ["node_modules", "scripts", "dist"]
+  "exclude": ["node_modules", "dist"]
 }

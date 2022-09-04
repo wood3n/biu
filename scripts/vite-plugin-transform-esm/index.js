@@ -42,7 +42,7 @@ const VitePluginInlineChunk = () => {
      * @param {import('vite').IndexHtmlTransformContext} ctx 当前 bundle，chunk 等输出信息
      * @returns {import('vite').IndexHtmlTransformResult} 转换后的 html 字符串
      */
-    async transformIndexHtml(html, ctx) {
+    async transformIndexHtml(html) {
       const inlineHtml = posthtml()
         .use((tree) => postTransformHtmlPlugin(tree))
         .process(html, { sync: true }).html;

@@ -1,0 +1,26 @@
+.win-action {
+  height: 100%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  column-gap: 12px;
+  -webkit-app-region: no-drag;
+}
+
+.action-badge {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.action-badge svg {
+  width: 10px;
+  height: 10px;
+  vertical-align: -0.2em;
+  fill: #000;
+}

@@ -1,24 +1,30 @@
-import React from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
+
+interface Props {
+  children?: ReactNode;
+}
 
 interface State {
   hasError: boolean;
 }
 
-class ErrorBoundary extends React.Component<any, State> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false };
-  }
+class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false
+  };
 
-  static getDerivedStateFromError() {
-    // 更新 state 使下一次渲染能够显示降级后的 UI
+  public static getDerivedStateFromError(): State {
+    // Update state so the next render will show the fallback UI.
     return { hasError: true };
   }
 
-  render() {
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Uncaught error:', error, errorInfo);
+  }
+
+  public render() {
     if (this.state.hasError) {
-      // 你可以自定义降级后的 UI 并渲染
-      return <h1>Something went wrong.</h1>;
+      return <h1>Sorry.. there was an error</h1>;
     }
 
     return this.props.children;

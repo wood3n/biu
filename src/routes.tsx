@@ -1,4 +1,3 @@
-import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import BasicLayout from './Layout/BasicLayout';
 import LazyLoad from './components/LazyLoad';
@@ -14,7 +13,7 @@ interface Routes extends Omit<RouteObject, 'children'> {
 const routes: Routes[] = [
   {
     path: '/login',
-    element: <LazyLoad path="pages/Login" />,
+    element: <LazyLoad path='pages/Login' />,
   },
   {
     path: '/',
@@ -23,7 +22,7 @@ const routes: Routes[] = [
       {
         title: '主页',
         index: true,
-        element: <LazyLoad path="pages/Home" />,
+        element: <LazyLoad path='pages/Home' />,
       },
     ],
   },
