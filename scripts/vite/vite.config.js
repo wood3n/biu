@@ -2,7 +2,7 @@
 const path = require('path');
 const viteReact = require('@vitejs/plugin-react').default;
 const svgr = require('vite-plugin-svgr');
-// const { viteSingleFile } = require('vite-plugin-singlefile');
+const { viteSingleFile } = require('vite-plugin-singlefile');
 
 /**
  * @param {string} mode developement | production
@@ -18,9 +18,9 @@ module.exports = function getConfig(mode) {
     plugins: [
       viteReact(),
       // @ts-expect-error ts(2349)
-      svgr()
-      // viteSingleFile()
-    ],
+      svgr(),
+      mode === 'production' && viteSingleFile()
+    ].filter(Boolean),
     resolve: {
       alias: {
         '@': path.resolve(projectRootDir, './src')

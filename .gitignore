@@ -5,6 +5,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+.vscode
 
 # Runtime data
 pids
@@ -96,3 +97,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+# electron-builder cache
+electron-builder

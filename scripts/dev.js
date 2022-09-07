@@ -12,14 +12,7 @@ const electronmon = require('electronmon');
     ...baseConfig('development'),
     server: {
       open: false,
-      port,
-      // proxy: {
-      //   '^/api': {
-      //     target: 'https://netease-cloud-music-api-kohl-beta.vercel.app',
-      //     changeOrigin: true,
-      //     rewrite: (path) => path.replace(/^\/api/, ''),
-      //   },
-      // },
+      port
     },
   });
   await server.listen();

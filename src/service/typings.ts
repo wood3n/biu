@@ -18,8 +18,44 @@ declare module API {
     data: boolean;
   }
 
+  interface QrLoginkey {
+    data: {
+      code: number;
+      unikey: string;
+    }
+  }
+
+  interface QrLoginImg {
+    data: {
+      /**
+       * base64
+       */
+      qrimg: string;
+      qrUrl: string;
+    }
+  }
+
+  interface QrLoginRes {
+    code: number;
+    cookie: string;
+    message: string;
+  }
+
+  interface Account {
+    id: number;
+  }
+
+  interface Profile {
+    userId: number;
+  }
+
+  interface UserAccount {
+    account: Account;
+    profile: Profile;
+  }
+
   interface User {
-    username: string;
-    name: string;
+    level: number;
   }
 }
+

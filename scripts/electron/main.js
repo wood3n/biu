@@ -72,9 +72,9 @@ function createWindow() {
 
   // https://www.electronjs.org/docs/latest/api/app#appispackaged-readonly
   if (app.isPackaged) {
-    win.loadFile('index.html');
+    win.loadFile('./dist/web/index.html');
   } else {
-    win.loadURL(`http://127.0.0.1:${process.env.PORT}/`);
+    win.loadURL(`http://localhost:${process.env.PORT}/`);
     win.webContents.openDevTools({
       mode: 'bottom'
     });

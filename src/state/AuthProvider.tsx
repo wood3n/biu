@@ -1,13 +1,9 @@
-import { createContext, useState } from 'react';
-import { login as reqLogin, logout as reqLogout } from '@/service/api';
-
-interface SignIn {
-  (user: API.PhoneLoginData, cb: VoidFunction): Promise<void>;
-}
+import { createContext, useEffect, useState } from 'react';
+import { logout as reqLogout, getLoginStatus, getUserAccount, getUserProfile } from '@/service/api';
 
 interface AuthContextType {
   user: API.User | null;
-  login: SignIn;
+  refresh: (cookie: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -16,19 +12,51 @@ export const AuthContext = createContext<AuthContextType>(null!);
 function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<API.User | null>(null);
 
-  const login: SignIn = (data: API.PhoneLoginData, cb?: VoidFunction) => {
-    return reqLogin(data).then((user) => {
-      // @ts-expect-error ts(2345)
-      setUser(user);
+  const updateUser = async (id: number) => {
+    const user = await getUserProfile(id);
+    setUser(user);
+  };
+
+  const refresh = async (cookie: string) => {
+    const { data } = await getLoginStatus(cookie);
+    if (data?.profile?.userId) {
+      updateUser(data.profile.userId);
+    }
+  };
+
+  const checkLogin = async () => {
+    const { profile } = await getUserAccount();
+    if (profile?.userId) {
+      updateUser(profile.userId);
+    }
+  };
+
+  useEffect(() => {
+    checkLogin();
+  }, []);
+
+  useEffect(() => {
+    console.log(user);
+  });
+
+  const logout = (cb?: VoidFunction) => {
+    return reqLogout().then(() => {
+      setUser(null);
       cb?.();
     });
   };
 
-  const logout = (callback?: VoidFunction) => {
-    return reqLogout().then(callback);
-  };
-
-  return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        refresh,
+        logout
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export default AuthProvider;

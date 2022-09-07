@@ -6,6 +6,8 @@ const BasicLayout: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
 
+  console.log('render layout');
+
   if (!user) {
     return <Navigate to='/login' state={{ from: location }} replace />;
   }

@@ -27,7 +27,7 @@
   "scripts": {
     "dev": "node scripts/dev.js",
     "build:web": "node scripts/build.js",
-    "build": "pnpm build:web && node scripts/electron-build.js",
+    "build": "pnpm build:web && node scripts/electron/electron-build.js",
     "preview": "http-server ./dist/web",
     "prepare": "husky install"
   },

@@ -29,12 +29,12 @@ const options = {
   //   output: 'dist/artifacts/local',
   //   buildResources: 'installer/resources',
   // },
-  files: ['./dist/web', 'scripts/main.js'],
+  files: ['./dist/web', 'scripts/electron'],
   win: {
     // windows 直接打包成便携程序
     target: 'portable',
     // 用 png 就行，builder 会自动生成 ico 文件
-    icon: './public/rate.png',
+    icon: './public/electron/music.png',
   },
   // nsis: {
   //   deleteAppDataOnUninstall: true,

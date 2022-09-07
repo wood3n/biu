@@ -1,6 +1,8 @@
 import { RouteObject } from 'react-router-dom';
 import BasicLayout from './Layout/BasicLayout';
-import LazyLoad from './components/LazyLoad';
+import Home from '@/pages/Home';
+import Login from '@/pages/Login';
+import NotFound from '@/pages/NotFound';
 
 interface Routes extends Omit<RouteObject, 'children'> {
   title?: string;
@@ -12,20 +14,24 @@ interface Routes extends Omit<RouteObject, 'children'> {
  */
 const routes: Routes[] = [
   {
-    path: '/login',
-    element: <LazyLoad path='pages/Login' />,
-  },
-  {
     path: '/',
     element: <BasicLayout />,
     children: [
       {
         title: '主页',
         index: true,
-        element: <LazyLoad path='pages/Home' />,
+        element: <Home />,
       },
     ],
   },
+  {
+    path: 'login',
+    element: <Login />,
+  },
+  {
+    path: '*',
+    element: <NotFound />,
+  }
 ];
 
 export default routes;
