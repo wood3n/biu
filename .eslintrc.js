@@ -15,6 +15,12 @@ module.exports = {
     "@typescript-eslint/no-unsafe-assignment": 0,
     "@typescript-eslint/no-misused-promises": 0,
     "@typescript-eslint/no-explicit-any": 0,
-    "@typescript-eslint/no-unsafe-argument": 0
+    "@typescript-eslint/no-unsafe-argument": 0,
+    "space-infix-ops": 1,
+    "keyword-spacing": ["error", {
+      "before": true,
+      "after": true
+    }],
+    "object-curly-spacing": ["error", "always"]
   },
 };

@@ -1,22 +1,25 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { HashRouter, useRoutes } from 'react-router-dom';
-import { Alert } from 'antd';
-import AuthProvider from './state/AuthProvider';
 import routes from './routes';
-import 'antd/dist/antd.css';
+import { Alert, ConfigProvider } from 'antd';
+import zhCN from 'antd/es/locale/zh_CN';
+import AuthProvider from './state/AuthProvider';
+import '@/assets/style/theme.less';
 
-const Routes = () => useRoutes(routes);
+const App = () => useRoutes(routes);
 
 const root = createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
-    <Alert.ErrorBoundary>
-      <AuthProvider>
-        <HashRouter basename='/'>
-          <Routes />
-        </HashRouter>
-      </AuthProvider>
-    </Alert.ErrorBoundary>
+    <ConfigProvider locale={zhCN}>
+      <Alert.ErrorBoundary>
+        <AuthProvider>
+          <HashRouter basename='/'>
+            <App />
+          </HashRouter>
+        </AuthProvider>
+      </Alert.ErrorBoundary>
+    </ConfigProvider>
   </React.StrictMode>
 );

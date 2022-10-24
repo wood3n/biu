@@ -1,0 +1,36 @@
+.pageContainer {
+  height: auto;
+  overflow: auto;
+
+  .pageHeader {
+    background: rgb(2 0 36);
+    background: linear-gradient(90deg, rgb(2 0 36 / 100%) 0%, rgb(9 85 121 / 100%) 0%, rgb(0 212 255 / 100%) 100%);
+
+    .topBar {
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dailyGreet {
+      padding: 48px;
+      display: flex;
+      align-items: center;
+      column-gap: 24px;
+
+      .date {
+        padding: 12px;
+        border-radius: 8px;
+        width: 120px;
+        height: 120px;
+        background: rgb(2 0 36);
+        background: linear-gradient(90deg, rgb(2 0 36 / 100%) 0%, rgb(0 212 255 / 100%) 0%, rgb(0 125 255 / 100%) 100%);
+      }
+
+      .information {
+        height: 100%;
+      }
+    }
+  }
+}

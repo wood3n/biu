@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Image, message, Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/common/hooks';
 import { createQrKey, createQrCode, loginByQr } from '@/service/api';
 import { IMAGE_ERR } from '@/common/constants';
 import { checkError } from '@/common/utils';
@@ -11,18 +10,16 @@ import styles from './index.module.less';
 
 const LoginByQr: React.FC = () => {
   const navigate = useNavigate();
-  const { refresh: refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [src, setSrc] = useState<string>();
 
-  const { runAsync, cancel } = useRequest(loginByQr, {
+  const { run, cancel } = useRequest(loginByQr, {
     manual: true,
     pollingInterval: 3000,
-    onSuccess: ({ code, cookie }) => {
+    onSuccess: ({ code }) => {
       if (code === QRLoginCode.Success) {
         cancel();
         message.success('登录成功');
-        refreshUser(cookie);
         navigate('/', { replace: true });
       }
 
@@ -52,7 +49,7 @@ const LoginByQr: React.FC = () => {
     try {
       const key = await createQr();
       if (key) {
-        runAsync(key);
+        run(key);
       }
     } catch (err) {
       checkError(err);
@@ -61,8 +58,11 @@ const LoginByQr: React.FC = () => {
 
   useEffect(() => {
     checkLogin();
-    return cancel;
   }, []);
+
+  useEffect(() => {
+    return () => cancel();
+  }, [cancel]);
 
   return (
     <div className={styles.container}>

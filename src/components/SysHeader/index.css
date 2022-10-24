@@ -1,7 +1,0 @@
-.system-header {
-  background: hsl(239deg 89% 14%);
-
-  /* https://www.electronjs.org/docs/latest/tutorial/window-customization#set-custom-draggable-region */
-  -webkit-app-region: drag;
-  -webkit-user-select: none;
-}

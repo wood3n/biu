@@ -1,3 +1,5 @@
+import WindowAction from '@/components/WindowAction';
+import { Layout } from 'antd';
 import styles from './index.module.less';
 
 const Home = () => {

@@ -12,6 +12,14 @@
   "rules": {
     "selector-class-pattern": null,
     "property-no-vendor-prefix": null,
-    "function-no-unknown": null
+    "function-no-unknown": null,
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": [
+          "global"
+        ]
+      }
+    ]
   }
 }

@@ -7,8 +7,8 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
 function createWindow() {
-  const minWidth = 1280;
-  const minHeight = 720;
+  const minWidth = 1440;
+  const minHeight = 960;
   // 初始打开窗口的配置项
   const win = new BrowserWindow({
     title: 'rate',
@@ -26,7 +26,7 @@ function createWindow() {
     // 窗口居中
     center: true,
     // 无边框
-    frame: false,
+    frame: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     },
@@ -76,10 +76,11 @@ function createWindow() {
   } else {
     win.loadURL(`http://localhost:${process.env.PORT}/`);
     win.webContents.openDevTools({
-      mode: 'bottom'
+      mode: 'right'
     });
   }
 
+  // 隐藏拖动区域右键菜单
   // https://github.com/electron/electron/issues/26726#issuecomment-1143199775
   const WM_INITMENU = 0x0116;
   win.hookWindowMessage(WM_INITMENU, () => {

@@ -48,24 +48,29 @@ export const loginByQr = (key: string) => request.get<API.QrLoginRes>('/login/qr
 });
 
 /**
- * 获取登录状态
+ * 获取登录状态，返回 account, profile
  */
-export const getLoginStatus = (cookie?: string) => request.post<APIResponseNestData<API.UserAccount>>('/login/status', {
+export const getLoginStatus = (cookie?: string) => request.post<APIResponseNestData<API.UserStatus>>('/login/status', {
   cookie
 }, {
   useTimeStamp: true,
 });
 
 /**
- * 获取用户 id 等账号信息
+ * 获取用户 account, profile
  */
-export const getUserAccount = () => request.get<APIResponse<API.UserAccount>>('/user/account');
+export const getUserAccount = () => request.get<APIResponse<API.UserStatus>>('/user/account');
 
 /**
  * 获取用户详情
  */
-export const getUserProfile = (uid: number) => request.get<API.User>('/user/detail', {
+export const getUserProfile = (uid: number) => request.get<API.UserDetail>('/user/detail', {
   params: {
     uid
   }
 });
+
+/**
+ * 获取每日推荐歌曲
+ */
+export const getDailySongs = () => request.get<APIResponseNestData<API.DailySong[]>>('/recommend/songs');

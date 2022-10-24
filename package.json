@@ -25,10 +25,9 @@
   ],
   "main": "scripts/electron/main.js",
   "scripts": {
-    "dev": "node scripts/dev.js",
+    "start": "node scripts/dev.js",
     "build:web": "node scripts/build.js",
     "build": "pnpm build:web && node scripts/electron/electron-build.js",
-    "preview": "http-server ./dist/web",
     "prepare": "husky install"
   },
   "dependencies": {
@@ -43,11 +42,12 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router": "^6.3.0",
-    "react-router-dom": "^6.3.0",
+    "react-router-dom": "~6.4.0",
     "read-pkg": "^5.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.18.10",
+    "@svgr/rollup": "^6.3.1",
     "@types/minimist": "^1.2.2",
     "@types/node": "^17.0.45",
     "@types/react": "^18.0.17",
@@ -69,8 +69,7 @@
     "stylelint-config-standard": "^28.0.0",
     "typescript": "^4.7.4",
     "vite": "^3.0.5",
-    "vite-plugin-singlefile": "^0.11.1",
-    "vite-plugin-svgr": "^2.2.1"
+    "vite-plugin-singlefile": "^0.11.1"
   },
   "lint-staged": {
     "*.{ts,tsx}": "eslint --fix --cache"

@@ -1,7 +1,7 @@
 // @ts-check
 const path = require('path');
 const viteReact = require('@vitejs/plugin-react').default;
-const svgr = require('vite-plugin-svgr');
+const svgr = require('@svgr/rollup');
 const { viteSingleFile } = require('vite-plugin-singlefile');
 
 /**
@@ -18,7 +18,26 @@ module.exports = function getConfig(mode) {
     plugins: [
       viteReact(),
       // @ts-expect-error ts(2349)
-      svgr(),
+      svgr({
+        icon: 16,
+        svgProps: {
+          stroke: '#fff',
+          color: '#fff'
+        },
+        svgoConfig: {
+          plugins: [
+            'preset-default',
+            'removeUselessStrokeAndFill',
+            {
+              name: 'removeAttrs',
+              params: {
+                // remove stroke and fill in path：https://github.com/svg/svgo/issues/440#issuecomment-396329184
+                attrs: '*:(stroke|fill):((?!^none$).)*'
+              },
+            },
+          ]
+        }
+      }),
       mode === 'production' && viteSingleFile()
     ].filter(Boolean),
     resolve: {
@@ -29,9 +48,6 @@ module.exports = function getConfig(mode) {
     css: {
       preprocessorOptions: {
         less: {
-          modifyVars: {
-            'border-radius-base': '4px',
-          },
           javascriptEnabled: true,
           additionalData:  `@import "${path.resolve(projectRootDir, 'src/assets/style/global.less')}";`
         },
