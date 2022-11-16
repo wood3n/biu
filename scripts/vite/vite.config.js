@@ -49,7 +49,7 @@ module.exports = function getConfig(mode) {
       preprocessorOptions: {
         less: {
           javascriptEnabled: true,
-          additionalData:  `@import "${path.resolve(projectRootDir, 'src/assets/style/global.less')}";`
+          additionalData:  `@import "${path.resolve(projectRootDir, 'src/common/style/global.less')}";`
         },
       },
     },

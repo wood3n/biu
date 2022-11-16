@@ -73,4 +73,4 @@ export const getUserProfile = (uid: number) => request.get<API.UserDetail>('/use
 /**
  * 获取每日推荐歌曲
  */
-export const getDailySongs = () => request.get<APIResponseNestData<API.DailySong[]>>('/recommend/songs');
+export const getDailySongs = () => request.get<APIResponseNestData<API.DayRecommendData>>('/recommend/songs');

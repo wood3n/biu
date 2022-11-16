@@ -146,6 +146,11 @@ declare module API {
     blockBalance?: number;
   }
 
+  interface DayRecommendData {
+    dailySongs: DailySong[];
+    recommendReasons: RecommendReasons[];
+  }
+
   /**
    * 推荐歌曲详情
    */
@@ -269,5 +274,11 @@ declare module API {
     listenType?: number;
   }
 
+  export interface RecommendReasons {
+    songId?: number;
+    reason?: string;
+    reasonId?: string;
+    targetUrl?: null;
+  }
 }
 

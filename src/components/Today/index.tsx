@@ -8,7 +8,7 @@ interface Props {
  * 显示当前日期的组件
  */
 const Today: React.FC<Props> = ({
-  color = '#000'
+  color = '#ada9a9'
 }) => {
   const textStyle: React.CSSProperties = {
     fill: color,
