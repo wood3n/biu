@@ -18,6 +18,7 @@ specifiers:
   electron-store: ^8.1.0
   electronmon: ^2.0.2
   eslint-plugin-oxygen: ^1.0.5
+  howler: ^2.2.3
   html-minifier-terser: 7.0.0-beta.0
   http-server: ^14.1.1
   husky: ^7.0.4
@@ -50,6 +51,7 @@ dependencies:
   axios: 0.27.2
   classnames: 2.3.1
   electron-store: 8.1.0
+  howler: 2.2.3
   http-server: 14.1.1
   moment: 2.29.4
   portfinder: 1.0.29
@@ -4367,6 +4369,10 @@ packages:
     dependencies:
       lru-cache: 6.0.0
     dev: true
+
+  /howler/2.2.3:
+    resolution: {integrity: sha512-QM0FFkw0LRX1PR8pNzJVAY25JhIWvbKMBFM4gqk+QdV+kPXOhleWGCB6AiAF/goGjIHK2e/nIElplvjQwhr0jg==}
+    dev: false
 
   /html-encoding-sniffer/3.0.0:
     resolution: {integrity: sha512-oWv4T4yJ52iKrufjnyZPkrN0CH3QnrUqdB6In1g5Fe1mia8GmF36gnfNySxoZtxD5+NmYw1EElVXiBk93UeskA==}

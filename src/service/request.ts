@@ -5,7 +5,7 @@ import axios from 'axios';
  * NeteaseCloudMusicApi 自带服务端跨域头配置，因此本地 server 可以不配置 proxy
  */
 const request = axios.create({
-  baseURL: 'https://netease-cloud-music-api-kohl-beta.vercel.app',
+  baseURL: process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://netease-cloud-music-api-kohl-beta.vercel.app',
   timeout: 10000,
   withCredentials: true,
   params: {},

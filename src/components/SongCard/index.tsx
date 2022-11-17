@@ -9,10 +9,12 @@ import './index.less';
 interface Props {
   id?: string | number;
   pic?: string;
+  canPlay?: boolean;
   imgWidth?: string | number;
   imgHeight?: string | number;
   name?: string;
   arts?: API.Artist[];
+  onClick?: () => void;
 }
 
 /**
@@ -20,6 +22,7 @@ interface Props {
  */
 const SongCard: React.FC<Props> = ({
   pic,
+  canPlay,
   imgWidth = '100%',
   imgHeight = '100%',
   name,
@@ -33,9 +36,11 @@ const SongCard: React.FC<Props> = ({
           height={imgHeight}
           src={pic}
         />
-        <div className='song-play-btn'>
-          <a><IconPlay /></a>
-        </div>
+        {canPlay && (
+          <div className='song-play-btn'>
+            <a><IconPlay /></a>
+          </div>
+        )}
       </div>
       <Typography.Title level={5} ellipsis={{ tooltip: name }} style={{ maxWidth: '100%', marginBottom: 12 }}>{name}</Typography.Title>
       <div className='card-meta'>
