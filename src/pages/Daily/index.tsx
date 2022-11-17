@@ -1,5 +1,16 @@
 import React from 'react';
-import { Typography, Progress, Tooltip, Card, Table, Image, Space, Divider, Button } from 'antd';
+import {
+  Typography,
+  Progress,
+  Tooltip,
+  Card,
+  Table,
+  Image,
+  Space,
+  Divider,
+  Button,
+  Avatar
+} from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
 import NavigationButton from '@/components/NavigationButton';

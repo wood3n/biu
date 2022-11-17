@@ -74,3 +74,12 @@ export const getUserProfile = (uid: number) => request.get<API.UserDetail>('/use
  * 获取每日推荐歌曲
  */
 export const getDailySongs = () => request.get<APIResponseNestData<API.DayRecommendData>>('/recommend/songs');
+
+/**
+ * 私人 FM（3首）
+ */
+export const getPersonalFM = () => request.get<APIResponseNestData<API.PersonalFMSong[]>>('/personal_fm', {
+  params: {
+    timestamp: Date.now()
+  }
+});

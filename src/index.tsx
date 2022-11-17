@@ -14,12 +14,6 @@ root.render(
   <React.StrictMode>
     <ConfigProvider
       locale={zhCN}
-      getPopupContainer={node => {
-        if (node && node.parentNode) {
-          return node.parentNode as HTMLElement;
-        }
-        return document.body;
-      }}
     >
       <Alert.ErrorBoundary>
         <AuthProvider>
