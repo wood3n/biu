@@ -41,18 +41,68 @@ declare module API {
     message: string;
   }
 
-  interface UserAccount {
-    id: number;
+  export interface UserAccount {
+    code?: number;
+    account?: Account;
+    profile?: UserAccountProfile;
   }
 
-  interface UserProfile {
-    userId: number;
+  export interface Account {
+    id?: number;
+    userName?: string;
+    type?: number;
+    status?: number;
+    whitelistAuthority?: number;
+    createTime?: number;
+    tokenVersion?: number;
+    ban?: number;
+    baoyueVersion?: number;
+    donateVersion?: number;
+    vipType?: number;
+    anonimousUser?: boolean;
+    paidFee?: boolean;
   }
 
-  interface UserStatus {
-    account: UserProfile;
-    profile: UserProfile;
+  export interface UserAccountProfile {
+    userId?: number;
+    userType?: number;
+    nickname?: string;
+    avatarImgId?: number;
+    avatarUrl?: string;
+    backgroundImgId?: number;
+    backgroundUrl?: string;
+    signature?: string;
+    createTime?: number;
+    userName?: string;
+    accountType?: number;
+    shortUserName?: string;
+    birthday?: number;
+    authority?: number;
+    gender?: number;
+    accountStatus?: number;
+    province?: number;
+    city?: number;
+    authStatus?: number;
+    description?: null;
+    detailDescription?: null;
+    defaultAvatar?: boolean;
+    expertTags?: null;
+    experts?: null;
+    djStatus?: number;
+    locationStatus?: number;
+    vipType?: number;
+    followed?: boolean;
+    mutual?: boolean;
+    authenticated?: boolean;
+    lastLoginTime?: number;
+    lastLoginIP?: string;
+    remarkName?: null;
+    viptypeVersion?: number;
+    authenticationTypes?: number;
+    avatarDetail?: null;
+    anchor?: boolean;
   }
+
 
   /**
    * 用户详情
@@ -63,7 +113,7 @@ declare module API {
     userPoint?: UserPoint;
     mobileSign?: boolean;
     pcSign?: boolean;
-    profile?: Profile;
+    profile?: UserDetailProfile;
     peopleCanSeeMyPlayRecord?: boolean;
     bindings?: any[];
     adValid?: boolean;
@@ -75,7 +125,7 @@ declare module API {
     profileVillageInfo?: ProfileVillageInfo;
   }
 
-  export interface Profile {
+  export interface UserDetailProfile {
     privacyItemUnlimit?: PrivacyItemUnlimit;
     avatarDetail?: null;
     avatarImgIdStr?: string;
@@ -145,6 +195,19 @@ declare module API {
     status?: number;
     blockBalance?: number;
   }
+
+  export interface UserAcountStats {
+    programCount?: number;
+    djRadioCount?: number;
+    mvCount?: number;
+    artistCount?: number;
+    newProgramCount?: number;
+    createDjRadioCount?: number;
+    createdPlaylistCount?: number;
+    subPlaylistCount?: number;
+    code?: number;
+  }
+
 
   interface DayRecommendData {
     dailySongs: DailySong[];
@@ -397,6 +460,211 @@ declare module API {
     chargeUrl?: null;
     chargeMessage?: null;
     chargeType?: number;
+  }
+
+  export interface SearchDefaultDataType {
+    showKeyword?: string;
+    styleKeyword?: StyleKeyword;
+    realkeyword?: string;
+    searchType?: number;
+    action?: number;
+    alg?: string;
+    gap?: number;
+    source?: null;
+    bizQueryInfo?: string;
+    logInfo?: null;
+    imageUrl?: null;
+  }
+
+  export interface StyleKeyword {
+    keyWord?: string;
+    descWord?: null;
+  }
+
+  export interface SearchSuggestionRes {
+    result: SearchSuggestion;
+  }
+
+  export interface SearchSuggestion {
+    albums?: SearchAlbumElement[];
+    artists?: SearchArtist[];
+    songs?: SearchSong[];
+    playlists?: SearchPlayList[];
+    order?: string[];
+  }
+
+  export interface SearchAlbumElement {
+    id?: number;
+    name?: string;
+    artist?: Artist;
+    publishTime?: number;
+    size?: number;
+    copyrightId?: number;
+    status?: number;
+    picId?: number;
+    mark?: number;
+  }
+
+  export interface SearchArtist {
+    id?: number;
+    name?: string;
+    picUrl?: null | string;
+    alias?: string[];
+    albumSize?: number;
+    picId?: number;
+    fansGroup?: null;
+    img1v1Url?: string;
+    img1v1?: number;
+    alia?: string[];
+    trans?: null;
+    accountId?: number;
+  }
+
+  export interface SearchSong {
+    id?: number;
+    name?: string;
+    artists?: Artist[];
+    album?: SongAlbum;
+    duration?: number;
+    copyrightId?: number;
+    status?: number;
+    alias?: string[];
+    rtype?: number;
+    ftype?: number;
+    mvid?: number;
+    fee?: number;
+    rUrl?: null;
+    mark?: number;
+  }
+
+  export interface SongAlbum {
+    id?: number;
+    name?: string;
+    artist?: Artist;
+    publishTime?: number;
+    size?: number;
+    copyrightId?: number;
+    status?: number;
+    picId?: number;
+    mark?: number;
+    alia?: string[];
+  }
+
+  export interface SearchPlayList {
+    id?: number;
+    name?: string;
+    coverImgUrl?: string;
+    creator?: null;
+    subscribed?: boolean;
+    trackCount?: number;
+    userId?: number;
+    playCount?: number;
+    bookCount?: number;
+    specialType?: number;
+    officialTags?: null;
+    action?: null;
+    actionType?: null;
+    recommendText?: null;
+    score?: null;
+    description?: string;
+    highQuality?: boolean;
+  }
+
+  export interface PersonalPlayListReq {
+    uid: number;
+    limit: number;
+    offset: number;
+  }
+
+  export interface PersonalPlayList {
+    version?: string;
+    more?: boolean;
+    playlist?: PlaylistInfoType[];
+    code?: number;
+  }
+
+  export interface PlaylistInfoType {
+    subscribers?: any[];
+    subscribed?: boolean;
+    creator?: Creator;
+    artists?: null;
+    tracks?: null;
+    updateFrequency?: null | string;
+    backgroundCoverId?: number;
+    backgroundCoverUrl?: null | string;
+    titleImage?: number;
+    titleImageUrl?: null | string;
+    englishTitle?: null | string;
+    opRecommend?: boolean;
+    recommendInfo?: RecommendInfo | null;
+    subscribedCount?: number;
+    cloudTrackCount?: number;
+    userId?: number;
+    totalDuration?: number;
+    coverImgId?: number;
+    privacy?: number;
+    trackUpdateTime?: number;
+    trackCount?: number;
+    updateTime?: number;
+    commentThreadId?: string;
+    coverImgUrl?: string;
+    specialType?: number;
+    anonimous?: boolean;
+    createTime?: number;
+    highQuality?: boolean;
+    newImported?: boolean;
+    trackNumberUpdateTime?: number;
+    playCount?: number;
+    adType?: number;
+    description?: null | string;
+    tags?: string[];
+    ordered?: boolean;
+    status?: number;
+    name?: string;
+    id?: number;
+    coverImgId_str?: null | string;
+    sharedUsers?: null;
+    shareStatus?: null;
+    copied?: boolean;
+  }
+
+  export interface Creator {
+    defaultAvatar?: boolean;
+    province?: number;
+    authStatus?: number;
+    followed?: boolean;
+    avatarUrl?: string;
+    accountStatus?: number;
+    gender?: number;
+    city?: number;
+    birthday?: number;
+    userId?: number;
+    userType?: number;
+    nickname?: string;
+    signature?: string;
+    description?: string;
+    detailDescription?: string;
+    avatarImgId?: number;
+    backgroundImgId?: number;
+    backgroundUrl?: string;
+    authority?: number;
+    mutual?: boolean;
+    expertTags?: null;
+    experts?: null;
+    djStatus?: number;
+    vipType?: number;
+    remarkName?: null;
+    authenticationTypes?: number;
+    avatarDetail?: null;
+    anchor?: boolean;
+    avatarImgIdStr?: string;
+    backgroundImgIdStr?: string;
+    avatarImgId_str?: string;
+  }
+
+  export interface RecommendInfo {
+    alg?: string;
+    logInfo?: string;
   }
 
 }

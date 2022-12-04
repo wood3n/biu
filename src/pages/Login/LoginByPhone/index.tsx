@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Form, Input, Button, Space, message } from 'antd';
 import { useRequest } from 'ahooks';
-import { sendCaptcha } from '@/service/api';
+import { sendCaptcha } from '@/service';
 import { checkPhone, validatePhone, validateCaptcha } from '@/common/utils';
 import { ReactComponent as Phone } from '@/assets/images/phone.svg';
 import { ReactComponent as Captcha } from '@/assets/images/captcha.svg';

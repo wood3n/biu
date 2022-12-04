@@ -20,10 +20,6 @@ module.exports = function getConfig(mode) {
       // @ts-expect-error ts(2349)
       svgr({
         icon: 16,
-        svgProps: {
-          stroke: '#fff',
-          color: '#fff'
-        },
         svgoConfig: {
           plugins: [
             'preset-default',

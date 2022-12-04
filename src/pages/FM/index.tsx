@@ -8,7 +8,7 @@ import { EffectCoverflow } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import 'swiper/css/pagination';
-import { getPersonalFM } from '@/service/api';
+import { getPersonalFM } from '@/service';
 import './index.css';
 
 interface Song {

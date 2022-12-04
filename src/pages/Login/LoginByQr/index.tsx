@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Image, message, Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { createQrKey, createQrCode, loginByQr } from '@/service/api';
+import { createQrKey, createQrCode, loginByQr } from '@/service';
 import { IMAGE_ERR } from '@/common/constants';
 import { checkError } from '@/common/utils';
 import { useRequest } from 'ahooks';

@@ -50,7 +50,7 @@ export const loginByQr = (key: string) => request.get<API.QrLoginRes>('/login/qr
 /**
  * 获取登录状态，返回 account, profile
  */
-export const getLoginStatus = (cookie?: string) => request.post<APIResponseNestData<API.UserStatus>>('/login/status', {
+export const getLoginStatus = (cookie?: string) => request.post<APIResponseNestData<API.UserAccount>>('/login/status', {
   cookie
 }, {
   useTimeStamp: true,
@@ -59,16 +59,21 @@ export const getLoginStatus = (cookie?: string) => request.post<APIResponseNestD
 /**
  * 获取用户 account, profile
  */
-export const getUserAccount = () => request.get<APIResponse<API.UserStatus>>('/user/account');
+export const getUserAccount = () => request.get<APIResponse<API.UserAccount>>('/user/account');
 
 /**
  * 获取用户详情
  */
-export const getUserProfile = (uid: number) => request.get<API.UserDetail>('/user/detail', {
+export const getUserDetail = (uid: number) => request.get<API.UserDetail>('/user/detail', {
   params: {
     uid
   }
 });
+
+/**
+ * 获取用户歌单，收藏，mv, dj 等数量
+ */
+export const getUserAcountStats = () => request.get<API.UserAcountStats>('/user/subcount');
 
 /**
  * 获取每日推荐歌曲
@@ -82,4 +87,34 @@ export const getPersonalFM = () => request.get<APIResponseNestData<API.PersonalF
   params: {
     timestamp: Date.now()
   }
+});
+
+/**
+ * 获取默认搜索关键词
+ */
+export const getSearchDefaultKeys = () => request.get<APIResponseNestData<API.SearchDefaultDataType>>('/search/default');
+
+/**
+ * 获取搜索建议
+ */
+export const getSearchSuggestion = (keywords: string) => request.get<APIResponse<API.SearchSuggestionRes>>('/search/suggest', {
+  params: {
+    keywords
+  }
+});
+
+/**
+ * 获取搜索内容
+ */
+export const getSearchContent = (keywords: string) => request.get('/search', {
+  params: {
+    keywords
+  }
+});
+
+/**
+ * 获取个人歌单，包括喜欢的音乐，年度歌单，个人创建的歌单，收藏的歌单
+ */
+export const getPlayList = (params: API.PersonalPlayListReq) => request.get<API.PersonalPlayList>('/user/playlist', {
+  params
 });

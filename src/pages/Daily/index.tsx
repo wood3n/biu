@@ -14,12 +14,13 @@ import {
 import { ColumnsType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
 import NavigationButton from '@/components/NavigationButton';
-import AvatarChip from '@/components/AvatarChip';
+import Search from '@/components/Search';
 import moment from 'moment';
+import PageContainer from '@/components/PageContainer';
 import { ReactComponent as IconTimeClock } from '@/assets/icons/time.svg';
 import { ReactComponent as IconView } from '@/assets/icons/view.svg';
 import { useRequest } from 'ahooks';
-import { getDailySongs } from '@/service/api';
+import { getDailySongs } from '@/service';
 import styles from './index.module.less';
 
 const getRemainingTimePert = () => (moment().hour() / 24) * 100;
@@ -39,7 +40,9 @@ const Daily: React.FC = () => {
       render: (_, record: API.DailySong) => (
         <Image
           width={48}
+          height={48}
           src={record?.al?.picUrl}
+          loading='lazy'
           preview={{
             mask: <IconView color='#fff' fill='#fff'/>
           }}
@@ -98,12 +101,8 @@ const Daily: React.FC = () => {
   ];
 
   return (
-    <div className={styles.pageContainer}>
+    <PageContainer>
       <div className={styles.pageHeader}>
-        <div className={styles.topBar}>
-          <NavigationButton />
-          <AvatarChip />
-        </div>
         <div className={styles.dailyGreet}>
           <div className={styles.date}>
             <Progress
@@ -135,7 +134,7 @@ const Daily: React.FC = () => {
           pagination={false}
         />
       </Card>
-    </div>
+    </PageContainer>
   );
 };
 

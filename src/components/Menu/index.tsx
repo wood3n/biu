@@ -31,7 +31,7 @@ const SysMenu: React.FC<Props> = ({
   const location = useLocation();
   const navigate = useNavigate();
   const [defaultOpenKeys, setDefaultOpenKeys] = useState<string[]>([]);
-  const [currentItemKey, setCurrentItemKey] = useState<string>('');
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
   const items = useMemo(() => {
     const deepMap: (arr: MenuItem[]) => MenuItemProps[] = (arr) => arr.map(({
@@ -63,7 +63,7 @@ const SysMenu: React.FC<Props> = ({
 
   useEffect(() => {
     if (location.pathname) {
-      console.log(location.pathname);
+      setSelectedKeys([location.pathname]);
     }
   }, [location]);
 
@@ -74,15 +74,13 @@ const SysMenu: React.FC<Props> = ({
   return (
     <Menu
       className={styles.inlineMenu}
-      theme='dark'
       items={items}
       mode='inline'
-      // inlineIndent={12}
       openKeys={defaultOpenKeys}
       expandIcon={<>{null}</>}
-      selectedKeys={[currentItemKey]}
+      selectedKeys={selectedKeys}
       onClick={({ key }) => {
-        setCurrentItemKey(key);
+        setSelectedKeys([key]);
         navigate(key);
       }}
     />

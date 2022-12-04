@@ -4,6 +4,7 @@ import Home from '@/pages/Home';
 import Login from '@/pages/Login';
 import Daily from './pages/Daily';
 import FM from './pages/FM';
+import Search from './pages/Search';
 import NotFound from '@/pages/NotFound';
 
 /**
@@ -25,6 +26,10 @@ const routes: RouteObject[] = [
       {
         path: '/fm',
         element: <FM />
+      },
+      {
+        path: '/search',
+        element: <Search />
       }
     ],
   },

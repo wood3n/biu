@@ -1,24 +1,85 @@
-.basicLayout {
-  height: calc(100vh - 96px);
+.pageLoading {
   width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.basicLayout {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+
+  .main {
+    flex: 1;
+    background: #121212;
+  }
 
   .sider {
+    background: #000;
     border-inline-end: 1px solid rgb(255 255 255 / 10%);
 
-    .siderHeader {
-      &:extend(.drag);
+    :global {
+      .ant-layout-sider-children {
+        display: flex;
+        flex-direction: column;
+      }
+    }
 
-      padding: 12px 12px 24px;
+    .sideLine {
+      position: absolute;
+      height: 100%;
+      inset-inline-end: -4.5px;
+      right: -4.5px;
+      width: 9px;
+    }
+
+    .menuCollapseTrigger {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      inset-block-start: 60px;
+      inset-inline-end: -10px;
+      background: #f0f0f0;
+      z-index: 999;
+    }
+
+    .userAvatarChip {
+      margin: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      column-gap: 12px;
+      cursor: pointer;
+
+      .avatar {
+        flex: 0 0 auto;
+      }
+
+      .username {
+        display: inline-block;
+        font-size: 16px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        color: #fff;
+      }
     }
   }
 
+  .content {
+    overflow-y: auto;
+  }
+
   .sysFooter {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: @layout-footer-height;
-    border-top: 1px solid rgb(255 255 255 / 10%);
-    background: @black-bg;
+    background: #181818;
+    flex: 0 0 @playbar-height;
   }
 }

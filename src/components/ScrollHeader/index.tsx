@@ -1,7 +1,6 @@
 import React from 'react';
 import { Space } from 'antd';
 import Search from '@/components/Search';
-import AvatarChip from '@/components/AvatarChip';
 import NavigationButton from '@/components/NavigationButton';
 import styles from './index.module.less';
 
@@ -15,7 +14,9 @@ const Header: React.FC = () => {
         <NavigationButton />
         <Search />
       </Space>
-      <AvatarChip />
+      <div className={styles.headerRight}>
+
+      </div>
     </div>
   );
 };
