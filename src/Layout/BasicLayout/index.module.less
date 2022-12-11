@@ -9,46 +9,13 @@
 .basicLayout {
   height: 100vh;
   width: 100vw;
-  display: flex;
-  flex-direction: column;
-
-  .main {
-    flex: 1;
-    background: #121212;
-  }
 
   .sider {
-    background: #000;
-    border-inline-end: 1px solid rgb(255 255 255 / 10%);
-
     :global {
       .ant-layout-sider-children {
         display: flex;
         flex-direction: column;
       }
-    }
-
-    .sideLine {
-      position: absolute;
-      height: 100%;
-      inset-inline-end: -4.5px;
-      right: -4.5px;
-      width: 9px;
-    }
-
-    .menuCollapseTrigger {
-      position: absolute;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      inset-block-start: 60px;
-      inset-inline-end: -10px;
-      background: #f0f0f0;
-      z-index: 999;
     }
 
     .userAvatarChip {
@@ -69,7 +36,6 @@
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
-        color: #fff;
       }
     }
   }
@@ -78,8 +44,10 @@
     overflow-y: auto;
   }
 
-  .sysFooter {
-    background: #181818;
-    flex: 0 0 @playbar-height;
+  .footer {
+    flex: 0 0 90px;
+    height: 90px;
+    padding: 0;
+    border-top: 1px solid rgb(255 255 255 / 10%);
   }
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import { HashRouter, useRoutes } from 'react-router-dom';
 import routes from './routes';
 import { Alert, ConfigProvider, theme } from 'antd';
@@ -10,8 +10,7 @@ import 'antd/dist/reset.css';
 
 const App = () => useRoutes(routes);
 
-const root = createRoot(document.getElementById('root')!);
-root.render(
+ReactDOM.render(
   <React.StrictMode>
     <ConfigProvider
       locale={zhCN}
@@ -21,7 +20,11 @@ root.render(
           colorPrimary: '#1fdf64',
           colorTextBase: '#ffffff',
           colorBgBase: '#000000',
+          colorBgContainer: '#212121',
           colorBgLayout: '#000000',
+          wireframe: true,
+          colorLink: '#ffffff',
+          colorLinkHover: '#1fdf64'
         },
         components: {
           Layout: {
@@ -50,5 +53,6 @@ root.render(
         </AuthProvider>
       </Alert.ErrorBoundary>
     </ConfigProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
+  document.getElementById('root')
 );

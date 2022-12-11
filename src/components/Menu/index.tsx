@@ -76,8 +76,7 @@ const SysMenu: React.FC<Props> = ({
       className={styles.inlineMenu}
       items={items}
       mode='inline'
-      openKeys={defaultOpenKeys}
-      expandIcon={<>{null}</>}
+      // openKeys={defaultOpenKeys}
       selectedKeys={selectedKeys}
       onClick={({ key }) => {
         setSelectedKeys([key]);

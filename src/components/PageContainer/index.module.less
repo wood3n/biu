@@ -2,7 +2,6 @@
   display: grid;
   grid-template-areas: "main-view";
   position: relative;
-  overflow: auto;
 
   .pageHeader {
     grid-area: main-view;
@@ -15,6 +14,7 @@
     align-items: center;
     justify-content: space-between;
     box-shadow: 0 1px 6px 0 rgb(0 0 0 / 20%);
+    transition: background 0.3s;
 
     .headerLeft {
       display: flex;
@@ -23,7 +23,14 @@
     }
   }
 
+  .stickyObTarget {
+    position: absolute;
+    top: 1px;
+    height: 1px;
+  }
+
   .pageContent {
     grid-area: main-view;
+    margin-top: 58px;
   }
 }

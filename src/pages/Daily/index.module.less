@@ -1,48 +1,37 @@
-.pageContainer {
-  position: relative;
-  height: auto;
-  overflow: auto;
+.pageHeader {
+  background-image: linear-gradient(to right, #051937, #004774, #007b99, #00af92, #1fdf64);
 
-  .pageHeader {
-    background: rgb(2 0 36);
-    background: linear-gradient(90deg, rgb(2 0 36 / 100%) 0%, rgb(9 85 121 / 100%) 0%, rgb(0 212 255 / 100%) 100%);
-
-    .stickyTitle {
-      position: sticky;
-      top: 0;
-      width: 100%;
-      height: 48px;
-      padding: 12px;
-      display: flex;
-      align-items: center;
-      column-gap: 24px;
-    }
-
-    .dailyGreet {
-      padding: 48px;
-      display: flex;
-      align-items: center;
-      column-gap: 24px;
-
-      .date {
-        padding: 12px;
-        border-radius: 8px;
-        width: 120px;
-        height: 120px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      .information {
-        height: 100%;
-      }
-    }
-  }
-
-  .timeTitle {
+  .dailyGreet {
+    padding: 48px;
+    padding-top: 96px;
     display: flex;
-    justify-content: center;
     align-items: center;
+    column-gap: 24px;
+
+    .clock {
+      :global {
+        .react-clock__face {
+          border: 2px solid #fff;
+        }
+
+        .react-clock__mark__body {
+          background: #fff;
+        }
+
+        .react-clock__second-hand > .react-clock__second-hand__body {
+          background: #1fdf64;
+        }
+      }
+    }
+
+    .information {
+      height: 100%;
+    }
   }
+}
+
+.timeTitle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

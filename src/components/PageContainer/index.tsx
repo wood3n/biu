@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import NavigationButton from '@/components/NavigationButton';
 import Search from '@/components/Search';
 import WindowCornerAction from '@/components/WindowCornerAction';
@@ -7,7 +7,9 @@ import styles from './index.module.less';
 interface Props {
   children?: React.ReactNode;
   style?: React.CSSProperties;
+  headerStickyColor?: string;
   headerStyle?: React.CSSProperties;
+  contentStyle?: React.CSSProperties;
 }
 
 /**
@@ -16,11 +18,33 @@ interface Props {
 const PageContainer: React.FC<Props> = ({
   children,
   style,
-  headerStyle
+  headerStickyColor = '#121212',
+  headerStyle,
+  contentStyle
 }) => {
+  useEffect(() => {
+    const header = document.querySelector('#stickyHeader') as HTMLDivElement;
+    const observerTarget = document.querySelector('#sticky-observer-target');
+    const observer = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) {
+        header.style.boxShadow = '0 1px 6px 0 rgb(0 0 0 / 20%)';
+        header.style.background = headerStickyColor;
+      } else {
+        header.style.boxShadow = 'none';
+        header.style.background = 'none';
+      }
+    }, {
+      root: document.querySelector('.sticky-content-container'),
+    });
+
+    if (observerTarget) {
+      observer.observe(observerTarget);
+    }
+  }, []);
+
   return (
     <div className={styles.pageContainer} style={style}>
-      <div className={styles.pageHeader} style={headerStyle}>
+      <div id='stickyHeader' className={styles.pageHeader} style={headerStyle}>
         <div className={styles.headerLeft}>
           <NavigationButton />
           <Search />
@@ -29,7 +53,8 @@ const PageContainer: React.FC<Props> = ({
           <WindowCornerAction />
         </div>
       </div>
-      <div className={styles.pageContent}>
+      <div className={styles.stickyObTarget} id='sticky-observer-target'></div>
+      <div className={styles.pageContent} style={contentStyle}>
         {children}
       </div>
     </div>

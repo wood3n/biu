@@ -13,6 +13,7 @@ const portfinder = require('portfinder');
     ...baseConfig('development'),
     server: {
       open: false,
+      overlay: false,
       port
     },
   });

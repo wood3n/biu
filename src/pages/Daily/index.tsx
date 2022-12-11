@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Progress,
@@ -8,28 +8,34 @@ import {
   Image,
   Space,
   Divider,
-  Button,
-  Avatar
 } from 'antd';
 import { ColumnsType } from 'antd/es/table';
+import Clock from 'react-clock';
+import 'react-clock/dist/Clock.css';
 import { useNavigate } from 'react-router-dom';
-import NavigationButton from '@/components/NavigationButton';
-import Search from '@/components/Search';
 import moment from 'moment';
 import PageContainer from '@/components/PageContainer';
-import { ReactComponent as IconTimeClock } from '@/assets/icons/time.svg';
-import { ReactComponent as IconView } from '@/assets/icons/view.svg';
+import { BiTime } from 'react-icons/bi';
+import { MdOutlineRemoveRedEye } from 'react-icons/md';
 import { useRequest } from 'ahooks';
 import { getDailySongs } from '@/service';
 import styles from './index.module.less';
-
-const getRemainingTimePert = () => (moment().hour() / 24) * 100;
 
 /**
  * 每日推荐
  */
 const Daily: React.FC = () => {
   const navigate = useNavigate();
+  const [clock, setClock] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => setClock(new Date()), 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
   const { data, loading } = useRequest(getDailySongs);
 
   const columns: ColumnsType<API.DailySong> = [
@@ -44,7 +50,7 @@ const Daily: React.FC = () => {
           src={record?.al?.picUrl}
           loading='lazy'
           preview={{
-            mask: <IconView color='#fff' fill='#fff'/>
+            mask: <MdOutlineRemoveRedEye />
           }}
         />
       )
@@ -92,7 +98,7 @@ const Daily: React.FC = () => {
       }
     },
     {
-      title: <span className={styles.timeTitle}><IconTimeClock color='#fff'/></span>,
+      title: <BiTime size={16}/>,
       width: 80,
       align: 'center',
       dataIndex: 'dt',
@@ -100,28 +106,21 @@ const Daily: React.FC = () => {
     }
   ];
 
+  const timeLength = data?.data?.dailySongs?.reduce((acc, { dt }) => acc + (dt ?? 0), 0);
+
   return (
-    <PageContainer>
+    <PageContainer contentStyle={{ margin: 0 }}>
       <div className={styles.pageHeader}>
         <div className={styles.dailyGreet}>
-          <div className={styles.date}>
-            <Progress
-              type='circle'
-              strokeColor={{
-                '0%': '#fc466b',
-                '100%': '#3f5efb',
-              }}
-              percent={getRemainingTimePert()}
-              format={() => (
-                <Tooltip title='今日剩余2小时'>
-                  {moment().format('MM.DD')}
-                </Tooltip>
-              )}
-            />
-          </div>
+          <Clock className={styles.clock} value={clock} renderMinuteMarks={false} size={120}/>
           <div className={styles.information}>
-            <Typography.Title level={2}>云村的第 2359 天</Typography.Title>
-            <Typography.Text>32 首歌曲，1 h 15 min</Typography.Text>
+            <Typography.Title level={2}>{moment().format('YYYY-MM-DD')}</Typography.Title>
+            <Typography.Title level={5} type='secondary'>云村的第 2359 天</Typography.Title>
+            {data?.data?.dailySongs && (
+              <Typography.Text type='secondary'>
+                {`${data.data.dailySongs.length} 首歌曲，${moment.utc(moment.duration(timeLength).as('milliseconds')).format('h [小时] mm [分钟]')}`}
+              </Typography.Text>
+            )}
           </div>
         </div>
       </div>
