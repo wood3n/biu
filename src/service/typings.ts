@@ -667,5 +667,55 @@ declare module API {
     logInfo?: string;
   }
 
+  export interface UserFollows {
+    touchCount?: number;
+    more?: boolean;
+    follow?: Follow[];
+  }
+
+  export interface Follow {
+    py?: string;
+    time?: number;
+    accountStatus?: number;
+    avatarDetail?: AvatarDetail;
+    userType?: number;
+    followed?: boolean;
+    vipType?: number;
+    follows?: number;
+    remarkName?: null;
+    mutual?: boolean;
+    nickname?: string;
+    followeds?: number;
+    avatarUrl?: string;
+    authStatus?: number;
+    gender?: number;
+    expertTags?: null;
+    experts?: null;
+    userId?: number;
+    signature?: string;
+    vipRights?: VipRights;
+    blacklist?: boolean;
+    eventCount?: number;
+    playlistCount?: number;
+  }
+
+  export interface AvatarDetail {
+    userType?: number;
+    identityLevel?: number;
+    identityIconUrl?: string;
+  }
+
+  export interface VipRights {
+    associator?: Associator;
+    musicPackage?: Associator;
+    redVipAnnualCount?: number;
+    redVipLevel?: number;
+  }
+
+  export interface Associator {
+    vipCode?: number;
+    rights?: boolean;
+  }
+
 }
 

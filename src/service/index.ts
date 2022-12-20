@@ -59,12 +59,13 @@ export const getLoginStatus = (cookie?: string) => request.post<APIResponseNestD
 /**
  * 获取用户 account, profile
  */
-export const getUserAccount = () => request.get<APIResponse<API.UserAccount>>('/user/account');
+export const getUserAccount = () => request.get<APIResponse<API.UserAccount>>('/user/account', { useTimeStamp: true });
 
 /**
  * 获取用户详情
  */
 export const getUserDetail = (uid: number) => request.get<API.UserDetail>('/user/detail', {
+  useTimeStamp: true,
   params: {
     uid
   }
@@ -116,5 +117,12 @@ export const getSearchContent = (keywords: string) => request.get('/search', {
  * 获取个人歌单，包括喜欢的音乐，年度歌单，个人创建的歌单，收藏的歌单
  */
 export const getPlayList = (params: API.PersonalPlayListReq) => request.get<API.PersonalPlayList>('/user/playlist', {
+  params
+});
+
+/**
+ * 获取用户关注列表
+ */
+export const getUserFollows = (params: PageRequest<{ uid: number }>) => request.get<APIResponse<API.UserFollows>>('/user/follows', {
   params
 });

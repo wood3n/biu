@@ -20,7 +20,7 @@ ReactDOM.render(
           colorPrimary: '#1fdf64',
           colorTextBase: '#ffffff',
           colorBgBase: '#000000',
-          colorBgContainer: '#212121',
+          colorBgContainer: '#121212',
           colorBgLayout: '#000000',
           wireframe: true,
           colorLink: '#ffffff',

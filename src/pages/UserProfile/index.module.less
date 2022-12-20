@@ -1,9 +1,53 @@
-.pageHeader {
-  padding: 32px;
+.userProfile {
+  padding: 24px 24px 0;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: -50px;
 
-  .genderAndLv {
+  .userProfileLeft {
+    flex: 1;
+    display: flex;
+    column-gap: 48px;
+
+    .avatar {
+      position: relative;
+      top: -50px;
+      border-radius: 50%;
+      cursor: pointer;
+
+      .avatarMask {
+        border-radius: 50%;
+      }
+    }
+
+    .userInfo {
+      flex: 1;
+    }
+  }
+
+  .editBtn {
+    margin-left: auto;
     display: flex;
     align-items: center;
     column-gap: 12px;
+  }
+}
+
+.userCard {
+  background: #181818;
+
+  &:hover {
+    background: #282828;
+  }
+
+  :global {
+    .ant-card-body {
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      row-gap: 24px;
+      justify-content: center;
+      align-items: center;
+    }
   }
 }

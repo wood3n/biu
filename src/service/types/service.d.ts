@@ -1,4 +1,12 @@
 /**
+ * 分页请求参数
+ */
+type PageRequest<T> = T & {
+  limit: number;
+  offset: number;
+}
+
+/**
  * 接口响应
  */
 type APIResponse<T> = T & {

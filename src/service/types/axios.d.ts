@@ -5,6 +5,9 @@ import axios from 'axios';
  */
 declare module 'axios' {
   export interface AxiosRequestConfig {
+    /**
+     * 即时更新
+     */
     useTimeStamp?: boolean;
   }
 
