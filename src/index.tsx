@@ -6,6 +6,7 @@ import { Alert, ConfigProvider, theme } from 'antd';
 import zhCN from 'antd/es/locale/zh_CN';
 import AuthProvider from './store/LoginProvider';
 import UserProvider from './store/UserProvider';
+import AudioProvider from './store/AudioProvider';
 import 'antd/dist/reset.css';
 
 const App = () => useRoutes(routes);
@@ -46,9 +47,11 @@ ReactDOM.render(
       <Alert.ErrorBoundary>
         <AuthProvider>
           <UserProvider>
-            <HashRouter basename='/'>
-              <App />
-            </HashRouter>
+            <AudioProvider>
+              <HashRouter basename='/'>
+                <App />
+              </HashRouter>
+            </AudioProvider>
           </UserProvider>
         </AuthProvider>
       </Alert.ErrorBoundary>

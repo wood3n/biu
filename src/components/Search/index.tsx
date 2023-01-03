@@ -2,7 +2,7 @@ import React from 'react';
 import { Spin, Card, Typography, Button, Input, Dropdown } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useRequest } from 'ahooks';
-import { STORAGE_ITEM, remove } from '@/localforage';
+import { STORAGE_ITEM, remove } from '@/common/localforage';
 import {
   MdSearch,
   MdDeleteForever,
@@ -112,7 +112,7 @@ const Search: React.FC = () => {
               <div className={styles.searchHistory}>
                 <Typography.Title level={5} className={styles.title}>
                   搜索历史
-                  <a onClick={() => remove(STORAGE_ITEM.SEARCH)} className={styles.delBtn}><MdDeleteForever size={16}/></a>
+                  <a onClick={() => remove(STORAGE_ITEM.SEARCH_KEY)} className={styles.delBtn}><MdDeleteForever size={16}/></a>
                 </Typography.Title>
                 <div className={styles.searchKeys}>
                   <Button size='small'>

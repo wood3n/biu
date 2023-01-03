@@ -8,6 +8,7 @@ import {
   Image,
   Space,
   Divider,
+  Button
 } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import Clock from 'react-clock';
@@ -15,10 +16,12 @@ import 'react-clock/dist/Clock.css';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import PageContainer from '@/components/PageContainer';
-import { BiTime } from 'react-icons/bi';
-import { MdOutlineRemoveRedEye } from 'react-icons/md';
+import TableSongInfo from '@/components/TableSongInfo';
+import { CgLoadbarSound } from 'react-icons/cg';
+import { MdAccessTime } from 'react-icons/md';
 import { useRequest } from 'ahooks';
 import { getDailySongs } from '@/service';
+import { formatDuration } from '@/common/utils';
 import styles from './index.module.less';
 
 /**
@@ -40,73 +43,43 @@ const Daily: React.FC = () => {
 
   const columns: ColumnsType<API.DailySong> = [
     {
-      title: '封面',
+      title: '#',
+      dataIndex: 'index',
+      width: 10,
+      align: 'center',
+      render: (_, __, index) => index + 1
+    },
+    {
+      title: '歌曲',
       dataIndex: 'picUrl',
-      width: 50,
       render: (_, record: API.DailySong) => (
-        <Image
-          width={48}
-          height={48}
-          src={record?.al?.picUrl}
-          loading='lazy'
-          preview={{
-            mask: <MdOutlineRemoveRedEye />
-          }}
+        <TableSongInfo
+          picUrl={record?.al?.picUrl}
+          name={record?.name}
+          ar={record?.ar}
         />
       )
     },
     {
-      title: '歌名',
-      width: 200,
-      dataIndex: 'name',
-      render: v => (
-        <Typography.Text ellipsis={{ tooltip: v }} style={{ maxWidth: 200 }}>{v}</Typography.Text>
-      )
-    },
-    {
       title: '专辑',
-      width: 160,
+      width: 320,
       dataIndex: 'al',
       render: (_, record: API.DailySong) => (
         <Typography.Text ellipsis={{ tooltip: record?.al?.name }} style={{ maxWidth: 160 }}>
-          <a>{record?.al?.name ?? '-'}</a>
+          <a className={styles.tableLink}>{record?.al?.name ?? '-'}</a>
         </Typography.Text>
       )
     },
     {
-      title: '歌手',
-      width: 200,
-      dataIndex: 'singer',
-      render: (_, record: API.DailySong) => {
-        const arts = record?.ar?.map(({ name }) => name) ?? [];
-        return (
-          <Typography.Text
-            ellipsis={{
-              tooltip: (
-                <Space size={2} split={<Divider type='vertical' />}>
-                  {arts.map((name) => (
-                    <a key={name}>{name}</a>
-                  ))}
-                </Space>
-              )
-            }}
-            style={{ maxWidth: 80 }}
-          >
-            {(arts.length ?? 0) <= 1 ? <a>{arts}</a> : arts.join(' | ')}
-          </Typography.Text>
-        );
-      }
-    },
-    {
-      title: <BiTime size={16}/>,
-      width: 80,
+      title: <span className={styles.timeTitle}><MdAccessTime size={18}/></span>,
+      width: 88,
       align: 'center',
       dataIndex: 'dt',
-      render: (v) => moment.utc(moment.duration(v).as('milliseconds')).format('mm:ss')
+      render: (v) => formatDuration(v)
     }
   ];
 
-  const timeLength = data?.data?.dailySongs?.reduce((acc, { dt }) => acc + (dt ?? 0), 0);
+  const timeLength = data?.data?.dailySongs?.reduce((acc, { dt }) => acc + (dt ?? 0), 0) ?? 0;
 
   return (
     <PageContainer contentStyle={{ margin: 0 }}>
@@ -118,7 +91,7 @@ const Daily: React.FC = () => {
             <Typography.Title level={5} type='secondary'>云村的第 2359 天</Typography.Title>
             {data?.data?.dailySongs && (
               <Typography.Text type='secondary'>
-                {`${data.data.dailySongs.length} 首歌曲，${moment.utc(moment.duration(timeLength).as('milliseconds')).format('h [小时] mm [分钟]')}`}
+                {`${data.data.dailySongs.length} 首歌曲，${formatDuration(timeLength, 'h [小时] mm [分钟]')}`}
               </Typography.Text>
             )}
           </div>
@@ -131,6 +104,16 @@ const Daily: React.FC = () => {
           loading={loading}
           dataSource={data?.data?.dailySongs}
           pagination={false}
+          rowClassName={styles.tableRow}
+          onRow={(record) => {
+            return {
+              onClick: (event) => {}, // 点击行
+              onDoubleClick: (event) => {},
+              onContextMenu: (event) => {},
+              onMouseEnter: (event) => {}, // 鼠标移入行
+              onMouseLeave: (event) => {},
+            };
+          }}
         />
       </Card>
     </PageContainer>

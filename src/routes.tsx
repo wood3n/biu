@@ -6,6 +6,7 @@ import FM from './pages/FM';
 import Search from './pages/Search';
 import NotFound from '@/pages/NotFound';
 import UserProfile from '@/pages/UserProfile';
+import PlayList from './pages/PlayList';
 
 /**
  * layout 组件不能用 lazy load，生产环境会报错
@@ -30,6 +31,10 @@ const routes: RouteObject[] = [
       {
         path: '/user',
         element: <UserProfile />
+      },
+      {
+        path: '/playlist/:id',
+        element: <PlayList />
       }
     ],
   },

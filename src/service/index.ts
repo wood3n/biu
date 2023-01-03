@@ -126,3 +126,16 @@ export const getPlayList = (params: API.PersonalPlayListReq) => request.get<API.
 export const getUserFollows = (params: PageRequest<{ uid: number }>) => request.get<APIResponse<API.UserFollows>>('/user/follows', {
   params
 });
+
+
+/**
+ * 获取用户播放记录
+ */
+export const getUserRecord = (params: API.UserRecordReqParams) => request.get<APIResponse<API.UserPlayRecord>>('/user/record', {
+  params
+});
+
+/**
+ * 创建歌单
+ */
+export const createPlayList = (data: API.PlayListData) => request.post<APIResponse<API.CreatePlayListRes>>('/playlist/create', data);

@@ -7,7 +7,6 @@ import {
   Row,
   Col,
   Card,
-  Pagination,
   Button,
   Tabs,
   Upload,
@@ -16,9 +15,15 @@ import {
 import { useRequest } from 'ahooks';
 import PageContainer from '@/components/PageContainer';
 import { AiOutlineUser } from 'react-icons/ai';
-import { MdMale, MdModeEditOutline, MdModeEdit } from 'react-icons/md';
+import {
+  MdMale,
+  MdModeEditOutline,
+  MdModeEdit,
+  MdAccountCircle
+} from 'react-icons/md';
 import { useUser } from '@/common/hooks';
-import { getUserFollows } from '@/service';
+import MyFocus from './Focus';
+import MyPlayRank from './PlayRank';
 import styles from './index.module.less';
 
 /**
@@ -26,20 +31,6 @@ import styles from './index.module.less';
  */
 const UserProfile: React.FC = () => {
   const { user } = useUser();
-
-  const { data: userFollows, loading, runAsync: reqUserFollows } = useRequest(getUserFollows, { manual: true });
-
-  useEffect(() => {
-    if (user?.userInfo?.profile?.userId) {
-      Promise.all([
-        reqUserFollows({
-          uid: user.userInfo.profile.userId,
-          limit: 12,
-          offset: 0
-        })
-      ]);
-    }
-  }, [user?.userInfo?.profile?.userId]);
 
   return (
     <PageContainer contentStyle={{ margin: 0 }}>
@@ -73,12 +64,7 @@ const UserProfile: React.FC = () => {
             </span>
           </Upload>
           <Space direction='vertical' className={styles.userInfo}>
-            <Space align='center'>
-              <Typography.Title level={2} style={{ margin: 0 }}>{user?.userInfo?.profile?.nickname}</Typography.Title>
-              <Tag color='#108ee9'>
-                Lv {user?.userInfo?.level}
-              </Tag>
-            </Space>
+            <Typography.Title level={2} style={{ margin: 0 }}>{user?.userInfo?.profile?.nickname}</Typography.Title>
             <Typography.Paragraph ellipsis={{ rows: 3 }} style={{ width: '60%' }}>
               {user?.userInfo?.profile?.signature}
             </Typography.Paragraph>
@@ -90,54 +76,10 @@ const UserProfile: React.FC = () => {
         </Button>
       </div>
       <Card bordered={false}>
-        <Tabs
-          items={[
-            {
-              label: '关注',
-              key: '1',
-              children: 'Content of Tab Pane 1',
-            },
-            {
-              label: 'Tab 2',
-              key: '2',
-              children: 'Content of Tab Pane 2',
-            },
-            {
-              label: 'Tab 3',
-              key: '3',
-              children: 'Content of Tab Pane 3',
-            },
-          ]}
-        />
-        <Typography.Title level={3} style={{ marginBottom: 24 }}>
-          我关注的人 ({user?.userInfo?.profile?.follows ?? 0})
-        </Typography.Title>
-        <Row gutter={[24, 24]}>
-          {userFollows?.follow?.map(({ avatarUrl, nickname, userId }) => (
-            <Col
-              key={userId}
-              md={{ span: 6 }}
-              lg={{ span: 6 }}
-              xl={{ span: 4 }}
-              xxl={{ span: 4 }}
-            >
-              <Card bordered={false} hoverable className={styles.userCard}>
-                <Avatar
-                  size={120}
-                  src={avatarUrl}
-                  icon={<AiOutlineUser />}
-                />
-                <Typography.Title
-                  level={5}
-                  ellipsis={{ tooltip: nickname }}
-                >
-                  {nickname}
-                </Typography.Title>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-        <Pagination />
+        <MyPlayRank />
+      </Card>
+      <Card bordered={false}>
+        <MyFocus />
       </Card>
     </PageContainer>
   );

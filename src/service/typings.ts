@@ -717,5 +717,177 @@ declare module API {
     rights?: boolean;
   }
 
+  export interface UserRecordReqParams {
+    uid: number;
+    type: string;
+  }
+
+  export interface UserPlayRecord {
+    weekData?: UserRecordDatum[];
+    allData?: UserRecordDatum[]
+  }
+
+  export interface UserRecordDatum {
+    playCount?: number;
+    score?: number;
+    song: Song;
+  }
+
+  export interface Song {
+    name?: string;
+    id?: number;
+    pst?: number;
+    t?: number;
+    ar?: Ar[];
+    alia?: any[];
+    pop?: number;
+    st?: number;
+    rt?: string;
+    fee?: number;
+    v?: number;
+    crbt?: null;
+    cf?: string;
+    al?: Al;
+    dt?: number;
+    h?: H;
+    m?: H;
+    l?: H;
+    a?: null;
+    cd?: string;
+    no?: number;
+    rtUrl?: null;
+    ftype?: number;
+    rtUrls?: any[];
+    djId?: number;
+    copyright?: number;
+    s_id?: number;
+    mark?: number;
+    originCoverType?: number;
+    originSongSimpleData?: null;
+    single?: number;
+    noCopyrightRcmd?: null;
+    rtype?: number;
+    rurl?: null;
+    mst?: number;
+    cp?: number;
+    mv?: number;
+    publishTime?: number;
+    privilege?: Privilege;
+  }
+
+  export interface Al {
+    id?: number;
+    name?: string;
+    picUrl?: string;
+    tns?: any[];
+    pic_str?: string;
+    pic?: number;
+  }
+
+  export interface Ar {
+    id?: number;
+    name?: string;
+    tns?: any[];
+    alias?: any[];
+  }
+
+  export interface H {
+    br?: number;
+    fid?: number;
+    size?: number;
+    vd?: number;
+  }
+
+  export interface Privilege {
+    id?: number;
+    fee?: number;
+    payed?: number;
+    st?: number;
+    pl?: number;
+    dl?: number;
+    sp?: number;
+    cp?: number;
+    subp?: number;
+    cs?: boolean;
+    maxbr?: number;
+    fl?: number;
+    toast?: boolean;
+    flag?: number;
+    preSell?: boolean;
+    playMaxbr?: number;
+    downloadMaxbr?: number;
+    maxBrLevel?: string;
+    playMaxBrLevel?: string;
+    downloadMaxBrLevel?: string;
+    plLevel?: string;
+    dlLevel?: string;
+    flLevel?: string;
+    rscl?: null;
+    freeTrialPrivilege?: FreeTrialPrivilege;
+    chargeInfoList?: ChargeInfoList[];
+  }
+
+  export interface ChargeInfoList {
+    rate?: number;
+    chargeUrl?: null;
+    chargeMessage?: null;
+    chargeType?: number;
+  }
+
+  export interface PlayListData {
+    name?: string;
+    type?: 'NORMAL' | 'VIDEO' | 'SHARED'
+  }
+
+  export interface CreatePlayListRes {
+    id: number;
+    playlist?: Playlist;
+  }
+
+  export interface Playlist {
+    subscribers?: any[];
+    subscribed?: null;
+    creator?: null;
+    artists?: null;
+    tracks?: null;
+    updateFrequency?: null;
+    backgroundCoverId?: number;
+    backgroundCoverUrl?: null;
+    titleImage?: number;
+    titleImageUrl?: null;
+    englishTitle?: null;
+    opRecommend?: boolean;
+    recommendInfo?: null;
+    subscribedCount?: number;
+    cloudTrackCount?: number;
+    userId?: number;
+    totalDuration?: number;
+    coverImgId?: number;
+    privacy?: number;
+    trackUpdateTime?: number;
+    trackCount?: number;
+    updateTime?: number;
+    commentThreadId?: string;
+    coverImgUrl?: string;
+    specialType?: number;
+    anonimous?: boolean;
+    createTime?: number;
+    highQuality?: boolean;
+    newImported?: boolean;
+    trackNumberUpdateTime?: number;
+    playCount?: number;
+    adType?: number;
+    description?: null;
+    tags?: any[];
+    ordered?: boolean;
+    status?: number;
+    name?: string;
+    id?: number;
+    coverImgId_str?: string;
+    sharedUsers?: null;
+    shareStatus?: null;
+    copied?: boolean;
+  }
+
 }
 

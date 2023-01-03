@@ -5,9 +5,9 @@ import { useUser } from '@/common/hooks';
 import type { MenuProps } from 'antd/es/menu';
 import { getPlayList } from '@/service';
 import {
+  MdLibraryMusic,
   MdToday,
   MdRadio,
-  MdLibraryMusic,
   MdFavoriteBorder,
   MdHistory,
   MdOutlineAlbum,
@@ -16,75 +16,12 @@ import {
   MdOutlineWbCloudy,
   MdOutlineCollectionsBookmark
 } from 'react-icons/md';
+import ScrollArea from 'react-scrollbar';
+import CreatePlayListModal from '@/components/CreatePlayListModal';
+import CreatedListMenuTitle from './MenuTitle';
+import styles from './index.module.less';
 
 type MenuItem = Required<MenuProps>['items'][number];
-
-const getPlaylists = async (uid: number) => {
-  const { playlist } = await getPlayList({
-    uid,
-    limit: 30,
-    offset: 0
-  });
-
-  const basicMenus: MenuItem[] = [
-    {
-      label: '推荐',
-      key: 'recommend',
-      icon: <MdRecommend />,
-      children: [
-        {
-          label: '每日推荐',
-          icon: <MdToday />,
-          key: '/',
-        },
-        {
-          label: '私人 FM',
-          icon: <MdOutlineAlbum />,
-          key: '/fm'
-        },
-        {
-          label: '电台',
-          icon: <MdRadio />,
-          key: '/radio'
-        },
-      ]
-    },
-    {
-      label: '音乐库',
-      key: 'lib',
-      icon: <MdOutlineLibraryAdd />,
-      children: [
-        {
-          label: '收藏',
-          icon: <MdOutlineCollectionsBookmark />,
-          key: '/collection',
-        },
-        {
-          label: '云盘',
-          icon: <MdOutlineWbCloudy />,
-          key: '/cloud'
-        },
-        {
-          label: '最近播放',
-          icon: <MdHistory />,
-          key: '/history'
-        },
-      ]
-    }
-  ];
-
-  console.log(playlist);
-  return basicMenus.concat({
-    label: '我的歌单',
-    icon: <MdLibraryMusic />,
-    key: 'collect',
-    children: playlist?.map(({ id, name }, index) => ({
-      icon: index === 0 ? <MdFavoriteBorder /> : null,
-      label: name!,
-      key: String(id),
-    }))
-  }) ;
-};
 
 /**
  * 菜单导航
@@ -93,19 +30,109 @@ const SysMenu: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useUser();
-  const [items, setItems] = useState<MenuItem[]>();
-  const [openKeys, setOpenKeys] = useState<string[]>(['recommend', 'lib', 'collect']);
-  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const { token: { colorBgLayout } } = theme.useToken();
+  const [items, setItems] = useState<MenuItem[]>();
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  const [open, setOpen] = useState(false);
 
-  const updateMenus = async (uid: number) => {
-    const playlists = await getPlaylists(uid);
+  const getPlaylists = async () => {
+    // 获取所有歌单
+    const { playlist } = await getPlayList({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+      uid: user?.userInfo?.profile?.userId!,
+      limit: 1000,
+      offset: 0
+    });
+
+    const playListMenu: MenuItem[] = [];
+    const createdList = playlist?.filter(item => item.creator?.userId === user?.userInfo?.profile?.userId)?.slice(1);
+    if (createdList?.length) {
+      playListMenu.push({
+        label: <CreatedListMenuTitle addPlayList={() => setOpen(true)} className={styles.createdListMenuTitle} />,
+        icon: <MdLibraryMusic />,
+        key: 'created',
+        children: createdList?.map(({ id, name }) => ({
+          label: name!,
+          key: String(id),
+        }))
+      });
+    }
+
+    const collectList = playlist?.filter(item => item.creator?.userId !== user?.userInfo?.profile?.userId);
+    if (collectList?.length) {
+      playListMenu.push({
+        label: '收藏的歌单',
+        icon: <MdLibraryMusic />,
+        key: 'collect',
+        children: collectList?.map(({ id, name }) => ({
+          label: name!,
+          key: String(id),
+        }))
+      });
+    }
+
+    return [
+      {
+        label: '推荐',
+        key: 'recommend',
+        icon: <MdRecommend />,
+        children: [
+          {
+            label: '每日推荐',
+            icon: <MdToday />,
+            key: '/'
+          },
+          {
+            label: '私人 FM',
+            icon: <MdOutlineAlbum />,
+            key: '/fm'
+          },
+          {
+            label: '电台',
+            icon: <MdRadio />,
+            key: '/radio'
+          },
+        ]
+      },
+      {
+        label: '音乐库',
+        key: 'lib',
+        icon: <MdOutlineLibraryAdd />,
+        children: [
+          {
+            label: '喜欢',
+            icon: <MdFavoriteBorder />,
+            key: '/favorite'
+          },
+          {
+            label: '收藏',
+            icon: <MdOutlineCollectionsBookmark />,
+            key: '/collection'
+          },
+          {
+            label: '云盘',
+            icon: <MdOutlineWbCloudy />,
+            key: '/cloud'
+          },
+          {
+            label: '最近播放',
+            icon: <MdHistory />,
+            key: '/history'
+          },
+        ]
+      },
+      ...playListMenu
+    ] as MenuItem[];
+  };
+
+  const updateMenus = async () => {
+    const playlists = await getPlaylists();
     setItems(playlists);
   };
 
   useEffect(() => {
     if (user?.userInfo?.profile?.userId) {
-      updateMenus(user.userInfo.profile.userId);
+      updateMenus();
     }
   }, [user?.userInfo?.profile?.userId]);
 
@@ -116,24 +143,32 @@ const SysMenu: React.FC = () => {
   }, [location]);
 
   return (
-    <AntMenu
-      items={items}
-      mode='inline'
-      inlineIndent={12}
-      openKeys={openKeys}
-      // expandIcon={() => null}
-      selectedKeys={selectedKeys}
-      onClick={({ key }) => {
-        setSelectedKeys([key]);
-        navigate(key);
-      }}
-      onOpenChange={keys => setOpenKeys(keys)}
-      style={{
-        height: '100%',
-        overflowY: 'auto',
-        background: colorBgLayout
-      }}
-    />
+    <ScrollArea>
+      <AntMenu
+        items={items}
+        mode='inline'
+        inlineIndent={12}
+        openKeys={['recommend', 'lib', 'created', 'collect']}
+        expandIcon={() => null}
+        selectedKeys={selectedKeys}
+        onClick={({ key }) => {
+          setSelectedKeys([key]);
+          if (key.startsWith('/')) {
+            navigate(key);
+          } else {
+            navigate(`/playlist/${key}`);
+          }
+        }}
+        style={{
+          background: colorBgLayout
+        }}
+      />
+      <CreatePlayListModal
+        open={open}
+        onClose={() => setOpen(false)}
+        refreshMenu={updateMenus}
+      />
+    </ScrollArea>
   );
 };
 
