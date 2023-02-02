@@ -1,0 +1,45 @@
+.pageHeader {
+  background-image: linear-gradient(to right, #051937, #004774, #007b99, #00af92, #1fdf64);
+
+  .dailyGreet {
+    padding: 48px;
+    padding-top: 96px;
+    display: flex;
+    align-items: center;
+    column-gap: 24px;
+
+    .clock {
+      :global {
+        .react-clock__face {
+          border: 2px solid #fff;
+        }
+
+        .react-clock__mark__body {
+          background: #fff;
+        }
+
+        .react-clock__second-hand > .react-clock__second-hand__body {
+          background: #1fdf64;
+        }
+      }
+    }
+
+    .information {
+      height: 100%;
+    }
+  }
+}
+
+.tableRow {
+  cursor: pointer;
+}
+
+.tableLink {
+  color: #b3b3b3;
+}
+
+.timeTitle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

@@ -1,0 +1,141 @@
+import request from './request';
+
+/**
+ * 发送验证码
+ */
+export const sendCaptcha = (phone: string) => request.get<API.BaseRes>('/captcha/sent', {
+  params: {
+    phone
+  }
+});
+
+/**
+ * 登录
+ */
+export const login = (data: API.PhoneLoginData) => request.post<API.PhoneLoginData>('/login/cellphone', data);
+
+/**
+ * 退出登录
+ */
+export const logout = () => request.get('/logout');
+
+/**
+ * 生成二维码key
+ */
+export const createQrKey = () => request.get<API.QrLoginkey>('/login/qr/key', { useTimeStamp: true });
+
+/**
+ * 生成二维码 base64 编码
+ */
+export const createQrCode = (key: string) => request.get<API.QrLoginImg>('/login/qr/create', {
+  useTimeStamp: true,
+  params: {
+    key,
+    qrimg: true
+  }
+});
+
+/**
+ * 二维码登录状态检测
+ * 800 为二维码过期,801 为等待扫码,802 为待确认,803 为授权登录成功(803 状态码下会返回 cookies)
+ * 成功登录会写入 cookie
+ */
+export const loginByQr = (key: string) => request.get<API.QrLoginRes>('/login/qr/check', {
+  useTimeStamp: true,
+  params: {
+    key
+  }
+});
+
+/**
+ * 获取登录状态，返回 account, profile
+ */
+export const getLoginStatus = (cookie?: string) => request.post<APIResponseNestData<API.UserAccount>>('/login/status', {
+  cookie
+}, {
+  useTimeStamp: true,
+});
+
+/**
+ * 获取用户 account, profile
+ */
+export const getUserAccount = () => request.get<APIResponse<API.UserAccount>>('/user/account', { useTimeStamp: true });
+
+/**
+ * 获取用户详情
+ */
+export const getUserDetail = (uid: number) => request.get<API.UserDetail>('/user/detail', {
+  useTimeStamp: true,
+  params: {
+    uid
+  }
+});
+
+/**
+ * 获取用户歌单，收藏，mv, dj 等数量
+ */
+export const getUserAcountStats = () => request.get<API.UserAcountStats>('/user/subcount');
+
+/**
+ * 获取每日推荐歌曲
+ */
+export const getDailySongs = () => request.get<APIResponseNestData<API.DayRecommendData>>('/recommend/songs');
+
+/**
+ * 私人 FM（3首）
+ */
+export const getPersonalFM = () => request.get<APIResponseNestData<API.PersonalFMSong[]>>('/personal_fm', {
+  params: {
+    timestamp: Date.now()
+  }
+});
+
+/**
+ * 获取默认搜索关键词
+ */
+export const getSearchDefaultKeys = () => request.get<APIResponseNestData<API.SearchDefaultDataType>>('/search/default');
+
+/**
+ * 获取搜索建议
+ */
+export const getSearchSuggestion = (keywords: string) => request.get<APIResponse<API.SearchSuggestionRes>>('/search/suggest', {
+  params: {
+    keywords
+  }
+});
+
+/**
+ * 获取搜索内容
+ */
+export const getSearchContent = (keywords: string) => request.get('/search', {
+  params: {
+    keywords
+  }
+});
+
+/**
+ * 获取个人歌单，包括喜欢的音乐，年度歌单，个人创建的歌单，收藏的歌单
+ */
+export const getPlayList = (params: API.PersonalPlayListReq) => request.get<API.PersonalPlayList>('/user/playlist', {
+  params
+});
+
+/**
+ * 获取用户关注列表
+ */
+export const getUserFollows = (params: PageRequest<{ uid: number }>) => request.get<APIResponse<API.UserFollows>>('/user/follows', {
+  params
+});
+
+
+/**
+ * 获取用户播放记录
+ */
+export const getUserRecord = (params: API.UserRecordReqParams) => request.get<APIResponse<API.UserPlayRecord>>('/user/record', {
+  params
+});
+
+/**
+ * 创建歌单
+ */
+export const createPlayList = (data: API.PlayListData) => request.post<APIResponse<API.CreatePlayListRes>>('/playlist/create', data);

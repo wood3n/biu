@@ -1,31 +1,50 @@
-import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import BasicLayout from './Layout/BasicLayout';
-import LazyLoad from './components/LazyLoad';
-
-interface Routes extends Omit<RouteObject, 'children'> {
-  title?: string;
-  children?: Routes[];
-}
+import Login from '@/pages/Login';
+import Daily from './pages/Daily';
+import FM from './pages/FM';
+import Search from './pages/Search';
+import NotFound from '@/pages/NotFound';
+import UserProfile from '@/pages/UserProfile';
+import PlayList from './pages/PlayList';
 
 /**
  * layout 组件不能用 lazy load，生产环境会报错
  */
-const routes: Routes[] = [
-  {
-    path: '/login',
-    element: <LazyLoad path="pages/Login" />,
-  },
+const routes: RouteObject[] = [
   {
     path: '/',
     element: <BasicLayout />,
     children: [
       {
-        title: '主页',
         index: true,
-        element: <LazyLoad path="pages/Home" />,
+        element: <Daily />
       },
+      {
+        path: '/fm',
+        element: <FM />
+      },
+      {
+        path: '/search',
+        element: <Search />
+      },
+      {
+        path: '/user',
+        element: <UserProfile />
+      },
+      {
+        path: '/playlist/:id',
+        element: <PlayList />
+      }
     ],
+  },
+  {
+    path: '/login',
+    element: <Login />,
+  },
+  {
+    path: '*',
+    element: <NotFound />,
   },
 ];
 

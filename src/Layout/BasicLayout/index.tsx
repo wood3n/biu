@@ -1,48 +1,83 @@
 import React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
+import { Outlet, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { useLogin, useUser } from '@/common/hooks';
+import { getLoginStatus, getUserDetail, getUserAcountStats } from '@/service';
+import { useRequest } from 'ahooks';
+import { Spin, Layout, Avatar, theme } from 'antd';
+import Menu from './Menu';
+import { AiOutlineUser } from 'react-icons/ai';
+import styles from './index.module.less';
 
-/*
- * 基础布局
- * 1. 顶部导航
- * 2. 顶部面包屑
- * 3. 左侧菜单栏
- * 4.
- */
+const { Sider, Footer, Content } = Layout;
+
 const BasicLayout: React.FC = () => {
+  const { update: updateAccount } = useLogin();
+  const { user, update: updateUser } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { token: { colorBgContainer, colorBgLayout, colorTextBase } } = theme.useToken();
+
+  // 获取登录状态
+  const { loading, data } = useRequest(getLoginStatus, {
+    onSuccess: async ({ data: loginStatus }) => {
+      if (loginStatus?.profile && loginStatus.profile.userId) {
+        // 用户详情信息
+        const userDetail = await getUserDetail(loginStatus.profile.userId);
+        // 歌单等数量
+        const userAccountStats = await getUserAcountStats();
+        updateAccount({
+          account: loginStatus.account,
+          profile: loginStatus.profile
+        });
+
+        updateUser({
+          userInfo: userDetail,
+          userAccountStats
+        });
+      }
+    }
+  });
+
+  if (loading) {
+    return <div className={styles.pageLoading}><Spin size='large'/></div>;
+  }
+
+  if (!data?.data?.profile) {
+    return <Navigate to='/login' state={{ from: location }} replace />;
+  }
 
   return (
-    <div>
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
-          <Toolbar>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 2 }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              News
-            </Typography>
-            <Button color="inherit" onClick={() => navigate('/login')}>
-              Login
-            </Button>
-          </Toolbar>
-        </AppBar>
-      </Box>
-      <Outlet />
-    </div>
+    <Layout className={styles.basicLayout} style={{ color: colorTextBase }}>
+      <Layout className={styles.main}>
+        <Sider
+          collapsible
+          trigger={null}
+          className={styles.sider}
+          style={{
+            background: colorBgLayout
+          }}
+        >
+          <div
+            className={styles.userAvatarChip}
+            onClick={() => navigate('/user')}
+          >
+            <Avatar
+              src={user?.userInfo?.profile?.avatarUrl}
+              icon={<AiOutlineUser />}
+              className={styles.avatar}
+            />
+            <span className={styles.username}>
+              {user?.userInfo?.profile?.nickname}
+            </span>
+          </div>
+          <Menu />
+        </Sider>
+        <Content className={styles.content} style={{ background: colorBgContainer }}>
+          <Outlet />
+        </Content>
+      </Layout>
+      <Footer className={styles.footer} style={{ background: colorBgContainer }}>Footer</Footer>
+    </Layout>
   );
 };
 

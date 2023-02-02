@@ -1,0 +1,52 @@
+.image-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+  margin-bottom: 12px;
+
+  .song-play-btn {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: none;
+    padding: 24px;
+
+    svg {
+      color: @base-color;
+      fill: @base-color;
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  &:hover .song-play-btn {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+}
+
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .song-action-container {
+    display: flex;
+    align-items: center;
+    column-gap: 24px;
+
+    .song-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover svg {
+        color: @base-color;
+        fill: @base-color;
+      }
+    }
+  }
+}

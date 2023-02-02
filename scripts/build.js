@@ -1,6 +1,6 @@
 const path = require('path');
 const { build } = require('vite');
-const baseConfig = require('./vite.config');
+const baseConfig = require('./vite/vite.config');
 
 process.env.NODE_ENV === 'production';
 
@@ -17,8 +17,6 @@ process.env.NODE_ENV === 'production';
         outDir,
         // 生成的 js，css 等文件相对于 outDir 的路径
         assetsDir: '.',
-        // disable css split chunks
-        // cssCodeSplit: false,
         minify: true,
         target: ['es2020'],
         emptyOutDir: true,
@@ -30,5 +28,5 @@ process.env.NODE_ENV === 'production';
     process.exit(1);
   }
 
-  console.log(`build web successfully!`);
+  console.log('build web successfully!');
 })();

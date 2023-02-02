@@ -1,16 +1,27 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import Button from '@mui/material/Button';
-import LoginIcon from '@mui/icons-material/Login';
+import { Row, Col } from 'antd';
+import WindowCornerAction from '@/components/WindowCornerAction';
+import { ReactComponent as Music } from '@/assets/images/Music.svg';
+import LoginByQr from './LoginByQr';
+import styles from './index.module.less';
 
 const Login: React.FC = () => {
-  const navigate = useNavigate();
 
   return (
-    <Button onClick={() => navigate('/home')}>
-      <LoginIcon />
-      登录
-    </Button>
+    <Row className={styles.login}>
+      <Col span={16} className={styles.loginSider} />
+      <Col span={8}>
+        <div className={styles.winAction}>
+          <WindowCornerAction />
+        </div>
+        <div className={styles.loginForm}>
+          <div className={styles.logo}>
+            <span><Music width={48} height={48} /></span>
+          </div>
+          <LoginByQr />
+        </div>
+      </Col>
+    </Row>
   );
 };
 
