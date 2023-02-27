@@ -22,7 +22,7 @@ module.exports = function getConfig(mode) {
         icon: 16,
         svgProps: {
           stroke: '#fff',
-          color: '#fff'
+          color: '#fff',
         },
         // svgoConfig: {
         //   plugins: [
@@ -38,18 +38,18 @@ module.exports = function getConfig(mode) {
         //   ]
         // }
       }),
-      mode === 'production' && viteSingleFile()
+      mode === 'production' && viteSingleFile(),
     ].filter(Boolean),
     resolve: {
       alias: {
-        '@': path.resolve(projectRootDir, './src')
+        '@': path.resolve(projectRootDir, './src'),
       },
     },
     css: {
       preprocessorOptions: {
         less: {
           javascriptEnabled: true,
-          additionalData:  `@import "${path.resolve(projectRootDir, 'src/common/style/global.less')}";`
+          additionalData: `@import "${path.resolve(projectRootDir, 'src/common/style/global.less')}";`,
         },
       },
     },

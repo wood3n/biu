@@ -127,7 +127,6 @@ export const getUserFollows = (params: PageRequest<{ uid: number }>) => request.
   params
 });
 
-
 /**
  * 获取用户播放记录
  */
@@ -139,3 +138,7 @@ export const getUserRecord = (params: API.UserRecordReqParams) => request.get<AP
  * 创建歌单
  */
 export const createPlayList = (data: API.PlayListData) => request.post<APIResponse<API.CreatePlayListRes>>('/playlist/create', data);
+
+export { getProgramRecommend } from './program-recommend';
+export { getRecommendResource } from './recommend-resource';
+export { getPersonalizedNewsong } from './personalized-newsong';

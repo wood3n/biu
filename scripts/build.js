@@ -2,7 +2,7 @@ const path = require('path');
 const { build } = require('vite');
 const baseConfig = require('./vite/vite.config');
 
-process.env.NODE_ENV === 'production';
+process.env.NODE_ENV = 'production';
 
 (async () => {
   console.log('Start build web resources...');

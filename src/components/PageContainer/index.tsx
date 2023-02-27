@@ -20,7 +20,7 @@ const PageContainer: React.FC<Props> = ({
   style,
   headerStickyColor = '#121212',
   headerStyle,
-  contentStyle
+  contentStyle,
 }) => {
   useEffect(() => {
     const header = document.querySelector('#stickyHeader') as HTMLDivElement;
@@ -44,7 +44,7 @@ const PageContainer: React.FC<Props> = ({
 
   return (
     <div className={styles.pageContainer} style={style}>
-      <div id='stickyHeader' className={styles.pageHeader} style={headerStyle}>
+      <div id="stickyHeader" className={styles.pageHeader} style={headerStyle}>
         <div className={styles.headerLeft}>
           <NavigationButton />
           <Search />
@@ -53,7 +53,7 @@ const PageContainer: React.FC<Props> = ({
           <WindowCornerAction />
         </div>
       </div>
-      <div className={styles.stickyObTarget} id='sticky-observer-target'></div>
+      <div className={styles.stickyObTarget} id="sticky-observer-target" />
       <div className={styles.pageContent} style={contentStyle}>
         {children}
       </div>

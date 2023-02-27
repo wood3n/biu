@@ -1,0 +1,36 @@
+[
+	{
+		"path": "/captcha/sent",
+		"method": "get",
+		"desc": "发送验证码",
+		"params": {
+			"phone": "string"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/captcha/sent",
+		"method": "get",
+		"desc": "发送验证码",
+		"params": {
+			"phone": "string"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/captcha/verify",
+		"method": "post",
+		"desc": "验证验证码",
+		"data": {
+			"phone": "string",
+			"captcha": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/user/cloud/detail",
+		"method": "get",
+		"desc": "云盘数据详情",
+		"parsed": true
+	}
+]

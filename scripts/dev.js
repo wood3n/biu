@@ -1,20 +1,20 @@
 const electronPath = require('electron');
 const { spawn } = require('child_process');
 const { createServer } = require('vite');
-const baseConfig = require('./vite/vite.config');
 const portfinder = require('portfinder');
+const baseConfig = require('./vite/vite.config');
 
 (async () => {
   console.log('Start vite server...');
 
-  process.env.NODE_ENV === 'development';
+  process.env.NODE_ENV = 'development';
   const port = await portfinder.getPortPromise();
   const server = await createServer({
     ...baseConfig('development'),
     server: {
       open: false,
       overlay: false,
-      port
+      port,
     },
   });
   await server.listen();
@@ -46,9 +46,10 @@ const portfinder = require('portfinder');
       electronProcess.kill();
       process.exit(code);
     });
+    return Promise.resolve();
   } catch (err) {
     return Promise.reject(err);
   }
-})().catch(err => {
+})().catch((err) => {
   console.log(err);
 });

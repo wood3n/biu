@@ -1,6 +1,7 @@
 import { RouteObject } from 'react-router-dom';
 import BasicLayout from './Layout/BasicLayout';
 import Login from '@/pages/Login';
+import Home from '@/pages/Home';
 import Daily from './pages/Daily';
 import FM from './pages/FM';
 import Search from './pages/Search';
@@ -18,6 +19,10 @@ const routes: RouteObject[] = [
     children: [
       {
         index: true,
+        element: <Home />
+      },
+      {
+        path: '/daily',
         element: <Daily />
       },
       {

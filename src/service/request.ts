@@ -12,18 +12,17 @@ const request = axios.create({
 });
 
 // 对 post 请求的 url 添加时间戳
-request.interceptors.request.use(({ method, params, useTimeStamp, ...rest }) => {
-  if (useTimeStamp) {
-    params.timestamp = Date.now();
-  }
+request.interceptors.request.use(({
+  method, params, useTimeStamp, ...rest
+}) => ({
+  method,
+  params: {
+    ...params,
+    timestamp: Date.now(),
+  },
+  ...rest,
+}));
 
-  return {
-    method,
-    params,
-    ...rest
-  };
-});
-
-request.interceptors.response.use(res => res.data);
+request.interceptors.response.use((res) => res.data);
 
 export default request;

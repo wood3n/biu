@@ -208,11 +208,265 @@ declare module API {
     code?: number;
   }
 
+  /**
+   * 每日推荐歌单
+   */
+  export interface DailyRecommendPlayList {
+    code?: number;
+    featureFirst?: boolean;
+    haveRcmdSongs?: boolean;
+    recommend?: Recommend[];
+  }
+
+  export interface Recommend {
+    id?: number;
+    type?: number;
+    name?: string;
+    copywriter?: string;
+    picUrl?: string;
+    playcount?: number;
+    createTime?: number;
+    creator?: Creator;
+    trackCount?: number;
+    userId?: number;
+    alg?: string;
+  }
+
+  export interface Creator {
+    avatarImgId?: number;
+    backgroundImgId?: number;
+    mutual?: boolean;
+    remarkName?: null;
+    backgroundImgIdStr?: string;
+    detailDescription?: string;
+    defaultAvatar?: boolean;
+    expertTags?: null;
+    djStatus?: number;
+    avatarImgIdStr?: string;
+    followed?: boolean;
+    backgroundUrl?: string;
+    accountStatus?: number;
+    vipType?: number;
+    province?: number;
+    avatarUrl?: string;
+    authStatus?: number;
+    userType?: number;
+    nickname?: string;
+    gender?: number;
+    birthday?: number;
+    city?: number;
+    userId?: number;
+    description?: string;
+    signature?: string;
+    authority?: number;
+  }
 
   interface DayRecommendData {
     dailySongs: DailySong[];
     recommendReasons: RecommendReasons[];
   }
+
+  export interface DailyRecommendRadio {
+    code?: number;
+    category?: number;
+    result?: DailyRecommendRadioList[];
+  }
+
+  export interface DailyRecommendRadioList {
+    id?: number;
+    type?: number;
+    name?: string;
+    copywriter?: string;
+    picUrl?: string;
+    canDislike?: boolean;
+    trackNumberUpdateTime?: null;
+    program?: Program;
+    alg?: string;
+  }
+
+  export interface Program {
+    mainSong?: MainSong;
+    songs?: null;
+    dj?: Dj;
+    blurCoverUrl?: string;
+    radio?: Radio;
+    subscribedCount?: number;
+    reward?: boolean;
+    mainTrackId?: number;
+    serialNum?: number;
+    listenerCount?: number;
+    name?: string;
+    id?: number;
+    createTime?: number;
+    description?: string;
+    userId?: number;
+    coverUrl?: string;
+    commentThreadId?: string;
+    channels?: any[];
+    titbits?: null;
+    titbitImages?: null;
+    pubStatus?: number;
+    trackCount?: number;
+    bdAuditStatus?: number;
+    programFeeType?: number;
+    buyed?: boolean;
+    programDesc?: null;
+    h5Links?: any[];
+    coverId?: number;
+    adjustedPlayCount?: number;
+    canReward?: boolean;
+    auditStatus?: number;
+    publish?: boolean;
+    duration?: number;
+    shareCount?: number;
+    subscribed?: boolean;
+    likedCount?: number;
+    commentCount?: number;
+    isPublish?: boolean;
+  }
+
+  export interface Dj {
+    defaultAvatar?: boolean;
+    province?: number;
+    authStatus?: number;
+    followed?: boolean;
+    avatarUrl?: string;
+    accountStatus?: number;
+    gender?: number;
+    city?: number;
+    birthday?: number;
+    userId?: number;
+    userType?: number;
+    nickname?: string;
+    signature?: string;
+    description?: string;
+    detailDescription?: string;
+    avatarImgId?: number;
+    backgroundImgId?: number;
+    backgroundUrl?: string;
+    authority?: number;
+    mutual?: boolean;
+    expertTags?: null;
+    experts?: null;
+    djStatus?: number;
+    vipType?: number;
+    remarkName?: null;
+    authenticationTypes?: number;
+    avatarDetail?: null;
+    backgroundImgIdStr?: string;
+    avatarImgIdStr?: string;
+    anchor?: boolean;
+    avatarImgId_str?: string;
+    brand?: string;
+  }
+
+  export interface MainSong {
+    name?: string;
+    id?: number;
+    position?: number;
+    alias?: any[];
+    status?: number;
+    fee?: number;
+    copyrightId?: number;
+    disc?: string;
+    no?: number;
+    artists?: Artist[];
+    album?: Album;
+    starred?: boolean;
+    popularity?: number;
+    score?: number;
+    starredNum?: number;
+    duration?: number;
+    playedNum?: number;
+    dayPlays?: number;
+    hearTime?: number;
+    sqMusic?: null;
+    hrMusic?: null;
+    ringtone?: string;
+    crbt?: null;
+    audition?: null;
+    copyFrom?: string;
+    commentThreadId?: string;
+    rtUrl?: null;
+    ftype?: number;
+    rtUrls?: any[];
+    copyright?: number;
+    transName?: null;
+    sign?: null;
+    mark?: number;
+    originCoverType?: number;
+    originSongSimpleData?: null;
+    single?: number;
+    noCopyrightRcmd?: null;
+    rtype?: number;
+    rurl?: null;
+    mvid?: number;
+    bMusic?: Music;
+    mp3Url?: null;
+    hMusic?: Music;
+    mMusic?: null;
+    lMusic?: Music;
+  }
+
+  export interface Artist {
+    name?: string;
+    id?: number;
+    picId?: number;
+    img1v1Id?: number;
+    briefDesc?: string;
+    picUrl?: string;
+    img1v1Url?: string;
+    albumSize?: number;
+    alias?: any[];
+    trans?: string;
+    musicSize?: number;
+    topicPerson?: number;
+  }
+
+  export interface Music {
+    name?: null;
+    id?: number;
+    size?: number;
+    extension?: string;
+    sr?: number;
+    dfsId?: number;
+    bitrate?: number;
+    playTime?: number;
+    volumeDelta?: number;
+  }
+
+  export interface Radio {
+    id?: number;
+    dj?: null;
+    name?: string;
+    picUrl?: string;
+    desc?: string;
+    subCount?: number;
+    programCount?: number;
+    createTime?: number;
+    categoryId?: number;
+    category?: string;
+    radioFeeType?: number;
+    feeScope?: number;
+    buyed?: boolean;
+    videos?: null;
+    finished?: boolean;
+    underShelf?: boolean;
+    purchaseCount?: number;
+    price?: number;
+    originalPrice?: number;
+    discountPrice?: null;
+    lastProgramCreateTime?: number;
+    lastProgramName?: null;
+    lastProgramId?: number;
+    picId?: number;
+    rcmdText?: null;
+    hightQuality?: boolean;
+    whiteList?: boolean;
+    composeVideo?: boolean;
+    subed?: boolean;
+  }
+
 
   /**
    * 推荐歌曲详情

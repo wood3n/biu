@@ -80,7 +80,7 @@ const SysMenu: React.FC = () => {
           {
             label: '每日推荐',
             icon: <MdToday />,
-            key: '/'
+            key: '/daily'
           },
           {
             label: '私人 FM',

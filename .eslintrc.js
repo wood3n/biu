@@ -1,26 +1,63 @@
 module.exports = {
-  plugins: ['oxygen'],
-  extends: ['plugin:oxygen/react'],
+  extends: [
+    'airbnb',
+    'airbnb/hooks',
+    'plugin:react/recommended',
+    'plugin:import/typescript',
+  ],
+  env: {
+    browser: true,
+    node: true,
+    es6: true,
+  },
+  settings: {
+    react: {
+      version: 'detect',
+    },
+    'import/resolver': {
+      typescript: {},
+    },
+  },
+  parser: '@typescript-eslint/parser',
+  plugins: ['react', '@babel', '@typescript-eslint', 'react-hooks'],
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx'],
+      rules: {
+        '@typescript-eslint/no-unused-vars': 0,
+        'no-unused-expressions': 'off',
+        '@typescript-eslint/no-unused-expressions': 2,
+        '@typescript-eslint/consistent-type-imports': [2, { disallowTypeAnnotations: false }],
+      },
+    },
+  ],
   rules: {
-    '@typescript-eslint/prefer-namespace-keyword': 'error',
-    '@typescript-eslint/no-unused-vars': 'error',
+    'eol-last': 0,
     '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/no-var-requires': 0,
     '@typescript-eslint/prefer-namespace-keyword': 0,
     '@typescript-eslint/no-namespace': ['error', { allowDeclarations: true }],
     '@typescript-eslint/no-floating-promises': 0,
-    "@typescript-eslint/no-unsafe-member-access": 0,
-    "@typescript-eslint/no-unsafe-call": 0,
-    "@typescript-eslint/no-unsafe-return": 0,
-    "@typescript-eslint/no-unsafe-assignment": 0,
-    "@typescript-eslint/no-misused-promises": 0,
-    "@typescript-eslint/no-explicit-any": 0,
-    "@typescript-eslint/no-unsafe-argument": 0,
-    "space-infix-ops": 1,
-    "keyword-spacing": ["error", {
-      "before": true,
-      "after": true
+    '@typescript-eslint/no-unsafe-member-access': 0,
+    '@typescript-eslint/no-unsafe-call': 0,
+    '@typescript-eslint/no-unsafe-return': 0,
+    '@typescript-eslint/no-unsafe-assignment': 0,
+    '@typescript-eslint/no-misused-promises': 0,
+    '@typescript-eslint/no-explicit-any': 0,
+    '@typescript-eslint/no-unsafe-argument': 0,
+    'space-infix-ops': 1,
+    'keyword-spacing': ['error', {
+      before: true,
+      after: true,
     }],
-    "object-curly-spacing": ["error", "always"]
+    'object-curly-spacing': ['error', 'always'],
+    'import/no-extraneous-dependencies': 0,
+    'import/prefer-default-export': 0,
+    'react/require-default-props': 0,
+    'react/function-component-definition': 0,
+    'react-hooks/exhaustive-deps': 0,
+    'react/jsx-filename-extension': 0,
+    'import/extensions': 0,
+    'no-console': 0,
   },
 };
