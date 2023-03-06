@@ -1,11 +1,15 @@
 import React from 'react';
-import { Outlet, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import {
+  Outlet, Navigate, useNavigate, useLocation,
+} from 'react-router-dom';
 import { useLogin, useUser } from '@/common/hooks';
-import { getLoginStatus, getUserDetail, getUserAcountStats } from '@/service';
+import { getLoginStatus, getUserDetail, getUserSubcount } from '@/service';
 import { useRequest } from 'ahooks';
-import { Spin, Layout, Avatar, theme } from 'antd';
-import Menu from './Menu';
+import {
+  Spin, Layout, Avatar, theme,
+} from 'antd';
 import { AiOutlineUser } from 'react-icons/ai';
+import Menu from './Menu';
 import styles from './index.module.less';
 
 const { Sider, Footer, Content } = Layout;
@@ -24,26 +28,26 @@ const BasicLayout: React.FC = () => {
         // 用户详情信息
         const userDetail = await getUserDetail(loginStatus.profile.userId);
         // 歌单等数量
-        const userAccountStats = await getUserAcountStats();
+        const userAccountStats = await getUserSubcount();
         updateAccount({
           account: loginStatus.account,
-          profile: loginStatus.profile
+          profile: loginStatus.profile,
         });
 
         updateUser({
           userInfo: userDetail,
-          userAccountStats
+          userAccountStats,
         });
       }
-    }
+    },
   });
 
   if (loading) {
-    return <div className={styles.pageLoading}><Spin size='large'/></div>;
+    return <div className={styles.pageLoading}><Spin size="large" /></div>;
   }
 
   if (!data?.data?.profile) {
-    return <Navigate to='/login' state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return (
@@ -54,7 +58,7 @@ const BasicLayout: React.FC = () => {
           trigger={null}
           className={styles.sider}
           style={{
-            background: colorBgLayout
+            background: colorBgLayout,
           }}
         >
           <div

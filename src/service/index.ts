@@ -1,144 +1,86 @@
-import request from './request';
-
-/**
- * 发送验证码
- */
-export const sendCaptcha = (phone: string) => request.get<API.BaseRes>('/captcha/sent', {
-  params: {
-    phone
-  }
-});
-
-/**
- * 登录
- */
-export const login = (data: API.PhoneLoginData) => request.post<API.PhoneLoginData>('/login/cellphone', data);
-
-/**
- * 退出登录
- */
-export const logout = () => request.get('/logout');
-
-/**
- * 生成二维码key
- */
-export const createQrKey = () => request.get<API.QrLoginkey>('/login/qr/key', { useTimeStamp: true });
-
-/**
- * 生成二维码 base64 编码
- */
-export const createQrCode = (key: string) => request.get<API.QrLoginImg>('/login/qr/create', {
-  useTimeStamp: true,
-  params: {
-    key,
-    qrimg: true
-  }
-});
-
-/**
- * 二维码登录状态检测
- * 800 为二维码过期,801 为等待扫码,802 为待确认,803 为授权登录成功(803 状态码下会返回 cookies)
- * 成功登录会写入 cookie
- */
-export const loginByQr = (key: string) => request.get<API.QrLoginRes>('/login/qr/check', {
-  useTimeStamp: true,
-  params: {
-    key
-  }
-});
-
-/**
- * 获取登录状态，返回 account, profile
- */
-export const getLoginStatus = (cookie?: string) => request.post<APIResponseNestData<API.UserAccount>>('/login/status', {
-  cookie
-}, {
-  useTimeStamp: true,
-});
-
-/**
- * 获取用户 account, profile
- */
-export const getUserAccount = () => request.get<APIResponse<API.UserAccount>>('/user/account', { useTimeStamp: true });
-
-/**
- * 获取用户详情
- */
-export const getUserDetail = (uid: number) => request.get<API.UserDetail>('/user/detail', {
-  useTimeStamp: true,
-  params: {
-    uid
-  }
-});
-
-/**
- * 获取用户歌单，收藏，mv, dj 等数量
- */
-export const getUserAcountStats = () => request.get<API.UserAcountStats>('/user/subcount');
-
-/**
- * 获取每日推荐歌曲
- */
-export const getDailySongs = () => request.get<APIResponseNestData<API.DayRecommendData>>('/recommend/songs');
-
-/**
- * 私人 FM（3首）
- */
-export const getPersonalFM = () => request.get<APIResponseNestData<API.PersonalFMSong[]>>('/personal_fm', {
-  params: {
-    timestamp: Date.now()
-  }
-});
-
-/**
- * 获取默认搜索关键词
- */
-export const getSearchDefaultKeys = () => request.get<APIResponseNestData<API.SearchDefaultDataType>>('/search/default');
-
-/**
- * 获取搜索建议
- */
-export const getSearchSuggestion = (keywords: string) => request.get<APIResponse<API.SearchSuggestionRes>>('/search/suggest', {
-  params: {
-    keywords
-  }
-});
-
-/**
- * 获取搜索内容
- */
-export const getSearchContent = (keywords: string) => request.get('/search', {
-  params: {
-    keywords
-  }
-});
-
-/**
- * 获取个人歌单，包括喜欢的音乐，年度歌单，个人创建的歌单，收藏的歌单
- */
-export const getPlayList = (params: API.PersonalPlayListReq) => request.get<API.PersonalPlayList>('/user/playlist', {
-  params
-});
-
-/**
- * 获取用户关注列表
- */
-export const getUserFollows = (params: PageRequest<{ uid: number }>) => request.get<APIResponse<API.UserFollows>>('/user/follows', {
-  params
-});
-
-/**
- * 获取用户播放记录
- */
-export const getUserRecord = (params: API.UserRecordReqParams) => request.get<APIResponse<API.UserPlayRecord>>('/user/record', {
-  params
-});
-
-/**
- * 创建歌单
- */
-export const createPlayList = (data: API.PlayListData) => request.post<APIResponse<API.CreatePlayListRes>>('/playlist/create', data);
-
 export { getProgramRecommend } from './program-recommend';
 export { getRecommendResource } from './recommend-resource';
 export { getPersonalizedNewsong } from './personalized-newsong';
+export { getCaptchaSent } from './captcha-sent';
+export { getCaptchaVerify } from './captcha-verify';
+export { getLoginQrKey } from './login-qr-key';
+export { getLoginQrCreate } from './login-qr-create';
+export { getLoginQrCheck } from './login-qr-check';
+export { getRegisterAnonimous } from './register-anonimous';
+export { getLogout } from './logout';
+export { getLoginStatus } from './login-status';
+export { getUserDetail } from './user-detail';
+export { postAvatarUpload } from './avatar-upload';
+export { getUserAccount } from './user-account';
+export { getUserSubcount } from './user-subcount';
+export { getUserLevel } from './user-level';
+export { getUserUpdate } from './user-update';
+export { getUserPlaylist } from './user-playlist';
+export { postPlaylistUpdate } from './playlist-update';
+export { postPlaylistOrderUpdate } from './playlist-order-update';
+export { postSongOrderUpdate } from './song-order-update';
+export { getUserDj } from './user-dj';
+export { getUserFollows } from './user-follows';
+export { getfollow } from './follow';
+export { getArtistSub } from './artist-sub';
+export { getUserRecord } from './user-record';
+export { getArtistList } from './artist-list';
+export { getArtistTopSong } from './artist-top-song';
+export { getDjPersonalizeRecommend } from './dj-personalize-recommend';
+export { getUserAudio } from './user-audio';
+export { getDjHot } from './dj-hot';
+export { getArtistSublist } from './artist-sublist';
+export { getArtistSongs } from './artist-songs';
+export { getTopicSublist } from './topic-sublist';
+export { getVideoSub } from './video-sub';
+export { getMvSublist } from './mv-sublist';
+export { getMvDetail } from './mv-detail';
+export { getMvUrl } from './mv-url';
+export { getPlaylistCatlist } from './playlist-catlist';
+export { getMvSub } from './mv-sub';
+export { getRelatedPlaylist } from './related-playlist';
+export { getSimiPlaylist } from './simi-playlist';
+export { getPlaylistDetail } from './playlist-detail';
+export { getPlaylistTrackAll } from './playlist-track-all';
+export { getPlaylistDetailDynamic } from './playlist-detail-dynamic';
+export { getSongUrl } from './song-url';
+export { getSongUrlV1 } from './song-url-v1';
+export { getSongDetail } from './song-detail';
+export { getlyric } from './lyric';
+export { getSimiSong } from './simi-song';
+export { getCheckMusic } from './check-music';
+export { getCloudsearch } from './cloudsearch';
+export { getSearchDefault } from './search-default';
+export { getSearchSuggest } from './search-suggest';
+export { getSearchMultimatch } from './search-multimatch';
+export { postPlaylistCreate } from './playlist-create';
+export { postPlaylistDelete } from './playlist-delete';
+export { getPlaylistSubscribe } from './playlist-subscribe';
+export { postPlaylistTracks } from './playlist-tracks';
+export { postPlaylistTrackAdd } from './playlist-track-add';
+export { postPlaylistTrackDelete } from './playlist-track-delete';
+export { getPlaylistVideoRecent } from './playlist-video-recent';
+export { getalbum } from './album';
+export { getAlbumDetailDynamic } from './album-detail-dynamic';
+export { getAlbumSub } from './album-sub';
+export { getAlbumSublist } from './album-sublist';
+export { getartists } from './artists';
+export { getArtistMv } from './artist-mv';
+export { getSimiMv } from './simi-mv';
+export { getArtistDesc } from './artist-desc';
+export { getArtistDetail } from './artist-detail';
+export { getSimiArtist } from './simi-artist';
+export { getArtistAlbum } from './artist-album';
+export { getpersonalized } from './personalized';
+export { getPersonalizedDjprogram } from './personalized-djprogram';
+export { getPersonalizedRecommend } from './personalized-recommend';
+export { getRecommendSongs } from './recommend-songs';
+export { getHistoryRecommendSongs } from './history-recommend-songs';
+export { getHistoryRecommendSongsDetail } from './history-recommend-songs-detail';
+export { getPersonalFM } from './personal-fm';
+export { getFmTrash } from './fm-trash';
+export { getlike } from './like';
+export { getlikelist } from './likelist';
+export { postUserCloudDel } from './user-cloud-del';
+export { postcloud } from './cloud';
+export { postCloudMatch } from './cloud-match';

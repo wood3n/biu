@@ -1,5 +1,5 @@
-import { createContext, useState } from 'react';
-import { logout as reqLogout } from '@/service';
+import React, { createContext, useState } from 'react';
+import { getLogout } from '@/service';
 
 interface AuthContextType {
   /**
@@ -11,7 +11,7 @@ interface AuthContextType {
 }
 
 export const LoginContext = createContext<AuthContextType>({
-  userAccount: null
+  userAccount: null,
 } as AuthContextType);
 
 function LoginProvider({ children }: { children: React.ReactNode }) {
@@ -21,19 +21,17 @@ function LoginProvider({ children }: { children: React.ReactNode }) {
     setUserAccount(user);
   };
 
-  const logout = (cb?: VoidFunction) => {
-    return reqLogout().then(() => {
-      setUserAccount(null);
-      cb?.();
-    });
-  };
+  const logout = (cb?: VoidFunction) => getLogout().then(() => {
+    setUserAccount(null);
+    cb?.();
+  });
 
   return (
     <LoginContext.Provider
       value={{
         userAccount,
         update,
-        logout
+        logout,
       }}
     >
       {children}

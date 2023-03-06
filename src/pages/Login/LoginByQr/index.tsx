@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Image, message, Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { createQrKey, createQrCode, loginByQr } from '@/service';
+import { getLoginQrKey, getLoginQrCreate, getLoginQrCheck } from '@/service';
 import { IMAGE_ERR } from '@/common/constants';
 import { checkError } from '@/common/utils';
 import { useRequest } from 'ahooks';
@@ -13,28 +13,13 @@ const LoginByQr: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [src, setSrc] = useState<string>();
 
-  const { run, cancel } = useRequest(loginByQr, {
-    manual: true,
-    pollingInterval: 3000,
-    onSuccess: ({ code }) => {
-      if (code === QRLoginCode.Success) {
-        cancel();
-        message.success('登录成功');
-        navigate('/', { replace: true });
-      }
-
-      if (code === QRLoginCode.Timeout) {
-        cancel();
-        checkLogin();
-      }
-    }
-  });
-
   const createQr = async () => {
     setLoading(true);
     try {
-      const { data } = await createQrKey();
-      const { data: qrData } = await createQrCode(data.unikey);
+      const { data } = await getLoginQrKey();
+      const { data: qrData } = await getLoginQrCreate({
+        key: data.unikey,
+      });
       setSrc(qrData.qrimg);
       return data.unikey;
     } catch (err) {
@@ -56,25 +41,42 @@ const LoginByQr: React.FC = () => {
     }
   }
 
+  const { run, cancel } = useRequest(getLoginQrCheck, {
+    manual: true,
+    pollingInterval: 3000,
+    onSuccess: ({ code }) => {
+      if (code === QRLoginCode.Success) {
+        cancel();
+        message.success('登录成功');
+        navigate('/', { replace: true });
+      }
+
+      if (code === QRLoginCode.Timeout) {
+        cancel();
+        checkLogin();
+      }
+    },
+  });
+
   useEffect(() => {
     checkLogin();
   }, []);
 
-  useEffect(() => {
-    return () => cancel();
-  }, [cancel]);
+  useEffect(() => () => cancel(), [cancel]);
 
   return (
     <div className={styles.container}>
       {
-        loading ?
-          <Spin tip='生成二维码' /> :
-          <Image
-            preview={false}
-            width='100%'
-            height='100%'
-            src={src}
-          />
+        loading
+          ? <Spin tip="生成二维码" />
+          : (
+            <Image
+              preview={false}
+              width="100%"
+              height="100%"
+              src={src}
+            />
+          )
       }
     </div>
   );

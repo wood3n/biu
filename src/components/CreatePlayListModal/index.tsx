@@ -1,7 +1,9 @@
 import React from 'react';
-import { Modal, Form, Input, Switch } from 'antd';
+import {
+  Modal, Form, Input, Switch,
+} from 'antd';
 import { useRequest } from 'ahooks';
-import { createPlayList } from '@/service';
+import { postPlaylistCreate } from '@/service';
 import toast from 'react-hot-toast';
 
 interface Props {
@@ -16,11 +18,11 @@ interface Props {
 const CreatePlayListModal: React.FC<Props> = ({
   open,
   onClose,
-  refreshMenu
+  refreshMenu,
 }) => {
   const [form] = Form.useForm();
 
-  const { loading, runAsync } = useRequest(createPlayList, {
+  const { loading, runAsync } = useRequest(postPlaylistCreate, {
     manual: true,
     onSuccess: ({ code, id }) => {
       if (code === 200 && id) {
@@ -29,38 +31,38 @@ const CreatePlayListModal: React.FC<Props> = ({
         onClose();
         refreshMenu();
       }
-    }
+    },
   });
 
   return (
     <Modal
-      title='新建歌单'
+      title="新建歌单"
       open={open}
       onCancel={onClose}
       okButtonProps={{
-        loading
+        loading,
       }}
-      okText='创建'
+      okText="创建"
       cancelButtonProps={{
         style: {
-          display: 'none'
-        }
+          display: 'none',
+        },
       }}
       onOk={() => {
         form.validateFields().then(({ name, type }) => {
           runAsync({
             name,
-            type
+            type,
           });
         });
       }}
     >
       <Form form={form}>
-        <Form.Item name='name' label='歌单名' rules={[{ required: true }]}>
-          <Input placeholder='歌单名称' />
+        <Form.Item name="name" label="歌单名" rules={[{ required: true }]}>
+          <Input placeholder="歌单名称" />
         </Form.Item>
-        <Form.Item name='type' label='隐私歌单' valuePropName='checked'>
-          <Switch checkedChildren='是' unCheckedChildren='否' />
+        <Form.Item name="type" label="隐私歌单" valuePropName="checked">
+          <Switch checkedChildren="是" unCheckedChildren="否" />
         </Form.Item>
       </Form>
     </Modal>

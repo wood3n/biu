@@ -1,5 +1,7 @@
 import React from 'react';
-import { Spin, Card, Typography, Button, Input, Dropdown } from 'antd';
+import {
+  Spin, Card, Typography, Button, Input, Dropdown,
+} from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import { STORAGE_ITEM, remove } from '@/common/localforage';
@@ -8,7 +10,7 @@ import {
   MdDeleteForever,
   MdOutlineClose,
 } from 'react-icons/md';
-import { getSearchSuggestion } from '@/service';
+import { getSearchSuggest } from '@/service';
 import { SEARCH_KEY_MAP } from './constants';
 import styles from './index.module.less';
 
@@ -19,13 +21,13 @@ const Search: React.FC = () => {
   const navigate = useNavigate();
 
   // 获取搜索建议
-  const { loading: loadSearchSuggestion, data: searchSuggestion, run: search } = useRequest(getSearchSuggestion, {
+  const { loading: loadSearchSuggestion, data: searchSuggestion, run: search } = useRequest(getSearchSuggest, {
     debounceWait: 500,
-    manual: true
+    manual: true,
   });
 
   // 搜索获取搜索建议
-  const handleSearch: React.ChangeEventHandler<HTMLInputElement> | undefined = e => {
+  const handleSearch: React.ChangeEventHandler<HTMLInputElement> | undefined = (e) => {
     const content = e.target.value?.trim();
     if (content) {
       search(content);
@@ -40,7 +42,7 @@ const Search: React.FC = () => {
     }
   };
 
-  const menuItems = searchSuggestion?.result?.order?.map(key => {
+  const menuItems = searchSuggestion?.result?.order?.map((key) => {
     const { icon, text: submenuTitle } = SEARCH_KEY_MAP[key];
     let children;
 
@@ -48,28 +50,28 @@ const Search: React.FC = () => {
       case 'songs': {
         children = searchSuggestion?.result?.songs?.map(({ id, name, artists }) => ({
           key: id,
-          label: name
+          label: name,
         }));
         break;
       }
       case 'albums': {
         children = searchSuggestion?.result?.albums?.map(({ id, name, artists }) => ({
           key: id,
-          label: name
+          label: name,
         }));
         break;
       }
       case 'artists': {
         children = searchSuggestion?.result?.artists?.map(({ id, name }) => ({
           key: id,
-          label: name
+          label: name,
         }));
         break;
       }
       case 'playlists': {
         children = searchSuggestion?.result?.playlists?.map(({ id, name }) => ({
           key: id,
-          label: name
+          label: name,
         }));
         break;
       }
@@ -86,7 +88,7 @@ const Search: React.FC = () => {
       ),
       key,
       type: 'group',
-      children
+      children,
     };
   });
 
@@ -95,10 +97,10 @@ const Search: React.FC = () => {
       <Dropdown
         menu={{
           items: menuItems,
-          defaultOpenKeys: searchSuggestion?.result ? Object.keys(searchSuggestion.result) : []
+          defaultOpenKeys: searchSuggestion?.result ? Object.keys(searchSuggestion.result) : [],
         }}
         trigger={['click']}
-        getPopupContainer={node => node.parentElement!}
+        getPopupContainer={(node) => node.parentElement!}
         dropdownRender={(menus) => (
           <Spin spinning={loadSearchSuggestion}>
             <Card
@@ -112,10 +114,10 @@ const Search: React.FC = () => {
               <div className={styles.searchHistory}>
                 <Typography.Title level={5} className={styles.title}>
                   搜索历史
-                  <a onClick={() => remove(STORAGE_ITEM.SEARCH_KEY)} className={styles.delBtn}><MdDeleteForever size={16}/></a>
+                  <a onClick={() => remove(STORAGE_ITEM.SEARCH_KEY)} className={styles.delBtn}><MdDeleteForever size={16} /></a>
                 </Typography.Title>
                 <div className={styles.searchKeys}>
-                  <Button size='small'>
+                  <Button size="small">
                     <span className={styles.tagContent}>
                       测试
                       <MdOutlineClose />
@@ -135,7 +137,7 @@ const Search: React.FC = () => {
         <Input
           allowClear
           prefix={<MdSearch />}
-          placeholder='everything'
+          placeholder="everything"
           style={{ width: 240, borderRadius: 16 }}
           onChange={handleSearch}
         />

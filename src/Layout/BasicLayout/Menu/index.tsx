@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu as AntMenu, theme } from 'antd';
 import { useUser } from '@/common/hooks';
 import type { MenuProps } from 'antd/es/menu';
-import { getPlayList } from '@/service';
+import { getUserPlaylist } from '@/service';
 import {
   MdLibraryMusic,
   MdToday,
@@ -14,7 +14,7 @@ import {
   MdRecommend,
   MdOutlineLibraryAdd,
   MdOutlineWbCloudy,
-  MdOutlineCollectionsBookmark
+  MdOutlineCollectionsBookmark,
 } from 'react-icons/md';
 import ScrollArea from 'react-scrollbar';
 import CreatePlayListModal from '@/components/CreatePlayListModal';
@@ -37,15 +37,15 @@ const SysMenu: React.FC = () => {
 
   const getPlaylists = async () => {
     // 获取所有歌单
-    const { playlist } = await getPlayList({
+    const { playlist } = await getUserPlaylist({
       // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       uid: user?.userInfo?.profile?.userId!,
       limit: 1000,
-      offset: 0
+      offset: 0,
     });
 
     const playListMenu: MenuItem[] = [];
-    const createdList = playlist?.filter(item => item.creator?.userId === user?.userInfo?.profile?.userId)?.slice(1);
+    const createdList = playlist?.filter((item) => item.creator?.userId === user?.userInfo?.profile?.userId)?.slice(1);
     if (createdList?.length) {
       playListMenu.push({
         label: <CreatedListMenuTitle addPlayList={() => setOpen(true)} className={styles.createdListMenuTitle} />,
@@ -54,11 +54,11 @@ const SysMenu: React.FC = () => {
         children: createdList?.map(({ id, name }) => ({
           label: name!,
           key: String(id),
-        }))
+        })),
       });
     }
 
-    const collectList = playlist?.filter(item => item.creator?.userId !== user?.userInfo?.profile?.userId);
+    const collectList = playlist?.filter((item) => item.creator?.userId !== user?.userInfo?.profile?.userId);
     if (collectList?.length) {
       playListMenu.push({
         label: '收藏的歌单',
@@ -67,7 +67,7 @@ const SysMenu: React.FC = () => {
         children: collectList?.map(({ id, name }) => ({
           label: name!,
           key: String(id),
-        }))
+        })),
       });
     }
 
@@ -80,19 +80,19 @@ const SysMenu: React.FC = () => {
           {
             label: '每日推荐',
             icon: <MdToday />,
-            key: '/daily'
+            key: '/daily',
           },
           {
             label: '私人 FM',
             icon: <MdOutlineAlbum />,
-            key: '/fm'
+            key: '/fm',
           },
           {
             label: '电台',
             icon: <MdRadio />,
-            key: '/radio'
+            key: '/radio',
           },
-        ]
+        ],
       },
       {
         label: '音乐库',
@@ -102,26 +102,26 @@ const SysMenu: React.FC = () => {
           {
             label: '喜欢',
             icon: <MdFavoriteBorder />,
-            key: '/favorite'
+            key: '/favorite',
           },
           {
             label: '收藏',
             icon: <MdOutlineCollectionsBookmark />,
-            key: '/collection'
+            key: '/collection',
           },
           {
             label: '云盘',
             icon: <MdOutlineWbCloudy />,
-            key: '/cloud'
+            key: '/cloud',
           },
           {
             label: '最近播放',
             icon: <MdHistory />,
-            key: '/history'
+            key: '/history',
           },
-        ]
+        ],
       },
-      ...playListMenu
+      ...playListMenu,
     ] as MenuItem[];
   };
 
@@ -146,7 +146,7 @@ const SysMenu: React.FC = () => {
     <ScrollArea>
       <AntMenu
         items={items}
-        mode='inline'
+        mode="inline"
         inlineIndent={12}
         openKeys={['recommend', 'lib', 'created', 'collect']}
         expandIcon={() => null}
@@ -160,7 +160,7 @@ const SysMenu: React.FC = () => {
           }
         }}
         style={{
-          background: colorBgLayout
+          background: colorBgLayout,
         }}
       />
       <CreatePlayListModal

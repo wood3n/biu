@@ -8,47 +8,69 @@ const apiData = require('./api.json');
 
 // api 方法生成
 (async () => {
-  const getMethodName = (method, pathname) => pathname.split('/').filter((v) => v).reduce((result, item) => `${result}${upperFirst(item)}`, method);
+  const getMethodSuffix = (pathname) => pathname.split('/').filter((v) => v).reduce((item, next) => `${upperFirst(item)}${upperFirst(next)}`);
 
-  const getInterfaceDeclaration = (api) => {
-    const { method = 'get', params, data } = api;
-    const properties = Object.entries(method === 'get' ? params : data).map(([key, type]) => {
+  // 获取  params 或 data 类型定义
+  const getInterfaceDeclaration = (interfaceName, paramsOrData) => {
+    const properties = Object.entries(paramsOrData).map(([key, type]) => {
       // unknown
-      let typeAnnotation = t.tsUnknownKeyword();
+      let typeAnnotation;
       if (type === 'string') {
-        typeAnnotation = t.tsStringKeyword();
+        typeAnnotation = t.tsUnionType([
+          t.tsStringKeyword(),
+          t.tsUndefinedKeyword(),
+        ]);
       }
       if (type === 'number') {
-        typeAnnotation = t.tsNumberKeyword();
+        typeAnnotation = t.tsUnionType([
+          t.tsNumberKeyword(),
+          t.tsUndefinedKeyword(),
+        ]);
+      }
+      if (type === 'boolean') {
+        typeAnnotation = t.tsUnionType([
+          t.tsBooleanKeyword(),
+          t.tsUndefinedKeyword(),
+        ]);
       }
       if (type === 'string[]') {
-        typeAnnotation = t.tsArrayType(t.tsStringKeyword());
+        typeAnnotation = t.tsUnionType([
+          t.tsArrayType(t.tsStringKeyword()),
+          t.tsUndefinedKeyword(),
+        ]);
       }
       if (type === 'number[]') {
-        typeAnnotation = t.tsArrayType(t.tsNumberKeyword());
+        typeAnnotation = t.tsUnionType([
+          t.tsArrayType(t.tsNumberKeyword()),
+          t.tsUndefinedKeyword(),
+        ]);
+      }
+      if (type === 'FormData') {
+        typeAnnotation = t.tsTypeReference(
+          t.identifier('FormData'),
+          null,
+        );
       }
 
       return t.tsPropertySignature(
-        t.identifier(key),
+        t.identifier(key), // 属性名称
         t.tsTypeAnnotation(typeAnnotation),
       );
     });
-    const interfaceDeclaration = t.tsInterfaceDeclaration(
-      t.identifier(method === 'get' ? 'RequestParamsType' : 'RequestDataType'),
+    const interfaceDeclaration = t.exportNamedDeclaration(t.tsInterfaceDeclaration(
+      t.identifier(interfaceName),
       null,
       null,
       t.tsInterfaceBody(properties),
-    );
+    ));
 
     return generate(interfaceDeclaration).code;
   };
 
-  const getFnCode = (api) => {
+  const getFnCode = (methodName, api) => {
     const {
       path: pathname, method = 'get', desc, params, data,
     } = api;
-
-    const methodName = getMethodName(method, pathname);
 
     if (!params && !data) {
       return `
@@ -59,30 +81,50 @@ const apiData = require('./api.json');
       `;
     }
 
-    const args = method === 'get' ? 'params:RequestParamsType' : 'data:RequestDataType';
-    const axiosConfig = method === 'get' ? '{ params }' : 'data';
-    return `
-      ${getInterfaceDeclaration(api)}
+    const methodSuffix = getMethodSuffix(pathname);
+    if (method === 'get') {
+      return `
+        ${getInterfaceDeclaration(`${methodSuffix}RequestParams`, params)}
 
-      /*
-       * ${desc}
-       */
-      export const ${methodName} = (${args}) => request.${method}('${pathname}', ${axiosConfig});
-    `;
-  };
-
-  const newConfig = apiData.reduce((result, api) => {
-    if (api.parsed) {
-      return [
-        ...result,
-        api,
-      ];
+        /*
+        * ${desc}
+        */
+        export const ${methodName} = (params: ${`${methodSuffix}RequestParams`}) => request.${method}('${pathname}', { params });
+      `;
     }
 
+    if (method === 'post') {
+      return `
+        ${params ? getInterfaceDeclaration(`${methodSuffix}RequestParams`, params) : ''}
+
+        ${data ? getInterfaceDeclaration(`${methodSuffix}RequestData`, data) : ''}
+
+        /*
+        * ${desc}
+        */
+        export const ${methodName} = (data: ${`${methodSuffix}RequestData`}${params ? `,params: ${`${methodSuffix}RequestParams`}` : ''}) => request.${method}('${pathname}', data${params ? ',{params}' : ''});
+      `;
+    }
+
+    return '';
+  };
+
+  const newApiJson = [];
+  const exportDeclarationCode = [];
+  apiData.forEach((api) => {
+    if (api.parsed) {
+      newApiJson.push(api);
+      return;
+    }
+
+    const {
+      path: pathname, method = 'get',
+    } = api;
+    const methodName = `${method}${getMethodSuffix(pathname)}`;
     const code = `
       import request from './request';
 
-      ${getFnCode(api)}
+      ${getFnCode(methodName, api)}
     `;
     const filename = api.path.split('/').filter((v) => v).join('-');
     fs.outputFileSync(
@@ -90,17 +132,21 @@ const apiData = require('./api.json');
       prettier.format(code, { parser: 'babel', singleQuote: true, printWidth: 220 }),
     );
 
-    return [
-      ...result,
-      {
-        ...api,
-        parsed: true,
-      },
-    ];
-  }, []);
+    exportDeclarationCode.push(`export { ${methodName} } from './${filename}';`);
+
+    newApiJson.push({
+      ...api,
+      parsed: true,
+    });
+  });
+
+  fs.appendFile(
+    path.resolve(process.cwd(), './src/service/index.ts'),
+    `\n${exportDeclarationCode.join('\n')}`,
+  );
 
   fs.outputFileSync(
     path.resolve(process.cwd(), './scripts/service-generator/api.json'),
-    JSON.stringify(newConfig, null, '\t'),
+    JSON.stringify(newApiJson, null, '\t'),
   );
 })();

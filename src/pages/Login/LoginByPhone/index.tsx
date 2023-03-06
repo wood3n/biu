@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Form, Input, Button, Space, message } from 'antd';
+import {
+  Form, Input, Button, Space, message,
+} from 'antd';
 import { useRequest } from 'ahooks';
-import { sendCaptcha } from '@/service';
+import { getCaptchaSent } from '@/service';
 import { checkPhone, validatePhone, validateCaptcha } from '@/common/utils';
 import { ReactComponent as Phone } from '@/assets/images/phone.svg';
 import { ReactComponent as Captcha } from '@/assets/images/captcha.svg';
@@ -11,7 +13,7 @@ const LoginByPhone: React.FC = () => {
   const [count, setCount] = useState(0);
   const timer = useRef<number>();
 
-  const reqSendCaptcha = useRequest(sendCaptcha, { manual: true });
+  const reqSendCaptcha = useRequest(getCaptchaSent, { manual: true });
 
   const handleSendCaptcha = async () => {
     const { phone } = form.getFieldsValue();
@@ -23,7 +25,7 @@ const LoginByPhone: React.FC = () => {
     if (data) {
       setCount(59);
       timer.current = window.setInterval(() => {
-        setCount(count => count - 1);
+        setCount((oldCount) => oldCount - 1);
       }, 1000);
     } else {
       message.error('发送验证码失败');
@@ -48,46 +50,44 @@ const LoginByPhone: React.FC = () => {
 
   return (
     <Form form={form}>
-      <Form.Item name='phone' rules={[{ validator: validatePhone }]}>
-        <Input size='large' placeholder='手机号码' prefix={<Phone width={16} height={16} />}/>
+      <Form.Item name="phone" rules={[{ validator: validatePhone }]}>
+        <Input size="large" placeholder="手机号码" prefix={<Phone width={16} height={16} />} />
       </Form.Item>
       <Form.Item
-        name='captcha'
+        name="captcha"
         rules={[
           {
             validator: validateCaptcha,
-          }
+          },
         ]}
       >
         <Space>
           <Input
-            size='large'
-            placeholder='验证码'
+            size="large"
+            placeholder="验证码"
             prefix={<Captcha width={16} height={16} />}
           />
           <Button
-            size='large'
+            size="large"
             onClick={handleSendCaptcha}
             disabled={count > 0}
             loading={reqSendCaptcha.loading}
           >
-            {
-              count > 0 ? count : '发送验证码'
-            }
+            {count > 0 ? count : '发送验证码'}
           </Button>
         </Space>
       </Form.Item>
       <Form.Item>
         <Button
-          size='large'
-          type='primary'
+          size="large"
+          type="primary"
           style={{ width: '100%' }}
           onClick={handleSubmit}
         >
           登录
         </Button>
       </Form.Item>
-      {form && <div></div>}
+      {form && <div />}
     </Form>
   );
 };

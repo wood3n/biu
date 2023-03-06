@@ -33,6 +33,10 @@ module.exports = {
   ],
   rules: {
     'eol-last': 0,
+    'no-undef': 0,
+    'max-len': 0,
+    'react/no-unstable-nested-components': 0,
+    'react/react-in-jsx-scope': 0,
     '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/no-var-requires': 0,
     '@typescript-eslint/prefer-namespace-keyword': 0,

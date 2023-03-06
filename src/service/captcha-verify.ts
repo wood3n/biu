@@ -1,11 +1,12 @@
 import request from './request';
 
-interface RequestDataType {
-  phone: string;
-  captcha: number;
+export interface CaptchaVerifyRequestParams {
+  phone: string | undefined;
+  captcha: number | undefined;
+  ctcode: string | undefined;
 }
 
 /*
  * 验证验证码
  */
-export const postCaptchaVerify = (data: RequestDataType) => request.post('/captcha/verify', data);
+export const getCaptchaVerify = (params: CaptchaVerifyRequestParams) => request.get('/captcha/verify', { params });
