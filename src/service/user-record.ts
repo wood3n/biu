@@ -2,7 +2,7 @@ import request from './request';
 
 export interface UserRecordRequestParams {
   uid: number | undefined;
-  type: number | undefined;
+  type: string | undefined;
 }
 
 export interface Ar {

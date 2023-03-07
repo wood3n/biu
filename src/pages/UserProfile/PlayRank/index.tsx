@@ -1,11 +1,13 @@
-import { Typography, Tabs, Table, Image, Space, Button } from 'antd';
+import { Typography, Tabs, Table } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useUser } from '@/common/hooks';
 import { getUserRecord } from '@/service';
+import type { Song } from '@/service/user-record';
 import { useRequest } from 'ahooks';
-import { ColumnsType } from 'antd/es/table';
+import type { ColumnsType } from 'antd/es/table';
 import { MdAccessTime } from 'react-icons/md';
 import { formatDuration } from '@/common/utils';
+import TableSongInfo from '@/components/TableSongInfo';
 import ScrollArea from 'react-scrollbar';
 import styles from './index.module.less';
 
@@ -24,85 +26,66 @@ const MyPlayRank: React.FC = () => {
     if (user?.userInfo?.profile?.userId) {
       runAsync({
         uid: user.userInfo.profile.userId,
-        type
+        type,
       });
     }
   }, [user?.userInfo?.profile?.userId, type]);
 
-  const columns: ColumnsType<API.Song> = [
+  const columns: ColumnsType<Song> = [
     {
       title: '歌曲',
       dataIndex: 'song',
       render: (_, record) => (
-        <Space>
-          <Image
-            width={48}
-            height={48}
-            src={record?.al?.picUrl}
-            loading='lazy'
-            preview={false}
-          />
-          <Space direction='vertical'>
-            <Typography.Text
-              strong
-              ellipsis={{ tooltip: record?.name }}
-              style={{ maxWidth: '100%' }}
-            >
-              {record?.name}
-            </Typography.Text>
-            <Space split='，'>
-              {record?.ar?.map(({ id, name }) => (
-                <a key={id} className={styles.tableLink}>{name}</a>
-              ))}
-            </Space>
-          </Space>
-        </Space>
-      )
+        <TableSongInfo
+          picUrl={record?.al?.picUrl}
+          name={record?.name}
+          ar={record?.ar}
+        />
+      ),
     },
     {
       title: '专辑',
       dataIndex: ['al', 'name'],
       render: (_, record) => (
         <a className={styles.tableLink}>{record?.al?.name ?? ''}</a>
-      )
+      ),
     },
     {
-      title: <span className={styles.timeTitle}><MdAccessTime size={18}/></span>,
+      title: <span className={styles.timeTitle}><MdAccessTime size={18} /></span>,
       align: 'center',
       width: 88,
       dataIndex: 'dt',
-      render: v => formatDuration(v)
-    }
+      render: (v) => formatDuration(v),
+    },
   ];
 
   return (
     <>
       <Typography.Title level={2}>听歌排行</Typography.Title>
       <Tabs
-        size='large'
+        size="large"
         activeKey={type}
-        onChange={key => setType(key)}
+        onChange={(key) => setType(key)}
         items={[
           {
             label: '最近一周',
-            key: '1'
+            key: '1',
           },
           {
             label: '所有时间',
-            key: '0'
+            key: '0',
           },
         ]}
       />
       <ScrollArea style={{ maxHeight: 460 }}>
         <Table
-          rowKey='id'
-          size='small'
+          rowKey="id"
+          size="small"
           loading={loading}
           columns={columns}
-          dataSource={type === '1' ?
-            data?.weekData?.map(({ song }) => song) :
-            data?.allData?.map(({ song }) => song)
-          }
+          dataSource={type === '1'
+            ? data?.weekData?.map(({ song }) => song)
+            : data?.allData?.map(({ song }) => song)}
           pagination={false}
         />
       </ScrollArea>

@@ -9,13 +9,14 @@ import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import 'swiper/css/pagination';
 import { getPersonalFM } from '@/service';
+import type { Artist } from '@/service/personal-fm';
 import './index.css';
 
 interface Song {
   id?: number;
   name?: string;
   pic?: string;
-  artists?: API.Artist[];
+  artists?: Artist[];
 }
 
 /**
@@ -26,14 +27,16 @@ const FM: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const { runAsync } = useRequest(getPersonalFM, {
     onSuccess: ({ data }) => {
-      const existSongIds = fms.map(item => item.id);
-      setfms([...fms, ...data?.filter(({ id }) => !existSongIds.includes(id))?.map(({ name, id, album, artists }) => ({
+      const existSongIds = fms.map((item) => item.id);
+      setfms([...fms, ...data?.filter(({ id }) => !existSongIds.includes(id))?.map(({
+        name, id, album, artists,
+      }) => ({
         id,
         name,
         pic: album?.picUrl,
-        artists
+        artists,
       })) ?? []]);
-    }
+    },
   });
 
   useEffect(() => {
@@ -46,10 +49,10 @@ const FM: React.FC = () => {
   return (
     <PageContainer>
       <Swiper
-        effect={'coverflow'}
-        grabCursor={true}
-        centeredSlides={true}
-        slidesPerView={'auto'}
+        effect="coverflow"
+        grabCursor
+        centeredSlides
+        slidesPerView="auto"
         coverflowEffect={{
           rotate: 50,
           stretch: 0,
@@ -59,9 +62,11 @@ const FM: React.FC = () => {
         }}
         pagination={false}
         modules={[EffectCoverflow]}
-        onActiveIndexChange={swiper => setActiveIndex(swiper.activeIndex)}
+        onActiveIndexChange={(swiper) => setActiveIndex(swiper.activeIndex)}
       >
-        {fms.map(({ id, name, pic, artists }) => (
+        {fms.map(({
+          id, name, pic, artists,
+        }) => (
           <SwiperSlide key={`${id as number}_${name as string}`}>
             <SongCard
               id={id}

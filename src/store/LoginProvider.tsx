@@ -1,12 +1,13 @@
 import React, { createContext, useState } from 'react';
 import { getLogout } from '@/service';
+import type { LoginStatus } from '@/service/login-status';
 
 interface AuthContextType {
   /**
    * 登录状态|用户账户信息
    */
-  userAccount: API.UserAccount | null;
-  update: (user: API.UserAccount) => void;
+  userAccount: LoginStatus | null;
+  update: (user: LoginStatus) => void;
   logout: () => Promise<void>;
 }
 
@@ -15,9 +16,9 @@ export const LoginContext = createContext<AuthContextType>({
 } as AuthContextType);
 
 function LoginProvider({ children }: { children: React.ReactNode }) {
-  const [userAccount, setUserAccount] = useState<API.UserAccount | null>(null);
+  const [userAccount, setUserAccount] = useState<LoginStatus | null>(null);
 
-  const update = (user: API.UserAccount) => {
+  const update = (user: LoginStatus) => {
     setUserAccount(user);
   };
 

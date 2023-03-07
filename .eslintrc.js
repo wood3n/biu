@@ -34,6 +34,7 @@ module.exports = {
   rules: {
     'eol-last': 0,
     'no-undef': 0,
+    'no-unused-vars': 0,
     'max-len': 0,
     'react/no-unstable-nested-components': 0,
     'react/react-in-jsx-scope': 0,

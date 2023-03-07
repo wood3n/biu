@@ -65,4 +65,4 @@ export interface LoginStatus {
 /*
  * 登录状态
  */
-export const getLoginStatus = () => request.get<LoginStatus>('/login/status');
+export const getLoginStatus = () => request.get<APIResponseNestData<LoginStatus>>('/login/status');

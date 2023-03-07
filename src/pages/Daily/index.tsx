@@ -21,6 +21,7 @@ import { CgLoadbarSound } from 'react-icons/cg';
 import { MdAccessTime } from 'react-icons/md';
 import { useRequest } from 'ahooks';
 import { getRecommendSongs } from '@/service';
+import type { DailySong } from '@/service/recommend-songs';
 import { formatDuration } from '@/common/utils';
 import styles from './index.module.less';
 
@@ -41,7 +42,7 @@ const Daily: React.FC = () => {
 
   const { data, loading } = useRequest(getRecommendSongs);
 
-  const columns: ColumnsType<API.DailySong> = [
+  const columns: ColumnsType<DailySong> = [
     {
       title: '#',
       dataIndex: 'index',
@@ -52,7 +53,7 @@ const Daily: React.FC = () => {
     {
       title: '歌曲',
       dataIndex: 'picUrl',
-      render: (_, record: API.DailySong) => (
+      render: (_, record) => (
         <TableSongInfo
           picUrl={record?.al?.picUrl}
           name={record?.name}
@@ -64,7 +65,7 @@ const Daily: React.FC = () => {
       title: '专辑',
       width: 320,
       dataIndex: 'al',
-      render: (_, record: API.DailySong) => (
+      render: (_, record) => (
         <Typography.Text ellipsis={{ tooltip: record?.al?.name }} style={{ maxWidth: 160 }}>
           <a className={styles.tableLink}>{record?.al?.name ?? '-'}</a>
         </Typography.Text>
@@ -98,7 +99,7 @@ const Daily: React.FC = () => {
         </div>
       </div>
       <Card bordered={false}>
-        <Table<API.DailySong>
+        <Table<DailySong>
           rowKey="id"
           columns={columns}
           loading={loading}

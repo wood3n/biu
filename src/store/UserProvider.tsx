@@ -1,8 +1,10 @@
 import React, { useState, createContext } from 'react';
+import type { UserDetail } from '@/service/user-detail';
+import type { UserAcountStats } from '@/service/user-subcount';
 
 interface User {
-  userInfo: API.UserDetail | null;
-  userAccountStats: API.UserAcountStats | null;
+  userInfo: UserDetail | null;
+  userAccountStats: UserAcountStats | null;
 }
 
 interface ContextType {
@@ -11,7 +13,7 @@ interface ContextType {
 }
 
 export const UserContext = createContext<ContextType>({
-  user: null
+  user: null,
 } as ContextType);
 
 /**
