@@ -1,7 +1,7 @@
 import request from './request';
 
 export interface UserDetailRequestParams {
-  uid: string | undefined;
+  uid: number | undefined;
 }
 
 export interface UserPoint {

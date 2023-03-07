@@ -24,6 +24,8 @@ module.exports = {
     {
       files: ['*.ts', '*.tsx'],
       rules: {
+        // https://typescript-eslint.io/rules/indent/#how-to-use
+        '@typescript-eslint/indent': ['error', 2],
         '@typescript-eslint/no-unused-vars': 0,
         'no-unused-expressions': 'off',
         '@typescript-eslint/no-unused-expressions': 2,
@@ -36,6 +38,8 @@ module.exports = {
     'no-undef': 0,
     'no-unused-vars': 0,
     'max-len': 0,
+    indent: 0,
+    'no-use-before-define': 0,
     'react/no-unstable-nested-components': 0,
     'react/react-in-jsx-scope': 0,
     '@typescript-eslint/no-non-null-assertion': 0,

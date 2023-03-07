@@ -99,6 +99,11 @@
     "vite": "^3.0.5",
     "vite-plugin-singlefile": "^0.11.1"
   },
+  "overrides": {
+    "babel-plugin-lodash": {
+      "@babel/types": "~7.20.0"
+    }
+  },
   "lint-staged": {
     "*.{js,json,ts,tsx}": "eslint --fix"
   },

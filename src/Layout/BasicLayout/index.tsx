@@ -26,7 +26,9 @@ const BasicLayout: React.FC = () => {
     onSuccess: async ({ data: loginStatus }) => {
       if (loginStatus?.profile && loginStatus.profile.userId) {
         // 用户详情信息
-        const userDetail = await getUserDetail(loginStatus.profile.userId);
+        const userDetail = await getUserDetail({
+          uid: loginStatus.profile.userId,
+        });
         // 歌单等数量
         const userAccountStats = await getUserSubcount();
         updateAccount({

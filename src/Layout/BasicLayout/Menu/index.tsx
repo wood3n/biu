@@ -131,6 +131,7 @@ const SysMenu: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log(user?.userInfo);
     if (user?.userInfo?.profile?.userId) {
       updateMenus();
     }

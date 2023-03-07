@@ -1,12 +1,12 @@
-import { RouteObject } from 'react-router-dom';
-import BasicLayout from './Layout/BasicLayout';
+import type { RouteObject } from 'react-router-dom';
 import Login from '@/pages/Login';
 import Home from '@/pages/Home';
+import NotFound from '@/pages/NotFound';
+import UserProfile from '@/pages/UserProfile';
+import BasicLayout from './Layout/BasicLayout';
 import Daily from './pages/Daily';
 import FM from './pages/FM';
 import Search from './pages/Search';
-import NotFound from '@/pages/NotFound';
-import UserProfile from '@/pages/UserProfile';
 import PlayList from './pages/PlayList';
 
 /**
@@ -19,28 +19,28 @@ const routes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <Home />
+        element: <Home />,
       },
       {
         path: '/daily',
-        element: <Daily />
+        element: <Daily />,
       },
       {
         path: '/fm',
-        element: <FM />
+        element: <FM />,
       },
       {
         path: '/search',
-        element: <Search />
+        element: <Search />,
       },
       {
         path: '/user',
-        element: <UserProfile />
+        element: <UserProfile />,
       },
       {
         path: '/playlist/:id',
-        element: <PlayList />
-      }
+        element: <PlayList />,
+      },
     ],
   },
   {
