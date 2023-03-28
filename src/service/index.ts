@@ -80,7 +80,7 @@ export { getHistoryRecommendSongsDetail } from './history-recommend-songs-detail
 export { getPersonalFM } from './personal-fm';
 export { getFmTrash } from './fm-trash';
 export { getlike } from './like';
-export { getlikelist } from './likelist';
+export { getLikelist } from './likelist';
 export { postUserCloudDel } from './user-cloud-del';
 export { postcloud } from './cloud';
 export { postCloudMatch } from './cloud-match';

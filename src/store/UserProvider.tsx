@@ -1,4 +1,4 @@
-import React, { useState, createContext } from 'react';
+import React, { useState, createContext, useMemo } from 'react';
 import type { UserDetail } from '@/service/user-detail';
 import type { UserAcountStats } from '@/service/user-subcount';
 
@@ -22,8 +22,13 @@ export const UserContext = createContext<ContextType>({
 const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
+  const memoValue = useMemo(() => ({
+    user,
+    update: (v: User) => setUser(v),
+  }), [user]);
+
   return (
-    <UserContext.Provider value={{ user, update: (user: User) => setUser(user) }}>
+    <UserContext.Provider value={memoValue}>
       {children}
     </UserContext.Provider>
   );

@@ -8,7 +8,6 @@ import {
   MdLibraryMusic,
   MdToday,
   MdRadio,
-  MdFavoriteBorder,
   MdHistory,
   MdOutlineAlbum,
   MdRecommend,
@@ -45,7 +44,7 @@ const SysMenu: React.FC = () => {
     });
 
     const playListMenu: MenuItem[] = [];
-    const createdList = playlist?.filter((item) => item.creator?.userId === user?.userInfo?.profile?.userId)?.slice(1);
+    const createdList = playlist?.filter((item) => item.creator?.userId === user?.userInfo?.profile?.userId);
     if (createdList?.length) {
       playListMenu.push({
         label: <CreatedListMenuTitle addPlayList={() => setOpen(true)} className={styles.createdListMenuTitle} />,
@@ -100,11 +99,6 @@ const SysMenu: React.FC = () => {
         icon: <MdOutlineLibraryAdd />,
         children: [
           {
-            label: '喜欢',
-            icon: <MdFavoriteBorder />,
-            key: '/favorite',
-          },
-          {
             label: '收藏',
             icon: <MdOutlineCollectionsBookmark />,
             key: '/collection',
@@ -131,7 +125,6 @@ const SysMenu: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log(user?.userInfo);
     if (user?.userInfo?.profile?.userId) {
       updateMenus();
     }

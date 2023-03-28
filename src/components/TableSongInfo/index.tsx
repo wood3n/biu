@@ -1,5 +1,6 @@
 import React from 'react';
 import { Space, Image, Typography } from 'antd';
+import { MdOutlinePlayCircle } from 'react-icons/md';
 import type { Ar } from '@/service/recommend-songs';
 import styles from './index.module.less';
 
@@ -7,6 +8,7 @@ interface Props {
   picUrl?: string;
   name?: string;
   ar?: Ar[];
+  hovering?: boolean;
 }
 
 /**
@@ -16,6 +18,7 @@ const TableSongInfo: React.FC<Props> = ({
   picUrl,
   name,
   ar,
+  hovering,
 }) => (
   <Space>
     <Image
@@ -23,7 +26,10 @@ const TableSongInfo: React.FC<Props> = ({
       height={48}
       src={picUrl}
       loading="lazy"
-      preview={false}
+      preview={hovering ? {
+        visible: false,
+        mask: <MdOutlinePlayCircle />,
+      } : false}
     />
     <Space direction="vertical">
       <Typography.Text
@@ -34,8 +40,8 @@ const TableSongInfo: React.FC<Props> = ({
         {name}
       </Typography.Text>
       <span>
-        {ar?.map<React.ReactNode>(({ id, name }) => (
-          <a key={id} className={styles.tableLink}>{name}</a>
+        {ar?.map<React.ReactNode>(({ id, name: arName }) => (
+          <a key={id} className={styles.tableLink}>{arName}</a>
         ))?.reduce((prev, curr) => [prev, ', ', curr])}
       </span>
     </Space>

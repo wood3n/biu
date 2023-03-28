@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
+import { Spin } from 'antd';
 import NavigationButton from '@/components/NavigationButton';
 import Search from '@/components/Search';
 import WindowCornerAction from '@/components/WindowCornerAction';
 import styles from './index.module.less';
 
 interface Props {
+  loading?: boolean;
   children?: React.ReactNode;
   style?: React.CSSProperties;
   headerStickyColor?: string;
@@ -16,6 +18,7 @@ interface Props {
  * 页面内容区域容器，具有吸顶顶栏
  */
 const PageContainer: React.FC<Props> = ({
+  loading,
   children,
   style,
   headerStickyColor = '#121212',
@@ -55,7 +58,7 @@ const PageContainer: React.FC<Props> = ({
       </div>
       <div className={styles.stickyObTarget} id="sticky-observer-target" />
       <div className={styles.pageContent} style={contentStyle}>
-        {children}
+        {loading ? <div className={styles.pageContentLoading}><Spin size="large" /></div> : children}
       </div>
     </div>
   );

@@ -1,11 +1,12 @@
 const path = require('path');
 const { build } = require('vite');
+const consola = require('consola');
 const baseConfig = require('./vite/vite.config');
 
 process.env.NODE_ENV = 'production';
 
 (async () => {
-  console.log('Start build web resources...');
+  consola.info('Start build web resources...');
   const outDir = path.resolve(process.cwd(), './dist/web');
 
   try {
@@ -24,9 +25,9 @@ process.env.NODE_ENV = 'production';
       },
     });
   } catch (err) {
-    console.log(err);
+    consola.error(err);
     process.exit(1);
   }
 
-  console.log('build web successfully!');
+  consola.success('build web successfully!');
 })();

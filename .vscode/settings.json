@@ -1,5 +1,5 @@
 {
-  "files.eol": "auto",
+  "files.eol": "lf",
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true,

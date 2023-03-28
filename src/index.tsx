@@ -3,10 +3,10 @@ import ReactDOM from 'react-dom';
 import { HashRouter, useRoutes } from 'react-router-dom';
 import { Alert, ConfigProvider, theme } from 'antd';
 import zhCN from 'antd/es/locale/zh_CN';
+import { Provider as JotaiProvider } from 'jotai';
 import routes from './routes';
 import AuthProvider from './store/LoginProvider';
 import UserProvider from './store/UserProvider';
-import AudioProvider from './store/AudioProvider';
 import 'antd/dist/reset.css';
 
 const App = () => useRoutes(routes);
@@ -47,11 +47,11 @@ ReactDOM.render(
       <Alert.ErrorBoundary>
         <AuthProvider>
           <UserProvider>
-            <AudioProvider>
+            <JotaiProvider>
               <HashRouter basename="/">
                 <App />
               </HashRouter>
-            </AudioProvider>
+            </JotaiProvider>
           </UserProvider>
         </AuthProvider>
       </Alert.ErrorBoundary>

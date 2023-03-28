@@ -2,6 +2,7 @@
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
     /* Language and Environment */
+    "baseUrl": ".",
     "target": "es2020" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
     "lib": [
       "es2020",
@@ -26,9 +27,13 @@
     "skipLibCheck": true,
     "types": ["vite/client", "node"],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@service/*": ["./src/service/*"],
+      "@components/*": ["./src/components/*"],
+      "@store": ["./src/store/*"],
+      "@common": ["./src/common/*"]
     }
   },
   "include": ["src", "scripts"],
-  "exclude": ["node_modules", "dist", "public"]
+  "exclude": ["node_modules", "dist", "public"],
 }

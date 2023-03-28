@@ -3,6 +3,8 @@ const path = require('path');
 const viteReact = require('@vitejs/plugin-react').default;
 const svgr = require('@svgr/rollup');
 const { viteSingleFile } = require('vite-plugin-singlefile');
+const jotaiDebugLabel = require('jotai/babel/plugin-debug-label').default;
+const jotaiReactRefresh = require('jotai/babel/plugin-react-refresh').default;
 
 /**
  * @param {string} mode developement | production
@@ -39,10 +41,16 @@ module.exports = function getConfig(mode) {
         // }
       }),
       mode === 'production' && viteSingleFile(),
+      jotaiDebugLabel,
+      jotaiReactRefresh,
     ].filter(Boolean),
     resolve: {
       alias: {
         '@': path.resolve(projectRootDir, './src'),
+        '@service': path.resolve(projectRootDir, './src/service'),
+        '@components': path.resolve(projectRootDir, './src/components'),
+        '@store': path.resolve(projectRootDir, './src/store'),
+        '@common': path.resolve(projectRootDir, './src/common'),
       },
     },
     css: {

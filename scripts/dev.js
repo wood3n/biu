@@ -1,11 +1,12 @@
 const electronPath = require('electron');
 const { spawn } = require('child_process');
 const { createServer } = require('vite');
+const consola = require('consola');
 const portfinder = require('portfinder');
 const baseConfig = require('./vite/vite.config');
 
 (async () => {
-  console.log('Start vite server...');
+  consola.info('Start vite server...');
 
   process.env.NODE_ENV = 'development';
   const port = await portfinder.getPortPromise();
@@ -21,7 +22,7 @@ const baseConfig = require('./vite/vite.config');
   server.printUrls();
 
   // 启动 electron 进程
-  console.log('Start electron main process...');
+  consola.info('Start electron main process...');
 
   // 启动 electron 进程
   try {
@@ -35,11 +36,11 @@ const baseConfig = require('./vite/vite.config');
     });
 
     electronProcess.on('spawn', () => {
-      console.log('Start electron successfully!');
+      consola.success('Start electron successfully!');
     });
 
     electronProcess.on('error', (err) => {
-      console.error(`Failed to start electron process: ${err}`, err);
+      consola.error(`Failed to start electron process: ${err}`, err);
     });
 
     electronProcess.on('close', (code) => {
@@ -51,5 +52,5 @@ const baseConfig = require('./vite/vite.config');
     return Promise.reject(err);
   }
 })().catch((err) => {
-  console.log(err);
+  consola.info(err);
 });

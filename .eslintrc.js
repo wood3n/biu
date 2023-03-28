@@ -15,7 +15,9 @@ module.exports = {
       version: 'detect',
     },
     'import/resolver': {
-      typescript: {},
+      typescript: {
+        alwaysTryTypes: true,
+      },
     },
   },
   parser: '@typescript-eslint/parser',
@@ -26,7 +28,6 @@ module.exports = {
       rules: {
         // https://typescript-eslint.io/rules/indent/#how-to-use
         '@typescript-eslint/indent': ['error', 2],
-        '@typescript-eslint/no-unused-vars': 0,
         'no-unused-expressions': 'off',
         '@typescript-eslint/no-unused-expressions': 2,
         '@typescript-eslint/consistent-type-imports': [2, { disallowTypeAnnotations: false }],
@@ -36,7 +37,8 @@ module.exports = {
   rules: {
     'eol-last': 0,
     'no-undef': 0,
-    'no-unused-vars': 0,
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': 'error',
     'max-len': 0,
     indent: 0,
     'no-use-before-define': 0,
@@ -66,6 +68,10 @@ module.exports = {
     'react/function-component-definition': 0,
     'react-hooks/exhaustive-deps': 0,
     'react/jsx-filename-extension': 0,
+    'jsx-a11y/anchor-is-valid': 0,
+    'jsx-a11y/click-events-have-key-events': 0,
+    'jsx-a11y/no-static-element-interactions': 0,
+    'react/jsx-props-no-spreading': 0,
     'import/extensions': 0,
     'no-console': 0,
   },

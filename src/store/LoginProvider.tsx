@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useMemo, useState } from 'react';
 import { getLogout } from '@/service';
 import type { LoginStatus } from '@/service/login-status';
 
@@ -27,13 +27,15 @@ function LoginProvider({ children }: { children: React.ReactNode }) {
     cb?.();
   });
 
+  const memoValue = useMemo(() => ({
+    userAccount,
+    update,
+    logout,
+  }), [userAccount]);
+
   return (
     <LoginContext.Provider
-      value={{
-        userAccount,
-        update,
-        logout,
-      }}
+      value={memoValue}
     >
       {children}
     </LoginContext.Provider>

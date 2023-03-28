@@ -9,9 +9,6 @@ import FM from './pages/FM';
 import Search from './pages/Search';
 import PlayList from './pages/PlayList';
 
-/**
- * layout 组件不能用 lazy load，生产环境会报错
- */
 const routes: RouteObject[] = [
   {
     path: '/',
@@ -30,12 +27,12 @@ const routes: RouteObject[] = [
         element: <FM />,
       },
       {
-        path: '/search',
-        element: <Search />,
-      },
-      {
         path: '/user',
         element: <UserProfile />,
+      },
+      {
+        path: '/search',
+        element: <Search />,
       },
       {
         path: '/playlist/:id',
