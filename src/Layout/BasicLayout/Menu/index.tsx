@@ -13,9 +13,12 @@ import {
   MdRecommend,
   MdOutlineLibraryAdd,
   MdOutlineWbCloudy,
+  MdQueueMusic,
   MdOutlineCollectionsBookmark,
 } from 'react-icons/md';
 import ScrollArea from 'react-scrollbar';
+import { useSetAtom } from 'jotai';
+import { playListAtom } from '@/store/play-list-atom';
 import CreatePlayListModal from '@/components/CreatePlayListModal';
 import CreatedListMenuTitle from './MenuTitle';
 import styles from './index.module.less';
@@ -29,6 +32,7 @@ const SysMenu: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useUser();
+  const setPlayList = useSetAtom(playListAtom);
   const { token: { colorBgLayout } } = theme.useToken();
   const [items, setItems] = useState<MenuItem[]>();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
@@ -43,6 +47,8 @@ const SysMenu: React.FC = () => {
       offset: 0,
     });
 
+    // 更新用户歌单列表
+    setPlayList(playlist);
     const playListMenu: MenuItem[] = [];
     const createdList = playlist?.filter((item) => item.creator?.userId === user?.userInfo?.profile?.userId);
     if (createdList?.length) {
@@ -53,6 +59,7 @@ const SysMenu: React.FC = () => {
         children: createdList?.map(({ id, name }) => ({
           label: name!,
           key: String(id),
+          icon: <MdQueueMusic />,
         })),
       });
     }
@@ -66,6 +73,7 @@ const SysMenu: React.FC = () => {
         children: collectList?.map(({ id, name }) => ({
           label: name!,
           key: String(id),
+          icon: <MdQueueMusic />,
         })),
       });
     }

@@ -35,7 +35,7 @@ const routes: RouteObject[] = [
         element: <Search />,
       },
       {
-        path: '/playlist/:id',
+        path: '/playlist/:pid',
         element: <PlayList />,
       },
     ],

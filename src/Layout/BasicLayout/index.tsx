@@ -9,6 +9,7 @@ import {
   Spin, Layout, Avatar, theme,
 } from 'antd';
 import { AiOutlineUser } from 'react-icons/ai';
+import PlayTaskBar from '@components/PlayTaskBar';
 import Menu from './Menu';
 import styles from './index.module.less';
 
@@ -82,7 +83,9 @@ const BasicLayout: React.FC = () => {
           <Outlet />
         </Content>
       </Layout>
-      <Footer className={styles.footer} style={{ background: colorBgContainer }}>Footer</Footer>
+      <Footer className={styles.footer} style={{ background: colorBgContainer }}>
+        <PlayTaskBar />
+      </Footer>
     </Layout>
   );
 };

@@ -56,7 +56,7 @@ export interface FreeTrialPrivilege {
 
 export interface Song {
   name?: string;
-  id?: number;
+  id: number;
   pst?: number;
   t?: number;
   ar?: Ar[];

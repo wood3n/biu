@@ -1,6 +1,41 @@
+.tableRow {
+  cursor: pointer;
+}
+
+.selectedRow {
+  background-color: #424242;
+}
+
+.timeTitle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dragingRow {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: #fff;
+
+  .dragHidden {
+    visibility: hidden;
+  }
+
+  :global {
+    td {
+      padding: 16px;
+    }
+  }
+}
+
 .playlistAction {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+}
+
+.playListMenu {
+  height: 300px;
+  overflow-y: auto;
 }

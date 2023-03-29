@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  MdLibraryAdd
+  MdPlaylistAdd,
 } from 'react-icons/md';
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
 
 const CreatedListMenuTitle: React.FC<Props> = ({
   className,
-  addPlayList
+  addPlayList,
 }) => {
   const [active, setActive] = useState(false);
 
@@ -21,14 +21,16 @@ const CreatedListMenuTitle: React.FC<Props> = ({
       className={className}
     >
       创建的歌单
-      {active &&
-        <a onClick={e => {
-          e.stopPropagation();
-          addPlayList();
-        }}>
-          <MdLibraryAdd size={18} style={{ verticalAlign: '-0.25em' }}/>
-        </a>
-      }
+      {active
+        && (
+          <a onClick={(e) => {
+            e.stopPropagation();
+            addPlayList();
+          }}
+          >
+            <MdPlaylistAdd size={18} style={{ verticalAlign: '-0.25em' }} />
+          </a>
+        )}
     </span>
   );
 };

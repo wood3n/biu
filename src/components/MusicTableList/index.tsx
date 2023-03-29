@@ -7,7 +7,7 @@ import { formatDuration } from '@/common/utils';
 import type { Song } from '@service/playlist-track-all';
 import { arrayMoveImmutable } from 'array-move';
 import type { SortableContainerProps, SortEnd } from 'react-sortable-hoc';
-import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
+import { SortableContainer, SortableElement } from 'react-sortable-hoc';
 import styles from './index.module.less';
 
 const SortableItem = SortableElement((props: React.HTMLAttributes<HTMLTableRowElement>) => (
@@ -25,6 +25,17 @@ const SortableBody = SortableContainer((props: React.HTMLAttributes<HTMLTableSec
 const MusicTableList = (props: TableProps<Song>) => {
   // 当前 hover 行
   const [hoverRowIndex, setHoverRowIndex] = useState<number>();
+  // 数据
+  const [dataSource, setDataSource] = useState<Song[]>([]);
+
+  const onSortEnd = ({ oldIndex, newIndex }: SortEnd) => {
+    if (oldIndex !== newIndex) {
+      const newData = arrayMoveImmutable(dataSource.slice(), oldIndex, newIndex).filter(
+        (el: Song) => !!el,
+      );
+      setDataSource(newData);
+    }
+  };
 
   const columns: ColumnsType<Song> = [
     {
@@ -65,19 +76,16 @@ const MusicTableList = (props: TableProps<Song>) => {
     },
   ];
 
-  const DraggableContainer = (props: SortableContainerProps) => (
+  const DraggableContainer = (containerProps: SortableContainerProps) => (
     <SortableBody
-      useDragHandle
-      disableAutoscroll
-      helperClass="row-dragging"
       onSortEnd={onSortEnd}
-      {...props}
+      {...containerProps}
     />
   );
 
   const DraggableBodyRow: React.FC<any> = ({ className, style, ...restProps }) => {
     // function findIndex base on Table rowKey props and should always be a right array index
-    const index = dataSource.findIndex((x) => x.index === restProps['data-row-key']);
+    const index = dataSource.findIndex((x) => x.id === restProps['data-row-key']);
     return <SortableItem index={index} {...restProps} />;
   };
 
