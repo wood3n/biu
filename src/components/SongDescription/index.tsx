@@ -1,67 +1,45 @@
 import React from 'react';
-import {
-  Typography, Image, Space, Modal,
-} from 'antd';
-import type { Playlist } from '@/service/playlist-detail';
-import { formatMillisecond } from '@/common/utils';
-import { IMAGE_ERR } from '@/common/constants';
+import { Space, Image, Typography } from 'antd';
+import type { Ar } from '@/service/recommend-songs';
 import styles from './index.module.less';
 
-interface Props extends Playlist{
+interface Props {
+  picUrl?: string;
+  name?: string;
+  ar?: Ar[];
 }
 
 /**
- * 歌曲详情描述
+ * 歌曲信息描述、图片、歌名、歌手名
  */
 const SongDescription: React.FC<Props> = ({
+  picUrl,
   name,
-  coverImgUrl,
-  description,
-  trackCount,
-  createTime,
+  ar,
 }) => (
-  <div className={styles.titleAndDescription}>
+  <Space>
     <Image
+      width={48}
+      height={48}
+      src={picUrl}
+      loading="lazy"
       preview={false}
-      width={200}
-      height={200}
-      src={coverImgUrl}
-      fallback={IMAGE_ERR}
-      className={styles.coverImage}
     />
     <Space direction="vertical">
-      <Typography.Title>{name}</Typography.Title>
-      <Typography.Text>
-        创建时间：
-        {formatMillisecond(createTime)}
-      </Typography.Text>
-      <Typography.Text>
-        歌曲数：
-        {trackCount}
-      </Typography.Text>
-      <Typography.Paragraph
-        ellipsis={{
-          rows: 2,
-          expandable: true,
-          symbol: (
-            <a
-              onClick={(e) => {
-                e.stopPropagation();
-                Modal.info({
-                  title: '歌单详情信息',
-                  content: description,
-                });
-              }}
-            >
-              more
-            </a>
-          ),
-        }}
+      <Typography.Text
+        strong
+        ellipsis={{ tooltip: name }}
+        style={{ maxWidth: '100%' }}
       >
-        {description}
-      </Typography.Paragraph>
+        {name}
+      </Typography.Text>
+      <span>
+        {ar?.map<React.ReactNode>(({ id, name: arName }) => (
+          <a key={id} className={styles.tableLink}>{arName}</a>
+        ))?.reduce((prev, curr) => [prev, ', ', curr])}
+      </span>
     </Space>
-  </div>
+  </Space>
 );
 
 export default SongDescription;

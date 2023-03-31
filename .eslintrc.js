@@ -37,6 +37,8 @@ module.exports = {
   rules: {
     'eol-last': 0,
     'no-undef': 0,
+    'no-shadow': 0,
+    'no-nested-ternary': 0,
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': 'error',
     'max-len': 0,

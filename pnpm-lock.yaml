@@ -6,6 +6,9 @@ specifiers:
   '@babel/eslint-plugin': ^7.19.1
   '@babel/generator': ^7.21.1
   '@babel/types': ^7.21.3
+  '@dnd-kit/core': ^6.0.8
+  '@dnd-kit/sortable': ^7.0.2
+  '@dnd-kit/utilities': ^3.2.1
   '@icon-park/react': ^1.4.2
   '@svgr/rollup': ^6.5.1
   '@types/minimist': ^1.2.2
@@ -57,7 +60,6 @@ specifiers:
   react-router: ^6.3.0
   react-router-dom: ~6.4.0
   react-scrollbar: ^0.5.6
-  react-sortable-hoc: ^2.0.0
   read-pkg: ^5.2.0
   rimraf: ^3.0.2
   stylelint: ^14.11.0
@@ -68,6 +70,9 @@ specifiers:
   vite-plugin-singlefile: ^0.11.1
 
 dependencies:
+  '@dnd-kit/core': 6.0.8_sfoxds7t5ydpegc3knd667wn6m
+  '@dnd-kit/sortable': 7.0.2_t27c2n57fgirhmvux7d536sgxm
+  '@dnd-kit/utilities': 3.2.1_react@17.0.2
   '@icon-park/react': 1.4.2_sfoxds7t5ydpegc3knd667wn6m
   '@vitejs/plugin-react': 1.3.2
   ahooks: 3.7.0_react@17.0.2
@@ -88,7 +93,6 @@ dependencies:
   react-router: 6.3.0_react@17.0.2
   react-router-dom: 6.4.0_sfoxds7t5ydpegc3knd667wn6m
   react-scrollbar: 0.5.6_react@17.0.2
-  react-sortable-hoc: 2.0.0_sfoxds7t5ydpegc3knd667wn6m
   read-pkg: 5.2.0
   swiper: 8.4.4
 
@@ -1670,6 +1674,49 @@ packages:
       ajv: 6.12.6
       ajv-keywords: 3.5.2_ajv@6.12.6
     dev: true
+
+  /@dnd-kit/accessibility/3.0.1_react@17.0.2:
+    resolution: {integrity: sha512-HXRrwS9YUYQO9lFRc/49uO/VICbM+O+ZRpFDe9Pd1rwVv2PCNkRiTZRdxrDgng/UkvdC3Re9r2vwPpXXrWeFzg==}
+    peerDependencies:
+      react: '>=16.8.0'
+    dependencies:
+      react: 17.0.2
+      tslib: 2.5.0
+    dev: false
+
+  /@dnd-kit/core/6.0.8_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-lYaoP8yHTQSLlZe6Rr9qogouGUz9oRUj4AHhDQGQzq/hqaJRpFo65X+JKsdHf8oUFBzx5A+SJPUvxAwTF2OabA==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+    dependencies:
+      '@dnd-kit/accessibility': 3.0.1_react@17.0.2
+      '@dnd-kit/utilities': 3.2.1_react@17.0.2
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      tslib: 2.5.0
+    dev: false
+
+  /@dnd-kit/sortable/7.0.2_t27c2n57fgirhmvux7d536sgxm:
+    resolution: {integrity: sha512-wDkBHHf9iCi1veM834Gbk1429bd4lHX4RpAwT0y2cHLf246GAvU2sVw/oxWNpPKQNQRQaeGXhAVgrOl1IT+iyA==}
+    peerDependencies:
+      '@dnd-kit/core': ^6.0.7
+      react: '>=16.8.0'
+    dependencies:
+      '@dnd-kit/core': 6.0.8_sfoxds7t5ydpegc3knd667wn6m
+      '@dnd-kit/utilities': 3.2.1_react@17.0.2
+      react: 17.0.2
+      tslib: 2.5.0
+    dev: false
+
+  /@dnd-kit/utilities/3.2.1_react@17.0.2:
+    resolution: {integrity: sha512-OOXqISfvBw/1REtkSK2N3Fi2EQiLMlWUlqnOK/UpOISqBZPWpE6TqL+jcPtMOkE8TqYGiURvRdPSI9hltNUjEA==}
+    peerDependencies:
+      react: '>=16.8.0'
+    dependencies:
+      react: 17.0.2
+      tslib: 2.5.0
+    dev: false
 
   /@electron/get/1.14.1:
     resolution: {integrity: sha512-BrZYyL/6m0ZXz/lDxy/nlVhQz+WF+iPS6qXolEU8atw7h6v1aYkjwJZ63m+bJMBTxDE66X+r2tPS4a/8C82sZw==}
@@ -5260,12 +5307,6 @@ packages:
     resolution: {integrity: sha512-7m1vEcPCxXYI8HqnL8CKI6siDyD+eIWSwgB3DZA+ZTogxk9I4CDnj4wilt9x/+/QbHI4YG5YZNmC6458/e9Ktg==}
     dev: false
 
-  /invariant/2.2.4:
-    resolution: {integrity: sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==}
-    dependencies:
-      loose-envify: 1.4.0
-    dev: false
-
   /is-arguments/1.1.1:
     resolution: {integrity: sha512-8Q7EARjzEnKpt/PCD7e1cgUS0a6X8u5tdSiMqXhojOdoV9TsMsiO+9VLC5vAmO8N7/GmXn7yjR8qnA6bVAEzfA==}
     engines: {node: '>= 0.4'}
@@ -7279,19 +7320,6 @@ packages:
       react-motion: 0.5.2_react@17.0.2
     dev: false
 
-  /react-sortable-hoc/2.0.0_sfoxds7t5ydpegc3knd667wn6m:
-    resolution: {integrity: sha512-JZUw7hBsAHXK7PTyErJyI7SopSBFRcFHDjWW5SWjcugY0i6iH7f+eJkY8cJmGMlZ1C9xz1J3Vjz0plFpavVeRg==}
-    peerDependencies:
-      react: ^16.3.0 || ^17.0.0
-      react-dom: ^16.3.0 || ^17.0.0
-    dependencies:
-      '@babel/runtime': 7.21.0
-      invariant: 2.2.4
-      prop-types: 15.8.1
-      react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
-    dev: false
-
   /react/17.0.2:
     resolution: {integrity: sha512-gnhPt75i/dq/z3/6q/0asP78D0u592D5L1pd7M8P+dck6Fu/jJeL6iVVK23fptSUZj8Vjf++7wXA8UNclGQcbA==}
     engines: {node: '>=0.10.0'}
@@ -8113,7 +8141,6 @@ packages:
 
   /tslib/2.5.0:
     resolution: {integrity: sha512-336iVw3rtn2BUK7ORdIAHTyxHGRIHVReokCR3XjbckJMK7ms8FysBfhLR8IXnAgy7T0PTPNBWKiH514FOW/WSg==}
-    dev: true
 
   /tsutils/3.21.0_typescript@4.7.4:
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}

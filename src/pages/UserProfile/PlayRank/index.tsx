@@ -7,7 +7,7 @@ import { useRequest } from 'ahooks';
 import type { ColumnsType } from 'antd/es/table';
 import { MdAccessTime } from 'react-icons/md';
 import { formatDuration } from '@/common/utils';
-import TableSongInfo from '@/components/TableSongInfo';
+import SongDescription from '@/components/SongDescription';
 import ScrollArea from 'react-scrollbar';
 import styles from './index.module.less';
 
@@ -36,7 +36,7 @@ const MyPlayRank: React.FC = () => {
       title: '歌曲',
       dataIndex: 'song',
       render: (_, record) => (
-        <TableSongInfo
+        <SongDescription
           picUrl={record?.al?.picUrl}
           name={record?.name}
           ar={record?.ar}

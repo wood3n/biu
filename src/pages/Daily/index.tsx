@@ -16,7 +16,7 @@ import 'react-clock/dist/Clock.css';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import PageContainer from '@/components/PageContainer';
-import TableSongInfo from '@/components/TableSongInfo';
+import SongDescription from '@/components/SongDescription';
 import { CgLoadbarSound } from 'react-icons/cg';
 import { MdAccessTime } from 'react-icons/md';
 import { useRequest } from 'ahooks';
@@ -54,7 +54,7 @@ const Daily: React.FC = () => {
       title: '歌曲',
       dataIndex: 'picUrl',
       render: (_, record) => (
-        <TableSongInfo
+        <SongDescription
           picUrl={record?.al?.picUrl}
           name={record?.name}
           ar={record?.ar}

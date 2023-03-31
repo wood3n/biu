@@ -18,7 +18,7 @@ import {
 } from 'react-icons/md';
 import ScrollArea from 'react-scrollbar';
 import { useSetAtom } from 'jotai';
-import { playListAtom } from '@/store/play-list-atom';
+import { userPlaylistAtom } from '@/store/userPlaylistAtom';
 import CreatePlayListModal from '@/components/CreatePlayListModal';
 import CreatedListMenuTitle from './MenuTitle';
 import styles from './index.module.less';
@@ -32,7 +32,7 @@ const SysMenu: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useUser();
-  const setPlayList = useSetAtom(playListAtom);
+  const setPlayList = useSetAtom(userPlaylistAtom);
   const { token: { colorBgLayout } } = theme.useToken();
   const [items, setItems] = useState<MenuItem[]>();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);

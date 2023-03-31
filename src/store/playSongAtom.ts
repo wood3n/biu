@@ -2,6 +2,6 @@ import { atom } from 'jotai';
 import type { Song } from '@service/playlist-track-all';
 
 /**
- * 用户播放列表
+ * 当前正在播放歌曲
  */
-export const musicListAtom = atom<Song[]>([]);
+export const playSongAtom = atom<Song | undefined>(undefined);
