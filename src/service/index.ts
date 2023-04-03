@@ -60,7 +60,7 @@ export { postPlaylistTracks } from './playlist-tracks';
 export { postPlaylistTrackAdd } from './playlist-track-add';
 export { postPlaylistTrackDelete } from './playlist-track-delete';
 export { getPlaylistVideoRecent } from './playlist-video-recent';
-export { getalbum } from './album';
+export { getAlbum } from './album';
 export { getAlbumDetailDynamic } from './album-detail-dynamic';
 export { getAlbumSub } from './album-sub';
 export { getAlbumSublist } from './album-sublist';

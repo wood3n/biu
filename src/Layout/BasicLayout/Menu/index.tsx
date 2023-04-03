@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu as AntMenu, theme } from 'antd';
-// import { useUser } from '@/common/hooks';
 import useUser from '@/store/userAtom';
 import type { MenuProps } from 'antd/es/menu';
 import { getUserPlaylist } from '@/service';
@@ -17,7 +16,6 @@ import {
   MdQueueMusic,
   MdOutlineCollectionsBookmark,
 } from 'react-icons/md';
-import ScrollArea from 'react-scrollbar';
 import { useSetAtom } from 'jotai';
 import { userPlaylistAtom } from '@/store/userPlaylistAtom';
 import CreatePlayListModal from '@/components/CreatePlayListModal';
@@ -146,7 +144,7 @@ const SysMenu: React.FC = () => {
   }, [location]);
 
   return (
-    <ScrollArea>
+    <>
       <AntMenu
         items={items}
         mode="inline"
@@ -171,7 +169,7 @@ const SysMenu: React.FC = () => {
         onClose={() => setOpen(false)}
         refreshMenu={updateMenus}
       />
-    </ScrollArea>
+    </>
   );
 };
 

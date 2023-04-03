@@ -10,13 +10,13 @@ import {
 import { AiOutlineUser } from 'react-icons/ai';
 import PlayTaskBar from '@components/PlayTaskBar';
 import useUser from '@/store/userAtom';
+import SimpleBar from 'simplebar-react';
 import Menu from './Menu';
 import styles from './index.module.less';
 
 const { Sider, Footer, Content } = Layout;
 
 const BasicLayout: React.FC = () => {
-  // const { user, update: updateUser } = useUser();
   const [user, setUser] = useUser();
   const navigate = useNavigate();
   const location = useLocation();
@@ -72,10 +72,14 @@ const BasicLayout: React.FC = () => {
               {user?.userInfo?.profile?.nickname}
             </span>
           </div>
-          <Menu />
+          <div className={styles.siderMenu}>
+            <SimpleBar style={{ height: '100%' }}><Menu /></SimpleBar>
+          </div>
         </Sider>
         <Content className={styles.content} style={{ background: colorBgContainer }}>
-          <Outlet />
+          <SimpleBar>
+            <Outlet />
+          </SimpleBar>
         </Content>
       </Layout>
       <Footer className={styles.footer} style={{ background: colorBgContainer }}>

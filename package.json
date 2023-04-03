@@ -54,8 +54,8 @@
     "react-icons": "^4.7.1",
     "react-router": "^6.3.0",
     "react-router-dom": "~6.4.0",
-    "react-scrollbar": "^0.5.6",
     "read-pkg": "^5.2.0",
+    "simplebar-react": "^3.2.3",
     "swiper": "^8.4.4"
   },
   "devDependencies": {

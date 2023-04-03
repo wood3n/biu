@@ -6,20 +6,21 @@ import { Provider as JotaiProvider } from 'jotai';
 import routes from './routes';
 import ThemeProvider from './store/Provider/ThemeProvider';
 import 'antd/dist/reset.css';
+import 'simplebar-react/dist/simplebar.min.css';
 
 const App = () => useRoutes(routes);
 
 ReactDOM.render(
   <React.StrictMode>
-    <Alert.ErrorBoundary>
-      <JotaiProvider>
-        <HashRouter basename="/">
-          <ThemeProvider>
+    <JotaiProvider>
+      <ThemeProvider>
+        <Alert.ErrorBoundary>
+          <HashRouter basename="/">
             <App />
-          </ThemeProvider>
-        </HashRouter>
-      </JotaiProvider>
-    </Alert.ErrorBoundary>
+          </HashRouter>
+        </Alert.ErrorBoundary>
+      </ThemeProvider>
+    </JotaiProvider>
   </React.StrictMode>,
   document.getElementById('root'),
 );

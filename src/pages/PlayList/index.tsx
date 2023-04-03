@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import {
   Card, Space, Input, Table, Typography, Dropdown, Button,
@@ -121,6 +121,7 @@ const Row = (props: RowProps) => {
  */
 const PlayList: React.FC = () => {
   const { pid } = useParams();
+  const navigate = useNavigate();
   // 设置播放队列
   const setPlayQueue = useSetAtom(playQueueAtom);
   const [dataSource, setDataSource] = useState<Song[]>([]);
@@ -203,7 +204,9 @@ const PlayList: React.FC = () => {
       dataIndex: 'al',
       render: (_, record) => (
         <Typography.Text ellipsis={{ tooltip: record?.al?.name }} style={{ maxWidth: 160 }}>
-          <Button type="link">{record?.al?.name ?? '-'}</Button>
+          {record?.al?.id ? (
+            <Button type="link" onClick={() => navigate(`/album/${record?.al?.id}`)}>{record?.al?.name}</Button>
+          ) : <span>{record?.al?.name ?? '-'}</span>}
         </Typography.Text>
       ),
     },

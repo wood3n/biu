@@ -20,7 +20,7 @@ const PlaylistDescription: React.FC<Props> = ({
   trackCount,
   createTime,
 }) => (
-  <div className={styles.titleAndDescription}>
+  <div className={styles.playlistDescription}>
     <Image
       preview={false}
       width={200}
