@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu as AntMenu, theme } from 'antd';
-import { useUser } from '@/common/hooks';
+// import { useUser } from '@/common/hooks';
+import useUser from '@/store/userAtom';
 import type { MenuProps } from 'antd/es/menu';
 import { getUserPlaylist } from '@/service';
 import {
@@ -31,7 +32,7 @@ type MenuItem = Required<MenuProps>['items'][number];
 const SysMenu: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useUser();
+  const [user] = useUser();
   const setPlayList = useSetAtom(userPlaylistAtom);
   const { token: { colorBgLayout } } = theme.useToken();
   const [items, setItems] = useState<MenuItem[]>();

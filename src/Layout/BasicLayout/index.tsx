@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Outlet, Navigate, useNavigate, useLocation,
 } from 'react-router-dom';
-import { useLogin, useUser } from '@/common/hooks';
 import { getLoginStatus, getUserDetail, getUserSubcount } from '@/service';
 import { useRequest } from 'ahooks';
 import {
@@ -10,14 +9,15 @@ import {
 } from 'antd';
 import { AiOutlineUser } from 'react-icons/ai';
 import PlayTaskBar from '@components/PlayTaskBar';
+import useUser from '@/store/userAtom';
 import Menu from './Menu';
 import styles from './index.module.less';
 
 const { Sider, Footer, Content } = Layout;
 
 const BasicLayout: React.FC = () => {
-  const { update: updateAccount } = useLogin();
-  const { user, update: updateUser } = useUser();
+  // const { user, update: updateUser } = useUser();
+  const [user, setUser] = useUser();
   const navigate = useNavigate();
   const location = useLocation();
   const { token: { colorBgContainer, colorBgLayout, colorTextBase } } = theme.useToken();
@@ -25,19 +25,14 @@ const BasicLayout: React.FC = () => {
   // 获取登录状态
   const { loading, data } = useRequest(getLoginStatus, {
     onSuccess: async ({ data: loginStatus }) => {
-      if (loginStatus?.profile && loginStatus.profile.userId) {
+      if (loginStatus?.profile?.userId) {
         // 用户详情信息
         const userDetail = await getUserDetail({
           uid: loginStatus.profile.userId,
         });
         // 歌单等数量
         const userAccountStats = await getUserSubcount();
-        updateAccount({
-          account: loginStatus.account,
-          profile: loginStatus.profile,
-        });
-
-        updateUser({
+        setUser({
           userInfo: userDetail,
           userAccountStats,
         });

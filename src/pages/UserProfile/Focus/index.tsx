@@ -9,7 +9,8 @@ import {
   Spin,
 } from 'antd';
 import { AiOutlineUser } from 'react-icons/ai';
-import { useUser } from '@/common/hooks';
+// import { useUser } from '@/common/hooks';
+import useUser from '@/store/userAtom';
 import { useRequest } from 'ahooks';
 import { getUserFollows } from '@/service';
 import styles from './index.module.less';
@@ -18,7 +19,7 @@ import styles from './index.module.less';
  * 我的关注
  */
 const MyFocus: React.FC = () => {
-  const { user } = useUser();
+  const [user] = useUser();
   const [page, setPage] = useState(1);
 
   const { data, loading, runAsync } = useRequest(getUserFollows, { manual: true });
@@ -28,7 +29,7 @@ const MyFocus: React.FC = () => {
       runAsync({
         uid: user.userInfo.profile.userId,
         limit: 12,
-        offset: (page - 1) * 12
+        offset: (page - 1) * 12,
       });
     }
   }, [user?.userInfo?.profile?.userId, page]);
@@ -68,7 +69,7 @@ const MyFocus: React.FC = () => {
           current={page}
           pageSize={12}
           total={user?.userInfo?.profile?.follows}
-          onChange={v => setPage(v)}
+          onChange={(v) => setPage(v)}
         />
       </Spin>
     </>
