@@ -1,25 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu as AntMenu, theme } from 'antd';
+import {
+  Menu as AntMenu, theme, Tooltip,
+} from 'antd';
 import useUser from '@/store/userAtom';
 import type { MenuProps } from 'antd/es/menu';
 import { getUserPlaylist } from '@/service';
 import {
-  MdLibraryMusic,
-  MdToday,
-  MdRadio,
-  MdHistory,
-  MdOutlineAlbum,
-  MdRecommend,
-  MdOutlineLibraryAdd,
-  MdOutlineWbCloudy,
   MdQueueMusic,
-  MdOutlineCollectionsBookmark,
+  MdPlaylistAdd,
 } from 'react-icons/md';
 import { useSetAtom } from 'jotai';
 import { userPlaylistAtom } from '@/store/userPlaylistAtom';
 import CreatePlayListModal from '@/components/CreatePlayListModal';
-import CreatedListMenuTitle from './MenuTitle';
+import BasicMenu from './BasicMenu';
 import styles from './index.module.less';
 
 type MenuItem = Required<MenuProps>['items'][number];
@@ -52,12 +46,26 @@ const SysMenu: React.FC = () => {
     const createdList = playlist?.filter((item) => item.creator?.userId === user?.userInfo?.profile?.userId);
     if (createdList?.length) {
       playListMenu.push({
-        label: <CreatedListMenuTitle addPlayList={() => setOpen(true)} className={styles.createdListMenuTitle} />,
-        icon: <MdLibraryMusic />,
+        label: (
+          <span className={styles.createdListMenuTitle}>
+            创建的歌单
+            <Tooltip title="创建新歌单">
+              <a
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpen(true);
+                }}
+              >
+                <MdPlaylistAdd size={18} style={{ verticalAlign: '-0.25em' }} />
+              </a>
+            </Tooltip>
+          </span>
+        ),
         key: 'created',
+        type: 'group',
         children: createdList?.map(({ id, name }) => ({
-          label: name!,
-          key: String(id),
+          label: name,
+          key: `/playlist/${id}`,
           icon: <MdQueueMusic />,
         })),
       });
@@ -67,61 +75,18 @@ const SysMenu: React.FC = () => {
     if (collectList?.length) {
       playListMenu.push({
         label: '收藏的歌单',
-        icon: <MdLibraryMusic />,
         key: 'collect',
+        type: 'group',
         children: collectList?.map(({ id, name }) => ({
-          label: name!,
-          key: String(id),
+          label: name,
+          key: `/playlist/${id}`,
           icon: <MdQueueMusic />,
         })),
       });
     }
 
     return [
-      {
-        label: '推荐',
-        key: 'recommend',
-        icon: <MdRecommend />,
-        children: [
-          {
-            label: '每日推荐',
-            icon: <MdToday />,
-            key: '/daily',
-          },
-          {
-            label: '私人 FM',
-            icon: <MdOutlineAlbum />,
-            key: '/fm',
-          },
-          {
-            label: '电台',
-            icon: <MdRadio />,
-            key: '/radio',
-          },
-        ],
-      },
-      {
-        label: '音乐库',
-        key: 'lib',
-        icon: <MdOutlineLibraryAdd />,
-        children: [
-          {
-            label: '收藏',
-            icon: <MdOutlineCollectionsBookmark />,
-            key: '/collection',
-          },
-          {
-            label: '云盘',
-            icon: <MdOutlineWbCloudy />,
-            key: '/cloud',
-          },
-          {
-            label: '最近播放',
-            icon: <MdHistory />,
-            key: '/history',
-          },
-        ],
-      },
+      ...BasicMenu,
       ...playListMenu,
     ] as MenuItem[];
   };
@@ -152,13 +117,8 @@ const SysMenu: React.FC = () => {
         openKeys={['recommend', 'lib', 'created', 'collect']}
         expandIcon={() => null}
         selectedKeys={selectedKeys}
-        onClick={({ key }) => {
-          setSelectedKeys([key]);
-          if (key.startsWith('/')) {
-            navigate(key);
-          } else {
-            navigate(`/playlist/${key}`);
-          }
+        onSelect={({ key }) => {
+          navigate(key);
         }}
         style={{
           background: colorBgLayout,

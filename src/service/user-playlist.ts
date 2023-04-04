@@ -82,7 +82,7 @@ export interface PlaylistInfoType {
   tags?: string[];
   ordered?: boolean;
   status?: number;
-  name?: string;
+  name: string;
   id?: number;
   coverImgId_str?: null | string;
   sharedUsers?: null;

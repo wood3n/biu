@@ -2,7 +2,6 @@ import { useRequest } from 'ahooks';
 import { getArtistDetail } from '@/service';
 import { useParams } from 'react-router-dom';
 import PageContainer from '@/components/PageContainer';
-import { Card } from 'antd';
 
 const Artist = () => {
   const { id } = useParams();
@@ -15,9 +14,7 @@ const Artist = () => {
 
   return (
     <PageContainer>
-      <Card bordered={false}>
-        geshou
-      </Card>
+      geshou
     </PageContainer>
   );
 };

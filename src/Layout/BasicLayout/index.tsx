@@ -1,24 +1,24 @@
 import React from 'react';
 import {
-  Outlet, Navigate, useNavigate, useLocation,
+  Outlet, Navigate, useLocation,
 } from 'react-router-dom';
 import { getLoginStatus, getUserDetail, getUserSubcount } from '@/service';
 import { useRequest } from 'ahooks';
 import {
-  Spin, Layout, Avatar, theme,
+  Spin, Layout, theme,
 } from 'antd';
-import { AiOutlineUser } from 'react-icons/ai';
 import PlayTaskBar from '@components/PlayTaskBar';
-import useUser from '@/store/userAtom';
+import { userAtom } from '@/store/userAtom';
+import { useSetAtom } from 'jotai';
 import SimpleBar from 'simplebar-react';
 import Menu from './Menu';
+import UserAvatarChip from './UserAvatarChip';
 import styles from './index.module.less';
 
 const { Sider, Footer, Content } = Layout;
 
 const BasicLayout: React.FC = () => {
-  const [user, setUser] = useUser();
-  const navigate = useNavigate();
+  const setUser = useSetAtom(userAtom);
   const location = useLocation();
   const { token: { colorBgContainer, colorBgLayout, colorTextBase } } = theme.useToken();
 
@@ -59,19 +59,7 @@ const BasicLayout: React.FC = () => {
             background: colorBgLayout,
           }}
         >
-          <div
-            className={styles.userAvatarChip}
-            onClick={() => navigate('/user')}
-          >
-            <Avatar
-              src={user?.userInfo?.profile?.avatarUrl}
-              icon={<AiOutlineUser />}
-              className={styles.avatar}
-            />
-            <span className={styles.username}>
-              {user?.userInfo?.profile?.nickname}
-            </span>
-          </div>
+          <UserAvatarChip />
           <div className={styles.siderMenu}>
             <SimpleBar style={{ height: '100%' }}><Menu /></SimpleBar>
           </div>

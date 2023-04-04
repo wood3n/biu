@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import {
-  Card, Space, Input, Table, Typography, Dropdown, Button,
+  Space, Input, Table, Typography, Dropdown, Button,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import PageContainer from '@/components/PageContainer';
@@ -11,6 +11,7 @@ import { getPlaylistDetail, getPlaylistTrackAll, postSongOrderUpdate } from '@/s
 import type { Song } from '@service/playlist-track-all';
 import TooltipButton from '@/components/TooltipButton';
 import SongDescription from '@/components/SongDescription';
+import TableDurationIcon from '@components/TableDurationIcon';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { userPlaylistAtom } from '@/store/userPlaylistAtom';
 import { playQueueAtom } from '@/store/playQueueAtom';
@@ -33,7 +34,6 @@ import {
   MdAdd,
   MdDownloadForOffline,
   MdOutlineSearch,
-  MdAccessTime,
   MdFileDownload,
   MdShare,
   MdFavoriteBorder,
@@ -211,7 +211,7 @@ const PlayList: React.FC = () => {
       ),
     },
     {
-      title: <span className={styles.timeTitle}><MdAccessTime size={18} /></span>,
+      title: <TableDurationIcon />,
       width: 88,
       align: 'center',
       dataIndex: 'dt',
@@ -222,49 +222,47 @@ const PlayList: React.FC = () => {
 
   return (
     <PageContainer loading={fetchingPlaylistDetail}>
-      <Card bordered={false}>
-        <PlaylistDescription
-          {...playListDetailRes?.playlist}
-        />
-        <div className={styles.playlistAction}>
-          <Space size={24}>
-            <TooltipButton tooltip="播放全部" onClick={handlePlayAll}>
-              <MdPlayCircle size={64} color="#1fdf64" />
-            </TooltipButton>
-            <TooltipButton tooltip="随机播放">
-              <MdShuffle size={36} />
-            </TooltipButton>
-            <TooltipButton tooltip="下载全部">
-              <MdDownloadForOffline size={36} />
-            </TooltipButton>
-          </Space>
-          <Input prefix={<MdOutlineSearch />} placeholder="搜索歌曲" style={{ width: 220 }} />
-        </div>
-        <DndContext onDragEnd={onDragEnd} sensors={sensors}>
-          <SortableContext
-            items={dataSource.map((i) => i.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <Table<Song>
-              loading={fetchingPlaylistTrack}
-              columns={columns}
-              dataSource={dataSource}
-              rowClassName={styles.tableRow}
-              rowKey="id"
-              components={{
-                body: {
-                  row: Row,
-                },
-              }}
-              pagination={false}
-              onRow={(record) => ({
-                // 双击播放
-                onDoubleClick: () => {},
-              })}
-            />
-          </SortableContext>
-        </DndContext>
-      </Card>
+      <PlaylistDescription
+        {...playListDetailRes?.playlist}
+      />
+      <div className={styles.playlistAction}>
+        <Space size={24}>
+          <TooltipButton tooltip="播放全部" onClick={handlePlayAll}>
+            <MdPlayCircle size={64} color="#1fdf64" />
+          </TooltipButton>
+          <TooltipButton tooltip="随机播放">
+            <MdShuffle size={36} />
+          </TooltipButton>
+          <TooltipButton tooltip="下载全部">
+            <MdDownloadForOffline size={36} />
+          </TooltipButton>
+        </Space>
+        <Input prefix={<MdOutlineSearch />} placeholder="搜索歌曲" style={{ width: 220 }} />
+      </div>
+      <DndContext onDragEnd={onDragEnd} sensors={sensors}>
+        <SortableContext
+          items={dataSource.map((i) => i.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <Table<Song>
+            loading={fetchingPlaylistTrack}
+            columns={columns}
+            dataSource={dataSource}
+            rowClassName={styles.tableRow}
+            rowKey="id"
+            components={{
+              body: {
+                row: Row,
+              },
+            }}
+            pagination={false}
+            onRow={(record) => ({
+              // 双击播放
+              onDoubleClick: () => {},
+            })}
+          />
+        </SortableContext>
+      </DndContext>
     </PageContainer>
   );
 };

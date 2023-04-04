@@ -18,38 +18,36 @@ function Home() {
 
   return (
     <PageContainer>
-      <Card bordered={false}>
-        <Typography.Title level={2} style={{ marginBottom: 24 }}>推荐歌单</Typography.Title>
-        <Row gutter={[24, 24]}>
-          {recommendResource?.recommend?.map(({ id, name, picUrl }) => (
-            <Col span={6} key={id}>
-              <Card hoverable cover={<img alt={name} src={picUrl} />} bordered={false}>
-                <Card.Meta title={name} />
-              </Card>
-            </Col>
-          ))}
-        </Row>
-        <Typography.Title level={2} style={{ marginBottom: 24 }}>最新音乐</Typography.Title>
-        <Row gutter={[24, 24]}>
-          {personalizedNewsong?.result?.map(({ id, name, picUrl }) => (
-            <Col span={6} key={id}>
-              <Card hoverable cover={<img alt={name} src={picUrl} />} bordered={false}>
-                <Card.Meta title={name} />
-              </Card>
-            </Col>
-          ))}
-        </Row>
-        <Typography.Title level={2} style={{ marginBottom: 24 }}>推荐电台</Typography.Title>
-        <Row gutter={[24, 24]}>
-          {programRecommend?.programs?.map(({ id, name, coverUrl }) => (
-            <Col span={6} key={id}>
-              <Card hoverable cover={<img alt={name} src={coverUrl} />} bordered={false}>
-                <Card.Meta title={name} />
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </Card>
+      <Typography.Title level={2} style={{ marginBottom: 24 }}>推荐歌单</Typography.Title>
+      <Row gutter={[24, 24]}>
+        {recommendResource?.recommend?.map(({ id, name, picUrl }) => (
+          <Col span={6} key={id}>
+            <Card hoverable cover={<img alt={name} src={picUrl} />} bordered={false}>
+              <Card.Meta title={name} />
+            </Card>
+          </Col>
+        ))}
+      </Row>
+      <Typography.Title level={2} style={{ marginBottom: 24 }}>最新音乐</Typography.Title>
+      <Row gutter={[24, 24]}>
+        {personalizedNewsong?.result?.map(({ id, name, picUrl }) => (
+          <Col span={6} key={id}>
+            <Card hoverable cover={<img alt={name} src={picUrl} />} bordered={false}>
+              <Card.Meta title={name} />
+            </Card>
+          </Col>
+        ))}
+      </Row>
+      <Typography.Title level={2} style={{ marginBottom: 24 }}>推荐电台</Typography.Title>
+      <Row gutter={[24, 24]}>
+        {programRecommend?.programs?.map(({ id, name, coverUrl }) => (
+          <Col span={6} key={id}>
+            <Card hoverable cover={<img alt={name} src={coverUrl} />} bordered={false}>
+              <Card.Meta title={name} />
+            </Card>
+          </Col>
+        ))}
+      </Row>
     </PageContainer>
   );
 }

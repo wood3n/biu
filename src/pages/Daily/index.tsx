@@ -17,9 +17,9 @@ import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import PageContainer from '@/components/PageContainer';
 import SongDescription from '@/components/SongDescription';
-import { CgLoadbarSound } from 'react-icons/cg';
 import { MdAccessTime } from 'react-icons/md';
 import { useRequest } from 'ahooks';
+import useUser from '@/store/userAtom';
 import { getRecommendSongs } from '@/service';
 import type { DailySong } from '@/service/recommend-songs';
 import { formatDuration } from '@/common/utils';
@@ -30,6 +30,7 @@ import styles from './index.module.less';
  */
 const Daily: React.FC = () => {
   const navigate = useNavigate();
+  const [user] = useUser();
   const [clock, setClock] = useState(new Date());
 
   useEffect(() => {
@@ -83,13 +84,20 @@ const Daily: React.FC = () => {
   const timeLength = data?.data?.dailySongs?.reduce((acc, { dt }) => acc + (dt ?? 0), 0) ?? 0;
 
   return (
-    <PageContainer contentStyle={{ margin: 0 }}>
+    <PageContainer contentStyle={{ margin: 0, padding: 0 }}>
       <div className={styles.pageHeader}>
         <div className={styles.dailyGreet}>
           <Clock className={styles.clock} value={clock} renderMinuteMarks={false} size={120} />
           <div className={styles.information}>
             <Typography.Title level={2}>{moment().format('YYYY-MM-DD')}</Typography.Title>
-            <Typography.Title level={5} type="secondary">云村的第 2359 天</Typography.Title>
+            {user?.userInfo?.createDays && (
+              <Typography.Title level={5} type="secondary">
+                云村的第
+                {user.userInfo.createDays}
+                {' '}
+                天
+              </Typography.Title>
+            )}
             {data?.data?.dailySongs && (
               <Typography.Text type="secondary">
                 {`${data.data.dailySongs.length} 首歌曲，${formatDuration(timeLength, 'h [小时] mm [分钟]')}`}
@@ -98,23 +106,21 @@ const Daily: React.FC = () => {
           </div>
         </div>
       </div>
-      <Card bordered={false}>
-        <Table<DailySong>
-          rowKey="id"
-          columns={columns}
-          loading={loading}
-          dataSource={data?.data?.dailySongs}
-          pagination={false}
-          rowClassName={styles.tableRow}
-          onRow={(record) => ({
-            onClick: (event) => {}, // 点击行
-            onDoubleClick: (event) => {},
-            onContextMenu: (event) => {},
-            onMouseEnter: (event) => {}, // 鼠标移入行
-            onMouseLeave: (event) => {},
-          })}
-        />
-      </Card>
+      <Table<DailySong>
+        rowKey="id"
+        columns={columns}
+        loading={loading}
+        dataSource={data?.data?.dailySongs}
+        pagination={false}
+        rowClassName={styles.tableRow}
+        onRow={(record) => ({
+          onClick: (event) => {}, // 点击行
+          onDoubleClick: (event) => {},
+          onContextMenu: (event) => {},
+          onMouseEnter: (event) => {}, // 鼠标移入行
+          onMouseLeave: (event) => {},
+        })}
+      />
     </PageContainer>
   );
 };

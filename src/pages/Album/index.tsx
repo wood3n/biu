@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react';
-import { Card } from 'antd';
 import { useParams } from 'react-router-dom';
 import PageContainer from '@/components/PageContainer';
+import { Table } from 'antd';
 import { getAlbum, getArtistDetail } from '@/service';
-import { type Album as AlBumDetailType } from '@/service/album';
+import { type GetAlbumRes, type Song } from '@/service/album';
 import AlbumDescription from '@components/AlbumDescription';
+import SongDescription from '@components/SongDescription';
+import TableDurationIcon from '@components/TableDurationIcon';
+import { type ColumnsType } from 'antd/es/table';
+import { formatDuration } from '@/common/utils';
 
 const Album = () => {
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
-  const [albumDetail, setAlbumDetail] = useState<AlBumDetailType>();
+  const [albumDetail, setAlbumDetail] = useState<GetAlbumRes>();
 
   const getAlbumDetail = async () => {
     setLoading(true);
@@ -21,21 +25,24 @@ const Album = () => {
         })));
 
         setAlbumDetail({
-          ...getAlbumRes.album,
-          artists: getAlbumRes!.album!.artists!.map((oldAr) => {
-            const newAr = arsDetailRes.find((newArItem) => oldAr.id === newArItem?.data?.artist?.id);
-            if (newAr?.data?.artist?.cover) {
-              return {
-                ...oldAr,
-                picUrl: newAr.data.artist.cover,
-              };
-            }
+          ...getAlbumRes,
+          album: {
+            ...getAlbumRes.album,
+            artists: getAlbumRes!.album!.artists!.map((oldAr) => {
+              const newAr = arsDetailRes.find((newArItem) => oldAr.id === newArItem?.data?.artist?.id);
+              if (newAr?.data?.artist?.cover) {
+                return {
+                  ...oldAr,
+                  picUrl: newAr.data.artist.cover,
+                };
+              }
 
-            return oldAr;
-          }),
+              return oldAr;
+            }),
+          },
         });
-      } else if (getAlbumRes?.album) {
-        setAlbumDetail(getAlbumRes.album);
+      } else if (getAlbumRes) {
+        setAlbumDetail(getAlbumRes);
       }
     } finally {
       setLoading(false);
@@ -48,13 +55,49 @@ const Album = () => {
     }
   }, [id]);
 
+  const columns: ColumnsType<Song> = [
+    {
+      title: '#',
+      dataIndex: 'index',
+      width: 10,
+      align: 'center',
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: '歌曲',
+      dataIndex: 'picUrl',
+      render: (_, record) => (
+        <SongDescription
+          // picUrl={record?.al?.picUrl}
+          name={record?.name}
+          ar={record?.ar}
+        />
+      ),
+    },
+    {
+      title: <TableDurationIcon />,
+      width: 88,
+      align: 'center',
+      dataIndex: 'dt',
+      render: (v) => formatDuration(v),
+    },
+  ];
+
   return (
     <PageContainer loading={loading}>
-      <Card bordered={false}>
-        <AlbumDescription
-          {...albumDetail}
-        />
-      </Card>
+      <AlbumDescription
+        {...albumDetail?.album}
+      />
+      <Table<Song>
+        columns={columns}
+        dataSource={albumDetail?.songs}
+        rowKey="id"
+        pagination={false}
+        onRow={(record) => ({
+          // 双击播放
+          onDoubleClick: () => {},
+        })}
+      />
     </PageContainer>
   );
 };

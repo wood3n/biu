@@ -23,6 +23,7 @@ const ThemeProvider = ({ children }: React.PropsWithChildren) => (
         },
         Menu: {
           borderRadius: 2,
+          padding: 24,
         },
         Input: {
           borderRadius: 16,

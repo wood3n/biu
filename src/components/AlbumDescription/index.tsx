@@ -7,6 +7,7 @@ import { useBoolean } from 'ahooks';
 import type { Album } from '@service/album';
 import { formatMillisecond } from '@/common/utils';
 import { IMAGE_ERR } from '@/common/constants';
+import SimpleBar from 'simplebar-react';
 import styles from './index.module.less';
 
 const AlbumDescription: React.FC<Album> = ({
@@ -61,14 +62,18 @@ const AlbumDescription: React.FC<Album> = ({
             rows: 2,
             expandable: true,
             symbol: (
-              <a onClick={(e) => {
-                e.stopPropagation();
-                toggle();
-              }}
+              <a
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggle();
+                }}
               >
                 更多
               </a>
             ),
+          }}
+          style={{
+            whiteSpace: 'pre-line',
           }}
         >
           {description}
@@ -82,24 +87,26 @@ const AlbumDescription: React.FC<Album> = ({
         closeIcon={false}
         width={600}
         footer={null}
-        bodyStyle={{
-          height: 420,
-          overflow: 'auto',
-        }}
       >
-        <Space direction="vertical" size={8}>
-          <Typography.Title>
-            {name}
-          </Typography.Title>
-          <Avatar.Group size="large">
-            {artists?.map(({ picUrl, name, id }) => (
-              <Tooltip key={id} title={name} placement="top">
-                <Avatar src={picUrl} onClick={() => navigate(`/artist/${id}`)} style={{ cursor: 'pointer' }} />
-              </Tooltip>
-            ))}
-          </Avatar.Group>
-          {description}
-        </Space>
+        <Typography.Title>
+          {name}
+        </Typography.Title>
+        <Avatar.Group size="large" style={{ marginBottom: 16 }}>
+          {artists?.map(({ picUrl, name, id }) => (
+            <Tooltip key={id} title={name} placement="top">
+              <Avatar src={picUrl} onClick={() => navigate(`/artist/${id}`)} style={{ cursor: 'pointer' }} />
+            </Tooltip>
+          ))}
+        </Avatar.Group>
+        <SimpleBar style={{ height: 420 }}>
+          <Typography.Paragraph
+            style={{
+              whiteSpace: 'pre-line',
+            }}
+          >
+            {description}
+          </Typography.Paragraph>
+        </SimpleBar>
       </Modal>
     </div>
   );

@@ -10,6 +10,10 @@ import Search from './pages/Search';
 import PlayList from './pages/PlayList';
 import Album from './pages/Album';
 import Artist from './pages/Artist';
+import Collect from './pages/Collect';
+import Podcast from './pages/Podcast';
+import CollectAlbum from './pages/Collect/Album';
+import CollectArtist from './pages/Collect/Artist';
 
 const routes: RouteObject[] = [
   {
@@ -29,7 +33,7 @@ const routes: RouteObject[] = [
         element: <FM />,
       },
       {
-        path: '/user',
+        path: '/profile',
         element: <UserProfile />,
       },
       {
@@ -37,8 +41,29 @@ const routes: RouteObject[] = [
         element: <Search />,
       },
       {
+        path: '/collect',
+        element: <Collect />,
+      },
+      {
+        path: '/podcast',
+        element: <Podcast />,
+      },
+      {
         path: '/album/:id',
         element: <Album />,
+      },
+      {
+        path: '/collect',
+        children: [
+          {
+            path: 'album',
+            element: <CollectAlbum />,
+          },
+          {
+            path: 'artist',
+            element: <CollectArtist />,
+          },
+        ],
       },
       {
         path: '/playlist/:pid',
