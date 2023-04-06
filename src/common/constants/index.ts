@@ -21,3 +21,7 @@ export enum MUSIC_BR {
   EXHIGH = 256000,
   LOSSLESS = 320000
 }
+
+export enum HTTP_RESPONSE {
+  SUCCESS = 200
+}

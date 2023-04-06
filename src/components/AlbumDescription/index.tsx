@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Typography, Image, Space, Modal, Avatar, Tooltip,
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { useBoolean } from 'ahooks';
 import type { Album } from '@service/album';
 import { formatMillisecond } from '@/common/utils';
 import { IMAGE_ERR } from '@/common/constants';
@@ -20,7 +19,7 @@ const AlbumDescription: React.FC<Album> = ({
   publishTime,
 }) => {
   const navigate = useNavigate();
-  const [open, { toggle }] = useBoolean();
+  const [open, setOpen] = useState(false);
 
   return (
     <div className={styles.albumDescription}>
@@ -65,7 +64,7 @@ const AlbumDescription: React.FC<Album> = ({
               <a
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggle();
+                  setOpen(true);
                 }}
               >
                 更多
@@ -83,8 +82,7 @@ const AlbumDescription: React.FC<Album> = ({
         centered
         maskClosable
         open={open}
-        onCancel={toggle}
-        closeIcon={false}
+        onCancel={() => setOpen(false)}
         width={600}
         footer={null}
       >

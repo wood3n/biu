@@ -1,10 +1,8 @@
-import { RuleObject } from 'antd/lib/form';
+import type { RuleObject } from 'antd/lib/form';
 
 type Validator = (rule: RuleObject, value: string | number, callback: (error?: string) => void) => Promise<void | any> | void;
 
-export const checkPhone = (input: string) => {
-  return /1\d{10}/.test(input);
-};
+export const checkPhone = (input: string) => /1\d{10}/.test(input);
 
 export const validatePhone: Validator = (_, input) => {
   if (checkPhone(input as string)) {
@@ -19,3 +17,7 @@ export const validateCaptcha: Validator = (_, input) => {
   }
   return Promise.reject(new Error('请正确输入验证码'));
 };
+
+export function isThenable(thing?: any): boolean {
+  return !!(thing && thing.then);
+}

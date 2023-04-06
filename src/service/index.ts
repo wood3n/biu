@@ -79,7 +79,7 @@ export { getHistoryRecommendSongs } from './history-recommend-songs';
 export { getHistoryRecommendSongsDetail } from './history-recommend-songs-detail';
 export { getPersonalFM } from './personal-fm';
 export { getFmTrash } from './fm-trash';
-export { getlike } from './like';
+export { postLike } from './like';
 export { getLikelist } from './likelist';
 export { postUserCloudDel } from './user-cloud-del';
 export { postcloud } from './cloud';

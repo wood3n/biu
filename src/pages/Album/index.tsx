@@ -2,16 +2,26 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import PageContainer from '@/components/PageContainer';
 import { Table } from 'antd';
-import { getAlbum, getArtistDetail } from '@/service';
+import { type ColumnsType } from 'antd/es/table';
+import { MdFavorite, MdFavoriteBorder } from 'react-icons/md';
+import {
+  getAlbum, getArtistDetail, postLike, getLikelist,
+} from '@/service';
 import { type GetAlbumRes, type Song } from '@/service/album';
 import AlbumDescription from '@components/AlbumDescription';
 import SongDescription from '@components/SongDescription';
 import TableDurationIcon from '@components/TableDurationIcon';
-import { type ColumnsType } from 'antd/es/table';
+import TooltipButton from '@components/TooltipButton';
 import { formatDuration } from '@/common/utils';
+import { HTTP_RESPONSE } from '@/common/constants';
+import { useAtom, useAtomValue } from 'jotai';
+import { likelistAtom } from '@/store/likelistAtom';
+import { userAtom } from '@/store/userAtom';
 
 const Album = () => {
   const { id } = useParams();
+  const user = useAtomValue(userAtom);
+  const [likelist, setLikelist] = useAtom(likelistAtom);
   const [loading, setLoading] = useState(false);
   const [albumDetail, setAlbumDetail] = useState<GetAlbumRes>();
 
@@ -55,7 +65,36 @@ const Album = () => {
     }
   }, [id]);
 
+  const haddleLike = async (id: number, like: boolean = true) => {
+    const { code } = await postLike({ id, like });
+    if (code === HTTP_RESPONSE.SUCCESS) {
+      const { ids } = await getLikelist({ uid: user?.userInfo?.profile?.userId });
+      setLikelist(ids);
+    }
+  };
+
+  console.log(likelist);
   const columns: ColumnsType<Song> = [
+    {
+      dataIndex: 'favorite',
+      width: 32,
+      align: 'center',
+      render: (_, record) => (record.id && likelist.includes(record.id) ? (
+        <TooltipButton
+          tooltip="取消喜欢"
+          onClick={() => haddleLike(record.id, false)}
+        >
+          <MdFavorite color="red" />
+        </TooltipButton>
+      ) : (
+        <TooltipButton
+          tooltip="喜欢"
+          onClick={() => haddleLike(record.id)}
+        >
+          <MdFavoriteBorder color="red" />
+        </TooltipButton>
+      )),
+    },
     {
       title: '#',
       dataIndex: 'index',

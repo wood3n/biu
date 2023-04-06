@@ -132,7 +132,7 @@ export interface Song {
   a?: null;
   m?: H;
   name?: string;
-  id?: number;
+  id: number;
   privilege?: Privilege;
   eq?: string;
 }

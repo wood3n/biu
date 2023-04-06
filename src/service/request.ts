@@ -13,11 +13,19 @@ const request = axios.create({
 
 // 对 post 请求的 url 添加时间戳
 request.interceptors.request.use(({
-  method, params, ...rest
-}) => ({
+  method, params, data, ...rest
+}) => (method === 'get' ? {
   method,
   params: {
     ...params,
+    timestamp: Date.now(),
+  },
+  ...rest,
+} : {
+  method,
+  params,
+  data: {
+    ...data,
     timestamp: Date.now(),
   },
   ...rest,

@@ -17,6 +17,9 @@ module.exports = function getConfig(mode) {
     mode,
     root: path.resolve(projectRootDir, './src'),
     publicDir: path.resolve(projectRootDir, './public/web'),
+    build: {
+      sourcemap: true,
+    },
     plugins: [
       viteReact(),
       // @ts-expect-error ts(2349)
