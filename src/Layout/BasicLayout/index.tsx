@@ -74,9 +74,7 @@ const BasicLayout: React.FC = () => {
           </div>
         </Sider>
         <Content className={styles.content} style={{ background: colorBgContainer }}>
-          <SimpleBar>
-            <Outlet />
-          </SimpleBar>
+          <Outlet />
         </Content>
       </Layout>
       <Footer className={styles.footer} style={{ background: colorBgContainer }}>

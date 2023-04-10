@@ -33,23 +33,26 @@ const SongDescription: React.FC<Props> = ({
       )}
       <Space direction="vertical">
         <Typography.Text
-          strong
           ellipsis={{ tooltip: name }}
-          style={{ maxWidth: '100%' }}
+          style={{ maxWidth: '100%', fontSize: 16 }}
         >
           {name}
         </Typography.Text>
-        <span>
+        <div className={styles.arList}>
           {ar?.map<React.ReactNode>(({ id, name: arName }) => (
-            <a
+            <Typography.Text
               key={id}
-              className={styles.tableLink}
+              className={styles.arLink}
               onClick={() => navigate(`/artist/${id}`)}
+              ellipsis={{ tooltip: arName }}
+              style={{
+                maxWidth: 100,
+              }}
             >
               {arName}
-            </a>
+            </Typography.Text>
           ))?.reduce((prev, curr) => [prev, ', ', curr])}
-        </span>
+        </div>
       </Space>
     </Space>
   );

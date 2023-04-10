@@ -122,6 +122,7 @@ const SysMenu: React.FC = () => {
         }}
         style={{
           background: colorBgLayout,
+          borderInline: 'none',
         }}
       />
       <CreatePlayListModal

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useBoolean } from 'ahooks';
 import { Tooltip, Button } from 'antd';
+import { TailSpin } from 'react-loader-spinner';
 import classNames from 'classnames';
 import { isThenable } from '@/common/utils';
 import styles from './index.module.less';
@@ -25,6 +26,7 @@ const TooltipButton = ({
   const [loading, { setTrue, setFalse }] = useBoolean(false);
 
   const handleClick: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> = (e) => {
+    e.stopPropagation();
     const returnOnClick = onClick(e);
     if (!isThenable(returnOnClick)) return;
 
@@ -34,16 +36,17 @@ const TooltipButton = ({
     });
   };
 
-  return (
+  return loading ? <TailSpin width={18} height={18} radius="2" /> : (
     <Tooltip title={tooltip}>
       <Button
         type="link"
         loading={loading}
-        icon={children}
         onClick={handleClick}
         className={classNames(className, styles.button)}
         style={style}
-      />
+      >
+        {children}
+      </Button>
     </Tooltip>
   );
 };

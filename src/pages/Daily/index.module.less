@@ -30,16 +30,19 @@
   }
 }
 
-.tableRow {
-  cursor: pointer;
+.playBtn {
+  animation-duration: 0.2s;
+  animation-name: resize;
 }
 
-.tableLink {
-  color: #b3b3b3;
-}
+@keyframes resize {
+  from {
+    width: 64;
+    height: 64;
+  }
 
-.timeTitle {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  to {
+    width: 66;
+    height: 66;
+  }
 }

@@ -80,7 +80,7 @@ export interface DailySong {
   crbt?: null;
   cf?: string;
   al?: Al;
-  dt?: number;
+  dt: number;
   /**
    * 品质，h为320hz，最高
    */

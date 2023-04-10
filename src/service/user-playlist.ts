@@ -83,7 +83,7 @@ export interface PlaylistInfoType {
   ordered?: boolean;
   status?: number;
   name: string;
-  id?: number;
+  id: number;
   coverImgId_str?: null | string;
   sharedUsers?: null;
   shareStatus?: null;

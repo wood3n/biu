@@ -1,3 +1,13 @@
-.tableLink {
-  color: #b3b3b3;
+.arList {
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  .arLink {
+    color: @secondary-color;
+    cursor: pointer;
+
+    &:hover {
+      color: @base-color;
+    }
+  }
 }

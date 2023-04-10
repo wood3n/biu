@@ -1,9 +1,9 @@
-import React from 'react';
 import {
-  Row, Col, Card, Typography,
+  Row, Col, Typography,
 } from 'antd';
 import { useRequest } from 'ahooks';
 import PageContainer from '@/components/PageContainer';
+import ImageCard from '@components/ImageCard';
 import { getRecommendResource, getProgramRecommend, getPersonalizedNewsong } from '@/service';
 
 /**
@@ -22,9 +22,7 @@ function Home() {
       <Row gutter={[24, 24]}>
         {recommendResource?.recommend?.map(({ id, name, picUrl }) => (
           <Col span={6} key={id}>
-            <Card hoverable cover={<img alt={name} src={picUrl} />} bordered={false}>
-              <Card.Meta title={name} />
-            </Card>
+            <ImageCard imgUrl={picUrl} title={name} />
           </Col>
         ))}
       </Row>
@@ -32,9 +30,7 @@ function Home() {
       <Row gutter={[24, 24]}>
         {personalizedNewsong?.result?.map(({ id, name, picUrl }) => (
           <Col span={6} key={id}>
-            <Card hoverable cover={<img alt={name} src={picUrl} />} bordered={false}>
-              <Card.Meta title={name} />
-            </Card>
+            <ImageCard imgUrl={picUrl} title={name} />
           </Col>
         ))}
       </Row>
@@ -42,9 +38,7 @@ function Home() {
       <Row gutter={[24, 24]}>
         {programRecommend?.programs?.map(({ id, name, coverUrl }) => (
           <Col span={6} key={id}>
-            <Card hoverable cover={<img alt={name} src={coverUrl} />} bordered={false}>
-              <Card.Meta title={name} />
-            </Card>
+            <ImageCard imgUrl={coverUrl} title={name} />
           </Col>
         ))}
       </Row>
