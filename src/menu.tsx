@@ -55,7 +55,7 @@ export default [
       {
         label: '云盘',
         icon: <MdOutlineWbCloudy />,
-        key: '/cloud',
+        key: '/drive',
       },
       {
         label: '最近播放',

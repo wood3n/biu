@@ -3,7 +3,7 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import UserProfile from './pages/UserProfile';
-import BasicLayout from './Layout/BasicLayout';
+import BasicLayout from './layout/basic';
 import Daily from './pages/Daily';
 import FM from './pages/FM';
 import Search from './pages/Search';
@@ -14,6 +14,7 @@ import Collect from './pages/Collect';
 import Podcast from './pages/Podcast';
 import CollectAlbum from './pages/Collect/Album';
 import CollectArtist from './pages/Collect/Artist';
+import CloudDrive from './pages/cloud-drive';
 
 const routes: RouteObject[] = [
   {
@@ -47,6 +48,10 @@ const routes: RouteObject[] = [
       {
         path: '/podcast',
         element: <Podcast />,
+      },
+      {
+        path: '/drive',
+        element: <CloudDrive />,
       },
       {
         path: '/album/:id',

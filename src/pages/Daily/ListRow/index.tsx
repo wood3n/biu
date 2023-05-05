@@ -18,7 +18,6 @@ import { formatDuration } from '@/common/utils';
 import { type DailySong } from '@/service/recommend-songs';
 import SongDescription from '@components/SongDescription';
 import TooltipButton from '@/components/TooltipButton';
-import AddPlaylistDropdown from '@components/AddPlaylistDropdown';
 import classNames from 'classnames';
 import styles from './index.module.less';
 
@@ -96,9 +95,7 @@ const ListRow: React.FC<Props> = ({
         {formatDuration(data.dt)}
       </Col>
       <Col span={2} className={styles.more}>
-        <AddPlaylistDropdown>
-          <MdAdd size={24} />
-        </AddPlaylistDropdown>
+        <MdAdd size={24} />
         <Dropdown
           menu={{
             items: [

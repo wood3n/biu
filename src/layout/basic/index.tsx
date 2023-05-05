@@ -13,18 +13,23 @@ import PlayTaskBar from '@components/PlayTaskBar';
 import { userAtom } from '@/store/userAtom';
 import { likelistAtom } from '@/store/likelistAtom';
 import { useSetAtom } from 'jotai';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import CssBaseline from '@mui/material/CssBaseline';
+import useScrollTrigger from '@mui/material/useScrollTrigger';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
 import SimpleBar from 'simplebar-react';
-import Menu from './Menu';
-import UserAvatarChip from './UserAvatarChip';
+import ElevationScroll from './elevation-scroll';
+import Menu from './menu';
+import UserAvatarChip from './user-avatar-chip';
 import styles from './index.module.less';
-
-const { Sider, Footer, Content } = Layout;
 
 const BasicLayout: React.FC = () => {
   const setUser = useSetAtom(userAtom);
   const setLikelist = useSetAtom(likelistAtom);
   const location = useLocation();
-  const { token: { colorBgContainer, colorBgLayout, colorTextBase } } = theme.useToken();
 
   // 获取登录状态
   const { loading, data } = useRequest(getLoginStatus, {
@@ -58,29 +63,40 @@ const BasicLayout: React.FC = () => {
   }
 
   return (
-    <Layout className={styles.basicLayout} style={{ color: colorTextBase }}>
-      <Layout className={styles.main}>
-        <Sider
-          collapsible
-          trigger={null}
-          className={styles.sider}
-          style={{
-            background: colorBgLayout,
-          }}
-        >
-          <UserAvatarChip />
-          <div className={styles.siderMenu}>
-            <SimpleBar style={{ height: '100%' }}><Menu /></SimpleBar>
-          </div>
-        </Sider>
-        <Content className={styles.content} style={{ background: colorBgContainer }}>
-          <Outlet />
-        </Content>
-      </Layout>
-      <Footer className={styles.footer} style={{ background: colorBgContainer }}>
-        <PlayTaskBar />
-      </Footer>
-    </Layout>
+    <>
+      <ElevationScroll>
+        <AppBar>
+          <Toolbar />
+        </AppBar>
+      </ElevationScroll>
+      <Toolbar />
+      <Container>
+        <Outlet />
+      </Container>
+    </>
+    // <Layout className={styles.basicLayout} style={{ color: colorTextBase }}>
+    //   <Layout className={styles.main}>
+    //     <Sider
+    //       collapsible
+    //       trigger={null}
+    //       className={styles.sider}
+    //       style={{
+    //         background: colorBgLayout,
+    //       }}
+    //     >
+    //       <UserAvatarChip />
+    //       <div className={styles.siderMenu}>
+    //         <SimpleBar style={{ height: '100%' }}><Menu /></SimpleBar>
+    //       </div>
+    //     </Sider>
+    //     <Content className={styles.content} style={{ background: colorBgContainer }}>
+    //       <Outlet />
+    //     </Content>
+    //   </Layout>
+    //   <Footer className={styles.footer} style={{ background: colorBgContainer }}>
+    //     <PlayTaskBar />
+    //   </Footer>
+    // </Layout>
   );
 };
 

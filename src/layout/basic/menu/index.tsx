@@ -13,7 +13,7 @@ import {
 import { useSetAtom } from 'jotai';
 import { userPlaylistAtom } from '@/store/userPlaylistAtom';
 import CreatePlayListModal from '@/components/CreatePlayListModal';
-import BasicMenu from './BasicMenu';
+import BasicMenu from '@/menu';
 import styles from './index.module.less';
 
 type MenuItem = Required<MenuProps>['items'][number];
