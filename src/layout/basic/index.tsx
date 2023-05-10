@@ -3,23 +3,23 @@ import {
   Outlet, Navigate, useLocation,
 } from 'react-router-dom';
 import {
-  getLoginStatus, getUserDetail, getUserSubcount, getLikelist,
+  getLoginStatus, getUserDetail, getUserSubcount, getLikelist, getUserPlaylist,
 } from '@/service';
 import { useRequest } from 'ahooks';
-import {
-  Spin, Layout, theme,
-} from 'antd';
 import PlayTaskBar from '@components/PlayTaskBar';
 import { userAtom } from '@/store/userAtom';
 import { likelistAtom } from '@/store/likelistAtom';
+import { userPlaylistAtom } from '@/store/userPlaylistAtom';
 import { useSetAtom } from 'jotai';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import Drawer from '@mui/material/Drawer';
+import CssBaseline from '@mui/material/CssBaseline';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
+import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
-import CssBaseline from '@mui/material/CssBaseline';
-import useScrollTrigger from '@mui/material/useScrollTrigger';
-import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
+import { useTheme } from '@mui/material/styles';
 import SimpleBar from 'simplebar-react';
 import ElevationScroll from './elevation-scroll';
 import Menu from './menu';
@@ -29,7 +29,9 @@ import styles from './index.module.less';
 const BasicLayout: React.FC = () => {
   const setUser = useSetAtom(userAtom);
   const setLikelist = useSetAtom(likelistAtom);
+  const setPlayList = useSetAtom(userPlaylistAtom);
   const location = useLocation();
+  const theme = useTheme();
 
   // 获取登录状态
   const { loading, data } = useRequest(getLoginStatus, {
@@ -45,6 +47,15 @@ const BasicLayout: React.FC = () => {
         const { ids } = await getLikelist({
           uid: loginStatus.profile.userId,
         });
+        // 获取所有歌单
+        const { playlist } = await getUserPlaylist({
+          uid: loginStatus.profile.userId,
+          limit: 1000,
+          offset: 0,
+        });
+
+        // 更新用户歌单列表
+        setPlayList(playlist);
         setUser({
           userInfo: userDetail,
           userAccountStats,
@@ -55,7 +66,11 @@ const BasicLayout: React.FC = () => {
   });
 
   if (loading) {
-    return <div className={styles.pageLoading}><Spin size="large" /></div>;
+    return (
+      <Box sx={{ display: 'flex', width: '100vw', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (!data?.data?.profile) {
@@ -63,17 +78,168 @@ const BasicLayout: React.FC = () => {
   }
 
   return (
-    <>
-      <ElevationScroll>
-        <AppBar>
-          <Toolbar />
-        </AppBar>
-      </ElevationScroll>
-      <Toolbar />
-      <Container>
-        <Outlet />
-      </Container>
-    </>
+    <div className={styles.basicLayout}>
+      <AppBar
+        position="fixed"
+        sx={{
+          height: 64,
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+      >
+        <Toolbar
+          sx={{
+            height: 64,
+          }}
+        >
+          <Typography variant="h6" noWrap component="div">
+            Clipped drawer
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <div className={styles.sider}>
+        <SimpleBar style={{ height: '100%', overflow: 'auto' }}>
+          <Menu />
+        </SimpleBar>
+      </div>
+      <div className={styles.outlet}>
+        <SimpleBar style={{ height: '100%' }}>
+          <Typography paragraph>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+            tempor incididunt ut labore et dolore magna aliqua. Rhoncus dolor purus non
+            enim praesent elementum facilisis leo vel. Risus at ultrices mi tempus
+            imperdiet. Semper risus in hendrerit gravida rutrum quisque non tellus.
+            Convallis convallis tellus id interdum velit laoreet id donec ultrices.
+            Odio morbi quis commodo odio aenean sed adipiscing. Amet nisl suscipit
+            adipiscing bibendum est ultricies integer quis. Cursus euismod quis viverra
+            nibh cras. Metus vulputate eu scelerisque felis imperdiet proin fermentum
+            leo. Mauris commodo quis imperdiet massa tincidunt. Cras tincidunt lobortis
+            feugiat vivamus at augue. At augue eget arcu dictum varius duis at
+            consectetur lorem. Velit sed ullamcorper morbi tincidunt. Lorem donec massa
+            sapien faucibus et molestie ac.
+          </Typography>
+          <Typography paragraph>
+            Consequat mauris nunc congue nisi vitae suscipit. Fringilla est ullamcorper
+            eget nulla facilisi etiam dignissim diam. Pulvinar elementum integer enim
+            neque volutpat ac tincidunt. Ornare suspendisse sed nisi lacus sed viverra
+            tellus. Purus sit amet volutpat consequat mauris. Elementum eu facilisis
+            sed odio morbi. Euismod lacinia at quis risus sed vulputate odio. Morbi
+            tincidunt ornare massa eget egestas purus viverra accumsan in. In hendrerit
+            gravida rutrum quisque non tellus orci ac. Pellentesque nec nam aliquam sem
+            et tortor. Habitant morbi tristique senectus et. Adipiscing elit duis
+            tristique sollicitudin nibh sit. Ornare aenean euismod elementum nisi quis
+            eleifend. Commodo viverra maecenas accumsan lacus vel facilisis. Nulla
+            posuere sollicitudin aliquam ultrices sagittis orci a.
+          </Typography>
+          <Typography paragraph>
+            Consequat mauris nunc congue nisi vitae suscipit. Fringilla est ullamcorper
+            eget nulla facilisi etiam dignissim diam. Pulvinar elementum integer enim
+            neque volutpat ac tincidunt. Ornare suspendisse sed nisi lacus sed viverra
+            tellus. Purus sit amet volutpat consequat mauris. Elementum eu facilisis
+            sed odio morbi. Euismod lacinia at quis risus sed vulputate odio. Morbi
+            tincidunt ornare massa eget egestas purus viverra accumsan in. In hendrerit
+            gravida rutrum quisque non tellus orci ac. Pellentesque nec nam aliquam sem
+            et tortor. Habitant morbi tristique senectus et. Adipiscing elit duis
+            tristique sollicitudin nibh sit. Ornare aenean euismod elementum nisi quis
+            eleifend. Commodo viverra maecenas accumsan lacus vel facilisis. Nulla
+            posuere sollicitudin aliquam ultrices sagittis orci a.
+          </Typography>
+          <Typography paragraph>
+            Consequat mauris nunc congue nisi vitae suscipit. Fringilla est ullamcorper
+            eget nulla facilisi etiam dignissim diam. Pulvinar elementum integer enim
+            neque volutpat ac tincidunt. Ornare suspendisse sed nisi lacus sed viverra
+            tellus. Purus sit amet volutpat consequat mauris. Elementum eu facilisis
+            sed odio morbi. Euismod lacinia at quis risus sed vulputate odio. Morbi
+            tincidunt ornare massa eget egestas purus viverra accumsan in. In hendrerit
+            gravida rutrum quisque non tellus orci ac. Pellentesque nec nam aliquam sem
+            et tortor. Habitant morbi tristique senectus et. Adipiscing elit duis
+            tristique sollicitudin nibh sit. Ornare aenean euismod elementum nisi quis
+            eleifend. Commodo viverra maecenas accumsan lacus vel facilisis. Nulla
+            posuere sollicitudin aliquam ultrices sagittis orci a.
+          </Typography>
+          <Typography paragraph>
+            Consequat mauris nunc congue nisi vitae suscipit. Fringilla est ullamcorper
+            eget nulla facilisi etiam dignissim diam. Pulvinar elementum integer enim
+            neque volutpat ac tincidunt. Ornare suspendisse sed nisi lacus sed viverra
+            tellus. Purus sit amet volutpat consequat mauris. Elementum eu facilisis
+            sed odio morbi. Euismod lacinia at quis risus sed vulputate odio. Morbi
+            tincidunt ornare massa eget egestas purus viverra accumsan in. In hendrerit
+            gravida rutrum quisque non tellus orci ac. Pellentesque nec nam aliquam sem
+            et tortor. Habitant morbi tristique senectus et. Adipiscing elit duis
+            tristique sollicitudin nibh sit. Ornare aenean euismod elementum nisi quis
+            eleifend. Commodo viverra maecenas accumsan lacus vel facilisis. Nulla
+            posuere sollicitudin aliquam ultrices sagittis orci a.
+          </Typography>
+          <Typography paragraph>
+            Consequat mauris nunc congue nisi vitae suscipit. Fringilla est ullamcorper
+            eget nulla facilisi etiam dignissim diam. Pulvinar elementum integer enim
+            neque volutpat ac tincidunt. Ornare suspendisse sed nisi lacus sed viverra
+            tellus. Purus sit amet volutpat consequat mauris. Elementum eu facilisis
+            sed odio morbi. Euismod lacinia at quis risus sed vulputate odio. Morbi
+            tincidunt ornare massa eget egestas purus viverra accumsan in. In hendrerit
+            gravida rutrum quisque non tellus orci ac. Pellentesque nec nam aliquam sem
+            et tortor. Habitant morbi tristique senectus et. Adipiscing elit duis
+            tristique sollicitudin nibh sit. Ornare aenean euismod elementum nisi quis
+            eleifend. Commodo viverra maecenas accumsan lacus vel facilisis. Nulla
+            posuere sollicitudin aliquam ultrices sagittis orci a.
+          </Typography>
+          <Typography paragraph>
+            Consequat mauris nunc congue nisi vitae suscipit. Fringilla est ullamcorper
+            eget nulla facilisi etiam dignissim diam. Pulvinar elementum integer enim
+            neque volutpat ac tincidunt. Ornare suspendisse sed nisi lacus sed viverra
+            tellus. Purus sit amet volutpat consequat mauris. Elementum eu facilisis
+            sed odio morbi. Euismod lacinia at quis risus sed vulputate odio. Morbi
+            tincidunt ornare massa eget egestas purus viverra accumsan in. In hendrerit
+            gravida rutrum quisque non tellus orci ac. Pellentesque nec nam aliquam sem
+            et tortor. Habitant morbi tristique senectus et. Adipiscing elit duis
+            tristique sollicitudin nibh sit. Ornare aenean euismod elementum nisi quis
+            eleifend. Commodo viverra maecenas accumsan lacus vel facilisis. Nulla
+            posuere sollicitudin aliquam ultrices sagittis orci a.
+          </Typography>
+          <Typography paragraph>
+            Consequat mauris nunc congue nisi vitae suscipit. Fringilla est ullamcorper
+            eget nulla facilisi etiam dignissim diam. Pulvinar elementum integer enim
+            neque volutpat ac tincidunt. Ornare suspendisse sed nisi lacus sed viverra
+            tellus. Purus sit amet volutpat consequat mauris. Elementum eu facilisis
+            sed odio morbi. Euismod lacinia at quis risus sed vulputate odio. Morbi
+            tincidunt ornare massa eget egestas purus viverra accumsan in. In hendrerit
+            gravida rutrum quisque non tellus orci ac. Pellentesque nec nam aliquam sem
+            et tortor. Habitant morbi tristique senectus et. Adipiscing elit duis
+            tristique sollicitudin nibh sit. Ornare aenean euismod elementum nisi quis
+            eleifend. Commodo viverra maecenas accumsan lacus vel facilisis. Nulla
+            posuere sollicitudin aliquam ultrices sagittis orci a.
+          </Typography>
+          <Typography paragraph>
+            Consequat mauris nunc congue nisi vitae suscipit. Fringilla est ullamcorper
+            eget nulla facilisi etiam dignissim diam. Pulvinar elementum integer enim
+            neque volutpat ac tincidunt. Ornare suspendisse sed nisi lacus sed viverra
+            tellus. Purus sit amet volutpat consequat mauris. Elementum eu facilisis
+            sed odio morbi. Euismod lacinia at quis risus sed vulputate odio. Morbi
+            tincidunt ornare massa eget egestas purus viverra accumsan in. In hendrerit
+            gravida rutrum quisque non tellus orci ac. Pellentesque nec nam aliquam sem
+            et tortor. Habitant morbi tristique senectus et. Adipiscing elit duis
+            tristique sollicitudin nibh sit. Ornare aenean euismod elementum nisi quis
+            eleifend. Commodo viverra maecenas accumsan lacus vel facilisis. Nulla
+            posuere sollicitudin aliquam ultrices sagittis orci a.
+          </Typography>
+        </SimpleBar>
+      </div>
+      <AppBar
+        component="div"
+        position="fixed"
+        sx={{
+          top: 'auto',
+          bottom: 0,
+          height: '80px',
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+      >
+        <Toolbar sx={{ height: '80px' }}>
+          <Typography variant="h6" noWrap component="div">
+            Clipped drawer
+          </Typography>
+        </Toolbar>
+      </AppBar>
+    </div>
     // <Layout className={styles.basicLayout} style={{ color: colorTextBase }}>
     //   <Layout className={styles.main}>
     //     <Sider

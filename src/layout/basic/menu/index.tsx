@@ -1,22 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Menu as AntMenu, theme, Tooltip,
-} from 'antd';
 import useUser from '@/store/userAtom';
-import type { MenuProps } from 'antd/es/menu';
 import { getUserPlaylist } from '@/service';
 import {
   MdQueueMusic,
   MdPlaylistAdd,
 } from 'react-icons/md';
-import { useSetAtom } from 'jotai';
+import { useSetAtom, useAtomValue } from 'jotai';
 import { userPlaylistAtom } from '@/store/userPlaylistAtom';
 import CreatePlayListModal from '@/components/CreatePlayListModal';
-import BasicMenu from '@/menu';
-import styles from './index.module.less';
-
-type MenuItem = Required<MenuProps>['items'][number];
+import type { MenuProps } from '@/menu';
+import basicMenu from '@/menu';
+import List from '@mui/material/List';
+import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListSubheader from '@mui/material/ListSubheader';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
+import OverflowText from '@components/overflow-text';
 
 /**
  * 菜单导航
@@ -25,45 +31,33 @@ const SysMenu: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [user] = useUser();
-  const setPlayList = useSetAtom(userPlaylistAtom);
-  const { token: { colorBgLayout } } = theme.useToken();
-  const [items, setItems] = useState<MenuItem[]>();
+  const userPlaylist = useAtomValue(userPlaylistAtom);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
-  const [open, setOpen] = useState(false);
 
-  const getPlaylists = async () => {
-    // 获取所有歌单
-    const { playlist } = await getUserPlaylist({
-      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-      uid: user?.userInfo?.profile?.userId!,
-      limit: 1000,
-      offset: 0,
-    });
-
-    // 更新用户歌单列表
-    setPlayList(playlist);
-    const playListMenu: MenuItem[] = [];
-    const createdList = playlist?.filter((item) => item.creator?.userId === user?.userInfo?.profile?.userId);
+  const menus: MenuProps[] = useMemo(() => {
+    const playListMenu = [];
+    const createdList = userPlaylist?.filter((item) => item.creator?.userId === user?.userInfo?.profile?.userId);
     if (createdList?.length) {
       playListMenu.push({
         label: (
-          <span className={styles.createdListMenuTitle}>
+          <Stack direction="row">
             创建的歌单
-            <Tooltip title="创建新歌单">
-              <a
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOpen(true);
-                }}
+            <Tooltip
+              title="创建新歌单"
+              PopperProps={{
+                disablePortal: true,
+              }}
+            >
+              <IconButton
+                size="small"
               >
-                <MdPlaylistAdd size={18} style={{ verticalAlign: '-0.25em' }} />
-              </a>
+                <MdPlaylistAdd />
+              </IconButton>
             </Tooltip>
-          </span>
+          </Stack>
         ),
         key: 'created',
-        type: 'group',
-        children: createdList?.map(({ id, name }) => ({
+        sub: createdList?.map(({ id, name }) => ({
           label: name,
           key: `/playlist/${id}`,
           icon: <MdQueueMusic />,
@@ -71,13 +65,12 @@ const SysMenu: React.FC = () => {
       });
     }
 
-    const collectList = playlist?.filter((item) => item.creator?.userId !== user?.userInfo?.profile?.userId);
+    const collectList = userPlaylist?.filter((item) => item.creator?.userId !== user?.userInfo?.profile?.userId);
     if (collectList?.length) {
       playListMenu.push({
         label: '收藏的歌单',
         key: 'collect',
-        type: 'group',
-        children: collectList?.map(({ id, name }) => ({
+        sub: collectList?.map(({ id, name }) => ({
           label: name,
           key: `/playlist/${id}`,
           icon: <MdQueueMusic />,
@@ -86,21 +79,10 @@ const SysMenu: React.FC = () => {
     }
 
     return [
-      ...BasicMenu,
+      ...basicMenu,
       ...playListMenu,
-    ] as MenuItem[];
-  };
-
-  const updateMenus = async () => {
-    const playlists = await getPlaylists();
-    setItems(playlists);
-  };
-
-  useEffect(() => {
-    if (user?.userInfo?.profile?.userId) {
-      updateMenus();
-    }
-  }, [user?.userInfo?.profile?.userId]);
+    ];
+  }, []);
 
   useEffect(() => {
     if (location.pathname) {
@@ -109,28 +91,68 @@ const SysMenu: React.FC = () => {
   }, [location]);
 
   return (
-    <>
-      <AntMenu
-        items={items}
-        mode="inline"
-        inlineIndent={12}
-        openKeys={['recommend', 'lib', 'created', 'collect']}
-        expandIcon={() => null}
-        selectedKeys={selectedKeys}
-        onSelect={({ key }) => {
-          navigate(key);
-        }}
-        style={{
-          background: colorBgLayout,
-          borderInline: 'none',
-        }}
-      />
-      <CreatePlayListModal
-        open={open}
-        onClose={() => setOpen(false)}
-        refreshMenu={updateMenus}
-      />
-    </>
+    <List
+      sx={{
+        width: '100%',
+        position: 'relative',
+        '& ul': { padding: 0 },
+      }}
+      subheader={<li />}
+    >
+      {menus.map(({
+        label, icon, sub, key,
+      }) => (sub ? (
+        <li key={key}>
+          <ul>
+            <ListSubheader>{label}</ListSubheader>
+            {sub.map((child) => (
+              <ListItemButton
+                key={child.key}
+                selected={selectedKeys.includes(child.key)}
+                onClick={() => {
+                  navigate(key);
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 32,
+                  }}
+                >
+                  {child.icon}
+                </ListItemIcon>
+                <ListItemText disableTypography>
+                  <OverflowText title={child.label}>
+                    {child.label}
+                  </OverflowText>
+                </ListItemText>
+              </ListItemButton>
+            ))}
+          </ul>
+        </li>
+      ) : (
+        <ListItem key={key} disablePadding>
+          <ListItemButton
+            selected={selectedKeys.includes(key)}
+            onClick={() => {
+              navigate(key);
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 32,
+              }}
+            >
+              {icon}
+            </ListItemIcon>
+            <ListItemText disableTypography>
+              <OverflowText title={label}>
+                {label}
+              </OverflowText>
+            </ListItemText>
+          </ListItemButton>
+        </ListItem>
+      )))}
+    </List>
   );
 };
 

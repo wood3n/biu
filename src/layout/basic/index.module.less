@@ -1,59 +1,28 @@
-.pageLoading {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .basicLayout {
-  height: 100vh;
-  width: 100vw;
+  position: relative;
 
   .sider {
-    :global {
-      .ant-layout-sider-children {
-        display: flex;
-        flex-direction: column;
-      }
-    }
-
-    .userAvatarChip {
-      padding: 12px;
-      display: flex;
-      // justify-content: center;
-      align-items: center;
-      column-gap: 12px;
-      cursor: pointer;
-
-      .avatar {
-        flex: 0 0 auto;
-      }
-
-      .username {
-        display: inline-block;
-        font-size: 16px;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-      }
-    }
-
-    .siderMenu {
-      flex: 1 1 auto;
-      overflow-y: auto;
-    }
-  }
-
-  .content {
+    position: fixed;
+    left: 0;
+    top: 65px;
+    bottom: 80px;
+    width: 240px;
+    height: auto;
     overflow-y: auto;
+    background: #000;
+    color: #fff;
   }
 
-  .footer {
-    flex: 0 0 90px;
-    height: 90px;
-    padding: 0;
-    margin: 0;
-    border-top: 1px solid rgb(255 255 255 / 10%);
+  .outlet {
+    overflow-y: auto;
+    height: calc(100vh - 64px - 80px);
+    margin-top: 64px;
+    margin-left: 240px;
+  }
+
+  :global {
+    .simplebar-scrollbar.simplebar-visible::before {
+      background: #b3b3b3;
+    }
   }
 }

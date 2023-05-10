@@ -10,6 +10,13 @@ import {
 import { BiLibrary } from 'react-icons/bi';
 import { IoRadio } from 'react-icons/io5';
 
+export interface MenuProps {
+  label: React.ReactNode;
+  icon?: React.ReactNode;
+  key: string;
+  sub?: MenuProps[];
+}
+
 export default [
   {
     label: '推荐',
@@ -34,9 +41,8 @@ export default [
   {
     label: '音乐库',
     key: 'lib',
-    type: 'group',
     icon: <MdOutlineLibraryAdd />,
-    children: [
+    sub: [
       {
         label: '专辑',
         icon: <BiLibrary />,
