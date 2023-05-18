@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Space, Image, Typography } from 'antd';
+import Stack from '@mui/material/Stack';
 import type { Ar } from '@/service/recommend-songs';
+import OverflowText from '../overflow-text';
 import styles from './index.module.less';
 
 interface Props {
@@ -21,40 +22,37 @@ const SongDescription: React.FC<Props> = ({
   const navigate = useNavigate();
 
   return (
-    <Space>
+    <Stack direction="row" alignItems="center" spacing={2}>
       {picUrl && (
-        <Image
+        <img
+          alt="name"
           width={48}
           height={48}
           src={picUrl}
           loading="lazy"
-          preview={false}
         />
       )}
-      <Space direction="vertical">
-        <Typography.Text
-          ellipsis={{ tooltip: name }}
-          style={{ maxWidth: '100%', fontSize: 16 }}
-        >
+      <Stack spacing={1}>
+        <OverflowText title={name}>
           {name}
-        </Typography.Text>
-        <div className={styles.arList}>
+        </OverflowText>
+        <Stack direction="row" spacing={1}>
           {ar?.map<React.ReactNode>(({ id, name: arName }) => (
-            <Typography.Text
+            <OverflowText
               key={id}
               className={styles.arLink}
               onClick={() => navigate(`/artist/${id}`)}
-              ellipsis={{ tooltip: arName }}
+              title={arName}
               style={{
                 maxWidth: 100,
               }}
             >
               {arName}
-            </Typography.Text>
+            </OverflowText>
           ))?.reduce((prev, curr) => [prev, ', ', curr])}
-        </div>
-      </Space>
-    </Space>
+        </Stack>
+      </Stack>
+    </Stack>
   );
 };
 

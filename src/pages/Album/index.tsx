@@ -9,9 +9,9 @@ import {
 } from '@/service';
 import { type GetAlbumRes, type Song } from '@/service/album';
 import AlbumDescription from '@components/AlbumDescription';
-import SongDescription from '@components/SongDescription';
+import SongDescription from '@/components/song-description';
 import TableDurationIcon from '@components/TableDurationIcon';
-import TooltipButton from '@components/TooltipButton';
+import TooltipButton from '@/components/tooltip-button';
 import { formatDuration } from '@/common/utils';
 import { HTTP_RESPONSE } from '@/common/constants';
 import { useAtom, useAtomValue } from 'jotai';

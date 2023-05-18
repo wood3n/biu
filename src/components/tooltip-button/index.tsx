@@ -1,14 +1,16 @@
 import React from 'react';
 import { useBoolean } from 'ahooks';
-import { Tooltip, Button } from 'antd';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import { TailSpin } from 'react-loader-spinner';
 import classNames from 'classnames';
 import { isThenable } from '@/common/utils';
 import styles from './index.module.less';
 
 interface Props {
+  size?: 'small' | 'medium' | 'large';
   tooltip: React.ReactNode;
-  onClick: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | ((e: React.MouseEvent<HTMLElement>) => Promise<any>);
+  onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | ((e: React.MouseEvent<HTMLElement>) => Promise<any>);
   className?: string;
   style?: React.CSSProperties;
 }
@@ -19,6 +21,7 @@ interface Props {
 const TooltipButton = ({
   tooltip,
   onClick,
+  size,
   className,
   style,
   children,
@@ -27,7 +30,7 @@ const TooltipButton = ({
 
   const handleClick: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> = (e) => {
     e.stopPropagation();
-    const returnOnClick = onClick(e);
+    const returnOnClick = onClick?.(e);
     if (!isThenable(returnOnClick)) return;
 
     setTrue();
@@ -38,15 +41,14 @@ const TooltipButton = ({
 
   return loading ? <TailSpin width={18} height={18} radius="2" /> : (
     <Tooltip title={tooltip}>
-      <Button
-        type="link"
-        loading={loading}
+      <IconButton
+        size={size}
         onClick={handleClick}
         className={classNames(className, styles.button)}
         style={style}
       >
         {children}
-      </Button>
+      </IconButton>
     </Tooltip>
   );
 };

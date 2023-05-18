@@ -20,6 +20,7 @@ specifiers:
   '@types/react-clock': ^3.0.1
   '@types/react-dom': ^18.0.6
   '@types/react-scrollbar': ^0.5.3
+  '@types/react-window': ^1.8.5
   '@typescript-eslint/eslint-plugin': ^5.53.0
   '@typescript-eslint/parser': ^5.53.0
   '@vitejs/plugin-react': ^1.3.2
@@ -64,6 +65,7 @@ specifiers:
   react-loader-spinner: ^5.3.4
   react-router: ^6.3.0
   react-router-dom: ~6.4.0
+  react-window: ^1.8.9
   read-pkg: ^5.2.0
   rimraf: ^3.0.2
   simplebar-react: ^3.2.3
@@ -102,6 +104,7 @@ dependencies:
   react-loader-spinner: 5.3.4_sfoxds7t5ydpegc3knd667wn6m
   react-router: 6.3.0_react@17.0.2
   react-router-dom: 6.4.0_sfoxds7t5ydpegc3knd667wn6m
+  react-window: 1.8.9_sfoxds7t5ydpegc3knd667wn6m
   read-pkg: 5.2.0
   simplebar-react: 3.2.3_react@17.0.2
   swiper: 8.4.4
@@ -119,6 +122,7 @@ devDependencies:
   '@types/react-clock': 3.0.1
   '@types/react-dom': 18.0.6
   '@types/react-scrollbar': 0.5.3
+  '@types/react-window': 1.8.5
   '@typescript-eslint/eslint-plugin': 5.53.0_7sfk55rxbgpcllusxxcqlqfeme
   '@typescript-eslint/parser': 5.53.0_ctjxwbjqmg5wmywbidv53geblq
   consola: 2.15.3
@@ -2668,6 +2672,12 @@ packages:
     dependencies:
       '@types/react': 18.0.17
     dev: false
+
+  /@types/react-window/1.8.5:
+    resolution: {integrity: sha512-V9q3CvhC9Jk9bWBOysPGaWy/Z0lxYcTXLtLipkt2cnRj1JOSFNF7wqGpkScSXMgBwC+fnVRg/7shwgddBG5ICw==}
+    dependencies:
+      '@types/react': 18.0.17
+    dev: true
 
   /@types/react/17.0.58:
     resolution: {integrity: sha512-c1GzVY97P0fGxwGxhYq989j4XwlcHQoto6wQISOC2v6wm3h0PORRWJFHlkRjfGsiG3y1609WdQ+J+tKxvrEd6A==}
@@ -6376,6 +6386,10 @@ packages:
     resolution: {integrity: sha512-dn6wd0uw5GsdswPFfsgMp5NSB0/aDe6fK94YJV/AJDYXL6HVLWBsxeq7js7Ad+mU2K9LAlwpk6kN2D5mwCPVow==}
     dev: true
 
+  /memoize-one/5.2.1:
+    resolution: {integrity: sha512-zYiwtZUcYyXKo/np96AGZAckk+FWWsUdJ3cHGGmld7+AhvcWmQyGCYUh1hc4Q/pkOhb65dQR/pqCyK0cOaHz4Q==}
+    dev: false
+
   /meow/9.0.0:
     resolution: {integrity: sha512-+obSblOQmRhcyBt62furQqRAQpNyWXo8BuQ5bN7dG8wmwQ+vwHKp/rCFD4CrTP8CsDQD1sjoZ94K417XEUk8IQ==}
     engines: {node: '>=10'}
@@ -7752,6 +7766,19 @@ packages:
       dom-helpers: 5.2.1
       loose-envify: 1.4.0
       prop-types: 15.8.1
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+    dev: false
+
+  /react-window/1.8.9_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-+Eqx/fj1Aa5WnhRfj9dJg4VYATGwIUP2ItwItiJ6zboKWA6EX3lYDAXfGF2hyNqplEprhbtjbipiADEcwQ823Q==}
+    engines: {node: '>8.0.0'}
+    peerDependencies:
+      react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@babel/runtime': 7.21.0
+      memoize-one: 5.2.1
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
     dev: false

@@ -23,7 +23,7 @@ import type { Song } from '@service/playlist-track-all';
 import { useRequest, useBoolean } from 'ahooks';
 import { getSongUrlV1 } from '@/service';
 import { MUSIC_LEVEL } from '@/common/constants';
-import SongDescription from '../SongDescription';
+import SongDescription from '../song-description';
 import PlaylistDrawer from '../PlaylistDrawer';
 import './index.less';
 

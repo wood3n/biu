@@ -5,7 +5,7 @@ import { useAtomValue } from 'jotai';
 import { playQueueAtom } from '@/store/playQueueAtom';
 import { formatDuration } from '@/common/utils';
 import type { Song } from '@service/playlist-track-all';
-import SongDescription from '../SongDescription';
+import SongDescription from '../song-description';
 
 interface Props {
   visible: boolean;

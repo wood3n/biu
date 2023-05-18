@@ -82,7 +82,7 @@ const SysMenu: React.FC = () => {
       ...basicMenu,
       ...playListMenu,
     ];
-  }, []);
+  }, [userPlaylist]);
 
   useEffect(() => {
     if (location.pathname) {

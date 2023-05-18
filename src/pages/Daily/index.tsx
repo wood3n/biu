@@ -12,12 +12,13 @@ import {
   List,
   Skeleton,
 } from 'antd';
-import Clock from 'react-clock';
+import Stack from '@mui/material/Stack';
 import 'react-clock/dist/Clock.css';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
+import SongList from '@/components/song-list';
 import PageContainer from '@/components/PageContainer';
-import TooltipButton from '@components/TooltipButton';
+import TooltipButton from '@/components/tooltip-button';
 import {
   MdPlayCircle,
   MdSkipNext,
@@ -43,23 +44,14 @@ import styles from './index.module.less';
  */
 const Daily: React.FC = () => {
   const [user] = useUser();
-  const [clock, setClock] = useState(new Date());
-
-  useEffect(() => {
-    const interval = setInterval(() => setClock(new Date()), 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
 
   const { data, loading } = useRequest(getRecommendSongs);
 
   const timeLength = data?.data?.dailySongs?.reduce((acc, { dt }) => acc + (dt ?? 0), 0) ?? 0;
 
   return (
-    <PageContainer contentStyle={{ margin: 0, padding: 0 }}>
-      <div className={styles.pageHeader}>
+    <div>
+      {/* <div className={styles.pageHeader}>
         <div className={styles.dailyGreet}>
           <Clock className={styles.clock} value={clock} renderMinuteMarks={false} size={120} />
           <div className={styles.information}>
@@ -76,36 +68,25 @@ const Daily: React.FC = () => {
             )}
           </div>
         </div>
-      </div>
-      <Card bordered={false}>
-        <Space size={32}>
-          <TooltipButton tooltip="播放全部">
-            <MdPlayCircle className={styles.playBtn} color="#1fdf64" size={64} />
-          </TooltipButton>
-          <TooltipButton tooltip="随机播放">
-            <MdShuffle size={36} />
-          </TooltipButton>
-          <TooltipButton tooltip="创建新歌单">
-            <MdOutlinePlaylistAddCircle size={36} />
-          </TooltipButton>
-          <TooltipButton tooltip="下载全部">
-            <MdDownloadForOffline size={36} />
-          </TooltipButton>
-        </Space>
-        <List
-          loading={loading}
-          itemLayout="horizontal"
-          dataSource={data?.data?.dailySongs}
-          bordered={false}
-          header={<ListHeader />}
-          renderItem={(item, index) => (
-            <List.Item key={item.id} style={{ padding: 0, border: 'none' }}>
-              <ListRow loading={loading} data={item} index={index} />
-            </List.Item>
-          )}
-        />
-      </Card>
-    </PageContainer>
+      </div> */}
+      {/* <Stack direction="row" spacing="32px">
+        <TooltipButton tooltip="播放全部">
+          <MdPlayCircle className={styles.playBtn} color="#1fdf64" size={64} />
+        </TooltipButton>
+        <TooltipButton tooltip="随机播放">
+          <MdShuffle size={36} />
+        </TooltipButton>
+        <TooltipButton tooltip="创建新歌单">
+          <MdOutlinePlaylistAddCircle size={36} />
+        </TooltipButton>
+        <TooltipButton tooltip="下载全部">
+          <MdDownloadForOffline size={36} />
+        </TooltipButton>
+      </Stack> */}
+      <SongList
+        data={data?.data?.dailySongs ?? []}
+      />
+    </div>
   );
 };
 

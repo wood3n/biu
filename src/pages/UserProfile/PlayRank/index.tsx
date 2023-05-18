@@ -8,7 +8,7 @@ import { useRequest } from 'ahooks';
 import type { ColumnsType } from 'antd/es/table';
 import { MdAccessTime } from 'react-icons/md';
 import { formatDuration } from '@/common/utils';
-import SongDescription from '@/components/SongDescription';
+import SongDescription from '@/components/song-description';
 import styles from './index.module.less';
 
 /**
