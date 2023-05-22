@@ -1,14 +1,17 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Stack from '@mui/material/Stack';
+import { MdOutlineMoreHoriz } from 'react-icons/md';
 import type { Ar } from '@/service/recommend-songs';
+import Image from '../image';
 import OverflowText from '../overflow-text';
+import DropDown from '../dropdown';
 import styles from './index.module.less';
 
 interface Props {
   picUrl?: string;
   name?: string;
-  ar?: Ar[];
+  ar: Ar[];
 }
 
 /**
@@ -24,20 +27,18 @@ const SongDescription: React.FC<Props> = ({
   return (
     <Stack direction="row" alignItems="center" spacing={2}>
       {picUrl && (
-        <img
-          alt="name"
-          width={48}
-          height={48}
+        <Image
+          width={50}
+          height={50}
           src={picUrl}
-          loading="lazy"
         />
       )}
-      <Stack spacing={1}>
+      <Stack spacing="4px">
         <OverflowText title={name}>
           {name}
         </OverflowText>
-        <Stack direction="row" spacing={1}>
-          {ar?.map<React.ReactNode>(({ id, name: arName }) => (
+        <div className={styles.ars}>
+          {ar?.slice(0, 3)?.map<React.ReactNode>(({ id, name: arName }) => (
             <OverflowText
               key={id}
               className={styles.arLink}
@@ -49,8 +50,18 @@ const SongDescription: React.FC<Props> = ({
             >
               {arName}
             </OverflowText>
-          ))?.reduce((prev, curr) => [prev, ', ', curr])}
-        </Stack>
+          ))?.reduce((prev, curr) => [prev, '，', curr])}
+          {ar?.length > 3 && (
+            <DropDown menus={ar?.slice(3).map(({ id, name: arName }) => ({
+              key: id,
+              label: arName,
+              onClick: () => navigate(`/artist/${id}`),
+            }))}
+            >
+              <MdOutlineMoreHoriz size={18} />
+            </DropDown>
+          )}
+        </div>
       </Stack>
     </Stack>
   );

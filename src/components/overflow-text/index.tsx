@@ -3,7 +3,9 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { type TooltipProps } from '@mui/material/Tooltip';
 
-const OverflowText = ({ children, ...props }: React.PropsWithChildren<Omit<TooltipProps, 'children'>>) => {
+const OverflowText = ({
+  children, className, style, onClick, ...props
+}: React.PropsWithChildren<Omit<TooltipProps, 'children'>>) => {
   const [isOverflowed, setIsOverflow] = useState(false);
   const textElementRef = useRef<HTMLDivElement>(null);
 
@@ -22,7 +24,10 @@ const OverflowText = ({ children, ...props }: React.PropsWithChildren<Omit<Toolt
     >
       <Typography
         ref={textElementRef}
+        onClick={onClick}
         noWrap
+        className={className}
+        style={style}
       >
         {children}
       </Typography>

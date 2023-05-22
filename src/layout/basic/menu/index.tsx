@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useUser from '@/store/userAtom';
-import { getUserPlaylist } from '@/service';
 import {
   MdQueueMusic,
   MdPlaylistAdd,
@@ -12,8 +11,6 @@ import CreatePlayListModal from '@/components/CreatePlayListModal';
 import type { MenuProps } from '@/menu';
 import basicMenu from '@/menu';
 import List from '@mui/material/List';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListSubheader from '@mui/material/ListSubheader';
@@ -40,7 +37,7 @@ const SysMenu: React.FC = () => {
     if (createdList?.length) {
       playListMenu.push({
         label: (
-          <Stack direction="row">
+          <div>
             创建的歌单
             <Tooltip
               title="创建新歌单"
@@ -54,7 +51,7 @@ const SysMenu: React.FC = () => {
                 <MdPlaylistAdd />
               </IconButton>
             </Tooltip>
-          </Stack>
+          </div>
         ),
         key: 'created',
         sub: createdList?.map(({ id, name }) => ({

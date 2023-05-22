@@ -6,7 +6,6 @@ import {
   getLoginStatus, getUserDetail, getUserSubcount, getLikelist, getUserPlaylist,
 } from '@/service';
 import { useRequest } from 'ahooks';
-import PlayTaskBar from '@components/PlayTaskBar';
 import { userAtom } from '@/store/userAtom';
 import { likelistAtom } from '@/store/likelistAtom';
 import { userPlaylistAtom } from '@/store/userPlaylistAtom';
@@ -17,6 +16,7 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
+import PlayBar from '@/components/playbar';
 import SimpleBar from 'simplebar-react';
 import Menu from './menu';
 import styles from './index.module.less';
@@ -112,9 +112,7 @@ const BasicLayout: React.FC = () => {
         }}
       >
         <Toolbar sx={{ height: '80px' }}>
-          <Typography variant="h6" noWrap component="div">
-            Clipped drawer
-          </Typography>
+          <PlayBar />
         </Toolbar>
       </AppBar>
     </div>

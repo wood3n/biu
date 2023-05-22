@@ -1,8 +1,8 @@
 import request from './request';
 
 export interface Ar {
-  id?: number;
-  name?: string;
+  id: number;
+  name: string;
   tns?: any[];
   alias?: any[];
 }
@@ -67,10 +67,10 @@ export interface Privilege {
 
 export interface DailySong {
   name?: string;
-  id?: number;
+  id: number;
   pst?: number;
   t?: number;
-  ar?: Ar[];
+  ar: Ar[];
   alia?: any[];
   pop?: number;
   st?: number;

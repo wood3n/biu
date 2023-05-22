@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Slider, Dropdown, Drawer } from 'antd';
+import Stack from '@mui/material/Stack';
+import Slider from '@mui/material/Slider';
 import {
   MdPlayCircleFilled,
   MdPauseCircleFilled,
@@ -17,7 +18,9 @@ import {
   MdOutlineMusicNote,
   MdOutlinePlaylistPlay,
 } from 'react-icons/md';
-import { BsArrowsCollapse } from 'react-icons/bs';
+import { useAtom, useAtomValue } from 'jotai';
+import { useLikelist } from '@/store/likelistAtom';
+import { playingSongAtom } from '@/store/playingSongAtom';
 import { formatDuration } from '@/common/utils';
 import type { Song } from '@service/playlist-track-all';
 import { useRequest, useBoolean } from 'ahooks';
@@ -27,16 +30,11 @@ import SongDescription from '../song-description';
 import PlaylistDrawer from '../PlaylistDrawer';
 import './index.less';
 
-interface Props {
-  song?: Song;
-}
-
 /**
  * 播放任务栏
  */
-const PlayTaskBar: React.FC<Props> = ({
-  song,
-}) => {
+const PlayTaskBar = () => {
+  const playingSong = useAtomValue(playingSongAtom);
   const [rate, setRate] = useState(1);
   const [volume, setVolume] = useState(0.2);
   const [muted, setMuted] = useState(false);
@@ -48,15 +46,15 @@ const PlayTaskBar: React.FC<Props> = ({
   const [playlistDrawerVisible, { toggle }] = useBoolean();
 
   const { data, runAsync, loading } = useRequest(() => getSongUrlV1({
-    id: song?.id,
+    id: playingSong?.id,
     level: MUSIC_LEVEL.LOSSLESS,
   }), { manual: true });
 
-  useEffect(() => {
-    if (song?.id) {
-      runAsync();
-    }
-  }, [song]);
+  // useEffect(() => {
+  //   if (playingSong?.id) {
+  //     runAsync();
+  //   }
+  // }, [playingSong]);
 
   useEffect(() => {
     if (data?.data?.[0]?.url) {
@@ -136,11 +134,11 @@ const PlayTaskBar: React.FC<Props> = ({
   return (
     <div className="play-taskbar">
       <div className="play-taskbar-left">
-        {song && (
+        {playingSong && (
           <SongDescription
-            picUrl={song.al?.picUrl}
-            name={song.name}
-            ar={song.ar}
+            picUrl={playingSong.al?.picUrl}
+            name={playingSong.name}
+            ar={playingSong.ar}
           />
         )}
       </div>
@@ -167,12 +165,9 @@ const PlayTaskBar: React.FC<Props> = ({
             value={current}
             onChange={handleSeek}
             style={{ flex: 1 }}
-            tooltip={{
-              open: false,
-            }}
           />
           <span className="play-total-time">
-            {song?.dt ? formatDuration(song.dt) : '00:00'}
+            {playingSong?.dt ? formatDuration(playingSong.dt) : '00:00'}
           </span>
         </div>
       </div>
@@ -188,19 +183,34 @@ const PlayTaskBar: React.FC<Props> = ({
                   : <MdVolumeUp size={24} />}
           </a>
           <Slider
+            size="small"
             min={0}
             max={1}
             step={0.01}
             value={volume}
-            onChange={handleChangeVolume}
-            tooltip={{
-              open: false,
-            }}
+            onChange={(_, v) => handleChangeVolume(v as number)}
             style={{ width: 120 }}
+            sx={{
+              color: '#fff',
+              '& .MuiSlider-track': {
+                border: 'none',
+              },
+              '& .MuiSlider-thumb': {
+                width: 16,
+                height: 16,
+                backgroundColor: '#fff',
+                '&:before': {
+                  boxShadow: '0 4px 8px rgba(0,0,0,0.4)',
+                },
+                '&:hover, &.Mui-focusVisible, &.Mui-active': {
+                  boxShadow: 'none',
+                },
+              },
+            }}
           />
         </span>
         <a className="play-mode"><MdRepeatOne size={24} /></a>
-        <Dropdown
+        {/* <Dropdown
           menu={{
             items: [
               { key: '0.5', label: '0.5x' },
@@ -214,7 +224,7 @@ const PlayTaskBar: React.FC<Props> = ({
           placement="top"
         >
           <a className="play-rate">{`${rate}x`}</a>
-        </Dropdown>
+        </Dropdown> */}
         <a onClick={toggle}><MdOutlinePlaylistPlay size={24} /></a>
       </div>
       <PlaylistDrawer

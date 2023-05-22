@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Typography,
-  Progress,
-  Tooltip,
-  Card,
-  Table,
-  Image,
-  Space,
-  Divider,
-  Button,
-  List,
-  Skeleton,
-} from 'antd';
+// import {
+//   Typography,
+//   Progress,
+//   Tooltip,
+//   Card,
+//   Table,
+//   Image,
+//   Space,
+//   Divider,
+//   Button,
+//   List,
+//   Skeleton,
+// } from 'antd';
 import Stack from '@mui/material/Stack';
-import 'react-clock/dist/Clock.css';
+// import 'react-clock/dist/Clock.css';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
-import SongList from '@/components/song-list';
+import SongList from '@/components/song-list-table';
 import PageContainer from '@/components/PageContainer';
 import TooltipButton from '@/components/tooltip-button';
 import {
@@ -30,19 +30,34 @@ import {
   MdFileDownload,
   MdShare,
   MdOutlinePlaylistAddCircle,
+  MdAccessTime,
+  MdOutlineFavoriteBorder,
+  MdOutlineFavorite,
 } from 'react-icons/md';
 import { useRequest } from 'ahooks';
 import useUser from '@/store/userAtom';
+import { useLikelist } from '@/store/likelistAtom';
+import { useAtomValue } from 'jotai';
 import { getRecommendSongs } from '@/service';
 import { formatDuration } from '@/common/utils';
-import ListHeader from './ListHeader';
-import ListRow from './ListRow';
+import { styled } from '@mui/material/styles';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import SongDescription from '@components/song-description';
+import OverflowText from '@components/overflow-text';
+import SongListTable from '@/components/song-list-table';
 import styles from './index.module.less';
 
 /**
  * 每日推荐
  */
 const Daily: React.FC = () => {
+  const navigate = useNavigate();
+  const { likelist, refresh } = useLikelist();
   const [user] = useUser();
 
   const { data, loading } = useRequest(getRecommendSongs);
@@ -69,7 +84,7 @@ const Daily: React.FC = () => {
           </div>
         </div>
       </div> */}
-      {/* <Stack direction="row" spacing="32px">
+      <Stack direction="row" spacing="32px">
         <TooltipButton tooltip="播放全部">
           <MdPlayCircle className={styles.playBtn} color="#1fdf64" size={64} />
         </TooltipButton>
@@ -82,10 +97,8 @@ const Daily: React.FC = () => {
         <TooltipButton tooltip="下载全部">
           <MdDownloadForOffline size={36} />
         </TooltipButton>
-      </Stack> */}
-      <SongList
-        data={data?.data?.dailySongs ?? []}
-      />
+      </Stack>
+      <SongListTable data={data?.data?.dailySongs ?? []} />
     </div>
   );
 };

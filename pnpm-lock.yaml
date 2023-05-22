@@ -49,6 +49,7 @@ specifiers:
   lint-staged: ^12.5.0
   localforage: ^1.10.0
   lodash: ^4.17.21
+  material-ui-popup-state: ^5.0.8
   minimist: ^1.2.6
   moment: ^2.29.4
   portfinder: ^1.0.29
@@ -62,6 +63,7 @@ specifiers:
   react-dom: 17.0.2
   react-hot-toast: ^2.4.0
   react-icons: ^4.8.0
+  react-image: ^4.1.0
   react-loader-spinner: ^5.3.4
   react-router: ^6.3.0
   react-router-dom: ~6.4.0
@@ -93,6 +95,7 @@ dependencies:
   http-server: 14.1.1
   jotai: 2.0.3_react@17.0.2
   localforage: 1.10.0
+  material-ui-popup-state: 5.0.8_dsf4e3apuenlkvio4aqmxlrol4
   moment: 2.29.4
   portfinder: 1.0.29
   react: 17.0.2
@@ -101,6 +104,7 @@ dependencies:
   react-dom: 17.0.2_react@17.0.2
   react-hot-toast: 2.4.0_sfoxds7t5ydpegc3knd667wn6m
   react-icons: 4.8.0_react@17.0.2
+  react-image: 4.1.0_sfoxds7t5ydpegc3knd667wn6m
   react-loader-spinner: 5.3.4_sfoxds7t5ydpegc3knd667wn6m
   react-router: 6.3.0_react@17.0.2
   react-router-dom: 6.4.0_sfoxds7t5ydpegc3knd667wn6m
@@ -2253,20 +2257,6 @@ packages:
       react-dom: 17.0.2_react@17.0.2
     dev: false
 
-  /@rc-component/portal/1.0.3_sfoxds7t5ydpegc3knd667wn6m:
-    resolution: {integrity: sha512-rG9j7OMiI9eLFLF6G0B4OcfLac9W8Z7Vjeizbjt/A6R+zzw7vhHbJ4GIkrDpUqXDvFdEEzdxfICpb8/noLwG+w==}
-    engines: {node: '>=8.x'}
-    peerDependencies:
-      react: '>=16.9.0'
-      react-dom: '>=16.9.0'
-    dependencies:
-      '@babel/runtime': 7.21.0
-      classnames: 2.3.2
-      rc-util: 5.29.2_sfoxds7t5ydpegc3knd667wn6m
-      react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
-    dev: false
-
   /@rc-component/portal/1.1.1_sfoxds7t5ydpegc3knd667wn6m:
     resolution: {integrity: sha512-m8w3dFXX0H6UkJ4wtfrSwhe2/6M08uz24HHrF8pWfAXPwA9hwCuTE5per/C86KwNLouRpwFGcr7LfpHaa1F38g==}
     engines: {node: '>=8.x'}
@@ -2289,7 +2279,7 @@ packages:
       react-dom: '>=16.9.0'
     dependencies:
       '@babel/runtime': 7.21.0
-      '@rc-component/portal': 1.0.3_sfoxds7t5ydpegc3knd667wn6m
+      '@rc-component/portal': 1.1.1_sfoxds7t5ydpegc3knd667wn6m
       '@rc-component/trigger': 1.6.2_sfoxds7t5ydpegc3knd667wn6m
       classnames: 2.3.2
       rc-util: 5.29.2_sfoxds7t5ydpegc3knd667wn6m
@@ -6378,6 +6368,23 @@ packages:
     dev: true
     optional: true
 
+  /material-ui-popup-state/5.0.8_dsf4e3apuenlkvio4aqmxlrol4:
+    resolution: {integrity: sha512-5ptEBQVd68QJpm0PCIYBatpX/F5QIFS+EH0lPpGqjl6HPD6uIHPt7laHbiqWDEm/6Wy5YvWF69ny+3jHXmHizQ==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@babel/runtime': 7.21.0
+      '@mui/material': 5.12.3_dsf4e3apuenlkvio4aqmxlrol4
+      classnames: 2.3.2
+      prop-types: 15.8.1
+      react: 17.0.2
+    transitivePeerDependencies:
+      - '@emotion/react'
+      - '@emotion/styled'
+      - '@types/react'
+      - react-dom
+    dev: false
+
   /mathml-tag-names/2.1.3:
     resolution: {integrity: sha512-APMBEanjybaPzUrfqU0IMU5I0AswKMH7k8OTLs0vvV4KZpExkTkY87nR/zpbuTPj+gARop7aGUbl11pnDfW6xg==}
     dev: true
@@ -7130,7 +7137,7 @@ packages:
       react-dom: '>=16.9.0'
     dependencies:
       '@babel/runtime': 7.21.0
-      '@rc-component/portal': 1.0.3_sfoxds7t5ydpegc3knd667wn6m
+      '@rc-component/portal': 1.1.1_sfoxds7t5ydpegc3knd667wn6m
       classnames: 2.3.2
       rc-motion: 2.6.2_sfoxds7t5ydpegc3knd667wn6m
       rc-util: 5.29.2_sfoxds7t5ydpegc3knd667wn6m
@@ -7145,7 +7152,7 @@ packages:
       react-dom: '>=16.9.0'
     dependencies:
       '@babel/runtime': 7.21.0
-      '@rc-component/portal': 1.0.3_sfoxds7t5ydpegc3knd667wn6m
+      '@rc-component/portal': 1.1.1_sfoxds7t5ydpegc3knd667wn6m
       classnames: 2.3.2
       rc-motion: 2.6.2_sfoxds7t5ydpegc3knd667wn6m
       rc-util: 5.29.2_sfoxds7t5ydpegc3knd667wn6m
@@ -7188,7 +7195,7 @@ packages:
       react-dom: '>=16.9.0'
     dependencies:
       '@babel/runtime': 7.21.0
-      '@rc-component/portal': 1.0.3_sfoxds7t5ydpegc3knd667wn6m
+      '@rc-component/portal': 1.1.1_sfoxds7t5ydpegc3knd667wn6m
       classnames: 2.3.2
       rc-dialog: 9.0.2_sfoxds7t5ydpegc3knd667wn6m
       rc-motion: 2.6.2_sfoxds7t5ydpegc3knd667wn6m
@@ -7698,6 +7705,17 @@ packages:
       react: '*'
     dependencies:
       react: 17.0.2
+    dev: false
+
+  /react-image/4.1.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-qwPNlelQe9Zy14K2pGWSwoL+vHsAwmJKS6gkotekDgRpcnRuzXNap00GfibD3eEPYu3WCPlyIUUNzcyHOrLHjw==}
+    peerDependencies:
+      '@babel/runtime': '>=7'
+      react: '>=16.8'
+      react-dom: '>=16.8'
+    dependencies:
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
     dev: false
 
   /react-is/16.13.1:
