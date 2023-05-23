@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { atom, useAtom, useAtomValue } from 'jotai';
-import { getLikelist } from '@/service';
+import { getLikelist, postLike } from '@/service';
 import { userAtom } from './userAtom';
 
 /**
@@ -9,6 +10,7 @@ export const likelistAtom = atom<number[]>([]);
 
 export const useLikelist = () => {
   const user = useAtomValue(userAtom);
+  const [loading, setLoading] = useState(false);
   const [likelist, setLikelist] = useAtom(likelistAtom);
 
   const refresh = async () => {
@@ -21,8 +23,29 @@ export const useLikelist = () => {
     }
   };
 
+  const like = (id: number) => {
+    setLoading(true);
+    return postLike({
+      id,
+    }).then(refresh).finally(() => {
+      setLoading(false);
+    });
+  };
+
+  const dislike = (id: number) => {
+    setLoading(true);
+    return postLike({
+      like: false,
+      id,
+    }).then(refresh).finally(() => {
+      setLoading(false);
+    });
+  };
+
   return {
+    loading,
     likelist,
-    refresh,
+    like,
+    dislike,
   };
 };

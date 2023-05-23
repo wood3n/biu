@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Stack from '@mui/material/Stack';
-import Slider from '@mui/material/Slider';
+import Grid from '@mui/material/Grid';
+import Menu from '@mui/material/Menu';
+import IconButton from '@mui/material/IconButton';
 import {
-  MdPlayCircleFilled,
-  MdPauseCircleFilled,
+  MdPlayArrow,
+  MdPause,
   MdSkipPrevious,
   MdSkipNext,
   MdRepeatOne,
@@ -17,6 +19,11 @@ import {
   MdOutlineFavoriteBorder,
   MdOutlineMusicNote,
   MdOutlinePlaylistPlay,
+  MdFastRewind,
+  MdFastForward,
+  MdQueueMusic,
+  MdOutlineFavorite,
+  MdPlaylistAdd,
 } from 'react-icons/md';
 import { useAtom, useAtomValue } from 'jotai';
 import { useLikelist } from '@/store/likelistAtom';
@@ -26,7 +33,12 @@ import type { Song } from '@service/playlist-track-all';
 import { useRequest, useBoolean } from 'ahooks';
 import { getSongUrlV1 } from '@/service';
 import { MUSIC_LEVEL } from '@/common/constants';
+import VolumeSlider, { VolumeSliderThumb } from './volume-slider';
+import PlayProgressSlider from './play-progress';
+import PlayRate from './play-rate';
 import SongDescription from '../song-description';
+import TooltipButton from '../tooltip-button';
+import LikeAction from '../like-action-button';
 import PlaylistDrawer from '../PlaylistDrawer';
 import './index.less';
 
@@ -132,48 +144,72 @@ const PlayTaskBar = () => {
   };
 
   return (
-    <div className="play-taskbar">
-      <div className="play-taskbar-left">
+    <Grid container columnSpacing={4} sx={{ height: '100%', padding: '0 24px' }}>
+      <Grid item xs className="playbar-action-left">
         {playingSong && (
-          <SongDescription
-            picUrl={playingSong.al?.picUrl}
-            name={playingSong.name}
-            ar={playingSong.ar}
-          />
+          <>
+            <SongDescription
+              picUrl={playingSong.al?.picUrl}
+              name={playingSong.name}
+              ar={playingSong.ar}
+            />
+            <LikeAction id={playingSong?.id} />
+            <TooltipButton tooltip="收藏" size="small">
+              <MdPlaylistAdd size={24} />
+            </TooltipButton>
+          </>
         )}
-      </div>
-      <div className="play-taskbar-center">
-        <div className="play-action">
-          <a className="play-prev" onClick={handlePrev}><MdSkipPrevious size={24} /></a>
-          {paused ? (
-            <a className="play-play" onClick={handlePlay}>
-              <MdPlayCircleFilled size={36} />
-            </a>
-          ) : (
-            <a className="play-pause" onClick={handlePause}>
-              <MdPauseCircleFilled size={36} />
-            </a>
-          )}
-          <a className="play-next" onClick={handleNext}><MdSkipNext size={24} /></a>
-        </div>
-        <div className="play-progress">
-          <span className="play-current-time">{formatDuration(current)}</span>
-          <Slider
-            min={0}
-            max={duration}
-            step={1}
-            value={current}
-            onChange={handleSeek}
-            style={{ flex: 1 }}
-          />
-          <span className="play-total-time">
-            {playingSong?.dt ? formatDuration(playingSong.dt) : '00:00'}
-          </span>
-        </div>
-      </div>
-      <div className="play-taskbar-right">
-        <span className="play-volume">
-          <a className="play-volume-toggle-mute" onClick={toggleMuted}>
+      </Grid>
+      <Grid item xs={6}>
+        <Stack alignItems="center" className="playbar-progress-stack">
+          <Stack
+            direction="row"
+            alignItems="center"
+          >
+            <IconButton size="small" aria-label="previous song">
+              <MdFastRewind size={24} />
+            </IconButton>
+            <IconButton
+              size="small"
+              aria-label={paused ? 'play' : 'pause'}
+              onClick={() => setPaused(!paused)}
+            >
+              {paused ? (
+                <MdPlayArrow size={34} />
+              ) : (
+                <MdPause size={34} />
+              )}
+            </IconButton>
+            <IconButton size="small" aria-label="next song">
+              <MdFastForward size={24} />
+            </IconButton>
+          </Stack>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={2}
+            style={{ flex: 1, width: '100%' }}
+          >
+            <span className="playbar-progress-dt-span">
+              {formatDuration(current)}
+            </span>
+            <PlayProgressSlider
+              valueLabelDisplay="auto"
+              min={0}
+              max={duration}
+              step={1}
+              value={current}
+              onChange={handleSeek}
+            />
+            <span className="playbar-progress-dt-span">
+              {playingSong?.dt ? formatDuration(playingSong.dt) : '00:00'}
+            </span>
+          </Stack>
+        </Stack>
+      </Grid>
+      <Grid item xs className="playbar-action-right">
+        <Stack direction="row" alignItems="center">
+          <IconButton size="small" onClick={toggleMuted}>
             {muted
               ? <MdVolumeOff size={24} />
               : volume === 0
@@ -181,8 +217,9 @@ const PlayTaskBar = () => {
                 : volume < 0.5
                   ? <MdVolumeDown size={24} />
                   : <MdVolumeUp size={24} />}
-          </a>
-          <Slider
+          </IconButton>
+          <VolumeSlider
+            slots={{ thumb: VolumeSliderThumb }}
             size="small"
             min={0}
             max={1}
@@ -190,48 +227,19 @@ const PlayTaskBar = () => {
             value={volume}
             onChange={(_, v) => handleChangeVolume(v as number)}
             style={{ width: 120 }}
-            sx={{
-              color: '#fff',
-              '& .MuiSlider-track': {
-                border: 'none',
-              },
-              '& .MuiSlider-thumb': {
-                width: 16,
-                height: 16,
-                backgroundColor: '#fff',
-                '&:before': {
-                  boxShadow: '0 4px 8px rgba(0,0,0,0.4)',
-                },
-                '&:hover, &.Mui-focusVisible, &.Mui-active': {
-                  boxShadow: 'none',
-                },
-              },
-            }}
           />
-        </span>
-        <a className="play-mode"><MdRepeatOne size={24} /></a>
-        {/* <Dropdown
-          menu={{
-            items: [
-              { key: '0.5', label: '0.5x' },
-              { key: '1', label: '1x' },
-              { key: '1.5', label: '1.5x' },
-              { key: '2', label: '2x' },
-            ],
-            selectedKeys: [String(rate)],
-            onClick: ({ key }) => handleChangeRate(key),
-          }}
-          placement="top"
-        >
-          <a className="play-rate">{`${rate}x`}</a>
-        </Dropdown> */}
-        <a onClick={toggle}><MdOutlinePlaylistPlay size={24} /></a>
-      </div>
-      <PlaylistDrawer
-        onClose={toggle}
-        visible={playlistDrawerVisible}
-      />
-    </div>
+        </Stack>
+        <Stack direction="row" spacing="12px" alignItems="center">
+          <TooltipButton tooltip="单曲循环" size="small">
+            <MdRepeatOne size={24} />
+          </TooltipButton>
+          <PlayRate value={rate} onChange={(v) => setRate(v)} />
+          <TooltipButton tooltip="播放列表" size="small">
+            <MdQueueMusic size={24} />
+          </TooltipButton>
+        </Stack>
+      </Grid>
+    </Grid>
   );
 };
 

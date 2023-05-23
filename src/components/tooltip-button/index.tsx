@@ -9,6 +9,7 @@ import styles from './index.module.less';
 
 interface Props {
   size?: 'small' | 'medium' | 'large';
+  disabled?: boolean;
   tooltip: React.ReactNode;
   onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | ((e: React.MouseEvent<HTMLElement>) => Promise<any>);
   className?: string;
@@ -19,6 +20,7 @@ interface Props {
  * 带有tooltip提示的按钮
  */
 const TooltipButton = ({
+  disabled,
   tooltip,
   onClick,
   size,
@@ -42,6 +44,7 @@ const TooltipButton = ({
   return loading ? <TailSpin width={18} height={18} radius="2" /> : (
     <Tooltip title={tooltip}>
       <IconButton
+        disabled={disabled}
         size={size}
         onClick={handleClick}
         className={classNames(className, styles.button)}

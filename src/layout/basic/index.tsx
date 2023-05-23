@@ -111,9 +111,7 @@ const BasicLayout: React.FC = () => {
           zIndex: (theme) => theme.zIndex.drawer + 1,
         }}
       >
-        <Toolbar sx={{ height: '80px' }}>
-          <PlayBar />
-        </Toolbar>
+        <PlayBar />
       </AppBar>
     </div>
     // <Layout className={styles.basicLayout} style={{ color: colorTextBase }}>

@@ -1,69 +1,21 @@
-.play-taskbar {
-  width: 100%;
-  height: 100%;
+.playbar-action-left {
   display: flex;
   align-items: center;
-  column-gap: 48px;
+  column-gap: 24px;
+}
 
-  .play-taskbar-left {
-    flex: 1 1 30%;
+.playbar-progress-stack {
+  height: 100%;
+
+  .playbar-progress-dt-span {
+    font-size: 14px;
   }
+}
 
-  .play-taskbar-center {
-    flex: 1 1 40%;
-
-    .play-action {
-      position: relative;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      column-gap: 24px;
-      margin-bottom: 8px;
-    }
-
-    .play-progress {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      column-gap: 12px;
-
-      .play-current-time,
-      .play-total-time {
-        flex: 0 0 65px;
-        width: 65px;
-        color: #fff;
-        text-align: center;
-      }
-    }
-  }
-
-  .play-taskbar-right {
-    padding: 24px;
-    flex: 1 1 30%;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    column-gap: 16px;
-
-    .play-volume {
-      display: flex;
-      align-items: center;
-      column-gap: 8px;
-    }
-
-    .play-volume-toggle-mute {
-      flex: 0 0 25px;
-      display: flex;
-      align-items: center;
-    }
-
-    .play-rate {
-      display: inline-block;
-      padding: 2px;
-      text-align: center;
-      flex: 0 0 36px;
-    }
-  }
+.playbar-action-right {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 24px;
+  padding-left: 48px;
 }

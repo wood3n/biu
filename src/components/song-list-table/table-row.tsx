@@ -56,14 +56,22 @@ const StyledTableRow = ({
       key={data.id}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      onDoubleClick={() => { setPlayingSong(data); }}
+      onDoubleClick={() => { setPlayingSong(data) }}
       style={{ cursor: 'pointer' }}
     >
       <StyledTableCell style={{ width: 60 }} align="center">
         {playingSong?.id === data.id
           ? <AudioSpinner width={16} height={16} wrapperStyle={{ justifyContent: 'center' }} />
           : hovered
-            ? <TooltipButton tooltip="播放"><MdPlayArrow size={24} /></TooltipButton>
+            ? (
+              <TooltipButton
+                size="small"
+                tooltip="播放"
+                onClick={() => { setPlayingSong(data) }}
+              >
+                <MdPlayArrow size={18} />
+              </TooltipButton>
+            )
             : index + 1}
       </StyledTableCell>
       <StyledTableCell>
