@@ -6,11 +6,11 @@ import {
   getLoginStatus, getUserDetail, getUserSubcount, getLikelist, getUserPlaylist,
 } from '@/service';
 import { useRequest } from 'ahooks';
-import { userAtom } from '@/store/userAtom';
-import { likelistAtom } from '@/store/likelistAtom';
-import { userPlaylistAtom } from '@/store/userPlaylistAtom';
+import { userAtom } from '@/store/user-atom';
+import { likelistAtom } from '@/store/likelist-atom';
+import { useUserPlaylist } from '@/store/user-playlist-atom';
 import { useSetAtom } from 'jotai';
-import Box from '@mui/material/Box';
+import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -24,7 +24,7 @@ import styles from './index.module.less';
 const BasicLayout: React.FC = () => {
   const setUser = useSetAtom(userAtom);
   const setLikelist = useSetAtom(likelistAtom);
-  const setPlayList = useSetAtom(userPlaylistAtom);
+  const { refresh } = useUserPlaylist();
   const location = useLocation();
   const theme = useTheme();
 
@@ -42,15 +42,9 @@ const BasicLayout: React.FC = () => {
         const { ids } = await getLikelist({
           uid: loginStatus.profile.userId,
         });
-        // 获取所有歌单
-        const { playlist } = await getUserPlaylist({
-          uid: loginStatus.profile.userId,
-          limit: 1000,
-          offset: 0,
-        });
 
         // 更新用户歌单列表
-        setPlayList(playlist);
+        refresh(loginStatus.profile.userId);
         setUser({
           userInfo: userDetail,
           userAccountStats,
@@ -62,9 +56,12 @@ const BasicLayout: React.FC = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', width: '100vw', height: '100vh' }}>
-        <CircularProgress />
-      </Box>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     );
   }
 
@@ -114,29 +111,6 @@ const BasicLayout: React.FC = () => {
         <PlayBar />
       </AppBar>
     </div>
-    // <Layout className={styles.basicLayout} style={{ color: colorTextBase }}>
-    //   <Layout className={styles.main}>
-    //     <Sider
-    //       collapsible
-    //       trigger={null}
-    //       className={styles.sider}
-    //       style={{
-    //         background: colorBgLayout,
-    //       }}
-    //     >
-    //       <UserAvatarChip />
-    //       <div className={styles.siderMenu}>
-    //         <SimpleBar style={{ height: '100%' }}><Menu /></SimpleBar>
-    //       </div>
-    //     </Sider>
-    //     <Content className={styles.content} style={{ background: colorBgContainer }}>
-    //       <Outlet />
-    //     </Content>
-    //   </Layout>
-    //   <Footer className={styles.footer} style={{ background: colorBgContainer }}>
-    //     <PlayTaskBar />
-    //   </Footer>
-    // </Layout>
   );
 };
 

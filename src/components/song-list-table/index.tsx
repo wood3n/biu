@@ -16,7 +16,7 @@ import {
   MdOutlineFavoriteBorder,
   MdOutlineFavorite,
 } from 'react-icons/md';
-import { useLikelist } from '@/store/likelistAtom';
+import { useLikelist } from '@/store/likelist-atom';
 import { formatDuration } from '@/common/utils';
 import { styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';

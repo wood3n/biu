@@ -1,6 +1,6 @@
 import React from 'react';
 import { Row, Col } from 'antd';
-import WindowCornerAction from '@/components/WindowCornerAction';
+import WindowCornerAction from '@/components/window-action';
 import { ReactComponent as Music } from '@/assets/images/music.svg';
 import LoginByQr from './LoginByQr';
 import styles from './index.module.less';

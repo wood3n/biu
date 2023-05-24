@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
-import { Spin } from 'antd';
-import NavigationButton from '@/components/NavigationButton';
+import NavigationButton from '@/components/navigation';
 import Search from '@/components/Search';
-import WindowCornerAction from '@/components/WindowCornerAction';
+import WindowCornerAction from '@/components/window-action';
 import styles from './index.module.less';
 
 interface Props {
@@ -58,7 +57,7 @@ const PageContainer: React.FC<Props> = ({
       </div>
       <div className={styles.stickyObTarget} id="sticky-observer-target" />
       <div className={styles.pageContent} style={contentStyle}>
-        {loading ? <div className={styles.pageContentLoading}><Spin size="large" /></div> : children}
+        {children}
       </div>
     </div>
   );

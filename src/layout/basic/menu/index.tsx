@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import useUser from '@/store/userAtom';
+import useUser from '@/store/user-atom';
 import {
   MdQueueMusic,
   MdPlaylistAdd,
 } from 'react-icons/md';
-import { useSetAtom, useAtomValue } from 'jotai';
-import { userPlaylistAtom } from '@/store/userPlaylistAtom';
-import CreatePlayListModal from '@/components/CreatePlayListModal';
+import { useAtomValue } from 'jotai';
+import { userPlaylistAtom } from '@/store/user-playlist-atom';
 import type { MenuProps } from '@/menu';
 import basicMenu from '@/menu';
 import List from '@mui/material/List';
@@ -18,8 +17,9 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
-import Stack from '@mui/material/Stack';
 import OverflowText from '@components/overflow-text';
+import TooltipButton from '@/components/tooltip-button';
+import CreatePlayList from '@components/create-playlist';
 
 /**
  * 菜单导航
@@ -30,6 +30,7 @@ const SysMenu: React.FC = () => {
   const [user] = useUser();
   const userPlaylist = useAtomValue(userPlaylistAtom);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  const [open, setOpen] = React.useState(false);
 
   const menus: MenuProps[] = useMemo(() => {
     const playListMenu = [];
@@ -39,18 +40,16 @@ const SysMenu: React.FC = () => {
         label: (
           <div>
             创建的歌单
-            <Tooltip
-              title="创建新歌单"
+            <TooltipButton
+              tooltip="创建新歌单"
+              size="small"
               PopperProps={{
                 disablePortal: true,
               }}
+              onClick={() => setOpen(true)}
             >
-              <IconButton
-                size="small"
-              >
-                <MdPlaylistAdd />
-              </IconButton>
-            </Tooltip>
+              <MdPlaylistAdd />
+            </TooltipButton>
           </div>
         ),
         key: 'created',
@@ -79,7 +78,7 @@ const SysMenu: React.FC = () => {
       ...basicMenu,
       ...playListMenu,
     ];
-  }, [userPlaylist]);
+  }, [userPlaylist, user?.userInfo?.profile?.userId]);
 
   useEffect(() => {
     if (location.pathname) {
@@ -88,68 +87,74 @@ const SysMenu: React.FC = () => {
   }, [location]);
 
   return (
-    <List
-      sx={{
-        width: '100%',
-        position: 'relative',
-        '& ul': { padding: 0 },
-      }}
-      subheader={<li />}
-    >
-      {menus.map(({
-        label, icon, sub, key,
-      }) => (sub ? (
-        <li key={key}>
-          <ul>
-            <ListSubheader>{label}</ListSubheader>
-            {sub.map((child) => (
-              <ListItemButton
-                key={child.key}
-                selected={selectedKeys.includes(child.key)}
-                onClick={() => {
-                  navigate(key);
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 32,
+    <>
+      <List
+        sx={{
+          width: '100%',
+          position: 'relative',
+          '& ul': { padding: 0 },
+        }}
+        subheader={<li />}
+      >
+        {menus.map(({
+          label, icon, sub, key,
+        }) => (sub ? (
+          <li key={key}>
+            <ul>
+              <ListSubheader>{label}</ListSubheader>
+              {sub.map((child) => (
+                <ListItemButton
+                  key={child.key}
+                  selected={selectedKeys.includes(child.key)}
+                  onClick={() => {
+                    navigate(key);
                   }}
                 >
-                  {child.icon}
-                </ListItemIcon>
-                <ListItemText disableTypography>
-                  <OverflowText title={child.label}>
-                    {child.label}
-                  </OverflowText>
-                </ListItemText>
-              </ListItemButton>
-            ))}
-          </ul>
-        </li>
-      ) : (
-        <ListItem key={key} disablePadding>
-          <ListItemButton
-            selected={selectedKeys.includes(key)}
-            onClick={() => {
-              navigate(key);
-            }}
-          >
-            <ListItemIcon
-              sx={{
-                minWidth: 32,
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 32,
+                    }}
+                  >
+                    {child.icon}
+                  </ListItemIcon>
+                  <ListItemText disableTypography>
+                    <OverflowText title={child.label}>
+                      {child.label}
+                    </OverflowText>
+                  </ListItemText>
+                </ListItemButton>
+              ))}
+            </ul>
+          </li>
+        ) : (
+          <ListItem key={key} disablePadding>
+            <ListItemButton
+              selected={selectedKeys.includes(key)}
+              onClick={() => {
+                navigate(key);
               }}
             >
-              {icon}
-            </ListItemIcon>
-            <ListItemText disableTypography>
-              <OverflowText title={label}>
-                {label}
-              </OverflowText>
-            </ListItemText>
-          </ListItemButton>
-        </ListItem>
-      )))}
-    </List>
+              <ListItemIcon
+                sx={{
+                  minWidth: 32,
+                }}
+              >
+                {icon}
+              </ListItemIcon>
+              <ListItemText disableTypography>
+                <OverflowText title={label}>
+                  {label}
+                </OverflowText>
+              </ListItemText>
+            </ListItemButton>
+          </ListItem>
+        )))}
+      </List>
+      <CreatePlayList
+        open={open}
+        onClose={() => setOpen(false)}
+      />
+    </>
   );
 };
 

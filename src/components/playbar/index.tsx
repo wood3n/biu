@@ -26,8 +26,8 @@ import {
   MdPlaylistAdd,
 } from 'react-icons/md';
 import { useAtom, useAtomValue } from 'jotai';
-import { useLikelist } from '@/store/likelistAtom';
-import { playingSongAtom } from '@/store/playingSongAtom';
+import { useLikelist } from '@/store/likelist-atom';
+import { playingSongAtom } from '@/store/current-play-atom';
 import { formatDuration } from '@/common/utils';
 import type { Song } from '@service/playlist-track-all';
 import { useRequest, useBoolean } from 'ahooks';

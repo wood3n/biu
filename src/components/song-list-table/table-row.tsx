@@ -18,8 +18,8 @@ import {
   MdPlayArrow,
 } from 'react-icons/md';
 import { useAtom } from 'jotai';
-import { useLikelist } from '@/store/likelistAtom';
-import { playingSongAtom } from '@/store/playingSongAtom';
+import { useLikelist } from '@/store/likelist-atom';
+import { playingSongAtom } from '@/store/current-play-atom';
 import { formatDuration } from '@/common/utils';
 import { styled } from '@mui/material/styles';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';

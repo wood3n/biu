@@ -13,8 +13,8 @@ import TooltipButton from '@/components/tooltip-button';
 import SongDescription from '@/components/song-description';
 import TableDurationIcon from '@components/TableDurationIcon';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { userPlaylistAtom } from '@/store/userPlaylistAtom';
-import { playQueueAtom } from '@/store/playQueueAtom';
+import { userPlaylistAtom } from '@/store/user-playlist-atom';
+import { playQueueAtom } from '@/store/play-queue-atom';
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
   DndContext, useSensor, useSensors, MouseSensor,

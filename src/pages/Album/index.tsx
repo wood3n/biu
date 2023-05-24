@@ -15,8 +15,8 @@ import TooltipButton from '@/components/tooltip-button';
 import { formatDuration } from '@/common/utils';
 import { HTTP_RESPONSE } from '@/common/constants';
 import { useAtom, useAtomValue } from 'jotai';
-import { likelistAtom } from '@/store/likelistAtom';
-import { userAtom } from '@/store/userAtom';
+import { likelistAtom } from '@/store/likelist-atom';
+import { userAtom } from '@/store/user-atom';
 
 const Album = () => {
   const { id } = useParams();

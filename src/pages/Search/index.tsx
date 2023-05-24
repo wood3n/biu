@@ -1,6 +1,5 @@
 import React from 'react';
 import { useRequest } from 'ahooks';
-import { Tabs } from 'antd';
 import { getSearchDefault, getCloudsearch } from '@/service';
 
 const Search: React.FC = () => {
@@ -9,9 +8,7 @@ const Search: React.FC = () => {
 
   const { data, loading } = useRequest(getCloudsearch);
 
-  return (
-    <div />
-  );
+  return <div>搜索</div>;
 };
 
 export default Search;

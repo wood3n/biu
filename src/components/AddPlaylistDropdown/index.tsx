@@ -8,8 +8,8 @@ import {
   MdSearch,
 } from 'react-icons/md';
 import { useAtomValue } from 'jotai';
-import { userAtom } from '@/store/userAtom';
-import { userPlaylistAtom } from '@/store/userPlaylistAtom';
+import { userAtom } from '@/store/user-atom';
+import { userPlaylistAtom } from '@/store/user-playlist-atom';
 import SimpleBar from 'simplebar-react';
 import './index.less';
 

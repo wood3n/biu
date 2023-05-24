@@ -1,19 +1,19 @@
 import type { RouteObject } from 'react-router-dom';
-import Login from './pages/Login';
-import Home from './pages/Home';
-import NotFound from './pages/NotFound';
-import UserProfile from './pages/UserProfile';
+import Login from './pages/login';
+import Home from './pages/home';
+import NotFound from './pages/not-found';
+import UserProfile from './pages/user-profile';
 import BasicLayout from './layout/basic';
-import Daily from './pages/Daily';
-import FM from './pages/FM';
-import Search from './pages/Search';
-import PlayList from './pages/PlayList';
-import Album from './pages/Album';
-import Artist from './pages/Artist';
-import Collect from './pages/Collect';
-import Podcast from './pages/Podcast';
-import CollectAlbum from './pages/Collect/Album';
-import CollectArtist from './pages/Collect/Artist';
+import Daily from './pages/daily';
+import FM from './pages/fm';
+import Search from './pages/search';
+import PlayList from './pages/playlist';
+import Album from './pages/album';
+import Artist from './pages/artist';
+import Collect from './pages/collect';
+import Podcast from './pages/podcast';
+import CollectAlbum from './pages/collect/Album';
+import CollectArtist from './pages/collect/Artist';
 import CloudDrive from './pages/cloud-drive';
 
 const routes: RouteObject[] = [

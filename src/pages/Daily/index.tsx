@@ -35,8 +35,8 @@ import {
   MdOutlineFavorite,
 } from 'react-icons/md';
 import { useRequest } from 'ahooks';
-import useUser from '@/store/userAtom';
-import { useLikelist } from '@/store/likelistAtom';
+import useUser from '@/store/user-atom';
+import { useLikelist } from '@/store/likelist-atom';
 import { useAtomValue } from 'jotai';
 import { getRecommendSongs } from '@/service';
 import { formatDuration } from '@/common/utils';

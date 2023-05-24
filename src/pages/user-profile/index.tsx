@@ -13,7 +13,7 @@ import {
   MdModeEdit,
 } from 'react-icons/md';
 // import { useUser } from '@/common/hooks';
-import useUser from '@/store/userAtom';
+import useUser from '@/store/user-atom';
 import MyFocus from './Focus';
 import MyPlayRank from './PlayRank';
 import styles from './index.module.less';

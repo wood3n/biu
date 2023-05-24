@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { getLikelist, postLike } from '@/service';
-import { userAtom } from './userAtom';
+import { userAtom } from './user-atom';
 
 /**
  * 所有喜欢的歌曲id

@@ -10,7 +10,7 @@ import {
 } from 'antd';
 import { AiOutlineUser } from 'react-icons/ai';
 // import { useUser } from '@/common/hooks';
-import useUser from '@/store/userAtom';
+import useUser from '@/store/user-atom';
 import { useRequest } from 'ahooks';
 import { getUserFollows } from '@/service';
 import styles from './index.module.less';

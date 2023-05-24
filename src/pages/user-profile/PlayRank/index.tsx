@@ -1,7 +1,7 @@
 import { Typography, Tabs, Table } from 'antd';
 import React, { useEffect, useState } from 'react';
 // import { useUser } from '@/common/hooks';
-import useUser from '@/store/userAtom';
+import useUser from '@/store/user-atom';
 import { getUserRecord } from '@/service';
 import type { Song } from '@/service/user-record';
 import { useRequest } from 'ahooks';

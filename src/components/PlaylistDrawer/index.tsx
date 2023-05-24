@@ -2,7 +2,7 @@ import React from 'react';
 import { Drawer, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useAtomValue } from 'jotai';
-import { playQueueAtom } from '@/store/playQueueAtom';
+import { playQueueAtom } from '@/store/play-queue-atom';
 import { formatDuration } from '@/common/utils';
 import type { Song } from '@service/playlist-track-all';
 import SongDescription from '../song-description';

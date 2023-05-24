@@ -5,9 +5,10 @@ import Tooltip from '@mui/material/Tooltip';
 import { TailSpin } from 'react-loader-spinner';
 import classNames from 'classnames';
 import { isThenable } from '@/common/utils';
+import { type TooltipProps } from '@mui/material/Tooltip/Tooltip';
 import styles from './index.module.less';
 
-interface Props {
+interface Props extends Omit<TooltipProps, 'onClick' | 'title'> {
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   tooltip: React.ReactNode;
@@ -27,6 +28,7 @@ const TooltipButton = ({
   className,
   style,
   children,
+  ...props
 }: React.PropsWithChildren<Props>) => {
   const [loading, { setTrue, setFalse }] = useBoolean(false);
 
@@ -42,7 +44,7 @@ const TooltipButton = ({
   };
 
   return loading ? <TailSpin width={18} height={18} radius="2" /> : (
-    <Tooltip title={tooltip}>
+    <Tooltip title={tooltip} {...props}>
       <IconButton
         disabled={disabled}
         size={size}
