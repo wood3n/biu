@@ -5,6 +5,15 @@ import CssBaseline from '@mui/material/CssBaseline';
 const theme = createTheme({
   palette: {
     mode: 'dark',
+    primary: {
+      main: '#1fdf64',
+    },
+    secondary: {
+      main: '#519BF4',
+    },
+  },
+  shape: {
+    borderRadius: 14,
   },
 });
 
