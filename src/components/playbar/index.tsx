@@ -144,7 +144,7 @@ const PlayTaskBar = () => {
   };
 
   return (
-    <Grid container columnSpacing={4} sx={{ height: '100%', padding: '0 24px' }}>
+    <Grid container columnSpacing={4} sx={{ height: '80px', padding: '0 24px' }}>
       <Grid item xs className="playbar-action-left">
         {playingSong && (
           <>
