@@ -34,14 +34,14 @@ const LoginByQr: React.FC = () => {
     try {
       const key = await createQr();
       if (key) {
-        run(key);
+        runAsync({ key });
       }
     } catch (err) {
       checkError(err);
     }
   }
 
-  const { run, cancel } = useRequest(getLoginQrCheck, {
+  const { runAsync, cancel } = useRequest(getLoginQrCheck, {
     manual: true,
     pollingInterval: 3000,
     onSuccess: ({ code }) => {
@@ -62,7 +62,7 @@ const LoginByQr: React.FC = () => {
     checkLogin();
   }, []);
 
-  useEffect(() => () => cancel(), [cancel]);
+  useEffect(() => cancel, [cancel]);
 
   return (
     <div className={styles.container}>
