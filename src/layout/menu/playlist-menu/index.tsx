@@ -17,6 +17,8 @@ import ListItemText from '@mui/material/ListItemText';
 import OverflowText from '@components/overflow-text';
 import TooltipButton from '@/components/tooltip-button';
 import CreatePlayList from '@components/create-playlist';
+import SimpleBar from 'simplebar-react';
+// import './index.less';
 
 interface Props {
   selectedKeys: string[];
@@ -80,68 +82,70 @@ const PlaylistMenu = ({
 
   return (
     <>
-      <List
-        sx={{
-          width: '100%',
-          position: 'relative',
-          '& ul': { padding: 0 },
-        }}
-        subheader={<li />}
-      >
-        {menus.map(({
-          label, icon, sub, key,
-        }) => (sub ? (
-          <li key={key}>
-            <ul>
-              <ListSubheader>{label}</ListSubheader>
-              {sub.map((child) => (
-                <ListItemButton
-                  key={child.key}
-                  selected={selectedKeys.includes(child.key)}
-                  onClick={() => {
-                    navigate(key);
-                  }}
-                >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 32,
+      <SimpleBar style={{ height: '100%' }}>
+        <List
+          sx={{
+            width: '100%',
+            position: 'relative',
+            '& ul': { padding: 0 },
+          }}
+          subheader={<li />}
+        >
+          {menus.map(({
+            label, icon, sub, key,
+          }) => (sub ? (
+            <li key={key}>
+              <ul>
+                <ListSubheader>{label}</ListSubheader>
+                {sub.map((child) => (
+                  <ListItemButton
+                    key={child.key}
+                    selected={selectedKeys.includes(child.key)}
+                    onClick={() => {
+                      navigate(key);
                     }}
                   >
-                    {child.icon}
-                  </ListItemIcon>
-                  <ListItemText disableTypography>
-                    <OverflowText title={child.label}>
-                      {child.label}
-                    </OverflowText>
-                  </ListItemText>
-                </ListItemButton>
-              ))}
-            </ul>
-          </li>
-        ) : (
-          <ListItem key={key} disablePadding>
-            <ListItemButton
-              selected={selectedKeys.includes(key)}
-              onClick={() => {
-                navigate(key);
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 32,
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 32,
+                      }}
+                    >
+                      {child.icon}
+                    </ListItemIcon>
+                    <ListItemText disableTypography>
+                      <OverflowText title={child.label}>
+                        {child.label}
+                      </OverflowText>
+                    </ListItemText>
+                  </ListItemButton>
+                ))}
+              </ul>
+            </li>
+          ) : (
+            <ListItem key={key} disablePadding>
+              <ListItemButton
+                selected={selectedKeys.includes(key)}
+                onClick={() => {
+                  navigate(key);
                 }}
               >
-                {icon}
-              </ListItemIcon>
-              <ListItemText disableTypography>
-                <OverflowText title={label}>
-                  {label}
-                </OverflowText>
-              </ListItemText>
-            </ListItemButton>
-          </ListItem>
-        )))}
-      </List>
+                <ListItemIcon
+                  sx={{
+                    minWidth: 32,
+                  }}
+                >
+                  {icon}
+                </ListItemIcon>
+                <ListItemText disableTypography>
+                  <OverflowText title={label}>
+                    {label}
+                  </OverflowText>
+                </ListItemText>
+              </ListItemButton>
+            </ListItem>
+          )))}
+        </List>
+      </SimpleBar>
       <CreatePlayList
         open={open}
         onClose={() => setOpen(false)}

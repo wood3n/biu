@@ -3,11 +3,12 @@ const {
   BrowserWindow,
   nativeImage,
   ipcMain,
-  Menu
+  Menu,
 } = require('electron');
 const path = require('path');
 const Store = require('electron-store');
-const createTray = require('./createTray');
+const { createTray } = require('./createTray');
+
 const store = new Store();
 
 function createWindow() {
@@ -33,19 +34,19 @@ function createWindow() {
     // 无边框
     frame: true,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
     },
   });
 
   // MAC dock icon
   if (process.platform === 'darwin') {
-    const dockIcon = nativeImage.createFromPath(path.resolve(process.cwd(), './public/electron/music_832x832.png'));
+    const dockIcon = nativeImage.createFromPath(path.resolve(process.cwd(), './public/electron/music_dock.png'));
     app.dock.setIcon(dockIcon);
     const dockMenu = Menu.buildFromTemplate([
       { label: 'Item1', type: 'radio' },
       { label: 'Item2', type: 'radio' },
       { label: 'Item3', type: 'radio', checked: true },
-      { label: 'Item4', type: 'radio' }
+      { label: 'Item4', type: 'radio' },
     ]);
     app.dock.setMenu(dockMenu);
   }
@@ -89,7 +90,7 @@ function createWindow() {
   ipcMain.handle('resize', () => {
     const bounds = store.get('bounds');
     if (win.isMaximized()) {
-      win.setBounds(bounds ? bounds : { width: 800, height: 800 });
+      win.setBounds(bounds || { width: 800, height: 800 });
     } else {
       store.set('bounds', bounds);
       win.maximize();
@@ -102,7 +103,7 @@ function createWindow() {
   } else {
     win.loadURL(`http://localhost:${process.env.PORT}/`);
     win.webContents.openDevTools({
-      mode: 'right'
+      mode: 'right',
     });
   }
 

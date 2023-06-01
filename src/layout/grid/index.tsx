@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import {
   Outlet, Navigate, useLocation,
 } from 'react-router-dom';
@@ -12,31 +11,19 @@ import {
 } from '@/service';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import CssBaseline from '@mui/material/CssBaseline';
 import Card from '@mui/material/Card';
 import PlayTaskBar from '@/components/playbar';
 import PageLoading from '@components/page-loading';
-import { menus, PlaylistMenu } from '../menu';
+import Menu from '../menu';
 
 const GridLayout = () => {
   const location = useLocation();
-  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const setUser = useSetAtom(userAtom);
   const setLikelist = useSetAtom(likelistAtom);
   const { refresh } = useUserPlaylist();
-
-  useEffect(() => {
-    if (location.pathname) {
-      setSelectedKeys([location.pathname]);
-    }
-  }, [location]);
 
   // 获取登录状态
   const { loading, data } = useRequest(getLoginStatus, {
@@ -80,23 +67,7 @@ const GridLayout = () => {
       <Grid container columnSpacing={2} sx={{ flex: 1 }}>
         <Grid item xs={3}>
           <Stack spacing={2} sx={{ height: '100%' }}>
-            <Card sx={{ flex: '1 0 0', maxHeight: '30%', overflowY: 'auto' }}>
-              <List>
-                {menus.map(({ label, icon, key }) => (
-                  <ListItem key={key} disablePadding>
-                    <ListItemButton>
-                      <ListItemIcon sx={{ minWidth: 34 }}>
-                        {icon}
-                      </ListItemIcon>
-                      <ListItemText primary={label} />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
-            </Card>
-            <Card sx={{ flex: '1 0 0', overflowY: 'auto' }}>
-              <PlaylistMenu selectedKeys={selectedKeys} />
-            </Card>
+            <Menu />
           </Stack>
         </Grid>
         <Grid item xs={9} sx={{ display: 'flex', flexDirection: 'column' }}>
