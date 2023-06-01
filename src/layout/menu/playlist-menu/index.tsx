@@ -2,26 +2,31 @@ import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useUser from '@/store/user-atom';
 import {
-  MdQueueMusic,
   MdPlaylistAdd,
 } from 'react-icons/md';
 import { useAtomValue } from 'jotai';
 import { userPlaylistAtom } from '@/store/user-playlist-atom';
-import type { MenuProps } from '@/menu';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListSubheader from '@mui/material/ListSubheader';
-import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import Avatar from '@mui/material/Avatar';
 import ListItemText from '@mui/material/ListItemText';
 import OverflowText from '@components/overflow-text';
 import TooltipButton from '@/components/tooltip-button';
 import CreatePlayList from '@components/create-playlist';
 import SimpleBar from 'simplebar-react';
-// import './index.less';
 
 interface Props {
   selectedKeys: string[];
+}
+
+interface PlaylistMenuType {
+  label: React.ReactNode;
+  key: string;
+  cover?: string;
+  sub?: PlaylistMenuType[];
 }
 
 /**
@@ -35,7 +40,7 @@ const PlaylistMenu = ({
   const userPlaylist = useAtomValue(userPlaylistAtom);
   const [open, setOpen] = React.useState(false);
 
-  const menus: MenuProps[] = useMemo(() => {
+  const menus: PlaylistMenuType[] = useMemo(() => {
     const playListMenu = [];
     const createdList = userPlaylist?.filter((item) => item.creator?.userId === user?.userInfo?.profile?.userId);
     if (createdList?.length) {
@@ -56,10 +61,10 @@ const PlaylistMenu = ({
           </div>
         ),
         key: 'created',
-        sub: createdList?.map(({ id, name }) => ({
+        sub: createdList?.map(({ id, name, coverImgUrl }) => ({
           label: name,
           key: `/playlist/${id}`,
-          icon: <MdQueueMusic />,
+          cover: coverImgUrl,
         })),
       });
     }
@@ -69,10 +74,10 @@ const PlaylistMenu = ({
       playListMenu.push({
         label: '收藏的歌单',
         key: 'collect',
-        sub: collectList?.map(({ id, name }) => ({
+        sub: collectList?.map(({ id, name, coverImgUrl }) => ({
           label: name,
           key: `/playlist/${id}`,
-          icon: <MdQueueMusic />,
+          cover: coverImgUrl,
         })),
       });
     }
@@ -92,7 +97,7 @@ const PlaylistMenu = ({
           subheader={<li />}
         >
           {menus.map(({
-            label, icon, sub, key,
+            label, cover, sub, key,
           }) => (sub ? (
             <li key={key}>
               <ul>
@@ -105,13 +110,9 @@ const PlaylistMenu = ({
                       navigate(key);
                     }}
                   >
-                    <ListItemIcon
-                      sx={{
-                        minWidth: 32,
-                      }}
-                    >
-                      {child.icon}
-                    </ListItemIcon>
+                    <ListItemAvatar>
+                      <Avatar variant="square" src={child.cover} />
+                    </ListItemAvatar>
                     <ListItemText disableTypography>
                       <OverflowText title={child.label}>
                         {child.label}
@@ -129,13 +130,9 @@ const PlaylistMenu = ({
                   navigate(key);
                 }}
               >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 32,
-                  }}
-                >
-                  {icon}
-                </ListItemIcon>
+                <ListItemAvatar>
+                  <Avatar variant="square" src={cover} />
+                </ListItemAvatar>
                 <ListItemText disableTypography>
                   <OverflowText title={label}>
                     {label}

@@ -22,28 +22,28 @@ const BasicMenu = ({ selectedKeys }: Props) => {
       {[
         {
           label: '推荐',
-          icon: <MdRecommend />,
+          icon: <MdRecommend size={24} />,
           key: '/',
         },
         {
           label: '私人FM',
-          icon: <MdRadio />,
+          icon: <MdRadio size={24} />,
           key: '/fm',
         },
         {
           label: '播放历史',
-          icon: <MdHistory />,
+          icon: <MdHistory size={24} />,
           key: '/history',
         },
       ].map(({ label, icon, key }) => (
-        <ListItem key={key}>
+        <ListItem key={key} disablePadding>
           <ListItemButton
             selected={selectedKeys.includes(key)}
             onClick={() => {
               navigate(key);
             }}
           >
-            <ListItemIcon sx={{ minWidth: 34 }}>
+            <ListItemIcon>
               {icon}
             </ListItemIcon>
             <ListItemText primary={label} />

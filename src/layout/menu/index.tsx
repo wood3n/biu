@@ -6,7 +6,6 @@ import Stack from '@mui/material/Stack';
 import Card from '@mui/material/Card';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import Tooltip from '@mui/material/Tooltip';
 import Tabs from '@mui/material/Tabs';
 import {
   MdQueueMusic,
@@ -44,30 +43,39 @@ const Menu = () => {
           flexDirection: 'column',
         }}
       >
-        <Tabs variant="fullWidth" value={tab} onChange={handleTabChange}>
+        <Tabs
+          value={tab}
+          onChange={handleTabChange}
+          TabIndicatorProps={{
+            style: { display: 'none' },
+          }}
+        >
           <Tab
             value="1"
-            icon={(
-              <Tooltip title="歌单">
-                <MdQueueMusic size={24} />
-              </Tooltip>
-            )}
+            icon={<MdQueueMusic size={20} />}
+            iconPosition="start"
+            label="歌单"
+            sx={{
+              flex: 1,
+            }}
           />
           <Tab
             value="2"
-            icon={(
-              <Tooltip title="收藏">
-                <MdStarBorder size={24} />
-              </Tooltip>
-            )}
+            icon={<MdStarBorder size={20} />}
+            iconPosition="start"
+            label="收藏"
+            sx={{
+              flex: 1,
+            }}
           />
           <Tab
             value="3"
-            icon={(
-              <Tooltip title="云盘">
-                <MdOutlineWbCloudy size={24} />
-              </Tooltip>
-            )}
+            icon={<MdOutlineWbCloudy size={20} />}
+            iconPosition="start"
+            label="云盘"
+            sx={{
+              flex: 1,
+            }}
           />
         </Tabs>
         <Box sx={{ flex: '1 0 0', overflowY: 'auto' }}>

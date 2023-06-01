@@ -19,6 +19,7 @@ const LoginByQr: React.FC = () => {
       const { data } = await getLoginQrKey();
       const { data: qrData } = await getLoginQrCreate({
         key: data.unikey,
+        qrimg: true,
       });
       setSrc(qrData.qrimg);
       return data.unikey;

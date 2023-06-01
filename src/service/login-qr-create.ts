@@ -2,6 +2,7 @@ import request from './request';
 
 export interface LoginQrCreateRequestParams {
   key: string | undefined;
+  qrimg: boolean;
 }
 
 export interface QrLoginImg {
@@ -10,7 +11,7 @@ export interface QrLoginImg {
      * base64
      */
     qrimg: string;
-    qrUrl: string;
+    qrurl: string;
   }
 }
 
