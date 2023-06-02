@@ -16,11 +16,10 @@ const OverflowText = ({
   return (
     <Tooltip
       disableHoverListener={!isOverflowed}
-      {...props}
-      // 禁止在 root 下面创建节点，可能会显示非预期的滚动条
       PopperProps={{
         disablePortal: true,
       }}
+      {...props}
     >
       <Typography
         ref={textElementRef}

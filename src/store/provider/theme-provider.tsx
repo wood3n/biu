@@ -1,22 +1,22 @@
 import React from 'react';
 import { ThemeProvider as MUIThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 
 const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#1fdf64',
+      main: '#1abc9c',
+      dark: '#1E1E1E',
     },
     secondary: {
-      main: '#519BF4',
+      main: '#3498db',
     },
     success: {
-      main: '#1fdf64',
+      main: '#1abc9c',
     },
   },
   shape: {
-    borderRadius: 14,
+    borderRadius: 8,
   },
 });
 
@@ -24,7 +24,6 @@ const ThemeProvider = ({ children }: React.PropsWithChildren) => (
   <MUIThemeProvider
     theme={theme}
   >
-    <CssBaseline />
     {children}
   </MUIThemeProvider>
 );

@@ -4,12 +4,11 @@ import {
 } from 'react-router-dom';
 import Stack from '@mui/material/Stack';
 import Card from '@mui/material/Card';
-import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import Tabs from '@mui/material/Tabs';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import {
-  MdQueueMusic,
-  MdOutlineWbCloudy,
+  MdLibraryMusic,
   MdStarBorder,
 } from 'react-icons/md';
 import BasicMenu from './basic-menu';
@@ -18,11 +17,7 @@ import PlaylistMenu from './playlist-menu';
 const Menu = () => {
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
-  const [tab, setTab] = React.useState('1');
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
-    setTab(newValue);
-  };
+  const [tab, setTab] = useState('1');
 
   useEffect(() => {
     if (location.pathname) {
@@ -31,7 +26,7 @@ const Menu = () => {
   }, [location]);
 
   return (
-    <Stack spacing={2} sx={{ height: '100%' }}>
+    <Stack spacing={1} sx={{ height: '100%' }}>
       <Card sx={{ flex: '0 0 auto', overflowY: 'auto' }}>
         <BasicMenu selectedKeys={selectedKeys} />
       </Card>
@@ -43,41 +38,33 @@ const Menu = () => {
           flexDirection: 'column',
         }}
       >
-        <Tabs
+        <ToggleButtonGroup
+          color="primary"
+          size="small"
           value={tab}
-          onChange={handleTabChange}
-          TabIndicatorProps={{
-            style: { display: 'none' },
+          exclusive
+          onChange={(_, key) => {
+            if (key !== null) {
+              setTab(key);
+            }
+          }}
+          sx={{
+            borderRadius: 0,
           }}
         >
-          <Tab
-            value="1"
-            icon={<MdQueueMusic size={20} />}
-            iconPosition="start"
-            label="歌单"
-            sx={{
-              flex: 1,
-            }}
-          />
-          <Tab
-            value="2"
-            icon={<MdStarBorder size={20} />}
-            iconPosition="start"
-            label="收藏"
-            sx={{
-              flex: 1,
-            }}
-          />
-          <Tab
-            value="3"
-            icon={<MdOutlineWbCloudy size={20} />}
-            iconPosition="start"
-            label="云盘"
-            sx={{
-              flex: 1,
-            }}
-          />
-        </Tabs>
+          <ToggleButton value="1" sx={{ flex: 1, border: 'none', borderRadius: 0 }}>
+            <Stack direction="row" columnGap={1} alignItems="center">
+              <MdLibraryMusic size={20} />
+              歌单
+            </Stack>
+          </ToggleButton>
+          <ToggleButton value="2" sx={{ flex: 1, border: 'none', borderRadius: 0 }}>
+            <Stack direction="row" columnGap={1} alignItems="center">
+              <MdStarBorder size={20} />
+              收藏
+            </Stack>
+          </ToggleButton>
+        </ToggleButtonGroup>
         <Box sx={{ flex: '1 0 0', overflowY: 'auto' }}>
           <PlaylistMenu selectedKeys={selectedKeys} />
         </Box>

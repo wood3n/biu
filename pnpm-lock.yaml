@@ -68,6 +68,7 @@ specifiers:
   react-loader-spinner: ^5.3.4
   react-router: ^6.3.0
   react-router-dom: ~6.4.0
+  react-tabs: ^4.3.0
   react-window: ^1.8.9
   read-pkg: ^5.2.0
   rimraf: ^3.0.2
@@ -110,6 +111,7 @@ dependencies:
   react-loader-spinner: 5.3.4_sfoxds7t5ydpegc3knd667wn6m
   react-router: 6.3.0_react@17.0.2
   react-router-dom: 6.4.0_sfoxds7t5ydpegc3knd667wn6m
+  react-tabs: 4.3.0_react@17.0.2
   react-window: 1.8.9_sfoxds7t5ydpegc3knd667wn6m
   read-pkg: 5.2.0
   simplebar-react: 3.2.3_react@17.0.2
@@ -7901,6 +7903,16 @@ packages:
       react: '>=16.8'
     dependencies:
       '@remix-run/router': 1.0.0
+      react: 17.0.2
+    dev: false
+
+  /react-tabs/4.3.0_react@17.0.2:
+    resolution: {integrity: sha512-2GfoG+f41kiBIIyd3gF+/GRCCYtamC8/2zlAcD8cqQmqI9Q+YVz7fJLHMmU9pXDVYYHpJeCgUSBJju85vu5q8Q==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0-0 || ^18.0.0
+    dependencies:
+      clsx: 1.2.1
+      prop-types: 15.8.1
       react: 17.0.2
     dev: false
 

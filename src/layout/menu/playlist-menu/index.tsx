@@ -101,7 +101,14 @@ const PlaylistMenu = ({
           }) => (sub ? (
             <li key={key}>
               <ul>
-                <ListSubheader>{label}</ListSubheader>
+                <ListSubheader
+                  sx={{
+                    background: '#1E1E1E',
+                    boxShadow: '0 6px 10px rgba(0,0,0,.6)',
+                  }}
+                >
+                  {label}
+                </ListSubheader>
                 {sub.map((child) => (
                   <ListItemButton
                     key={child.key}

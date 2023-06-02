@@ -62,6 +62,7 @@
     "react-loader-spinner": "^5.3.4",
     "react-router": "^6.3.0",
     "react-router-dom": "~6.4.0",
+    "react-tabs": "^4.3.0",
     "react-window": "^1.8.9",
     "read-pkg": "^5.2.0",
     "simplebar-react": "^3.2.3",

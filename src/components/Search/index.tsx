@@ -1,18 +1,63 @@
 import React from 'react';
-import {
-  Spin, Card, Typography, Button, Input, Dropdown,
-} from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useRequest } from 'ahooks';
-import { STORAGE_ITEM, remove } from '@/common/localforage';
 import {
   MdSearch,
   MdDeleteForever,
   MdOutlineClose,
 } from 'react-icons/md';
+import { styled, alpha } from '@mui/material/styles';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import InputBase from '@mui/material/InputBase';
 import { getSearchSuggest } from '@/service';
 import { SEARCH_KEY_MAP } from './constants';
 import styles from './index.module.less';
+
+const StyleSearch = styled('div')(({ theme }) => ({
+  position: 'relative',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginLeft: 0,
+  width: '100%',
+  [theme.breakpoints.up('sm')]: {
+    marginLeft: theme.spacing(1),
+    width: 'auto',
+  },
+}));
+
+const SearchIconWrapper = styled('div')(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: '100%',
+  position: 'absolute',
+  pointerEvents: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: 'inherit',
+  '& .MuiInputBase-input': {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create('width'),
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+      width: '12ch',
+      '&:focus': {
+        width: '20ch',
+      },
+    },
+  },
+}));
 
 /**
  * 全局搜索
@@ -93,56 +138,15 @@ const Search: React.FC = () => {
   });
 
   return (
-    <div onKeyDown={handlePressEnter}>
-      <Dropdown
-        menu={{
-          items: menuItems,
-          defaultOpenKeys: searchSuggestion?.result ? Object.keys(searchSuggestion.result) : [],
-        }}
-        trigger={['click']}
-        getPopupContainer={(node) => node.parentElement!}
-        dropdownRender={(menus) => (
-          <Spin spinning={loadSearchSuggestion}>
-            <Card
-              bordered={false}
-              bodyStyle={{
-                padding: 12,
-                width: 400,
-              }}
-              className={styles.searchDropdown}
-            >
-              <div className={styles.searchHistory}>
-                <Typography.Title level={5} className={styles.title}>
-                  搜索历史
-                  <a onClick={() => remove(STORAGE_ITEM.SEARCH_KEY)} className={styles.delBtn}><MdDeleteForever size={16} /></a>
-                </Typography.Title>
-                <div className={styles.searchKeys}>
-                  <Button size="small">
-                    <span className={styles.tagContent}>
-                      测试
-                      <MdOutlineClose />
-                    </span>
-                  </Button>
-                </div>
-              </div>
-              {searchSuggestion && (
-                <div className={styles.searchAdvice}>
-                  {menus}
-                </div>
-              )}
-            </Card>
-          </Spin>
-        )}
-      >
-        <Input
-          allowClear
-          prefix={<MdSearch />}
-          placeholder="everything"
-          style={{ width: 240, borderRadius: 16 }}
-          onChange={handleSearch}
-        />
-      </Dropdown>
-    </div>
+    <StyleSearch>
+      <SearchIconWrapper>
+        <MdSearch />
+      </SearchIconWrapper>
+      <StyledInputBase
+        placeholder="Search…"
+        inputProps={{ 'aria-label': 'search' }}
+      />
+    </StyleSearch>
   );
 };
 

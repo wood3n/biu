@@ -3,6 +3,7 @@ import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
 import Menu from '@mui/material/Menu';
 import IconButton from '@mui/material/IconButton';
+import Slider from '@mui/material/Slider';
 import {
   MdPlayArrow,
   MdPause,
@@ -21,7 +22,7 @@ import {
   MdOutlinePlaylistPlay,
   MdFastRewind,
   MdFastForward,
-  MdQueueMusic,
+  MdPlaylistPlay,
   MdOutlineFavorite,
   MdPlaylistAdd,
 } from 'react-icons/md';
@@ -33,8 +34,6 @@ import type { Song } from '@service/playlist-track-all';
 import { useRequest, useBoolean } from 'ahooks';
 import { getSongUrlV1 } from '@/service';
 import { MUSIC_LEVEL } from '@/common/constants';
-import VolumeSlider, { VolumeSliderThumb } from './volume-slider';
-import PlayProgressSlider from './play-progress';
 import PlayRate from './play-rate';
 import SongDescription from '../song-description';
 import TooltipButton from '../tooltip-button';
@@ -145,7 +144,7 @@ const PlayTaskBar = () => {
 
   return (
     <Grid container columnSpacing={4} sx={{ height: '80px', padding: '0 24px' }}>
-      <Grid item xs className="playbar-action-left">
+      <Grid item xs={3} className="playbar-action-left">
         {playingSong && (
           <>
             <SongDescription
@@ -165,9 +164,10 @@ const PlayTaskBar = () => {
           <Stack
             direction="row"
             alignItems="center"
+            spacing={2}
           >
             <IconButton size="small" aria-label="previous song">
-              <MdFastRewind size={24} />
+              <MdSkipPrevious size={24} />
             </IconButton>
             <IconButton
               size="small"
@@ -175,13 +175,13 @@ const PlayTaskBar = () => {
               onClick={() => setPaused(!paused)}
             >
               {paused ? (
-                <MdPlayArrow size={34} />
+                <MdPlayArrow size={36} />
               ) : (
-                <MdPause size={34} />
+                <MdPause size={36} />
               )}
             </IconButton>
             <IconButton size="small" aria-label="next song">
-              <MdFastForward size={24} />
+              <MdSkipNext size={24} />
             </IconButton>
           </Stack>
           <Stack
@@ -191,23 +191,25 @@ const PlayTaskBar = () => {
             style={{ flex: 1, width: '100%' }}
           >
             <span className="playbar-progress-dt-span">
-              {formatDuration(current)}
+              {playingSong ? formatDuration(current) : ''}
             </span>
-            <PlayProgressSlider
+            <Slider
+              size="small"
               valueLabelDisplay="auto"
               min={0}
               max={duration}
               step={1}
               value={current}
+              disabled={!playingSong}
               onChange={handleSeek}
             />
             <span className="playbar-progress-dt-span">
-              {playingSong?.dt ? formatDuration(playingSong.dt) : '00:00'}
+              {playingSong?.dt ? formatDuration(playingSong.dt) : ''}
             </span>
           </Stack>
         </Stack>
       </Grid>
-      <Grid item xs className="playbar-action-right">
+      <Grid item xs={3} className="playbar-action-right">
         <Stack direction="row" alignItems="center">
           <IconButton size="small" onClick={toggleMuted}>
             {muted
@@ -218,15 +220,14 @@ const PlayTaskBar = () => {
                   ? <MdVolumeDown size={24} />
                   : <MdVolumeUp size={24} />}
           </IconButton>
-          <VolumeSlider
-            slots={{ thumb: VolumeSliderThumb }}
+          <Slider
             size="small"
             min={0}
             max={1}
             step={0.01}
             value={volume}
             onChange={(_, v) => handleChangeVolume(v as number)}
-            style={{ width: 120 }}
+            style={{ width: 90 }}
           />
         </Stack>
         <Stack direction="row" spacing="12px" alignItems="center">
@@ -235,7 +236,7 @@ const PlayTaskBar = () => {
           </TooltipButton>
           <PlayRate value={rate} onChange={(v) => setRate(v)} />
           <TooltipButton tooltip="播放列表" size="small">
-            <MdQueueMusic size={24} />
+            <MdPlaylistPlay size={24} />
           </TooltipButton>
         </Stack>
       </Grid>

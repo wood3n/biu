@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import NavigationButton from '@/components/navigation';
-import Search from '@/components/Search';
+import Search from '@/components/search';
 import WindowCornerAction from '@/components/window-action';
 import styles from './index.module.less';
 
