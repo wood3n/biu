@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useUser from '@/store/user-atom';
 import {
@@ -8,6 +8,7 @@ import { useAtomValue } from 'jotai';
 import { userPlaylistAtom } from '@/store/user-playlist-atom';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
+import Typography from '@mui/material/Typography';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListSubheader from '@mui/material/ListSubheader';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
@@ -16,13 +17,15 @@ import ListItemText from '@mui/material/ListItemText';
 import OverflowText from '@components/overflow-text';
 import TooltipButton from '@/components/tooltip-button';
 import CreatePlayList from '@components/create-playlist';
+import type { PlaylistInfoType } from '@service/user-playlist';
 import SimpleBar from 'simplebar-react';
+import './index.less';
 
 interface Props {
   selectedKeys: string[];
 }
 
-interface PlaylistMenuType {
+interface PlaylistMenuType extends Omit<PlaylistInfoType, 'name' | 'id'> {
   label: React.ReactNode;
   key: string;
   cover?: string;
@@ -39,6 +42,23 @@ const PlaylistMenu = ({
   const [user] = useUser();
   const userPlaylist = useAtomValue(userPlaylistAtom);
   const [open, setOpen] = React.useState(false);
+
+  useEffect(() => {
+    const observerTarget = document.querySelectorAll('.MuiListSubheader-root');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.target.classList.toggle('sticky-subheader', entry.intersectionRatio < 1);
+      });
+    }, {
+      threshold: [1],
+    });
+
+    if (observerTarget) {
+      observerTarget.forEach((tagret) => {
+        observer.observe(tagret);
+      });
+    }
+  }, []);
 
   const menus: PlaylistMenuType[] = useMemo(() => {
     const playListMenu = [];
@@ -61,10 +81,13 @@ const PlaylistMenu = ({
           </div>
         ),
         key: 'created',
-        sub: createdList?.map(({ id, name, coverImgUrl }) => ({
+        sub: createdList?.map(({
+          id, name, coverImgUrl, trackCount,
+        }) => ({
           label: name,
           key: `/playlist/${id}`,
           cover: coverImgUrl,
+          trackCount,
         })),
       });
     }
@@ -74,10 +97,13 @@ const PlaylistMenu = ({
       playListMenu.push({
         label: '收藏的歌单',
         key: 'collect',
-        sub: collectList?.map(({ id, name, coverImgUrl }) => ({
+        sub: collectList?.map(({
+          id, name, coverImgUrl, trackCount,
+        }) => ({
           label: name,
           key: `/playlist/${id}`,
           cover: coverImgUrl,
+          trackCount,
         })),
       });
     }
@@ -104,7 +130,7 @@ const PlaylistMenu = ({
                 <ListSubheader
                   sx={{
                     background: '#1E1E1E',
-                    boxShadow: '0 6px 10px rgba(0,0,0,.6)',
+                    top: '-1px',
                   }}
                 >
                   {label}
@@ -120,7 +146,18 @@ const PlaylistMenu = ({
                     <ListItemAvatar>
                       <Avatar variant="square" src={child.cover} />
                     </ListItemAvatar>
-                    <ListItemText disableTypography>
+                    <ListItemText
+                      disableTypography
+                      secondary={(
+                        <Typography
+                          variant="body2"
+                          color={(theme) => theme.palette.text.secondary}
+                          paddingTop="4px"
+                        >
+                          {`${child.trackCount}首歌曲`}
+                        </Typography>
+                      )}
+                    >
                       <OverflowText title={child.label}>
                         {child.label}
                       </OverflowText>

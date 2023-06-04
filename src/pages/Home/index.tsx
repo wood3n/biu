@@ -3,20 +3,26 @@ import { useRequest } from 'ahooks';
 import { useNavigate } from 'react-router-dom';
 import ImageList from '@mui/material/ImageList';
 import ImageCard from '@/components/image-card';
-import ListSubheader from '@mui/material/ListSubheader';
-import {
-  Tab, Tabs, TabList, TabPanel,
-} from 'react-tabs';
-import 'react-tabs/style/react-tabs.css';
+import Stack from '@mui/material/Stack';
+import Box from '@mui/material/Box';
+import Chip from '@components/chip';
+import Grow from '@mui/material/Grow';
+import useScrollTrigger from '@mui/material/useScrollTrigger';
+import PageContainer from '@components/page-container';
 import { getRecommendResource, getProgramRecommend, getPersonalizedNewsong } from '@/service';
-import styles from './index.module.less';
 
 /**
  * 主页
  */
 function Home() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState(1);
+  const [selectedTab, setTab] = useState('歌单');
+  const [scrollTarget, setScrollTarget] = useState<HTMLElement | undefined>();
+
+  const trigger = useScrollTrigger({
+    target: scrollTarget,
+    threshold: 10,
+  });
 
   const { data: recommendResource } = useRequest(getRecommendResource);
 
@@ -24,68 +30,77 @@ function Home() {
 
   const { data: personalizedNewsong } = useRequest(getPersonalizedNewsong);
 
+  const data = [
+    {
+      tab: '歌单',
+      list: recommendResource?.recommend?.map(({ id, name, picUrl }) => ({
+        key: id,
+        title: name,
+        imgUrl: picUrl,
+      })) ?? [],
+    },
+    {
+      tab: '音乐',
+      list: personalizedNewsong?.result?.map(({ id, name, picUrl }) => ({
+        key: id,
+        title: name,
+        imgUrl: picUrl,
+      })) ?? [],
+    },
+  ];
+
   return (
-    <>
-      <Tabs selectedIndex={tab} onSelect={(index) => setTab(index)}>
-        <ListSubheader sx={{ background: (theme) => theme.palette.primary.dark }}>
-          <TabList className={styles.pageTabList}>
-            <Tab>歌单</Tab>
-            <Tab>音乐</Tab>
-          </TabList>
-        </ListSubheader>
-        <TabPanel forceRender>
-          <ImageList cols={4} gap={24}>
-            {recommendResource?.recommend?.map(({ id, name, picUrl }) => (
-              <ImageCard
-                key={id}
-                title={name}
-                imgUrl={picUrl}
-                onClick={() => navigate(`/playlist/${id}`)}
-              />
-            )) ?? []}
-          </ImageList>
-        </TabPanel>
-        <TabPanel forceRender>
-          <ImageList cols={4} gap={24}>
-            {personalizedNewsong?.result?.map(({ id, name, picUrl }) => (
-              <ImageCard
-                key={id}
-                title={name}
-                imgUrl={picUrl}
-                onClick={() => navigate(`/playlist/${id}`)}
-              />
-            )) ?? []}
-          </ImageList>
-        </TabPanel>
-      </Tabs>
-      {/* <ListSubheader>
-        <Typography variant="h5" color={(theme) => theme.palette.primary.dark} sx={{ padding: '8px' }}>
-          推荐歌单
-        </Typography>
-      </ListSubheader>
-
-      <ListSubheader>
-        <Typography variant="h5" color={(theme) => theme.palette.primary.dark} sx={{ padding: '8px' }}>
-          最新音乐
-        </Typography>
-      </ListSubheader>
-
-      <ListSubheader>
-        <Typography variant="h5" color={(theme) => theme.palette.primary.dark} sx={{ padding: '8px' }}>
-          推荐播客
-        </Typography>
-      </ListSubheader>
-      <ImageList cols={4} gap={24}>
-        {programRecommend?.programs?.map(({ id, name, coverUrl }) => (
-          <ImageCard
-            key={id}
-            title={name}
-            imgUrl={coverUrl}
-            onClick={() => navigate(`/playlist/${id}`)}
+    <PageContainer scrollableNodeProps={{
+      ref: (node: HTMLDivElement) => {
+        if (node) {
+          setScrollTarget(node as HTMLElement);
+        }
+      },
+    }}
+    >
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          padding: '12px',
+          position: 'sticky',
+          top: 0,
+          boxShadow: trigger ? '0 6px 10px rgba(0,0,0,.6)' : 'none',
+          zIndex: 99999,
+          background: (theme) => theme.palette.primary.dark,
+        }}
+      >
+        {data.map(({ tab }) => (
+          <Chip
+            component="a"
+            key={tab}
+            label={tab}
+            clickable
+            color="primary"
+            variant={selectedTab === tab ? 'filled' : 'outlined'}
+            onClick={() => setTab(tab)}
           />
-        )) ?? []}
-      </ImageList> */}
-    </>
+        ))}
+      </Stack>
+      {data.map(({ tab, list }) => (
+        <Grow key={tab} in={tab === selectedTab}>
+          <Box
+            sx={{ p: '0 12px 12px 12px', display: tab === selectedTab ? 'block' : 'none' }}
+          >
+            <ImageList cols={4} gap={24}>
+              {list.map(({ key, title, imgUrl }) => (
+                <ImageCard
+                  key={key}
+                  title={title}
+                  imgUrl={imgUrl}
+                  onClick={() => navigate(`/playlist/${key}`)}
+                />
+              ))}
+            </ImageList>
+          </Box>
+        </Grow>
+      )) ?? []}
+    </PageContainer>
   );
 }
 

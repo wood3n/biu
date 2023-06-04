@@ -16,7 +16,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Card from '@mui/material/Card';
 import PlayTaskBar from '@/components/playbar';
 import PageLoading from '@components/page-loading';
-import SimpleBar from 'simplebar-react';
 import Header from '../header';
 import Menu from '../menu';
 
@@ -76,9 +75,7 @@ const GridLayout = () => {
           >
             <Header style={{ flex: 0 }} />
             <Box sx={{ flex: '1 0 0', overflowY: 'auto' }}>
-              <SimpleBar style={{ height: '100%' }}>
-                <Outlet />
-              </SimpleBar>
+              <Outlet />
             </Box>
           </Card>
         </Grid>
