@@ -72,7 +72,6 @@ function Home() {
       >
         {data.map(({ tab }) => (
           <Chip
-            component="a"
             key={tab}
             label={tab}
             clickable

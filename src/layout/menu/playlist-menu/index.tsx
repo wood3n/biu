@@ -1,17 +1,20 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useUser from '@/store/user-atom';
 import {
   MdPlaylistAdd,
+  MdPlayCircle,
 } from 'react-icons/md';
 import { useAtomValue } from 'jotai';
 import { userPlaylistAtom } from '@/store/user-playlist-atom';
+import { useTheme } from '@mui/material/styles';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListSubheader from '@mui/material/ListSubheader';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import Avatar from '@mui/material/Avatar';
 import ListItemText from '@mui/material/ListItemText';
 import OverflowText from '@components/overflow-text';
@@ -28,6 +31,7 @@ interface Props {
 interface PlaylistMenuType extends Omit<PlaylistInfoType, 'name' | 'id'> {
   label: React.ReactNode;
   key: string;
+  id?: number;
   cover?: string;
   sub?: PlaylistMenuType[];
 }
@@ -39,9 +43,11 @@ const PlaylistMenu = ({
   selectedKeys,
 }: Props) => {
   const navigate = useNavigate();
+  const globalTheme = useTheme();
   const [user] = useUser();
   const userPlaylist = useAtomValue(userPlaylistAtom);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [hoveredId, setHoverId] = useState<number | null>(null);
 
   useEffect(() => {
     const observerTarget = document.querySelectorAll('.MuiListSubheader-root');
@@ -85,6 +91,7 @@ const PlaylistMenu = ({
           id, name, coverImgUrl, trackCount,
         }) => ({
           label: name,
+          id,
           key: `/playlist/${id}`,
           cover: coverImgUrl,
           trackCount,
@@ -101,6 +108,7 @@ const PlaylistMenu = ({
           id, name, coverImgUrl, trackCount,
         }) => ({
           label: name,
+          id,
           key: `/playlist/${id}`,
           cover: coverImgUrl,
           trackCount,
@@ -142,6 +150,8 @@ const PlaylistMenu = ({
                     onClick={() => {
                       navigate(key);
                     }}
+                    onMouseEnter={() => setHoverId(child.id as number)}
+                    onMouseLeave={() => setHoverId(null)}
                   >
                     <ListItemAvatar>
                       <Avatar variant="square" src={child.cover} />
@@ -157,11 +167,21 @@ const PlaylistMenu = ({
                           {`${child.trackCount}首歌曲`}
                         </Typography>
                       )}
+                      sx={{
+                        paddingRight: '50px',
+                      }}
                     >
                       <OverflowText title={child.label}>
                         {child.label}
                       </OverflowText>
                     </ListItemText>
+                    {hoveredId === child.id && (
+                      <ListItemSecondaryAction>
+                        <TooltipButton tooltip="播放">
+                          <MdPlayCircle color={globalTheme.palette.primary.main} />
+                        </TooltipButton>
+                      </ListItemSecondaryAction>
+                    )}
                   </ListItemButton>
                 ))}
               </ul>
