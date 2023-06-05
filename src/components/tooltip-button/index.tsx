@@ -8,12 +8,12 @@ import { isThenable } from '@/common/utils';
 import { type TooltipProps } from '@mui/material/Tooltip/Tooltip';
 import styles from './index.module.less';
 
-interface Props extends Omit<TooltipProps, 'onClick' | 'title'> {
+interface Props extends Omit<TooltipProps, 'onClick'> {
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
-  tooltip: React.ReactNode;
   onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | ((e: React.MouseEvent<HTMLElement>) => Promise<any>);
   className?: string;
+  tooltipStyle?: React.CSSProperties;
   style?: React.CSSProperties;
 }
 
@@ -22,12 +22,12 @@ interface Props extends Omit<TooltipProps, 'onClick' | 'title'> {
  */
 const TooltipButton = ({
   disabled,
-  tooltip,
   onClick,
   size,
   className,
   style,
   children,
+  tooltipStyle,
   ...props
 }: React.PropsWithChildren<Props>) => {
   const [loading, { setTrue, setFalse }] = useBoolean(false);
@@ -44,7 +44,7 @@ const TooltipButton = ({
   };
 
   return loading ? <TailSpin width={18} height={18} radius="2" /> : (
-    <Tooltip title={tooltip} {...props}>
+    <Tooltip {...props} style={tooltipStyle}>
       <IconButton
         disabled={disabled}
         size={size}

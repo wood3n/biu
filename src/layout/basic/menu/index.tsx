@@ -41,7 +41,7 @@ const SysMenu: React.FC = () => {
           <div>
             创建的歌单
             <TooltipButton
-              tooltip="创建新歌单"
+              title="创建新歌单"
               size="small"
               PopperProps={{
                 disablePortal: true,

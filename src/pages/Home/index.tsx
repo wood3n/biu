@@ -86,7 +86,7 @@ function Home() {
           <Box
             sx={{ p: '0 12px 12px 12px', display: tab === selectedTab ? 'block' : 'none' }}
           >
-            <ImageList cols={4} gap={24}>
+            <ImageList cols={4} gap={12}>
               {list.map(({ key, title, imgUrl }) => (
                 <ImageCard
                   key={key}

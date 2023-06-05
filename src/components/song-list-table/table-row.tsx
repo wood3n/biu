@@ -66,7 +66,7 @@ const StyledTableRow = ({
             ? (
               <TooltipButton
                 size="small"
-                tooltip="播放"
+                title="播放"
                 onClick={() => { setPlayingSong(data) }}
               >
                 <MdPlayArrow size={18} />
@@ -95,11 +95,11 @@ const StyledTableRow = ({
       </StyledTableCell>
       <StyledTableCell style={{ width: 60 }} align="center">
         {likelist.includes(data?.id) ? (
-          <TooltipButton size="small" tooltip="取消喜欢">
+          <TooltipButton size="small" title="取消喜欢">
             <MdOutlineFavorite />
           </TooltipButton>
         ) : (
-          <TooltipButton size="small" tooltip="喜欢">
+          <TooltipButton size="small" title="喜欢">
             <MdOutlineFavoriteBorder />
           </TooltipButton>
         )}

@@ -81,14 +81,14 @@ const Album = () => {
       align: 'center',
       render: (_, record) => (record.id && likelist.includes(record.id) ? (
         <TooltipButton
-          tooltip="取消喜欢"
+          title="取消喜欢"
           onClick={() => haddleLike(record.id, false)}
         >
           <MdFavorite color="red" />
         </TooltipButton>
       ) : (
         <TooltipButton
-          tooltip="喜欢"
+          title="喜欢"
           onClick={() => haddleLike(record.id)}
         >
           <MdFavoriteBorder color="red" />

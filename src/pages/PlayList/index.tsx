@@ -227,13 +227,13 @@ const PlayList: React.FC = () => {
       />
       <div className={styles.playlistAction}>
         <Space size={24}>
-          <TooltipButton tooltip="播放全部" onClick={handlePlayAll}>
+          <TooltipButton title="播放全部" onClick={handlePlayAll}>
             <MdPlayCircle size={64} color="#1fdf64" />
           </TooltipButton>
-          <TooltipButton tooltip="随机播放">
+          <TooltipButton title="随机播放">
             <MdShuffle size={36} />
           </TooltipButton>
-          <TooltipButton tooltip="下载全部">
+          <TooltipButton title="下载全部">
             <MdDownloadForOffline size={36} />
           </TooltipButton>
         </Space>

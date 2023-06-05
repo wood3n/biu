@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   useLocation,
 } from 'react-router-dom';
+import { styled } from '@mui/material/styles';
 import Stack from '@mui/material/Stack';
 import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
@@ -11,8 +12,14 @@ import {
   MdLibraryMusic,
   MdStarBorder,
 } from 'react-icons/md';
-import BasicMenu from './basic-menu';
+import UserCard from './user-card';
 import PlaylistMenu from './playlist-menu';
+
+const StyledToggleButtonGroup = styled(ToggleButtonGroup)(() => ({
+  '& .MuiToggleButtonGroup-grouped.Mui-selected': {
+    'background-color': 'transparent',
+  },
+}));
 
 const Menu = () => {
   const location = useLocation();
@@ -27,8 +34,8 @@ const Menu = () => {
 
   return (
     <Stack spacing={1} sx={{ height: '100%' }}>
-      <Card sx={{ flex: '0 0 auto', overflowY: 'auto' }}>
-        <BasicMenu selectedKeys={selectedKeys} />
+      <Card sx={{ flex: '0 0 auto' }}>
+        <UserCard />
       </Card>
       <Card
         sx={{
@@ -38,7 +45,7 @@ const Menu = () => {
           flexDirection: 'column',
         }}
       >
-        <ToggleButtonGroup
+        <StyledToggleButtonGroup
           color="primary"
           size="small"
           value={tab}
@@ -54,17 +61,17 @@ const Menu = () => {
         >
           <ToggleButton value="1" sx={{ flex: 1, border: 'none', borderRadius: 0 }}>
             <Stack direction="row" columnGap={1} alignItems="center">
-              <MdLibraryMusic size={20} />
+              <MdLibraryMusic size={18} />
               歌单
             </Stack>
           </ToggleButton>
           <ToggleButton value="2" sx={{ flex: 1, border: 'none', borderRadius: 0 }}>
             <Stack direction="row" columnGap={1} alignItems="center">
-              <MdStarBorder size={20} />
+              <MdStarBorder size={18} />
               收藏
             </Stack>
           </ToggleButton>
-        </ToggleButtonGroup>
+        </StyledToggleButtonGroup>
         <Box sx={{ flex: '1 0 0', overflowY: 'auto' }}>
           <PlaylistMenu selectedKeys={selectedKeys} />
         </Box>

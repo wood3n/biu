@@ -2,7 +2,7 @@ import {
   Outlet, Navigate, useLocation,
 } from 'react-router-dom';
 import { useRequest } from 'ahooks';
-import { userAtom } from '@/store/user-atom';
+import useUser from '@/store/user-atom';
 import { likelistAtom } from '@/store/likelist-atom';
 import { useUserPlaylist } from '@/store/user-playlist-atom';
 import { useSetAtom } from 'jotai';
@@ -21,7 +21,7 @@ import Menu from '../menu';
 
 const GridLayout = () => {
   const location = useLocation();
-  const setUser = useSetAtom(userAtom);
+  const [user, setUser] = useUser();
   const setLikelist = useSetAtom(likelistAtom);
   const { refresh } = useUserPlaylist();
 
@@ -61,8 +61,16 @@ const GridLayout = () => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  console.log(user);
+
   return (
-    <Stack spacing={1} sx={{ padding: '8px', height: '100vh' }}>
+    <Stack
+      spacing={1}
+      sx={{
+        padding: '8px',
+        height: '100vh',
+      }}
+    >
       <CssBaseline />
       <Grid container columnSpacing={1} sx={{ flex: 1 }}>
         <Grid item xs={3}>

@@ -85,16 +85,16 @@ const Daily: React.FC = () => {
         </div>
       </div> */}
       <Stack direction="row" spacing="32px">
-        <TooltipButton tooltip="播放全部">
+        <TooltipButton title="播放全部">
           <MdPlayCircle className={styles.playBtn} color="#1fdf64" size={64} />
         </TooltipButton>
-        <TooltipButton tooltip="随机播放">
+        <TooltipButton title="随机播放">
           <MdShuffle size={36} />
         </TooltipButton>
-        <TooltipButton tooltip="创建新歌单">
+        <TooltipButton title="创建新歌单">
           <MdOutlinePlaylistAddCircle size={36} />
         </TooltipButton>
-        <TooltipButton tooltip="下载全部">
+        <TooltipButton title="下载全部">
           <MdDownloadForOffline size={36} />
         </TooltipButton>
       </Stack>

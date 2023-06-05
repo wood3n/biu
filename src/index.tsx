@@ -4,6 +4,7 @@ import { HashRouter, useRoutes } from 'react-router-dom';
 import routes from './routes';
 import ThemeProvider from './store/provider/theme-provider';
 import 'simplebar-react/dist/simplebar.min.css';
+import 'react-tooltip/dist/react-tooltip.css';
 import '@/common/style/global.less';
 
 const App = () => useRoutes(routes);

@@ -29,6 +29,7 @@ module.exports = {
         // https://typescript-eslint.io/rules/indent/#how-to-use
         '@typescript-eslint/indent': ['error', 2],
         'no-unused-expressions': 'off',
+        '@typescript-eslint/no-unused-vars': 'error',
         '@typescript-eslint/no-unused-expressions': 2,
         '@typescript-eslint/consistent-type-imports': [2, { disallowTypeAnnotations: false }],
       },
@@ -59,6 +60,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 0,
     '@typescript-eslint/no-unsafe-argument': 0,
     'space-infix-ops': 1,
+    'import/no-named-default': 0,
     'keyword-spacing': ['error', {
       before: true,
       after: true,

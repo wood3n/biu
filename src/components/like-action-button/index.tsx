@@ -22,10 +22,9 @@ const LikeAction: React.FC<Props> = ({
       size="small"
       disabled={!id}
       onClick={() => (liked ? dislike(id) : like(id))}
-      tooltip={liked ? '取消喜欢' : '喜欢'}
+      title={liked ? '取消喜欢' : '喜欢'}
     >
       {liked ? <MdOutlineFavorite /> : <MdOutlineFavoriteBorder />}
-      <MdOutlineFavorite />
     </TooltipButton>
   );
 };

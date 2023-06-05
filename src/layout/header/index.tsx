@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   MdKeyboardArrowLeft,
   MdKeyboardArrowRight,
@@ -20,12 +21,19 @@ interface Props {
 const Header = ({
   style,
 } : Props) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const noExistHistory = location.key === 'default';
   const [user] = useUser();
 
   return (
     <div className="m-header" style={style}>
       <div className="navigation">
-        <IconButton size="small">
+        <IconButton
+          size="small"
+          disabled={noExistHistory}
+          onClick={() => navigate(-1)}
+        >
           <MdKeyboardArrowLeft />
         </IconButton>
         <IconButton size="small">

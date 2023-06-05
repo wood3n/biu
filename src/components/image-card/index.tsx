@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
+import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import Fade from '@mui/material/Fade';
 import { MdStarBorder, MdOutlinePlayCircleFilled } from 'react-icons/md';
@@ -44,7 +45,7 @@ const ImageCard: React.FC<Props> = ({
           position="top"
           actionIcon={(
             <TooltipButton
-              tooltip="收藏"
+              title="收藏"
               sx={{ color: 'white' }}
             >
               <MdStarBorder />
@@ -78,9 +79,14 @@ const ImageCard: React.FC<Props> = ({
         }}
         actionIcon={(
           <Fade timeout={300} in={hovered}>
-            <IconButton>
-              <MdOutlinePlayCircleFilled size={32} color="#1abc9c" />
-            </IconButton>
+            <Tooltip
+              title="播放"
+              placement="top"
+            >
+              <IconButton>
+                <MdOutlinePlayCircleFilled size={32} color="#1abc9c" />
+              </IconButton>
+            </Tooltip>
           </Fade>
         )}
       />

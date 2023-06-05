@@ -153,7 +153,7 @@ const PlayTaskBar = () => {
               ar={playingSong.ar}
             />
             <LikeAction id={playingSong?.id} />
-            <TooltipButton tooltip="收藏" size="small">
+            <TooltipButton title="收藏" size="small">
               <MdPlaylistAdd size={24} />
             </TooltipButton>
           </>
@@ -231,11 +231,11 @@ const PlayTaskBar = () => {
           />
         </Stack>
         <Stack direction="row" spacing="12px" alignItems="center">
-          <TooltipButton tooltip="单曲循环" size="small">
+          <TooltipButton title="单曲循环" size="small">
             <MdRepeatOne size={24} />
           </TooltipButton>
           <PlayRate value={rate} onChange={(v) => setRate(v)} />
-          <TooltipButton tooltip="播放列表" size="small">
+          <TooltipButton title="播放列表" size="small">
             <MdPlaylistPlay size={24} />
           </TooltipButton>
         </Stack>
