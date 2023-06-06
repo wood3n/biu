@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import NavigationButton from '@/components/navigation';
 import Search from '@/components/search';
 import WindowCornerAction from '@/components/window-action';
 import styles from './index.module.less';
@@ -48,7 +47,6 @@ const PageContainer: React.FC<Props> = ({
     <div className={styles.pageContainer} style={style}>
       <div id="stickyHeader" className={styles.pageHeader} style={headerStyle}>
         <div className={styles.headerLeft}>
-          <NavigationButton />
           <Search />
         </div>
         <div className={styles.headerRight}>

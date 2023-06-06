@@ -66,7 +66,7 @@ function Home() {
           position: 'sticky',
           top: 0,
           boxShadow: trigger ? '0 6px 10px rgba(0,0,0,.6)' : 'none',
-          zIndex: 99999,
+          zIndex: 2,
           background: (theme) => theme.palette.primary.dark,
         }}
       >

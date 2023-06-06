@@ -32,7 +32,7 @@ interface Props {
   trackCount?: number;
 }
 
-const ListItem: React.FC<Props> = ({
+const PlayListItem: React.FC<Props> = ({
   selected,
   onClick,
   title,
@@ -99,4 +99,4 @@ const ListItem: React.FC<Props> = ({
   );
 };
 
-export default ListItem;
+export default PlayListItem;

@@ -29,7 +29,6 @@ module.exports = {
         // https://typescript-eslint.io/rules/indent/#how-to-use
         '@typescript-eslint/indent': ['error', 2],
         'no-unused-expressions': 'off',
-        '@typescript-eslint/no-unused-vars': 'error',
         '@typescript-eslint/no-unused-expressions': 2,
         '@typescript-eslint/consistent-type-imports': [2, { disallowTypeAnnotations: false }],
       },
@@ -41,12 +40,19 @@ module.exports = {
     'no-shadow': 0,
     'no-nested-ternary': 0,
     'no-unused-vars': 'off',
-    '@typescript-eslint/no-unused-vars': 'error',
+    '@typescript-eslint/no-unused-vars': [
+      'error', // or "error"
+      {
+        varsIgnorePattern: '^_',
+        argsIgnorePattern: '^_',
+      },
+    ],
     'max-len': 0,
     indent: 0,
     'no-use-before-define': 0,
     'react/no-unstable-nested-components': 0,
     'react/react-in-jsx-scope': 0,
+    'react/jsx-no-useless-fragment': 0,
     '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/no-var-requires': 0,
     '@typescript-eslint/prefer-namespace-keyword': 0,

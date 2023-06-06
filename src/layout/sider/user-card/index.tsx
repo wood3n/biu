@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
-import CardMedia from '@mui/material/CardMedia';
 import Avatar from '@mui/material/Avatar';
 import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
@@ -28,14 +27,18 @@ const UserCard = () => {
 
   return (
     <>
-      <CardMedia
-        component="img"
-        height="140"
-        image={user?.userInfo?.profile?.backgroundUrl}
-      />
       <div
-        className="user-card-content"
-      >
+        style={{
+          backgroundImage: `url(${user?.userInfo?.profile?.backgroundUrl})`,
+          height: '140px',
+          width: '100%',
+          display: 'block',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'cover',
+        }}
+      />
+      <div className="user-card-content">
         <div
           className="user-avatar"
           onMouseEnter={() => setHovered(true)}
@@ -68,8 +71,19 @@ const UserCard = () => {
         </div>
         <Stack
           direction="row"
+          alignItems="center"
           spacing={2}
-          divider={<Divider orientation="vertical" flexItem />}
+          divider={(
+            <Divider
+              variant="inset"
+              orientation="vertical"
+              flexItem
+              sx={{
+                alignSelf: 'center',
+                height: '18px',
+              }}
+            />
+          )}
         >
           {[
             {

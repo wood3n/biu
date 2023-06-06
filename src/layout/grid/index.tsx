@@ -3,11 +3,18 @@ import {
 } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import useUser from '@/store/user-atom';
+import { userArsAtom } from '@/store/user-ars-atom';
+import { userAlsAtom } from '@/store/user-als-atom';
 import { likelistAtom } from '@/store/likelist-atom';
 import { useUserPlaylist } from '@/store/user-playlist-atom';
 import { useSetAtom } from 'jotai';
 import {
-  getLoginStatus, getUserDetail, getUserSubcount, getLikelist,
+  getLoginStatus,
+  getUserDetail,
+  getUserSubcount,
+  getLikelist,
+  getArtistSublist,
+  getAlbumSublist,
 } from '@/service';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -17,11 +24,13 @@ import Card from '@mui/material/Card';
 import PlayTaskBar from '@/components/playbar';
 import PageLoading from '@components/page-loading';
 import Header from '../header';
-import Menu from '../menu';
+import Menu from '../sider';
 
 const GridLayout = () => {
   const location = useLocation();
-  const [user, setUser] = useUser();
+  const [_user, setUser] = useUser();
+  const setUserArs = useSetAtom(userArsAtom);
+  const setUserAls = useSetAtom(userAlsAtom);
   const setLikelist = useSetAtom(likelistAtom);
   const { refresh } = useUserPlaylist();
 
@@ -39,6 +48,19 @@ const GridLayout = () => {
         const { ids } = await getLikelist({
           uid: loginStatus.profile.userId,
         });
+        // 收藏歌手
+        const { data: ars } = await getArtistSublist();
+        if (ars) {
+          setUserArs(ars);
+        }
+        // 收藏专辑
+        const { data: als } = await getAlbumSublist({
+          limit: 99999,
+          offset: 0,
+        });
+        if (als) {
+          setUserAls(als);
+        }
 
         // 更新用户歌单列表
         refresh(loginStatus.profile.userId);
@@ -60,8 +82,6 @@ const GridLayout = () => {
   if (!data?.data?.profile) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-
-  console.log(user);
 
   return (
     <Stack

@@ -34,7 +34,7 @@ export const useUserPlaylist = () => {
 
   const rm = async (data: PlaylistDeleteRequestData, cb?: VoidFunction) => postPlaylistDelete(data).then(({ code, id }) => {
     if (code === 200 && id) {
-      toast.success('创建成功');
+      toast.success('删除成功');
       cb?.();
     }
   });

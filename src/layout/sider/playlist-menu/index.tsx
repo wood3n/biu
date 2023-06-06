@@ -1,5 +1,5 @@
 import React, {
-  useState, useEffect, useMemo,
+  useState, useEffect, useMemo, useRef,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useUser from '@/store/user-atom';
@@ -14,8 +14,7 @@ import TooltipButton from '@/components/tooltip-button';
 import CreatePlayList from '@components/create-playlist';
 import type { PlaylistInfoType } from '@service/user-playlist';
 import SimpleBar from 'simplebar-react';
-import ListItem from './list-item';
-import './index.less';
+import ListItem from './play-list-item';
 
 interface Props {
   selectedKeys: string[];
@@ -39,24 +38,27 @@ const PlaylistMenu = ({
   const [user] = useUser();
   const userPlaylist = useAtomValue(userPlaylistAtom);
   const [open, setOpen] = useState(false);
-  const observerTargets = document.querySelectorAll('.MuiListSubheader-root');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      entry.target.classList.toggle('sticky-subheader', entry.intersectionRatio < 1);
-    });
-  }, {
-    threshold: [0, 1],
-  });
+  const subheaderRefs = useRef<HTMLElement[]>([]);
 
-  if (observerTargets.length) {
-    observerTargets.forEach((target) => {
-      observer?.observe(target);
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.target.classList.toggle('sticky-subheader', entry.intersectionRatio < 1);
+      });
+    }, {
+      threshold: [1],
     });
-  }
 
-  useEffect(() => () => {
-    observer?.disconnect();
-  }, []);
+    if (subheaderRefs.current.length) {
+      subheaderRefs.current.forEach((target) => {
+        observer?.observe(target);
+      });
+    }
+
+    return () => {
+      observer?.disconnect();
+    };
+  }, [userPlaylist]);
 
   const menus: PlaylistMenuType[] = useMemo(() => {
     const playListMenu = [];
@@ -124,13 +126,18 @@ const PlaylistMenu = ({
         >
           {menus.map(({
             label, sub, key,
-          }) => ((
+          }, i) => ((
             <li key={key}>
               <ul>
                 <ListSubheader
                   sx={{
                     background: '#1E1E1E',
                     top: '-1px',
+                  }}
+                  ref={(el) => {
+                    if (el) {
+                      subheaderRefs.current[i] = el;
+                    }
                   }}
                 >
                   {label}
