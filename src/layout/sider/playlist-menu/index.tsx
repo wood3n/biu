@@ -1,5 +1,5 @@
 import React, {
-  useState, useEffect, useMemo, useRef,
+  useState, useMemo,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useUser from '@/store/user-atom';
@@ -12,6 +12,7 @@ import List from '@mui/material/List';
 import ListSubheader from '@mui/material/ListSubheader';
 import TooltipButton from '@/components/tooltip-button';
 import CreatePlayList from '@components/create-playlist';
+import ScrollObserverTarget from '@components/scroll-observer-target';
 import type { PlaylistInfoType } from '@service/user-playlist';
 import SimpleBar from 'simplebar-react';
 import ListItem from './play-list-item';
@@ -38,27 +39,6 @@ const PlaylistMenu = ({
   const [user] = useUser();
   const userPlaylist = useAtomValue(userPlaylistAtom);
   const [open, setOpen] = useState(false);
-  const subheaderRefs = useRef<HTMLElement[]>([]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        entry.target.classList.toggle('sticky-subheader', entry.intersectionRatio < 1);
-      });
-    }, {
-      threshold: [1],
-    });
-
-    if (subheaderRefs.current.length) {
-      subheaderRefs.current.forEach((target) => {
-        observer?.observe(target);
-      });
-    }
-
-    return () => {
-      observer?.disconnect();
-    };
-  }, [userPlaylist]);
 
   const menus: PlaylistMenuType[] = useMemo(() => {
     const playListMenu = [];
@@ -126,22 +106,21 @@ const PlaylistMenu = ({
         >
           {menus.map(({
             label, sub, key,
-          }, i) => ((
+          }) => ((
             <li key={key}>
               <ul>
                 <ListSubheader
                   sx={{
                     background: '#1E1E1E',
-                    top: '-1px',
                   }}
-                  ref={(el) => {
-                    if (el) {
-                      subheaderRefs.current[i] = el;
-                    }
-                  }}
+                  className="sider-play-list-subheader"
                 >
                   {label}
                 </ListSubheader>
+                <ScrollObserverTarget
+                  deps={userPlaylist}
+                  stickyElSelector=".sider-play-list-subheader"
+                />
                 {sub?.map((child) => (
                   <ListItem
                     key={child.key}

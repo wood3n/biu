@@ -25,7 +25,7 @@ const SongDescription: React.FC<Props> = ({
   const navigate = useNavigate();
 
   return (
-    <Stack direction="row" alignItems="center" spacing={2}>
+    <Stack direction="row" alignItems="center" spacing={2} sx={{ minWidth: 0 }}>
       {picUrl && (
         <Image
           width={50}
@@ -33,7 +33,7 @@ const SongDescription: React.FC<Props> = ({
           src={picUrl}
         />
       )}
-      <Stack spacing="4px">
+      <Stack spacing="4px" sx={{ minWidth: 0 }}>
         <OverflowText title={name}>
           {name}
         </OverflowText>
@@ -41,6 +41,8 @@ const SongDescription: React.FC<Props> = ({
           {ar?.slice(0, 3)?.map<React.ReactNode>(({ id, name: arName }) => (
             <OverflowText
               key={id}
+              variant="caption"
+              color={(theme) => theme.palette.text.secondary}
               className={styles.arLink}
               onClick={() => navigate(`/artist/${id}`)}
               title={arName}
@@ -50,7 +52,7 @@ const SongDescription: React.FC<Props> = ({
             >
               {arName}
             </OverflowText>
-          ))?.reduce((prev, curr) => [prev, '，', curr])}
+          ))?.reduce((prev, curr) => [prev, <>,&nbsp;</>, curr])}
           {ar?.length > 3 && (
             <DropDown menus={ar?.slice(3).map(({ id, name: arName }) => ({
               key: id,

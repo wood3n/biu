@@ -101,8 +101,8 @@ const GridLayout = () => {
             flex: '1 0 0', overflowY: 'auto', display: 'flex', flexDirection: 'column',
           }}
           >
-            <Header style={{ flex: 0 }} />
-            <Box sx={{ flex: '1 0 0', overflowY: 'auto' }}>
+            {/* <Header style={{ flex: 0 }} /> */}
+            <Box id="play-queue-drawer-container" sx={{ flex: '1 0 0', position: 'relative', overflowY: 'auto' }}>
               <Outlet />
             </Box>
           </Card>

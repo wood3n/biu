@@ -63,16 +63,25 @@ interface ChargeInfoList {
   chargeType?: number;
 }
 
+/**
+ * 特权
+ */
 interface Privilege {
   id?: number;
   fee?: number;
   payed?: number;
+  /**
+   * -200无版权
+   */
   st?: number;
   pl?: number;
   dl?: number;
   sp?: number;
   cp?: number;
   subp?: number;
+  /**
+   * 云盘
+   */
   cs?: boolean;
   maxbr?: number;
   fl?: number;
@@ -102,6 +111,11 @@ interface Song {
   pop?: number;
   st?: number;
   rt?: string;
+  /**
+    8、0：免费
+    4：所在专辑需单独付费
+    1：VIP可听
+   */
   fee?: number;
   v?: number;
   crbt?: null;
@@ -144,4 +158,8 @@ interface Song {
   reason?: string;
   privilege?: Privilege;
   alg?: string;
+  /**
+   * 当前播放歌曲
+   */
+  playing?: boolean;
 }

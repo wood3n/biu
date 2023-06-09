@@ -44,7 +44,10 @@ const TooltipButton = ({
   };
 
   return loading ? <TailSpin width={18} height={18} radius="2" /> : (
-    <Tooltip {...props} style={tooltipStyle}>
+    <Tooltip
+      {...props}
+      style={tooltipStyle}
+    >
       <IconButton
         disabled={disabled}
         size={size}

@@ -53,6 +53,10 @@ const UserCard = () => {
                 <MdModeEdit size={16} />
               </TooltipButton>
             )}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
           >
             <Avatar
               src={user?.userInfo?.profile?.avatarUrl}
@@ -62,12 +66,17 @@ const UserCard = () => {
               }}
             />
           </Badge>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Typography>
+              {user?.userInfo?.profile?.nickname}
+            </Typography>
+            {user?.userInfo?.level && (
+              <Chip size="small" label={`Lv${user?.userInfo?.level}`} />
+            )}
+          </Stack>
           {Boolean(user?.userInfo?.profile?.vipType) && (
             <Chip size="small" label="vip" />
           )}
-          <Typography>
-            {user?.userInfo?.profile?.nickname}
-          </Typography>
         </div>
         <Stack
           direction="row"

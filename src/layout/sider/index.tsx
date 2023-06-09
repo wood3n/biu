@@ -20,7 +20,7 @@ import UserCollection from './user-collection';
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(() => ({
   borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
   '& .MuiToggleButtonGroup-grouped.Mui-selected': {
-    'background-color': 'transparent',
+    backgroundColor: 'transparent',
   },
 }));
 

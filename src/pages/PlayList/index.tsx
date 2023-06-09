@@ -84,7 +84,6 @@ const Row = (props: RowProps) => {
             key: 'collect',
             icon: <MdAdd size={14} />,
             popupClassName: styles.playListMenu,
-            // @ts-expect-error children in props
             children: userPlaylist?.map(({ id, name }) => ({
               key: id,
               label: name,

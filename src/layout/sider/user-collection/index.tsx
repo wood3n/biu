@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import Stack from '@mui/material/Stack';
 import List from '@mui/material/List';
 import ImageList from '@mui/material/ImageList';
 import Chip from '@components/chip';
+import ScrollObserverTarget from '@/components/scroll-observer-target';
 import { useUserArs } from '@/store/user-ars-atom';
 import { useUserAls } from '@/store/user-als-atom';
 import SimpleBar from 'simplebar-react';
@@ -13,26 +14,6 @@ const UserCollection = () => {
   const [userArs] = useUserArs();
   const [userAls] = useUserAls();
   const [tab, setTab] = useState('专辑');
-  const subHeaderRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const observerTarget = document.querySelector('#observer-target');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        subHeaderRef.current?.classList.toggle('sticky-subheader', !entry.isIntersecting);
-      });
-    }, {
-      threshold: [0, 1],
-    });
-
-    if (observerTarget) {
-      observer?.observe(observerTarget);
-    }
-
-    return () => {
-      observer?.disconnect();
-    };
-  }, []);
 
   return (
     <SimpleBar style={{ height: '100%' }}>
@@ -46,8 +27,7 @@ const UserCollection = () => {
           background: (theme) => theme.palette.primary.dark,
           zIndex: 2,
         }}
-        id="subheader"
-        ref={subHeaderRef}
+        id="user-collection-chip-tab"
       >
         <Chip
           size="small"
@@ -66,12 +46,8 @@ const UserCollection = () => {
           onClick={() => setTab('歌手')}
         />
       </Stack>
-      <div
-        id="observer-target"
-        style={{
-          position: 'absolute',
-          height: 1,
-        }}
+      <ScrollObserverTarget
+        stickyElSelector="#user-collection-chip-tab"
       />
       {tab === '专辑' ? (
         <List sx={{ padding: 0 }}>

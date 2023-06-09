@@ -7,6 +7,7 @@ const theme = createTheme({
     primary: {
       main: '#1abc9c',
       dark: '#1E1E1E',
+      action: '',
     },
     secondary: {
       main: '#3498db',
@@ -18,6 +19,11 @@ const theme = createTheme({
   },
   shape: {
     borderRadius: 8,
+  },
+  components: {
+    MuiTab: {
+
+    },
   },
 });
 
