@@ -72,9 +72,15 @@ const PlayTaskBar = () => {
 
   useEffect(() => {
     if (playingSong?.id) {
+      setCurrent(0);
+      setDuration(0);
       runAsync();
     }
   }, [playingSong]);
+
+  useEffect(() => {
+    audioElRef.current.loop = (playMode === PLAY_MODE.SINGLE);
+  }, [playMode]);
 
   useEffect(() => {
     if (data?.data?.[0]?.url) {
@@ -159,7 +165,6 @@ const PlayTaskBar = () => {
     <>
       <Grid
         container
-        columnSpacing={4}
         sx={{
           height: '80px', padding: '0 8px',
         }}
@@ -246,10 +251,13 @@ const PlayTaskBar = () => {
                 value={current}
                 disabled={!playingSong}
                 onChange={handleSeek}
-                sx={{ width: '80%' }}
               />
               <span className="playbar-progress-dt-span">
-                {playingSong?.dt ? formatDuration(playingSong.dt) : ''}
+                {duration
+                  ? formatDuration(duration, false)
+                  : playingSong?.dt
+                    ? formatDuration(playingSong.dt, false)
+                    : ''}
               </span>
             </Stack>
           </Stack>

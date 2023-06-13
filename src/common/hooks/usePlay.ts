@@ -58,6 +58,16 @@ const usePlay = () => {
   };
 
   /**
+   * 下一首()
+   */
+  const next = (auto = false) => {
+    // 单曲循环自动
+    if (auto && playMode === PLAY_MODE.LOOP) {
+
+    }
+  };
+
+  /**
    * 添加到下一首播放
    */
   const addNext = (song: Song) => {
