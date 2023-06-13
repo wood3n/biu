@@ -33,6 +33,7 @@ import { ReactComponent as RandomIcon } from '@/assets/icons/random.svg';
 import { ReactComponent as RepeatOneIcon } from '@/assets/icons/repeatone.svg';
 import { formatDuration } from '@/common/utils';
 import { useRequest, useBoolean } from 'ahooks';
+import isNil from 'lodash/isNil';
 import { getSongUrlV1 } from '@/service';
 import { MUSIC_LEVEL, PLAY_MODE } from '@/common/constants';
 import usePlay from '@/common/hooks/usePlay';
@@ -53,7 +54,7 @@ const PlayTaskBar = () => {
   const [volume, setVolume] = useState(0.2);
   const [muted, setMuted] = useState(false);
   const [current, setCurrent] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState<number | null>(null);
   const [paused, setPaused] = useState(true);
   const audioElRef = useRef<HTMLAudioElement>(new Audio());
   const [playlistDrawerVisible, { toggle }] = useBoolean();
@@ -73,7 +74,7 @@ const PlayTaskBar = () => {
   useEffect(() => {
     if (playingSong?.id) {
       setCurrent(0);
-      setDuration(0);
+      setDuration(null);
       runAsync();
     }
   }, [playingSong]);
@@ -241,23 +242,19 @@ const PlayTaskBar = () => {
               style={{ flex: 1, width: '100%' }}
             >
               <span className="playbar-progress-dt-span">
-                {playingSong ? formatDuration(current, false) : ''}
+                {playingSong ? formatDuration(current, false) : '-:--'}
               </span>
               <Slider
                 size="small"
                 min={0}
-                max={duration}
+                max={duration ?? 0}
                 step={1}
                 value={current}
                 disabled={!playingSong}
                 onChange={handleSeek}
               />
               <span className="playbar-progress-dt-span">
-                {duration
-                  ? formatDuration(duration, false)
-                  : playingSong?.dt
-                    ? formatDuration(playingSong.dt, false)
-                    : ''}
+                {isNil(duration) ? '-:--' : formatDuration(duration, false)}
               </span>
             </Stack>
           </Stack>
