@@ -3,24 +3,24 @@ import {
 } from 'react-icons/md';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import TableCell from '@components/table-cell';
+import TableCell from '../table-cell';
 
 const TableHeader = () => (
   <TableHead>
     <TableRow>
-      <TableCell style={{ width: 60 }} align="center">
+      <TableCell sx={{ width: '48px', color: (theme) => theme.palette.text.secondary }} align="center">
         #
       </TableCell>
-      <TableCell>
+      <TableCell sx={{ color: (theme) => theme.palette.text.secondary }}>
         歌曲
       </TableCell>
-      <TableCell>
+      <TableCell sx={{ color: (theme) => theme.palette.text.secondary }}>
         专辑
       </TableCell>
-      <TableCell style={{ maxWidth: 80 }} align="center">
+      <TableCell sx={{ color: (theme) => theme.palette.text.secondary }} align="center">
         <MdAccessTime size={18} />
       </TableCell>
-      <TableCell style={{ width: 60 }} align="center" />
+      <TableCell sx={{ color: (theme) => theme.palette.text.secondary }} align="center" />
     </TableRow>
   </TableHead>
 );

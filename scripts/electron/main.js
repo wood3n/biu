@@ -18,7 +18,7 @@ function createWindow() {
   const win = new BrowserWindow({
     title: 'rate',
     // windows taskbar icon
-    icon: path.resolve(process.cwd(), './public/electron/music.png'),
+    icon: path.resolve(process.cwd(), process.platform === 'darwin' ? './public/electron/music.icns' : './public/electron/music.png'),
     // 先隐藏窗口，等待页面初始化完成后加载
     show: true,
     hasShadow: false,

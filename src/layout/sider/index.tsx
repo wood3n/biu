@@ -37,12 +37,12 @@ const Sider = () => {
 
   return (
     <Stack spacing={1} sx={{ height: '100%' }}>
-      <Card sx={{ flex: '0 0 auto' }}>
+      <Card>
         <UserCard />
       </Card>
       <Card
         sx={{
-          flex: '1 0 0',
+          flex: 1,
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',

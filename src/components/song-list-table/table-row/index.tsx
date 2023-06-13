@@ -39,7 +39,7 @@ const StyledTableRow = ({
       onDoubleClick={() => { play(data) }}
       style={{ cursor: 'pointer' }}
     >
-      <TableCell align="center">
+      <TableCell align="center" sx={{ width: '48px', color: (theme) => theme.palette.text.secondary }}>
         {playingSong?.id === data.id
           ? <AudioSpinner width={16} height={16} wrapperStyle={{ justifyContent: 'center' }} />
           : hovered
@@ -54,11 +54,7 @@ const StyledTableRow = ({
             )
             : index + 1}
       </TableCell>
-      <TableCell
-        style={{
-          maxWidth: 240,
-        }}
-      >
+      <TableCell>
         <SongDescription
           picUrl={data?.al?.picUrl}
           name={data?.name}
@@ -75,10 +71,10 @@ const StyledTableRow = ({
           {data?.al?.name ?? '-'}
         </OverflowText>
       </TableCell>
-      <TableCell style={{ maxWidth: 80 }} align="center">
+      <TableCell sx={{ color: (theme) => theme.palette.text.secondary }} align="center">
         {formatDuration(data?.dt)}
       </TableCell>
-      <TableCell style={{ width: 60 }} align="center">
+      <TableCell align="center">
         {likelist.includes(data?.id) ? (
           <TooltipButton size="small" title="取消喜欢">
             <MdOutlineFavorite />

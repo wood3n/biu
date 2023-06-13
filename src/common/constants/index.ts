@@ -50,10 +50,6 @@ export enum HTTP_RESPONSE {
  */
 export enum PLAY_MODE {
   /**
-   * 顺序播放
-   */
-  ORDER = 0,
-  /**
    * 单曲循环
    */
   SINGLE = 1,
@@ -68,7 +64,6 @@ export enum PLAY_MODE {
 }
 
 export const PLAY_MODE_DESCRIPTION = {
-  [PLAY_MODE.ORDER]: '顺序播放',
   [PLAY_MODE.SINGLE]: '单曲循环',
   [PLAY_MODE.LOOP]: '列表循环',
   [PLAY_MODE.RANDOM]: '随机播放',

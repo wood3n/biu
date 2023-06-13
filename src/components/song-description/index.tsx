@@ -34,7 +34,7 @@ const SongDescription: React.FC<Props> = ({
         />
       )}
       <Stack spacing="4px" sx={{ minWidth: 0 }}>
-        <OverflowText title={name}>
+        <OverflowText PopperProps={{ disablePortal: false }} title={name}>
           {name}
         </OverflowText>
         <div className={styles.ars}>

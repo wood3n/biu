@@ -24,7 +24,7 @@ import Card from '@mui/material/Card';
 import PlayTaskBar from '@/components/playbar';
 import PageLoading from '@components/page-loading';
 import Header from '../header';
-import Menu from '../sider';
+import Sider from '../sider';
 
 const GridLayout = () => {
   const location = useLocation();
@@ -84,36 +84,46 @@ const GridLayout = () => {
   }
 
   return (
-    <Stack
-      spacing={1}
+    <Box
       sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        rowGap: '8px',
         padding: '8px',
+        width: '100vw',
         height: '100vh',
       }}
     >
       <CssBaseline />
-      <Grid container columnSpacing={1} sx={{ flex: 1 }}>
-        <Grid item xs={3}>
-          <Menu />
-        </Grid>
-        <Grid item xs={9} sx={{ display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{
+        display: 'flex', columnGap: '8px', flex: 1, flexWrap: 'nowrap',
+      }}
+      >
+        <Box sx={{ flex: '0 0 300px' }}>
+          <Sider />
+        </Box>
+        {/* minWidth让子元素不会超出flex容器 */}
+        <Box sx={{
+          flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column',
+        }}
+        >
           <Card sx={{
             flex: '1 0 0', overflowY: 'auto', display: 'flex', flexDirection: 'column',
           }}
           >
             {/* <Header style={{ flex: 0 }} /> */}
-            <Box id="play-queue-drawer-container" sx={{ flex: '1 0 0', position: 'relative', overflowY: 'auto' }}>
+            <Box sx={{ flex: '1 0 0', position: 'relative', overflowY: 'auto' }}>
               <Outlet />
             </Box>
           </Card>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
       <Card>
         <Box sx={{ flex: 0 }}>
           <PlayTaskBar />
         </Box>
       </Card>
-    </Stack>
+    </Box>
   );
 };
 

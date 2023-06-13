@@ -13,13 +13,19 @@ import { PLAY_MODE } from '@/common/constants';
  */
 const usePlay = () => {
   const [playQueue, setPlayQueue] = useAtom(playQueueAtom);
-  const [playMode, setPlayMode] = useState<PLAY_MODE>(PLAY_MODE.ORDER);
+  const [playMode, setPlayMode] = useState<PLAY_MODE>(PLAY_MODE.LOOP);
   console.log(playQueue);
 
   /**
    * 修改播放模式
    */
-  const changePlayMode = (mode: PLAY_MODE) => setPlayMode(mode);
+  const changePlayMode = (mode: PLAY_MODE) => {
+    if (mode !== playMode) {
+      setPlayMode(mode);
+    } else {
+      setPlayMode(PLAY_MODE.LOOP);
+    }
+  };
 
   /**
    * 当前播放歌曲

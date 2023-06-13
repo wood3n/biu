@@ -5,7 +5,6 @@ import Home from './pages/home';
 import NotFound from './pages/not-found';
 import UserProfile from './pages/user-profile';
 import BasicLayout from './layout/basic';
-import Daily from './pages/daily';
 import FM from './pages/fm';
 import Search from './pages/search';
 import PlayList from './pages/playlist';
@@ -26,10 +25,6 @@ const routes: RouteObject[] = [
       {
         index: true,
         element: <Home />,
-      },
-      {
-        path: '/daily',
-        element: <Daily />,
       },
       {
         path: '/fm',

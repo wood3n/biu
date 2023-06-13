@@ -1,5 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Stack from '@mui/material/Stack';
+import { useTheme } from '@mui/material/styles';
+import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { toast } from 'react-hot-toast';
 import Menu from '@mui/material/Menu';
@@ -27,10 +29,12 @@ import {
   MdOutlineFavorite,
   MdPlaylistAdd,
 } from 'react-icons/md';
+import { ReactComponent as RandomIcon } from '@/assets/icons/random.svg';
+import { ReactComponent as RepeatOneIcon } from '@/assets/icons/repeatone.svg';
 import { formatDuration } from '@/common/utils';
 import { useRequest, useBoolean } from 'ahooks';
 import { getSongUrlV1 } from '@/service';
-import { MUSIC_LEVEL } from '@/common/constants';
+import { MUSIC_LEVEL, PLAY_MODE } from '@/common/constants';
 import usePlay from '@/common/hooks/usePlay';
 import PlayRate from './play-rate';
 import SongDescription from '../song-description';
@@ -43,7 +47,8 @@ import './index.less';
  * 播放任务栏
  */
 const PlayTaskBar = () => {
-  const { playingSong } = usePlay();
+  const theme = useTheme();
+  const { playingSong, playMode, changePlayMode } = usePlay();
   const [rate, setRate] = useState(1);
   const [volume, setVolume] = useState(0.2);
   const [muted, setMuted] = useState(false);
@@ -152,20 +157,28 @@ const PlayTaskBar = () => {
 
   return (
     <>
-      <Grid container columnSpacing={4} sx={{ height: '80px', padding: '0 24px' }}>
-        <Grid item xs={3} className="playbar-action-left">
+      <Grid
+        container
+        columnSpacing={4}
+        sx={{
+          height: '80px', padding: '0 8px',
+        }}
+      >
+        <Grid
+          item
+          xs={3}
+          sx={{
+            minWidth: 0,
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           {playingSong && (
-            <div style={{ display: 'flex', columnGap: 8, alignItems: 'center' }}>
-              <SongDescription
-                picUrl={playingSong.al?.picUrl}
-                name={playingSong.name}
-                ar={playingSong.ar}
-              />
-              <LikeAction id={playingSong?.id} />
-              <TooltipButton title="收藏" size="small">
-                <MdPlaylistAdd size={24} />
-              </TooltipButton>
-            </div>
+            <SongDescription
+              picUrl={playingSong.al?.picUrl}
+              name={playingSong.name}
+              ar={playingSong.ar}
+            />
           )}
         </Grid>
         <Grid item xs={6}>
@@ -175,7 +188,19 @@ const PlayTaskBar = () => {
               alignItems="center"
               spacing={2}
             >
-              <IconButton size="small" aria-label="previous song">
+              <TooltipButton
+                title="随机播放"
+                placement="top"
+                size="small"
+                onClick={() => changePlayMode(PLAY_MODE.RANDOM)}
+              >
+                <RandomIcon
+                  width={18}
+                  height={18}
+                  fill={playMode === PLAY_MODE.RANDOM ? theme.palette.primary.main : theme.palette.text.secondary}
+                />
+              </TooltipButton>
+              <IconButton size="small">
                 <MdSkipPrevious size={24} />
               </IconButton>
               <IconButton
@@ -188,9 +213,21 @@ const PlayTaskBar = () => {
                   <MdPause size={36} />
                 )}
               </IconButton>
-              <IconButton size="small" aria-label="next song">
+              <IconButton size="small">
                 <MdSkipNext size={24} />
               </IconButton>
+              <TooltipButton
+                title="单曲循环"
+                placement="top"
+                size="small"
+                onClick={() => changePlayMode(PLAY_MODE.SINGLE)}
+              >
+                <RepeatOneIcon
+                  width={18}
+                  height={18}
+                  fill={playMode === PLAY_MODE.SINGLE ? theme.palette.primary.main : theme.palette.text.secondary}
+                />
+              </TooltipButton>
             </Stack>
             <Stack
               direction="row"
@@ -209,6 +246,7 @@ const PlayTaskBar = () => {
                 value={current}
                 disabled={!playingSong}
                 onChange={handleSeek}
+                sx={{ width: '80%' }}
               />
               <span className="playbar-progress-dt-span">
                 {playingSong?.dt ? formatDuration(playingSong.dt) : ''}
@@ -216,7 +254,17 @@ const PlayTaskBar = () => {
             </Stack>
           </Stack>
         </Grid>
-        <Grid item xs={3} className="playbar-action-right">
+        <Grid
+          item
+          xs={3}
+          sx={{
+            minWidth: 0,
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            columnGap: '8px',
+          }}
+        >
           <Stack direction="row" alignItems="center">
             <IconButton size="small" onClick={toggleMuted}>
               {muted
@@ -238,9 +286,6 @@ const PlayTaskBar = () => {
             />
           </Stack>
           <Stack direction="row" spacing="12px" alignItems="center">
-            <TooltipButton title="单曲循环" size="small">
-              <MdRepeatOne size={24} />
-            </TooltipButton>
             <PlayRate value={rate} onChange={handleChangeRate} />
             <TooltipButton
               title="播放列表"
