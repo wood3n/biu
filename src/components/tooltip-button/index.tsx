@@ -43,20 +43,32 @@ const TooltipButton = ({
     });
   };
 
-  return loading ? <TailSpin width={18} height={18} radius="2" /> : (
+  const btnNode = (
+    <IconButton
+      disabled={disabled}
+      size={size}
+      onClick={handleClick}
+      className={classNames(className, styles.button)}
+      style={style}
+    >
+      {children}
+    </IconButton>
+  );
+
+  if (disabled) {
+    return btnNode;
+  }
+
+  if (loading) {
+    return <TailSpin width={18} height={18} radius="2" />;
+  }
+
+  return (
     <Tooltip
       {...props}
       style={tooltipStyle}
     >
-      <IconButton
-        disabled={disabled}
-        size={size}
-        onClick={handleClick}
-        className={classNames(className, styles.button)}
-        style={style}
-      >
-        {children}
-      </IconButton>
+      {btnNode}
     </Tooltip>
   );
 };

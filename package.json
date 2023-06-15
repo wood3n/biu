@@ -1,5 +1,6 @@
 {
   "name": "rate",
+  "productName": "rate",
   "version": "1.0.0",
   "description": "windows music application",
   "license": "MIT",
@@ -46,6 +47,7 @@
     "axios": "^0.27.2",
     "classnames": "^2.3.1",
     "electron-store": "^8.1.0",
+    "electron-tray-window": "^1.2.7",
     "http-server": "^14.1.1",
     "immer": "^10.0.2",
     "jotai": "^2.0.3",

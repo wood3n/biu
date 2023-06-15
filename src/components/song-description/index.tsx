@@ -1,12 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import { MdOutlineMoreHoriz } from 'react-icons/md';
 import type { Ar } from '@/service/recommend-songs';
 import Image from '../image';
 import OverflowText from '../overflow-text';
 import DropDown from '../dropdown';
-import styles from './index.module.less';
 
 interface Props {
   picUrl?: string;
@@ -37,22 +37,24 @@ const SongDescription: React.FC<Props> = ({
         <OverflowText PopperProps={{ disablePortal: false }} title={name}>
           {name}
         </OverflowText>
-        <div className={styles.ars}>
-          {ar?.slice(0, 3)?.map<React.ReactNode>(({ id, name: arName }) => (
-            <OverflowText
-              key={id}
-              variant="caption"
-              color={(theme) => theme.palette.text.secondary}
-              className={styles.arLink}
-              onClick={() => navigate(`/artist/${id}`)}
-              title={arName}
-              style={{
-                maxWidth: 100,
-              }}
-            >
-              {arName}
-            </OverflowText>
-          ))?.reduce((prev, curr) => [prev, <>,&nbsp;</>, curr])}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {ar?.slice(0, 3)?.map<React.ReactNode>(({ id, name: arName }, i) => (
+            <React.Fragment key={id}>
+              {i ? <>,&nbsp;</> : ''}
+              <OverflowText
+                link
+                variant="caption"
+                color={(theme) => theme.palette.text.secondary}
+                onClick={() => navigate(`/artist/${id}`)}
+                title={arName}
+                style={{
+                  maxWidth: 100,
+                }}
+              >
+                {arName}
+              </OverflowText>
+            </React.Fragment>
+          ))}
           {ar?.length > 3 && (
             <DropDown menus={ar?.slice(3).map(({ id, name: arName }) => ({
               key: id,
@@ -63,7 +65,7 @@ const SongDescription: React.FC<Props> = ({
               <MdOutlineMoreHoriz size={18} />
             </DropDown>
           )}
-        </div>
+        </Box>
       </Stack>
     </Stack>
   );

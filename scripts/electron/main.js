@@ -3,7 +3,6 @@ const {
   BrowserWindow,
   nativeImage,
   ipcMain,
-  Menu,
 } = require('electron');
 const path = require('path');
 const Store = require('electron-store');
@@ -18,7 +17,7 @@ function createWindow() {
   const win = new BrowserWindow({
     title: 'rate',
     // windows taskbar icon
-    icon: path.resolve(process.cwd(), process.platform === 'darwin' ? './public/electron/music.icns' : './public/electron/music.png'),
+    icon: path.resolve(process.cwd(), process.platform === 'win32' ? './public/electron/windows_tray.ico' : './public/electron/macos_dock.png'),
     // 先隐藏窗口，等待页面初始化完成后加载
     show: true,
     hasShadow: false,
@@ -40,15 +39,8 @@ function createWindow() {
 
   // MAC dock icon
   if (process.platform === 'darwin') {
-    const dockIcon = nativeImage.createFromPath(path.resolve(process.cwd(), './public/electron/music_dock.png'));
+    const dockIcon = nativeImage.createFromPath(path.resolve(process.cwd(), './public/electron/macos_dock.png'));
     app.dock.setIcon(dockIcon);
-    const dockMenu = Menu.buildFromTemplate([
-      { label: 'Item1', type: 'radio' },
-      { label: 'Item2', type: 'radio' },
-      { label: 'Item3', type: 'radio', checked: true },
-      { label: 'Item4', type: 'radio' },
-    ]);
-    app.dock.setMenu(dockMenu);
   }
 
   // 设置 windows taskbar 图标的操作栏

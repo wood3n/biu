@@ -1,8 +1,8 @@
 const {
   Tray,
   nativeImage,
-  Menu,
 } = require('electron');
+const trayWindow = require('electron-tray-window');
 const path = require('path');
 
 /**
@@ -13,30 +13,23 @@ let tray;
 const createTray = () => {
   // mac
   if (process.platform === 'darwin') {
-    const trayIcon = nativeImage.createFromPath(path.resolve(process.cwd(), './public/electron/musicTemplate.png'));
+    const trayIcon = nativeImage.createFromPath(path.resolve(process.cwd(), './public/electron/mac_trayTemplate.png'));
     trayIcon.setTemplateImage(true);
-    tray = new Tray(trayIcon.resize({ width: 18, height: 18 }));
-    const contextMenu = Menu.buildFromTemplate([
-      { label: 'Item1', type: 'radio' },
-      { label: 'Item2', type: 'radio' },
-      { label: 'Item3', type: 'radio', checked: true },
-      { label: 'Item4', type: 'radio' },
-    ]);
-    tray.setContextMenu(contextMenu);
+    tray = new Tray(trayIcon);
   }
 
   if (process.platform === 'win32') {
-    const trayIcon = nativeImage.createFromPath(path.resolve(process.cwd(), './public/electron/music.png'));
+    const trayIcon = nativeImage.createFromPath(path.resolve(process.cwd(), './public/electron/windows_tray.ico'));
     trayIcon.setTemplateImage(true);
     tray = new Tray(trayIcon);
-    const contextMenu = Menu.buildFromTemplate([
-      { label: 'Item1', type: 'radio' },
-      { label: 'Item2', type: 'radio' },
-      { label: 'Item3', type: 'radio', checked: true },
-      { label: 'Item4', type: 'radio' },
-    ]);
-    tray.setContextMenu(contextMenu);
   }
+
+  trayWindow.setOptions({
+    tray,
+    windowUrl: `file://${path.join(__dirname, './tray.html')}`,
+    width: 280,
+    height: 120,
+  });
 };
 
 module.exports = {

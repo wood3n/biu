@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { produce } from 'immer';
 import { useAtom } from 'jotai';
+import random from 'lodash/random';
 import { playQueueAtom } from '@/store/play-queue-atom';
 import { PLAY_MODE } from '@/common/constants';
 
@@ -14,7 +15,6 @@ import { PLAY_MODE } from '@/common/constants';
 const usePlay = () => {
   const [playQueue, setPlayQueue] = useAtom(playQueueAtom);
   const [playMode, setPlayMode] = useState<PLAY_MODE>(PLAY_MODE.LOOP);
-  console.log(playQueue);
 
   /**
    * 修改播放模式
@@ -26,6 +26,8 @@ const usePlay = () => {
       setPlayMode(PLAY_MODE.LOOP);
     }
   };
+
+  const disabledPlay = Boolean(!playQueue.length);
 
   /**
    * 当前播放歌曲
@@ -58,12 +60,66 @@ const usePlay = () => {
   };
 
   /**
-   * 下一首()
+   * 上一首
    */
-  const next = (auto = false) => {
-    // 单曲循环自动
-    if (auto && playMode === PLAY_MODE.LOOP) {
+  const prev = () => {
+    if (playMode === PLAY_MODE.RANDOM) {
+      randomPlay();
+      return;
+    }
 
+    if (playQueue.length) {
+      setPlayQueue(produce((draft) => {
+        const currentIndex = playQueue.findIndex(({ id }) => id === playingSong?.id);
+        const nextIndex = (currentIndex + playQueue.length - 1) % playQueue.length;
+        const current = draft?.find(({ id }) => id === playingSong?.id);
+        if (current) {
+          current.playing = false;
+        }
+
+        const prevSong = draft[nextIndex];
+        prevSong.playing = true;
+      }));
+    }
+  };
+
+  /**
+   * 随机播放
+   */
+  const randomPlay = () => {
+    setPlayQueue(produce((draft) => {
+      const current = draft?.find(({ id }) => id === playingSong?.id);
+      if (current) {
+        current.playing = false;
+      }
+
+      const randomIndex = random(0, playQueue.length);
+      const nextSong = draft[randomIndex];
+      nextSong.playing = true;
+    }));
+  };
+
+  /**
+   * 下一首
+   */
+  const next = () => {
+    if (playMode === PLAY_MODE.RANDOM) {
+      randomPlay();
+      return;
+    }
+
+    if (playQueue.length) {
+      setPlayQueue(produce((draft) => {
+        const currentIndex = playQueue.findIndex(({ id }) => id === playingSong?.id);
+        const nextIndex = (currentIndex + 1) % playQueue.length;
+        const current = draft?.find(({ id }) => id === playingSong?.id);
+        if (current) {
+          current.playing = false;
+        }
+
+        const nextSong = draft[nextIndex];
+        nextSong.playing = true;
+      }));
     }
   };
 
@@ -101,10 +157,14 @@ const usePlay = () => {
   };
 
   return {
+    disabledPlay,
     playQueue,
     playingSong,
     playMode,
     play,
+    prev,
+    next,
+    randomPlay,
     addNext,
     addPlayQueue,
     changePlayMode,

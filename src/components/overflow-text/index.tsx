@@ -59,6 +59,7 @@ const OverflowText = ({
       placement={placement}
       PopperProps={{
         disablePortal: true,
+        style: { pointerEvents: 'none' },
         ...PopperProps,
       }}
       sx={{
