@@ -2,9 +2,6 @@
 const path = require('path');
 const viteReact = require('@vitejs/plugin-react').default;
 const svgr = require('@svgr/rollup');
-const { viteSingleFile } = require('vite-plugin-singlefile');
-const jotaiDebugLabel = require('jotai/babel/plugin-debug-label').default;
-const jotaiReactRefresh = require('jotai/babel/plugin-react-refresh').default;
 
 /**
  * @param {string} mode developement | production
@@ -17,9 +14,6 @@ module.exports = function getConfig(mode) {
     mode,
     root: path.resolve(projectRootDir, './src'),
     publicDir: path.resolve(projectRootDir, './public/web'),
-    build: {
-      sourcemap: true,
-    },
     plugins: [
       viteReact(),
       // @ts-expect-error ts(2349)
@@ -29,23 +23,7 @@ module.exports = function getConfig(mode) {
           stroke: '#fff',
           color: '#fff',
         },
-        // svgoConfig: {
-        //   plugins: [
-        //     'preset-default',
-        //     'removeUselessStrokeAndFill',
-        //     {
-        //       name: 'removeAttrs',
-        //       params: {
-        //         // remove stroke and fill in path：https://github.com/svg/svgo/issues/440#issuecomment-396329184
-        //         attrs: '*:(stroke|fill):((?!^none$).)*'
-        //       },
-        //     },
-        //   ]
-        // }
       }),
-      mode === 'production' && viteSingleFile(),
-      jotaiDebugLabel,
-      jotaiReactRefresh,
     ].filter(Boolean),
     resolve: {
       alias: {

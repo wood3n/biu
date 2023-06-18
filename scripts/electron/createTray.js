@@ -2,7 +2,6 @@ const {
   Tray,
   nativeImage,
 } = require('electron');
-const trayWindow = require('electron-tray-window');
 const path = require('path');
 
 /**
@@ -23,13 +22,6 @@ const createTray = () => {
     trayIcon.setTemplateImage(true);
     tray = new Tray(trayIcon);
   }
-
-  trayWindow.setOptions({
-    tray,
-    windowUrl: `file://${path.join(__dirname, './tray.html')}`,
-    width: 280,
-    height: 120,
-  });
 };
 
 module.exports = {

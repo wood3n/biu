@@ -27,8 +27,7 @@
   "main": "scripts/electron/main.js",
   "scripts": {
     "start": "node scripts/dev.js",
-    "build:web": "node scripts/build.js",
-    "build": "pnpm build:web && node scripts/electron/electron-build.js",
+    "build": "node scripts/build.js",
     "prepare": "husky install",
     "api": "node scripts/service-generator/index.js"
   },
@@ -90,8 +89,7 @@
     "@typescript-eslint/parser": "^5.53.0",
     "consola": "^2.15.3",
     "electron": "v20.1.1",
-    "electron-builder": "^23.3.3",
-    "electronmon": "^2.0.2",
+    "electron-builder": "^24.4.0",
     "eslint": "^8.35.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-import-resolver-typescript": "^3.5.3",

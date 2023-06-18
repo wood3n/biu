@@ -6,7 +6,7 @@ const prettier = require('prettier');
 const upperFirst = require('lodash/upperFirst');
 const apiData = require('./api.json');
 
-// api 方法生成
+// neteasecloudmusic api 生成工具
 (async () => {
   const getMethodSuffix = (pathname) => pathname.split('/').filter((v) => v).reduce((item, next) => `${upperFirst(item)}${upperFirst(next)}`);
 

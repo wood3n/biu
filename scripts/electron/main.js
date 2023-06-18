@@ -34,6 +34,7 @@ function createWindow() {
     frame: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
     },
   });
 
@@ -112,18 +113,21 @@ app.whenReady().then(() => {
   createTray();
 
   createWindow();
+});
 
-  app.on('activate', () => {
-    // 只有当应用程序激活后没有可见窗口时，才能创建新的浏览器窗口，macOS 设定
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
-  });
+app.on('activate', () => {
+  // 只有当应用程序激活后没有可见窗口时，才能创建新的浏览器窗口，macOS 设定
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
 });
 
 app.on('window-all-closed', () => {
+  win = null;
   // 如果用户不是在 macOS(darwin) 上运行程序，调用 quit 方法在所有窗口关闭后结束 electron 进程
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
+
+app.disableHardwareAcceleration();
