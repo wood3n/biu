@@ -96,32 +96,26 @@ const GridLayout = () => {
     >
       <CssBaseline />
       <Box sx={{
-        display: 'flex', columnGap: '8px', flex: 1, flexWrap: 'nowrap',
+        display: 'flex', columnGap: '8px', flex: '1 1 auto', flexWrap: 'nowrap',
       }}
       >
-        <Box sx={{ flex: '0 0 300px' }}>
+        <Box sx={{ flex: '0 0 20%' }}>
           <Sider />
         </Box>
         {/* minWidth让子元素不会超出flex容器 */}
-        <Box sx={{
-          flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column',
-        }}
-        >
-          <Card sx={{
-            flex: '1 0 0', overflowY: 'auto', display: 'flex', flexDirection: 'column',
+        <Card
+          sx={{
+            flex: '1 1 auto',
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
           }}
-          >
-            {/* <Header style={{ flex: 0 }} /> */}
-            <Box sx={{ flex: '1 0 0', position: 'relative', overflowY: 'auto' }}>
-              <Outlet />
-            </Box>
-          </Card>
-        </Box>
+        >
+          <Outlet />
+        </Card>
       </Box>
       <Card>
-        <Box sx={{ flex: 0 }}>
-          <PlayTaskBar />
-        </Box>
+        <PlayTaskBar />
       </Card>
     </Box>
   );

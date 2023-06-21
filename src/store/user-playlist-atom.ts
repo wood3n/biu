@@ -8,6 +8,7 @@ import {
 } from '@/service';
 import { type PlaylistCreateRequestData } from '@service/playlist-create';
 import { type PlaylistDeleteRequestData } from '@service/playlist-delete';
+import useUser from './user-atom';
 
 /**
  * 用户歌单列表
@@ -15,7 +16,12 @@ import { type PlaylistDeleteRequestData } from '@service/playlist-delete';
 export const userPlaylistAtom = atom<PlaylistInfoType[] | undefined>(undefined);
 
 export const useUserPlaylist = () => {
+  const [user] = useUser();
   const [playlist, setPlaylist] = useAtom(userPlaylistAtom);
+
+  const selfCreatedPlaylist = playlist?.filter((item) => item.creator?.userId === user?.userInfo?.profile?.userId);
+
+  const collectedPlaylist = playlist?.filter((item) => item.creator?.userId !== user?.userInfo?.profile?.userId);
 
   const refresh = async (uid: number) => getUserPlaylist({
     uid,
@@ -39,8 +45,16 @@ export const useUserPlaylist = () => {
     }
   });
 
+  const isCollect = (pid?: number | string) => !!collectedPlaylist?.find((item) => item.id === Number(pid));
+
+  const isCreated = (pid?: number | string) => !!selfCreatedPlaylist?.find((item) => item.id === Number(pid));
+
   return {
     playlist,
+    selfCreatedPlaylist,
+    collectedPlaylist,
+    isCreated,
+    isCollect,
     add,
     rm,
     refresh,

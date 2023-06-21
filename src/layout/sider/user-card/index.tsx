@@ -33,7 +33,7 @@ const UserCard = () => {
           height: '140px',
           width: '100%',
           display: 'block',
-          backgroundPosition: 'center',
+          backgroundPosition: 'center top',
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover',
         }}

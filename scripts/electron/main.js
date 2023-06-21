@@ -10,21 +10,20 @@ const { createTray } = require('./createTray');
 
 const store = new Store();
 
+let mainWindow;
+
 function createWindow() {
-  const minWidth = 960;
-  const minHeight = 600;
   // 初始打开窗口的配置项
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     title: 'rate',
     // windows taskbar icon
     icon: path.resolve(process.cwd(), process.platform === 'win32' ? './public/electron/windows_tray.ico' : './public/electron/macos_dock.png'),
-    // 先隐藏窗口，等待页面初始化完成后加载
     show: true,
     hasShadow: false,
-    width: minWidth,
-    height: minHeight,
-    minWidth,
-    minHeight,
+    width: 1560,
+    height: 900,
+    minWidth: 1180,
+    minHeight: 800,
     resizable: true,
     // 跟随 web 页面大小
     useContentSize: true,
@@ -32,6 +31,9 @@ function createWindow() {
     center: true,
     // 无边框
     frame: true,
+    // macos不需要设置frame-false，只需要titleBarStyle即可隐藏边框，因此也不需要自定义窗口操作
+    titleBarStyle: 'customButtonsOnHover',
+    trafficLightPosition: { x: 14, y: 14 },
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
@@ -71,41 +73,44 @@ function createWindow() {
   //   },
   // ]);
 
-  // 注册 ipc 事件
-  ipcMain.handle('isMaximized', () => {
-    console.log(win.isMaximized());
-    return win.isMaximized();
-  });
-  ipcMain.handle('close-window', () => {
-    app.quit();
-  });
-  ipcMain.handle('min-win', () => win.minimize());
-  ipcMain.handle('resize', () => {
-    const bounds = store.get('bounds');
-    if (win.isMaximized()) {
-      win.setBounds(bounds || { width: 800, height: 800 });
-    } else {
-      store.set('bounds', bounds);
-      win.maximize();
-    }
-  });
-
-  // https://www.electronjs.org/docs/latest/api/app#appispackaged-readonly
-  if (app.isPackaged) {
-    win.loadFile('./dist/web/index.html');
-  } else {
-    win.loadURL(`http://localhost:${process.env.PORT}/`);
-    win.webContents.openDevTools({
-      mode: 'right',
+  // windows自定义窗口
+  if (process.platform === 'win32') {
+    ipcMain.handle('isMaximized', () => {
+      console.log(mainWindow.isMaximized());
+      return mainWindow.isMaximized();
+    });
+    ipcMain.handle('close-window', () => {
+      app.quit();
+    });
+    ipcMain.handle('min-win', () => mainWindow.minimize());
+    ipcMain.handle('resize', () => {
+      const bounds = store.get('bounds');
+      if (mainWindow.isMaximized()) {
+        mainWindow.setBounds(bounds || { width: 800, height: 800 });
+      } else {
+        store.set('bounds', bounds);
+        mainWindow.maximize();
+      }
     });
   }
 
-  // 隐藏拖动区域右键菜单
-  // https://github.com/electron/electron/issues/26726#issuecomment-1143199775
-  const WM_INITMENU = 0x0116;
-  win.hookWindowMessage(WM_INITMENU, () => {
-    win.setEnabled(false);
-    win.setEnabled(true);
+  // https://www.electronjs.org/docs/latest/api/app#appispackaged-readonly
+  if (app.isPackaged) {
+    mainWindow.loadFile('./dist/web/index.html');
+  } else {
+    mainWindow.loadURL(`http://localhost:${process.env.PORT}/`);
+    mainWindow.webContents.openDevTools({
+      mode: 'bottom',
+    });
+  }
+
+  mainWindow.on('close', (event) => {
+    if (app.quitting) {
+      mainWindow = null;
+    } else {
+      event.preventDefault();
+      mainWindow.hide();
+    }
   });
 }
 
@@ -115,15 +120,11 @@ app.whenReady().then(() => {
   createWindow();
 });
 
-app.on('activate', () => {
-  // 只有当应用程序激活后没有可见窗口时，才能创建新的浏览器窗口，macOS 设定
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
+app.on('activate', () => mainWindow.show());
+
+app.on('before-quit', () => { app.quitting = true });
 
 app.on('window-all-closed', () => {
-  win = null;
   // 如果用户不是在 macOS(darwin) 上运行程序，调用 quit 方法在所有窗口关闭后结束 electron 进程
   if (process.platform !== 'darwin') {
     app.quit();

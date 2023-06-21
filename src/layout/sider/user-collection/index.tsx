@@ -47,6 +47,7 @@ const UserCollection = () => {
         />
       </Stack>
       <ScrollObserverTarget
+        searchInParent
         stickyElSelector="#user-collection-chip-tab"
       />
       {tab === '专辑' ? (

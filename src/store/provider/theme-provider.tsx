@@ -6,7 +6,8 @@ const theme = createTheme({
     mode: 'dark',
     primary: {
       main: '#1abc9c',
-      dark: '#1E1E1E',
+      dark: '#00bcd4',
+      // dark: 'linear-gradient(90deg, hsla(168, 76%, 42%, 1) 0%, hsla(204, 70%, 53%, 1) 99%)',
     },
     secondary: {
       main: '#3498db',
@@ -21,7 +22,6 @@ const theme = createTheme({
   },
   components: {
     MuiTab: {
-
     },
   },
 });

@@ -53,8 +53,8 @@ const baseConfig = require('./vite/vite.config');
 
   const handleTerminationSignal = (signal) => {
     process.on(signal, () => {
-      if (!child.killed) {
-        child.kill(signal);
+      if (!electronProcess.killed) {
+        electronProcess.kill(signal);
       }
     });
   };

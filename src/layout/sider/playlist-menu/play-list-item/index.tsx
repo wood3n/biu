@@ -66,6 +66,9 @@ const PlayListItem: React.FC<Props> = ({
       )}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      sx={{
+        borderRadius: (theme) => `${theme.shape.borderRadius}px`,
+      }}
     >
       <ListItemAvatar
         sx={{

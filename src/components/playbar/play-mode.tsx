@@ -66,6 +66,7 @@ const PlayModeToggle: React.FC<Props> = ({
         <ToggleButtonGroup
           color="primary"
           size="small"
+          exclusive
           value={value}
           onChange={handleChange}
         >

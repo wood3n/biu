@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
-import {
-  Space, Input, Table, Typography, Dropdown, Button,
-} from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import PageContainer from '@/components/PageContainer';
+import { useTheme } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
+import SongListTable from '@/components/song-list-table';
+import PageContainer from '@/components/page-container';
 import PlaylistDescription from '@/components/PlaylistDescription';
 import { getPlaylistDetail, getPlaylistTrackAll, postSongOrderUpdate } from '@/service';
-import type { Song } from '@service/playlist-track-all';
 import TooltipButton from '@/components/tooltip-button';
 import SongDescription from '@/components/song-description';
 import TableDurationIcon from '@components/TableDurationIcon';
+import Image from '@/components/image';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { userPlaylistAtom } from '@/store/user-playlist-atom';
+import { useUserPlaylist } from '@/store/user-playlist-atom';
 import { playQueueAtom } from '@/store/play-queue-atom';
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
@@ -37,92 +40,22 @@ import {
   MdFileDownload,
   MdShare,
   MdFavoriteBorder,
+  MdStar,
+  MdStarOutline,
+  MdEditSquare,
 } from 'react-icons/md';
 import { formatDuration } from '@/common/utils';
 import styles from './index.module.less';
-
-interface RowProps extends React.HTMLAttributes<HTMLTableRowElement> {
-  'data-row-key': string;
-}
-
-const Row = (props: RowProps) => {
-  const userPlaylist = useAtomValue(userPlaylistAtom);
-  const {
-    attributes, listeners, setNodeRef, transform, transition, isDragging,
-  } = useSortable({
-    id: props['data-row-key'],
-  });
-
-  const style: React.CSSProperties = {
-    ...props.style,
-    transform: CSS.Transform.toString(transform && { ...transform, scaleY: 1 }),
-    transition,
-    ...(isDragging ? { position: 'relative', zIndex: 9999 } : {}),
-  };
-
-  return (
-    <Dropdown
-      menu={{
-        items: [
-          {
-            label: '立即播放',
-            key: 'play',
-            icon: <MdPlayCircle size={14} />,
-          },
-          {
-            label: '下一首播放',
-            key: 'playnext',
-            icon: <MdSkipNext size={14} />,
-          },
-          {
-            label: '标记为喜欢',
-            key: 'like',
-            icon: <MdFavoriteBorder size={14} />,
-          },
-          {
-            label: '收藏',
-            key: 'collect',
-            icon: <MdAdd size={14} />,
-            popupClassName: styles.playListMenu,
-            children: userPlaylist?.map(({ id, name }) => ({
-              key: id,
-              label: name,
-              icon: <MdQueueMusic />,
-            })) ?? [],
-          },
-          {
-            label: '下载',
-            key: 'download',
-            icon: <MdFileDownload size={14} />,
-          },
-          {
-            label: '分享',
-            key: 'share',
-            icon: <MdShare size={14} />,
-            children: [
-              {
-                label: '微信',
-                key: 'wechat',
-              },
-            ],
-          },
-        ],
-      }}
-      trigger={['contextMenu']}
-    >
-      <tr {...props} ref={setNodeRef} style={style} {...attributes} {...listeners} />
-    </Dropdown>
-  );
-};
 
 /**
  * 歌单歌曲列表
  */
 const PlayList: React.FC = () => {
   const { pid } = useParams();
+  const theme = useTheme();
   const navigate = useNavigate();
   // 设置播放队列
-  const setPlayQueue = useSetAtom(playQueueAtom);
+  const { isCollect, isCreated } = useUserPlaylist();
   const [dataSource, setDataSource] = useState<Song[]>([]);
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
@@ -134,14 +67,14 @@ const PlayList: React.FC = () => {
 
   // 歌单详情
   const { data: playListDetailRes, loading: fetchingPlaylistDetail } = useRequest(() => getPlaylistDetail({
-    id: pid,
+    id: Number(pid),
   }), {
     refreshDeps: [pid],
   });
 
   // 歌单歌曲详情列表
   const { loading: fetchingPlaylistTrack } = useRequest(() => getPlaylistTrackAll({
-    id: pid,
+    id: Number(pid),
     limit: 9999,
     offset: 0,
   }), {
@@ -174,94 +107,64 @@ const PlayList: React.FC = () => {
     }
   };
 
-  const handlePlayAll = () => {
-    setPlayQueue(dataSource);
-  };
-
-  const columns: ColumnsType<Song> = [
-    {
-      title: '#',
-      dataIndex: 'index',
-      width: 10,
-      align: 'center',
-      render: (_, __, index) => index + 1,
-    },
-    {
-      title: '歌曲',
-      dataIndex: 'picUrl',
-      render: (_, record) => (
-        <SongDescription
-          picUrl={record?.al?.picUrl}
-          name={record?.name}
-          ar={record?.ar}
-        />
-      ),
-    },
-    {
-      title: '专辑',
-      width: 320,
-      dataIndex: 'al',
-      render: (_, record) => (
-        <Typography.Text ellipsis={{ tooltip: record?.al?.name }} style={{ maxWidth: 160 }}>
-          {record?.al?.id ? (
-            <Button type="link" onClick={() => navigate(`/album/${record?.al?.id}`)}>{record?.al?.name}</Button>
-          ) : <span>{record?.al?.name ?? '-'}</span>}
-        </Typography.Text>
-      ),
-    },
-    {
-      title: <TableDurationIcon />,
-      width: 88,
-      align: 'center',
-      dataIndex: 'dt',
-      className: styles.dragHidden,
-      render: (v) => formatDuration(v),
-    },
-  ];
-
   return (
-    <PageContainer loading={fetchingPlaylistDetail}>
-      <PlaylistDescription
-        {...playListDetailRes?.playlist}
-      />
-      <div className={styles.playlistAction}>
-        <Space size={24}>
-          <TooltipButton title="播放全部" onClick={handlePlayAll}>
-            <MdPlayCircle size={64} color="#1fdf64" />
-          </TooltipButton>
-          <TooltipButton title="随机播放">
-            <MdShuffle size={36} />
-          </TooltipButton>
-          <TooltipButton title="下载全部">
-            <MdDownloadForOffline size={36} />
-          </TooltipButton>
-        </Space>
-        <Input prefix={<MdOutlineSearch />} placeholder="搜索歌曲" style={{ width: 220 }} />
-      </div>
-      <DndContext onDragEnd={onDragEnd} sensors={sensors}>
-        <SortableContext
-          items={dataSource.map((i) => i.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          <Table<Song>
-            loading={fetchingPlaylistTrack}
-            columns={columns}
-            dataSource={dataSource}
-            rowClassName={styles.tableRow}
-            rowKey="id"
-            components={{
-              body: {
-                row: Row,
-              },
-            }}
-            pagination={false}
-            onRow={(record) => ({
-              // 双击播放
-              onDoubleClick: () => {},
-            })}
+    <PageContainer>
+      <Box sx={{ padding: '12px' }}>
+        <Box sx={{ padding: '24px', display: 'flex', columnGap: 2 }}>
+          <Image
+            src={playListDetailRes?.playlist?.coverImgUrl}
+            width={160}
+            height={160}
           />
-        </SortableContext>
-      </DndContext>
+          <Stack spacing={2}>
+            <Stack sx={{ flex: 1 }} spacing={2}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="h5">{playListDetailRes?.playlist?.name}</Typography>
+                {isCreated(pid) && (
+                  <TooltipButton size="small" title="修改歌单信息">
+                    <MdEditSquare size={14} color={theme.palette.text.secondary} />
+                  </TooltipButton>
+                )}
+              </Box>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: (theme) => theme.palette.text.secondary,
+                }}
+              >
+                {playListDetailRes?.playlist?.description}
+              </Typography>
+              {playListDetailRes?.playlist?.trackCount && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: (theme) => theme.palette.text.secondary,
+                  }}
+                >
+                  {playListDetailRes?.playlist?.trackCount}
+                  {' '}
+                  首歌曲
+                </Typography>
+              )}
+            </Stack>
+            <Stack direction="row" spacing={2}>
+              <Button variant="contained" startIcon={<MdPlayCircle />}>播放</Button>
+              {!isCreated(pid) && (
+                <Button
+                  variant="outlined"
+                  startIcon={isCollect(pid) ? <MdStar /> : <MdStarOutline />}
+                >
+                  {isCollect(pid) ? '取消收藏' : '收藏'}
+                </Button>
+              )}
+            </Stack>
+          </Stack>
+        </Box>
+        {/* <TooltipButton title="播放" onClick={() => data && addPlayQueue(data, true)}>
+          <MdPlayCircle color="#1fdf64" size={48} />
+        </TooltipButton> */}
+        <SongListTable loading={fetchingPlaylistTrack} data={dataSource} />
+      </Box>
     </PageContainer>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 
 interface Props {
+  searchInParent?: boolean;
   stickyElSelector: string;
   deps?: React.DependencyList;
 }
@@ -9,6 +10,7 @@ interface Props {
  * 滚动子元素添加box-shadow
  */
 const ScrollObserverTarget = ({
+  searchInParent,
   stickyElSelector,
   deps = [],
 }: Props) => {
@@ -16,7 +18,7 @@ const ScrollObserverTarget = ({
     const observerTargets = document.querySelectorAll('.scroll-observer-target');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        const subheader = entry.target.parentElement?.querySelector(stickyElSelector);
+        const subheader = searchInParent ? entry.target.parentElement?.querySelector(stickyElSelector) : document.querySelector(stickyElSelector);
         subheader?.classList.toggle('sticky-subheader', !entry.isIntersecting);
       });
     }, {

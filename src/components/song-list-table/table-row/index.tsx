@@ -5,6 +5,7 @@ import {
   MdOutlineFavoriteBorder,
   MdOutlineFavorite,
   MdPlayArrow,
+  MdOutlineInfo,
 } from 'react-icons/md';
 import { useLikelist } from '@/store/likelist-atom';
 import { formatDuration } from '@/common/utils';
@@ -28,6 +29,8 @@ const StyledTableRow = ({
   const { playingSong, play } = usePlay();
   const [hovered, setHover] = useState(false);
   const { likelist, refresh } = useLikelist();
+  // 无版权禁止播放
+  const canPlay = !data?.noCopyrightRcmd;
 
   return (
     <TableRow
@@ -37,19 +40,34 @@ const StyledTableRow = ({
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onDoubleClick={() => { play(data) }}
-      style={{ cursor: 'pointer' }}
+      sx={{
+        cursor: 'pointer',
+      }}
     >
-      <TableCell align="center" sx={{ width: '48px', color: (theme) => theme.palette.text.secondary }}>
+      <TableCell
+        align="center"
+        sx={{
+          width: '48px',
+          color: (theme) => theme.palette.text.secondary,
+          borderTopLeftRadius: (theme) => theme.shape.borderRadius,
+          borderBottomLeftRadius: (theme) => theme.shape.borderRadius,
+        }}
+      >
         {playingSong?.id === data.id
           ? <AudioSpinner width={16} height={16} wrapperStyle={{ justifyContent: 'center' }} />
           : hovered
             ? (
               <TooltipButton
+                placement="top"
                 size="small"
-                title="播放"
+                title={canPlay ? '播放' : data?.noCopyrightRcmd?.typeDesc ?? '无法播放'}
                 onClick={() => { play(data) }}
+                PopperProps={{
+                  disablePortal: true,
+                  style: { pointerEvents: 'none' },
+                }}
               >
-                <MdPlayArrow size={18} />
+                {canPlay ? <MdPlayArrow size={18} /> : <MdOutlineInfo size={18} />}
               </TooltipButton>
             )
             : index + 1}
@@ -59,6 +77,7 @@ const StyledTableRow = ({
           picUrl={data?.al?.picUrl}
           name={data?.name}
           ar={data?.ar}
+          noCopyrightRcmd={data?.noCopyrightRcmd}
         />
       </TableCell>
       <TableCell>
@@ -67,6 +86,7 @@ const StyledTableRow = ({
           color={(theme) => theme.palette.text.secondary}
           title={data?.al?.name}
           onClick={() => navigate(`/album/${data?.id}`)}
+          sx={{ maxWidth: 180 }}
         >
           {data?.al?.name ?? '-'}
         </OverflowText>
@@ -74,7 +94,13 @@ const StyledTableRow = ({
       <TableCell sx={{ color: (theme) => theme.palette.text.secondary }} align="center">
         {formatDuration(data?.dt)}
       </TableCell>
-      <TableCell align="center">
+      <TableCell
+        align="center"
+        sx={{
+          borderTopRightRadius: (theme) => theme.shape.borderRadius,
+          borderBottomRightRadius: (theme) => theme.shape.borderRadius,
+        }}
+      >
         {likelist.includes(data?.id) ? (
           <TooltipButton size="small" title="取消喜欢">
             <MdOutlineFavorite />

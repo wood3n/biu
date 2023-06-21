@@ -38,6 +38,8 @@ const usePlay = () => {
    * 播放所选歌曲
    */
   const play = (song: Song) => {
+    // 无版权等不可播放
+    if (song.noCopyrightRcmd) return;
     if (song.id === playingSong?.id) return;
 
     setPlayQueue(produce((draft) => {

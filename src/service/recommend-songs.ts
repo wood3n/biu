@@ -127,7 +127,7 @@ export interface RecommendReasons {
 }
 
 export interface DayRecommendData {
-  dailySongs: DailySong[];
+  dailySongs: Song[];
   recommendReasons: RecommendReasons[];
 }
 

@@ -39,6 +39,7 @@ const OverflowText = ({
   children,
   className,
   style,
+  sx,
   paragraph,
   onClick,
   variant,
@@ -69,12 +70,18 @@ const OverflowText = ({
       {link ? (
         <HoverLink
           // @ts-expect-error
-          component="button"
+          component="div"
           underline="none"
           variant={variant}
           color={color}
           onClick={onClick}
           ref={textElementRef as React.MutableRefObject<HTMLAnchorElement>}
+          sx={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            ...sx,
+          }}
           className={className}
           style={style}
         >
@@ -88,6 +95,7 @@ const OverflowText = ({
           variant={variant}
           paragraph={paragraph}
           color={color}
+          sx={sx}
           className={className}
           style={style}
         >

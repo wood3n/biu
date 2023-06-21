@@ -50,6 +50,7 @@ function Home() {
       icon: <MdToday size={18} />,
       component: (
         <Daily
+          loading={loading}
           data={recommendDailySongs?.data?.dailySongs?.filter(({ fee }) => fee === MUSIC_FEE.FREE || fee === MUSIC_FEE.FREE_EX
            || (user?.userInfo?.profile?.vipType && fee === MUSIC_FEE.VIP))}
         />
@@ -76,58 +77,30 @@ function Home() {
   ];
 
   return (
-    <PageContainer>
-      <Tabs
-        value={selectedTab}
-        onChange={(_, v) => setTab(v)}
-        TabIndicatorProps={{
-          style: { display: 'none' },
-        }}
-        sx={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 2,
-          background: (theme) => theme.palette.primary.dark,
-        }}
-        id="home-chip-tab"
-      >
-        {data.map(({ tab, icon }) => (
-          <Tab
-            key={tab}
-            icon={icon}
-            iconPosition="start"
-            value={tab}
-            label={tab}
-            sx={{
-              minHeight: '54px',
-            }}
-          />
-        ))}
-      </Tabs>
-      {/* <Stack
-        direction="row"
-        spacing={1}
-        sx={{
-          padding: '12px',
-          position: 'sticky',
-          top: 0,
-          zIndex: 2,
-          background: (theme) => theme.palette.primary.dark,
-        }}
-        id="home-chip-tab"
-      >
-        {data.map(({ tab }) => (
-          <Chip
-            key={tab}
-            label={tab}
-            clickable
-            color="primary"
-            variant={selectedTab === tab ? 'filled' : 'outlined'}
-            onClick={() => setTab(tab)}
-          />
-        ))}
-      </Stack> */}
-      <ScrollObserverTarget stickyElSelector="#home-chip-tab" />
+    <PageContainer
+      extra={(
+        <Tabs
+          value={selectedTab}
+          onChange={(_, v) => setTab(v)}
+          TabIndicatorProps={{
+            style: { display: 'none' },
+          }}
+        >
+          {data.map(({ tab, icon }) => (
+            <Tab
+              key={tab}
+              icon={icon}
+              iconPosition="start"
+              value={tab}
+              label={tab}
+              sx={{
+                minHeight: '42px',
+              }}
+            />
+          ))}
+        </Tabs>
+      )}
+    >
       {data.map(({ tab, imgList, component }) => (
         <Grow key={tab} in={tab === selectedTab}>
           <Box

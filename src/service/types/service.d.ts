@@ -148,11 +148,17 @@ interface Song {
   songJumpInfo?: null;
   entertainmentTags?: null;
   single?: number;
-  noCopyrightRcmd?: null;
+  /**
+   * null 表示可以播，非空表示无法播放
+   */
+  noCopyrightRcmd?: NoCopyrightRcmd;
   rtype?: number;
   rurl?: null;
   mst?: number;
   cp?: number;
+  /**
+   * mv id
+   */
   mv?: number;
   publishTime?: number;
   reason?: string;
@@ -162,4 +168,12 @@ interface Song {
    * 当前播放歌曲
    */
   playing?: boolean;
+}
+
+interface NoCopyrightRcmd {
+    type?:           number;
+    typeDesc?:       string;
+    songId?:         null;
+    thirdPartySong?: null;
+    expInfo?:        null;
 }

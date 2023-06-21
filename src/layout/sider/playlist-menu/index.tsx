@@ -118,6 +118,7 @@ const PlaylistMenu = ({
                   {label}
                 </ListSubheader>
                 <ScrollObserverTarget
+                  searchInParent
                   deps={userPlaylist}
                   stickyElSelector=".sider-play-list-subheader"
                 />

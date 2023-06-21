@@ -12,6 +12,7 @@ interface Props {
   picUrl?: string;
   name?: string;
   ar: Ar[];
+  noCopyrightRcmd?: NoCopyrightRcmd;
 }
 
 /**
@@ -21,6 +22,7 @@ const SongDescription: React.FC<Props> = ({
   picUrl,
   name,
   ar,
+  noCopyrightRcmd,
 }) => {
   const navigate = useNavigate();
 
@@ -34,7 +36,14 @@ const SongDescription: React.FC<Props> = ({
         />
       )}
       <Stack spacing="4px" sx={{ minWidth: 0 }}>
-        <OverflowText PopperProps={{ disablePortal: false }} title={name}>
+        <OverflowText
+          PopperProps={{ disablePortal: false }}
+          title={name}
+          sx={{
+            maxWidth: 220,
+            color: (theme) => (noCopyrightRcmd ? theme.palette.text.secondary : theme.palette.text.primary),
+          }}
+        >
           {name}
         </OverflowText>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -47,8 +56,9 @@ const SongDescription: React.FC<Props> = ({
                 color={(theme) => theme.palette.text.secondary}
                 onClick={() => navigate(`/artist/${id}`)}
                 title={arName}
-                style={{
-                  maxWidth: 100,
+                sx={{
+                  maxWidth: ar.length > 1 ? 90 : undefined,
+                  minWidth: 0,
                 }}
               >
                 {arName}
