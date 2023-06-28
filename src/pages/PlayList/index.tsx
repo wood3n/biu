@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
-import { useTheme } from '@mui/material/styles';
+import { useTheme, styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
+import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Paper from '@mui/material/Paper';
-import Card from '@mui/material/Card';
+import Avatar from '@mui/material/Avatar';
+import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
+import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Fade from '@mui/material/Fade';
@@ -31,10 +34,17 @@ import {
 import { download } from '@/common/utils';
 import PlayListSkeleton from './skeleton';
 
+const StyledChip = styled(Chip)(({ theme }) => ({
+  maxWidth: 'auto',
+  background: 'none',
+  width: 'auto',
+}));
+
 /**
  * 歌单歌曲列表
  */
 const PlayList: React.FC = () => {
+  const navigate = useNavigate();
   const { pid } = useParams();
   const theme = useTheme();
   const { addPlayQueue } = usePlay();
@@ -143,7 +153,12 @@ const PlayList: React.FC = () => {
       </Box> */}
       <Box sx={{ padding: '8px' }}>
         {fetchingPlaylistDetail ? <PlayListSkeleton /> : (
-          <Box ref={titleNodeRef} sx={{ padding: '16px', display: 'flex', columnGap: 2 }}>
+          <Box
+            ref={titleNodeRef}
+            sx={{
+              padding: '16px', display: 'flex', alignItems: 'center', columnGap: 2,
+            }}
+          >
             <Image
               src={playListDetailRes?.playlist?.coverImgUrl}
               width={200}
@@ -159,29 +174,84 @@ const PlayList: React.FC = () => {
                     </TooltipButton>
                   )}
                 </Box>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Chip
+                    avatar={(
+                      <Avatar
+                        alt={playListDetailRes?.playlist?.creator?.nickname}
+                        src={playListDetailRes?.playlist?.creator?.avatarUrl}
+                      />
+                    )}
+                    label={(
+                      <Link
+                        underline="hover"
+                        onClick={() => navigate(`/profile/${playListDetailRes?.playlist?.creator?.userId}`)}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        {playListDetailRes?.playlist?.creator?.nickname}
+                      </Link>
+                    )}
+                    sx={{
+                      maxWidth: 'max-content',
+                      width: 'auto',
+                      background: 'none',
+                      '& .MuiChip-avatar': {
+                        margin: 0,
+                      },
+                      '& .MuiChip-label': {
+                        fontSize: 'initial',
+                      },
+                    }}
+                  />
+                  {playListDetailRes?.playlist?.trackCount && (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: (theme) => theme.palette.text.secondary,
+                      }}
+                    >
+                      {playListDetailRes?.playlist?.trackCount}
+                      {' '}
+                      首歌曲
+                    </Typography>
+                  )}
+                </Stack>
+                {playListDetailRes?.playlist?.tags?.length && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      color: (theme) => theme.palette.text.secondary,
+                      fontSize: (theme) => theme.typography.body2.fontSize,
+                    }}
+                  >
+                    <span>标签：</span>
+                    <Breadcrumbs maxItems={5} aria-label="breadcrumb">
+                      {playListDetailRes.playlist.tags.map((tag) => (
+                        <Link
+                          key={tag}
+                          underline="hover"
+                          fontSize="normal"
+                          sx={{ cursor: 'pointer' }}
+                        >
+                          {tag}
+                        </Link>
+                      ))}
+                    </Breadcrumbs>
+                  </Box>
+                )}
                 <MultilineOverflowText
                   variant="body2"
                   lines={2}
                   sx={{
+                    maxWidth: '80%',
                     color: (theme) => theme.palette.text.secondary,
                   }}
                 >
                   {playListDetailRes?.playlist?.description}
                 </MultilineOverflowText>
-                {playListDetailRes?.playlist?.trackCount && (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: (theme) => theme.palette.text.secondary,
-                    }}
-                  >
-                    {playListDetailRes?.playlist?.trackCount}
-                    {' '}
-                    首歌曲
-                  </Typography>
-                )}
               </Stack>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              {/* <Stack direction="row" alignContent="center" spacing={2}>
                 <Button
                   sx={{ '&:hover': { backgroundColor: '#00bcd4' } }}
                   variant="contained"
@@ -190,44 +260,46 @@ const PlayList: React.FC = () => {
                 >
                   播放
                 </Button>
-                {/* <Stack direction="row" spacing={2}>
-                  <Button
-                    sx={{ '&:hover': { backgroundColor: '#00bcd4' } }}
-                    variant="contained"
-                    startIcon={<MdPlayCircle />}
-                    onClick={handlePlayAll}
-                  >
-                    播放
-                  </Button>
-                  {!isCreated(pid) && (
-                    <Button
-                      variant="outlined"
-                      startIcon={isCollect(pid) ? <MdStar /> : <MdStarOutline />}
-                      onClick={handleCollect}
-                    >
-                      {isCollect(pid) ? '取消收藏' : '收藏'}
-                    </Button>
-                  )}
-                </Stack> */}
-                <Stack direction="row" spacing={2}>
-                  <TooltipButton
-                    title={isCollect(pid) ? '取消收藏' : '收藏'}
-                    onClick={handleCollect}
-                  >
-                    {isCollect(pid) ? <MdStar color={theme.palette.primary.main} /> : <MdStarOutline />}
-                  </TooltipButton>
-                  <TooltipButton
-                    title="下载全部"
-                    onClick={() => download(songList)}
-                  >
-                    <MdCloudDownload />
-                  </TooltipButton>
-                </Stack>
-
-              </Box>
+                <TooltipButton
+                  title={isCollect(pid) ? '取消收藏' : '收藏'}
+                  onClick={handleCollect}
+                >
+                  {isCollect(pid) ? <MdStar color={theme.palette.primary.main} /> : <MdStarOutline />}
+                </TooltipButton>
+                <TooltipButton
+                  title="下载全部"
+                  onClick={() => download(songList)}
+                >
+                  <MdCloudDownload color={theme.palette.text.secondary} />
+                </TooltipButton>
+              </Stack> */}
             </Stack>
           </Box>
         )}
+        <Box sx={{ padding: '16px' }}>
+          <Stack direction="row" alignContent="center" spacing={2}>
+            <Button
+              sx={{ '&:hover': { backgroundColor: '#00bcd4' } }}
+              variant="contained"
+              startIcon={<MdPlayArrow />}
+              onClick={handlePlayAll}
+            >
+              播放
+            </Button>
+            <TooltipButton
+              title={isCollect(pid) ? '取消收藏' : '收藏'}
+              onClick={handleCollect}
+            >
+              {isCollect(pid) ? <MdStar color={theme.palette.primary.main} /> : <MdStarOutline />}
+            </TooltipButton>
+            <TooltipButton
+              title="下载全部"
+              onClick={() => download(songList)}
+            >
+              <MdCloudDownload color={theme.palette.text.secondary} />
+            </TooltipButton>
+          </Stack>
+        </Box>
         <SongListTable loading={fetchingPlaylistTrack} data={songList} />
       </Box>
     </PageContainer>

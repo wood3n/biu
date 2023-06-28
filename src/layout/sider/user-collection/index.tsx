@@ -2,13 +2,20 @@ import { useState } from 'react';
 import Stack from '@mui/material/Stack';
 import List from '@mui/material/List';
 import ImageList from '@mui/material/ImageList';
-import Chip from '@components/chip';
+import Chip from '@mui/material/Chip';
+import { styled } from '@mui/material/styles';
 import ScrollObserverTarget from '@/components/scroll-observer-target';
 import { useUserArs } from '@/store/user-ars-atom';
 import { useUserAls } from '@/store/user-als-atom';
 import SimpleBar from 'simplebar-react';
 import AlbumListItem from './album-list-item';
 import ArtistListItem from './artist-list-item';
+
+const StyledChip = styled(Chip)(({ theme }) => ({
+  '&.MuiChip-filled:hover': {
+    backgroundColor: theme.palette.primary.main,
+  },
+}));
 
 const UserCollection = () => {
   const [userArs] = useUserArs();
@@ -29,7 +36,7 @@ const UserCollection = () => {
         }}
         id="user-collection-chip-tab"
       >
-        <Chip
+        <StyledChip
           size="small"
           label="专辑"
           clickable
@@ -37,7 +44,7 @@ const UserCollection = () => {
           variant={tab === '专辑' ? 'filled' : 'outlined'}
           onClick={() => setTab('专辑')}
         />
-        <Chip
+        <StyledChip
           size="small"
           label="歌手"
           clickable

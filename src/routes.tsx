@@ -31,7 +31,7 @@ const routes: RouteObject[] = [
         element: <FM />,
       },
       {
-        path: '/profile',
+        path: '/profile/:id',
         element: <UserProfile />,
       },
       {
