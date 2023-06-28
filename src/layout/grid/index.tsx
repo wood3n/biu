@@ -17,13 +17,9 @@ import {
   getAlbumSublist,
 } from '@/service';
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Stack from '@mui/material/Stack';
-import CssBaseline from '@mui/material/CssBaseline';
 import Card from '@mui/material/Card';
 import PlayTaskBar from '@/components/playbar';
 import PageLoading from '@components/page-loading';
-import Header from '../header';
 import Sider from '../sider';
 
 const GridLayout = () => {
@@ -94,7 +90,6 @@ const GridLayout = () => {
         height: '100vh',
       }}
     >
-      <CssBaseline />
       <Box sx={{
         display: 'flex', columnGap: '8px', flex: '1 1 auto', flexWrap: 'nowrap',
       }}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Stack from '@mui/material/Stack';
 import List from '@mui/material/List';
 import ImageList from '@mui/material/ImageList';
@@ -24,7 +24,7 @@ const UserCollection = () => {
           position: 'sticky',
           top: 0,
           padding: '12px 16px',
-          background: (theme) => theme.palette.primary.dark,
+          background: '#1E1E1E',
           zIndex: 2,
         }}
         id="user-collection-chip-tab"

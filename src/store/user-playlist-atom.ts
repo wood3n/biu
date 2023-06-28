@@ -5,6 +5,7 @@ import {
   getUserPlaylist,
   postPlaylistCreate,
   postPlaylistDelete,
+  getPlaylistSubscribe,
 } from '@/service';
 import { type PlaylistCreateRequestData } from '@service/playlist-create';
 import { type PlaylistDeleteRequestData } from '@service/playlist-delete';
@@ -31,6 +32,7 @@ export const useUserPlaylist = () => {
     setPlaylist(playlist);
   });
 
+  // 创建歌单
   const add = async (data: PlaylistCreateRequestData, cb?: VoidFunction) => postPlaylistCreate(data).then(({ code, id }) => {
     if (code === 200 && id) {
       toast.success('创建成功');
@@ -38,9 +40,31 @@ export const useUserPlaylist = () => {
     }
   });
 
+  // 删除歌单
   const rm = async (data: PlaylistDeleteRequestData, cb?: VoidFunction) => postPlaylistDelete(data).then(({ code, id }) => {
     if (code === 200 && id) {
       toast.success('删除成功');
+      cb?.();
+    }
+  });
+
+  // 收藏歌单
+  const collect = (id?: number | string, cb?: VoidFunction) => getPlaylistSubscribe({
+    id,
+    t: 1,
+  }).then(({ code, id }) => {
+    if (code === 200 && id) {
+      toast.success('收藏成功');
+      cb?.();
+    }
+  });
+
+  const cancelCollect = (id?: number | string, cb?: VoidFunction) => getPlaylistSubscribe({
+    id,
+    t: 2,
+  }).then(({ code, id }) => {
+    if (code === 200 && id) {
+      toast.success('已取消收藏');
       cb?.();
     }
   });
@@ -58,5 +82,7 @@ export const useUserPlaylist = () => {
     add,
     rm,
     refresh,
+    collect,
+    cancelCollect,
   };
 };

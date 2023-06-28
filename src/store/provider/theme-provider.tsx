@@ -1,4 +1,5 @@
 import React from 'react';
+import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider as MUIThemeProvider, createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
@@ -6,8 +7,7 @@ const theme = createTheme({
     mode: 'dark',
     primary: {
       main: '#1abc9c',
-      dark: '#00bcd4',
-      // dark: 'linear-gradient(90deg, hsla(168, 76%, 42%, 1) 0%, hsla(204, 70%, 53%, 1) 99%)',
+      // dark: '#1E1E1E',
     },
     secondary: {
       main: '#3498db',
@@ -30,6 +30,7 @@ const ThemeProvider = ({ children }: React.PropsWithChildren) => (
   <MUIThemeProvider
     theme={theme}
   >
+    <CssBaseline />
     {children}
   </MUIThemeProvider>
 );

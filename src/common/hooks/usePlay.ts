@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { produce } from 'immer';
 import { useAtom } from 'jotai';
 import random from 'lodash/random';
+import uniqBy from 'lodash/uniqBy';
 import { playQueueAtom } from '@/store/play-queue-atom';
 import { PLAY_MODE } from '@/common/constants';
 
@@ -145,17 +146,18 @@ const usePlay = () => {
    * 添加歌曲到播放列表或替换播放列表
    */
   const addPlayQueue = (songList: Song[], clear: boolean = false) => {
-    if (clear) {
-      setPlayQueue(produce(songList, (draft) => {
-        const first = draft[0];
-        first.playing = true;
-      }));
-    } else {
-      setPlayQueue([
-        ...playQueue,
-        ...songList,
-      ]);
-    }
+    const newPlayQueue = clear ? songList : uniqBy([
+      ...playQueue,
+      ...songList,
+    ], 'id');
+
+    setPlayQueue(newPlayQueue.map((song, i) => {
+      const playIndex = playMode === PLAY_MODE.RANDOM ? random(0, songList.length) : 0;
+      return i === playIndex ? {
+        ...song,
+        playing: true,
+      } : song;
+    }));
   };
 
   return {

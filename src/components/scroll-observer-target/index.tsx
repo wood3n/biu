@@ -4,6 +4,7 @@ interface Props {
   searchInParent?: boolean;
   stickyElSelector: string;
   deps?: React.DependencyList;
+  id?: string;
 }
 
 /**
@@ -13,6 +14,7 @@ const ScrollObserverTarget = ({
   searchInParent,
   stickyElSelector,
   deps = [],
+  id,
 }: Props) => {
   useEffect(() => {
     const observerTargets = document.querySelectorAll('.scroll-observer-target');
@@ -38,6 +40,7 @@ const ScrollObserverTarget = ({
 
   return (
     <div
+      id={id}
       className="scroll-observer-target"
       style={{
         position: 'absolute',

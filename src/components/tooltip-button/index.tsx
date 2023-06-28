@@ -65,6 +65,11 @@ const TooltipButton = ({
 
   return (
     <Tooltip
+      placement="top"
+      PopperProps={{
+        disablePortal: true,
+        style: { pointerEvents: 'none' },
+      }}
       {...props}
       style={tooltipStyle}
     >

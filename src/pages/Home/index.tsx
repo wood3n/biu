@@ -78,7 +78,7 @@ function Home() {
 
   return (
     <PageContainer
-      extra={(
+      left={(
         <Tabs
           value={selectedTab}
           onChange={(_, v) => setTab(v)}

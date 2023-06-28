@@ -9,8 +9,8 @@ interface Props {
   src?: string;
   mask?: React.ReactNode;
   showMask?: boolean;
-  width?: number | string;
-  height?: number| string;
+  width?: number;
+  height?: number;
   fallback?: JSX.Element | null;
   style?: React.CSSProperties;
 }
@@ -19,8 +19,8 @@ const Image = ({
   src,
   mask,
   showMask,
-  width,
-  height,
+  width = 48,
+  height = 48,
   fallback,
   style,
 }: Props) => {
@@ -38,10 +38,17 @@ const Image = ({
         width={width}
         height={height}
         src={src || ''}
-        loader={<CircularProgress size={12} />}
+        loader={(
+          <div
+            className="image-process-fallback"
+            style={{ width, height, borderRadius: theme.shape.borderRadius }}
+          >
+            <CircularProgress size={width * 0.3} />
+          </div>
+        )}
         unloader={fallback || (
-          <div className="image-error-fallback" style={{ width, height, borderRadius: theme.shape.borderRadius }}>
-            <BsMusicNoteBeamed size={24} />
+          <div className="image-process-fallback" style={{ width, height, borderRadius: theme.shape.borderRadius }}>
+            <BsMusicNoteBeamed size={width * 0.5} />
           </div>
         )}
         loading="lazy"

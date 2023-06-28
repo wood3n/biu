@@ -1,7 +1,7 @@
 import request from './request';
 
 export interface PlaylistSubscribeRequestParams {
-  id: string | undefined;
+  id: string | number | undefined;
   t: number | undefined;
 }
 

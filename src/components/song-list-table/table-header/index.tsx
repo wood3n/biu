@@ -6,7 +6,7 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '../table-cell';
 
 const TableHeader = () => (
-  <TableHead>
+  <TableHead sx={{ marginBottom: '8px' }}>
     <TableRow>
       <TableCell sx={{ width: '48px', color: (theme) => theme.palette.text.secondary }} align="center">
         #
@@ -14,13 +14,13 @@ const TableHeader = () => (
       <TableCell sx={{ color: (theme) => theme.palette.text.secondary }}>
         歌曲
       </TableCell>
+      {/* <TableCell sx={{ width: '48px', color: (theme) => theme.palette.text.secondary }} align="center" /> */}
       <TableCell sx={{ color: (theme) => theme.palette.text.secondary }}>
         专辑
       </TableCell>
       <TableCell sx={{ color: (theme) => theme.palette.text.secondary }} align="center">
         <MdAccessTime size={18} />
       </TableCell>
-      <TableCell sx={{ color: (theme) => theme.palette.text.secondary }} align="center" />
     </TableRow>
   </TableHead>
 );

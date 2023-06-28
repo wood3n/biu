@@ -53,6 +53,7 @@ const PlayListItem: React.FC<Props> = ({
           title="播放歌单"
           PopperProps={{
             disablePortal: true,
+            style: { pointerEvents: 'none' },
           }}
         >
           <IconButton

@@ -9,6 +9,7 @@ import {
 } from 'react-icons/md';
 import { useLikelist } from '@/store/likelist-atom';
 import { formatDuration } from '@/common/utils';
+import { useTheme } from '@mui/material/styles';
 import TableRow from '@mui/material/TableRow';
 import { Audio as AudioSpinner } from 'react-loader-spinner';
 import SongDescription from '@components/song-description';
@@ -25,10 +26,12 @@ const StyledTableRow = ({
   index,
   data,
 }: Props) => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const { playingSong, play } = usePlay();
   const [hovered, setHover] = useState(false);
   const { likelist, refresh } = useLikelist();
+  const isLiked = likelist.includes(data?.id);
   // 无版权禁止播放
   const canPlay = !data?.noCopyrightRcmd;
 
@@ -72,33 +75,31 @@ const StyledTableRow = ({
             )
             : index + 1}
       </TableCell>
-      <TableCell>
+      <TableCell
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <SongDescription
           picUrl={data?.al?.picUrl}
           name={data?.name}
           ar={data?.ar}
           noCopyrightRcmd={data?.noCopyrightRcmd}
         />
+        <span style={{ width: '48px' }}>
+          {hovered && (
+            <TooltipButton size="small" title={isLiked ? '取消喜欢' : '喜欢'}>
+              {isLiked ? <MdOutlineFavorite size={16} color={theme.palette.primary.main} /> : <MdOutlineFavoriteBorder size={16} />}
+            </TooltipButton>
+          )}
+        </span>
       </TableCell>
-      <TableCell>
-        <OverflowText
-          link
-          color={(theme) => theme.palette.text.secondary}
-          title={data?.al?.name}
-          onClick={() => navigate(`/album/${data?.id}`)}
-          sx={{ maxWidth: 180 }}
-        >
-          {data?.al?.name ?? '-'}
-        </OverflowText>
-      </TableCell>
-      <TableCell sx={{ color: (theme) => theme.palette.text.secondary }} align="center">
-        {formatDuration(data?.dt)}
-      </TableCell>
-      <TableCell
+      {/* <TableCell
         align="center"
         sx={{
-          borderTopRightRadius: (theme) => theme.shape.borderRadius,
-          borderBottomRightRadius: (theme) => theme.shape.borderRadius,
+          width: '48px',
         }}
       >
         {likelist.includes(data?.id) ? (
@@ -110,6 +111,27 @@ const StyledTableRow = ({
             <MdOutlineFavoriteBorder />
           </TooltipButton>
         )}
+      </TableCell> */}
+      <TableCell>
+        <OverflowText
+          link
+          color={(theme) => theme.palette.text.secondary}
+          title={data?.al?.name}
+          onClick={() => navigate(`/album/${data?.id}`)}
+          sx={{ maxWidth: 180 }}
+        >
+          {data?.al?.name ?? '-'}
+        </OverflowText>
+      </TableCell>
+      <TableCell
+        sx={{
+          color: (theme) => theme.palette.text.secondary,
+          borderTopRightRadius: (theme) => theme.shape.borderRadius,
+          borderBottomRightRadius: (theme) => theme.shape.borderRadius,
+        }}
+        align="center"
+      >
+        {formatDuration(data?.dt)}
       </TableCell>
     </TableRow>
   );

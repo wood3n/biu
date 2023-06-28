@@ -9,7 +9,9 @@ const path = require('path');
  * mac 任务栏
  */
 let tray;
-const createTray = () => {
+const createTray = ({
+  onClick,
+}) => {
   // mac
   if (process.platform === 'darwin') {
     const trayIcon = nativeImage.createFromPath(path.resolve(process.cwd(), './public/electron/mac_trayTemplate.png'));
@@ -22,6 +24,8 @@ const createTray = () => {
     trayIcon.setTemplateImage(true);
     tray = new Tray(trayIcon);
   }
+
+  tray.addListener('click', onClick);
 };
 
 module.exports = {
