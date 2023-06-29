@@ -4,7 +4,6 @@ import Login from './pages/login';
 import Home from './pages/home';
 import NotFound from './pages/not-found';
 import UserProfile from './pages/user-profile';
-import BasicLayout from './layout/basic';
 import FM from './pages/fm';
 import Search from './pages/search';
 import PlayList from './pages/playlist';
@@ -19,7 +18,6 @@ import CloudDrive from './pages/cloud-drive';
 const routes: RouteObject[] = [
   {
     path: '/',
-    // element: <BasicLayout />,
     element: <GridLayout />,
     children: [
       {
