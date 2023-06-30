@@ -9,7 +9,7 @@ import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
 import { MdKeyboardArrowUp } from 'react-icons/md';
 import useScrollTrigger from '@mui/material/useScrollTrigger';
-import Search from '@components/search';
+import Search from '@/components/search';
 import WindowAction from '@components/window-action';
 import './index.less';
 

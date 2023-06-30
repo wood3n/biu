@@ -203,7 +203,7 @@ const PlayList: React.FC = () => {
                       },
                     }}
                   />
-                  {playListDetailRes?.playlist?.trackCount && (
+                  {Boolean(playListDetailRes?.playlist?.trackCount) && (
                     <Typography
                       variant="body2"
                       sx={{
@@ -216,7 +216,7 @@ const PlayList: React.FC = () => {
                     </Typography>
                   )}
                 </Stack>
-                {playListDetailRes?.playlist?.tags?.length && (
+                {Boolean(playListDetailRes?.playlist?.tags?.length) && (
                   <Box
                     sx={{
                       display: 'flex',
@@ -227,7 +227,7 @@ const PlayList: React.FC = () => {
                   >
                     <span>标签：</span>
                     <Breadcrumbs maxItems={5} aria-label="breadcrumb">
-                      {playListDetailRes.playlist.tags.map((tag) => (
+                      {playListDetailRes?.playlist?.tags?.map((tag) => (
                         <Link
                           key={tag}
                           underline="hover"
