@@ -34,6 +34,7 @@ const ArtistLinks: React.FC<Props> = ({
             sx={{
               maxWidth: ars.length > 1 ? 90 : undefined,
               minWidth: 0,
+              cursor: 'pointer',
             }}
           >
             {arName}

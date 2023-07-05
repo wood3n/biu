@@ -1,10 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { produce } from 'immer';
 import { useAtom } from 'jotai';
 import random from 'lodash/random';
 import uniqBy from 'lodash/uniqBy';
+import { useRequest } from 'ahooks';
+import { toast } from 'react-hot-toast';
+import { getSongUrlV1, getLyrics } from '@/service';
 import { playQueueAtom } from '@/store/play-queue-atom';
-import { PLAY_MODE } from '@/common/constants';
+import { PLAY_MODE, MUSIC_LEVEL } from '@/common/constants';
+import { STORAGE_KEY, getLocal, updateLocal } from '@/common/localforage';
 
 /**
  * 播放
@@ -14,26 +18,25 @@ import { PLAY_MODE } from '@/common/constants';
  * 动态排序
  */
 const usePlay = () => {
+  /**
+   * 播放队列
+   */
   const [playQueue, setPlayQueue] = useAtom(playQueueAtom);
+  const disabledPlay = useMemo(() => Boolean(!playQueue.length), [playQueue]);
+  /**
+   * 当前播放歌曲
+   */
+  const playingSong = useMemo(() => playQueue?.find(({ playing }) => playing), [playQueue]);
   const [playMode, setPlayMode] = useState<PLAY_MODE>(PLAY_MODE.LOOP);
 
   /**
    * 修改播放模式
    */
   const changePlayMode = (mode: PLAY_MODE) => {
-    if (mode !== playMode) {
-      setPlayMode(mode);
-    } else {
-      setPlayMode(PLAY_MODE.LOOP);
-    }
+    const newMode = mode !== playMode ? mode : PLAY_MODE.LOOP;
+    updateLocal(STORAGE_KEY.PLAY_MODE, newMode);
+    setPlayMode(newMode);
   };
-
-  const disabledPlay = Boolean(!playQueue.length);
-
-  /**
-   * 当前播放歌曲
-   */
-  const playingSong = useMemo(() => playQueue?.find(({ playing }) => playing), [playQueue]);
 
   /**
    * 播放所选歌曲

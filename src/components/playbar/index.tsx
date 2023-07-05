@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 import Menu from '@mui/material/Menu';
 import IconButton from '@mui/material/IconButton';
 import Slider from '@mui/material/Slider';
-import localforage from 'localforage';
+import { STORAGE_KEY, getLocal, updateLocal } from '@/common/localforage';
 import {
   MdPlayArrow,
   MdPause,
@@ -30,20 +30,22 @@ import {
   MdOutlineFavorite,
   MdPlaylistAdd,
 } from 'react-icons/md';
-import { ReactComponent as RandomIcon } from '@/assets/icons/random.svg';
-import { ReactComponent as RepeatOneIcon } from '@/assets/icons/repeatone.svg';
 import { formatDuration } from '@/common/utils';
 import { useRequest, useBoolean } from 'ahooks';
 import isNil from 'lodash/isNil';
-import { getSongUrlV1 } from '@/service';
+import { getSongUrlV1, getLyrics } from '@/service';
 import { MUSIC_LEVEL, PLAY_MODE } from '@/common/constants';
 import usePlay from '@/common/hooks/usePlay';
 import PlayRate from './play-rate';
 import PlayModeToggle from './play-mode';
+import Image from '../image';
+import ArtistLinks from '../artist-links';
 import SongDescription from '../song-description';
 import TooltipButton from '../tooltip-button';
 import LikeAction from '../like-action-button';
 import PlayQueueDrawer from '../play-queue-drawer';
+import OverflowText from '../overflow-text';
+import FullScreenPlayCenter from '../full-screen-play-center';
 import './index.less';
 
 /**
@@ -67,11 +69,22 @@ const PlayTaskBar = () => {
   const [paused, setPaused] = useState(true);
   const audioElRef = useRef<HTMLAudioElement>(new Audio());
   const [playlistDrawerVisible, { toggle }] = useBoolean();
+  const [fullScreenOpen, setFullScreenOpen] = useState(false);
 
   const init = async () => {
-    const oldVolume: number | null = await localforage.getItem('volume');
+    const oldVolume = await getLocal<number>(STORAGE_KEY.VOLUME);
     setVolume(oldVolume || 0.1);
   };
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  const { data: getLyricsRes, runAsync: reqLyrics } = useRequest(() => getLyrics({
+    id: playingSong?.id,
+  }), {
+    manual: true,
+  });
 
   const { data, runAsync, loading } = useRequest(() => getSongUrlV1({
     id: playingSong?.id,
@@ -81,19 +94,17 @@ const PlayTaskBar = () => {
     onSuccess: (res) => {
       if (!res?.data?.[0]?.url) {
         toast.error('无法获取歌曲播放链接');
+      } else {
+        reqLyrics();
       }
     },
   });
 
   useEffect(() => {
-    init();
-  }, []);
-
-  useEffect(() => {
     if (playingSong?.id) {
       runAsync();
     }
-  }, [playingSong]);
+  }, [playingSong?.id]);
 
   useEffect(() => {
     audioElRef.current.loop = (playMode === PLAY_MODE.SINGLE);
@@ -142,7 +153,7 @@ const PlayTaskBar = () => {
   }, [data?.data?.[0]?.url]);
 
   const handlePlay = () => {
-    if (data?.data?.[0]?.url && audioElRef.current) {
+    if (audioElRef.current) {
       audioElRef.current.play();
     }
   };
@@ -176,7 +187,7 @@ const PlayTaskBar = () => {
   const handleChangeVolume = (v: number) => {
     setVolume(v);
     audioElRef.current.volume = v;
-    localforage.setItem('volume', v);
+    updateLocal(STORAGE_KEY.VOLUME, v);
   };
 
   const toggleMuted = () => {
@@ -205,45 +216,43 @@ const PlayTaskBar = () => {
       >
         <Grid
           item
-          xs={3}
+          xs
           sx={{
             minWidth: 0,
-            display: 'flex',
-            alignItems: 'center',
           }}
         >
           {playingSong && (
-            <SongDescription
-              picUrl={playingSong.al?.picUrl}
-              name={playingSong.name}
-              ar={playingSong.ar}
-            />
+            <Box
+              sx={{
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                columnGap: 2,
+              }}
+            >
+              <Image
+                src={playingSong?.al?.picUrl}
+                mask={{
+                  child: <MdExpand size={18} />,
+                  onClick: () => setFullScreenOpen(true),
+                }}
+              />
+              <Stack spacing="4px" sx={{ minWidth: 0 }}>
+                <OverflowText title={playingSong?.name} sx={{ minWidth: 0 }}>
+                  {playingSong?.name}
+                </OverflowText>
+                <ArtistLinks ars={playingSong?.ar} />
+              </Stack>
+            </Box>
           )}
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={5}>
           <Stack alignItems="center" className="playbar-progress-stack">
             <Stack
               direction="row"
               alignItems="center"
               spacing={2}
             >
-              {/* <TooltipButton
-                title="随机播放"
-                placement="top"
-                size="small"
-                disabled={disabledPlay}
-                onClick={() => changePlayMode(PLAY_MODE.RANDOM)}
-              >
-                <RandomIcon
-                  width={18}
-                  height={18}
-                  fill={disabledPlay
-                    ? theme.palette.action.disabled
-                    : playMode === PLAY_MODE.RANDOM
-                      ? theme.palette.primary.main
-                      : theme.palette.text.secondary}
-                />
-              </TooltipButton> */}
               <IconButton disabled={disabledPlay} size="small" onClick={handlePrev}>
                 <MdSkipPrevious size={24} />
               </IconButton>
@@ -265,23 +274,6 @@ const PlayTaskBar = () => {
               >
                 <MdSkipNext size={24} />
               </IconButton>
-              {/* <TooltipButton
-                title="单曲循环"
-                placement="top"
-                size="small"
-                disabled={disabledPlay}
-                onClick={() => changePlayMode(PLAY_MODE.SINGLE)}
-              >
-                <RepeatOneIcon
-                  width={18}
-                  height={18}
-                  fill={disabledPlay
-                    ? theme.palette.action.disabled
-                    : playMode === PLAY_MODE.SINGLE
-                      ? theme.palette.primary.main
-                      : theme.palette.text.secondary}
-                />
-              </TooltipButton> */}
             </Stack>
             <Stack
               direction="row"
@@ -309,7 +301,7 @@ const PlayTaskBar = () => {
         </Grid>
         <Grid
           item
-          xs={3}
+          xs
           sx={{
             minWidth: 0,
             display: 'flex',
@@ -354,6 +346,12 @@ const PlayTaskBar = () => {
       <PlayQueueDrawer
         open={playlistDrawerVisible}
         onClose={toggle}
+      />
+      <FullScreenPlayCenter
+        open={fullScreenOpen}
+        onClose={() => setFullScreenOpen(false)}
+        song={playingSong}
+        lyrics={getLyricsRes?.lrc?.lyric}
       />
     </>
   );

@@ -1,8 +1,16 @@
+.image-process-fallback {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #282828;
+}
+
 .m-image-container {
   position: relative;
   display: inline-flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
 
   .image-process-fallback {
     display: flex;
@@ -25,13 +33,10 @@
     justify-content: center;
     color: #fff;
     transition: opacity 0.3s;
+    cursor: pointer;
   }
 
-  .m-image-mask-show {
-    opacity: 1;
-  }
-
-  &.m-image-hovered:hover .m-image-mask {
+  &:hover .m-image-mask {
     opacity: 1;
   }
 }

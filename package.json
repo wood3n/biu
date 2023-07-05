@@ -68,6 +68,7 @@
     "react-window": "^1.8.9",
     "read-pkg": "^5.2.0",
     "simplebar-react": "^3.2.3",
+    "stackblur-canvas": "^2.6.0",
     "swiper": "^8.4.4"
   },
   "devDependencies": {

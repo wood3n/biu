@@ -74,6 +74,7 @@ const MultilineOverflowText: React.FC<Props> = ({
               position: 'absolute',
               right: 0,
               bottom: 0,
+              color: (theme) => theme.palette.text.secondary,
             }}
             onClick={() => setOpen(true)}
           >

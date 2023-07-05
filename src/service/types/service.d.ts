@@ -102,7 +102,7 @@ interface Privilege {
 }
 
 interface Song {
-  name?: string;
+  name: string;
   id: number;
   pst?: number;
   t?: number;

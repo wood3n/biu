@@ -46,7 +46,7 @@ export { getPlaylistDetailDynamic } from './playlist-detail-dynamic';
 export { getSongUrl } from './song-url';
 export { getSongUrlV1 } from './song-url-v1';
 export { getSongDetail } from './song-detail';
-export { getlyric } from './lyric';
+export { getLyrics } from './lyric';
 export { getSimiSong } from './simi-song';
 export { getCheckMusic } from './check-music';
 export { getCloudsearch } from './cloudsearch';

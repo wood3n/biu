@@ -21,6 +21,8 @@ import { getPlaylistDetail, getPlaylistTrackAll, postSongOrderUpdate } from '@/s
 import TooltipButton from '@/components/tooltip-button';
 import Image from '@/components/image';
 import MultilineOverflowText from '@/components/multiline-overflow-text';
+import SearchAutoComplete from '@/components/search-autocomplete';
+import Empty from '@/components/empty';
 import usePlay from '@/common/hooks/usePlay';
 import { useUserPlaylist } from '@/store/user-playlist-atom';
 import {
@@ -54,7 +56,7 @@ const PlayList: React.FC = () => {
   const {
     isCollect, isCreated, collect, cancelCollect,
   } = useUserPlaylist();
-  const [songList, setSongList] = useState<Song[]>([]);
+  const [searchName, setSearchName] = useState<string>();
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -86,17 +88,12 @@ const PlayList: React.FC = () => {
   });
 
   // 歌单歌曲详情列表
-  const { loading: fetchingPlaylistTrack } = useRequest(() => getPlaylistTrackAll({
+  const { data: getSongRes, loading: fetchingPlaylistTrack } = useRequest(() => getPlaylistTrackAll({
     id: Number(pid),
     limit: 9999,
     offset: 0,
   }), {
     refreshDeps: [pid],
-    onSuccess: (data) => {
-      if (Array.isArray(data?.songs)) {
-        setSongList([...data.songs]);
-      }
-    },
   });
 
   const updatePlayList = () => {
@@ -104,34 +101,17 @@ const PlayList: React.FC = () => {
       // 更新歌单歌曲顺序
       postSongOrderUpdate({
         pid: Number(pid),
-        ids: songList.map(({ id }) => id!),
+        ids: getSongRes?.songs?.map(({ id }) => id!),
       });
     }, 200);
   };
 
-  const handlePlayAll = () => addPlayQueue(songList);
+  const handlePlayAll = () => addPlayQueue(getSongRes?.songs ?? [], true);
 
   const handleCollect = () => (isCollect(pid) ? cancelCollect(pid) : isCollect(pid));
 
   return (
     <PageContainer
-      // speedActions={[
-      //   {
-      //     name: '下载',
-      //     icon: <MdCloudDownload size={24} />,
-      //     onClick: () => download(songList),
-      //   },
-      //   {
-      //     name: isCollect(pid) ? '取消收藏' : '收藏',
-      //     icon: isCollect(pid) ? <MdStar size={24} /> : <MdStarOutline size={24} />,
-      //     onClick: handleCollect,
-      //   },
-      //   {
-      //     name: '播放',
-      //     icon: <MdPlayCircle size={24} color={theme.palette.primary.main} />,
-      //     onClick: handlePlayAll,
-      //   },
-      // ]}
       showScrollBoxShadow={false}
     >
       {/* <Box
@@ -156,7 +136,7 @@ const PlayList: React.FC = () => {
           <Box
             ref={titleNodeRef}
             sx={{
-              padding: '16px', display: 'flex', alignItems: 'center', columnGap: 2,
+              padding: '16px', display: 'flex', columnGap: 2,
             }}
           >
             <Image
@@ -226,12 +206,18 @@ const PlayList: React.FC = () => {
                     }}
                   >
                     <span>标签：</span>
-                    <Breadcrumbs maxItems={5} aria-label="breadcrumb">
+                    <Breadcrumbs
+                      maxItems={5}
+                      aria-label="song-tag"
+                      sx={{
+                        lineHeight: 1,
+                      }}
+                    >
                       {playListDetailRes?.playlist?.tags?.map((tag) => (
                         <Link
                           key={tag}
                           underline="hover"
-                          fontSize="normal"
+                          variant="body2"
                           sx={{ cursor: 'pointer' }}
                         >
                           {tag}
@@ -251,56 +237,44 @@ const PlayList: React.FC = () => {
                   {playListDetailRes?.playlist?.description}
                 </MultilineOverflowText>
               </Stack>
-              {/* <Stack direction="row" alignContent="center" spacing={2}>
-                <Button
-                  sx={{ '&:hover': { backgroundColor: '#00bcd4' } }}
-                  variant="contained"
-                  startIcon={<MdPlayArrow />}
-                  onClick={handlePlayAll}
-                >
-                  播放
-                </Button>
+            </Stack>
+          </Box>
+        )}
+        {getSongRes?.songs?.length ? (
+          <>
+            <Box sx={{
+              display: 'flex', alignItems: 'center', columnGap: 2,
+            }}
+            >
+              <TooltipButton
+                title="播放全部"
+                onClick={handlePlayAll}
+                sx={{
+                  color: (theme) => theme.palette.primary.main,
+                  '&:hover': { color: '#00bcd4' },
+                }}
+              >
+                <MdPlayCircle size={48} />
+              </TooltipButton>
+              {isCollect(pid) && (
                 <TooltipButton
                   title={isCollect(pid) ? '取消收藏' : '收藏'}
                   onClick={handleCollect}
                 >
                   {isCollect(pid) ? <MdStar color={theme.palette.primary.main} /> : <MdStarOutline />}
                 </TooltipButton>
-                <TooltipButton
-                  title="下载全部"
-                  onClick={() => download(songList)}
-                >
-                  <MdCloudDownload color={theme.palette.text.secondary} />
-                </TooltipButton>
-              </Stack> */}
-            </Stack>
-          </Box>
-        )}
-        <Box sx={{ padding: '16px' }}>
-          <Stack direction="row" alignContent="center" spacing={2}>
-            <Button
-              sx={{ '&:hover': { backgroundColor: '#00bcd4' } }}
-              variant="contained"
-              startIcon={<MdPlayArrow />}
-              onClick={handlePlayAll}
-            >
-              播放
-            </Button>
-            <TooltipButton
-              title={isCollect(pid) ? '取消收藏' : '收藏'}
-              onClick={handleCollect}
-            >
-              {isCollect(pid) ? <MdStar color={theme.palette.primary.main} /> : <MdStarOutline />}
-            </TooltipButton>
-            <TooltipButton
-              title="下载全部"
-              onClick={() => download(songList)}
-            >
-              <MdCloudDownload color={theme.palette.text.secondary} />
-            </TooltipButton>
-          </Stack>
-        </Box>
-        <SongListTable loading={fetchingPlaylistTrack} data={songList} />
+              )}
+              <TooltipButton
+                title="下载全部"
+                onClick={() => download(getSongRes?.songs)}
+              >
+                <MdCloudDownload color={theme.palette.text.secondary} />
+              </TooltipButton>
+              <SearchAutoComplete options={getSongRes?.songs?.map((item) => item.name) ?? []} />
+            </Box>
+            <SongListTable loading={fetchingPlaylistTrack} data={getSongRes?.songs} />
+          </>
+        ) : <Empty />}
       </Box>
     </PageContainer>
   );
