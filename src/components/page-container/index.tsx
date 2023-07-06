@@ -1,40 +1,37 @@
-import React from 'react';
+import React, { useImperativeHandle } from 'react';
 import SimpleBar from 'simplebar-react';
 import { type Props as SimpleBarProps } from 'simplebar-react/dist';
 import Box from '@mui/material/Box';
 import Fade from '@mui/material/Fade';
 import Fab from '@mui/material/Fab';
-import SpeedDial from '@mui/material/SpeedDial';
-import SpeedDialIcon from '@mui/material/SpeedDialIcon';
-import SpeedDialAction from '@mui/material/SpeedDialAction';
 import { MdKeyboardArrowUp } from 'react-icons/md';
 import useScrollTrigger from '@mui/material/useScrollTrigger';
 import Search from '@/components/search';
 import WindowAction from '@components/window-action';
 import './index.less';
 
-interface SpeedAction {
-  icon: React.ReactNode;
-  name: string;
-  onClick: VoidFunction;
-}
-
 interface Props extends SimpleBarProps {
-  left?: React.ReactNode;
+  titleLeft?: React.ReactNode;
   showScrollBoxShadow?: boolean;
   children: React.ReactNode;
-  speedActions?: SpeedAction[];
 }
 
-const PageContainer = ({
-  left,
+export interface ScrollNodeRef {
+  getScrollNodeRef: () => React.MutableRefObject<HTMLDivElement | undefined>;
+}
+
+const PageContainer = React.forwardRef<ScrollNodeRef, Props>(({
+  titleLeft,
   showScrollBoxShadow = true,
   children,
-  speedActions,
   ...props
-}: Props) => {
-  const scrollableNodeRef = React.useRef();
+}, ref) => {
+  const scrollableNodeRef = React.useRef<HTMLDivElement>();
   const isWindows = window.versions.platform() === 'win32';
+
+  useImperativeHandle(ref, () => ({
+    getScrollNodeRef: () => scrollableNodeRef,
+  }), [scrollableNodeRef]);
 
   const trigger = useScrollTrigger({
     target: scrollableNodeRef.current,
@@ -74,14 +71,14 @@ const PageContainer = ({
         }}
         className={trigger && showScrollBoxShadow ? 'sticky-subheader' : ''}
       >
-        {left && (
+        {titleLeft && (
           <Box
             sx={{
               position: 'absolute',
-              left: 0,
+              left: '12px',
             }}
           >
-            {left}
+            {titleLeft}
           </Box>
         )}
         <Search />
@@ -105,53 +102,17 @@ const PageContainer = ({
             <Box
               onClick={handleScrollTop}
               role="presentation"
-              sx={{ position: 'fixed', bottom: 120, right: 28 }}
+              sx={{ position: 'fixed', bottom: 120, right: 16 }}
             >
-              {speedActions?.length ? (
-                <SpeedDial
-                  ariaLabel="Page SpeedDial"
-                  direction="left"
-                  FabProps={{
-                    size: 'small',
-                    sx: { background: (theme) => theme.palette.grey[800] },
-                  }}
-                  icon={(
-                    <SpeedDialIcon
-                      openIcon={(
-                        <div onClick={handleScrollTop}>
-                          <MdKeyboardArrowUp size={24} />
-                        </div>
-                      )}
-                    />
-                  )}
-                >
-                  {speedActions?.map(({ name, icon, onClick }) => (
-                    <SpeedDialAction
-                      key={name}
-                      icon={icon}
-                      tooltipTitle={name}
-                      onClick={onClick}
-                      sx={{
-                        opacity: 1,
-                        background: (theme) => theme.palette.grey[800],
-                      }}
-                      FabProps={{
-                        size: 'medium',
-                      }}
-                    />
-                  ))}
-                </SpeedDial>
-              ) : (
-                <Fab sx={{ opacity: 0.5 }} size="small" aria-label="scroll back to top">
-                  <MdKeyboardArrowUp size={24} />
-                </Fab>
-              )}
+              <Fab sx={{ opacity: 0.5 }} size="small" aria-label="scroll back to top">
+                <MdKeyboardArrowUp size={24} />
+              </Fab>
             </Box>
           </Fade>
         </SimpleBar>
       </Box>
     </Box>
   );
-};
+});
 
 export default PageContainer;

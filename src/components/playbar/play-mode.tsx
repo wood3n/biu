@@ -71,13 +71,13 @@ const PlayModeToggle: React.FC<Props> = ({
           onChange={handleChange}
         >
           <ToggleButton value={PLAY_MODE.LOOP}>
-            <MdRepeat size={24} />
+            <MdRepeat size={18} />
           </ToggleButton>
           <ToggleButton value={PLAY_MODE.SINGLE}>
-            <MdRepeatOne size={24} />
+            <MdRepeatOne size={18} />
           </ToggleButton>
           <ToggleButton value={PLAY_MODE.RANDOM}>
-            <MdShuffle size={24} />
+            <MdShuffle size={18} />
           </ToggleButton>
         </ToggleButtonGroup>
       </HoverPopover>

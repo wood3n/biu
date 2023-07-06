@@ -4,7 +4,7 @@ import {
   MdPlayCircle,
 } from 'react-icons/md';
 import Box from '@mui/material/Box';
-import SongListTable from '@/components/song-list-table';
+import PlaylistTable from '@/components/playlist-table';
 import usePlay from '@/common/hooks/usePlay';
 
 interface Props {
@@ -25,7 +25,7 @@ const Daily = ({
 
   return (
     <Box sx={{ p: '0 12px 12px 12px' }}>
-      <SongListTable loading={loading} data={data ?? []} />
+      <PlaylistTable loading={loading} data={data ?? []} />
     </Box>
   );
 };

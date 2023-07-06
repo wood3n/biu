@@ -88,6 +88,7 @@ module.exports = {
     'jsx-a11y/mouse-events-have-key-events': 0,
     'react/jsx-props-no-spreading': 0,
     'import/extensions': 0,
+    'consistent-return': 0,
     'no-console': 0,
     semi: ['error', 'always', { omitLastInOneLineBlock: true }],
   },

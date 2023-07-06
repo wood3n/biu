@@ -3,29 +3,40 @@ import {
   MdSearch,
 } from 'react-icons/md';
 import {
-  Autocomplete, InputAdornment, IconButton, TextField, Typography,
+  useTheme, Autocomplete, InputAdornment, IconButton, TextField, Typography,
 } from '@mui/material';
 import SimpleBar from 'simplebar-react';
 
-interface Option {
-  label: string;
-}
-
 interface Props {
   placeholder: string;
-  options: Option[];
+  options: string[];
+  onChange: (value: string | null) => void;
 }
 
+const ListboxComponent = React.forwardRef<
+HTMLDivElement,
+React.HTMLAttributes<HTMLElement>
+>((props, ref) => (
+  <SimpleBar scrollableNodeProps={{ ref }} style={{ height: '100%' }}>
+    <ul {...props} />
+  </SimpleBar>
+));
+
 const SearchAutoComplete = React.memo(({
+  placeholder,
   options,
+  onChange,
 }: Props) => {
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
 
   return (
     <Autocomplete
       id="search-autocomplete"
       freeSolo
-      open
+      autoSelect
+      open={open}
+      size="small"
       options={options}
       noOptionsText="找不到歌曲"
       onInputChange={(_, newInputValue) => {
@@ -35,30 +46,46 @@ const SearchAutoComplete = React.memo(({
           setOpen(false);
         }
       }}
+      onChange={(_, value) => {
+        console.log(value);
+        setOpen(false);
+        onChange(value as string);
+      }}
       sx={{
-        minWidth: 320,
-        '& .MuiOutlinedInput-root': {
-          padding: '0 8px',
-        },
-        '& .MuiFormControl-root .MuiOutlinedInput-root': {
-          paddingRight: '8px',
+        width: 240,
+        '& .MuiFormControl-root .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-colorPrimary': {
+          padding: '4px',
         },
       }}
+      componentsProps={{
+        paper: {
+          sx: {
+            height: 280,
+          },
+        },
+      }}
+      ListboxProps={{
+        sx: {
+          height: 'auto',
+          overflow: 'initial',
+        },
+      }}
+      ListboxComponent={ListboxComponent}
       renderInput={(params) => (
         <TextField
           {...params}
           variant="outlined"
-          placeholder="搜索..."
+          placeholder={placeholder}
           InputProps={{
             ...params.InputProps,
-            endAdornment: (
+            startAdornment: (
               <InputAdornment position="end">
                 <IconButton
-                  aria-label="toggle password visibility"
+                  aria-label="search"
                   edge="end"
                   size="small"
                 >
-                  <MdSearch />
+                  <MdSearch size={14} color={theme.palette.text.secondary} />
                 </IconButton>
               </InputAdornment>
             ),
@@ -84,11 +111,6 @@ const SearchAutoComplete = React.memo(({
           }}
         />
       )}
-      ListboxProps={{
-        sx: {
-          height: 300,
-        },
-      }}
       renderOption={(props, option) => (
         <li {...props}>
           <Typography variant="body2" noWrap color="text.secondary">
