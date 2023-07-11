@@ -7,7 +7,7 @@ import { styled } from '@mui/material/styles';
 import ScrollObserverTarget from '@/components/scroll-observer-target';
 import { useUserArs } from '@/store/user-ars-atom';
 import { useUserAls } from '@/store/user-als-atom';
-import SimpleBar from 'simplebar-react';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import AlbumListItem from './album-list-item';
 import ArtistListItem from './artist-list-item';
 
@@ -23,7 +23,7 @@ const UserCollection = () => {
   const [tab, setTab] = useState('专辑');
 
   return (
-    <SimpleBar style={{ height: '100%' }}>
+    <OverlayScrollbarsComponent style={{ height: '100%' }}>
       <Stack
         direction="row"
         spacing={1}
@@ -85,7 +85,7 @@ const UserCollection = () => {
           </>
         </ImageList>
       )}
-    </SimpleBar>
+    </OverlayScrollbarsComponent>
   );
 };
 

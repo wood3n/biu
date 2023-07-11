@@ -94,7 +94,7 @@ const GridLayout = () => {
         display: 'flex', columnGap: '8px', flex: '1 1 auto', flexWrap: 'nowrap',
       }}
       >
-        <Box sx={{ flex: '0 0 20%' }}>
+        <Box sx={{ flex: '0 0 20%', minWidth: 0 }}>
           <Sider />
         </Box>
         {/* minWidth让子元素不会超出flex容器 */}

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Album } from '@service/album';
 import { formatMillisecond } from '@/common/utils';
 import { IMAGE_ERR } from '@/common/constants';
-import SimpleBar from 'simplebar-react';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import styles from './index.module.less';
 
 const AlbumDescription: React.FC<Album> = ({
@@ -96,7 +96,7 @@ const AlbumDescription: React.FC<Album> = ({
             </Tooltip>
           ))}
         </Avatar.Group>
-        <SimpleBar style={{ height: 420 }}>
+        <OverlayScrollbarsComponent style={{ height: 420 }}>
           <Typography.Paragraph
             style={{
               whiteSpace: 'pre-line',
@@ -104,7 +104,7 @@ const AlbumDescription: React.FC<Album> = ({
           >
             {description}
           </Typography.Paragraph>
-        </SimpleBar>
+        </OverlayScrollbarsComponent>
       </Modal>
     </div>
   );

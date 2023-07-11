@@ -1,6 +1,9 @@
 import React, { useImperativeHandle } from 'react';
-import SimpleBar from 'simplebar-react';
-import { type Props as SimpleBarProps } from 'simplebar-react/dist';
+import {
+  OverlayScrollbarsComponent,
+  type OverlayScrollbarsComponentProps,
+  type OverlayScrollbarsComponentRef,
+} from 'overlayscrollbars-react';
 import Box from '@mui/material/Box';
 import Fade from '@mui/material/Fade';
 import Fab from '@mui/material/Fab';
@@ -10,14 +13,14 @@ import Search from '@/components/search';
 import WindowAction from '@components/window-action';
 import './index.less';
 
-interface Props extends SimpleBarProps {
+interface Props extends OverlayScrollbarsComponentProps {
   titleLeft?: React.ReactNode;
   showScrollBoxShadow?: boolean;
   children: React.ReactNode;
 }
 
 export interface ScrollNodeRef {
-  getScrollNodeRef: () => React.MutableRefObject<HTMLDivElement | undefined>;
+  getScrollNodeElement: () => HTMLElement | undefined | null;
 }
 
 const PageContainer = React.forwardRef<ScrollNodeRef, Props>(({
@@ -26,29 +29,21 @@ const PageContainer = React.forwardRef<ScrollNodeRef, Props>(({
   children,
   ...props
 }, ref) => {
-  const scrollableNodeRef = React.useRef<HTMLDivElement>();
+  const scrollableNodeRef = React.useRef<OverlayScrollbarsComponentRef>(null);
   const isWindows = window.versions.platform() === 'win32';
 
   useImperativeHandle(ref, () => ({
-    getScrollNodeRef: () => scrollableNodeRef,
+    getScrollNodeElement: () => scrollableNodeRef.current?.osInstance()?.elements()?.viewport,
   }), [scrollableNodeRef]);
 
   const trigger = useScrollTrigger({
-    target: scrollableNodeRef.current,
+    target: scrollableNodeRef.current?.osInstance()?.elements()?.viewport,
     disableHysteresis: true,
     threshold: 140,
   });
 
-  const handleScrollTop = (event: React.MouseEvent<HTMLDivElement>) => {
-    const anchor = (
-      (event.target as HTMLDivElement).ownerDocument || document
-    ).querySelector('#main-page-scroll-observe-node');
-
-    if (anchor) {
-      anchor.scrollIntoView({
-        block: 'center',
-      });
-    }
+  const handleScrollTop = () => {
+    scrollableNodeRef.current?.osInstance()?.elements()?.viewport?.scrollTo({ top: 0 });
   };
 
   return (
@@ -95,8 +90,21 @@ const PageContainer = React.forwardRef<ScrollNodeRef, Props>(({
         )}
       </Box>
       <Box sx={{ flex: '1 1 auto', overflowY: 'auto' }}>
-        <SimpleBar scrollableNodeProps={{ ref: scrollableNodeRef }} {...props} style={{ height: '100%' }}>
-          <span id="main-page-scroll-observe-node" />
+        <OverlayScrollbarsComponent
+          ref={scrollableNodeRef}
+          options={{
+            overflow: {
+              x: 'hidden',
+            },
+            scrollbars: {
+              theme: 'os-theme-light',
+              autoHide: 'move',
+              autoHideDelay: 800,
+            },
+          }}
+          style={{ height: '100%' }}
+          {...props}
+        >
           {children}
           <Fade in={trigger}>
             <Box
@@ -104,12 +112,12 @@ const PageContainer = React.forwardRef<ScrollNodeRef, Props>(({
               role="presentation"
               sx={{ position: 'fixed', bottom: 120, right: 16 }}
             >
-              <Fab sx={{ opacity: 0.5 }} size="small" aria-label="scroll back to top">
+              <Fab sx={{ opacity: 0.4 }} size="small" aria-label="scroll back to top">
                 <MdKeyboardArrowUp size={24} />
               </Fab>
             </Box>
           </Fade>
-        </SimpleBar>
+        </OverlayScrollbarsComponent>
       </Box>
     </Box>
   );

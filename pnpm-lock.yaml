@@ -20,6 +20,9 @@ dependencies:
   '@emotion/styled':
     specifier: ^11.10.8
     version: 11.10.8(@emotion/react@11.10.8)(@types/react@18.0.17)(react@17.0.2)
+  '@fontsource/roboto':
+    specifier: ^5.0.5
+    version: 5.0.5
   '@mui/material':
     specifier: ^5.12.3
     version: 5.12.3(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.0.17)(react-dom@17.0.2)(react@17.0.2)
@@ -71,6 +74,12 @@ dependencies:
   moment-duration-format:
     specifier: ^2.3.2
     version: 2.3.2
+  overlayscrollbars:
+    specifier: ^2.2.0
+    version: 2.2.0
+  overlayscrollbars-react:
+    specifier: ^0.5.0
+    version: 0.5.0(overlayscrollbars@2.2.0)(react@17.0.2)
   portfinder:
     specifier: ^1.0.29
     version: 1.0.29
@@ -2307,6 +2316,10 @@ packages:
     resolution: {integrity: sha512-JXdzbRiWclLVoD8sNUjR443VVlYqiYmDVT6rGUEIEHU5YJW0gaVZwV2xgM7D4arkvASqD0IlLUVjHiFuxaftRw==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
+
+  /@fontsource/roboto@5.0.5:
+    resolution: {integrity: sha512-IMXFq5AMgGx0sgNLfwWsmPuy3qa7lmDmQcXXihqwF4mT2UpD725cbxZj93ERY793OWon+6V1ANax02I3nt9+4w==}
+    dev: false
 
   /@humanwhocodes/config-array@0.11.8:
     resolution: {integrity: sha512-UybHIJzJnR5Qc/MsD9Kr+RpO2h+/P1GhOwdiLPXK5TWk5sgTdu88bTD9UP+CKbPPh5Rni1u0GjAdYQLemG8g+g==}
@@ -7154,6 +7167,20 @@ packages:
       strip-ansi: 6.0.1
       wcwidth: 1.0.1
     dev: true
+
+  /overlayscrollbars-react@0.5.0(overlayscrollbars@2.2.0)(react@17.0.2):
+    resolution: {integrity: sha512-uCNTnkfWW74veoiEv3kSwoLelKt4e8gTNv65D771X3il0x5g5Yo0fUbro7SpQzR9yNgi23cvB2mQHTTdQH96pA==}
+    peerDependencies:
+      overlayscrollbars: ^2.0.0
+      react: '>=16.8.0'
+    dependencies:
+      overlayscrollbars: 2.2.0
+      react: 17.0.2
+    dev: false
+
+  /overlayscrollbars@2.2.0:
+    resolution: {integrity: sha512-Sx7gI2TEx+TFvFXJq4BUYM5R4bfWQR2ertdxyzAQ589ouPKKifMBU0/opdCb1bUC7x6sMiSNI1u9ngC0RbMnBg==}
+    dev: false
 
   /p-cancelable@1.1.0:
     resolution: {integrity: sha512-s73XxOZ4zpt1edZYZzvhqFa6uvQc1vwUa0K0BdtIZgQMAJj9IbebH+JkgKZc9h+B05PKHLOTl4ajG1BmNrVZlw==}

@@ -7,7 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import { MdClose } from 'react-icons/md';
-import SimpleBar from 'simplebar-react';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 
 type Props = TypographyTypeMap['props'] & {
   lines?: number;
@@ -103,12 +103,11 @@ const MultilineOverflowText: React.FC<Props> = ({
             padding: 0, width: '600px', height: '500px',
           }}
           >
-            <SimpleBar
-              style={{ height: '100%' }}
-              scrollableNodeProps={{ style: { whiteSpace: 'pre-line', padding: '24px' } }}
+            <OverlayScrollbarsComponent
+              style={{ height: '100%', whiteSpace: 'pre-line', padding: '24px' }}
             >
               {children}
-            </SimpleBar>
+            </OverlayScrollbarsComponent>
           </DialogContent>
         </Dialog>
       )}

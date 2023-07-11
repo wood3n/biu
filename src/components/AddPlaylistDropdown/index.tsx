@@ -10,7 +10,7 @@ import {
 import { useAtomValue } from 'jotai';
 import { userAtom } from '@/store/user-atom';
 import { userPlaylistAtom } from '@/store/user-playlist-atom';
-import SimpleBar from 'simplebar-react';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import './index.less';
 
 interface Props {
@@ -33,9 +33,9 @@ const AddPlaylistDropdown = ({
     >
       <Input prefix={<MdSearch />} placeholder="查找歌单" style={{ borderRadius: 4 }} />
       <Divider style={{ margin: 0 }} />
-      <SimpleBar style={{ height: 300, width: 320 }}>
+      <OverlayScrollbarsComponent style={{ height: 300, width: 320 }}>
         <div style={{ height: 300, width: 320 }}>歌单</div>
-      </SimpleBar>
+      </OverlayScrollbarsComponent>
     </Modal>
   );
 };

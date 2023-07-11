@@ -15,7 +15,6 @@ import {
   MdQueueMusic,
 } from 'react-icons/md';
 import PageContainer from '@components/page-container';
-import ScrollObserverTarget from '@/components/scroll-observer-target';
 import {
   getRecommendSongs,
   getRecommendResource,
@@ -77,7 +76,7 @@ function Home() {
 
   return (
     <PageContainer
-      left={(
+      titleLeft={(
         <Tabs
           value={selectedTab}
           onChange={(_, v) => setTab(v)}

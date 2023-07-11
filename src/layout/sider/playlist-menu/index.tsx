@@ -14,7 +14,7 @@ import TooltipButton from '@/components/tooltip-button';
 import CreatePlayList from '@components/create-playlist';
 import ScrollObserverTarget from '@components/scroll-observer-target';
 import type { PlaylistInfoType } from '@service/user-playlist';
-import SimpleBar from 'simplebar-react';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import ListItem from './play-list-item';
 
 interface Props {
@@ -95,7 +95,7 @@ const PlaylistMenu = ({
 
   return (
     <>
-      <SimpleBar style={{ height: '100%' }}>
+      <OverlayScrollbarsComponent style={{ height: '100%' }}>
         <List
           sx={{
             width: '100%',
@@ -136,7 +136,7 @@ const PlaylistMenu = ({
             </li>
           )))}
         </List>
-      </SimpleBar>
+      </OverlayScrollbarsComponent>
       <CreatePlayList
         open={open}
         onClose={() => setOpen(false)}

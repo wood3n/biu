@@ -3,7 +3,9 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import SimpleBar from 'simplebar-react';
+import {
+  OverlayScrollbarsComponent,
+} from 'overlayscrollbars-react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 
 interface Props {
@@ -19,7 +21,7 @@ const LyricsList = React.memo(({
       overflow: 'auto',
     }}
   >
-    <SimpleBar style={{ height: '100%' }}>
+    <OverlayScrollbarsComponent style={{ height: '100%' }}>
       {lyrics?.split('\n')?.map((line, i) => (
         <ListItem key={String(i)} component="div" disablePadding>
           <ListItemButton>
@@ -27,7 +29,7 @@ const LyricsList = React.memo(({
           </ListItemButton>
         </ListItem>
       ))}
-    </SimpleBar>
+    </OverlayScrollbarsComponent>
   </List>
 ));
 

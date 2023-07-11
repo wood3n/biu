@@ -5,7 +5,7 @@ import {
 import {
   useTheme, Autocomplete, InputAdornment, IconButton, TextField, Typography,
 } from '@mui/material';
-import SimpleBar from 'simplebar-react';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 
 interface Props {
   placeholder: string;
@@ -17,9 +17,9 @@ const ListboxComponent = React.forwardRef<
 HTMLDivElement,
 React.HTMLAttributes<HTMLElement>
 >((props, ref) => (
-  <SimpleBar scrollableNodeProps={{ ref }} style={{ height: '100%' }}>
+  <OverlayScrollbarsComponent style={{ height: '100%' }}>
     <ul {...props} />
-  </SimpleBar>
+  </OverlayScrollbarsComponent>
 ));
 
 const SearchAutoComplete = React.memo(({

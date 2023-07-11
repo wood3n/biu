@@ -12,7 +12,6 @@ import {
   Typography,
   Button,
   Fade,
-  useScrollTrigger,
   IconButton,
 } from '@mui/material';
 import PlaylistTable from '@/components/playlist-table';
@@ -48,12 +47,6 @@ const PlayList: React.FC = () => {
     isCollect, isCreated, collect, cancelCollect,
   } = useUserPlaylist();
 
-  const trigger = useScrollTrigger({
-    target: containerRef.current?.getScrollNodeRef().current,
-    disableHysteresis: true,
-    threshold: 240,
-  });
-
   // 歌单详情
   const { data: playListDetailRes, loading: fetchingPlaylistDetail } = useRequest(() => getPlaylistDetail({
     id: Number(pid),
@@ -87,30 +80,30 @@ const PlayList: React.FC = () => {
   return (
     <PageContainer
       ref={containerRef}
-      titleLeft={(
-        <Fade in={trigger}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              columnGap: 2,
-            }}
-          >
-            <Image
-              width={32}
-              height={32}
-              src={playListDetailRes?.playlist?.coverImgUrl}
-            />
-            <Typography variant="body1">{playListDetailRes?.playlist?.name}</Typography>
-            <IconButton size="small" onClick={handlePlayAll}>
-              <MdPlayCircle color={theme.palette.primary.main} />
-            </IconButton>
-            <IconButton size="small" onClick={handleCollect}>
-              {isCollect(pid) ? <MdStar color={theme.palette.primary.main} /> : <MdStarOutline />}
-            </IconButton>
-          </Box>
-        </Fade>
-      )}
+      // titleLeft={(
+      //   <Fade in={trigger}>
+      //     <Box
+      //       sx={{
+      //         display: 'flex',
+      //         alignItems: 'center',
+      //         columnGap: 2,
+      //       }}
+      //     >
+      //       <Image
+      //         width={32}
+      //         height={32}
+      //         src={playListDetailRes?.playlist?.coverImgUrl}
+      //       />
+      //       <Typography variant="body1" noWrap sx={{ maxWidth: 200 }}>{playListDetailRes?.playlist?.name}</Typography>
+      //       <IconButton size="small" onClick={handlePlayAll}>
+      //         <MdPlayCircle color={theme.palette.primary.main} />
+      //       </IconButton>
+      //       <IconButton size="small" onClick={handleCollect}>
+      //         {isCollect(pid) ? <MdStar color={theme.palette.primary.main} /> : <MdStarOutline />}
+      //       </IconButton>
+      //     </Box>
+      //   </Fade>
+      // )}
     >
       <Box sx={{ position: 'relative', padding: '8px' }} ref={containerRef}>
         {fetchingPlaylistDetail ? <PlayListSkeleton /> : (
@@ -237,6 +230,7 @@ const PlayList: React.FC = () => {
                     )}
                     {isCollect(pid) && (
                       <TooltipButton
+                        size="small"
                         title={isCollect(pid) ? '取消收藏' : '收藏'}
                         onClick={handleCollect}
                       >
@@ -245,6 +239,7 @@ const PlayList: React.FC = () => {
                     )}
                     {Boolean(getSongRes?.songs?.length) && (
                       <TooltipButton
+                        size="small"
                         title="下载全部"
                         onClick={() => download(getSongRes?.songs)}
                       >
