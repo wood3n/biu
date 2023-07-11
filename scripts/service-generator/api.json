@@ -1,0 +1,784 @@
+[
+	{
+		"path": "/login/qr/key",
+		"method": "get",
+		"desc": "二维码 key 生成接口",
+		"parsed": true
+	},
+	{
+		"path": "/login/qr/create",
+		"method": "get",
+		"desc": "二维码生成接口",
+		"params": {
+			"key": "string"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/login/qr/check",
+		"method": "get",
+		"desc": "二维码检测扫码状态接口",
+		"params": {
+			"key": "string"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/register/anonimous",
+		"method": "get",
+		"desc": "游客登录",
+		"parsed": true
+	},
+	{
+		"path": "/captcha/sent",
+		"method": "get",
+		"desc": "发送验证码",
+		"params": {
+			"phone": "string",
+			"ctcode": "string"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/captcha/verify",
+		"method": "get",
+		"desc": "验证验证码",
+		"params": {
+			"phone": "string",
+			"captcha": "number",
+			"ctcode": "string"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/logout",
+		"method": "get",
+		"desc": "退出登录",
+		"parsed": true
+	},
+	{
+		"path": "/login/status",
+		"method": "get",
+		"desc": "登录状态",
+		"parsed": true
+	},
+	{
+		"path": "/user/detail",
+		"method": "get",
+		"desc": "获取用户详情",
+		"params": {
+			"uid": "string"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/avatar/upload",
+		"method": "post",
+		"desc": "更新头像",
+		"params": {
+			"imgSize": "number",
+			"imgX": "number"
+		},
+		"data": {
+			"imgFile": "FormData"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/user/account",
+		"method": "get",
+		"desc": "获取账号信息",
+		"parsed": true
+	},
+	{
+		"path": "/user/subcount",
+		"method": "get",
+		"desc": "获取用户信息，歌单，收藏，mv，dj 数量",
+		"parsed": true
+	},
+	{
+		"path": "/user/level",
+		"method": "get",
+		"desc": "获取用户等级信息",
+		"parsed": true
+	},
+	{
+		"path": "/user/update",
+		"method": "get",
+		"desc": "更新用户信息",
+		"params": {
+			"gender": "number",
+			"birthday": "number",
+			"nickname": "string",
+			"province": "string",
+			"city": "string",
+			"signature": "string"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/user/playlist",
+		"method": "get",
+		"desc": "获取用户歌单",
+		"params": {
+			"uid": "string",
+			"limit": "number",
+			"offset": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/playlist/update",
+		"method": "post",
+		"desc": "更新歌单",
+		"data": {
+			"id": "number",
+			"name": "string",
+			"desc": "string",
+			"tags": "string[]"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/playlist/order/update",
+		"method": "post",
+		"desc": "调整歌单顺序",
+		"data": {
+			"ids": "number[]"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/song/order/update",
+		"method": "post",
+		"desc": "调整歌曲顺序",
+		"data": {
+			"pid": "number",
+			"ids": "number[]"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/user/dj",
+		"method": "get",
+		"desc": "获取用户电台",
+		"params": {
+			"uid": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/dj/personalize/recommend",
+		"method": "get",
+		"desc": "电台个性推荐",
+		"params": {
+			"limit": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/user/audio",
+		"method": "get",
+		"desc": "传入用户 id 可获取用户创建的电台",
+		"params": {
+			"uid": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/dj/hot",
+		"method": "get",
+		"desc": "热门电台",
+		"params": {
+			"limit": "number",
+			"offset": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/user/follows",
+		"method": "get",
+		"desc": "获取用户关注列表",
+		"params": {
+			"uid": "number",
+			"limit": "number",
+			"offset": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/follow",
+		"method": "get",
+		"desc": "关注/取消关注用户，t : 1为关注,其他为取消关注",
+		"params": {
+			"id": "number",
+			"t": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/artist/sublist",
+		"method": "get",
+		"desc": "收藏的歌手列表",
+		"parsed": true
+	},
+	{
+		"path": "/artist/sub",
+		"method": "get",
+		"desc": "收藏/取消收藏歌手，t:操作,1 为收藏,其他为取消收藏",
+		"params": {
+			"id": "number",
+			"t": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/user/record",
+		"method": "get",
+		"desc": "获取用户播放记录，type=1 时只返回 weekData, type=0 时返回 allData",
+		"params": {
+			"uid": "number",
+			"type": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/artist/list",
+		"method": "get",
+		"desc": "歌手分类列表，https://neteasecloudmusicapi.vercel.app/#/?id=%e6%ad%8c%e6%89%8b%e5%88%86%e7%b1%bb%e5%88%97%e8%a1%a8",
+		"params": {
+			"limit": "number",
+			"offset": "number",
+			"type": "number",
+			"area": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/artist/songs",
+		"method": "get",
+		"desc": "获取用户播放记录，type=1 时只返回 weekData, type=0 时返回 allData",
+		"params": {
+			"id": "number",
+			"uid": "number",
+			"type": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/artist/top/song",
+		"method": "get",
+		"desc": "歌手热门 50 首歌曲",
+		"params": {
+			"id": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/artist/songs",
+		"method": "get",
+		"desc": "歌手全部歌曲",
+		"params": {
+			"order": "string",
+			"id": "number",
+			"limit": "number",
+			"offset": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/topic/sublist",
+		"method": "get",
+		"desc": "收藏的专栏",
+		"params": {
+			"limit": "number",
+			"offset": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/video/sub",
+		"method": "get",
+		"desc": "收藏/取消收藏视频，t : 1 为收藏,其他为取消收藏",
+		"params": {
+			"id": "number",
+			"t": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/mv/sublist",
+		"method": "get",
+		"desc": "收藏的 MV 列表",
+		"parsed": true
+	},
+	{
+		"path": "/mv/detail",
+		"method": "get",
+		"desc": "获取对应 MV 数据 , 数据包含 mv 名字 , 歌手 , 发布时间 , mv 视频地址等数据",
+		"params": {
+			"mvid": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/mv/url",
+		"method": "get",
+		"desc": "获取对应 MV 播放地址",
+		"params": {
+			"id": "number",
+			"r": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/playlist/catlist",
+		"method": "get",
+		"desc": "歌单分类",
+		"parsed": true
+	},
+	{
+		"path": "/mv/sub",
+		"method": "get",
+		"desc": "收藏/取消收藏MV，t : 1 为收藏,其他为取消收藏",
+		"params": {
+			"mvid": "number",
+			"t": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/related/playlist",
+		"method": "get",
+		"desc": "相关歌单推荐，传入歌单 id",
+		"params": {
+			"id": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/simi/playlist",
+		"method": "get",
+		"desc": "获取相似歌单",
+		"params": {
+			"id": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/playlist/detail",
+		"method": "get",
+		"desc": "获取歌单详情",
+		"params": {
+			"id": "number",
+			"s": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/playlist/track/all",
+		"method": "get",
+		"desc": "获取歌单所有歌曲",
+		"params": {
+			"id": "number",
+			"limit": "number",
+			"offset": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/playlist/detail/dynamic",
+		"method": "get",
+		"desc": "歌单详情动态，如评论数,是否收藏,播放数",
+		"params": {
+			"id": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/song/url",
+		"method": "get",
+		"desc": "获取音乐 url",
+		"params": {
+			"id": "number",
+			"br": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/song/url/v1",
+		"method": "get",
+		"desc": "获取音乐 url - 新版",
+		"params": {
+			"id": "number",
+			"level": "string"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/song/detail",
+		"method": "get",
+		"desc": "获取歌曲详情，多个 id用逗号隔开",
+		"params": {
+			"ids": "string"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/lyric",
+		"method": "get",
+		"desc": "获取歌词",
+		"params": {
+			"id": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/simi/song",
+		"method": "get",
+		"desc": "获取相似音乐",
+		"params": {
+			"id": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/check/music",
+		"method": "get",
+		"desc": "音乐是否可用",
+		"params": {
+			"id": "number",
+			"br": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/cloudsearch",
+		"method": "get",
+		"desc": "传入搜索关键词可以搜索该音乐 / 专辑 / 歌手 / 歌单 / 用户, 关键词可以多个, 以空格隔开",
+		"params": {
+			"keywords": "string",
+			"limit": "number",
+			"type": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/search/default",
+		"method": "get",
+		"desc": "默认搜索关键词",
+		"parsed": true
+	},
+	{
+		"path": "/search/suggest",
+		"method": "get",
+		"desc": "传入搜索关键词可获得搜索建议 , 搜索结果同时包含单曲 , 歌手 , 歌单信息",
+		"params": {
+			"keywords": "string",
+			"type": "string"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/search/multimatch",
+		"method": "get",
+		"desc": "搜索多重匹配",
+		"params": {
+			"keywords": "string"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/playlist/create",
+		"method": "post",
+		"desc": "新建歌单",
+		"data": {
+			"name": "string",
+			"privacy": "number",
+			"type": "string"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/playlist/delete",
+		"method": "post",
+		"desc": "删除歌单；多个歌单id用逗号隔开",
+		"data": {
+			"id": "number[]"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/playlist/subscribe",
+		"method": "get",
+		"desc": "收藏/取消收藏歌单；t：1-收藏,2-取消收藏",
+		"params": {
+			"id": "string",
+			"t": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/playlist/tracks",
+		"method": "post",
+		"desc": "对歌单添加或删除歌曲",
+		"data": {
+			"op": "string",
+			"pid": "number",
+			"tracks": "number[]"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/playlist/track/add",
+		"method": "post",
+		"desc": "收藏视频到视频歌单",
+		"data": {
+			"pid": "number",
+			"ids": "number[]"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/playlist/track/delete",
+		"method": "post",
+		"desc": "删除视频歌单里的视频",
+		"data": {
+			"pid": "number",
+			"ids": "number[]"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/playlist/video/recent",
+		"method": "get",
+		"desc": "最近播放的视频",
+		"parsed": true
+	},
+	{
+		"path": "/album",
+		"method": "get",
+		"desc": "获取专辑内容",
+		"params": {
+			"id": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/album/detail/dynamic",
+		"method": "get",
+		"desc": "获得专辑动态信息,如是否收藏,收藏数,评论数,分享数",
+		"params": {
+			"id": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/album/sub",
+		"method": "get",
+		"desc": "收藏/取消收藏专辑；t : 1 为收藏,其他为取消收藏",
+		"params": {
+			"id": "number",
+			"t": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/album/sublist",
+		"method": "get",
+		"desc": "获取已收藏专辑列表",
+		"params": {
+			"limit": "number",
+			"offset": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/artists",
+		"method": "get",
+		"desc": "获得歌手部分信息和热门歌曲",
+		"params": {
+			"id": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/artist/mv",
+		"method": "get",
+		"desc": "获取歌手 mv",
+		"params": {
+			"id": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/simi/mv",
+		"method": "get",
+		"desc": "获取相似 mv",
+		"params": {
+			"mvid": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/artist/desc",
+		"method": "get",
+		"desc": "获取歌手描述",
+		"params": {
+			"id": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/artist/detail",
+		"method": "get",
+		"desc": "获取歌手详情",
+		"params": {
+			"id": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/simi/artist",
+		"method": "get",
+		"desc": "获取相似歌手",
+		"params": {
+			"id": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/artist/album",
+		"method": "get",
+		"desc": "获取歌手专辑",
+		"params": {
+			"id": "number",
+			"limit": "number",
+			"offset": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/recommend/resource",
+		"method": "get",
+		"desc": "获取每日推荐歌单",
+		"parsed": true
+	},
+	{
+		"path": "/personalized",
+		"method": "get",
+		"desc": "推荐歌单",
+		"params": {
+			"limit": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/personalized/newsong",
+		"method": "get",
+		"desc": "推荐新音乐",
+		"params": {
+			"limit": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/personalized/djprogram",
+		"method": "get",
+		"desc": "推荐电台",
+		"parsed": true
+	},
+	{
+		"path": "/personalized/recommend",
+		"method": "get",
+		"desc": "推荐节目",
+		"parsed": true
+	},
+	{
+		"path": "/recommend/songs",
+		"method": "get",
+		"desc": "获取每日推荐歌曲",
+		"parsed": true
+	},
+	{
+		"path": "/history/recommend/songs",
+		"method": "get",
+		"desc": "获取历史日推可用日期列表",
+		"parsed": true
+	},
+	{
+		"path": "/history/recommend/songs/detail",
+		"method": "get",
+		"desc": "获取历史日推详情数据",
+		"parsed": true
+	},
+	{
+		"path": "/personal_fm",
+		"method": "get",
+		"desc": "私人 FM",
+		"parsed": true
+	},
+	{
+		"path": "/fm_trash",
+		"method": "get",
+		"desc": "从私人 FM 中移除至垃圾桶",
+		"params": {
+			"id": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/like",
+		"method": "get",
+		"desc": "喜欢音乐",
+		"params": {
+			"id": "number",
+			"like": "boolean"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/likelist",
+		"method": "get",
+		"desc": "喜欢的音乐列表",
+		"params": {
+			"uid": "number"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/user/cloud/detail",
+		"method": "get",
+		"desc": "云盘数据详情",
+		"parsed": true
+	},
+	{
+		"path": "/user/cloud/del",
+		"method": "post",
+		"desc": "云盘歌曲删除",
+		"data": {
+			"id": "number[]"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/cloud",
+		"method": "post",
+		"desc": "云盘上传",
+		"data": {
+			"songFile": "FormData"
+		},
+		"parsed": true
+	},
+	{
+		"path": "/cloud/match",
+		"method": "post",
+		"desc": "对云盘歌曲信息匹配纠正,如需取消匹配,asid 需要传 0",
+		"data": {
+			"uid": "number",
+			"sid": "number",
+			"asid": "number"
+		},
+		"parsed": true
+	}
+]

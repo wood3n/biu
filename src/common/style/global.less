@@ -1,0 +1,30 @@
+body {
+  overflow: hidden !important;
+}
+
+// 无边框拖拽
+.drag {
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.noDrag {
+  -webkit-app-region: no-drag;
+}
+
+@base-color: #1abc9c;
+@base-border-radius: 4px;
+@text-color: #ffffff;
+@secondary-color: #3498db;
+@sider-bg: #000000;
+@black-bg: #121212;
+@gradient-bg: linear-gradient(180deg, #393939 0%, #191414 100%);
+@playbar-height: 68px;
+
+.simplebar-scrollbar::before {
+  background-color: #6b6b6b;
+}
+
+.sticky-subheader {
+  box-shadow: 0 6px 10px rgb(0 0 0 / 60%);
+}
