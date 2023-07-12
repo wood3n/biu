@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Image, message, Spin } from 'antd';
+import Image from '@components/image';
+import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { getLoginQrKey, getLoginQrCreate, getLoginQrCheck } from '@/service';
 import { IMAGE_ERR } from '@/common/constants';
-import { checkError } from '@/common/utils';
 import { useRequest } from 'ahooks';
 import { QRLoginCode } from '../constants';
 import styles from './index.module.less';
@@ -38,7 +38,11 @@ const LoginByQr: React.FC = () => {
         runAsync({ key });
       }
     } catch (err) {
-      checkError(err);
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else if (typeof err === 'string') {
+        toast.error(err);
+      }
     }
   }
 
@@ -48,7 +52,7 @@ const LoginByQr: React.FC = () => {
     onSuccess: ({ code }) => {
       if (code === QRLoginCode.Success) {
         cancel();
-        message.success('登录成功');
+        toast.success('登录成功');
         navigate('/', { replace: true });
       }
 
@@ -67,18 +71,11 @@ const LoginByQr: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {
-        loading
-          ? <Spin tip="生成二维码" />
-          : (
-            <Image
-              preview={false}
-              width="100%"
-              height="100%"
-              src={src}
-            />
-          )
-      }
+      <Image
+        width={120}
+        height={120}
+        src={src}
+      />
     </div>
   );
 };

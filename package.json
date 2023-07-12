@@ -1,22 +1,22 @@
 {
-  "name": "rate",
-  "productName": "rate",
+  "name": "tune",
+  "productName": "tune",
   "version": "1.0.0",
   "description": "windows music application",
   "license": "MIT",
   "author": "wood3n",
-  "homepage": "https://github.com/wood3n/rate#readme",
+  "homepage": "https://github.com/wood3n/tune#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wood3n/rate.git"
+    "url": "git+https://github.com/wood3n/tune.git"
   },
   "bugs": {
-    "url": "https://github.com/wood3n/rate/issues"
+    "url": "https://github.com/wood3n/tune/issues"
   },
   "keywords": [
-    "rate",
+    "tune",
     "music application",
-    "NeteaseCloudMusicApi",
+    "NeteaseCloudMusic",
     "frontend",
     "react",
     "vite",
@@ -43,7 +43,6 @@
     "@types/lodash": "^4.14.195",
     "@vitejs/plugin-react": "^1.3.2",
     "ahooks": "^3.7.0",
-    "antd": "5.3.3",
     "axios": "^0.27.2",
     "classnames": "^2.3.1",
     "electron-store": "^8.1.0",
@@ -62,6 +61,7 @@
     "react-clock": "^4.0.0",
     "react-contextmenu": "^2.14.0",
     "react-dom": "17.0.2",
+    "react-dropzone": "^14.2.3",
     "react-hot-toast": "^2.4.0",
     "react-icons": "^4.8.0",
     "react-image": "^4.1.0",

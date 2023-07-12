@@ -1,6 +1,4 @@
-import type { RuleObject } from 'antd/lib/form';
-
-type Validator = (rule: RuleObject, value: string | number, callback: (error?: string) => void) => Promise<void | any> | void;
+type Validator = (rule: unknown, value: string | number, callback: (error?: string) => void) => Promise<void | any> | void;
 
 export const checkPhone = (input: string) => /1\d{10}/.test(input);
 

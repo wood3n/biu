@@ -39,9 +39,9 @@ process.env.NODE_ENV = 'production';
     await builder
       .build({
         config: {
-          appId: 'com.rate.wangkai',
-          productName: 'Rate',
-          copyright: 'Copyright © 2022 wangkai',
+          appId: 'com.tune.wangkai',
+          productName: 'Tune',
+          copyright: 'Copyright © 2023 wangkai',
           nodeVersion: 'current',
           buildVersion: pkg.version,
           asar: true,

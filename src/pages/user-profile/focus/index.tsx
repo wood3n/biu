@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Avatar,
-  Typography,
-  Row,
-  Col,
-  Card,
-  Pagination,
-  Spin,
-} from 'antd';
+import { Avatar, Typography, Card } from '@mui/material';
 import { AiOutlineUser } from 'react-icons/ai';
 // import { useUser } from '@/common/hooks';
 import useUser from '@/store/user-atom';
@@ -36,42 +28,7 @@ const MyFocus: React.FC = () => {
 
   return (
     <>
-      <Typography.Title level={2}>我的关注</Typography.Title>
-
-      <Spin spinning={loading}>
-        <Row gutter={[24, 24]}>
-          {data?.follow?.map(({ avatarUrl, nickname, userId }) => (
-            <Col
-              key={userId}
-              md={{ span: 6 }}
-              lg={{ span: 6 }}
-              xl={{ span: 4 }}
-              xxl={{ span: 4 }}
-            >
-              <Card bordered={false} hoverable className={styles.userCard}>
-                <Avatar
-                  size={120}
-                  src={avatarUrl}
-                  icon={<AiOutlineUser />}
-                />
-                <Typography.Title
-                  level={5}
-                  ellipsis={{ tooltip: nickname }}
-                >
-                  {nickname}
-                </Typography.Title>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-        <Pagination
-          className={styles.pagination}
-          current={page}
-          pageSize={12}
-          total={user?.userInfo?.profile?.follows}
-          onChange={(v) => setPage(v)}
-        />
-      </Spin>
+      <Typography>我的关注</Typography>
     </>
   );
 };

@@ -1,12 +1,7 @@
 import React from 'react';
-import {
-  Space,
-  Typography,
-  Card,
-  Button,
-  Upload,
-  Image,
-} from 'antd';
+import {useDropzone} from 'react-dropzone'
+import { Button, Card, Stack, Typography, Avatar } from '@mui/material';
+import MultilineOverflowText from '@/components/multiline-overflow-text';
 import PageContainer from '@/components/page-container';
 import {
   MdModeEditOutline,
@@ -23,6 +18,7 @@ import styles from './index.module.less';
  */
 const UserProfile: React.FC = () => {
   const [user] = useUser();
+  const {getRootProps, getInputProps, isDragActive} = useDropzone({})
 
   return (
     <PageContainer>
@@ -39,38 +35,31 @@ const UserProfile: React.FC = () => {
       />
       <div className={styles.userProfile}>
         <div className={styles.userProfileLeft}>
-          <Upload>
-            <span className={styles.avatar}>
-              <Image
-                width={220}
-                preview={{
-                  visible: false,
-                  mask: <MdModeEditOutline size={48} />,
-                  maskClassName: styles.avatarMask,
-                }}
-                src={user?.userInfo?.profile?.avatarUrl}
-                style={{
-                  borderRadius: '50%',
-                }}
-              />
-            </span>
-          </Upload>
-          <Space direction="vertical" className={styles.userInfo}>
-            <Typography.Title level={2} style={{ margin: 0 }}>{user?.userInfo?.profile?.nickname}</Typography.Title>
-            <Typography.Paragraph ellipsis={{ rows: 3 }} style={{ width: '60%' }}>
+          <div {...getRootProps()}>
+            <input {...getInputProps()} />
+            <Avatar
+              alt={user?.userInfo?.profile?.nickname}
+              src={user?.userInfo?.profile?.avatarUrl}
+              sx={{
+                width: 200
+              }}
+            />
+          </div>
+          <Stack className={styles.userInfo}>
+            <Typography variant='h4'>{user?.userInfo?.profile?.nickname}</Typography>
+            <MultilineOverflowText lines={2}>
               {user?.userInfo?.profile?.signature}
-            </Typography.Paragraph>
-          </Space>
+            </MultilineOverflowText>
+          </Stack>
         </div>
-        <Button className={styles.editBtn}>
-          <MdModeEdit />
+        <Button startIcon={<MdModeEdit />}>
           修改
         </Button>
       </div>
-      <Card bordered={false}>
+      <Card>
         <MyPlayRank />
       </Card>
-      <Card bordered={false}>
+      <Card>
         <MyFocus />
       </Card>
     </PageContainer>

@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import PageContainer from '@/components/page-container';
-import { Table } from 'antd';
-import { type ColumnsType } from 'antd/es/table';
 import { MdFavorite, MdFavoriteBorder } from 'react-icons/md';
 import {
   getAlbum, getArtistDetail, postLike, getLikelist,
@@ -71,67 +69,9 @@ const Album = () => {
     }
   };
 
-  console.log(likelist);
-  const columns: ColumnsType<Song> = [
-    {
-      dataIndex: 'favorite',
-      width: 32,
-      align: 'center',
-      render: (_, record) => (record.id && likelist.includes(record.id) ? (
-        <TooltipButton
-          title="取消喜欢"
-          onClick={() => haddleLike(record.id, false)}
-        >
-          <MdFavorite color="red" />
-        </TooltipButton>
-      ) : (
-        <TooltipButton
-          title="喜欢"
-          onClick={() => haddleLike(record.id)}
-        >
-          <MdFavoriteBorder color="red" />
-        </TooltipButton>
-      )),
-    },
-    {
-      title: '#',
-      dataIndex: 'index',
-      width: 10,
-      align: 'center',
-      render: (_, __, index) => index + 1,
-    },
-    {
-      title: '歌曲',
-      dataIndex: 'picUrl',
-      render: (_, record) => (
-        <SongDescription
-          // picUrl={record?.al?.picUrl}
-          name={record?.name}
-          ar={record?.ar}
-        />
-      ),
-    },
-    {
-      title: '时长',
-      width: 88,
-      align: 'center',
-      dataIndex: 'dt',
-      render: (v) => formatDuration(v),
-    },
-  ];
-
   return (
     <PageContainer>
-      <Table<Song>
-        columns={columns}
-        dataSource={albumDetail?.songs}
-        rowKey="id"
-        pagination={false}
-        onRow={(record) => ({
-          // 双击播放
-          onDoubleClick: () => {},
-        })}
-      />
+      专辑
     </PageContainer>
   );
 };
