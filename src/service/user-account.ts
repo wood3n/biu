@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface Account {
   id?: number;
@@ -65,4 +65,4 @@ export interface UserAccount {
 /*
  * 获取账号信息
  */
-export const getUserAccount = () => request.get<APIResponse<UserAccount>>('/user/account');
+export const getUserAccount = () => request.get<APIResponse<UserAccount>>("/user/account");

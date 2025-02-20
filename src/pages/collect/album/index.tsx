@@ -1,4 +1,4 @@
-import PageContainer from '@/components/PageContainer';
+import PageContainer from "@/components/PageContainer";
 
 /**
  * 收藏的专辑

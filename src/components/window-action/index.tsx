@@ -1,12 +1,8 @@
-import React from 'react';
-import Stack from '@mui/material/Stack';
-import IconButton from '@mui/material/IconButton';
-import {
-  MdOutlineFullscreenExit,
-  MdOutlineFullscreen,
-  MdClose,
-  MdRemove,
-} from 'react-icons/md';
+import React from "react";
+import { MdClose, MdOutlineFullscreen, MdRemove } from "react-icons/md";
+
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
 
 /**
  * 窗口关闭等按钮操作

@@ -1,13 +1,13 @@
-import { styled } from '@mui/material/styles';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import { styled } from "@mui/material/styles";
+import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 
 const StyledTableCell = styled(TableCell)(() => ({
   [`&.${tableCellClasses.head}`]: {
     padding: 8,
-    border: 'none',
+    border: "none",
   },
   [`&.${tableCellClasses.body}`]: {
-    border: 'none',
+    border: "none",
     padding: 8,
   },
 }));

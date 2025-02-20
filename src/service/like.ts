@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface LikeRequestData {
   id: number | undefined;
@@ -11,4 +11,4 @@ export interface LikeRequestData {
 /*
  * 喜欢音乐
  */
-export const postLike = (data: LikeRequestData) => request.post('/like', data);
+export const postLike = (data: LikeRequestData) => request.post("/like", data);

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useInterval } from 'ahooks';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { useInterval } from "ahooks";
 
 /**
  * 路由不匹配处理
@@ -13,18 +14,14 @@ const NotFound: React.FC = () => {
 
   useEffect(() => {
     if (count === 0) {
-      navigate('/');
+      navigate("/");
     }
   }, [count]);
 
   return (
     <div>
       <h1>404</h1>
-      <span>
-        {count}
-        {' '}
-        秒后回到主页...
-      </span>
+      <span>{count} 秒后回到主页...</span>
     </div>
   );
 };

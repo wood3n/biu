@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface SongDetailRequestParams {
   ids: string | undefined;
@@ -7,4 +7,4 @@ export interface SongDetailRequestParams {
 /*
  * 获取歌曲详情，多个 id用逗号隔开
  */
-export const getSongDetail = (params: SongDetailRequestParams) => request.get('/song/detail', { params });
+export const getSongDetail = (params: SongDetailRequestParams) => request.get("/song/detail", { params });

@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface UserAudioRequestParams {
   uid: number | undefined;
@@ -7,4 +7,4 @@ export interface UserAudioRequestParams {
 /*
  * 传入用户 id 可获取用户创建的电台
  */
-export const getUserAudio = (params: UserAudioRequestParams) => request.get('/user/audio', { params });
+export const getUserAudio = (params: UserAudioRequestParams) => request.get("/user/audio", { params });

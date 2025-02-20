@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface SongOrderUpdateRequestData {
   pid: number | undefined;
@@ -8,4 +8,4 @@ export interface SongOrderUpdateRequestData {
 /*
  * 调整歌曲顺序
  */
-export const postSongOrderUpdate = (data: SongOrderUpdateRequestData) => request.post('/song/order/update', data);
+export const postSongOrderUpdate = (data: SongOrderUpdateRequestData) => request.post("/song/order/update", data);

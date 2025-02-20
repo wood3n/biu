@@ -1,6 +1,7 @@
-import { atom, useAtom } from 'jotai';
-import type { UserDetail } from '@/service/user-detail';
-import type { UserAcountStats } from '@/service/user-subcount';
+import { atom, useAtom } from "jotai";
+
+import type { UserDetail } from "@/service/user-detail";
+import type { UserAcountStats } from "@/service/user-subcount";
 
 interface User {
   userInfo: UserDetail | null;

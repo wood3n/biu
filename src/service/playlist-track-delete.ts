@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface PlaylistTrackDeleteRequestData {
   pid: number | undefined;
@@ -8,4 +8,4 @@ export interface PlaylistTrackDeleteRequestData {
 /*
  * 删除视频歌单里的视频
  */
-export const postPlaylistTrackDelete = (data: PlaylistTrackDeleteRequestData) => request.post('/playlist/track/delete', data);
+export const postPlaylistTrackDelete = (data: PlaylistTrackDeleteRequestData) => request.post("/playlist/track/delete", data);

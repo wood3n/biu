@@ -1,5 +1,6 @@
-import { atom, useAtom } from 'jotai';
-import { type AlbumSublistData } from '@service/album-sublist';
+import { atom, useAtom } from "jotai";
+
+import type { AlbumSublistData } from "@/service/album-sublist";
 
 /**
  * 用户收藏的专辑

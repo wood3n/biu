@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface CaptchaSentRequestParams {
   phone: string | undefined;
@@ -13,4 +13,4 @@ export interface Response {
 /*
  * 发送验证码
  */
-export const getCaptchaSent = (params: CaptchaSentRequestParams) => request.get<Response>('/captcha/sent', { params });
+export const getCaptchaSent = (params: CaptchaSentRequestParams) => request.get<Response>("/captcha/sent", { params });

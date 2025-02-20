@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface PlaylistTrackAddRequestData {
   pid: number | undefined;
@@ -8,4 +8,4 @@ export interface PlaylistTrackAddRequestData {
 /*
  * 收藏视频到视频歌单
  */
-export const postPlaylistTrackAdd = (data: PlaylistTrackAddRequestData) => request.post('/playlist/track/add', data);
+export const postPlaylistTrackAdd = (data: PlaylistTrackAddRequestData) => request.post("/playlist/track/add", data);

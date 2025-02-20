@@ -20,6 +20,14 @@
           "global"
         ]
       }
+    ],
+    "block-no-empty": true,
+    "color-hex-length": "short",
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": ["extends", "tailwind"]
+      }
     ]
   }
 }

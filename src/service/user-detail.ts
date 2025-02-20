@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface UserDetailRequestParams {
   uid: number | undefined;
@@ -96,4 +96,4 @@ export interface UserDetail {
 /*
  * 获取用户详情
  */
-export const getUserDetail = (params: UserDetailRequestParams) => request.get<UserDetail>('/user/detail', { params });
+export const getUserDetail = (params: UserDetailRequestParams) => request.get<UserDetail>("/user/detail", { params });

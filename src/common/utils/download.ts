@@ -1,3 +1,1 @@
-export const download = (file: any) => {
-
-};
+export function download(file: any) {}

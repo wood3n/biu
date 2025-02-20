@@ -1,27 +1,26 @@
-import React, {
-  useState, useMemo,
-} from 'react';
-import { useNavigate } from 'react-router-dom';
-import useUser from '@/store/user-atom';
-import {
-  MdPlaylistAdd,
-} from 'react-icons/md';
-import { useAtomValue } from 'jotai';
-import { userPlaylistAtom } from '@/store/user-playlist-atom';
-import List from '@mui/material/List';
-import ListSubheader from '@mui/material/ListSubheader';
-import TooltipButton from '@/components/tooltip-button';
-import CreatePlayList from '@components/create-playlist';
-import ScrollObserverTarget from '@components/scroll-observer-target';
-import type { PlaylistInfoType } from '@service/user-playlist';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
-import ListItem from './play-list-item';
+import React, { useMemo, useState } from "react";
+import { MdPlaylistAdd } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+
+import { useAtomValue } from "jotai";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
+import List from "@mui/material/List";
+import ListSubheader from "@mui/material/ListSubheader";
+
+import CreatePlayList from "@/components/create-playlist";
+import ScrollObserverTarget from "@/components/scroll-observer-target";
+import TooltipButton from "@/components/tooltip-button";
+import type { PlaylistInfoType } from "@/service/user-playlist";
+import useUser from "@/store/user-atom";
+import { userPlaylistAtom } from "@/store/user-playlist-atom";
+
+import ListItem from "./play-list-item";
 
 interface Props {
   selectedKeys: string[];
 }
 
-interface PlaylistMenuType extends Omit<PlaylistInfoType, 'name' | 'id'> {
+interface PlaylistMenuType extends Omit<PlaylistInfoType, "name" | "id"> {
   label: React.ReactNode;
   key: string;
   id?: number;
@@ -32,9 +31,7 @@ interface PlaylistMenuType extends Omit<PlaylistInfoType, 'name' | 'id'> {
 /**
  * 菜单导航
  */
-const PlaylistMenu = ({
-  selectedKeys,
-}: Props) => {
+function PlaylistMenu({ selectedKeys }: Props) {
   const navigate = useNavigate();
   const [user] = useUser();
   const userPlaylist = useAtomValue(userPlaylistAtom);
@@ -42,7 +39,7 @@ const PlaylistMenu = ({
 
   const menus: PlaylistMenuType[] = useMemo(() => {
     const playListMenu = [];
-    const createdList = userPlaylist?.filter((item) => item.creator?.userId === user?.userInfo?.profile?.userId);
+    const createdList = userPlaylist?.filter(item => item.creator?.userId === user?.userInfo?.profile?.userId);
     if (createdList?.length) {
       playListMenu.push({
         label: (
@@ -60,10 +57,8 @@ const PlaylistMenu = ({
             </TooltipButton>
           </div>
         ),
-        key: 'created',
-        sub: createdList?.map(({
-          id, name, coverImgUrl, trackCount,
-        }) => ({
+        key: "created",
+        sub: createdList?.map(({ id, name, coverImgUrl, trackCount }) => ({
           label: name,
           id,
           key: `/playlist/${id}`,
@@ -73,14 +68,12 @@ const PlaylistMenu = ({
       });
     }
 
-    const collectList = userPlaylist?.filter((item) => item.creator?.userId !== user?.userInfo?.profile?.userId);
+    const collectList = userPlaylist?.filter(item => item.creator?.userId !== user?.userInfo?.profile?.userId);
     if (collectList?.length) {
       playListMenu.push({
-        label: '收藏的歌单',
-        key: 'collect',
-        sub: collectList?.map(({
-          id, name, coverImgUrl, trackCount,
-        }) => ({
+        label: "收藏的歌单",
+        key: "collect",
+        sub: collectList?.map(({ id, name, coverImgUrl, trackCount }) => ({
           label: name,
           id,
           key: `/playlist/${id}`,
@@ -95,34 +88,28 @@ const PlaylistMenu = ({
 
   return (
     <>
-      <OverlayScrollbarsComponent style={{ height: '100%' }}>
+      <OverlayScrollbarsComponent style={{ height: "100%" }}>
         <List
           sx={{
-            width: '100%',
-            position: 'relative',
-            '& ul': { padding: 0 },
+            width: "100%",
+            position: "relative",
+            "& ul": { padding: 0 },
           }}
           subheader={<li />}
         >
-          {menus.map(({
-            label, sub, key,
-          }) => ((
+          {menus.map(({ label, sub, key }) => (
             <li key={key}>
               <ul>
                 <ListSubheader
                   sx={{
-                    background: '#1E1E1E',
+                    background: "#1E1E1E",
                   }}
                   className="sider-play-list-subheader"
                 >
                   {label}
                 </ListSubheader>
-                <ScrollObserverTarget
-                  searchInParent
-                  deps={userPlaylist}
-                  stickyElSelector=".sider-play-list-subheader"
-                />
-                {sub?.map((child) => (
+                <ScrollObserverTarget searchInParent deps={userPlaylist} stickyElSelector=".sider-play-list-subheader" />
+                {sub?.map(child => (
                   <ListItem
                     key={child.key}
                     selected={selectedKeys.includes(child.key)}
@@ -134,15 +121,12 @@ const PlaylistMenu = ({
                 ))}
               </ul>
             </li>
-          )))}
+          ))}
         </List>
       </OverlayScrollbarsComponent>
-      <CreatePlayList
-        open={open}
-        onClose={() => setOpen(false)}
-      />
+      <CreatePlayList open={open} onClose={() => setOpen(false)} />
     </>
   );
-};
+}
 
 export default PlaylistMenu;

@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface TopicSublistRequestParams {
   limit: number | undefined;
@@ -8,4 +8,4 @@ export interface TopicSublistRequestParams {
 /*
  * 收藏的专栏
  */
-export const getTopicSublist = (params: TopicSublistRequestParams) => request.get('/topic/sublist', { params });
+export const getTopicSublist = (params: TopicSublistRequestParams) => request.get("/topic/sublist", { params });

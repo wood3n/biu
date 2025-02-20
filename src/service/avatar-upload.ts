@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface AvatarUploadRequestParams {
   imgSize: number | undefined;
@@ -12,4 +12,4 @@ export interface AvatarUploadRequestData {
 /*
  * 更新头像
  */
-export const postAvatarUpload = (data: AvatarUploadRequestData, params: AvatarUploadRequestParams) => request.post('/avatar/upload', data, { params });
+export const postAvatarUpload = (data: AvatarUploadRequestData, params: AvatarUploadRequestParams) => request.post("/avatar/upload", data, { params });

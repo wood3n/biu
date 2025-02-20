@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface SearchMultimatchRequestParams {
   keywords: string | undefined;
@@ -7,4 +7,4 @@ export interface SearchMultimatchRequestParams {
 /*
  * 搜索多重匹配
  */
-export const getSearchMultimatch = (params: SearchMultimatchRequestParams) => request.get('/search/multimatch', { params });
+export const getSearchMultimatch = (params: SearchMultimatchRequestParams) => request.get("/search/multimatch", { params });

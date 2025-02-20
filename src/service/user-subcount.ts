@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface UserAcountStats {
   programCount?: number;
@@ -15,4 +15,4 @@ export interface UserAcountStats {
 /*
  * 获取用户信息，歌单，收藏，mv，dj 数量
  */
-export const getUserSubcount = () => request.get<UserAcountStats>('/user/subcount');
+export const getUserSubcount = () => request.get<UserAcountStats>("/user/subcount");

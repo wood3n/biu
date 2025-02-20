@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
-import {
-  MdSearch,
-} from 'react-icons/md';
-import {
-  useTheme, Autocomplete, InputAdornment, IconButton, TextField, Typography,
-} from '@mui/material';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import React, { useState } from "react";
+import { MdSearch } from "react-icons/md";
+
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
+import { Autocomplete, IconButton, InputAdornment, TextField, Typography, useTheme } from "@mui/material";
 
 interface Props {
   placeholder: string;
@@ -13,20 +10,13 @@ interface Props {
   onChange: (value: string | null) => void;
 }
 
-const ListboxComponent = React.forwardRef<
-HTMLDivElement,
-React.HTMLAttributes<HTMLElement>
->((props, ref) => (
-  <OverlayScrollbarsComponent style={{ height: '100%' }}>
+const ListboxComponent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLElement>>((props, ref) => (
+  <OverlayScrollbarsComponent style={{ height: "100%" }}>
     <ul {...props} />
   </OverlayScrollbarsComponent>
 ));
 
-const SearchAutoComplete = React.memo(({
-  placeholder,
-  options,
-  onChange,
-}: Props) => {
+const SearchAutoComplete = React.memo(({ placeholder, options, onChange }: Props) => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
 
@@ -53,8 +43,8 @@ const SearchAutoComplete = React.memo(({
       }}
       sx={{
         width: 240,
-        '& .MuiFormControl-root .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-colorPrimary': {
-          padding: '4px',
+        "& .MuiFormControl-root .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-colorPrimary": {
+          padding: "4px",
         },
       }}
       componentsProps={{
@@ -66,12 +56,12 @@ const SearchAutoComplete = React.memo(({
       }}
       ListboxProps={{
         sx: {
-          height: 'auto',
-          overflow: 'initial',
+          height: "auto",
+          overflow: "initial",
         },
       }}
       ListboxComponent={ListboxComponent}
-      renderInput={(params) => (
+      renderInput={params => (
         <TextField
           {...params}
           variant="outlined"
@@ -80,32 +70,28 @@ const SearchAutoComplete = React.memo(({
             ...params.InputProps,
             startAdornment: (
               <InputAdornment position="end">
-                <IconButton
-                  aria-label="search"
-                  edge="end"
-                  size="small"
-                >
+                <IconButton aria-label="search" edge="end" size="small">
                   <MdSearch size={14} color={theme.palette.text.secondary} />
                 </IconButton>
               </InputAdornment>
             ),
             sx: {
-              fontSize: (theme) => theme.typography.body2.fontSize,
-              borderRadius: (theme) => theme.shape.borderRadius,
-              '& .MuiInputBase-input': {
-                padding: '6px 14px',
+              fontSize: theme => theme.typography.body2.fontSize,
+              borderRadius: theme => theme.shape.borderRadius,
+              "& .MuiInputBase-input": {
+                padding: "6px 14px",
               },
-              '&:hover': {
-                borderColor: (theme) => theme.palette.primary.main,
+              "&:hover": {
+                borderColor: theme => theme.palette.primary.main,
               },
-              '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: (theme) => theme.palette.primary.main,
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme => theme.palette.primary.main,
               },
-              '&:focus': {
-                borderColor: (theme) => theme.palette.primary.main,
+              "&:focus": {
+                borderColor: theme => theme.palette.primary.main,
               },
-              '&:focus .MuiOutlinedInput-notchedOutline': {
-                borderColor: (theme) => theme.palette.primary.main,
+              "&:focus .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme => theme.palette.primary.main,
               },
             },
           }}

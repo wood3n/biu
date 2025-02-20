@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface PersonalizedNewsongRequestParams {
   limit: number | undefined;
@@ -174,4 +174,4 @@ export interface FreeTrialPrivilege {
 /*
  * 推荐新音乐
  */
-export const getPersonalizedNewsong = (params: PersonalizedNewsongRequestParams) => request.get<PersonalizedNewsongData>('/personalized/newsong', { params });
+export const getPersonalizedNewsong = (params: PersonalizedNewsongRequestParams) => request.get<PersonalizedNewsongData>("/personalized/newsong", { params });

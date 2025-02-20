@@ -1,19 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Avatar,
-  Typography,
-  Row,
-  Col,
-  Card,
-  Pagination,
-  Spin,
-} from 'antd';
-import { AiOutlineUser } from 'react-icons/ai';
+import React, { useEffect, useState } from "react";
+import { AiOutlineUser } from "react-icons/ai";
+
+import { useRequest } from "ahooks";
+import { Avatar, Card, Col, Pagination, Row, Spin, Typography } from "antd";
+
+import { getUserFollows } from "@/service";
 // import { useUser } from '@/common/hooks';
-import useUser from '@/store/user-atom';
-import { useRequest } from 'ahooks';
-import { getUserFollows } from '@/service';
-import styles from './index.module.less';
+import useUser from "@/store/user-atom";
+
+import styles from "./index.module.less";
 
 /**
  * 我的关注
@@ -41,36 +36,17 @@ const MyFocus: React.FC = () => {
       <Spin spinning={loading}>
         <Row gutter={[24, 24]}>
           {data?.follow?.map(({ avatarUrl, nickname, userId }) => (
-            <Col
-              key={userId}
-              md={{ span: 6 }}
-              lg={{ span: 6 }}
-              xl={{ span: 4 }}
-              xxl={{ span: 4 }}
-            >
+            <Col key={userId} md={{ span: 6 }} lg={{ span: 6 }} xl={{ span: 4 }} xxl={{ span: 4 }}>
               <Card bordered={false} hoverable className={styles.userCard}>
-                <Avatar
-                  size={120}
-                  src={avatarUrl}
-                  icon={<AiOutlineUser />}
-                />
-                <Typography.Title
-                  level={5}
-                  ellipsis={{ tooltip: nickname }}
-                >
+                <Avatar size={120} src={avatarUrl} icon={<AiOutlineUser />} />
+                <Typography.Title level={5} ellipsis={{ tooltip: nickname }}>
                   {nickname}
                 </Typography.Title>
               </Card>
             </Col>
           ))}
         </Row>
-        <Pagination
-          className={styles.pagination}
-          current={page}
-          pageSize={12}
-          total={user?.userInfo?.profile?.follows}
-          onChange={(v) => setPage(v)}
-        />
+        <Pagination className={styles.pagination} current={page} pageSize={12} total={user?.userInfo?.profile?.follows} onChange={v => setPage(v)} />
       </Spin>
     </>
   );

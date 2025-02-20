@@ -1,8 +1,10 @@
-import { BsMusicNoteBeamed } from 'react-icons/bs';
-import { Img } from 'react-image';
-import CircularProgress from '@mui/material/CircularProgress';
-import { useTheme } from '@mui/material/styles';
-import './index.less';
+import { BsMusicNoteBeamed } from "react-icons/bs";
+import { Img } from "react-image";
+
+import CircularProgress from "@mui/material/CircularProgress";
+import { useTheme } from "@mui/material/styles";
+
+import "./index.less";
 
 interface Props {
   src?: string;
@@ -17,44 +19,31 @@ interface Props {
   circle?: boolean;
 }
 
-const Image = ({
-  src = '',
-  mask,
-  width = 48,
-  height = 48,
-  fallback,
-  circle,
-  style,
-}: Props) => {
+function Image({ src = "", mask, width = 48, height = 48, fallback, circle, style }: Props) {
   const theme = useTheme();
 
   return mask ? (
-    <div
-      className="m-image-container"
-      onClick={mask.onClick}
-      style={{ width, height, borderRadius: theme.shape.borderRadius }}
-    >
+    <div className="m-image-container" onClick={mask.onClick} style={{ width, height, borderRadius: theme.shape.borderRadius }}>
       <Img
         alt="name"
         width={width}
         height={height}
         src={src}
-        loader={(
-          <div
-            className="image-process-fallback"
-            style={{ width, height, borderRadius: theme.shape.borderRadius }}
-          >
+        loader={
+          <div className="image-process-fallback" style={{ width, height, borderRadius: theme.shape.borderRadius }}>
             <CircularProgress size={width * 0.3} />
           </div>
-        )}
-        unloader={fallback || (
-          <div className="image-process-fallback" style={{ width, height, borderRadius: theme.shape.borderRadius }}>
-            <BsMusicNoteBeamed size={width * 0.5} />
-          </div>
-        )}
+        }
+        unloader={
+          fallback || (
+            <div className="image-process-fallback" style={{ width, height, borderRadius: theme.shape.borderRadius }}>
+              <BsMusicNoteBeamed size={width * 0.5} />
+            </div>
+          )
+        }
         loading="lazy"
         style={{
-          borderRadius: circle ? '50%' : theme.shape.borderRadius,
+          borderRadius: circle ? "50%" : theme.shape.borderRadius,
           ...style,
         }}
       />
@@ -73,26 +62,25 @@ const Image = ({
       width={width}
       height={height}
       src={src}
-      loader={(
-        <div
-          className="image-process-fallback"
-          style={{ width, height, borderRadius: theme.shape.borderRadius }}
-        >
+      loader={
+        <div className="image-process-fallback" style={{ width, height, borderRadius: theme.shape.borderRadius }}>
           <CircularProgress size={width * 0.3} />
         </div>
-      )}
-      unloader={fallback || (
-        <div className="image-process-fallback" style={{ width, height, borderRadius: theme.shape.borderRadius }}>
-          <BsMusicNoteBeamed size={width * 0.5} />
-        </div>
-      )}
+      }
+      unloader={
+        fallback || (
+          <div className="image-process-fallback" style={{ width, height, borderRadius: theme.shape.borderRadius }}>
+            <BsMusicNoteBeamed size={width * 0.5} />
+          </div>
+        )
+      }
       loading="lazy"
       style={{
-        borderRadius: circle ? '50%' : theme.shape.borderRadius,
+        borderRadius: circle ? "50%" : theme.shape.borderRadius,
         ...style,
       }}
     />
   );
-};
+}
 
 export default Image;

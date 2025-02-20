@@ -1,17 +1,16 @@
-import React from 'react';
-import Dialog from '@mui/material/Dialog';
-import Slide from '@mui/material/Slide';
-import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
-import {
-  MdClose,
-} from 'react-icons/md';
-import type { TransitionProps } from '@mui/material/transitions';
-import BlurBackground from './blur-background';
-import Image from '../image';
-import LyricsList from '../lyrics-list';
+import React from "react";
+import { MdClose } from "react-icons/md";
+
+import Container from "@mui/material/Container";
+import Dialog from "@mui/material/Dialog";
+import Grid from "@mui/material/Grid";
+import IconButton from "@mui/material/IconButton";
+import Slide from "@mui/material/Slide";
+import type { TransitionProps } from "@mui/material/transitions";
+
+import Image from "../image";
+import LyricsList from "../lyrics-list";
+import BlurBackground from "./blur-background";
 
 interface Props {
   open: boolean;
@@ -24,36 +23,24 @@ interface Props {
   current: number;
 }
 
-const Transition = React.forwardRef((
-  props: TransitionProps & {
-    children: React.ReactElement;
-  },
-  ref: React.Ref<unknown>,
-) => <Slide direction="up" ref={ref} {...props} />);
+const Transition = React.forwardRef(
+  (
+    props: TransitionProps & {
+      children: React.ReactElement;
+    },
+    ref: React.Ref<unknown>,
+  ) => <Slide direction="up" ref={ref} {...props} />,
+);
 
-const FullScreenPlayCenter = React.memo(({
-  open,
-  onClose,
-  song,
-  lyrics,
-  volume,
-  rate,
-  duration,
-  current,
-}: Props) => (
-  <Dialog
-    fullScreen
-    open={open}
-    onClose={onClose}
-    TransitionComponent={Transition}
-  >
+const FullScreenPlayCenter = React.memo(({ open, onClose, song, lyrics, volume, rate, duration, current }: Props) => (
+  <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
     {song?.al?.picUrl && <BlurBackground backgroundImageUrl={song?.al?.picUrl} />}
     <Container
       maxWidth="lg"
       sx={{
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
         zIndex: 1,
       }}
     >
@@ -62,20 +49,15 @@ const FullScreenPlayCenter = React.memo(({
           size="small"
           onClick={onClose}
           sx={{
-            position: 'absolute',
-            top: '12px',
-            right: '12px',
+            position: "absolute",
+            top: "12px",
+            right: "12px",
           }}
         >
           <MdClose />
         </IconButton>
         <Grid item xs={8}>
-          <Image
-            circle
-            width={240}
-            height={240}
-            src={song?.al?.picUrl}
-          />
+          <Image circle width={240} height={240} src={song?.al?.picUrl} />
         </Grid>
         <Grid item xs={4}>
           <LyricsList lyrics={lyrics} />

@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface DjHotRequestParams {
   limit: number | undefined;
@@ -8,4 +8,4 @@ export interface DjHotRequestParams {
 /*
  * 热门电台
  */
-export const getDjHot = (params: DjHotRequestParams) => request.get('/dj/hot', { params });
+export const getDjHot = (params: DjHotRequestParams) => request.get("/dj/hot", { params });

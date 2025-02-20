@@ -1,14 +1,6 @@
-import {
-  MdToday,
-  MdRadio,
-  MdHistory,
-  MdRecommend,
-  MdOutlineLibraryAdd,
-  MdOutlineWbCloudy,
-  MdRecentActors,
-} from 'react-icons/md';
-import { BiLibrary } from 'react-icons/bi';
-import { IoRadio } from 'react-icons/io5';
+import { BiLibrary } from "react-icons/bi";
+import { IoRadio } from "react-icons/io5";
+import { MdHistory, MdOutlineLibraryAdd, MdOutlineWbCloudy, MdRadio, MdRecentActors, MdRecommend, MdToday } from "react-icons/md";
 
 export interface MenuProps {
   label: React.ReactNode;
@@ -19,39 +11,39 @@ export interface MenuProps {
 
 export default [
   {
-    label: '推荐',
+    label: "推荐",
     icon: <MdRecommend />,
-    key: '/',
+    key: "/",
   },
   {
-    label: '日推',
+    label: "日推",
     icon: <MdToday />,
-    key: '/daily',
+    key: "/daily",
   },
   {
-    label: '私人FM',
+    label: "私人FM",
     icon: <MdRadio />,
-    key: '/fm',
+    key: "/fm",
   },
   {
-    label: '播客',
+    label: "播客",
     icon: <IoRadio />,
-    key: '/podcast',
+    key: "/podcast",
   },
   {
-    label: '音乐库',
-    key: 'lib',
+    label: "音乐库",
+    key: "lib",
     icon: <MdOutlineLibraryAdd />,
     sub: [
       {
-        label: '专辑',
+        label: "专辑",
         icon: <BiLibrary />,
-        key: '/collect/album',
+        key: "/collect/album",
       },
       {
-        label: '艺人',
+        label: "艺人",
         icon: <MdRecentActors />,
-        key: '/collect/artist',
+        key: "/collect/artist",
       },
       // {
       //   label: '收藏',
@@ -59,14 +51,14 @@ export default [
       //   key: '/collect',
       // },
       {
-        label: '云盘',
+        label: "云盘",
         icon: <MdOutlineWbCloudy />,
-        key: '/drive',
+        key: "/drive",
       },
       {
-        label: '最近播放',
+        label: "最近播放",
         icon: <MdHistory />,
-        key: '/history',
+        key: "/history",
       },
     ],
   },

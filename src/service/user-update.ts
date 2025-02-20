@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface UserUpdateRequestParams {
   gender: number | undefined;
@@ -12,4 +12,4 @@ export interface UserUpdateRequestParams {
 /*
  * 更新用户信息
  */
-export const getUserUpdate = (params: UserUpdateRequestParams) => request.get('/user/update', { params });
+export const getUserUpdate = (params: UserUpdateRequestParams) => request.get("/user/update", { params });

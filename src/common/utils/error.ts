@@ -1,9 +1,9 @@
-import { message } from 'antd';
+import { message } from "antd";
 
-export const checkError = (err: unknown) => {
+export function checkError(err: unknown) {
   if (err instanceof Error) {
     message.error(err.message);
-  } else if (typeof err === 'string') {
+  } else if (typeof err === "string") {
     message.error(err);
   }
-};
+}

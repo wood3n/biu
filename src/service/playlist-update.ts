@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface PlaylistUpdateRequestData {
   id: number | undefined;
@@ -10,4 +10,4 @@ export interface PlaylistUpdateRequestData {
 /*
  * 更新歌单
  */
-export const postPlaylistUpdate = (data: PlaylistUpdateRequestData) => request.post('/playlist/update', data);
+export const postPlaylistUpdate = (data: PlaylistUpdateRequestData) => request.post("/playlist/update", data);

@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface RecommendResourceData {
   code?: number;
@@ -53,4 +53,4 @@ export interface Creator {
 /*
  * 获取每日推荐歌单
  */
-export const getRecommendResource = () => request.get<RecommendResourceData>('/recommend/resource');
+export const getRecommendResource = () => request.get<RecommendResourceData>("/recommend/resource");

@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface UserPlaylistRequestParams {
   uid: number | undefined;
@@ -100,4 +100,4 @@ export interface PersonalPlayList {
 /*
  * 获取用户歌单
  */
-export const getUserPlaylist = (params: UserPlaylistRequestParams) => request.get<PersonalPlayList>('/user/playlist', { params });
+export const getUserPlaylist = (params: UserPlaylistRequestParams) => request.get<PersonalPlayList>("/user/playlist", { params });

@@ -14,5 +14,5 @@ export enum QRLoginCode {
   /**
    * 成功登录
    */
-  Success = 803
+  Success = 803,
 }

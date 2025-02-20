@@ -6,5 +6,5 @@ export const win = {
   close: () => window.electron.close(),
   max: () => window.electron.maxWin(),
   min: () => window.electron.minWin(),
-  resize: () => window.electron.resize()
+  resize: () => window.electron.resize(),
 };

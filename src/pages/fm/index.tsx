@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import PageContainer from '@/components/PageContainer';
-import { Spin } from 'antd';
-import SongCard from '@/components/SongCard';
-import { useRequest } from 'ahooks';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { EffectCoverflow } from 'swiper';
-import 'swiper/css';
-import 'swiper/css/effect-coverflow';
-import 'swiper/css/pagination';
-import { getPersonalFM } from '@/service';
-import type { Artist } from '@/service/personal-fm';
-import './index.css';
+import React, { useEffect, useState } from "react";
+import "swiper/css";
+import "swiper/css/effect-coverflow";
+import "swiper/css/pagination";
+
+import { useRequest } from "ahooks";
+import { EffectCoverflow } from "swiper";
+import { Swiper, SwiperSlide } from "swiper/react";
+
+import PageContainer from "@/components/PageContainer";
+import { getPersonalFM } from "@/service";
+import type { Artist } from "@/service/personal-fm";
+
+import "./index.css";
 
 interface Song {
   id?: number;
@@ -27,15 +28,18 @@ const FM: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const { runAsync } = useRequest(getPersonalFM, {
     onSuccess: ({ data }) => {
-      const existSongIds = fms.map((item) => item.id);
-      setfms([...fms, ...data?.filter(({ id }) => !existSongIds.includes(id))?.map(({
-        name, id, album, artists,
-      }) => ({
-        id,
-        name,
-        pic: album?.picUrl,
-        artists,
-      })) ?? []]);
+      const existSongIds = fms.map(item => item.id);
+      setfms([
+        ...fms,
+        ...(data
+          ?.filter(({ id }) => !existSongIds.includes(id))
+          ?.map(({ name, id, album, artists }) => ({
+            id,
+            name,
+            pic: album?.picUrl,
+            artists,
+          })) ?? []),
+      ]);
     },
   });
 
@@ -62,20 +66,11 @@ const FM: React.FC = () => {
         }}
         pagination={false}
         modules={[EffectCoverflow]}
-        onActiveIndexChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+        onActiveIndexChange={swiper => setActiveIndex(swiper.activeIndex)}
       >
-        {fms.map(({
-          id, name, pic, artists,
-        }) => (
+        {fms.map(({ id, name, pic, artists }) => (
           <SwiperSlide key={`${id as number}_${name as string}`}>
-            <SongCard
-              id={id}
-              name={name}
-              pic={pic}
-              imgWidth={250}
-              imgHeight={250}
-              arts={artists}
-            />
+            <div>测试</div>
           </SwiperSlide>
         ))}
       </Swiper>

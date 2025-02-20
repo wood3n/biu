@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface likelistRequestParams {
   uid: number | undefined;
@@ -13,4 +13,4 @@ export interface LikelistResponse {
 /*
  * 喜欢的音乐列表id
  */
-export const getLikelist = (params: likelistRequestParams) => request.get<LikelistResponse>('/likelist', { params });
+export const getLikeList = (params: likelistRequestParams) => request.get<LikelistResponse>("/likelist", { params });

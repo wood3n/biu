@@ -1,4 +1,4 @@
-import { atom } from 'jotai';
+import { atom } from "jotai";
 
 /**
  * 当前播放列表

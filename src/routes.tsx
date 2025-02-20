@@ -1,86 +1,82 @@
-import type { RouteObject } from 'react-router-dom';
-import GridLayout from './layout/grid';
-import Login from './pages/login';
-import Home from './pages/home';
-import NotFound from './pages/not-found';
-import UserProfile from './pages/user-profile';
-import FM from './pages/fm';
-import Search from './pages/search';
-import PlayList from './pages/playlist';
-import Album from './pages/album';
-import Artist from './pages/artist';
-import Collect from './pages/collect';
-import Podcast from './pages/podcast';
-import CollectAlbum from './pages/collect/album';
-import CollectArtist from './pages/collect/artist';
-import CloudDrive from './pages/cloud-drive';
+import type { RouteObject } from "react-router-dom";
+
+import DefaultLayout from "./layout/default";
+import Album from "./pages/album";
+import Artist from "./pages/artist";
+import CloudDrive from "./pages/cloud-drive";
+import Collect from "./pages/collect";
+import CollectAlbum from "./pages/collect/album";
+import CollectArtist from "./pages/collect/artist";
+import FM from "./pages/fm";
+import Home from "./pages/home";
+import Login from "./pages/login";
+import NotFound from "./pages/not-found";
+import PlayList from "./pages/playlist";
+import Podcast from "./pages/podcast";
+import UserProfile from "./pages/user-profile";
 
 const routes: RouteObject[] = [
   {
-    path: '/',
-    element: <GridLayout />,
+    path: "/",
+    element: <DefaultLayout />,
     children: [
       {
         index: true,
         element: <Home />,
       },
       {
-        path: '/fm',
+        path: "/fm",
         element: <FM />,
       },
       {
-        path: '/profile/:id',
+        path: "/profile/:id",
         element: <UserProfile />,
       },
       {
-        path: '/search',
-        element: <Search />,
-      },
-      {
-        path: '/collect',
+        path: "/collect",
         element: <Collect />,
       },
       {
-        path: '/podcast',
+        path: "/podcast",
         element: <Podcast />,
       },
       {
-        path: '/drive',
+        path: "/drive",
         element: <CloudDrive />,
       },
       {
-        path: '/album/:id',
+        path: "/album/:id",
         element: <Album />,
       },
       {
-        path: '/collect',
+        path: "/collect",
         children: [
           {
-            path: 'album',
+            path: "album",
             element: <CollectAlbum />,
           },
           {
-            path: 'artist',
+            path: "artist",
             element: <CollectArtist />,
           },
         ],
       },
       {
-        path: '/playlist/:pid',
+        path: "/playlist/:pid",
         element: <PlayList />,
       },
       {
-        path: '/artist/:id',
+        path: "/artist/:id",
         element: <Artist />,
       },
     ],
   },
   {
-    path: '/login',
+    path: "/login",
     element: <Login />,
   },
   {
-    path: '*',
+    path: "*",
     element: <NotFound />,
   },
 ];

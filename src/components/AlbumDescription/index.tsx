@@ -1,44 +1,28 @@
-import React, { useState } from 'react';
-import {
-  Typography, Image, Space, Modal, Avatar, Tooltip,
-} from 'antd';
-import { useNavigate } from 'react-router-dom';
-import type { Album } from '@service/album';
-import { formatMillisecond } from '@/common/utils';
-import { IMAGE_ERR } from '@/common/constants';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
-import styles from './index.module.less';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const AlbumDescription: React.FC<Album> = ({
-  name,
-  picUrl,
-  description,
-  artists,
-  company,
-  size,
-  publishTime,
-}) => {
+import { Avatar, Image, Modal, Space, Tooltip, Typography } from "antd";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
+
+import { IMAGE_ERR } from "@/common/constants";
+import { formatMillisecond } from "@/common/utils";
+import type { Album } from "@/service/album";
+
+import styles from "./index.module.less";
+
+const AlbumDescription: React.FC<Album> = ({ name, picUrl, description, artists, company, size, publishTime }) => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   return (
     <div className={styles.albumDescription}>
-      <Image
-        preview={false}
-        width={200}
-        height={200}
-        src={picUrl}
-        fallback={IMAGE_ERR}
-        className={styles.coverImage}
-      />
+      <Image preview={false} width={200} height={200} src={picUrl} fallback={IMAGE_ERR} className={styles.coverImage} />
       <Space direction="vertical">
         <Typography.Title>{name}</Typography.Title>
         <Avatar.Group size="large">
-          {artists?.map(({
-            picUrl, name, id,
-          }) => (
+          {artists?.map(({ picUrl, name, id }) => (
             <Tooltip key={id} title={name} placement="top">
-              <Avatar src={picUrl} onClick={() => navigate(`/artist/${id}`)} style={{ cursor: 'pointer' }} />
+              <Avatar src={picUrl} onClick={() => navigate(`/artist/${id}`)} style={{ cursor: "pointer" }} />
             </Tooltip>
           ))}
         </Avatar.Group>
@@ -62,7 +46,7 @@ const AlbumDescription: React.FC<Album> = ({
             expandable: true,
             symbol: (
               <a
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   setOpen(true);
                 }}
@@ -72,34 +56,25 @@ const AlbumDescription: React.FC<Album> = ({
             ),
           }}
           style={{
-            whiteSpace: 'pre-line',
+            whiteSpace: "pre-line",
           }}
         >
           {description}
         </Typography.Paragraph>
       </Space>
-      <Modal
-        centered
-        maskClosable
-        open={open}
-        onCancel={() => setOpen(false)}
-        width={600}
-        footer={null}
-      >
-        <Typography.Title>
-          {name}
-        </Typography.Title>
+      <Modal centered maskClosable open={open} onCancel={() => setOpen(false)} width={600} footer={null}>
+        <Typography.Title>{name}</Typography.Title>
         <Avatar.Group size="large" style={{ marginBottom: 16 }}>
           {artists?.map(({ picUrl, name, id }) => (
             <Tooltip key={id} title={name} placement="top">
-              <Avatar src={picUrl} onClick={() => navigate(`/artist/${id}`)} style={{ cursor: 'pointer' }} />
+              <Avatar src={picUrl} onClick={() => navigate(`/artist/${id}`)} style={{ cursor: "pointer" }} />
             </Tooltip>
           ))}
         </Avatar.Group>
         <OverlayScrollbarsComponent style={{ height: 420 }}>
           <Typography.Paragraph
             style={{
-              whiteSpace: 'pre-line',
+              whiteSpace: "pre-line",
             }}
           >
             {description}

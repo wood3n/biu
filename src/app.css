@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.window-drag {
+  app-region: drag;
+}
+
+.window-no-drag {
+  app-region: no-drag;
+}

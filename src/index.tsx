@@ -1,19 +1,6 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { HashRouter, useRoutes } from 'react-router-dom';
-import routes from './routes';
-import ThemeProvider from './store/provider/theme-provider';
-import '@/common/style/global.less';
+import { createRoot } from "react-dom/client";
 
-const App = () => useRoutes(routes);
+import { App } from "./app";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <HashRouter basename="/">
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
-    </HashRouter>
-  </React.StrictMode>,
-  document.getElementById('root'),
-);
+const root = createRoot(document.getElementById("root") as Element);
+root.render(<App />);

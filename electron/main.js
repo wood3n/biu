@@ -1,12 +1,7 @@
-const {
-  app,
-  BrowserWindow,
-  nativeImage,
-  ipcMain,
-} = require('electron');
-const path = require('path');
-const Store = require('electron-store');
-const { createTray } = require('./createTray');
+const path = require("node:path");
+const Store = require("electron-store");
+const { app, BrowserWindow, nativeImage, ipcMain } = require("electron/main");
+const { createTray } = require("./createTray");
 
 const store = new Store();
 
@@ -15,9 +10,9 @@ let mainWindow;
 function createWindow() {
   // 初始打开窗口的配置项
   mainWindow = new BrowserWindow({
-    title: 'rate',
+    title: "Tune",
     // windows taskbar icon
-    icon: path.resolve(process.cwd(), process.platform === 'win32' ? './public/electron/windows_tray.ico' : './public/electron/macos_dock.png'),
+    icon: path.resolve(process.cwd(), process.platform === "win32" ? "./public/electron/windows_tray.ico" : "./public/electron/macos_dock.png"),
     show: true,
     hasShadow: false,
     width: 1560,
@@ -32,17 +27,17 @@ function createWindow() {
     // 无边框
     frame: true,
     // macos不需要设置frame-false，只需要titleBarStyle即可隐藏边框，因此也不需要自定义窗口操作
-    titleBarStyle: 'hiddenInset',
+    titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 14, y: 14 },
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, "preload.js"),
       nodeIntegration: true,
     },
   });
 
   // MAC dock icon
-  if (process.platform === 'darwin') {
-    const dockIcon = nativeImage.createFromPath(path.resolve(process.cwd(), './public/electron/macos_dock.png'));
+  if (process.platform === "darwin") {
+    const dockIcon = nativeImage.createFromPath(path.resolve(process.cwd(), "./public/electron/macos_dock.png"));
     app.dock.setIcon(dockIcon);
   }
 
@@ -74,21 +69,21 @@ function createWindow() {
   // ]);
 
   // windows自定义窗口
-  if (process.platform === 'win32') {
-    ipcMain.handle('isMaximized', () => {
+  if (process.platform === "win32") {
+    ipcMain.handle("isMaximized", () => {
       console.log(mainWindow.isMaximized());
       return mainWindow.isMaximized();
     });
-    ipcMain.handle('close-window', () => {
+    ipcMain.handle("close-window", () => {
       app.quit();
     });
-    ipcMain.handle('min-win', () => mainWindow.minimize());
-    ipcMain.handle('resize', () => {
-      const bounds = store.get('bounds');
+    ipcMain.handle("min-win", () => mainWindow.minimize());
+    ipcMain.handle("resize", () => {
+      const bounds = store.get("bounds");
       if (mainWindow.isMaximized()) {
         mainWindow.setBounds(bounds || { width: 800, height: 800 });
       } else {
-        store.set('bounds', bounds);
+        store.set("bounds", bounds);
         mainWindow.maximize();
       }
     });
@@ -96,15 +91,15 @@ function createWindow() {
 
   // https://www.electronjs.org/docs/latest/api/app#appispackaged-readonly
   if (app.isPackaged) {
-    mainWindow.loadFile('./dist/web/index.html');
+    mainWindow.loadFile("./dist/web/index.html");
   } else {
     mainWindow.loadURL(`http://localhost:${process.env.PORT}/`);
     mainWindow.webContents.openDevTools({
-      mode: 'bottom',
+      mode: "bottom",
     });
   }
 
-  mainWindow.on('close', (event) => {
+  mainWindow.on("close", event => {
     if (app.quitting) {
       mainWindow = null;
     } else {
@@ -122,13 +117,15 @@ app.whenReady().then(() => {
   createWindow();
 });
 
-app.on('activate', () => mainWindow.show());
+app.on("activate", () => mainWindow.show());
 
-app.on('before-quit', () => { app.quitting = true });
+app.on("before-quit", () => {
+  app.quitting = true;
+});
 
-app.on('window-all-closed', () => {
+app.on("window-all-closed", () => {
   // 如果用户不是在 macOS(darwin) 上运行程序，调用 quit 方法在所有窗口关闭后结束 electron 进程
-  if (process.platform !== 'darwin') {
+  if (process.platform !== "darwin") {
     app.quit();
   }
 });

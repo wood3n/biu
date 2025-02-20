@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface Ar {
   id: number;
@@ -134,4 +134,4 @@ export interface DayRecommendData {
 /*
  * 获取每日推荐歌曲
  */
-export const getRecommendSongs = () => request.get<APIResponseNestData<DayRecommendData>>('/recommend/songs');
+export const getRecommendSongs = () => request.get<APIResponseNestData<DayRecommendData>>("/recommend/songs");

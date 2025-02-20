@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface ArtistMvRequestParams {
   id: number | undefined;
@@ -7,4 +7,4 @@ export interface ArtistMvRequestParams {
 /*
  * 获取歌手 mv
  */
-export const getArtistMv = (params: ArtistMvRequestParams) => request.get('/artist/mv', { params });
+export const getArtistMv = (params: ArtistMvRequestParams) => request.get("/artist/mv", { params });

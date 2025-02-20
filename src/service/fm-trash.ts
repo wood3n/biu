@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface fm_trashRequestParams {
   id: number | undefined;
@@ -7,4 +7,4 @@ export interface fm_trashRequestParams {
 /*
  * 从私人 FM 中移除至垃圾桶
  */
-export const getFmTrash = (params: fm_trashRequestParams) => request.get('/fm_trash', { params });
+export const getFmTrash = (params: fm_trashRequestParams) => request.get("/fm_trash", { params });

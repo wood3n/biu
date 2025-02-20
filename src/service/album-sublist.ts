@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface AlbumSublistRequestParams {
   limit: number | undefined;
@@ -46,4 +46,4 @@ export interface Artist {
 /*
  * 获取已收藏专辑列表
  */
-export const getAlbumSublist = (params: AlbumSublistRequestParams) => request.get<GetAlbumSublist>('/album/sublist', { params });
+export const getAlbumSublist = (params: AlbumSublistRequestParams) => request.get<GetAlbumSublist>("/album/sublist", { params });

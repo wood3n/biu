@@ -1,30 +1,25 @@
-import {
-  Outlet, Navigate, useLocation,
-} from 'react-router-dom';
-import { useRequest } from 'ahooks';
-import useUser from '@/store/user-atom';
-import { userArsAtom } from '@/store/user-ars-atom';
-import { userAlsAtom } from '@/store/user-als-atom';
-import { likelistAtom } from '@/store/likelist-atom';
-import { useUserPlaylist } from '@/store/user-playlist-atom';
-import { useSetAtom } from 'jotai';
-import {
-  getLoginStatus,
-  getUserDetail,
-  getUserSubcount,
-  getLikelist,
-  getArtistSublist,
-  getAlbumSublist,
-} from '@/service';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import PlayTaskBar from '@/components/playbar';
-import PageLoading from '@components/page-loading';
-import Sider from '../sider';
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 
-const GridLayout = () => {
+import { useRequest } from "ahooks";
+import { useSetAtom } from "jotai";
+import { Button } from "@heroui/button";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+
+import PageLoading from "@/components/page-loading";
+import PlayTaskBar from "@/components/playbar";
+import { getAlbumSublist, getArtistSublist, getLikeList, getLoginStatus, getUserDetail, getUserSubcount } from "@/service";
+import { likelistAtom } from "@/store/likelist-atom";
+import { userAlsAtom } from "@/store/user-als-atom";
+import { userArsAtom } from "@/store/user-ars-atom";
+import useUser from "@/store/user-atom";
+import { useUserPlaylist } from "@/store/user-playlist-atom";
+
+import Sider from "../sider";
+
+function GridLayout() {
   const location = useLocation();
-  const [_user, setUser] = useUser();
+  const [_, setUser] = useUser();
   const setUserArs = useSetAtom(userArsAtom);
   const setUserAls = useSetAtom(userAlsAtom);
   const setLikelist = useSetAtom(likelistAtom);
@@ -41,7 +36,7 @@ const GridLayout = () => {
         // 歌单等数量
         const userAccountStats = await getUserSubcount();
         // 喜欢的歌曲id
-        const { ids } = await getLikelist({
+        const { ids } = await getLikeList({
           uid: loginStatus.profile.userId,
         });
         // 收藏歌手
@@ -70,9 +65,7 @@ const GridLayout = () => {
   });
 
   if (loading) {
-    return (
-      <PageLoading />
-    );
+    return <PageLoading />;
   }
 
   if (!data?.data?.profile) {
@@ -82,38 +75,43 @@ const GridLayout = () => {
   return (
     <Box
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        rowGap: '8px',
-        padding: '8px',
-        width: '100vw',
-        height: '100vh',
+        display: "flex",
+        flexDirection: "column",
+        rowGap: "8px",
+        padding: "8px",
+        width: "100vw",
+        height: "100vh",
       }}
     >
-      <Box sx={{
-        display: 'flex', columnGap: '8px', flex: '1 1 auto', flexWrap: 'nowrap',
-      }}
+      <Box
+        sx={{
+          display: "flex",
+          columnGap: "8px",
+          flex: "1 1 auto",
+          flexWrap: "nowrap",
+        }}
       >
-        <Box sx={{ flex: '0 0 20%', minWidth: 0 }}>
+        <Box sx={{ flex: "0 0 20%", minWidth: 0 }}>
           <Sider />
         </Box>
         {/* minWidth让子元素不会超出flex容器 */}
         <Card
           sx={{
-            flex: '1 1 auto',
+            flex: "1 1 auto",
             minWidth: 0,
-            display: 'flex',
-            flexDirection: 'column',
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           <Outlet />
         </Card>
       </Box>
       <Card>
+        <Button>测试</Button>
         <PlayTaskBar />
       </Card>
     </Box>
   );
-};
+}
 
 export default GridLayout;

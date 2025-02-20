@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface UserRecordRequestParams {
   uid: number | undefined;
@@ -121,10 +121,10 @@ export interface UserRecordDatum {
 
 export interface UserPlayRecord {
   weekData?: UserRecordDatum[];
-  allData?: UserRecordDatum[]
+  allData?: UserRecordDatum[];
 }
 
 /*
  * 获取用户播放记录，type=1 时只返回 weekData, type=0 时返回 allData
  */
-export const getUserRecord = (params: UserRecordRequestParams) => request.get<APIResponse<UserPlayRecord>>('/user/record', { params });
+export const getUserRecord = (params: UserRecordRequestParams) => request.get<APIResponse<UserPlayRecord>>("/user/record", { params });

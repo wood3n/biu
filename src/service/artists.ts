@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface artistsRequestParams {
   id: number | undefined;
@@ -7,4 +7,4 @@ export interface artistsRequestParams {
 /*
  * 获得歌手部分信息和热门歌曲
  */
-export const getartists = (params: artistsRequestParams) => request.get('/artists', { params });
+export const getartists = (params: artistsRequestParams) => request.get("/artists", { params });

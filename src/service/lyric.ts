@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface lyricRequestParams {
   id: number | undefined;
@@ -23,4 +23,4 @@ export interface Klyric {
 /*
  * 获取歌词
  */
-export const getLyrics = (params: lyricRequestParams) => request.get<GetLyricsRes>('/lyric', { params });
+export const getLyrics = (params: lyricRequestParams) => request.get<GetLyricsRes>("/lyric", { params });

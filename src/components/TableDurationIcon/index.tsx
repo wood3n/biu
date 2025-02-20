@@ -1,6 +1,13 @@
-import { MdAccessTime } from 'react-icons/md';
-import './index.less';
+import { MdAccessTime } from "react-icons/md";
 
-const TableDurationIcon = () => <span className="table-header-duration-icon"><MdAccessTime size={18} /></span>;
+import "./index.less";
+
+function TableDurationIcon() {
+  return (
+    <span className="table-header-duration-icon">
+      <MdAccessTime size={18} />
+    </span>
+  );
+}
 
 export default TableDurationIcon;

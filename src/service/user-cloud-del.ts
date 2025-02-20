@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface UserCloudDelRequestData {
   id: number[] | undefined;
@@ -7,4 +7,4 @@ export interface UserCloudDelRequestData {
 /*
  * 云盘歌曲删除
  */
-export const postUserCloudDel = (data: UserCloudDelRequestData) => request.post('/user/cloud/del', data);
+export const postUserCloudDel = (data: UserCloudDelRequestData) => request.post("/user/cloud/del", data);

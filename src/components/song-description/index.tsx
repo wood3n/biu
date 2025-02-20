@@ -1,9 +1,12 @@
-import React from 'react';
-import Stack from '@mui/material/Stack';
-import type { Ar } from '@/service/recommend-songs';
-import Image from '../image';
-import OverflowText from '../overflow-text';
-import ArtistLinks from '../artist-links';
+import React from "react";
+
+import Stack from "@mui/material/Stack";
+
+import type { Ar } from "@/service/recommend-songs";
+
+import ArtistLinks from "../artist-links";
+import Image from "../image";
+import OverflowText from "../overflow-text";
 
 interface Props {
   picUrl?: string;
@@ -15,12 +18,7 @@ interface Props {
 /**
  * 歌曲信息描述、图片、歌名、歌手名
  */
-const SongDescription: React.FC<Props> = ({
-  picUrl,
-  name,
-  ar,
-  noCopyrightRcmd,
-}) => (
+const SongDescription: React.FC<Props> = ({ picUrl, name, ar, noCopyrightRcmd }) => (
   <Stack
     direction="row"
     alignItems="center"
@@ -29,20 +27,14 @@ const SongDescription: React.FC<Props> = ({
       minWidth: 0,
     }}
   >
-    {picUrl && (
-      <Image
-        width={50}
-        height={50}
-        src={picUrl}
-      />
-    )}
+    {picUrl && <Image width={50} height={50} src={picUrl} />}
     <Stack spacing="4px" sx={{ minWidth: 0 }}>
       <OverflowText
         PopperProps={{ disablePortal: false }}
         title={name}
         sx={{
           maxWidth: 220,
-          color: (theme) => (noCopyrightRcmd ? theme.palette.text.secondary : theme.palette.text.primary),
+          color: theme => (noCopyrightRcmd ? theme.palette.text.secondary : theme.palette.text.primary),
         }}
       >
         {name}

@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface CaptchaVerifyRequestParams {
   phone: string | undefined;
@@ -9,4 +9,4 @@ export interface CaptchaVerifyRequestParams {
 /*
  * 验证验证码
  */
-export const getCaptchaVerify = (params: CaptchaVerifyRequestParams) => request.get('/captcha/verify', { params });
+export const getCaptchaVerify = (params: CaptchaVerifyRequestParams) => request.get("/captcha/verify", { params });

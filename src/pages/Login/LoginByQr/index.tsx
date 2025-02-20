@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { Image, message, Spin } from 'antd';
-import { useNavigate } from 'react-router-dom';
-import { getLoginQrKey, getLoginQrCreate, getLoginQrCheck } from '@/service';
-import { IMAGE_ERR } from '@/common/constants';
-import { checkError } from '@/common/utils';
-import { useRequest } from 'ahooks';
-import { QRLoginCode } from '../constants';
-import styles from './index.module.less';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { useRequest } from "ahooks";
+import { Image, message, Spin } from "antd";
+
+import { IMAGE_ERR } from "@/common/constants";
+import { checkError } from "@/common/utils";
+import { getLoginQrCheck, getLoginQrCreate, getLoginQrKey } from "@/service";
+
+import { QRLoginCode } from "../constants";
+
+import styles from "./index.module.less";
 
 const LoginByQr: React.FC = () => {
   const navigate = useNavigate();
@@ -31,6 +35,22 @@ const LoginByQr: React.FC = () => {
     }
   };
 
+  const { runAsync, cancel } = useRequest(getLoginQrCheck, {
+    manual: true,
+    pollingInterval: 3000,
+    onSuccess: ({ code }) => {
+      if (code === QRLoginCode.Success) {
+        cancel();
+        message.success("登录成功");
+        navigate("/", { replace: true });
+      }
+
+      if (code === QRLoginCode.Timeout) {
+        cancel();
+      }
+    },
+  });
+
   async function checkLogin() {
     try {
       const key = await createQr();
@@ -42,45 +62,13 @@ const LoginByQr: React.FC = () => {
     }
   }
 
-  const { runAsync, cancel } = useRequest(getLoginQrCheck, {
-    manual: true,
-    pollingInterval: 3000,
-    onSuccess: ({ code }) => {
-      if (code === QRLoginCode.Success) {
-        cancel();
-        message.success('登录成功');
-        navigate('/', { replace: true });
-      }
-
-      if (code === QRLoginCode.Timeout) {
-        cancel();
-        checkLogin();
-      }
-    },
-  });
-
   useEffect(() => {
     checkLogin();
   }, []);
 
   useEffect(() => cancel, [cancel]);
 
-  return (
-    <div className={styles.container}>
-      {
-        loading
-          ? <Spin tip="生成二维码" />
-          : (
-            <Image
-              preview={false}
-              width="100%"
-              height="100%"
-              src={src}
-            />
-          )
-      }
-    </div>
-  );
+  return <div className={styles.container}>{loading ? <Spin tip="生成二维码" /> : <Image preview={false} width="100%" height="100%" src={src} />}</div>;
 };
 
 export default LoginByQr;

@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface LoginQrCheckRequestParams {
   key: string | undefined;
@@ -13,4 +13,4 @@ export interface QrLoginRes {
 /*
  * 二维码检测扫码状态接口
  */
-export const getLoginQrCheck = (params: LoginQrCheckRequestParams) => request.get<QrLoginRes>('/login/qr/check', { params });
+export const getLoginQrCheck = (params: LoginQrCheckRequestParams) => request.get<QrLoginRes>("/login/qr/check", { params });

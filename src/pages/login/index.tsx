@@ -1,9 +1,13 @@
-import React from 'react';
-import { Row, Col } from 'antd';
-import WindowCornerAction from '@/components/window-action';
-import { ReactComponent as Music } from '@/assets/images/music.svg';
-import LoginByQr from './LoginByQr';
-import styles from './index.module.less';
+import React from "react";
+
+import { Col, Row } from "antd";
+
+import { ReactComponent as Music } from "@/assets/images/music.svg";
+import WindowCornerAction from "@/components/window-action";
+
+import LoginByQr from "./LoginByQr";
+
+import styles from "./index.module.less";
 
 const Login: React.FC = () => (
   <Row className={styles.login}>
@@ -14,7 +18,9 @@ const Login: React.FC = () => (
       </div>
       <div className={styles.loginForm}>
         <div className={styles.logo}>
-          <span><Music width={48} height={48} /></span>
+          <span>
+            <Music width={48} height={48} />
+          </span>
         </div>
         <LoginByQr />
       </div>

@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface PlaylistTrackAllRequestParams {
   id: number | undefined;
@@ -81,4 +81,4 @@ export interface H {
 /*
  * 获取歌单所有歌曲
  */
-export const getPlaylistTrackAll = (params: PlaylistTrackAllRequestParams) => request.get<PlaylistTrackAllResponse>('/playlist/track/all', { params });
+export const getPlaylistTrackAll = (params: PlaylistTrackAllRequestParams) => request.get<PlaylistTrackAllResponse>("/playlist/track/all", { params });

@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface StyleKeyword {
   keyWord?: string;
@@ -22,4 +22,4 @@ export interface SearchDefaultDataType {
 /*
  * 默认搜索关键词
  */
-export const getSearchDefault = () => request.get<APIResponseNestData<SearchDefaultDataType>>('/search/default');
+export const getSearchDefault = () => request.get<APIResponseNestData<SearchDefaultDataType>>("/search/default");

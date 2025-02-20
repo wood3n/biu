@@ -4,27 +4,27 @@
 type PageRequest<T> = T & {
   limit: number;
   offset: number;
-}
+};
 
 /**
  * 接口响应
  */
 type APIResponse<T> = T & {
   code: number;
-}
+};
 
 /**
  * 一般响应
  */
-type APIResponseData<T> = APIResponse<{ data: T }>
+type APIResponseData<T> = APIResponse<{ data: T }>;
 
 /**
  * 嵌套响应
  */
-type APIResponseNestData<T> = {
+interface APIResponseNestData<T> {
   data: T & {
     code: number;
-  }
+  };
 }
 
 interface Ar {
@@ -171,9 +171,9 @@ interface Song {
 }
 
 interface NoCopyrightRcmd {
-    type?:           number;
-    typeDesc?:       string;
-    songId?:         null;
-    thirdPartySong?: null;
-    expInfo?:        null;
+  type?: number;
+  typeDesc?: string;
+  songId?: null;
+  thirdPartySong?: null;
+  expInfo?: null;
 }

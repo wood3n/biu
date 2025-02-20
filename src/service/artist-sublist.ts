@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface GetArtistSublist {
   code?: number;
@@ -41,4 +41,4 @@ export interface ArtistSublistData {
 /*
  * 收藏的歌手列表
  */
-export const getArtistSublist = () => request.get<GetArtistSublist>('/artist/sublist');
+export const getArtistSublist = () => request.get<GetArtistSublist>("/artist/sublist");

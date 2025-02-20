@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface albumRequestParams {
   id: string | undefined;
@@ -203,4 +203,4 @@ export interface FreeTrialPrivilege {
 /*
  * 获取专辑内容
  */
-export const getAlbum = (params: albumRequestParams) => request.get<GetAlbumRes>('/album', { params });
+export const getAlbum = (params: albumRequestParams) => request.get<GetAlbumRes>("/album", { params });

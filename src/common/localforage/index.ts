@@ -1,12 +1,12 @@
-import localforage from 'localforage';
+import localforage from "localforage";
 
 export enum STORAGE_KEY {
-  VOLUME = 'VOLUME',
-  MUTED = 'MUTED',
-  PLAY_CURRENT= 'PLAY_CURRENT',
-  PLAY_RATE = 'PLAY_RATE',
-  PLAY_QUEUE = 'PLAY_QUEUE',
-  PLAY_MODE = 'PLAY_MODE'
+  VOLUME = "VOLUME",
+  MUTED = "MUTED",
+  PLAY_CURRENT = "PLAY_CURRENT",
+  PLAY_RATE = "PLAY_RATE",
+  PLAY_QUEUE = "PLAY_QUEUE",
+  PLAY_MODE = "PLAY_MODE",
 }
 
 export const getLocal = <T>(key: STORAGE_KEY) => localforage.getItem<T>(key);

@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface ArtistDetailRequestParams {
   id: string | undefined;
@@ -118,4 +118,4 @@ export interface RightsInfoDetailDtoList {
 /*
  * 获取歌手详情
  */
-export const getArtistDetail = (params: ArtistDetailRequestParams) => request.get<GetArtistDetailRes>('/artist/detail', { params });
+export const getArtistDetail = (params: ArtistDetailRequestParams) => request.get<GetArtistDetailRes>("/artist/detail", { params });

@@ -1,37 +1,23 @@
-import React, { useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useRequest } from 'ahooks';
-import { useTheme } from '@mui/material/styles';
-import {
-  Box,
-  Breadcrumbs,
-  Avatar,
-  Chip,
-  Stack,
-  Link,
-  Typography,
-  Button,
-  Fade,
-  IconButton,
-} from '@mui/material';
-import PlaylistTable from '@/components/playlist-table';
-import type { ScrollNodeRef } from '@/components/page-container';
-import PageContainer from '@/components/page-container';
-import { getPlaylistDetail, getPlaylistTrackAll, postSongOrderUpdate } from '@/service';
-import TooltipButton from '@/components/tooltip-button';
-import Image from '@/components/image';
-import MultilineOverflowText from '@/components/multiline-overflow-text';
-import usePlay from '@/common/hooks/usePlay';
-import { useUserPlaylist } from '@/store/user-playlist-atom';
-import {
-  MdPlayCircle,
-  MdStar,
-  MdStarOutline,
-  MdEditSquare,
-  MdArrowCircleDown,
-} from 'react-icons/md';
-import { download } from '@/common/utils';
-import PlayListSkeleton from './skeleton';
+import React, { useRef } from "react";
+import { MdArrowCircleDown, MdEditSquare, MdPlayCircle, MdStar, MdStarOutline } from "react-icons/md";
+import { useNavigate, useParams } from "react-router-dom";
+
+import { useRequest } from "ahooks";
+import { Avatar, Box, Breadcrumbs, Button, Chip, Link, Stack, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+
+import usePlay from "@/common/hooks/usePlay";
+import { download } from "@/common/utils";
+import Image from "@/components/image";
+import MultilineOverflowText from "@/components/multiline-overflow-text";
+import type { ScrollNodeRef } from "@/components/page-container";
+import PageContainer from "@/components/page-container";
+import PlaylistTable from "@/components/playlist-table";
+import TooltipButton from "@/components/tooltip-button";
+import { getPlaylistDetail, getPlaylistTrackAll, postSongOrderUpdate } from "@/service";
+import { useUserPlaylist } from "@/store/user-playlist-atom";
+
+import PlayListSkeleton from "./skeleton";
 
 /**
  * 歌单歌曲列表
@@ -43,25 +29,31 @@ const PlayList: React.FC = () => {
   const { addPlayQueue } = usePlay();
   const containerRef = useRef<ScrollNodeRef>(null);
   // 设置播放队列
-  const {
-    isCollect, isCreated, collect, cancelCollect,
-  } = useUserPlaylist();
+  const { isCollect, isCreated, collect, cancelCollect } = useUserPlaylist();
 
   // 歌单详情
-  const { data: playListDetailRes, loading: fetchingPlaylistDetail } = useRequest(() => getPlaylistDetail({
-    id: Number(pid),
-  }), {
-    refreshDeps: [pid],
-  });
+  const { data: playListDetailRes, loading: fetchingPlaylistDetail } = useRequest(
+    () =>
+      getPlaylistDetail({
+        id: Number(pid),
+      }),
+    {
+      refreshDeps: [pid],
+    },
+  );
 
   // 歌单歌曲详情列表
-  const { data: getSongRes, loading: fetchingPlaylistTrack } = useRequest(() => getPlaylistTrackAll({
-    id: Number(pid),
-    limit: 9999,
-    offset: 0,
-  }), {
-    refreshDeps: [pid],
-  });
+  const { data: getSongRes, loading: fetchingPlaylistTrack } = useRequest(
+    () =>
+      getPlaylistTrackAll({
+        id: Number(pid),
+        limit: 9999,
+        offset: 0,
+      }),
+    {
+      refreshDeps: [pid],
+    },
+  );
 
   const updatePlayList = () => {
     window.setTimeout(() => {
@@ -105,21 +97,21 @@ const PlayList: React.FC = () => {
       //   </Fade>
       // )}
     >
-      <Box sx={{ position: 'relative', padding: '8px' }} ref={containerRef}>
-        {fetchingPlaylistDetail ? <PlayListSkeleton /> : (
+      <Box sx={{ position: "relative", padding: "8px" }} ref={containerRef}>
+        {fetchingPlaylistDetail ? (
+          <PlayListSkeleton />
+        ) : (
           <Box
             sx={{
-              padding: '16px', display: 'flex', columnGap: 2,
+              padding: "16px",
+              display: "flex",
+              columnGap: 2,
             }}
           >
-            <Image
-              src={playListDetailRes?.playlist?.coverImgUrl}
-              width={240}
-              height={240}
-            />
+            <Image src={playListDetailRes?.playlist?.coverImgUrl} width={240} height={240} />
             <Stack spacing={2} sx={{ flex: 1 }}>
               <Stack sx={{ flex: 1 }} spacing={2}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Typography variant="h5">{playListDetailRes?.playlist?.name}</Typography>
                   {isCreated(pid) && (
                     <TooltipButton size="small" title="修改歌单信息">
@@ -129,30 +121,21 @@ const PlayList: React.FC = () => {
                 </Box>
                 <Stack direction="row" spacing={2} alignItems="center">
                   <Chip
-                    avatar={(
-                      <Avatar
-                        alt={playListDetailRes?.playlist?.creator?.nickname}
-                        src={playListDetailRes?.playlist?.creator?.avatarUrl}
-                      />
-                    )}
-                    label={(
-                      <Link
-                        underline="hover"
-                        onClick={() => navigate(`/profile/${playListDetailRes?.playlist?.creator?.userId}`)}
-                        sx={{ cursor: 'pointer' }}
-                      >
+                    avatar={<Avatar alt={playListDetailRes?.playlist?.creator?.nickname} src={playListDetailRes?.playlist?.creator?.avatarUrl} />}
+                    label={
+                      <Link underline="hover" onClick={() => navigate(`/profile/${playListDetailRes?.playlist?.creator?.userId}`)} sx={{ cursor: "pointer" }}>
                         {playListDetailRes?.playlist?.creator?.nickname}
                       </Link>
-                    )}
+                    }
                     sx={{
-                      maxWidth: 'max-content',
-                      width: 'auto',
-                      background: 'none',
-                      '& .MuiChip-avatar': {
+                      maxWidth: "max-content",
+                      width: "auto",
+                      background: "none",
+                      "& .MuiChip-avatar": {
                         margin: 0,
                       },
-                      '& .MuiChip-label': {
-                        fontSize: 'initial',
+                      "& .MuiChip-label": {
+                        fontSize: "initial",
                       },
                     }}
                   />
@@ -160,22 +143,20 @@ const PlayList: React.FC = () => {
                     <Typography
                       variant="body2"
                       sx={{
-                        color: (theme) => theme.palette.text.secondary,
+                        color: theme => theme.palette.text.secondary,
                       }}
                     >
-                      {playListDetailRes?.playlist?.trackCount}
-                      {' '}
-                      首歌曲
+                      {playListDetailRes?.playlist?.trackCount} 首歌曲
                     </Typography>
                   )}
                 </Stack>
                 {Boolean(playListDetailRes?.playlist?.tags?.length) && (
                   <Box
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      color: (theme) => theme.palette.text.secondary,
-                      fontSize: (theme) => theme.typography.body2.fontSize,
+                      display: "flex",
+                      alignItems: "center",
+                      color: theme => theme.palette.text.secondary,
+                      fontSize: theme => theme.typography.body2.fontSize,
                     }}
                   >
                     <span>标签：</span>
@@ -186,13 +167,8 @@ const PlayList: React.FC = () => {
                         lineHeight: 1,
                       }}
                     >
-                      {playListDetailRes?.playlist?.tags?.map((tag) => (
-                        <Link
-                          key={tag}
-                          underline="hover"
-                          variant="body2"
-                          sx={{ cursor: 'pointer' }}
-                        >
+                      {playListDetailRes?.playlist?.tags?.map(tag => (
+                        <Link key={tag} underline="hover" variant="body2" sx={{ cursor: "pointer" }}>
                           {tag}
                         </Link>
                       ))}
@@ -203,46 +179,33 @@ const PlayList: React.FC = () => {
                   variant="body2"
                   lines={2}
                   sx={{
-                    maxWidth: '80%',
-                    color: (theme) => theme.palette.text.secondary,
+                    maxWidth: "80%",
+                    color: theme => theme.palette.text.secondary,
                   }}
                 >
                   {playListDetailRes?.playlist?.description}
                 </MultilineOverflowText>
-                <Box sx={{ flex: 1, display: 'flex', alignItems: 'end' }}>
+                <Box sx={{ flex: 1, display: "flex", alignItems: "end" }}>
                   <Box
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
+                      display: "flex",
+                      alignItems: "center",
                       columnGap: 2,
                       paddingRight: 2,
                     }}
                   >
                     {Boolean(getSongRes?.songs?.length) && (
-                      <Button
-                        size="small"
-                        onClick={handlePlayAll}
-                        variant="outlined"
-                        startIcon={<MdPlayCircle />}
-                      >
+                      <Button size="small" onClick={handlePlayAll} variant="outlined" startIcon={<MdPlayCircle />}>
                         播放全部
                       </Button>
                     )}
                     {isCollect(pid) && (
-                      <TooltipButton
-                        size="small"
-                        title={isCollect(pid) ? '取消收藏' : '收藏'}
-                        onClick={handleCollect}
-                      >
+                      <TooltipButton size="small" title={isCollect(pid) ? "取消收藏" : "收藏"} onClick={handleCollect}>
                         {isCollect(pid) ? <MdStar color={theme.palette.primary.main} /> : <MdStarOutline />}
                       </TooltipButton>
                     )}
                     {Boolean(getSongRes?.songs?.length) && (
-                      <TooltipButton
-                        size="small"
-                        title="下载全部"
-                        onClick={() => download(getSongRes?.songs)}
-                      >
+                      <TooltipButton size="small" title="下载全部" onClick={() => download(getSongRes?.songs)}>
                         <MdArrowCircleDown color={theme.palette.text.secondary} />
                       </TooltipButton>
                     )}

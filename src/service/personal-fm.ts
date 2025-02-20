@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface Artist {
   name?: string;
@@ -152,4 +152,4 @@ export interface PersonalFMSong {
 /*
  * 私人 FM
  */
-export const getPersonalFM = () => request.get<APIResponseNestData<PersonalFMSong[]>>('/personal_fm');
+export const getPersonalFM = () => request.get<APIResponseNestData<PersonalFMSong[]>>("/personal_fm");

@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface SimiSongRequestParams {
   id: number | undefined;
@@ -7,4 +7,4 @@ export interface SimiSongRequestParams {
 /*
  * 获取相似音乐
  */
-export const getSimiSong = (params: SimiSongRequestParams) => request.get('/simi/song', { params });
+export const getSimiSong = (params: SimiSongRequestParams) => request.get("/simi/song", { params });

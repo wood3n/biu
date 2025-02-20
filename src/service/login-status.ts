@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface Account {
   id?: number;
@@ -65,4 +65,4 @@ export interface LoginStatus {
 /*
  * 登录状态
  */
-export const getLoginStatus = () => request.get<APIResponseNestData<LoginStatus>>('/login/status');
+export const getLoginStatus = () => request.get<APIResponseNestData<LoginStatus>>("/login/status");

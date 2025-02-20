@@ -1,49 +1,46 @@
-import React, { useState, useRef, useEffect } from 'react';
-import Typography, { type TypographyTypeMap } from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import IconButton from '@mui/material/IconButton';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import { MdClose } from 'react-icons/md';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import React, { useEffect, useRef, useState } from "react";
+import { MdClose } from "react-icons/md";
 
-type Props = TypographyTypeMap['props'] & {
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import IconButton from "@mui/material/IconButton";
+import { styled } from "@mui/material/styles";
+import type { TypographyTypeMap } from "@mui/material/Typography";
+import Typography from "@mui/material/Typography";
+
+type Props = TypographyTypeMap["props"] & {
   lines?: number;
-}
+};
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  width: 'auto',
-  color: '#fff',
+  width: "auto",
+  color: "#fff",
   minWidth: 0,
   padding: 0,
-  lineHeight: 'normal',
-  transition: 'none',
+  lineHeight: "normal",
+  transition: "none",
   background: theme.palette.grey[900],
   backgroundColor: theme.palette.grey[900],
   boxShadow: `-15px 0px 8px 0px ${theme.palette.grey[900]}`,
-  textTransform: 'none',
-  '&:hover': {
+  textTransform: "none",
+  "&:hover": {
     background: theme.palette.grey[900],
-    backgroundColor: 'none',
+    backgroundColor: "none",
     color: theme.palette.primary.main,
   },
-  '&:active': {
+  "&:active": {
     background: theme.palette.grey[900],
   },
-  '&:focus': {
+  "&:focus": {
     background: theme.palette.grey[900],
     padding: 0,
   },
 }));
 
-const MultilineOverflowText: React.FC<Props> = ({
-  lines = 1,
-  children,
-  sx,
-  ...props
-}) => {
+const MultilineOverflowText: React.FC<Props> = ({ lines = 1, children, sx, ...props }) => {
   const [isOverflowed, setIsOverflow] = useState(false);
   const [open, setOpen] = useState(false);
   const textRef = useRef<HTMLElement>(null);
@@ -58,11 +55,11 @@ const MultilineOverflowText: React.FC<Props> = ({
         ref={textRef}
         {...props}
         sx={{
-          position: 'relative',
-          display: '-webkit-box',
+          position: "relative",
+          display: "-webkit-box",
           WebkitLineClamp: lines,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
           ...sx,
         }}
       >
@@ -71,10 +68,10 @@ const MultilineOverflowText: React.FC<Props> = ({
           <StyledButton
             className=""
             sx={{
-              position: 'absolute',
+              position: "absolute",
               right: 0,
               bottom: 0,
-              color: (theme) => theme.palette.text.secondary,
+              color: theme => theme.palette.text.secondary,
             }}
             onClick={() => setOpen(true)}
           >
@@ -90,24 +87,23 @@ const MultilineOverflowText: React.FC<Props> = ({
               aria-label="close"
               onClick={() => setOpen(false)}
               sx={{
-                position: 'absolute',
+                position: "absolute",
                 right: 8,
                 top: 8,
-                color: (theme) => theme.palette.grey[500],
+                color: theme => theme.palette.grey[500],
               }}
             >
               <MdClose />
             </IconButton>
           </DialogTitle>
-          <DialogContent sx={{
-            padding: 0, width: '600px', height: '500px',
-          }}
+          <DialogContent
+            sx={{
+              padding: 0,
+              width: "600px",
+              height: "500px",
+            }}
           >
-            <OverlayScrollbarsComponent
-              style={{ height: '100%', whiteSpace: 'pre-line', padding: '24px' }}
-            >
-              {children}
-            </OverlayScrollbarsComponent>
+            <OverlayScrollbarsComponent style={{ height: "100%", whiteSpace: "pre-line", padding: "24px" }}>{children}</OverlayScrollbarsComponent>
           </DialogContent>
         </Dialog>
       )}

@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface SongUrlRequestParams {
   id: number | undefined;
@@ -55,4 +55,4 @@ export interface FreeTrialPrivilege {
 /*
  * 获取音乐 url
  */
-export const getSongUrl = (params: SongUrlRequestParams) => request.get<SongURLRes>('/song/url', { params });
+export const getSongUrl = (params: SongUrlRequestParams) => request.get<SongURLRes>("/song/url", { params });

@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface cloudRequestData {
   songFile: FormData;
@@ -7,4 +7,4 @@ export interface cloudRequestData {
 /*
  * 云盘上传
  */
-export const postcloud = (data: cloudRequestData) => request.post('/cloud', data);
+export const postcloud = (data: cloudRequestData) => request.post("/cloud", data);

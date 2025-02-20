@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import {
-  Input, Collapse, Box, IconButton, useTheme, InputAdornment,
-} from '@mui/material';
-import { MdSearch, MdClose } from 'react-icons/md';
-import { useDebounceFn } from 'ahooks';
+import React, { useState } from "react";
+import { MdClose, MdSearch } from "react-icons/md";
+
+import { useDebounceFn } from "ahooks";
+import { Box, Collapse, IconButton, Input, InputAdornment, useTheme } from "@mui/material";
 
 interface Props {
   onChange: (value: string | undefined) => void;
@@ -21,10 +20,10 @@ const TableSearch = React.memo(({ onChange }: Props) => {
   return (
     <Box
       sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        marginLeft: '12px',
-        minWidth: 'min-content',
+        display: "inline-flex",
+        alignItems: "center",
+        marginLeft: "12px",
+        minWidth: "min-content",
       }}
     >
       <IconButton
@@ -33,21 +32,21 @@ const TableSearch = React.memo(({ onChange }: Props) => {
           setActive(true);
         }}
         sx={{
-          width: '24px',
-          height: '24px',
+          width: "24px",
+          height: "24px",
         }}
       >
         <MdSearch size={14} color={theme.palette.text.secondary} />
       </IconButton>
       <Collapse orientation="horizontal" in={active || Boolean(input?.trim())}>
         <Input
-          inputRef={(input) => input && input.focus()}
-          value={input || ''}
-          onChange={(e) => {
+          inputRef={input => input && input.focus()}
+          value={input || ""}
+          onChange={e => {
             setInput(e.target.value);
             run(e.target.value);
           }}
-          endAdornment={(
+          endAdornment={
             <InputAdornment position="end">
               <IconButton
                 size="small"
@@ -59,7 +58,7 @@ const TableSearch = React.memo(({ onChange }: Props) => {
                 <MdClose size={14} color={theme.palette.text.secondary} />
               </IconButton>
             </InputAdornment>
-          )}
+          }
           onBlur={() => setActive(false)}
         />
       </Collapse>

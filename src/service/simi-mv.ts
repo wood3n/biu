@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface SimiMvRequestParams {
   mvid: number | undefined;
@@ -7,4 +7,4 @@ export interface SimiMvRequestParams {
 /*
  * 获取相似 mv
  */
-export const getSimiMv = (params: SimiMvRequestParams) => request.get('/simi/mv', { params });
+export const getSimiMv = (params: SimiMvRequestParams) => request.get("/simi/mv", { params });

@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface CheckMusicRequestParams {
   id: number | undefined;
@@ -8,4 +8,4 @@ export interface CheckMusicRequestParams {
 /*
  * 音乐是否可用
  */
-export const getCheckMusic = (params: CheckMusicRequestParams) => request.get('/check/music', { params });
+export const getCheckMusic = (params: CheckMusicRequestParams) => request.get("/check/music", { params });

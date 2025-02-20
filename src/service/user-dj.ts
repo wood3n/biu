@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface UserDjRequestParams {
   uid: number | undefined;
@@ -7,4 +7,4 @@ export interface UserDjRequestParams {
 /*
  * 获取用户电台
  */
-export const getUserDj = (params: UserDjRequestParams) => request.get('/user/dj', { params });
+export const getUserDj = (params: UserDjRequestParams) => request.get("/user/dj", { params });

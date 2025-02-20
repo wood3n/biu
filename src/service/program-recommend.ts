@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface ProgramRecommend {
   code?: number;
@@ -241,4 +241,4 @@ export interface Radio {
 /**
  * 获取每日推荐电台
  */
-export const getProgramRecommend = () => request.get<ProgramRecommend>('/program/recommend');
+export const getProgramRecommend = () => request.get<ProgramRecommend>("/program/recommend");

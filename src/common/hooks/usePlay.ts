@@ -1,14 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
-import { produce } from 'immer';
-import { useAtom } from 'jotai';
-import random from 'lodash/random';
-import uniqBy from 'lodash/uniqBy';
-import { useRequest } from 'ahooks';
-import { toast } from 'react-hot-toast';
-import { getSongUrlV1, getLyrics } from '@/service';
-import { playQueueAtom } from '@/store/play-queue-atom';
-import { PLAY_MODE, MUSIC_LEVEL } from '@/common/constants';
-import { STORAGE_KEY, getLocal, updateLocal } from '@/common/localforage';
+import { useMemo, useState } from "react";
+
+import { random, uniqBy } from "es-toolkit";
+import { produce } from "immer";
+import { useAtom } from "jotai";
+
+import { PLAY_MODE } from "@/common/constants";
+import { STORAGE_KEY, updateLocal } from "@/common/localforage";
+import { playQueueAtom } from "@/store/play-queue-atom";
 
 /**
  * 播放
@@ -17,7 +15,7 @@ import { STORAGE_KEY, getLocal, updateLocal } from '@/common/localforage';
  * 移除选择的歌曲
  * 动态排序
  */
-const usePlay = () => {
+function usePlay() {
   /**
    * 播放队列
    */
@@ -46,23 +44,25 @@ const usePlay = () => {
     if (song.noCopyrightRcmd) return;
     if (song.id === playingSong?.id) return;
 
-    setPlayQueue(produce((draft) => {
-      const current = draft?.find(({ id }) => id === playingSong?.id);
-      if (current) {
-        current.playing = false;
-      }
+    setPlayQueue(
+      produce(draft => {
+        const current = draft?.find(({ id }) => id === playingSong?.id);
+        if (current) {
+          current.playing = false;
+        }
 
-      const exist = draft?.find(({ id }) => id === song.id);
+        const exist = draft?.find(({ id }) => id === song.id);
 
-      if (exist) {
-        exist.playing = true;
-      } else {
-        draft.unshift({
-          ...song,
-          playing: true,
-        });
-      }
-    }));
+        if (exist) {
+          exist.playing = true;
+        } else {
+          draft.unshift({
+            ...song,
+            playing: true,
+          });
+        }
+      }),
+    );
   };
 
   /**
@@ -75,17 +75,19 @@ const usePlay = () => {
     }
 
     if (playQueue.length) {
-      setPlayQueue(produce((draft) => {
-        const currentIndex = playQueue.findIndex(({ id }) => id === playingSong?.id);
-        const nextIndex = (currentIndex + playQueue.length - 1) % playQueue.length;
-        const current = draft?.find(({ id }) => id === playingSong?.id);
-        if (current) {
-          current.playing = false;
-        }
+      setPlayQueue(
+        produce(draft => {
+          const currentIndex = playQueue.findIndex(({ id }) => id === playingSong?.id);
+          const nextIndex = (currentIndex + playQueue.length - 1) % playQueue.length;
+          const current = draft?.find(({ id }) => id === playingSong?.id);
+          if (current) {
+            current.playing = false;
+          }
 
-        const prevSong = draft[nextIndex];
-        prevSong.playing = true;
-      }));
+          const prevSong = draft[nextIndex];
+          prevSong.playing = true;
+        }),
+      );
     }
   };
 
@@ -93,16 +95,18 @@ const usePlay = () => {
    * 随机播放
    */
   const randomPlay = () => {
-    setPlayQueue(produce((draft) => {
-      const current = draft?.find(({ id }) => id === playingSong?.id);
-      if (current) {
-        current.playing = false;
-      }
+    setPlayQueue(
+      produce(draft => {
+        const current = draft?.find(({ id }) => id === playingSong?.id);
+        if (current) {
+          current.playing = false;
+        }
 
-      const randomIndex = random(0, playQueue.length);
-      const nextSong = draft[randomIndex];
-      nextSong.playing = true;
-    }));
+        const randomIndex = random(0, playQueue.length);
+        const nextSong = draft[randomIndex];
+        nextSong.playing = true;
+      }),
+    );
   };
 
   /**
@@ -115,17 +119,19 @@ const usePlay = () => {
     }
 
     if (playQueue.length) {
-      setPlayQueue(produce((draft) => {
-        const currentIndex = playQueue.findIndex(({ id }) => id === playingSong?.id);
-        const nextIndex = (currentIndex + 1) % playQueue.length;
-        const current = draft?.find(({ id }) => id === playingSong?.id);
-        if (current) {
-          current.playing = false;
-        }
+      setPlayQueue(
+        produce(draft => {
+          const currentIndex = playQueue.findIndex(({ id }) => id === playingSong?.id);
+          const nextIndex = (currentIndex + 1) % playQueue.length;
+          const current = draft?.find(({ id }) => id === playingSong?.id);
+          if (current) {
+            current.playing = false;
+          }
 
-        const nextSong = draft[nextIndex];
-        nextSong.playing = true;
-      }));
+          const nextSong = draft[nextIndex];
+          nextSong.playing = true;
+        }),
+      );
     }
   };
 
@@ -140,27 +146,30 @@ const usePlay = () => {
       return;
     }
 
-    setPlayQueue(produce((draft) => {
-      draft.splice(playingSong ? draft.indexOf(playingSong) : 0, 1, song);
-    }));
+    setPlayQueue(
+      produce(draft => {
+        draft.splice(playingSong ? draft.indexOf(playingSong) : 0, 1, song);
+      }),
+    );
   };
 
   /**
    * 添加歌曲到播放列表或替换播放列表
    */
   const addPlayQueue = (songList: Song[], clear: boolean = false) => {
-    const newPlayQueue = clear ? songList : uniqBy([
-      ...playQueue,
-      ...songList,
-    ], 'id');
+    const newPlayQueue = clear ? songList : uniqBy([...playQueue, ...songList], "id");
 
-    setPlayQueue(newPlayQueue.map((song, i) => {
-      const playIndex = playMode === PLAY_MODE.RANDOM ? random(0, songList.length) : 0;
-      return i === playIndex ? {
-        ...song,
-        playing: true,
-      } : song;
-    }));
+    setPlayQueue(
+      newPlayQueue.map((song, i) => {
+        const playIndex = playMode === PLAY_MODE.RANDOM ? random(0, songList.length) : 0;
+        return i === playIndex
+          ? {
+              ...song,
+              playing: true,
+            }
+          : song;
+      }),
+    );
   };
 
   return {
@@ -176,6 +185,6 @@ const usePlay = () => {
     addPlayQueue,
     changePlayMode,
   };
-};
+}
 
 export default usePlay;

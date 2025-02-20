@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface ArtistSongsRequestParams {
   order: string | undefined;
@@ -10,4 +10,4 @@ export interface ArtistSongsRequestParams {
 /*
  * 歌手全部歌曲
  */
-export const getArtistSongs = (params: ArtistSongsRequestParams) => request.get('/artist/songs', { params });
+export const getArtistSongs = (params: ArtistSongsRequestParams) => request.get("/artist/songs", { params });

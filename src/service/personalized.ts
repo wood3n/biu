@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface personalizedRequestParams {
   limit: number | undefined;
@@ -7,4 +7,4 @@ export interface personalizedRequestParams {
 /*
  * 推荐歌单
  */
-export const getpersonalized = (params: personalizedRequestParams) => request.get('/personalized', { params });
+export const getpersonalized = (params: personalizedRequestParams) => request.get("/personalized", { params });

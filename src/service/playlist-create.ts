@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface PlaylistCreateRequestData {
   name: string | undefined;
@@ -59,4 +59,4 @@ export interface CreatePlayListRes {
 /*
  * 新建歌单
  */
-export const postPlaylistCreate = (data: PlaylistCreateRequestData) => request.post<APIResponse<CreatePlayListRes>>('/playlist/create', data);
+export const postPlaylistCreate = (data: PlaylistCreateRequestData) => request.post<APIResponse<CreatePlayListRes>>("/playlist/create", data);

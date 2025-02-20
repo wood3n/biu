@@ -1,4 +1,4 @@
-import request from './request';
+import request from "./request";
 
 export interface SimiPlaylistRequestParams {
   id: number | undefined;
@@ -7,4 +7,4 @@ export interface SimiPlaylistRequestParams {
 /*
  * 获取相似歌单
  */
-export const getSimiPlaylist = (params: SimiPlaylistRequestParams) => request.get('/simi/playlist', { params });
+export const getSimiPlaylist = (params: SimiPlaylistRequestParams) => request.get("/simi/playlist", { params });

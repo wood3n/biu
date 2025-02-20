@@ -1,35 +1,34 @@
-import React, { useRef, useState, useEffect } from 'react';
-import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
-import Link from '@mui/material/Link';
-import { styled } from '@mui/material/styles';
-import { type TooltipProps } from '@mui/material/Tooltip';
-import { type TypographyTypeMap } from '@mui/material/Typography';
+import React, { useEffect, useRef, useState } from "react";
 
-interface PropsWithChildren extends Omit<TooltipProps, 'children' | 'color'> {
+import Link from "@mui/material/Link";
+import { styled } from "@mui/material/styles";
+import type { TooltipProps } from "@mui/material/Tooltip";
+import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
+import type { TypographyTypeMap } from "@mui/material/Typography";
+import Typography from "@mui/material/Typography";
+
+interface PropsWithChildren extends Omit<TooltipProps, "children" | "color"> {
   link?: boolean;
   children?: React.ReactNode;
   onClick?: (React.MouseEventHandler<HTMLAnchorElement> & React.MouseEventHandler<HTMLSpanElement>) | undefined;
 }
 
-type Props = PropsWithChildren & TypographyTypeMap['props'];
+type Props = PropsWithChildren & TypographyTypeMap["props"];
 
-const StyleTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))(() => ({
+const StyleTooltip = styled(({ className, ...props }: TooltipProps) => <Tooltip {...props} classes={{ popper: className }} />)(() => ({
   [`& .${tooltipClasses.tooltip}`]: {
-    whiteSpace: 'pre-wrap',
-    overflowWrap: 'anywhere',
+    whiteSpace: "pre-wrap",
+    overflowWrap: "anywhere",
   },
 }));
 
 const HoverLink = styled(Link)(({ theme }) => ({
-  '&:hover': {
+  "&:hover": {
     color: theme.palette.primary.main,
   },
 }));
 
-const OverflowText = ({
+function OverflowText({
   maxWidth = 140,
   link,
   title,
@@ -44,7 +43,7 @@ const OverflowText = ({
   onClick,
   variant,
   color,
-}: Props) => {
+}: Props) {
   const [isOverflowed, setIsOverflow] = useState(false);
   const textElementRef = useRef<HTMLDivElement | HTMLAnchorElement>(null);
 
@@ -60,7 +59,7 @@ const OverflowText = ({
       placement={placement}
       PopperProps={{
         disablePortal: true,
-        style: { pointerEvents: 'none' },
+        style: { pointerEvents: "none" },
         ...PopperProps,
       }}
       sx={{
@@ -77,9 +76,9 @@ const OverflowText = ({
           onClick={onClick}
           ref={textElementRef as React.MutableRefObject<HTMLAnchorElement>}
           sx={{
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
             ...sx,
           }}
           className={className}
@@ -104,6 +103,6 @@ const OverflowText = ({
       )}
     </StyleTooltip>
   );
-};
+}
 
 export default OverflowText;
