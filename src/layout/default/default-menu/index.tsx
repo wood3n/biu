@@ -10,8 +10,6 @@ const DefaultMenu = () => {
   const location = useLocation();
   const [selectedKey, setSelectedKey] = useState<string>();
 
-  console.log(location.pathname.slice(1));
-
   useEffect(() => {
     const pathname = location.pathname?.slice(1);
     if (pathname) {
@@ -21,7 +19,7 @@ const DefaultMenu = () => {
 
   return (
     <OverlayScrollbarsComponent defer options={{ scrollbars: { theme: "os-theme-light" } }}>
-      <Listbox selectionMode="single" aria-label="Menu">
+      <Listbox selectionMode="single" aria-label="menu">
         {menus.map(item => (
           <ListboxItem
             aria-label={item.label}
