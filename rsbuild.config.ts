@@ -7,6 +7,11 @@ import { pluginElectronBuild } from "./plugins/build";
 import { pluginElectronDev } from "./plugins/dev";
 
 const config: RsbuildConfig = {
+  output: {
+    distPath: {
+      root: "./dist/web",
+    },
+  },
   plugins: [
     pluginReact(),
     pluginLess({
@@ -24,8 +29,8 @@ const config: RsbuildConfig = {
     pluginElectronDev(),
     pluginElectronBuild(),
   ],
-  dev: {
-    lazyCompilation: true,
+  server: {
+    port: 3456,
   },
 };
 

@@ -1,6 +1,5 @@
-import toast from "react-hot-toast";
-
 import { atom, useAtom } from "jotai";
+import { addToast } from "@heroui/react";
 
 import { getPlaylistSubscribe, getUserPlaylist, postPlaylistCreate, postPlaylistDelete } from "@/service";
 import type { PlaylistCreateRequestData } from "@/service/playlist-create";
@@ -35,7 +34,10 @@ export function useUserPlaylist() {
   const add = async (data: PlaylistCreateRequestData, cb?: VoidFunction) =>
     postPlaylistCreate(data).then(({ code, id }) => {
       if (code === 200 && id) {
-        toast.success("创建成功");
+        addToast({
+          title: "创建成功",
+          color: "success",
+        });
         cb?.();
       }
     });
@@ -44,7 +46,10 @@ export function useUserPlaylist() {
   const rm = async (data: PlaylistDeleteRequestData, cb?: VoidFunction) =>
     postPlaylistDelete(data).then(({ code, id }) => {
       if (code === 200 && id) {
-        toast.success("删除成功");
+        addToast({
+          title: "已删除",
+          color: "success",
+        });
         cb?.();
       }
     });
@@ -56,7 +61,10 @@ export function useUserPlaylist() {
       t: 1,
     }).then(({ code, id }) => {
       if (code === 200 && id) {
-        toast.success("收藏成功");
+        addToast({
+          title: "收藏成功",
+          color: "success",
+        });
         cb?.();
       }
     });
@@ -67,7 +75,10 @@ export function useUserPlaylist() {
       t: 2,
     }).then(({ code, id }) => {
       if (code === 200 && id) {
-        toast.success("已取消收藏");
+        addToast({
+          title: "已取消收藏",
+          color: "success",
+        });
         cb?.();
       }
     });

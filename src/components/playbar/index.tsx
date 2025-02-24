@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { toast } from "react-hot-toast";
 import {
   MdExpand,
   MdPause,
@@ -15,12 +14,12 @@ import {
 
 import { useBoolean, useRequest } from "ahooks";
 import { isNil } from "es-toolkit";
+import { addToast } from "@heroui/react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import Slider from "@mui/material/Slider";
 import Stack from "@mui/material/Stack";
-import { useTheme } from "@mui/material/styles";
 
 import { MUSIC_LEVEL, PLAY_MODE } from "@/common/constants";
 import usePlay from "@/common/hooks/usePlay";
@@ -43,7 +42,6 @@ import "./index.less";
  * 播放任务栏
  */
 function PlayTaskBar() {
-  const theme = useTheme();
   const { disabledPlay, playingSong, playMode, prev, next, changePlayMode } = usePlay();
   const [rate, setRate] = useState(1);
   const [volume, setVolume] = useState(0);
@@ -84,7 +82,10 @@ function PlayTaskBar() {
       manual: true,
       onSuccess: res => {
         if (!res?.data?.[0]?.url) {
-          toast.error("无法获取歌曲播放链接");
+          addToast({
+            title: "无法获取歌曲播放链接",
+            color: "danger",
+          });
         } else {
           reqLyrics();
         }

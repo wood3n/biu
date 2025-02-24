@@ -1,8 +1,8 @@
 import React from "react";
-import { TailSpin } from "react-loader-spinner";
 
 import { useBoolean } from "ahooks";
 import classNames from "classnames";
+import { Spinner } from "@heroui/react";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import type { TooltipProps } from "@mui/material/Tooltip/Tooltip";
@@ -48,7 +48,7 @@ function TooltipButton({ disabled, onClick, size, className, style, children, to
   }
 
   if (loading) {
-    return <TailSpin width={18} height={18} radius="2" />;
+    return <Spinner classNames={{ label: "text-foreground mt-4" }} label="simple" variant="simple" />;
   }
 
   return (

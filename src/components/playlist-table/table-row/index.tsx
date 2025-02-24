@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { MdOutlineFavorite, MdOutlineFavoriteBorder, MdOutlineInfo, MdPlayArrow } from "react-icons/md";
-import { Audio as AudioSpinner } from "react-loader-spinner";
 import { useNavigate } from "react-router-dom";
 
+import { Spinner } from "@heroui/react";
 import { useTheme } from "@mui/material/styles";
 import TableRow from "@mui/material/TableRow";
 
@@ -54,7 +54,7 @@ function StyledTableRow({ index, data }: Props) {
         }}
       >
         {playingSong?.id === data.id ? (
-          <AudioSpinner width={16} height={16} wrapperStyle={{ justifyContent: "center" }} />
+          <Spinner classNames={{ label: "text-foreground mt-4" }} label="wave" variant="wave" />
         ) : hovered ? (
           <TooltipButton
             placement="top"

@@ -7,6 +7,7 @@ import CloudDrive from "./pages/cloud-drive";
 import Collect from "./pages/collect";
 import CollectAlbum from "./pages/collect/album";
 import CollectArtist from "./pages/collect/artist";
+import Daily from "./pages/daily";
 import FM from "./pages/fm";
 import Home from "./pages/home";
 import Login from "./pages/login";
@@ -23,6 +24,10 @@ const routes: RouteObject[] = [
       {
         index: true,
         element: <Home />,
+      },
+      {
+        path: "/daily",
+        element: <Daily />,
       },
       {
         path: "/fm",

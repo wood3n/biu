@@ -16,7 +16,7 @@
     "music",
     "music desktop application",
     "music application",
-    "NeteaseCloudMusic",
+    "Netease Cloud Music",
     "frontend",
     "react",
     "typescript",
@@ -24,7 +24,7 @@
   ],
   "main": "electron/main.js",
   "scripts": {
-    "api": "node scripts/service-generator/index.js",
+    "postinstall": "node node_modules/electron/install.js",
     "prepare": "husky install",
     "dev": "rsbuild dev",
     "build": "rsbuild build"
@@ -53,14 +53,12 @@
     "material-ui-popup-state": "^5.0.8",
     "moment": "^2.29.4",
     "moment-duration-format": "^2.3.2",
-    "overlayscrollbars": "^2.2.0",
-    "overlayscrollbars-react": "^0.5.0",
+    "overlayscrollbars": "^2.11.1",
+    "overlayscrollbars-react": "^0.5.6",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-hot-toast": "^2.4.0",
     "react-icons": "^4.8.0",
     "react-image": "^4.1.0",
-    "react-loader-spinner": "^5.3.4",
     "react-router": "^6.3.0",
     "react-router-dom": "~6.4.0",
     "react-window": "^1.8.9",
@@ -82,6 +80,7 @@
     "@types/react-dom": "^18.0.6",
     "@types/react-scrollbar": "^0.5.3",
     "@types/react-window": "^1.8.5",
+    "changelogen": "^0.5.7",
     "electron": "v34.1.1",
     "electron-builder": "^25.1.8",
     "eslint": "^9.20.1",
@@ -108,7 +107,7 @@
     "typescript-eslint": "^8.24.0"
   },
   "lint-staged": {
-    "*.{js,json,ts,tsx}": "npx eslint --fix",
+    "*.{js,cjs,mjs,json,ts,tsx}": "npx eslint --fix",
     "*.{css,less}": "npx stylelint --fix"
   },
   "publishConfig": {

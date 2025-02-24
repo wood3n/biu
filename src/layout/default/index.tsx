@@ -2,13 +2,15 @@ import React from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 
 import { useRequest } from "ahooks";
-import { Spinner } from "@heroui/react";
+import { Card, CardBody, Spinner } from "@heroui/react";
 
-import LayoutNavbar from "@/components/navbar";
+import Navbar from "@/components/navbar";
 import { getLoginStatus } from "@/service";
 import { useUser } from "@/store/user";
 import { useFavoriteSongs } from "@/store/user-favorite-songs";
 import { useUserPlayList } from "@/store/user-playlist";
+
+import DefaultMenu from "./default-menu";
 
 const DefaultLayout = () => {
   const navigate = useNavigate();
@@ -39,11 +41,27 @@ const DefaultLayout = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <LayoutNavbar />
-      <div className="flex-grow">
-        <Outlet />
+      <Navbar />
+      <div className="flex flex-grow space-x-2 p-2">
+        <div className="flex w-72 flex-col space-y-2">
+          <Card>
+            <CardBody>
+              <DefaultMenu />
+            </CardBody>
+          </Card>
+          <Card className="flex-grow">
+            <CardBody>
+              <p>Make beautiful websites regardless of your design experience.</p>
+            </CardBody>
+          </Card>
+        </div>
+        <Card className="flex-3">
+          <CardBody>
+            <Outlet />
+          </CardBody>
+        </Card>
       </div>
-      <div className="h-24 w-full">playbar</div>
+      <div className="h-24 w-full border-t-1 border-zinc-800">playbar</div>
     </div>
   );
 };

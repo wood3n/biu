@@ -1,7 +1,7 @@
 const path = require("node:path");
 const Store = require("electron-store");
 const { app, BrowserWindow, nativeImage, ipcMain } = require("electron/main");
-const { createTray } = require("./createTray");
+// const { createTray } = require("./createTray");
 
 const store = new Store();
 
@@ -110,9 +110,9 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  createTray({
-    onClick: () => mainWindow.show(),
-  });
+  // createTray({
+  //   onClick: () => mainWindow.show(),
+  // });
 
   createWindow();
 });
