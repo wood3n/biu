@@ -1,4 +1,5 @@
 import importPlugin from "eslint-plugin-import";
+import jsxA11y from "eslint-plugin-jsx-a11y";
 import nodePlugin from "eslint-plugin-n";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
@@ -10,9 +11,8 @@ import eslintReact from "@eslint-react/eslint-plugin";
 
 export default tseslint.config(
   {
+    files: ["**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}"],
     ignores: ["dist", "node_modules", "public"],
-  },
-  {
     extends: [
       eslintJs.configs.recommended,
       tseslint.configs.recommended,
@@ -20,9 +20,10 @@ export default tseslint.config(
       importPlugin.flatConfigs.recommended,
       importPlugin.flatConfigs.typescript,
       eslintPluginPrettierRecommended,
+      nodePlugin.configs["flat/recommended-script"],
+      jsxA11y.flatConfigs.recommended,
     ],
     plugins: {
-      node: nodePlugin,
       "unused-imports": unusedImports,
       "simple-import-sort": simpleImportSort,
     },
@@ -30,6 +31,9 @@ export default tseslint.config(
       parser: tseslint.parser,
       parserOptions: {
         projectService: true,
+        ecmaFeatures: {
+          jsx: true,
+        },
       },
       globals: {
         ...globals.browser,
@@ -45,26 +49,23 @@ export default tseslint.config(
     },
     rules: {
       "import/no-named-as-default-member": 0,
+      "n/no-missing-import": 0,
+      "n/no-process-exit": 0,
+      "n/no-missing-require": [
+        "error",
+        {
+          allowModules: ["electron"],
+        },
+      ],
+      "unused-imports/no-unused-vars": 0,
       "@typescript-eslint/no-require-imports": 0,
       "@eslint-react/prefer-shorthand-boolean": "warn",
       "@eslint-react/hooks-extra/no-direct-set-state-in-use-effect": 0,
       "@eslint-react/no-array-index-key": 0,
       "@typescript-eslint/no-explicit-any": 0,
       "@typescript-eslint/ban-ts-comment": 0,
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          args: "all",
-          argsIgnorePattern: "^_",
-          caughtErrors: "all",
-          caughtErrorsIgnorePattern: "^_",
-          destructuredArrayIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          ignoreRestSiblings: true,
-        },
-      ],
-      "no-unused-vars": "off", // or "@typescript-eslint/no-unused-vars": "off",
-      "unused-imports/no-unused-imports": "error",
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": 0,
       "unused-imports/no-unused-vars": [
         "warn",
         {
@@ -74,6 +75,7 @@ export default tseslint.config(
           argsIgnorePattern: "^_",
         },
       ],
+      "unused-imports/no-unused-imports": "error",
       "simple-import-sort/imports": [
         "error",
         {

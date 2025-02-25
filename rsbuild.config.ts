@@ -11,6 +11,12 @@ const config: RsbuildConfig = {
     distPath: {
       root: "./dist/web",
     },
+    sourceMap: {
+      js: "source-map",
+    },
+  },
+  html: {
+    template: "./src/index.html",
   },
   plugins: [
     pluginReact(),

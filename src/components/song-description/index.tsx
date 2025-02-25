@@ -4,7 +4,7 @@ import Stack from "@mui/material/Stack";
 
 import type { Ar } from "@/service/recommend-songs";
 
-import ArtistLinks from "../artist-links";
+import ArtistLinks from "../artists";
 import Image from "../image";
 import OverflowText from "../overflow-text";
 

@@ -42,8 +42,8 @@ const DefaultLayout = () => {
   return (
     <div className="flex h-full flex-col">
       <Navbar />
-      <div className="flex flex-grow space-x-2 p-2">
-        <div className="flex w-72 flex-col space-y-2">
+      <div className="flex min-h-0 flex-grow space-x-2 p-2">
+        <div className="flex w-60 flex-col space-y-2">
           <Card>
             <CardBody>
               <DefaultMenu />

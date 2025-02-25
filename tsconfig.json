@@ -13,6 +13,7 @@
       "@/*": ["./src/*"]
     },
     "resolveJsonModule": true,
+    "noImplicitAny": false,
     "types": ["node"],
     "allowJs": true,
     "strict": true,

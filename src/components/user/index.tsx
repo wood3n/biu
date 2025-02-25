@@ -1,34 +1,34 @@
 import React from "react";
 
-import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, User } from "@heroui/react";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, User } from "@heroui/react";
 
-interface Props {}
+import { useUser } from "@/store/user";
 
-const UserChip = (props: Props) => {
+const UserChip = () => {
+  const user = useUser(store => store.user);
+
   return (
-    <Dropdown placement="bottom-end">
+    <Dropdown>
       <DropdownTrigger>
         <User
+          aria-label="打开个人信息设置以及反馈、退出登录"
           avatarProps={{
-            src: "https://i.pravatar.cc/150?u=a04258114e29026702d",
+            src: user?.profile?.avatarUrl,
           }}
-          name="Jane Doe"
+          name={user?.profile?.nickname}
         />
       </DropdownTrigger>
-      <DropdownMenu aria-label="Profile Actions" variant="flat">
-        <DropdownItem key="profile" className="h-14 gap-2">
-          <p className="font-semibold">Signed in as</p>
-          <p className="font-semibold">zoey@example.com</p>
-        </DropdownItem>
-        <DropdownItem key="settings">My Settings</DropdownItem>
-        <DropdownItem key="team_settings">Team Settings</DropdownItem>
-        <DropdownItem key="analytics">Analytics</DropdownItem>
-        <DropdownItem key="system">System</DropdownItem>
-        <DropdownItem key="configurations">Configurations</DropdownItem>
-        <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
-        <DropdownItem key="logout" color="danger">
-          Log Out
-        </DropdownItem>
+      <DropdownMenu variant="flat">
+        <DropdownSection showDivider>
+          <DropdownItem key="profile">我的会员</DropdownItem>
+          <DropdownItem key="settings">个人设置</DropdownItem>
+        </DropdownSection>
+        <DropdownSection>
+          <DropdownItem key="help_and_feedback">帮助与反馈</DropdownItem>
+          <DropdownItem key="logout" className="text-danger" color="danger">
+            退出登录
+          </DropdownItem>
+        </DropdownSection>
       </DropdownMenu>
     </Dropdown>
   );

@@ -1,6 +1,7 @@
 {
   "name": "rate",
   "version": "1.0.0",
+  "private": true,
   "description": "windows music application",
   "author": "wood3n",
   "license": "MIT",
@@ -44,7 +45,6 @@
     "axios": "^1.7.9",
     "classnames": "^2.3.1",
     "electron-store": "^8.1.0",
-    "electron-tray-window": "^1.2.7",
     "es-toolkit": "^1.32.0",
     "framer-motion": "^12.4.2",
     "immer": "^10.0.2",
@@ -87,6 +87,7 @@
     "eslint-config-prettier": "^10.0.1",
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-n": "^17.15.1",
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-simple-import-sort": "^12.1.1",

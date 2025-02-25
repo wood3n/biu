@@ -27,7 +27,7 @@ import { getLocal, STORAGE_KEY, updateLocal } from "@/common/localforage";
 import { formatDuration } from "@/common/utils";
 import { getLyrics, getSongUrlV1 } from "@/service";
 
-import ArtistLinks from "../artist-links";
+import ArtistLinks from "../artists";
 import FullScreenPlayCenter from "../full-screen-play-center";
 import Image from "../image";
 import OverflowText from "../overflow-text";
