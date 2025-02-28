@@ -1,9 +1,12 @@
 import { create } from "zustand";
 
+import { PlaylistSpecialType } from "@/common/constants";
 import { getUserPlaylist, type PlaylistInfoType } from "@/service/user-playlist";
 
 interface State {
-  playList: PlaylistInfoType[] | null | undefined;
+  likeList?: PlaylistInfoType | null;
+  createList?: PlaylistInfoType[];
+  collectList?: PlaylistInfoType[];
 }
 
 interface Action {
@@ -11,7 +14,7 @@ interface Action {
 }
 
 export const useUserPlayList = create<State & Action>(set => ({
-  playList: null,
+  likeList: null,
   updatePlayList: async userId => {
     const response = await getUserPlaylist({
       uid: userId,
@@ -19,6 +22,9 @@ export const useUserPlayList = create<State & Action>(set => ({
       offset: 0,
     });
 
-    set(() => ({ playList: response?.playlist }));
+    const likeList = response?.playlist?.find(item => item.specialType === PlaylistSpecialType.Favorite);
+    const createList = response?.playlist?.filter(item => item.specialType !== PlaylistSpecialType.Favorite && item.userId === userId);
+    const collectList = response?.playlist?.filter(item => item.specialType !== PlaylistSpecialType.Favorite && item.userId !== userId);
+    set(() => ({ likeList, createList, collectList }));
   },
 }));

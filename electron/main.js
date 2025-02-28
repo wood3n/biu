@@ -109,6 +109,8 @@ function createWindow() {
   });
 }
 
+app.commandLine.appendSwitch("--in-process-gpu");
+
 app.whenReady().then(() => {
   // createTray({
   //   onClick: () => mainWindow.show(),

@@ -1,9 +1,10 @@
 import React from "react";
 
 import { Button, Tooltip } from "@heroui/react";
-import { RiDislikeFill, RiHeartLine } from "@remixicon/react";
+import { RiHeart3Fill, RiHeart3Line } from "@remixicon/react";
 
 import { postLike } from "@/service";
+import { useUser } from "@/store/user";
 import { useFavoriteSongs } from "@/store/user-favorite-songs";
 
 interface Props {
@@ -11,7 +12,8 @@ interface Props {
 }
 
 const SwitchFavorite: React.FC<Props> = ({ id }) => {
-  const songs = useFavoriteSongs(store => store.songs);
+  const user = useUser(store => store.user);
+  const { songs, updateFavoriteSongs } = useFavoriteSongs();
   const liked = songs?.includes(id);
 
   const switchLike = async () => {
@@ -19,12 +21,14 @@ const SwitchFavorite: React.FC<Props> = ({ id }) => {
       id,
       like: !liked,
     });
+
+    await updateFavoriteSongs(user?.profile?.userId as number);
   };
 
   return (
-    <Tooltip onClick={switchLike} title={liked ? "取消喜欢" : "喜欢"}>
-      <Button size="sm" variant="light" isIconOnly>
-        {liked ? <RiDislikeFill size={18} /> : <RiHeartLine size={18} />}
+    <Tooltip content={liked ? "取消喜欢" : "喜欢"}>
+      <Button size="sm" variant="light" isIconOnly onPress={switchLike}>
+        {liked ? <RiHeart3Fill color="#F31260" size={18} /> : <RiHeart3Line size={18} />}
       </Button>
     </Tooltip>
   );

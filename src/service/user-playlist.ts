@@ -61,6 +61,7 @@ export interface PlaylistInfoType {
   recommendInfo?: RecommendInfo | null;
   subscribedCount?: number;
   cloudTrackCount?: number;
+  /** 创建人 */
   userId?: number;
   totalDuration?: number;
   coverImgId?: number;
@@ -98,6 +99,6 @@ export interface PersonalPlayList {
 }
 
 /*
- * 获取用户歌单
+ * 获取用户歌单，包括喜欢的音乐列表，创建的歌单，收藏的歌单
  */
 export const getUserPlaylist = (params: UserPlaylistRequestParams) => request.get<PersonalPlayList>("/user/playlist", { params });

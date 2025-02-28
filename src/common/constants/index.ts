@@ -69,3 +69,36 @@ export const PLAY_MODE_DESCRIPTION = {
   [PLAY_MODE.LOOP]: "列表循环",
   [PLAY_MODE.RANDOM]: "随机播放",
 };
+
+/**
+ * https://developer.music.163.com/st/developer/document?docId=44502066b50849bb9364350ab7fb71de
+ * 歌单类型
+ */
+export enum PlaylistSpecialType {
+  /**
+   * 普通歌单
+   */
+  Ordinary = 0,
+  /**
+   * 红心歌单
+   */
+  Favorite = 5,
+  /**
+   * 置顶歌单
+   */
+  Topped = 10,
+  /**
+   * 尾部的
+   */
+  Tail = 20,
+  /**
+   * 官方歌单
+   */
+  Official = 100,
+  /**
+   * 视频歌单
+   */
+  Video = 200,
+  /** 分享歌单 */
+  Shared = 300,
+}

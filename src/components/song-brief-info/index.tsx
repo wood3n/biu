@@ -13,7 +13,7 @@ interface Props {
 
 const SongBriefInfo = ({ name, ars, coverUrl }: Props) => {
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex w-full items-center space-x-2">
       <Image className="object-cover" loading="lazy" width={48} height={48} src={coverUrl} />
       <div className="flex flex-col space-y-1">
         <Ellipsis className="text-base">{name}</Ellipsis>
