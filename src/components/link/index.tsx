@@ -11,11 +11,11 @@ const Link = ({ children, className, ...props }: LinkProps) => {
     if (ref.current) {
       setIsOverflow(ref.current.scrollWidth > ref.current.clientWidth);
     }
-  }, []);
+  });
 
   return (
     <Tooltip isDisabled={!isOverflowed} content={children}>
-      <HeroLink {...props} className={clx(className, "truncate")} ref={ref}>
+      <HeroLink {...props} className={clx(className, "inline-block truncate")} ref={ref}>
         {children}
       </HeroLink>
     </Tooltip>

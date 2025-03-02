@@ -1,8 +1,6 @@
-import PageContainer from "@/components/PageContainer";
-
 /**
  * 播客
  */
-const Podcast = () => <PageContainer>播客</PageContainer>;
+const Podcast = () => <div>播客</div>;
 
 export default Podcast;

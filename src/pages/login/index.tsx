@@ -1,31 +1,78 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { Col, Row } from "antd";
+import { useRequest } from "ahooks";
+import { addToast, Image } from "@heroui/react";
 
-import { ReactComponent as Music } from "@/assets/images/music.svg";
-import WindowCornerAction from "@/components/window-action";
+import { ImageErr } from "@/common/constants";
+import { checkError } from "@/common/utils";
+import { getLoginQrCheck, getLoginQrCreate, getLoginQrKey } from "@/service";
 
-import LoginByQr from "./LoginByQr";
+import { QRLoginCode } from "./constants";
 
-import styles from "./index.module.less";
+const LoginByQr: React.FC = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [src, setSrc] = useState<string>();
 
-const Login: React.FC = () => (
-  <Row className={styles.login}>
-    <Col span={16} className={styles.loginSider} />
-    <Col span={8}>
-      <div className={styles.winAction}>
-        <WindowCornerAction />
-      </div>
-      <div className={styles.loginForm}>
-        <div className={styles.logo}>
-          <span>
-            <Music width={48} height={48} />
-          </span>
-        </div>
-        <LoginByQr />
-      </div>
-    </Col>
-  </Row>
-);
+  const createQr = async () => {
+    setLoading(true);
+    try {
+      const { data } = await getLoginQrKey();
+      const { data: qrData } = await getLoginQrCreate({
+        key: data.unikey,
+        qrimg: true,
+      });
+      setSrc(qrData.qrimg);
+      return data.unikey;
+    } catch (err) {
+      return Promise.reject(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-export default Login;
+  const { runAsync, cancel } = useRequest(getLoginQrCheck, {
+    manual: true,
+    pollingInterval: 3000,
+    onSuccess: ({ code }) => {
+      if (code === QRLoginCode.Success) {
+        cancel();
+        addToast({
+          title: "登录成功",
+          color: "success",
+        });
+        navigate("/recommend", { replace: true });
+      }
+
+      if (code === QRLoginCode.Timeout) {
+        cancel();
+      }
+    },
+  });
+
+  async function checkLogin() {
+    try {
+      const key = await createQr();
+      if (key) {
+        runAsync({ key });
+      }
+    } catch (err) {
+      checkError(err);
+    }
+  }
+
+  useEffect(() => {
+    checkLogin();
+  }, []);
+
+  useEffect(() => cancel, [cancel]);
+
+  return (
+    <div className="flex h-full w-full items-center justify-center">
+      <Image isLoading={loading} width={180} fallbackSrc={ImageErr} src={src} />
+    </div>
+  );
+};
+
+export default LoginByQr;

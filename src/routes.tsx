@@ -4,16 +4,13 @@ import DefaultLayout from "./layout/default";
 import Album from "./pages/album";
 import Artist from "./pages/artist";
 import CloudDrive from "./pages/cloud-drive";
-import Collect from "./pages/collect";
-import CollectAlbum from "./pages/collect/album";
-import CollectArtist from "./pages/collect/artist";
+import Collection from "./pages/collection";
 import Daily from "./pages/daily";
-import FM from "./pages/fm";
-import Home from "./pages/home";
 import Login from "./pages/login";
 import NotFound from "./pages/not-found";
 import PlayList from "./pages/playlist";
 import Podcast from "./pages/podcast";
+import Recommend from "./pages/recommend";
 import UserProfile from "./pages/user-profile";
 
 const routes: RouteObject[] = [
@@ -22,24 +19,20 @@ const routes: RouteObject[] = [
     element: <DefaultLayout />,
     children: [
       {
-        index: true,
-        element: <Home />,
+        path: "/recommend",
+        element: <Recommend />,
       },
       {
         path: "/daily",
         element: <Daily />,
       },
       {
-        path: "/fm",
-        element: <FM />,
-      },
-      {
         path: "/profile/:id",
         element: <UserProfile />,
       },
       {
-        path: "/collect",
-        element: <Collect />,
+        path: "/collection",
+        element: <Collection />,
       },
       {
         path: "/podcast",
@@ -52,19 +45,6 @@ const routes: RouteObject[] = [
       {
         path: "/album/:id",
         element: <Album />,
-      },
-      {
-        path: "/collect",
-        children: [
-          {
-            path: "album",
-            element: <CollectAlbum />,
-          },
-          {
-            path: "artist",
-            element: <CollectArtist />,
-          },
-        ],
       },
       {
         path: "/playlist/:pid",

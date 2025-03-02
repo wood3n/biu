@@ -1,9 +1,15 @@
-import { message } from "antd";
+import { addToast } from "@heroui/react";
 
 export function checkError(err: unknown) {
   if (err instanceof Error) {
-    message.error(err.message);
+    addToast({
+      title: err.message,
+      color: "danger",
+    });
   } else if (typeof err === "string") {
-    message.error(err);
+    addToast({
+      title: err,
+      color: "danger",
+    });
   }
 }

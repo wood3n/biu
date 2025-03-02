@@ -3,7 +3,6 @@ import React from "react";
 import { Image } from "@heroui/react";
 
 import Artists from "../artists";
-import Ellipsis from "../ellipsis";
 
 interface Props {
   name: string;
@@ -14,10 +13,12 @@ interface Props {
 const SongBriefInfo = ({ name, ars, coverUrl }: Props) => {
   return (
     <div className="flex w-full items-center space-x-2">
-      <Image className="object-cover" loading="lazy" width={48} height={48} src={coverUrl} />
-      <div className="flex flex-col space-y-1">
-        <Ellipsis className="text-base">{name}</Ellipsis>
-        {Boolean(ars?.length) && <Artists className="text-sm text-zinc-500" ars={ars!} />}
+      <div className="flex-none">
+        <Image radius="sm" className="object-cover" loading="lazy" width={42} height={42} src={coverUrl} />
+      </div>
+      <div className="flex min-w-0 flex-col space-y-0.5">
+        <span className="truncate text-base">{name}</span>
+        {Boolean(ars?.length) && <Artists ars={ars!} />}
       </div>
     </div>
   );

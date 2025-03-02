@@ -2,10 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-.window-drag {
-  app-region: drag;
-}
+@layer components {
+  .window-drag {
+    app-region: drag;
+  }
 
-.window-no-drag {
-  app-region: no-drag;
+  .window-no-drag {
+    app-region: no-drag;
+  }
 }

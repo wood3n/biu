@@ -15,6 +15,9 @@ const config: RsbuildConfig = {
       js: "source-map",
     },
   },
+  performance: {
+    removeMomentLocale: true,
+  },
   html: {
     template: "./src/index.html",
   },

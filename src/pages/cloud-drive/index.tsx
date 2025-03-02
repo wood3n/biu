@@ -1,5 +1,3 @@
-import PageContainer from "@/components/PageContainer";
-
-const CloudDrive = () => <PageContainer>云盘</PageContainer>;
+const CloudDrive = () => <div>云盘</div>;
 
 export default CloudDrive;

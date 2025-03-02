@@ -1,24 +1,23 @@
 import React from "react";
-import { MdClose, MdOutlineFullscreen, MdRemove } from "react-icons/md";
 
-import IconButton from "@mui/material/IconButton";
-import Stack from "@mui/material/Stack";
+import { Button } from "@heroui/react";
+import { RiCloseLine, RiFullscreenLine, RiSubtractLine } from "@remixicon/react";
 
 /**
  * 窗口关闭等按钮操作
  */
 const WindowAction: React.FC = () => (
-  <Stack spacing={1} direction="row">
-    <IconButton size="small">
-      <MdRemove size={18} />
-    </IconButton>
-    <IconButton size="small">
-      <MdOutlineFullscreen size={18} />
-    </IconButton>
-    <IconButton size="small">
-      <MdClose size={18} />
-    </IconButton>
-  </Stack>
+  <div className="flex items-center space-x-6">
+    <Button isIconOnly size="sm" variant="light">
+      <RiSubtractLine size={18} />
+    </Button>
+    <Button isIconOnly size="sm" variant="light">
+      <RiFullscreenLine size={18} />
+    </Button>
+    <Button isIconOnly size="sm" variant="light">
+      <RiCloseLine size={18} />
+    </Button>
+  </div>
 );
 
 export default WindowAction;

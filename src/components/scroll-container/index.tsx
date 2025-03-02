@@ -4,8 +4,7 @@ import { OverlayScrollbarsComponent, OverlayScrollbarsComponentProps } from "ove
 
 import "overlayscrollbars/overlayscrollbars.css";
 
-// @ts-ignore options type not match
-const ScrollContainer = ({ options, children, ...props }: OverlayScrollbarsComponentProps["options"] & { children: React.ReactNode }) => {
+const ScrollContainer = ({ options, children, ...props }: OverlayScrollbarsComponentProps & { children: React.ReactNode }) => {
   return (
     <OverlayScrollbarsComponent defer options={{ scrollbars: { theme: "os-theme-light" }, ...options }} {...props}>
       {children}

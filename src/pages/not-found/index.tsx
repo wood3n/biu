@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 
 import { useInterval } from "ahooks";
 
+import Empty from "@/components/empty";
+
 /**
  * 路由不匹配处理
  */
@@ -19,9 +21,8 @@ const NotFound: React.FC = () => {
   }, [count]);
 
   return (
-    <div>
-      <h1>404</h1>
-      <span>{count} 秒后回到主页...</span>
+    <div className="h-full w-full">
+      <Empty />
     </div>
   );
 };

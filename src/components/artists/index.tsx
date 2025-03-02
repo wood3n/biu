@@ -5,19 +5,18 @@ import { RiMoreLine } from "@remixicon/react";
 
 interface Props {
   ars: Ar[];
-  className?: string;
 }
 
 /**
  * 艺人串
  */
-const Artists: React.FC<Props> = ({ ars, className }) => {
+const Artists: React.FC<Props> = ({ ars }) => {
   return (
     <div className="flex items-center">
       {ars?.slice(0, 3)?.map<React.ReactNode>(({ id, name }, i) => (
         <React.Fragment key={id}>
-          {i ? <span className={className}>,&nbsp;</span> : ""}
-          <Link className={className} underline="hover" color="foreground" href={`/artist/${id}`}>
+          {i ? <span className="text-sm text-zinc-500">，</span> : ""}
+          <Link className="inline-block min-w-0 flex-shrink truncate text-sm text-zinc-500" underline="hover" color="foreground" href={`/artist/${id}`}>
             {name}
           </Link>
         </React.Fragment>
@@ -25,7 +24,9 @@ const Artists: React.FC<Props> = ({ ars, className }) => {
       {ars?.length > 3 && (
         <Dropdown>
           <DropdownTrigger>
-            <RiMoreLine size={14} />
+            <span className="ml-1 text-zinc-700">
+              <RiMoreLine size={14} />
+            </span>
           </DropdownTrigger>
           <DropdownMenu items={ars} aria-label="其他艺人" variant="flat">
             {item => <DropdownItem key={item.id}>{item.name}</DropdownItem>}

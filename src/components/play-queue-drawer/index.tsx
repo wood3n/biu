@@ -1,31 +1,19 @@
 import * as React from "react";
 
-import { useAtomValue } from "jotai";
-import Drawer from "@mui/material/Drawer";
-
-import { playQueueAtom } from "@/store/play-queue-atom";
+import { Drawer, DrawerBody, DrawerContent, DrawerHeader } from "@heroui/react";
 
 interface Props {
-  open: boolean;
-  onClose: VoidFunction;
+  isOpen: boolean;
+  onOpenChange?: ((isOpen: boolean) => void) | undefined;
 }
 
-const PlayQueueDrawer: React.FC<Props> = ({ open, onClose }) => {
-  const playQueue = useAtomValue(playQueueAtom);
-
+const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
   return (
-    <Drawer
-      anchor="right"
-      PaperProps={{ style: { position: "absolute" } }}
-      BackdropProps={{ style: { position: "absolute" } }}
-      ModalProps={{
-        container: document.getElementById("play-queue-drawer-container"),
-        style: { position: "absolute" },
-      }}
-      open={open}
-      onClose={onClose}
-    >
-      测试
+    <Drawer isOpen={isOpen} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <DrawerHeader className="flex flex-col gap-1">Drawer Title</DrawerHeader>
+        <DrawerBody>播放列表</DrawerBody>
+      </DrawerContent>
     </Drawer>
   );
 };

@@ -1,48 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  MdExpand,
-  MdPause,
-  MdPlayArrow,
-  MdPlaylistPlay,
-  MdSkipNext,
-  MdSkipPrevious,
-  MdVolumeDown,
-  MdVolumeMute,
-  MdVolumeOff,
-  MdVolumeUp,
-} from "react-icons/md";
 
 import { useBoolean, useRequest } from "ahooks";
-import { isNil } from "es-toolkit";
 import { addToast } from "@heroui/react";
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import IconButton from "@mui/material/IconButton";
-import Slider from "@mui/material/Slider";
-import Stack from "@mui/material/Stack";
 
-import { MUSIC_LEVEL, PLAY_MODE } from "@/common/constants";
-import usePlay from "@/common/hooks/usePlay";
+import { MusicLevel, PlayMode } from "@/common/constants";
 import { getLocal, STORAGE_KEY, updateLocal } from "@/common/localforage";
-import { formatDuration } from "@/common/utils";
 import { getLyrics, getSongUrlV1 } from "@/service";
+import { usePlayingQueue } from "@/store/playing-queue";
 
-import ArtistLinks from "../artists";
-import FullScreenPlayCenter from "../full-screen-play-center";
-import Image from "../image";
-import OverflowText from "../overflow-text";
 import PlayQueueDrawer from "../play-queue-drawer";
-import TooltipButton from "../tooltip-button";
-import PlayModeToggle from "./play-mode";
-import PlayRate from "./play-rate";
-
-import "./index.less";
 
 /**
  * 播放任务栏
  */
-function PlayTaskBar() {
-  const { disabledPlay, playingSong, playMode, prev, next, changePlayMode } = usePlay();
+function PlayBar() {
   const [rate, setRate] = useState(1);
   const [volume, setVolume] = useState(0);
   const [muted, setMuted] = useState(false);
@@ -52,6 +23,9 @@ function PlayTaskBar() {
   const audioElRef = useRef<HTMLAudioElement>(new Audio());
   const [playlistDrawerVisible, { toggle }] = useBoolean();
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
+  const [playMode, setPlayMode] = useState<PlayMode>(PlayMode.Random);
+
+  const { currentSong } = usePlayingQueue();
 
   const init = async () => {
     const oldVolume = await getLocal<number>(STORAGE_KEY.VOLUME);
@@ -65,7 +39,7 @@ function PlayTaskBar() {
   const { data: getLyricsRes, runAsync: reqLyrics } = useRequest(
     () =>
       getLyrics({
-        id: playingSong?.id,
+        id: currentSong?.id,
       }),
     {
       manual: true,
@@ -75,8 +49,8 @@ function PlayTaskBar() {
   const { data, runAsync, loading } = useRequest(
     () =>
       getSongUrlV1({
-        id: playingSong?.id,
-        level: MUSIC_LEVEL.LOSSLESS,
+        id: currentSong?.id,
+        level: MusicLevel.Lossless,
       }),
     {
       manual: true,
@@ -94,14 +68,10 @@ function PlayTaskBar() {
   );
 
   useEffect(() => {
-    if (playingSong?.id) {
+    if (currentSong?.id) {
       runAsync();
     }
-  }, [playingSong?.id]);
-
-  useEffect(() => {
-    audioElRef.current.loop = playMode === PLAY_MODE.SINGLE;
-  }, [playMode]);
+  }, [currentSong?.id]);
 
   useEffect(() => {
     if (data?.data?.[0]?.url) {
@@ -133,8 +103,7 @@ function PlayTaskBar() {
       };
 
       audioElRef.current.onended = () => {
-        if (playMode !== PLAY_MODE.SINGLE) {
-          next();
+        if (playMode !== PlayMode.Single) {
         }
       };
     }
@@ -164,12 +133,10 @@ function PlayTaskBar() {
 
   const handlePrev = () => {
     stopPlay();
-    prev();
   };
 
   const handleNext = () => {
     stopPlay();
-    next();
   };
 
   const handleSeek = (_: Event, playTime: number | number[]) => {
@@ -197,106 +164,11 @@ function PlayTaskBar() {
   };
 
   return (
-    <>
-      <Grid
-        container
-        columnGap={4}
-        flexWrap="nowrap"
-        sx={{
-          height: "80px",
-          padding: "0 8px",
-        }}
-      >
-        <Grid
-          item
-          xs
-          sx={{
-            minWidth: 0,
-          }}
-        >
-          {playingSong && (
-            <Box
-              sx={{
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                columnGap: 2,
-              }}
-            >
-              <Image
-                src={playingSong?.al?.picUrl}
-                mask={{
-                  child: <MdExpand size={18} />,
-                  onClick: () => setFullScreenOpen(true),
-                }}
-              />
-              <Stack spacing="4px" sx={{ minWidth: 0 }}>
-                <OverflowText title={playingSong?.name} sx={{ minWidth: 0 }}>
-                  {playingSong?.name}
-                </OverflowText>
-                <ArtistLinks ars={playingSong?.ar} />
-              </Stack>
-            </Box>
-          )}
-        </Grid>
-        <Grid item xs={5}>
-          <Stack alignItems="center" className="playbar-progress-stack">
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <IconButton disabled={disabledPlay} size="small" onClick={handlePrev}>
-                <MdSkipPrevious size={24} />
-              </IconButton>
-              <IconButton disabled={disabledPlay} size="small" onClick={paused ? handlePlay : handlePause}>
-                {paused ? <MdPlayArrow size={36} /> : <MdPause size={36} />}
-              </IconButton>
-              <IconButton disabled={disabledPlay} size="small" onClick={handleNext}>
-                <MdSkipNext size={24} />
-              </IconButton>
-            </Stack>
-            <Stack direction="row" alignItems="center" spacing={2} style={{ flex: 1, width: "100%" }}>
-              <span className="playbar-progress-dt-span">{playingSong ? formatDuration(current, false) : ""}</span>
-              <Slider size="small" min={0} max={duration ?? 0} step={1} value={current} disabled={!playingSong} onChange={handleSeek} />
-              <span className="playbar-progress-dt-span">{isNil(duration) ? "" : formatDuration(duration, false)}</span>
-            </Stack>
-          </Stack>
-        </Grid>
-        <Grid
-          item
-          xs
-          sx={{
-            minWidth: 0,
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            columnGap: "8px",
-          }}
-        >
-          <PlayModeToggle value={playMode} onChange={v => changePlayMode(v)} />
-          <Stack direction="row" alignItems="center">
-            <IconButton size="small" onClick={toggleMuted}>
-              {muted ? (
-                <MdVolumeOff size={24} />
-              ) : volume === 0 ? (
-                <MdVolumeMute size={24} />
-              ) : volume < 0.5 ? (
-                <MdVolumeDown size={24} />
-              ) : (
-                <MdVolumeUp size={24} />
-              )}
-            </IconButton>
-            <Slider size="small" min={0} max={1} step={0.01} value={volume} onChange={(_, v) => handleChangeVolume(v as number)} style={{ width: 90 }} />
-          </Stack>
-          <Stack direction="row" spacing="12px" alignItems="center">
-            <PlayRate value={rate} onChange={handleChangeRate} />
-            <TooltipButton title="播放列表" size="small" onClick={toggle}>
-              <MdPlaylistPlay size={24} />
-            </TooltipButton>
-          </Stack>
-        </Grid>
-      </Grid>
-      <PlayQueueDrawer open={playlistDrawerVisible} onClose={toggle} />
-      <FullScreenPlayCenter open={fullScreenOpen} onClose={() => setFullScreenOpen(false)} song={playingSong} lyrics={getLyricsRes?.lrc?.lyric} />
-    </>
+    <div className="h-24">
+      <div>play</div>
+      <PlayQueueDrawer isOpen={playlistDrawerVisible} onOpenChange={toggle} />
+    </div>
   );
 }
 
-export default PlayTaskBar;
+export default PlayBar;

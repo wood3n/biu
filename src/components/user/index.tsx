@@ -13,9 +13,11 @@ const UserChip = () => {
         <User
           aria-label="打开个人信息设置以及反馈、退出登录"
           avatarProps={{
+            size: "sm",
             src: user?.profile?.avatarUrl,
           }}
           name={user?.profile?.nickname}
+          className="cursor-pointer"
         />
       </DropdownTrigger>
       <DropdownMenu variant="flat">

@@ -1,5 +1,5 @@
 import { Link } from "@heroui/react";
-import { RiPulseFill } from "@remixicon/react";
+import { RiPulseFill, RiTimeLine } from "@remixicon/react";
 
 import { formatDuration } from "@/common/utils";
 import Collection from "@/components/collection";
@@ -11,7 +11,7 @@ export const columns: ColumnsType<Song> = [
     title: "#",
     key: "index",
     align: "center",
-    className: "text-zinc-400",
+    className: "text-zinc-400 text-sm",
     render: ({ index, isSelected }) => (isSelected ? <RiPulseFill className="text-green-500" /> : index + 1),
   },
   {
@@ -25,13 +25,13 @@ export const columns: ColumnsType<Song> = [
     key: "album",
     align: "start",
     render: ({ rowData }) => (
-      <Link underline="hover" className="cursor-pointer truncate text-sm" color="foreground">
+      <Link underline="hover" className="inline-block cursor-pointer truncate text-sm" color="foreground">
         {rowData?.al?.name}
       </Link>
     ),
   },
   {
-    title: "时长",
+    title: <RiTimeLine size={16} />,
     key: "duration",
     align: "center",
     className: "text-sm",

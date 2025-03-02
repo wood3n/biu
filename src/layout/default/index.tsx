@@ -4,13 +4,14 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { useRequest } from "ahooks";
 import { Card, CardBody, Spinner } from "@heroui/react";
 
-import Navbar from "@/components/navbar";
+import PlayBar from "@/components/playbar";
+import Navbar from "@/layout/default/navbar";
 import { getLoginStatus } from "@/service";
 import { useUser } from "@/store/user";
 import { useFavoriteSongs } from "@/store/user-favorite-songs";
 import { useUserPlayList } from "@/store/user-playlist";
 
-import DefaultMenu from "./default-menu";
+import Side from "./side";
 
 const DefaultLayout = () => {
   const navigate = useNavigate();
@@ -43,25 +44,20 @@ const DefaultLayout = () => {
     <div className="flex h-full flex-col">
       <Navbar />
       <div className="flex min-h-0 flex-grow space-x-2 p-2">
-        <div className="flex w-60 flex-col space-y-2">
-          <Card>
-            <CardBody>
-              <DefaultMenu />
-            </CardBody>
-          </Card>
-          <Card className="flex-grow">
-            <CardBody>
-              <p>Make beautiful websites regardless of your design experience.</p>
-            </CardBody>
-          </Card>
-        </div>
-        <Card className="flex-3">
+        <Card className="w-1/5 min-w-64">
+          <CardBody className="p-0">
+            <Side />
+          </CardBody>
+        </Card>
+        <Card className="flex-grow">
           <CardBody className="p-0">
             <Outlet />
           </CardBody>
         </Card>
       </div>
-      <div className="h-24 w-full border-t-1 border-zinc-800">playbar</div>
+      <div className="h-24 w-full border-t-1 border-zinc-800">
+        <PlayBar />
+      </div>
     </div>
   );
 };

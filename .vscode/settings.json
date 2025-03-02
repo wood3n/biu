@@ -11,5 +11,9 @@
     "less",
     "postcss",
     "scss"
-  ]
+  ],
+  "marscode.codeCompletionPro": {
+    "enableCodeCompletionPro": false
+  },
+  "marscode.enableInlineCommand": false
 }
