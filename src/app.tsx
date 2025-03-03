@@ -6,6 +6,7 @@ import { HeroUIProvider, ToastProvider } from "@heroui/react";
 
 import routes from "./routes";
 
+import "overlayscrollbars/overlayscrollbars.css";
 import "./app.css";
 
 moment.locale("zh-cn");

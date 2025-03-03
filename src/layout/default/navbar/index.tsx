@@ -21,7 +21,7 @@ const LayoutNavbar = () => {
   }, [location.pathname]);
 
   return (
-    <Navbar isBordered isBlurred={false} className="window-drag h-16 w-full">
+    <Navbar isBordered isBlurred={false}>
       <NavbarContent justify="start" className="window-no-drag">
         <NavbarContent className="hidden gap-3 sm:flex">
           {navs.map(item => {

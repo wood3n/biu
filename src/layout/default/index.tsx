@@ -1,8 +1,8 @@
 import React from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { useRequest } from "ahooks";
-import { Card, CardBody, Spinner } from "@heroui/react";
+import { Spinner } from "@heroui/react";
 
 import PlayBar from "@/components/playbar";
 import Navbar from "@/layout/default/navbar";
@@ -11,7 +11,7 @@ import { useUser } from "@/store/user";
 import { useFavoriteSongs } from "@/store/user-favorite-songs";
 import { useUserPlayList } from "@/store/user-playlist";
 
-import Side from "./side";
+import Content from "./content";
 
 const DefaultLayout = () => {
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ const DefaultLayout = () => {
 
         Promise.allSettled([updateUser(userId), updateFavoriteSongs(userId), updateUserPlayList(userId)]);
       } else {
-        navigate("/login");
+        navigate("/login", { replace: true });
       }
     },
   });
@@ -42,19 +42,10 @@ const DefaultLayout = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <Navbar />
-      <div className="flex min-h-0 flex-grow space-x-2 p-2">
-        <Card className="w-1/5 min-w-64">
-          <CardBody className="p-0">
-            <Side />
-          </CardBody>
-        </Card>
-        <Card className="flex-grow">
-          <CardBody className="p-0">
-            <Outlet />
-          </CardBody>
-        </Card>
+      <div className="window-drag h-16 w-full">
+        <Navbar />
       </div>
+      <Content className="min-h-0 flex-grow" />
       <div className="h-24 w-full border-t-1 border-zinc-800">
         <PlayBar />
       </div>
