@@ -1,16 +1,25 @@
 import { create } from "zustand";
 
-import { AlbumSublistData } from "@/service/album-sublist";
+import { AlbumSublistData, getAlbumSublist } from "@/service/album-sublist";
 
 interface State {
   albums: AlbumSublistData[] | null;
 }
 
 interface Action {
-  updateFavoriteAlbums: (data: AlbumSublistData[]) => void;
+  updateFavoriteAlbums: () => Promise<void>;
 }
 
 export const useFavoriteAlbums = create<State & Action>(set => ({
   albums: null,
-  updateFavoriteAlbums: data => set(() => ({ albums: data })),
+  updateFavoriteAlbums: async () => {
+    const res = await getAlbumSublist({
+      limit: 9999,
+      offset: 0,
+    });
+
+    if (res?.data?.length) {
+      set(() => ({ albums: res.data }));
+    }
+  },
 }));

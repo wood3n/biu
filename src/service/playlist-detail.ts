@@ -1,11 +1,11 @@
 import request from "./request";
 
 export interface PlaylistDetailRequestParams {
-  id: number | undefined;
+  id: string | undefined;
   /**
    * 歌单最近的 s 个收藏者,默认为 8
    */
-  s?: number | undefined;
+  s?: string | undefined;
 }
 
 export interface PlaylistDetailResponse {

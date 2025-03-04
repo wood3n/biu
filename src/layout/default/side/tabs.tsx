@@ -1,8 +1,8 @@
 import { RiAlbumLine, RiPlayListLine, RiUserStarLine } from "@remixicon/react";
 
-import Album from "../album";
-import Artist from "../artist";
-import PlayList from "../playlist";
+import Album from "./albums";
+import Artist from "./artists";
+import PlayList from "./playlist";
 
 export const tabs = [
   {

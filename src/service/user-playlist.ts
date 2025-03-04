@@ -47,6 +47,7 @@ export interface RecommendInfo {
 
 export interface PlaylistInfoType {
   subscribers?: any[];
+  /** 是否收藏 */
   subscribed?: boolean;
   creator?: Creator;
   artists?: null;

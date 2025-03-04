@@ -1,5 +1,10 @@
 import request from "./request";
 
+export interface GetArtistSublistRequestParams {
+  limit: number | undefined;
+  offset: number | undefined;
+}
+
 export interface GetArtistSublist {
   code?: number;
   count?: number;
@@ -41,4 +46,4 @@ export interface ArtistSublistData {
 /*
  * 收藏的歌手列表
  */
-export const getArtistSublist = () => request.get<GetArtistSublist>("/artist/sublist");
+export const getArtistSublist = (params: GetArtistSublistRequestParams) => request.get<GetArtistSublist>("/artist/sublist", { params });

@@ -9,6 +9,8 @@ interface State {
 interface Action {
   /** 播放歌曲 */
   play: (song: Song, newList?: Song[]) => void;
+  /** 播放列表 */
+  playList: (songs: Song[]) => void;
   /** 当歌曲添加到队列首 */
   unshift: (song: Song[]) => void;
   /** 当歌曲添加到队列尾 */
@@ -42,6 +44,9 @@ export const usePlayingQueue = create<State & Action>(set => ({
         return { currentSong: song, list };
       }
     });
+  },
+  playList: songs => {
+    set({ list: songs, currentSong: songs[0] });
   },
   unshift: song => {
     set(state => ({ list: [...song, ...(state.list || [])] }));

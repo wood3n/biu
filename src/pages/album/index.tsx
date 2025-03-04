@@ -1,61 +1,77 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-import { getAlbum, getArtistDetail } from "@/service";
-import type { GetAlbumRes } from "@/service/album";
-import { useUser } from "@/store/user";
+import { useRequest } from "ahooks";
+import { Image, User } from "@heroui/react";
+import { RiPlayCircleLine, RiStarFill, RiStarLine } from "@remixicon/react";
+
+import AsyncButton from "@/components/async-button";
+import Table from "@/components/table";
+import { getAlbum, getAlbumSub } from "@/service";
+import { usePlayingQueue } from "@/store/playing-queue";
+import { useFavoriteAlbums } from "@/store/user-favorite-album";
+
+import { columns } from "./columns";
 
 function Album() {
   const { id } = useParams();
-  const user = useUser(store => store.user);
-  const [loading, setLoading] = useState(false);
-  const [albumDetail, setAlbumDetail] = useState<GetAlbumRes>();
+  const navigate = useNavigate();
+  const { currentSong, playList, play } = usePlayingQueue();
+  const userSubscribeAlbums = useFavoriteAlbums(store => store.albums);
 
-  const getAlbumDetail = async () => {
-    setLoading(true);
-    try {
-      const getAlbumRes = await getAlbum({ id: String(id) });
-      if (getAlbumRes?.album?.artists?.length) {
-        const arsDetailRes = await Promise.all(
-          getAlbumRes.album.artists.map(({ id }) =>
-            getArtistDetail({
-              id: String(id),
-            }),
-          ),
-        );
+  const { data: response, loading } = useRequest(() => getAlbum({ id: String(id) }), {
+    refreshDeps: [id],
+  });
 
-        setAlbumDetail({
-          ...getAlbumRes,
-          album: {
-            ...getAlbumRes.album,
-            artists: getAlbumRes!.album!.artists!.map(oldAr => {
-              const newAr = arsDetailRes.find(newArItem => oldAr.id === newArItem?.data?.artist?.id);
-              if (newAr?.data?.artist?.cover) {
-                return {
-                  ...oldAr,
-                  picUrl: newAr.data.artist.cover,
-                };
-              }
+  const isSubed = userSubscribeAlbums?.find(album => album?.id === response?.album?.id);
 
-              return oldAr;
-            }),
-          },
-        });
-      } else if (getAlbumRes) {
-        setAlbumDetail(getAlbumRes);
-      }
-    } finally {
-      setLoading(false);
-    }
+  const subscribe = async () => {
+    await getAlbumSub({
+      id,
+      t: isSubed ? 2 : 1,
+    });
   };
 
-  useEffect(() => {
-    if (id) {
-      getAlbumDetail();
-    }
-  }, [id]);
-
-  return <div>专辑</div>;
+  return (
+    <div className="p-4">
+      <div className="mb-6 flex space-x-6">
+        <div className="flex-none">
+          <Image src={response?.album?.picUrl} width={232} height={232} radius="sm" />
+        </div>
+        <div className="flex flex-grow flex-col justify-between">
+          <div className="flex flex-col items-start space-y-4">
+            <span className="text-4xl font-bold">{response?.album?.name}</span>
+            <span className="text-base text-zinc-500">{response?.album?.size} 首歌曲</span>
+            <User
+              avatarProps={{
+                src: response?.album?.artist?.picUrl,
+              }}
+              name={response?.album?.artist?.name}
+              className={"cursor-pointer hover:text-green-500"}
+              onPointerDown={() => navigate(`/artist/${response?.album?.artist?.id}`)}
+            />
+          </div>
+          {Boolean(response?.songs?.length) && (
+            <div className="flex items-center space-x-4">
+              <AsyncButton color="success" startContent={<RiPlayCircleLine size={16} />} onPress={() => playList(response!.songs!)}>
+                播放
+              </AsyncButton>
+              <AsyncButton onPress={subscribe} color="default" startContent={isSubed ? <RiStarFill size={16} /> : <RiStarLine size={16} />}>
+                {isSubed ? "取消收藏" : "收藏"}
+              </AsyncButton>
+            </div>
+          )}
+        </div>
+      </div>
+      <Table
+        rowKey="id"
+        selectedRowKeys={currentSong ? [currentSong?.id] : undefined}
+        loading={loading}
+        data={response?.songs}
+        columns={columns}
+        onDoubleClick={song => play(song, response?.songs)}
+      />
+    </div>
+  );
 }
 
 export default Album;

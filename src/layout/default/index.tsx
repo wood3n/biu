@@ -1,21 +1,24 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 
 import { useRequest } from "ahooks";
-import { Spinner } from "@heroui/react";
+import { Card, CardBody, Spinner } from "@heroui/react";
 
 import PlayBar from "@/components/playbar";
+import ScrollContainer from "@/components/scroll-container";
 import Navbar from "@/layout/default/navbar";
 import { getLoginStatus } from "@/service";
 import { useUser } from "@/store/user";
+import { useFavoriteAlbums } from "@/store/user-favorite-album";
 import { useFavoriteSongs } from "@/store/user-favorite-songs";
 import { useUserPlayList } from "@/store/user-playlist";
 
-import Content from "./content";
+import Side from "./side";
 
 const DefaultLayout = () => {
   const navigate = useNavigate();
   const updateUser = useUser(store => store.updateUser);
+  const updateFavoriteAlbums = useFavoriteAlbums(store => store.updateFavoriteAlbums);
   const updateFavoriteSongs = useFavoriteSongs(store => store.updateFavoriteSongs);
   const updateUserPlayList = useUserPlayList(store => store.updatePlayList);
 
@@ -25,7 +28,7 @@ const DefaultLayout = () => {
       if (loginStatus?.profile?.userId) {
         const userId = loginStatus.profile.userId;
 
-        Promise.allSettled([updateUser(userId), updateFavoriteSongs(userId), updateUserPlayList(userId)]);
+        Promise.allSettled([updateUser(userId), updateFavoriteSongs(userId), updateUserPlayList(userId), updateFavoriteAlbums()]);
       } else {
         navigate("/login", { replace: true });
       }
@@ -45,7 +48,20 @@ const DefaultLayout = () => {
       <div className="window-drag h-16 w-full">
         <Navbar />
       </div>
-      <Content className="min-h-0 flex-grow" />
+      <div className="flex min-h-0 flex-grow space-x-2 p-2">
+        <Card className="w-80">
+          <CardBody className="p-0">
+            <Side />
+          </CardBody>
+        </Card>
+        <Card className="flex-1">
+          <CardBody className="p-0">
+            <ScrollContainer>
+              <Outlet />
+            </ScrollContainer>
+          </CardBody>
+        </Card>
+      </div>
       <div className="h-24 w-full border-t-1 border-zinc-800">
         <PlayBar />
       </div>

@@ -1,7 +1,7 @@
 import request from "./request";
 
 export interface PlaylistTrackAllRequestParams {
-  id: number | undefined;
+  id: string | undefined;
   limit: number | undefined;
   offset: number | undefined;
 }

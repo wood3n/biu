@@ -98,45 +98,6 @@ export interface ResourceInfo {
   webUrl?: null;
 }
 
-export interface Song {
-  rtUrls?: any[];
-  ar?: Ar[];
-  al?: Al;
-  st?: number;
-  noCopyrightRcmd?: null;
-  songJumpInfo?: null;
-  rurl?: null;
-  pst?: number;
-  alia?: any[];
-  pop?: number;
-  rt?: string;
-  mst?: number;
-  cp?: number;
-  crbt?: null;
-  cf?: string;
-  dt?: number;
-  rtUrl?: null;
-  ftype?: number;
-  rtype?: number;
-  djId?: number;
-  no?: number;
-  fee?: number;
-  mv?: number;
-  t?: number;
-  v?: number;
-  h?: H;
-  l?: H;
-  sq?: H;
-  hr?: null;
-  cd?: string;
-  a?: null;
-  m?: H;
-  name?: string;
-  id: number;
-  privilege?: Privilege;
-  eq?: string;
-}
-
 export interface Al {
   id?: number;
   name?: string;

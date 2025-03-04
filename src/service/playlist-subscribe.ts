@@ -2,6 +2,7 @@ import request from "./request";
 
 export interface PlaylistSubscribeRequestParams {
   id: string | number | undefined;
+  /** 1:收藏；2:取消收藏 */
   t: number | undefined;
 }
 

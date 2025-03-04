@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 
-import { Button, Tab, Tabs, Tooltip } from "@heroui/react";
-import { RiAddCircleLine } from "@remixicon/react";
+import { Button, Input, Tooltip } from "@heroui/react";
+import { RiAddCircleLine, RiSearchLine } from "@remixicon/react";
+
+import ScrollContainer from "@/components/scroll-container";
 
 import { tabs } from "./tabs";
 
@@ -10,29 +12,36 @@ const Side = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between p-2 pb-0">
-        <Tabs aria-label="侧边导航" variant="underlined" color="success" selectedKey={tabKey} onSelectionChange={key => setTabKey(key as string)}>
+      <div className="flex flex-col justify-between space-y-2 rounded-lg p-2">
+        <div className="flex items-center space-x-2">
           {tabs.map(item => (
-            <Tab
+            <Button
               key={item.key}
-              title={
-                <div className="flex items-center space-x-1">
-                  {item.icon}
-                  <span>{item.title}</span>
-                </div>
-              }
-            />
-          ))}
-        </Tabs>
-        {tabKey === "playlist" && (
-          <Tooltip content="新建歌单">
-            <Button isIconOnly size="sm" variant="light">
-              <RiAddCircleLine size={18} />
+              color={tabKey === item.key ? "success" : "default"}
+              radius="full"
+              className="text-sm"
+              size="sm"
+              startContent={item.icon}
+              onPress={() => setTabKey(item.key)}
+            >
+              {item.title}
             </Button>
-          </Tooltip>
-        )}
+          ))}
+        </div>
+        <div className="flex items-center space-x-2">
+          <Input size="sm" placeholder="搜索" startContent={<RiSearchLine size={14} />} />
+          {tabKey === "playlist" && (
+            <Tooltip content="新建歌单" closeDelay={0}>
+              <Button isIconOnly size="sm" variant="flat">
+                <RiAddCircleLine size={18} />
+              </Button>
+            </Tooltip>
+          )}
+        </div>
       </div>
-      <div className="min-h-0 flex-grow p-1">{tabs.find(item => item.key === tabKey)?.content}</div>
+      <ScrollContainer>
+        <div className="min-h-0 flex-grow p-1">{tabs.find(item => item.key === tabKey)?.content}</div>
+      </ScrollContainer>
     </div>
   );
 };

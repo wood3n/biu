@@ -22,11 +22,14 @@ export const columns: ColumnsType<Song> = [
     align: "start",
     minWidth: 120,
     columnFraction: 5,
-    render: ({ rowData }) => (
-      <Link underline="hover" href={`/album/${rowData?.al?.id}`} className="inline-block cursor-pointer truncate text-sm" color="foreground">
-        {rowData?.al?.name}
-      </Link>
-    ),
+    render: ({ rowData }) =>
+      rowData?.al?.name ? (
+        <Link underline="hover" href={`/album/${rowData?.al?.id}`} className="inline-block cursor-pointer truncate text-sm" color="foreground">
+          {rowData?.al?.name}
+        </Link>
+      ) : (
+        "-"
+      ),
   },
   {
     title: <RiTimeLine size={16} />,
