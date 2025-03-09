@@ -4,16 +4,18 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useRequest } from "ahooks";
 
 import { getArtistSublist } from "@/service";
+import { useUserStats } from "@/store/user-total-stats";
 
 import List from "./List";
 
 const Artists = () => {
   const navigate = useNavigate();
+  const userStats = useUserStats(store => store.stats);
   const urlParams = useParams();
 
   const { data, loading } = useRequest(async () => {
     const res = await getArtistSublist({
-      limit: 1000,
+      limit: userStats?.artistCount,
       offset: 0,
     });
 

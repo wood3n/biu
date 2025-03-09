@@ -11,3 +11,17 @@
     app-region: no-drag;
   }
 }
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  h1 {
+    @apply text-2xl;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+}

@@ -7,10 +7,12 @@ interface State {
 }
 
 interface Action {
-  updateFavoriteSingers: (data: ArtistSublistData[]) => void;
+  updateFavoriteSingers: (singers: ArtistSublistData[] | null | undefined) => void;
 }
 
 export const useFavoriteSinger = create<State & Action>(set => ({
   singers: null,
-  updateFavoriteSingers: data => set(() => ({ singers: data })),
+  updateFavoriteSingers: data => {
+    set({ singers: data });
+  },
 }));

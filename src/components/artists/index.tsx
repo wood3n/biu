@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Link } from "@heroui/react";
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Link } from "@heroui/react";
 import { RiMoreLine } from "@remixicon/react";
 
 interface Props {
@@ -24,9 +24,9 @@ const Artists: React.FC<Props> = ({ ars }) => {
       {ars?.length > 3 && (
         <Dropdown>
           <DropdownTrigger>
-            <span className="ml-1 text-zinc-700">
-              <RiMoreLine size={14} />
-            </span>
+            <Button radius="full" variant="light" className="ml-1 h-auto min-h-0 min-w-0 p-0.5 text-zinc-500" onPointerDown={e => e.stopPropagation()}>
+              <RiMoreLine size={12} />
+            </Button>
           </DropdownTrigger>
           <DropdownMenu items={ars} aria-label="其他艺人" variant="flat">
             {item => <DropdownItem key={item.id}>{item.name}</DropdownItem>}

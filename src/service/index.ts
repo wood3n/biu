@@ -11,7 +11,7 @@ export { getArtistSongs } from "./artist-songs";
 export { getArtistSub } from "./artist-sub";
 export { getArtistSublist } from "./artist-sublist";
 export { getArtistTopSong } from "./artist-top-song";
-export { getartists } from "./artists";
+export * from "./artists";
 export { postAvatarUpload } from "./avatar-upload";
 export { getCaptchaSent } from "./captcha-sent";
 export { getCaptchaVerify } from "./captcha-verify";

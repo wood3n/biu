@@ -19,7 +19,7 @@ interface Props<T> {
 
 const Table = <T extends object = any>({ loading, data, rowKey, selectedRowKeys, columns, onDoubleClick, className, style }: Props<T>) => {
   const gridTemplateColumns = columns.reduce((prev, curr) => {
-    return `${prev}_minmax(${typeof curr.minWidth === "string" ? curr.minWidth : `${curr.minWidth}px`},_${curr.columnFraction}fr)`;
+    return `${prev} minmax(${typeof curr.minWidth === "string" ? curr.minWidth : `${curr.minWidth}px`}, ${curr.columnFraction}fr)`;
   }, "48px");
 
   if (loading) {
@@ -50,10 +50,20 @@ const Table = <T extends object = any>({ loading, data, rowKey, selectedRowKeys,
 
   return (
     <div className={className} style={style}>
-      <div className={`sticky top-0 z-50 mb-1 grid grid-cols-[${gridTemplateColumns}] gap-6 rounded-lg bg-zinc-800 py-2 text-sm text-zinc-400`}>
+      <div
+        className={`sticky top-0 z-50 mb-1 grid gap-2 rounded-lg bg-zinc-800 text-sm text-zinc-400`}
+        style={{
+          gridTemplateColumns,
+        }}
+      >
         {[indexColumn, ...columns].map(column => {
           return (
-            <div key={column.key} className={clx(column.className, "flex", "items-center", `justify-${column.align ?? "start"}`)}>
+            <div
+              key={column.key}
+              className={clx(column.className, "flex", `justify-${column.align ?? "start"}`, "items-center", {
+                "p-2": column.key !== indexColumn.key,
+              })}
+            >
               {column.title}
             </div>
           );
@@ -65,16 +75,24 @@ const Table = <T extends object = any>({ loading, data, rowKey, selectedRowKeys,
         return (
           <div
             key={rowData[rowKey]}
-            className={clx(`grid cursor-pointer grid-cols-[${gridTemplateColumns}] gap-6 rounded-lg py-2`, {
+            className={clx(`grid cursor-pointer gap-2 rounded-lg`, {
               "bg-mid-green text-green-500": isSelected,
               "hover:bg-zinc-800": !isSelected,
             })}
             onDoubleClick={() => {
               onDoubleClick?.(rowData);
             }}
+            style={{
+              gridTemplateColumns,
+            }}
           >
             {[indexColumn, ...columns].map(column => (
-              <div key={column.key} className={clx(column.className, "flex", "items-center", `justify-${column.align ?? "start"}`)}>
+              <div
+                key={column.key}
+                className={clx(column.className, "flex", `justify-${column.align ?? "start"}`, "items-center", {
+                  "p-2": column.key !== indexColumn.key,
+                })}
+              >
                 {column.render
                   ? column.render({
                       value: rowData[column.key],

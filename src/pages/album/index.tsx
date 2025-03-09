@@ -43,6 +43,7 @@ function Album() {
             <span className="text-base text-zinc-500">{response?.album?.size} 首歌曲</span>
             <User
               avatarProps={{
+                size: "sm",
                 src: response?.album?.artist?.picUrl,
               }}
               name={response?.album?.artist?.name}

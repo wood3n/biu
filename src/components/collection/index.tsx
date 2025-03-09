@@ -52,7 +52,7 @@ const Collection = ({ id, className }: Props) => {
       <Button size="sm" variant="light" isIconOnly onPress={onOpen}>
         <RiStarLine size={18} className={className} />
       </Button>
-      <Modal scrollBehavior="inside" isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal scrollBehavior="inside" disableAnimation isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">添加歌曲到歌单</ModalHeader>
           <ModalBody className="flex h-full min-h-80 flex-col">

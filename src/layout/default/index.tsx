@@ -12,6 +12,7 @@ import { useUser } from "@/store/user";
 import { useFavoriteAlbums } from "@/store/user-favorite-album";
 import { useFavoriteSongs } from "@/store/user-favorite-songs";
 import { useUserPlayList } from "@/store/user-playlist";
+import { useUserStats } from "@/store/user-total-stats";
 
 import Side from "./side";
 
@@ -21,6 +22,7 @@ const DefaultLayout = () => {
   const updateFavoriteAlbums = useFavoriteAlbums(store => store.updateFavoriteAlbums);
   const updateFavoriteSongs = useFavoriteSongs(store => store.updateFavoriteSongs);
   const updateUserPlayList = useUserPlayList(store => store.updatePlayList);
+  const updateUserStats = useUserStats(store => store.updateUserStats);
 
   // 获取登录状态
   const { loading } = useRequest(getLoginStatus, {
@@ -28,7 +30,7 @@ const DefaultLayout = () => {
       if (loginStatus?.profile?.userId) {
         const userId = loginStatus.profile.userId;
 
-        Promise.allSettled([updateUser(userId), updateFavoriteSongs(userId), updateUserPlayList(userId), updateFavoriteAlbums()]);
+        Promise.allSettled([updateUser(userId), updateFavoriteSongs(userId), updateUserPlayList(userId), updateFavoriteAlbums(), updateUserStats()]);
       } else {
         navigate("/login", { replace: true });
       }
@@ -38,7 +40,7 @@ const DefaultLayout = () => {
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <Spinner color="primary" label="加载中..." labelColor="primary" />
+        <Spinner color="primary" label="加载数据中..." labelColor="primary" />
       </div>
     );
   }

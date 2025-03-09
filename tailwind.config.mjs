@@ -21,6 +21,7 @@ export default {
         "bubble-gum": "#ff77e9",
         bermuda: "#78dcca",
         "mid-green": "#1F3C2B",
+        "second-background": "#18181b",
       },
       gridTemplateColumns: {
         14: "repeat(14, minmax(0, 1fr))",
