@@ -64,7 +64,7 @@ const LayoutNavbar = () => {
           </Button>
         </Tooltip>
         <Tooltip content="最近播放">
-          <Button variant="light" isIconOnly size="sm">
+          <Button variant="light" isIconOnly size="sm" onPress={() => navigate("/recent")}>
             <RiHistoryLine size={20} />
           </Button>
         </Tooltip>

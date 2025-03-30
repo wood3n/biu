@@ -12,6 +12,7 @@ interface ColumnType<T> {
   columnFraction?: number;
   minWidth?: number | string;
   align?: "center" | "start" | "end" | undefined;
+  hidden?: boolean;
   className?: string;
   render?: (props: RenderCellProps<T>) => React.ReactNode;
 }

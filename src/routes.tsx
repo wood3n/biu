@@ -10,6 +10,7 @@ import Login from "./pages/login";
 import NotFound from "./pages/not-found";
 import PlayList from "./pages/playlist";
 import Podcast from "./pages/podcast";
+import Recent from "./pages/recent";
 import Recommend from "./pages/recommend";
 import UserProfile from "./pages/user-profile";
 
@@ -53,6 +54,10 @@ const routes: RouteObject[] = [
       {
         path: "/artist/:id",
         element: <Artist />,
+      },
+      {
+        path: "recent",
+        element: <Recent />,
       },
     ],
   },

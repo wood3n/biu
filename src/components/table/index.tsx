@@ -75,7 +75,7 @@ const Table = <T extends object = any>({ loading, data, rowKey, selectedRowKeys,
         return (
           <div
             key={rowData[rowKey]}
-            className={clx(`grid cursor-pointer gap-2 rounded-lg`, {
+            className={clx(`grid cursor-pointer gap-2 rounded-lg transition`, {
               "bg-mid-green text-green-500": isSelected,
               "hover:bg-zinc-800": !isSelected,
             })}

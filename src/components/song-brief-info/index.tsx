@@ -19,7 +19,9 @@ const SongBriefInfo = ({ name, ars, coverUrl }: Props) => {
         </div>
       )}
       <div className="flex min-w-0 flex-col space-y-0.5">
-        <span className="truncate text-base">{name}</span>
+        <span title={name} className="truncate text-base">
+          {name}
+        </span>
         {Boolean(ars?.length) && <Artists ars={ars!} />}
       </div>
     </div>

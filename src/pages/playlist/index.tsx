@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useRequest } from "ahooks";
@@ -6,20 +6,17 @@ import { Image, Input, User } from "@heroui/react";
 import { RiPlayCircleLine, RiSearchLine, RiStarFill, RiStarLine } from "@remixicon/react";
 
 import AsyncButton from "@/components/async-button";
-import Table from "@/components/table";
+import VirtuosoSongList from "@/components/song-list";
 import { getPlaylistDetail, getPlaylistSubscribe, getPlaylistTrackAll } from "@/service";
 import { usePlayingQueue } from "@/store/playing-queue";
 import { useUser } from "@/store/user";
-
-import { columns } from "./columns";
 
 const Playlist = () => {
   const urlParams = useParams();
   const navigate = useNavigate();
   const user = useUser(store => store.user);
-  const [songs, setSongs] = useState<Song[]>();
   const [search, setSearch] = useState("");
-  const { currentSong, playList, play } = usePlayingQueue();
+  const { currentSong, playList } = usePlayingQueue();
 
   const { data: playlistDetail } = useRequest(
     async () => {
@@ -34,30 +31,29 @@ const Playlist = () => {
     },
   );
 
-  const getSongs = async () => {
+  const fetchSongs = async (params: { limit: number; offset: number }) => {
     const res = await getPlaylistTrackAll({
       id: urlParams?.pid,
-      limit: 1000,
-      offset: 0,
+      limit: params.limit,
+      offset: params.offset,
     });
 
-    if (res?.songs?.length) {
-      setSongs(res?.songs);
+    // 如果搜索关键词存在，过滤歌曲列表
+    let filteredSongs = res?.songs || [];
+    if (search?.trim()) {
+      filteredSongs = filteredSongs.filter(song => song?.name?.toLowerCase().includes(search?.trim().toLowerCase()));
     }
-  };
 
-  useEffect(() => {
-    getSongs();
-  }, [urlParams.pid]);
+    return {
+      data: filteredSongs,
+      hasMore: params.offset + params.limit < (playlistDetail?.playlist?.trackCount || 0),
+    };
+  };
 
   const isOwner = playlistDetail?.playlist?.creator?.userId === user?.profile?.userId;
   const isSubed = playlistDetail?.playlist?.subscribed;
 
   const playAll = async () => {
-    if (Array.isArray(songs) && songs?.length === playlistDetail?.playlist?.trackCount) {
-      playList(songs);
-    }
-
     const res = await getPlaylistTrackAll({
       id: urlParams?.pid,
       limit: playlistDetail?.playlist?.trackCount,
@@ -77,7 +73,7 @@ const Playlist = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="flex h-full flex-col p-4">
       <div className="mb-6 flex space-x-6">
         <div className="flex-none">
           <Image src={playlistDetail?.playlist?.coverImgUrl} width={232} height={232} radius="sm" />
@@ -95,30 +91,24 @@ const Playlist = () => {
               onPointerDown={() => navigate(`/profile/${playlistDetail?.playlist?.creator?.userId}`)}
             />
           </div>
-          {Boolean(songs?.length) && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <AsyncButton color="success" startContent={<RiPlayCircleLine size={16} />} onPress={playAll}>
-                  播放
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <AsyncButton color="success" startContent={<RiPlayCircleLine size={16} />} onPress={playAll}>
+                播放
+              </AsyncButton>
+              {!isOwner && (
+                <AsyncButton onPress={subscribe} color="default" startContent={isSubed ? <RiStarFill size={16} /> : <RiStarLine size={16} />}>
+                  {isSubed ? "取消收藏" : "收藏"}
                 </AsyncButton>
-                {!isOwner && (
-                  <AsyncButton onPress={subscribe} color="default" startContent={isSubed ? <RiStarFill size={16} /> : <RiStarLine size={16} />}>
-                    {isSubed ? "取消收藏" : "收藏"}
-                  </AsyncButton>
-                )}
-              </div>
-              <Input className="w-60" placeholder="搜索歌名" onValueChange={setSearch} startContent={<RiSearchLine size={16} />} />
+              )}
             </div>
-          )}
+            <Input className="w-60" placeholder="搜索歌名" value={search} onValueChange={setSearch} startContent={<RiSearchLine size={16} />} />
+          </div>
         </div>
       </div>
-      <Table
-        rowKey="id"
-        selectedRowKeys={currentSong ? [currentSong?.id] : undefined}
-        columns={columns}
-        data={songs?.filter(song => (search?.trim() ? song?.name?.includes(search?.trim()) : true))}
-        onDoubleClick={song => play(song, songs)}
-      />
+      <div className="flex-grow">
+        <VirtuosoSongList service={fetchSongs} defaultLimit={50} hideAlbum={false} className="h-full" />
+      </div>
     </div>
   );
 };

@@ -17,9 +17,8 @@ const Item = ({ imgUrl, title, description, isSelected, onPointerDown }: Props) 
 
   return (
     <div
-      className={classNames("flex cursor-pointer items-center space-x-2 rounded-lg p-2", {
-        "hover:bg-zinc-800": !isSelected,
-        "bg-mid-green text-green-500": isSelected,
+      className={classNames("flex cursor-pointer items-center space-x-2 rounded-lg p-2 transition hover:bg-zinc-700", {
+        "bg-zinc-700": isSelected,
       })}
       onPointerDown={onPointerDown}
       onMouseEnter={() => setHovered(true)}
@@ -30,7 +29,7 @@ const Item = ({ imgUrl, title, description, isSelected, onPointerDown }: Props) 
       </span>
       <div className="flex min-w-0 flex-1 flex-col space-y-1">
         <span className="truncate text-sm">{title}</span>
-        <span className="text-xs text-zinc-500">{description}</span>
+        <span className="text-xs text-zinc-400">{description}</span>
       </div>
       <div className="flex items-center">
         {hovered && (

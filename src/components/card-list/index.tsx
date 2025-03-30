@@ -3,27 +3,38 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { Card, CardBody, CardFooter, Image } from "@heroui/react";
 
-import { getArtistAlbum } from "@/service";
-import { HotAlbum } from "@/service/artist-album";
+interface ListData {
+  id: string;
+  name: string;
+  picUrl: string;
+}
 
-const Albums = () => {
+interface Data {
+  hasMore: boolean;
+  list: ListData[];
+}
+
+interface Props {
+  service: (params: { limit: number; offset: number }) => Promise<Data>;
+}
+
+const CardList = ({ service }: Props) => {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [page, setPage] = React.useState(1);
-  const [data, setData] = React.useState<HotAlbum[]>([]);
+  const [data, setData] = React.useState<ListData[]>([]);
   const [more, setMore] = React.useState(false);
 
   const getData = async () => {
-    const res = await getArtistAlbum({
-      id,
+    const res = await service({
       limit: 10,
       offset: (page - 1) * 10,
     });
 
-    if (res?.code === 200 && res?.hotAlbums?.length) {
-      setData(old => [...old, ...res.hotAlbums]);
-      setMore(res?.more);
+    if (res?.list?.length) {
+      setData(old => [...old, ...res.list]);
+      setMore(Boolean(res.hasMore));
     }
   };
 
@@ -47,4 +58,4 @@ const Albums = () => {
   );
 };
 
-export default Albums;
+export default CardList;
