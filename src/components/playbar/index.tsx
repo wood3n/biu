@@ -8,7 +8,7 @@ import { getLocal, STORAGE_KEY, updateLocal } from "@/common/localforage";
 import { getLyrics, getSongUrlV1 } from "@/service";
 import { usePlayingQueue } from "@/store/playing-queue";
 
-import PlayQueueDrawer from "../play-queue-drawer";
+import PlayQueue from "../play-queue-drawer";
 
 /**
  * 播放任务栏
@@ -166,7 +166,7 @@ function PlayBar() {
   return (
     <div className="h-24">
       <div>play</div>
-      <PlayQueueDrawer isOpen={playlistDrawerVisible} onOpenChange={toggle} />
+      <PlayQueue isOpen={playlistDrawerVisible} onOpenChange={toggle} />
     </div>
   );
 }

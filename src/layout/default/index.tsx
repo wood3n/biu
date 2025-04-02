@@ -5,7 +5,6 @@ import { useRequest } from "ahooks";
 import { Card, CardBody, Spinner } from "@heroui/react";
 
 import PlayBar from "@/components/playbar";
-import ScrollContainer from "@/components/scroll-container";
 import Navbar from "@/layout/default/navbar";
 import { getLoginStatus } from "@/service";
 import { useUser } from "@/store/user";
@@ -57,10 +56,8 @@ const DefaultLayout = () => {
           </CardBody>
         </Card>
         <Card className="flex-1">
-          <CardBody className="p-0">
-            <ScrollContainer>
-              <Outlet />
-            </ScrollContainer>
+          <CardBody className="overflow-hidden p-0">
+            <Outlet />
           </CardBody>
         </Card>
       </div>

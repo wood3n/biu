@@ -1,14 +1,5 @@
 {
   "extends": "stylelint-config-standard",
-  "overrides": [
-    {
-      "files": [
-        "*.less",
-        "**/*.less"
-      ],
-      "customSyntax": "postcss-less"
-    }
-  ],
   "rules": {
     "selector-class-pattern": null,
     "property-no-vendor-prefix": null,
