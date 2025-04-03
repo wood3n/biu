@@ -29,7 +29,13 @@ const DefaultLayout = () => {
       if (loginStatus?.profile?.userId) {
         const userId = loginStatus.profile.userId;
 
-        Promise.allSettled([updateUser(userId), updateFavoriteSongs(userId), updateUserPlayList(userId), updateFavoriteAlbums(), updateUserStats()]);
+        Promise.allSettled([
+          updateUser(userId),
+          updateFavoriteSongs(userId),
+          updateUserPlayList(userId),
+          updateFavoriteAlbums(),
+          updateUserStats(),
+        ]);
       } else {
         navigate("/login", { replace: true });
       }

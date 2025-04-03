@@ -36,7 +36,14 @@ const Albums = () => {
       {data?.map(item => (
         <Card key={item.id} isPressable shadow="sm" onPress={() => navigate(`/album/${item.id}`)}>
           <CardBody className="overflow-visible p-0">
-            <Image alt={item.name} className="w-full object-cover" radius="lg" shadow="sm" src={item.picUrl} width="100%" />
+            <Image
+              alt={item.name}
+              className="w-full object-cover"
+              radius="lg"
+              shadow="sm"
+              src={item.picUrl}
+              width="100%"
+            />
           </CardBody>
           <CardFooter className="justify-end text-small">
             <b>{item.name}</b>

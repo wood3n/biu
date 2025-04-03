@@ -46,4 +46,5 @@ export interface ArtistSublistData {
 /*
  * 收藏的歌手列表
  */
-export const getArtistSublist = (params: GetArtistSublistRequestParams) => request.get<GetArtistSublist>("/artist/sublist", { params });
+export const getArtistSublist = (params: GetArtistSublistRequestParams) =>
+  request.get<GetArtistSublist>("/artist/sublist", { params });

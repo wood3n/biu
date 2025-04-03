@@ -17,7 +17,16 @@ interface Props<T> {
   style?: React.CSSProperties;
 }
 
-const Table = <T extends object = any>({ loading, data, rowKey, selectedRowKeys, columns, onDoubleClick, className, style }: Props<T>) => {
+const Table = <T extends object = any>({
+  loading,
+  data,
+  rowKey,
+  selectedRowKeys,
+  columns,
+  onDoubleClick,
+  className,
+  style,
+}: Props<T>) => {
   const gridTemplateColumns = columns.reduce((prev, curr) => {
     return `${prev} minmax(${typeof curr.minWidth === "string" ? curr.minWidth : `${curr.minWidth}px`}, ${curr.columnFraction}fr)`;
   }, "48px");

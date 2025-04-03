@@ -143,4 +143,5 @@ export interface Content {
 /*
  * 获取歌手描述（deprecated）
  */
-export const getArtistDesc = (params: ArtistDescRequestParams) => request.get<ArtistDescResponse>("/artist/desc", { params });
+export const getArtistDesc = (params: ArtistDescRequestParams) =>
+  request.get<ArtistDescResponse>("/artist/desc", { params });

@@ -44,4 +44,5 @@ export enum OSText {
 /*
  * 获取最近播放歌曲
  */
-export const getRecentSongs = (params?: Params) => request.get<GetRecentSongResponse>("/record/recent/song", { params });
+export const getRecentSongs = (params?: Params) =>
+  request.get<GetRecentSongResponse>("/record/recent/song", { params });

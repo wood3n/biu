@@ -31,7 +31,12 @@ export const getColumns = ({ hideAlbum }: Params) => {
       hidden: hideAlbum,
       className: "flex-[4]",
       render: ({ rowData }) => (
-        <Link underline="hover" href={`/album/${rowData?.al?.id}`} className="inline-block cursor-pointer truncate text-sm" color="foreground">
+        <Link
+          underline="hover"
+          href={`/album/${rowData?.al?.id}`}
+          className="inline-block cursor-pointer truncate text-sm"
+          color="foreground"
+        >
           {rowData?.al?.name}
         </Link>
       ),

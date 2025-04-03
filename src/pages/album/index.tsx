@@ -53,10 +53,18 @@ function Album() {
           </div>
           {Boolean(response?.songs?.length) && (
             <div className="flex items-center space-x-4">
-              <AsyncButton color="success" startContent={<RiPlayCircleLine size={16} />} onPress={() => playList(response!.songs!)}>
+              <AsyncButton
+                color="success"
+                startContent={<RiPlayCircleLine size={16} />}
+                onPress={() => playList(response!.songs!)}
+              >
                 播放
               </AsyncButton>
-              <AsyncButton onPress={subscribe} color="default" startContent={isSubed ? <RiStarFill size={16} /> : <RiStarLine size={16} />}>
+              <AsyncButton
+                onPress={subscribe}
+                color="default"
+                startContent={isSubed ? <RiStarFill size={16} /> : <RiStarLine size={16} />}
+              >
                 {isSubed ? "取消收藏" : "收藏"}
               </AsyncButton>
             </div>

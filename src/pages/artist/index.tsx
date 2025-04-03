@@ -69,7 +69,11 @@ const Artist = () => {
               {artistDesc?.briefDesc}
             </Ellipsis>
           </div>
-          <AsyncButton onPress={collect} color="default" startContent={isFavorite ? <RiStarFill size={16} /> : <RiStarLine size={16} />}>
+          <AsyncButton
+            onPress={collect}
+            color="default"
+            startContent={isFavorite ? <RiStarFill size={16} /> : <RiStarLine size={16} />}
+          >
             {isFavorite ? "取消收藏" : "收藏"}
           </AsyncButton>
         </div>

@@ -102,4 +102,5 @@ export interface PersonalPlayList {
 /*
  * 获取用户歌单，包括喜欢的音乐列表，创建的歌单，收藏的歌单
  */
-export const getUserPlaylist = (params: UserPlaylistRequestParams) => request.get<PersonalPlayList>("/user/playlist", { params });
+export const getUserPlaylist = (params: UserPlaylistRequestParams) =>
+  request.get<PersonalPlayList>("/user/playlist", { params });

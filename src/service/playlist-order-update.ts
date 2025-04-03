@@ -7,4 +7,5 @@ export interface PlaylistOrderUpdateRequestData {
 /*
  * 调整歌单顺序
  */
-export const postPlaylistOrderUpdate = (data: PlaylistOrderUpdateRequestData) => request.post("/playlist/order/update", data);
+export const postPlaylistOrderUpdate = (data: PlaylistOrderUpdateRequestData) =>
+  request.post("/playlist/order/update", data);

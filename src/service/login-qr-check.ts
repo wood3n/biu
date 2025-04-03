@@ -13,4 +13,5 @@ export interface QrLoginRes {
 /*
  * 二维码检测扫码状态接口
  */
-export const getLoginQrCheck = (params: LoginQrCheckRequestParams) => request.get<QrLoginRes>("/login/qr/check", { params });
+export const getLoginQrCheck = (params: LoginQrCheckRequestParams) =>
+  request.get<QrLoginRes>("/login/qr/check", { params });

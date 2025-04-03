@@ -16,7 +16,12 @@ const Artists: React.FC<Props> = ({ ars }) => {
       {ars?.slice(0, 3)?.map<React.ReactNode>(({ id, name }, i) => (
         <React.Fragment key={id}>
           {i ? <span className="text-sm text-zinc-500">，</span> : ""}
-          <Link className="inline-block min-w-0 flex-shrink truncate text-sm text-zinc-500" underline="hover" color="foreground" href={`/artist/${id}`}>
+          <Link
+            className="inline-block min-w-0 flex-shrink truncate text-sm text-zinc-500"
+            underline="hover"
+            color="foreground"
+            href={`/artist/${id}`}
+          >
             {name}
           </Link>
         </React.Fragment>
@@ -24,7 +29,12 @@ const Artists: React.FC<Props> = ({ ars }) => {
       {ars?.length > 3 && (
         <Dropdown>
           <DropdownTrigger>
-            <Button radius="full" variant="light" className="ml-1 h-auto min-h-0 min-w-0 p-0.5 text-zinc-500" onPointerDown={e => e.stopPropagation()}>
+            <Button
+              radius="full"
+              variant="light"
+              className="ml-1 h-auto min-h-0 min-w-0 p-0.5 text-zinc-500"
+              onPointerDown={e => e.stopPropagation()}
+            >
               <RiMoreLine size={12} />
             </Button>
           </DropdownTrigger>

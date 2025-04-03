@@ -127,4 +127,5 @@ export interface UserPlayRecord {
 /*
  * 获取用户播放记录，type=1 时只返回 weekData, type=0 时返回 allData
  */
-export const getUserRecord = (params: UserRecordRequestParams) => request.get<APIResponse<UserPlayRecord>>("/user/record", { params });
+export const getUserRecord = (params: UserRecordRequestParams) =>
+  request.get<APIResponse<UserPlayRecord>>("/user/record", { params });

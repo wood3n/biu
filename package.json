@@ -52,9 +52,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "~6.4.0",
-    "react-virtualized": "^9.22.6",
     "react-virtuoso": "^4.12.5",
-    "simplebar-react": "^3.3.0",
     "swiper": "^8.4.4",
     "zustand": "^5.0.3"
   },

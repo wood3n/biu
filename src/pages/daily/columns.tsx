@@ -23,7 +23,12 @@ export const columns: ColumnsType<Song> = [
     minWidth: 120,
     columnFraction: 5,
     render: ({ rowData }) => (
-      <Link underline="hover" href={`/album/${rowData?.al?.id}`} className="inline-block cursor-pointer truncate text-sm" color="foreground">
+      <Link
+        underline="hover"
+        href={`/album/${rowData?.al?.id}`}
+        className="inline-block cursor-pointer truncate text-sm"
+        color="foreground"
+      >
         {rowData?.al?.name}
       </Link>
     ),

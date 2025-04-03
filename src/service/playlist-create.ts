@@ -59,4 +59,5 @@ export interface CreatePlayListRes {
 /*
  * 新建歌单
  */
-export const postPlaylistCreate = (data: PlaylistCreateRequestData) => request.post<APIResponse<CreatePlayListRes>>("/playlist/create", data);
+export const postPlaylistCreate = (data: PlaylistCreateRequestData) =>
+  request.post<APIResponse<CreatePlayListRes>>("/playlist/create", data);

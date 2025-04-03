@@ -59,4 +59,5 @@ export interface UserFollows {
 /*
  * 获取用户关注列表
  */
-export const getUserFollows = (params: UserFollowsRequestParams) => request.get<APIResponse<UserFollows>>("/user/follows", { params });
+export const getUserFollows = (params: UserFollowsRequestParams) =>
+  request.get<APIResponse<UserFollows>>("/user/follows", { params });

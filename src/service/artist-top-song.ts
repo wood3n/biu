@@ -12,4 +12,5 @@ export interface ArtistTopSongResponse {
 /*
  * 歌手热门 50 首歌曲
  */
-export const getArtistTopSong = (params: ArtistTopSongRequestParams) => request.get<ArtistTopSongResponse>("/artist/top/song", { params });
+export const getArtistTopSong = (params: ArtistTopSongRequestParams) =>
+  request.get<ArtistTopSongResponse>("/artist/top/song", { params });

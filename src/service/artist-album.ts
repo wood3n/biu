@@ -66,4 +66,5 @@ export interface HotAlbum {
 /*
  * 获取歌手专辑
  */
-export const getArtistAlbum = (params: ArtistAlbumRequestParams) => request.get<ArtistAlbumResponse>("/artist/album", { params });
+export const getArtistAlbum = (params: ArtistAlbumRequestParams) =>
+  request.get<ArtistAlbumResponse>("/artist/album", { params });

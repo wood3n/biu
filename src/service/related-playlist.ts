@@ -7,4 +7,5 @@ export interface RelatedPlaylistRequestParams {
 /*
  * 相关歌单推荐，传入歌单 id
  */
-export const getRelatedPlaylist = (params: RelatedPlaylistRequestParams) => request.get("/related/playlist", { params });
+export const getRelatedPlaylist = (params: RelatedPlaylistRequestParams) =>
+  request.get("/related/playlist", { params });

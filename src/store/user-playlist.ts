@@ -23,8 +23,12 @@ export const useUserPlayList = create<State & Action>(set => ({
     });
 
     const likeList = response?.playlist?.find(item => item.specialType === PlaylistSpecialType.Favorite);
-    const createList = response?.playlist?.filter(item => item.specialType !== PlaylistSpecialType.Favorite && item.userId === userId);
-    const collectList = response?.playlist?.filter(item => item.specialType !== PlaylistSpecialType.Favorite && item.userId !== userId);
+    const createList = response?.playlist?.filter(
+      item => item.specialType !== PlaylistSpecialType.Favorite && item.userId === userId,
+    );
+    const collectList = response?.playlist?.filter(
+      item => item.specialType !== PlaylistSpecialType.Favorite && item.userId !== userId,
+    );
     set(() => ({ likeList, createList, collectList }));
   },
 }));

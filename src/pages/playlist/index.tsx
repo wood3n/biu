@@ -78,7 +78,11 @@ const Playlist = () => {
             </div>
             <div className="flex items-center space-x-4">
               {!isOwner && (
-                <AsyncButton onPress={subscribe} color="default" startContent={isSubscribed ? <RiStarFill size={16} /> : <RiStarLine size={16} />}>
+                <AsyncButton
+                  onPress={subscribe}
+                  color="default"
+                  startContent={isSubscribed ? <RiStarFill size={16} /> : <RiStarLine size={16} />}
+                >
                   {isSubscribed ? "取消收藏" : "收藏"}
                 </AsyncButton>
               )}

@@ -12,7 +12,10 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     title: "Tune",
     // windows taskbar icon
-    icon: path.resolve(process.cwd(), process.platform === "win32" ? "./public/electron/windows_tray.ico" : "./public/electron/macos_dock.png"),
+    icon: path.resolve(
+      process.cwd(),
+      process.platform === "win32" ? "./public/electron/windows_tray.ico" : "./public/electron/macos_dock.png",
+    ),
     show: true,
     hasShadow: false,
     width: 1560,

@@ -17,7 +17,12 @@ export function App() {
 
   return (
     <HeroUIProvider navigate={navigate} useHref={useHref} locale="zh-CN">
-      <ToastProvider placement="top-center" toastOffset={24} maxVisibleToasts={3} toastProps={{ timeout: 3000, color: "primary" }} />
+      <ToastProvider
+        placement="top-center"
+        toastOffset={24}
+        maxVisibleToasts={3}
+        toastProps={{ timeout: 3000, color: "primary" }}
+      />
       <main className="h-screen w-screen overflow-hidden bg-background text-foreground dark">{routeElement}</main>
     </HeroUIProvider>
   );

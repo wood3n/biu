@@ -1,4 +1,11 @@
-import { RiBroadcastLine, RiHardDriveFill, RiHardDriveLine, RiRadioLine, RiSparklingFill, RiSparklingLine } from "@remixicon/react";
+import {
+  RiBroadcastLine,
+  RiHardDriveFill,
+  RiHardDriveLine,
+  RiRadioLine,
+  RiSparklingFill,
+  RiSparklingLine,
+} from "@remixicon/react";
 
 const size = 18;
 

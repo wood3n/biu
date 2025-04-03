@@ -17,7 +17,7 @@ const Item = ({ imgUrl, title, description, isSelected, onPointerDown }: Props) 
 
   return (
     <div
-      className={classNames("flex cursor-pointer items-center space-x-2 rounded-lg p-2 transition hover:bg-zinc-700", {
+      className={classNames("flex cursor-pointer items-center space-x-2 rounded-lg p-2 hover:bg-zinc-700", {
         "bg-zinc-700": isSelected,
       })}
       onPointerDown={onPointerDown}

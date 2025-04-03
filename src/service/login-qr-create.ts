@@ -18,4 +18,5 @@ export interface QrLoginImg {
 /*
  * 二维码生成接口
  */
-export const getLoginQrCreate = (params: LoginQrCreateRequestParams) => request.get<QrLoginImg>("/login/qr/create", { params });
+export const getLoginQrCreate = (params: LoginQrCreateRequestParams) =>
+  request.get<QrLoginImg>("/login/qr/create", { params });

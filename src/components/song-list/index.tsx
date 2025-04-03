@@ -59,18 +59,44 @@ const SongList = ({ loading, songs, header, hideAlbum }: Props) => {
 
   return (
     <ScrollContainer ref={scrollerRef} className="h-full w-full p-6">
-      <Header header={header} showToolbar={Boolean(songs?.length)} columns={columns} onSearch={setSearch} onPlayAll={handlePlayAll} />
+      <Header
+        getScrollElement={() => scrollerRef.current?.osInstance()?.elements().viewport as HTMLDivElement}
+        header={header}
+        showToolbar={Boolean(songs?.length)}
+        columns={columns}
+        onSearch={setSearch}
+        onPlayAll={handlePlayAll}
+      />
       <If condition={isVirtual}>
-        <VirtualList data={songs} getScrollElement={() => scrollerRef.current?.osInstance()?.elements().viewport as HTMLDivElement}>
+        <VirtualList
+          data={songs}
+          getScrollElement={() => scrollerRef.current?.osInstance()?.elements().viewport as HTMLDivElement}
+        >
           {(index, data) => {
-            return <Row key={data?.id} index={index} data={data} columns={columns} hoverable isSelected={currentSong?.id === data?.id} />;
+            return (
+              <Row
+                key={data?.id}
+                index={index}
+                data={data}
+                columns={columns}
+                hoverable
+                isSelected={currentSong?.id === data?.id}
+              />
+            );
           }}
         </VirtualList>
       </If>
       <If condition={!isVirtual}>
         <div className="flex flex-col">
           {filteredSongs?.map((song, index) => (
-            <Row key={song?.id} index={index} data={song} columns={columns} hoverable isSelected={currentSong?.id === song?.id} />
+            <Row
+              key={song?.id}
+              index={index}
+              data={song}
+              columns={columns}
+              hoverable
+              isSelected={currentSong?.id === song?.id}
+            />
           ))}
         </div>
       </If>

@@ -262,4 +262,5 @@ export interface FreeTrialPrivilege {
 /*
  * 获取歌单详情
  */
-export const getPlaylistDetail = (params: PlaylistDetailRequestParams) => request.get<PlaylistDetailResponse>("/playlist/detail", { params });
+export const getPlaylistDetail = (params: PlaylistDetailRequestParams) =>
+  request.get<PlaylistDetailResponse>("/playlist/detail", { params });
