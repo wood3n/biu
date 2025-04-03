@@ -1,14 +1,15 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Virtuoso } from "react-virtuoso";
+import React, { useMemo, useRef, useState } from "react";
 
-import { useOverlayScrollbars } from "overlayscrollbars-react";
 import { Spinner } from "@heroui/react";
 
 import { usePlayingQueue } from "@/store/playing-queue";
 
-import Empty from "../empty";
+import If from "../if";
+import ScrollContainer, { type ScrollRefObject } from "../scroll-container";
+import { getColumns } from "./columns";
 import Header from "./header";
 import Row from "./row";
+import VirtualList from "./virtual-list";
 
 interface Props {
   loading: boolean;
@@ -18,43 +19,16 @@ interface Props {
   className?: string;
 }
 
-const rowHeight = 60;
-
-const SongList = ({ loading, songs, hideAlbum, header, className }: Props) => {
+const SongList = ({ loading, songs, header, hideAlbum }: Props) => {
   const [search, setSearch] = useState<string>();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scroller, setScroller] = useState<HTMLElement | null>(null);
+
+  const isVirtual = (songs?.length ?? 0) > 100;
+
+  const columns = getColumns({ hideAlbum });
+
+  const scrollerRef = useRef<ScrollRefObject>(null);
 
   const { currentSong, play, playList } = usePlayingQueue();
-
-  const [initialize, osInstance] = useOverlayScrollbars({ options: { scrollbars: { autoHide: "leave", theme: "os-theme-light" } }, defer: true });
-
-  useEffect(() => {
-    if (scroller && containerRef.current) {
-      initialize({
-        target: containerRef.current,
-        elements: {
-          viewport: scroller,
-        },
-      });
-    }
-
-    return () => osInstance()?.destroy();
-  }, [scroller, initialize, osInstance]);
-
-  const handlePlayAll = () => {
-    playList(songs!);
-  };
-
-  const renderHeader = () => {
-    return <Header showToolbar={Boolean(songs?.length)} hideAlbum={hideAlbum} header={header} onSearch={setSearch} onPlayAll={handlePlayAll} />;
-  };
-
-  const renderRow = (index: number) => {
-    const song = songs?.[index];
-
-    return <Row index={index} data={song!} hideAlbum={hideAlbum} list={songs} rowHeight={60} />;
-  };
 
   const filteredSongs = useMemo(() => {
     if (!search?.trim()) {
@@ -71,30 +45,36 @@ const SongList = ({ loading, songs, hideAlbum, header, className }: Props) => {
     );
   }, [songs, search]);
 
+  const handlePlayAll = () => {
+    playList(songs!);
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
+      <div className="flex h-full w-full items-center justify-center">
         <Spinner />
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="h-full w-full overflow-hidden">
-      <Virtuoso
-        data={filteredSongs}
-        totalCount={filteredSongs?.length}
-        fixedItemHeight={rowHeight}
-        overscan={{ main: 5, reverse: 5 }}
-        itemContent={renderRow}
-        scrollerRef={v => setScroller(v as HTMLElement)}
-        components={{
-          Header: renderHeader,
-          EmptyPlaceholder: Empty,
-        }}
-        className="relative overflow-hidden"
-      />
-    </div>
+    <ScrollContainer ref={scrollerRef} className="h-full w-full p-6">
+      <Header header={header} showToolbar={Boolean(songs?.length)} columns={columns} onSearch={setSearch} onPlayAll={handlePlayAll} />
+      <If condition={isVirtual}>
+        <VirtualList data={songs} getScrollElement={() => scrollerRef.current?.osInstance()?.elements().viewport as HTMLDivElement}>
+          {(index, data) => {
+            return <Row key={data?.id} index={index} data={data} columns={columns} hoverable isSelected={currentSong?.id === data?.id} />;
+          }}
+        </VirtualList>
+      </If>
+      <If condition={!isVirtual}>
+        <div className="flex flex-col">
+          {filteredSongs?.map((song, index) => (
+            <Row key={song?.id} index={index} data={song} columns={columns} hoverable isSelected={currentSong?.id === song?.id} />
+          ))}
+        </div>
+      </If>
+    </ScrollContainer>
   );
 };
 

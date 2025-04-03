@@ -56,7 +56,7 @@ const DefaultLayout = () => {
           </CardBody>
         </Card>
         <Card className="flex-1">
-          <CardBody className="overflow-hidden p-0">
+          <CardBody className="p-0">
             <Outlet />
           </CardBody>
         </Card>

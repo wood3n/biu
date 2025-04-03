@@ -1,48 +1,51 @@
+import React, { HTMLAttributes, useState } from "react";
+
 import clx from "classnames";
-import { Link } from "@heroui/react";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
 
-import { formatDuration } from "@/common/utils";
-import { usePlayingQueue } from "@/store/playing-queue";
+import { ColumnsType } from "./types";
 
-import If from "../if";
-import SongBriefInfo from "../song-brief-info";
-
-interface Props {
+interface Props extends HTMLAttributes<HTMLDivElement> {
   index: number;
-  data?: Song;
-  list?: Song[];
-  hideAlbum?: boolean;
-  rowHeight?: number;
+  data: Song;
+  columns: ColumnsType<Song>;
+  hoverable?: boolean;
+  isSelected?: boolean;
 }
 
-const Row = ({ index, data, list, rowHeight = 60, hideAlbum }: Props) => {
-  const { currentSong, play, playList } = usePlayingQueue();
-  const isPlaying = currentSong?.id === data?.id;
+const Row = ({ index, data, columns, hoverable, isSelected, className, ...props }: Props) => {
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div
-      className={clx(`flex w-full cursor-pointer gap-2 rounded-lg px-6 py-2`, {
-        "bg-mid-green text-green-500": isPlaying,
-        "hover:bg-zinc-800": !isPlaying,
-      })}
-      onDoubleClick={() => play(data as Song, list)}
-      style={{
-        height: rowHeight,
-      }}
-    >
-      <div className="flex w-12 items-center justify-center p-2 text-sm text-zinc-500">{index + 1}</div>
-      <div className="flex flex-[5] items-center p-2">
-        <SongBriefInfo coverUrl={data?.al?.picUrl} name={data?.name as string} ars={data?.ar} />
-      </div>
-      <If condition={!hideAlbum}>
-        <div className="flex flex-[4] items-center p-2">
-          <Link underline="hover" href={`/album/${data?.al?.id}`} className="inline-block cursor-pointer truncate text-sm" color="foreground">
-            {data?.al?.name || "-"}
-          </Link>
+    <Dropdown isOpen={isOpen} onOpenChange={setIsOpen}>
+      <DropdownTrigger>
+        <div
+          {...props}
+          className={clx("flex space-x-4 rounded-lg py-2", className, {
+            "bg-mid-green text-green-500": isSelected,
+            "cursor-pointer hover:bg-zinc-800": hoverable && !isSelected,
+          })}
+          onContextMenu={e => {
+            e.preventDefault();
+            setIsOpen(true);
+          }}
+        >
+          {columns.map(({ key, align = "start", render, className }) => (
+            <div key={key} className={clx(`flex items-center justify-${align}`, className)}>
+              {render({ index, rowData: data, isSelected })}
+            </div>
+          ))}
         </div>
-      </If>
-      <div className="flex w-[100px] items-center justify-center p-2 text-sm text-zinc-500">{data?.dt ? formatDuration(data.dt) : "-"}</div>
-    </div>
+      </DropdownTrigger>
+      <DropdownMenu aria-label="Static Actions">
+        <DropdownItem key="new">New file</DropdownItem>
+        <DropdownItem key="copy">Copy link</DropdownItem>
+        <DropdownItem key="edit">Edit file</DropdownItem>
+        <DropdownItem key="delete" className="text-danger" color="danger">
+          Delete file
+        </DropdownItem>
+      </DropdownMenu>
+    </Dropdown>
   );
 };
 

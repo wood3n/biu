@@ -1,4 +1,4 @@
-import { RiBroadcastLine, RiFolderMusicFill, RiFolderMusicLine, RiRadioLine, RiSparklingFill, RiSparklingLine } from "@remixicon/react";
+import { RiBroadcastLine, RiHardDriveFill, RiHardDriveLine, RiRadioLine, RiSparklingFill, RiSparklingLine } from "@remixicon/react";
 
 const size = 18;
 
@@ -28,7 +28,7 @@ export const navs = [
   {
     key: "local",
     label: "本地",
-    icon: <RiFolderMusicLine size={size} />,
-    selectedIcon: <RiFolderMusicFill size={size} />,
+    icon: <RiHardDriveLine size={size} />,
+    selectedIcon: <RiHardDriveFill size={size} />,
   },
 ];
