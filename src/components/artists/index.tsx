@@ -17,7 +17,7 @@ const Artists: React.FC<Props> = ({ ars }) => {
         <React.Fragment key={id}>
           {i ? <span className="text-sm text-zinc-500">，</span> : ""}
           <Link
-            className="inline-block min-w-0 flex-shrink truncate text-sm text-zinc-500"
+            className="inline-block min-w-0 flex-shrink truncate text-sm text-zinc-400"
             underline="hover"
             color="foreground"
             href={`/artist/${id}`}
@@ -32,7 +32,7 @@ const Artists: React.FC<Props> = ({ ars }) => {
             <Button
               radius="full"
               variant="light"
-              className="ml-1 h-auto min-h-0 min-w-0 p-0.5 text-zinc-500"
+              className="ml-1 h-auto min-h-0 min-w-0 p-0.5 text-zinc-400"
               onPointerDown={e => e.stopPropagation()}
             >
               <RiMoreLine size={12} />

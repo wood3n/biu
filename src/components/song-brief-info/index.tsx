@@ -15,7 +15,14 @@ const SongBriefInfo = ({ name, ars, coverUrl }: Props) => {
     <div className="flex w-full items-center space-x-2">
       {coverUrl && (
         <div className="flex-none">
-          <Image radius="sm" className="object-cover" loading="lazy" width={44} height={44} src={coverUrl} />
+          <Image
+            radius="sm"
+            className="object-cover"
+            loading="lazy"
+            width={44}
+            height={44}
+            src={`${coverUrl}?param=44y44`}
+          />
         </div>
       )}
       <div className="flex min-w-0 flex-col space-y-0.5">

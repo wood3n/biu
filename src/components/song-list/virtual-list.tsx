@@ -17,7 +17,7 @@ const VirtualList = <T extends object = any>({ data, getScrollElement, children 
     estimateSize: () => 60,
     overscan: 5,
     // top content height
-    scrollMargin: listRef.current?.offsetTop ?? 0,
+    scrollMargin: (listRef.current?.offsetTop ?? 0) - 64,
   });
 
   return (

@@ -40,6 +40,7 @@
     "ahooks": "^3.7.0",
     "axios": "^1.7.9",
     "classnames": "^2.3.1",
+    "colorthief": "^2.6.0",
     "electron-store": "^8.2.0",
     "es-toolkit": "^1.32.0",
     "framer-motion": "^12.4.7",

@@ -25,3 +25,8 @@
     @apply text-xl;
   }
 }
+
+.os-scrollbar {
+  --os-size: 12px;
+  --os-handle-border-radius: 4px;
+}

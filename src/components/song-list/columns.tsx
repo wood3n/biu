@@ -22,14 +22,14 @@ export const getColumns = ({ hideAlbum }: Params) => {
     {
       title: "歌曲",
       key: "song",
-      className: "flex-[5]",
+      className: "flex-[5_0]",
       render: ({ rowData }) => <SongBriefInfo coverUrl={rowData?.al?.picUrl} name={rowData?.name} ars={rowData?.ar} />,
     },
     {
       title: "专辑",
       key: "album",
       hidden: hideAlbum,
-      className: "flex-[4]",
+      className: "flex-[4_0]",
       render: ({ rowData }) => (
         <Link
           underline="hover"

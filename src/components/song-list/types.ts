@@ -16,6 +16,8 @@ interface ColumnType<T> {
   align?: "center" | "start" | "end" | undefined;
   hidden?: boolean;
   className?: string;
+  fr?: number;
+  width?: number;
   headerClassName?: string;
   render: (props: RenderCellProps<T>) => React.ReactNode;
 }

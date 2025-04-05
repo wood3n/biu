@@ -11,7 +11,6 @@ const ScrollContainer = React.forwardRef<OverlayScrollbarsComponentRef<"div">, O
     return (
       <OverlayScrollbarsComponent
         ref={ref}
-        defer
         options={{ scrollbars: { autoHide: "leave", theme: "os-theme-light" }, ...options }}
         {...props}
       >
