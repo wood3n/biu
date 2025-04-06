@@ -5,6 +5,7 @@ import { Image } from "@heroui/react";
 import { RiDownloadLine, RiPlayCircleLine } from "@remixicon/react";
 
 import AsyncButton from "../async-button";
+import { StyleConfig } from "./config";
 
 interface Props {
   visible?: boolean;
@@ -16,15 +17,13 @@ interface Props {
   style?: React.CSSProperties;
 }
 
-const StickyHeader = ({ visible = false, coverImageUrl, title, extraTool, onPlayAll, onDownload, style }: Props) => {
+const StickyHeader = ({ visible, coverImageUrl, title, extraTool, onPlayAll, onDownload, style }: Props) => {
   return (
     <div
       className={clx(
-        "sticky top-0 z-20 -mt-16 flex h-16 w-full items-center justify-between bg-second-background px-6 py-4 shadow-md transition",
+        "sticky -top-16 z-20 -mt-16 flex h-16 w-full items-center justify-between bg-second-background px-6 py-4 shadow-md transition-[transform,top] duration-300",
         {
-          "-top-16": !visible,
-          "-translate-y-16": !visible,
-          "translate-y-0": visible,
+          "translate-y-16": visible,
         },
       )}
       style={style}
@@ -34,8 +33,17 @@ const StickyHeader = ({ visible = false, coverImageUrl, title, extraTool, onPlay
         <span className="truncate">{title}</span>
       </div>
       <div className="flex items-center space-x-2">
-        <AsyncButton isIconOnly startContent={<RiPlayCircleLine size={16} />} onPress={onPlayAll} />
-        <AsyncButton isIconOnly startContent={<RiDownloadLine size={16} />} onPress={onDownload} />
+        <AsyncButton
+          isIconOnly
+          color="success"
+          startContent={<RiPlayCircleLine size={StyleConfig.ToolbarIconSize} />}
+          onPress={onPlayAll}
+        />
+        <AsyncButton
+          isIconOnly
+          startContent={<RiDownloadLine size={StyleConfig.ToolbarIconSize} />}
+          onPress={onDownload}
+        />
         {extraTool}
       </div>
     </div>

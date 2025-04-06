@@ -4,6 +4,7 @@ import { RiPulseFill, RiTimeLine } from "@remixicon/react";
 import { formatDuration } from "@/common/utils";
 import SongBriefInfo from "@/components/song-brief-info";
 
+import { StyleConfig } from "./config";
 import { ColumnsType } from "./types";
 
 interface Params {
@@ -42,7 +43,7 @@ export const getColumns = ({ hideAlbum }: Params) => {
       ),
     },
     {
-      title: <RiTimeLine size={16} />,
+      title: <RiTimeLine size={StyleConfig.RowHeaderIconSize} />,
       key: "duration",
       align: "center",
       className: "w-[100px] text-sm",

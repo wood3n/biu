@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useInViewport } from "ahooks";
 import ColorThief from "colorthief";
-import { Image as Img, Spinner, User } from "@heroui/react";
+import { Image as Img, User } from "@heroui/react";
 
 import { usePlayingQueue } from "@/store/playing-queue";
 
@@ -13,6 +13,7 @@ import ScrollContainer, { type ScrollRefObject } from "../scroll-container";
 import { getColumns } from "./columns";
 import Row from "./row";
 import RowHeader from "./row-header";
+import Skeleton from "./skeleton";
 import StickyHeader from "./sticky-header";
 import Toolbar from "./toolbar";
 import VirtualList from "./virtual-list";
@@ -32,7 +33,6 @@ interface Props {
   songs?: Song[];
   extraTool?: React.ReactNode;
   hideAlbum?: boolean;
-  className?: string;
 }
 
 const SongList = ({ loading, coverImageUrl, title, description, owner, songs, extraTool, hideAlbum }: Props) => {
@@ -47,6 +47,7 @@ const SongList = ({ loading, coverImageUrl, title, description, owner, songs, ex
 
   const [toolbarVisible] = useInViewport(toolbarRef, {
     root: scrollerRef.current?.osInstance()?.elements().target as HTMLDivElement,
+    threshold: [1, 0],
   });
 
   const { currentSong, play, playList } = usePlayingQueue();
@@ -60,11 +61,15 @@ const SongList = ({ loading, coverImageUrl, title, description, owner, songs, ex
 
     return songs?.filter(
       song =>
-        song.name.toLowerCase().includes(searchContent) ||
-        song.ar?.some(ar => ar.name.toLowerCase().includes(searchContent)) ||
-        song.al?.name?.toLowerCase().includes(searchContent),
+        song.name?.toLowerCase()?.includes(searchContent) ||
+        song.ar?.some(ar => ar.name?.toLowerCase()?.includes(searchContent)) ||
+        song.al?.name?.toLowerCase()?.includes(searchContent),
     );
   }, [songs, search]);
+
+  if (loading) {
+    return <Skeleton />;
+  }
 
   const handlePlayAll = () => {
     playList(songs!);
@@ -74,16 +79,12 @@ const SongList = ({ loading, coverImageUrl, title, description, owner, songs, ex
     console.log("download");
   };
 
-  if (loading) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <Spinner />
-      </div>
-    );
-  }
+  const handlePlay = (song: Song) => {
+    play(song, songs);
+  };
 
   const isVirtual = (songs?.length ?? 0) > 100;
-  const columns = getColumns({ hideAlbum });
+  const columns = getColumns({ hideAlbum }).filter(item => !item.hidden);
 
   return (
     <ScrollContainer
@@ -95,7 +96,8 @@ const SongList = ({ loading, coverImageUrl, title, description, owner, songs, ex
       }}
     >
       <StickyHeader
-        visible={!toolbarVisible}
+        // initial toolbarVisible will be undefined
+        visible={toolbarVisible === false}
         coverImageUrl={coverImageUrl}
         title={title}
         extraTool={extraTool}
@@ -126,7 +128,7 @@ const SongList = ({ loading, coverImageUrl, title, description, owner, songs, ex
             <div className="flex flex-col items-start space-y-4">
               <span className="text-4xl font-bold">{title}</span>
               <If condition={Boolean(songs?.length)}>
-                <span className="text-base mix-blend-darken">{songs?.length} 首歌曲</span>
+                <span className="text-base opacity-60 mix-blend-darken">{songs?.length} 首歌曲</span>
               </If>
               <If condition={Boolean(owner)}>
                 <User
@@ -157,15 +159,18 @@ const SongList = ({ loading, coverImageUrl, title, description, owner, songs, ex
             data={filteredSongs}
             getScrollElement={() => scrollerRef.current?.osInstance()?.elements().viewport as HTMLDivElement}
           >
-            {(index, data) => {
+            {(index, song) => {
               return (
                 <Row
-                  key={data?.id}
+                  key={song?.id}
                   index={index}
-                  data={data}
+                  data={song}
                   columns={columns}
                   hoverable
-                  isSelected={currentSong?.id === data?.id}
+                  isSelected={currentSong?.id === song?.id}
+                  onDoubleClick={() => {
+                    handlePlay(song);
+                  }}
                 />
               );
             }}
@@ -181,6 +186,9 @@ const SongList = ({ loading, coverImageUrl, title, description, owner, songs, ex
                 columns={columns}
                 hoverable
                 isSelected={currentSong?.id === song?.id}
+                onDoubleClick={() => {
+                  handlePlay(song);
+                }}
               />
             ))}
           </div>

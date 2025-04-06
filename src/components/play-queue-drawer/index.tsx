@@ -9,7 +9,7 @@ interface Props {
 
 const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
   return (
-    <Drawer isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Drawer disableAnimation isOpen={isOpen} onOpenChange={onOpenChange}>
       <DrawerContent>
         <DrawerHeader className="flex flex-col gap-1">Drawer Title</DrawerHeader>
         <DrawerBody>播放列表</DrawerBody>

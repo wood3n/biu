@@ -11,7 +11,7 @@ import { navs } from "./navs";
 const LayoutNavbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [selectedKey, setSelectedKey] = useState<string>();
+  const [selectedKey, setSelectedKey] = useState<string>("/");
 
   useEffect(() => {
     const pathname = location.pathname?.slice(1);

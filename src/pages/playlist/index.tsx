@@ -75,8 +75,6 @@ const Playlist = () => {
           />
         </If>
       }
-      hideAlbum={false}
-      className="h-full w-full"
     />
   );
 };

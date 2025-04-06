@@ -11,7 +11,7 @@ const size = 18;
 
 export const navs = [
   {
-    key: "daily",
+    key: "/",
     label: "推荐",
     icon: <RiSparklingLine size={size} />,
     selectedIcon: <RiSparklingFill size={size} />,

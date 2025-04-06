@@ -1,14 +1,30 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useBoolean, useRequest } from "ahooks";
-import { addToast } from "@heroui/react";
+import { addToast, Button } from "@heroui/react";
+import {
+  RiPauseCircleFill,
+  RiPlayCircleFill,
+  RiPlayList2Fill,
+  RiSkipBackFill,
+  RiSkipForwardFill,
+} from "@remixicon/react";
 
-import { MusicLevel, PlayMode } from "@/common/constants";
-import { getLocal, STORAGE_KEY, updateLocal } from "@/common/localforage";
+import { MusicLevel } from "@/common/constants";
+import { getLocal, STORAGE_KEY } from "@/common/localforage";
+import { formatDuration } from "@/common/utils";
 import { getLyrics, getSongUrlV1 } from "@/service";
 import { usePlayingQueue } from "@/store/playing-queue";
 
+import If from "../if";
 import PlayQueue from "../play-queue-drawer";
+import SongBriefInfo from "../song-brief-info";
+import SwitchFavorite from "../switch-favorite";
+import { PlayBarStyle, PlayMode } from "./constants";
+import Mode from "./mode";
+import Rate from "./rate";
+import Slider from "./slider";
+import Volume from "./volume";
 
 /**
  * 播放任务栏
@@ -17,13 +33,13 @@ function PlayBar() {
   const [rate, setRate] = useState(1);
   const [volume, setVolume] = useState(0);
   const [muted, setMuted] = useState(false);
-  const [current, setCurrent] = useState(0);
+  const [playProgress, setPlayProgress] = useState(0);
   const [duration, setDuration] = useState<number | null>(null);
   const [paused, setPaused] = useState(true);
   const audioElRef = useRef<HTMLAudioElement>(new Audio());
-  const [playlistDrawerVisible, { toggle }] = useBoolean();
+  const [playlistDrawerVisible, { toggle }] = useBoolean(false);
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
-  const [playMode, setPlayMode] = useState<PlayMode>(PlayMode.Random);
+  const [playMode, setPlayMode] = useState<PlayMode>(PlayMode.Sequential);
 
   const { currentSong } = usePlayingQueue();
 
@@ -36,7 +52,7 @@ function PlayBar() {
     init();
   }, []);
 
-  const { data: getLyricsRes, runAsync: reqLyrics } = useRequest(
+  const { data: getLyricsRes, runAsync: reqPlayLyrics } = useRequest(
     () =>
       getLyrics({
         id: currentSong?.id,
@@ -46,7 +62,11 @@ function PlayBar() {
     },
   );
 
-  const { data, runAsync, loading } = useRequest(
+  const {
+    data,
+    runAsync: getPlayData,
+    loading,
+  } = useRequest(
     () =>
       getSongUrlV1({
         id: currentSong?.id,
@@ -61,7 +81,7 @@ function PlayBar() {
             color: "danger",
           });
         } else {
-          reqLyrics();
+          reqPlayLyrics();
         }
       },
     },
@@ -69,7 +89,7 @@ function PlayBar() {
 
   useEffect(() => {
     if (currentSong?.id) {
-      runAsync();
+      getPlayData();
     }
   }, [currentSong?.id]);
 
@@ -86,7 +106,7 @@ function PlayBar() {
       };
 
       audioElRef.current.ontimeupdate = () => {
-        setCurrent(Math.floor(audioElRef.current.currentTime));
+        setPlayProgress(Math.floor(audioElRef.current.currentTime));
       };
 
       audioElRef.current.onplay = () => {
@@ -114,21 +134,19 @@ function PlayBar() {
     };
   }, [data?.data?.[0]?.url]);
 
-  const handlePlay = () => {
-    if (audioElRef.current) {
-      audioElRef.current.play();
-    }
-  };
-
   const stopPlay = () => {
     audioElRef.current.pause();
     audioElRef.current.currentTime = 0;
     setDuration(null);
   };
 
-  const handlePause = () => {
-    setPaused(true);
-    audioElRef.current.pause();
+  const togglePlay = () => {
+    if (paused && audioElRef.current) {
+      audioElRef.current.play();
+    } else {
+      audioElRef.current.pause();
+      setPaused(true);
+    }
   };
 
   const handlePrev = () => {
@@ -139,20 +157,14 @@ function PlayBar() {
     stopPlay();
   };
 
-  const handleSeek = (_: Event, playTime: number | number[]) => {
-    setCurrent(playTime as number);
+  const handleSeek = (playTime: number | number[]) => {
+    setPlayProgress(playTime as number);
     audioElRef.current.currentTime = playTime as number;
   };
 
   const handleChangeVolume = (v: number) => {
     setVolume(v);
     audioElRef.current.volume = v;
-    updateLocal(STORAGE_KEY.VOLUME, v);
-  };
-
-  const toggleMuted = () => {
-    audioElRef.current.muted = !muted;
-    setMuted(!muted);
   };
 
   // 修改播放速率
@@ -163,9 +175,65 @@ function PlayBar() {
     }
   };
 
+  // 切换播放模式
+  const handleChangeMode = (v: PlayMode) => {
+    setPlayMode(v);
+  };
+
   return (
-    <div className="h-24">
-      <div>play</div>
+    <div className="h-20 px-6">
+      <div className="flex h-full items-center space-x-6">
+        <div className="flex h-full flex-1 items-center justify-start space-x-4">
+          <If condition={currentSong?.id}>
+            <SongBriefInfo name={currentSong?.name} ars={currentSong?.ar} coverUrl={currentSong?.al?.picUrl} />
+            <SwitchFavorite id={currentSong?.id as number} />
+          </If>
+        </div>
+        <div className="flex h-full min-w-0 flex-3 flex-col items-center justify-center space-y-0.5 px-6">
+          <div className="flex items-center space-x-6">
+            <Button isIconOnly size="sm" variant="light" className="hover:text-green-500">
+              <RiSkipBackFill size={PlayBarStyle.SecondIconSize} />
+            </Button>
+            <Button isIconOnly variant="light" radius="full" className="hover:text-green-500" onPress={togglePlay}>
+              {paused ? (
+                <RiPlayCircleFill size={PlayBarStyle.MainPlayIconSize} />
+              ) : (
+                <RiPauseCircleFill size={PlayBarStyle.MainPlayIconSize} />
+              )}
+            </Button>
+            <Button isIconOnly size="sm" variant="light" className="hover:text-green-500">
+              <RiSkipForwardFill size={PlayBarStyle.SecondIconSize} />
+            </Button>
+          </div>
+          <Slider
+            hideThumb
+            className="w-3/4 cursor-pointer"
+            minValue={0}
+            maxValue={duration || 0}
+            value={playProgress}
+            startContent={
+              <span className="whitespace-nowrap text-sm opacity-70">
+                {playProgress ? formatDuration(playProgress, false) : "-:--"}
+              </span>
+            }
+            // @ts-ignore value is number
+            onChange={handleSeek}
+            endContent={
+              <span className="whitespace-nowrap text-sm opacity-70">
+                {duration ? formatDuration(duration, false) : "-:--"}
+              </span>
+            }
+          />
+        </div>
+        <div className="flex h-full flex-1 items-center justify-end space-x-2">
+          <Mode value={playMode} onChange={handleChangeMode} />
+          <Rate value={rate} onChange={handleChangeRate} />
+          <Volume value={volume} onChange={handleChangeVolume} isMuted={muted} onChangeMute={setMuted} />
+          <Button isIconOnly size="sm" variant="light" onPress={toggle} className="hover:text-green-500">
+            <RiPlayList2Fill size={PlayBarStyle.SideIconSize} />
+          </Button>
+        </div>
+      </div>
       <PlayQueue isOpen={playlistDrawerVisible} onOpenChange={toggle} />
     </div>
   );

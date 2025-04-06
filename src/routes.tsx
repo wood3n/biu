@@ -20,7 +20,7 @@ const routes: RouteObject[] = [
     element: <DefaultLayout />,
     children: [
       {
-        path: "/recommend",
+        index: true,
         element: <Recommend />,
       },
       {

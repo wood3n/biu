@@ -17,13 +17,10 @@ const Row = ({ index, data, columns, hoverable, isSelected, className, ...props 
   return (
     <div
       {...props}
-      className={clx("flex space-x-4 rounded-lg py-2", className, {
+      className={clx("flex h-full space-x-4 rounded-lg py-2", className, {
         "bg-mid-green text-green-500": isSelected,
         "cursor-pointer hover:bg-zinc-800": hoverable && !isSelected,
       })}
-      style={{
-        height: "100%",
-      }}
     >
       {columns.map(({ key, align = "start", render, className }) => (
         <div key={key} className={clx(`flex items-center justify-${align} min-w-0`, className)}>

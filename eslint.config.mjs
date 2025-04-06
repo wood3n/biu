@@ -20,7 +20,6 @@ export default tseslint.config(
       importPlugin.flatConfigs.recommended,
       importPlugin.flatConfigs.typescript,
       eslintPluginPrettierRecommended,
-      nodePlugin.configs["flat/recommended-script"],
       jsxA11y.flatConfigs.recommended,
     ],
     plugins: {
@@ -49,18 +48,11 @@ export default tseslint.config(
     },
     rules: {
       "import/no-named-as-default-member": 0,
-      "n/no-missing-import": 0,
-      "n/no-process-exit": 0,
-      "n/no-missing-require": [
-        "error",
-        {
-          allowModules: ["electron"],
-        },
-      ],
       "unused-imports/no-unused-vars": 0,
       "@typescript-eslint/no-require-imports": 0,
       "@eslint-react/prefer-shorthand-boolean": "warn",
       "@eslint-react/hooks-extra/no-direct-set-state-in-use-effect": 0,
+
       "@eslint-react/no-array-index-key": 0,
       "@typescript-eslint/no-explicit-any": 0,
       "@typescript-eslint/ban-ts-comment": 0,
@@ -121,6 +113,21 @@ export default tseslint.config(
         },
         {
           usePrettierrc: true,
+        },
+      ],
+      "jsx-a11y/no-autofocus": 0,
+    },
+  },
+  {
+    files: ["**/plugins/*.{ts,js}", "**/electron/**/*.{ts,js}"],
+    extends: [nodePlugin.configs["flat/recommended-script"]],
+    rules: {
+      "n/no-missing-import": 0,
+      "n/no-process-exit": 0,
+      "n/no-missing-require": [
+        "error",
+        {
+          allowModules: ["electron"],
         },
       ],
     },

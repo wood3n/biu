@@ -1,10 +1,10 @@
 import React, { forwardRef, useState } from "react";
 
-import clx from "classnames";
-import { Input } from "@heroui/react";
-import { RiDownloadLine, RiPlayCircleLine, RiSearchLine } from "@remixicon/react";
+import { RiDownloadLine, RiPlayCircleLine } from "@remixicon/react";
 
 import AsyncButton from "../async-button";
+import { StyleConfig } from "./config";
+import Search from "./search";
 
 interface Props {
   onSearch: (value: string) => void;
@@ -19,19 +19,21 @@ const Toolbar = forwardRef<HTMLDivElement, Props>(({ extraTool, onSearch, onPlay
   return (
     <div ref={ref} className="mb-4 flex items-center justify-between">
       <div className="flex items-center space-x-2">
-        <AsyncButton color="success" startContent={<RiPlayCircleLine size={16} />} onPress={onPlayAll}>
+        <AsyncButton
+          color="success"
+          startContent={<RiPlayCircleLine size={StyleConfig.ToolbarIconSize} />}
+          onPress={onPlayAll}
+        >
           播放
         </AsyncButton>
-        <AsyncButton isIconOnly startContent={<RiDownloadLine size={16} />} onPress={onDownload} />
+        <AsyncButton
+          isIconOnly
+          startContent={<RiDownloadLine size={StyleConfig.ToolbarIconSize} />}
+          onPress={onDownload}
+        />
         {extraTool}
       </div>
-      <Input
-        className={clx("w-min transition", { "w-48": focusedSearch })}
-        onFocus={() => setFocusedSearch(true)}
-        onBlur={() => setFocusedSearch(false)}
-        onValueChange={onSearch}
-        startContent={<RiSearchLine size={16} />}
-      />
+      <Search onSearch={onSearch} />
     </div>
   );
 });

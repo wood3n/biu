@@ -51,6 +51,10 @@ export enum HttpResponse {
  */
 export enum PlayMode {
   /**
+   * 顺序播放
+   */
+  Sequential = 0,
+  /**
    * 单曲循环
    */
   Single = 1,
@@ -65,6 +69,7 @@ export enum PlayMode {
 }
 
 export const PlayModeDesc = {
+  [PlayMode.Sequential]: "顺序播放",
   [PlayMode.Single]: "单曲循环",
   [PlayMode.Loop]: "循环播放",
   [PlayMode.Random]: "随机播放",
