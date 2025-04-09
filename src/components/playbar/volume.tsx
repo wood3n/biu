@@ -38,7 +38,8 @@ const Volume = ({ isMuted, value, onChange, onChangeMute }: Props) => {
 
   return (
     <Slider
-      className="w-36 cursor-pointer"
+      aria-label="音量"
+      className="w-36"
       value={value}
       minValue={0}
       maxValue={1}

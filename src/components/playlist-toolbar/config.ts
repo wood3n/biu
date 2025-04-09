@@ -1,3 +1,3 @@
 export const StyleConfig = {
-  RowHeaderIconSize: 16,
+  ToolbarIconSize: 20,
 };

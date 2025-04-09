@@ -1,69 +1,91 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { useRequest } from "ahooks";
 import { RiStarFill, RiStarLine } from "@remixicon/react";
 
 import AsyncButton from "@/components/async-button";
 import If from "@/components/if";
-import SongList from "@/components/song-list";
+import PlaylistPage from "@/components/playlist-page";
 import { getPlaylistDetail, getPlaylistSubscribe, getPlaylistTrackAll } from "@/service";
+import { Playlist as PlaylistType } from "@/service/playlist-detail";
+import { SubscribeState } from "@/service/playlist-subscribe";
 import { useUser } from "@/store/user";
 
 const Playlist = () => {
   const urlParams = useParams();
   const user = useUser(store => store.user);
+  const [loading, setLoading] = useState(false);
+  const [playlistDetail, setPlaylistDetail] = useState<PlaylistType>();
+  const [songs, setSongs] = useState<Song[]>([]);
+  const pageRef = useRef(1);
 
-  const { loading, data } = useRequest(
-    async () => {
-      const playlistDetail = await getPlaylistDetail({
+  const getSongs = async () => {
+    const limit = 500;
+    const trackRes = await getPlaylistTrackAll({
+      id: urlParams?.pid,
+      limit,
+      offset: (pageRef.current - 1) * limit,
+    });
+
+    if (trackRes?.songs?.length) {
+      setSongs(prev => [...prev, ...trackRes.songs!]);
+    }
+  };
+
+  const init = async () => {
+    setLoading(true);
+    try {
+      const getPlaylistDetailRes = await getPlaylistDetail({
         id: urlParams?.pid,
       });
 
-      if (playlistDetail?.playlist?.trackCount) {
-        const trackRes = await getPlaylistTrackAll({
-          id: urlParams?.pid,
-          limit: playlistDetail.playlist.trackCount,
-          offset: 0,
-        });
+      setPlaylistDetail(getPlaylistDetailRes?.playlist);
 
-        return {
-          playlistDetail,
-          songs: trackRes?.songs,
-          total: playlistDetail.playlist.trackCount,
-        };
+      if (getPlaylistDetailRes?.playlist?.trackCount) {
+        await getSongs();
       }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      return {
-        playlistDetail,
-      };
-    },
-    {
-      refreshDeps: [urlParams?.pid],
-    },
-  );
+  useEffect(() => {
+    if (urlParams?.pid) {
+      setSongs([]);
+      pageRef.current = 1;
+      init();
+    }
+  }, [urlParams?.pid]);
 
-  const isOwner = data?.playlistDetail?.playlist?.creator?.userId === user?.profile?.userId;
-  const isSubscribed = data?.playlistDetail?.playlist?.subscribed;
+  const loadMore = async () => {
+    pageRef.current = pageRef.current + 1;
+    await getSongs();
+  };
+
+  const isOwner = playlistDetail?.creator?.userId === user?.profile?.userId;
+  const isSubscribed = playlistDetail?.subscribed;
 
   const subscribe = async () => {
     await getPlaylistSubscribe({
       id: urlParams?.pid,
-      t: isSubscribed ? 2 : 1,
+      t: isSubscribed ? SubscribeState.Unsubscribed : SubscribeState.Subscribed,
     });
   };
 
   return (
-    <SongList
+    <PlaylistPage
       loading={loading}
-      songs={data?.songs}
-      coverImageUrl={data?.playlistDetail?.playlist?.coverImgUrl}
-      title={data?.playlistDetail?.playlist?.name}
-      description={data?.playlistDetail?.playlist?.description}
+      songs={songs}
+      hasMore={songs.length < (playlistDetail?.trackCount ?? 0)}
+      loadMore={loadMore}
+      coverImageUrl={playlistDetail?.coverImgUrl}
+      title={playlistDetail?.name}
+      description={playlistDetail?.description}
       owner={{
-        avatarUrl: data?.playlistDetail?.playlist?.creator?.avatarUrl,
-        name: data?.playlistDetail?.playlist?.creator?.nickname,
-        userId: data?.playlistDetail?.playlist?.creator?.userId,
+        avatarUrl: playlistDetail?.creator?.avatarUrl,
+        name: playlistDetail?.creator?.nickname,
+        userId: playlistDetail?.creator?.userId,
+        link: `/profile/${playlistDetail?.creator?.userId}`,
       }}
       extraTool={
         <If condition={!isOwner}>
@@ -71,7 +93,7 @@ const Playlist = () => {
             onPress={subscribe}
             color="default"
             isIconOnly
-            startContent={isSubscribed ? <RiStarFill size={16} /> : <RiStarLine size={16} />}
+            startContent={isSubscribed ? <RiStarFill size={20} /> : <RiStarLine size={20} />}
           />
         </If>
       }

@@ -6,7 +6,7 @@ import { RiSearchLine } from "@remixicon/react";
 import { StyleConfig } from "./config";
 
 interface Props {
-  onSearch: (value: string) => void;
+  onSearch?: (value: string) => void;
 }
 
 const Search: React.FC<Props> = ({ onSearch }) => {
@@ -23,7 +23,7 @@ const Search: React.FC<Props> = ({ onSearch }) => {
         }}
         autoFocus
         onBlur={() => setFocused(false)}
-        onChange={e => onSearch(e.target.value)}
+        onChange={e => onSearch?.(e.target.value)}
         startContent={<RiSearchLine size={StyleConfig.ToolbarIconSize} className="flex-none" />}
       />
     );

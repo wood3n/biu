@@ -65,7 +65,7 @@ const Collection = ({ id, className }: Props) => {
       <Modal scrollBehavior="inside" disableAnimation isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">添加歌曲到歌单</ModalHeader>
-          <ModalBody className="flex h-full min-h-80 flex-col">
+          <ModalBody className="flex flex-col">
             <SpinContainer loading={loading}>
               <Input
                 value={name}

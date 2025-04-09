@@ -4,7 +4,7 @@ import { useRequest } from "ahooks";
 import { RiStarFill, RiStarLine } from "@remixicon/react";
 
 import AsyncButton from "@/components/async-button";
-import SongList from "@/components/song-list";
+import PlaylistPage from "@/components/playlist-page";
 import { getAlbum, getAlbumSub } from "@/service";
 import { useFavoriteAlbums } from "@/store/user-favorite-album";
 
@@ -26,7 +26,7 @@ function Album() {
   };
 
   return (
-    <SongList
+    <PlaylistPage
       loading={loading}
       hideAlbum
       songs={albumData?.songs}
@@ -37,6 +37,7 @@ function Album() {
         avatarUrl: albumData?.album?.artist?.picUrl,
         name: albumData?.album?.artist?.name,
         userId: albumData?.album?.artist?.id,
+        link: `/artist/${albumData?.album?.artist?.id}`,
       }}
       extraTool={
         <AsyncButton

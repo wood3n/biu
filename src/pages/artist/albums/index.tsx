@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { Card, CardBody, CardFooter, Image } from "@heroui/react";
+import { Button, Card, CardBody, CardFooter, Image } from "@heroui/react";
+import { RiPlayFill } from "@remixicon/react";
 
 import { getArtistAlbum } from "@/service";
 import { HotAlbum } from "@/service/artist-album";
@@ -35,7 +36,7 @@ const Albums = () => {
     <div className="grid grid-cols-4 gap-8">
       {data?.map(item => (
         <Card key={item.id} isPressable shadow="sm" onPress={() => navigate(`/album/${item.id}`)}>
-          <CardBody className="overflow-visible p-0">
+          <CardBody className="group relative overflow-visible p-0">
             <Image
               alt={item.name}
               className="w-full object-cover"
@@ -44,6 +45,11 @@ const Albums = () => {
               src={item.picUrl}
               width="100%"
             />
+            <div className="absolute bottom-0 left-0 z-20 w-full p-6 text-right opacity-0 backdrop-blur-sm transition group-hover:opacity-100">
+              <Button isIconOnly radius="full" color="success">
+                <RiPlayFill />
+              </Button>
+            </div>
           </CardBody>
           <CardFooter className="justify-end text-small">
             <b>{item.name}</b>

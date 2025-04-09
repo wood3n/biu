@@ -14,7 +14,7 @@ function createWindow() {
     // windows taskbar icon
     icon: path.resolve(
       process.cwd(),
-      process.platform === "win32" ? "./public/electron/windows_tray.ico" : "./public/electron/macos_dock.png",
+      process.platform === "win32" ? "./public/electron/windows_tray.ico" : "./public/electron/macos_dock.icns",
     ),
     show: true,
     hasShadow: false,

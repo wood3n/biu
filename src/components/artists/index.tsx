@@ -15,7 +15,7 @@ const Artists: React.FC<Props> = ({ ars }) => {
     <div className="flex items-center">
       {ars?.slice(0, 3)?.map<React.ReactNode>(({ id, name }, i) => (
         <React.Fragment key={id}>
-          {i ? <span className="text-sm text-zinc-500">，</span> : ""}
+          {i ? <span className="text-sm text-zinc-500">,</span> : ""}
           <Link
             className="inline-block min-w-0 flex-shrink truncate text-sm text-zinc-400"
             underline="hover"

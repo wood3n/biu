@@ -7,6 +7,7 @@ import { RiStarFill, RiStarLine } from "@remixicon/react";
 
 import AsyncButton from "@/components/async-button";
 import Ellipsis from "@/components/ellipsis";
+import ScrollContainer from "@/components/scroll-container";
 import { getArtistDesc, getArtists, getArtistSub } from "@/service";
 
 import Albums from "./albums";
@@ -40,7 +41,7 @@ const Artist = () => {
   };
 
   return (
-    <div className="p-6">
+    <ScrollContainer className="p-6">
       <div className="mb-6 flex space-x-6">
         <div className="flex-none">
           <Image src={artistDetail?.artist?.img1v1Url} width={232} height={232} radius="full" />
@@ -86,7 +87,7 @@ const Artist = () => {
           <Albums />
         </Tab>
       </Tabs>
-    </div>
+    </ScrollContainer>
   );
 };
 

@@ -10,7 +10,7 @@ interface RenderCellProps<T> {
   isSelected?: boolean;
 }
 
-interface ColumnType<T> {
+export interface ColumnType<T> {
   title: React.ReactNode;
   key: string;
   align?: "center" | "start" | "end" | undefined;

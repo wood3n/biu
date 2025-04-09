@@ -24,23 +24,28 @@ export const getColumns = ({ hideAlbum }: Params) => {
       title: "歌曲",
       key: "song",
       className: "flex-[5_0]",
-      render: ({ rowData }) => <SongBriefInfo coverUrl={rowData?.al?.picUrl} name={rowData?.name} ars={rowData?.ar} />,
+      render: ({ rowData }) => (
+        <SongBriefInfo coverUrl={rowData?.al?.picUrl} name={rowData?.name} ars={rowData?.ar} className="w-full" />
+      ),
     },
     {
       title: "专辑",
       key: "album",
       hidden: hideAlbum,
       className: "flex-[4_0]",
-      render: ({ rowData }) => (
-        <Link
-          underline="hover"
-          href={`/album/${rowData?.al?.id}`}
-          className="inline-block cursor-pointer truncate text-sm"
-          color="foreground"
-        >
-          {rowData?.al?.name}
-        </Link>
-      ),
+      render: ({ rowData }) =>
+        rowData?.al?.name ? (
+          <Link
+            underline="hover"
+            href={`/album/${rowData?.al?.id}`}
+            className="inline-block cursor-pointer truncate text-sm"
+            color="foreground"
+          >
+            {rowData?.al?.name}
+          </Link>
+        ) : (
+          <span className="text-sm opacity-70">未知</span>
+        ),
     },
     {
       title: <RiTimeLine size={StyleConfig.RowHeaderIconSize} />,

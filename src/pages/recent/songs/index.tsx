@@ -1,4 +1,4 @@
-import SongList from "@/components/song-list";
+import SongList from "@/components/playlist-page";
 import { getRecentSongs } from "@/service/record-recent-song";
 
 const Songs = () => {

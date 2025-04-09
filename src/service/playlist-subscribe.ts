@@ -1,9 +1,16 @@
 import request from "./request";
 
+export enum SubscribeState {
+  /** 取消收藏 */
+  Unsubscribed = 2,
+  /** 收藏 */
+  Subscribed = 1,
+}
+
 export interface PlaylistSubscribeRequestParams {
   id: string | number | undefined;
   /** 1:收藏；2:取消收藏 */
-  t: number | undefined;
+  t: SubscribeState;
 }
 
 /*

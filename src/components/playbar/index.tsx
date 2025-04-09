@@ -2,28 +2,19 @@ import { useEffect, useRef, useState } from "react";
 
 import { useBoolean, useRequest } from "ahooks";
 import { addToast, Button } from "@heroui/react";
-import {
-  RiPauseCircleFill,
-  RiPlayCircleFill,
-  RiPlayList2Fill,
-  RiSkipBackFill,
-  RiSkipForwardFill,
-} from "@remixicon/react";
+import { RiPlayList2Fill } from "@remixicon/react";
 
 import { MusicLevel } from "@/common/constants";
 import { getLocal, STORAGE_KEY } from "@/common/localforage";
-import { formatDuration } from "@/common/utils";
 import { getLyrics, getSongUrlV1 } from "@/service";
 import { usePlayingQueue } from "@/store/playing-queue";
 
 import If from "../if";
 import PlayQueue from "../play-queue-drawer";
-import SongBriefInfo from "../song-brief-info";
-import SwitchFavorite from "../switch-favorite";
-import { PlayBarStyle, PlayMode } from "./constants";
-import Mode from "./mode";
+import { PlayMode } from "./constants";
+import Control from "./control";
 import Rate from "./rate";
-import Slider from "./slider";
+import SongInfo from "./song-info";
 import Volume from "./volume";
 
 /**
@@ -33,15 +24,16 @@ function PlayBar() {
   const [rate, setRate] = useState(1);
   const [volume, setVolume] = useState(0);
   const [muted, setMuted] = useState(false);
-  const [playProgress, setPlayProgress] = useState(0);
+  const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState<number | null>(null);
   const [paused, setPaused] = useState(true);
   const audioElRef = useRef<HTMLAudioElement>(new Audio());
   const [playlistDrawerVisible, { toggle }] = useBoolean(false);
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
   const [playMode, setPlayMode] = useState<PlayMode>(PlayMode.Sequential);
+  const [isRandom, setIsRandom] = useState(false);
 
-  const { currentSong } = usePlayingQueue();
+  const { currentSong, list: playlist } = usePlayingQueue();
 
   const init = async () => {
     const oldVolume = await getLocal<number>(STORAGE_KEY.VOLUME);
@@ -93,47 +85,6 @@ function PlayBar() {
     }
   }, [currentSong?.id]);
 
-  useEffect(() => {
-    if (data?.data?.[0]?.url) {
-      audioElRef.current.src = data.data[0].url;
-      audioElRef.current.controls = false;
-      audioElRef.current.volume = volume;
-      audioElRef.current.preload = "metadata";
-      audioElRef.current.playbackRate = rate;
-
-      audioElRef.current.onloadedmetadata = () => {
-        setDuration(Math.floor(audioElRef.current.duration));
-      };
-
-      audioElRef.current.ontimeupdate = () => {
-        setPlayProgress(Math.floor(audioElRef.current.currentTime));
-      };
-
-      audioElRef.current.onplay = () => {
-        setPaused(false);
-      };
-
-      audioElRef.current.onpause = () => {
-        setPaused(true);
-      };
-
-      audioElRef.current.oncanplay = () => {
-        setPaused(false);
-        audioElRef.current.play();
-      };
-
-      audioElRef.current.onended = () => {
-        if (playMode !== PlayMode.Single) {
-        }
-      };
-    }
-
-    return () => {
-      // https://html.spec.whatwg.org/multipage/media.html#best-practices-for-authors-using-media-elements
-      audioElRef.current.src = "";
-    };
-  }, [data?.data?.[0]?.url]);
-
   const stopPlay = () => {
     audioElRef.current.pause();
     audioElRef.current.currentTime = 0;
@@ -158,7 +109,7 @@ function PlayBar() {
   };
 
   const handleSeek = (playTime: number | number[]) => {
-    setPlayProgress(playTime as number);
+    setProgress(playTime as number);
     audioElRef.current.currentTime = playTime as number;
   };
 
@@ -178,60 +129,106 @@ function PlayBar() {
   // 切换播放模式
   const handleChangeMode = (v: PlayMode) => {
     setPlayMode(v);
+    if (v === PlayMode.Single) {
+      audioElRef.current.loop = true;
+    }
   };
+
+  // 注册系统播放会话
+  const registerMediaSession = () => {
+    if (currentSong && "mediaSession" in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentSong.name,
+        artist: currentSong?.ar?.map(ar => ar.name).join("/"),
+        album: currentSong.al?.name,
+        artwork: [{ src: currentSong.al?.picUrl as string, sizes: "512x512" }],
+      });
+      navigator.mediaSession.setActionHandler("previoustrack", () => {
+        handlePrev();
+      });
+      navigator.mediaSession.setActionHandler("nexttrack", () => {
+        handleNext();
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (data?.data?.[0]?.url) {
+      registerMediaSession();
+
+      audioElRef.current.src = data.data[0].url;
+      audioElRef.current.controls = false;
+      audioElRef.current.volume = volume;
+      audioElRef.current.preload = "metadata";
+      audioElRef.current.playbackRate = rate;
+
+      audioElRef.current.onloadedmetadata = () => {
+        setDuration(Math.floor(audioElRef.current.duration));
+      };
+
+      audioElRef.current.ontimeupdate = () => {
+        setProgress(Math.floor(audioElRef.current.currentTime));
+      };
+
+      audioElRef.current.onplay = () => {
+        setPaused(false);
+      };
+
+      audioElRef.current.onpause = () => {
+        setPaused(true);
+      };
+
+      audioElRef.current.oncanplay = () => {
+        setPaused(false);
+        audioElRef.current.play();
+      };
+
+      audioElRef.current.onended = () => {
+        if (playMode !== PlayMode.Single) {
+          return;
+        }
+
+        handleNext();
+      };
+    }
+
+    return () => {
+      // https://html.spec.whatwg.org/multipage/media.html#best-practices-for-authors-using-media-elements
+      audioElRef.current.src = "";
+    };
+  }, [data?.data?.[0]?.url]);
+
+  const isPlaylistEmpty = !playlist?.length;
 
   return (
     <div className="h-20 px-6">
-      <div className="flex h-full items-center space-x-6">
-        <div className="flex h-full flex-1 items-center justify-start space-x-4">
+      <div className="grid h-full grid-cols-[minmax(0,1fr)_minmax(0,3fr)_minmax(0,1fr)] space-x-6">
+        <div className="h-full">
           <If condition={currentSong?.id}>
-            <SongBriefInfo name={currentSong?.name} ars={currentSong?.ar} coverUrl={currentSong?.al?.picUrl} />
-            <SwitchFavorite id={currentSong?.id as number} />
+            <SongInfo song={currentSong!} />
           </If>
         </div>
-        <div className="flex h-full min-w-0 flex-3 flex-col items-center justify-center space-y-0.5 px-6">
-          <div className="flex items-center space-x-6">
-            <Button isIconOnly size="sm" variant="light" className="hover:text-green-500">
-              <RiSkipBackFill size={PlayBarStyle.SecondIconSize} />
-            </Button>
-            <Button isIconOnly variant="light" radius="full" className="hover:text-green-500" onPress={togglePlay}>
-              {paused ? (
-                <RiPlayCircleFill size={PlayBarStyle.MainPlayIconSize} />
-              ) : (
-                <RiPauseCircleFill size={PlayBarStyle.MainPlayIconSize} />
-              )}
-            </Button>
-            <Button isIconOnly size="sm" variant="light" className="hover:text-green-500">
-              <RiSkipForwardFill size={PlayBarStyle.SecondIconSize} />
-            </Button>
-          </div>
-          <Slider
-            hideThumb
-            className="w-3/4 cursor-pointer"
-            minValue={0}
-            maxValue={duration || 0}
-            value={playProgress}
-            startContent={
-              <span className="whitespace-nowrap text-sm opacity-70">
-                {playProgress ? formatDuration(playProgress, false) : "-:--"}
-              </span>
-            }
-            // @ts-ignore value is number
-            onChange={handleSeek}
-            endContent={
-              <span className="whitespace-nowrap text-sm opacity-70">
-                {duration ? formatDuration(duration, false) : "-:--"}
-              </span>
-            }
-          />
-        </div>
-        <div className="flex h-full flex-1 items-center justify-end space-x-2">
-          <Mode value={playMode} onChange={handleChangeMode} />
+        <Control
+          disabled={isPlaylistEmpty}
+          loading={loading}
+          progress={progress}
+          duration={duration}
+          paused={paused}
+          playMode={playMode}
+          isRandom={isRandom}
+          onSeek={handleSeek}
+          onPlay={togglePlay}
+          onNext={handleNext}
+          onPrev={handlePrev}
+          onToggleRandomPlay={() => setIsRandom(!isRandom)}
+          onChangePlayMode={handleChangeMode}
+        />
+        <div className="flex h-full items-center justify-end space-x-2">
           <Rate value={rate} onChange={handleChangeRate} />
-          <Volume value={volume} onChange={handleChangeVolume} isMuted={muted} onChangeMute={setMuted} />
           <Button isIconOnly size="sm" variant="light" onPress={toggle} className="hover:text-green-500">
-            <RiPlayList2Fill size={PlayBarStyle.SideIconSize} />
+            <RiPlayList2Fill size={18} />
           </Button>
+          <Volume value={volume} onChange={handleChangeVolume} isMuted={muted} onChangeMute={setMuted} />
         </div>
       </div>
       <PlayQueue isOpen={playlistDrawerVisible} onOpenChange={toggle} />
