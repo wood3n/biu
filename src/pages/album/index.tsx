@@ -4,7 +4,7 @@ import { useRequest } from "ahooks";
 import { RiStarFill, RiStarLine } from "@remixicon/react";
 
 import AsyncButton from "@/components/async-button";
-import PlaylistPage from "@/components/playlist-page";
+import PlaylistPage from "@/components/virtual-list-container";
 import { getAlbum, getAlbumSub } from "@/service";
 import { useFavoriteAlbums } from "@/store/user-favorite-album";
 

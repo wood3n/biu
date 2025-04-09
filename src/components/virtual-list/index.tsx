@@ -49,7 +49,6 @@ const VirtualList = <T extends object = any>({
 
     const lastItem = items[items.length - 1];
     if (data && lastItem.index >= data.length - 1 && !loadingMore && hasMore) {
-      console.log("load more");
       loadMoreData();
     }
   }, [virtualizer.getVirtualItems()]);
@@ -79,7 +78,7 @@ const VirtualList = <T extends object = any>({
             }}
           >
             {isLoaderRow ? (
-              <div className="flex h-full items-center justify-center">
+              <div className="flex h-full items-center justify-center text-sm opacity-70">
                 <Spinner variant="dots" label="加载更多中..." />
               </div>
             ) : (

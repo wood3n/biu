@@ -5,7 +5,7 @@ import { RiStarFill, RiStarLine } from "@remixicon/react";
 
 import AsyncButton from "@/components/async-button";
 import If from "@/components/if";
-import PlaylistPage from "@/components/playlist-page";
+import VirtualListContainer from "@/components/virtual-list-container";
 import { getPlaylistDetail, getPlaylistSubscribe, getPlaylistTrackAll } from "@/service";
 import { Playlist as PlaylistType } from "@/service/playlist-detail";
 import { SubscribeState } from "@/service/playlist-subscribe";
@@ -73,15 +73,16 @@ const Playlist = () => {
   };
 
   return (
-    <PlaylistPage
+    <VirtualListContainer
       loading={loading}
       songs={songs}
+      trackCount={playlistDetail?.trackCount}
       hasMore={songs.length < (playlistDetail?.trackCount ?? 0)}
       loadMore={loadMore}
       coverImageUrl={playlistDetail?.coverImgUrl}
       title={playlistDetail?.name}
       description={playlistDetail?.description}
-      owner={{
+      user={{
         avatarUrl: playlistDetail?.creator?.avatarUrl,
         name: playlistDetail?.creator?.nickname,
         userId: playlistDetail?.creator?.userId,
