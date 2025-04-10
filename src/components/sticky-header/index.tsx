@@ -28,7 +28,7 @@ const StickyHeader = ({ children, observerTarget, observerRoot, className }: Pro
   });
 
   return (
-    // FIXME: backdrop-filter 在这里使用会有严重的性能问题，无法解决
+    // FIXME: backdrop-filter 在这里和 transform 一起使用会有严重的性能问题，无法解决
     <div
       className={clx(
         "sticky -top-16 z-20 -mt-16 h-16 w-full shadow transition-[transform,top] duration-300",
