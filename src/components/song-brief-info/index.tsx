@@ -3,6 +3,8 @@ import React from "react";
 import clx from "classnames";
 import { Image } from "@heroui/react";
 
+import EmptyImg from "@/assets/images/empty.jpg";
+
 import Artists from "../artists";
 
 interface Props {
@@ -16,14 +18,18 @@ const SongBriefInfo = ({ name, ars, coverUrl, className }: Props) => {
   return (
     <div className={clx("flex items-center space-x-2", className)}>
       {coverUrl && (
-        <div className="flex-none">
+        <div className="h-12 w-12 flex-none">
           <Image
             radius="sm"
-            className="object-cover"
+            crossOrigin="anonymous"
             loading="lazy"
-            width={44}
-            height={44}
-            src={`${coverUrl}?param=88y88`}
+            width="100%"
+            height="100%"
+            src={`${coverUrl}?param=96y96&timestamp=${Date.now()}`}
+            fallbackSrc={EmptyImg}
+            classNames={{
+              wrapper: "h-full w-full",
+            }}
           />
         </div>
       )}

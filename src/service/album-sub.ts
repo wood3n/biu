@@ -1,9 +1,16 @@
 import request from "./request";
 
+export enum AlbumSubState {
+  /* 收藏 */
+  Subscribed = 1,
+  /* 取消收藏 */
+  Unsubscribed = 2,
+}
+
 export interface AlbumSubRequestParams {
   id: string | undefined;
-  /** 1 为收藏,其他为取消收藏 */
-  t: number | undefined;
+  /** 1 为收藏, 2 取消收藏 */
+  t: AlbumSubState;
 }
 
 /*

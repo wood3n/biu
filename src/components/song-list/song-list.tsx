@@ -4,32 +4,19 @@ import clx from "classnames";
 
 import { usePlayingQueue } from "@/store/playing-queue";
 
-import VirtualList from "../virtual-list";
 import { getColumns } from "./columns";
 import Row from "./row";
 import Skeleton from "./skeleton";
 
 interface Props {
-  loading: boolean;
+  loading?: boolean;
   songs?: Song[];
   hideAlbum?: boolean;
-  getScrollElement: () => HTMLElement | null;
-  virtualScrollMargin?: number;
-  hasMore?: boolean;
-  loadMore?: () => Promise<void>;
+  footer?: React.ReactNode;
   className?: string;
 }
 
-const SongList = ({
-  loading,
-  getScrollElement,
-  virtualScrollMargin,
-  songs,
-  hideAlbum,
-  hasMore,
-  loadMore,
-  className,
-}: Props) => {
+export const SongList = ({ loading, songs, hideAlbum, footer, className }: Props) => {
   const { currentSong, play } = usePlayingQueue();
 
   if (loading) {
@@ -45,15 +32,8 @@ const SongList = ({
   return (
     <div className={className}>
       <Row columns={columns} render={column => column.title} className="mb-1 bg-zinc-800 text-sm text-zinc-400" />
-      <VirtualList
-        rowHeight={60}
-        data={songs}
-        getScrollElement={getScrollElement}
-        scrollMargin={virtualScrollMargin}
-        hasMore={hasMore}
-        loadMore={loadMore}
-      >
-        {(index, song) => {
+      <div className="flex flex-col">
+        {songs?.map((song, index) => {
           const isSelected = currentSong?.id === song?.id;
 
           return (
@@ -76,10 +56,9 @@ const SongList = ({
               }}
             />
           );
-        }}
-      </VirtualList>
+        })}
+      </div>
+      {footer}
     </div>
   );
 };
-
-export default SongList;

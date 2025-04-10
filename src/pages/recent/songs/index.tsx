@@ -1,4 +1,4 @@
-import SongList from "@/components/virtual-list-container";
+import SongList from "@/components/virtual-songlist-container";
 import { getRecentSongs } from "@/service/record-recent-song";
 
 const Songs = () => {

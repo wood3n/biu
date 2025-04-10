@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 
 import clx from "classnames";
-import { Modal, ModalBody, ModalContent, ModalHeader, useDisclosure } from "@heroui/react";
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/react";
 
 import ScrollContainer from "../scroll-container";
 
@@ -26,10 +26,10 @@ const lineClampMap = {
   6: "line-clamp-6",
 };
 
-const Ellipsis = ({ showMore, lines = 1, children, className, style }: Props) => {
+const Ellipsis = ({ showMore, lines = 2, children, className, style }: Props) => {
   const [isOverflowed, setIsOverflow] = useState(false);
   const textElementRef = useRef<HTMLDivElement>(null);
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
   useLayoutEffect(() => {
     if (textElementRef.current) {
@@ -42,26 +42,35 @@ const Ellipsis = ({ showMore, lines = 1, children, className, style }: Props) =>
       <div ref={textElementRef} className={clx(className, lineClampMap[lines], "relative")} style={style}>
         {children}
         {isOverflowed && showMore && (
-          <span
-            role="button"
-            onPointerDown={onOpen}
-            tabIndex={0}
-            className={clx(
-              "absolute bottom-0 right-0 cursor-pointer bg-second-background text-zinc-500 shadow-[-22px_5px_18px_0px_#18181b] transition-colors hover:text-white",
-              showMore.className,
-            )}
-          >
-            ...更多
-          </span>
+          <div className="absolute bottom-0 right-0">
+            <button
+              type="button"
+              onClick={onOpen}
+              className="overflow-hidden rounded-l-lg bg-transparent pl-3 font-light italic backdrop-blur-sm hover:text-blue-500 hover:underline"
+            >
+              更多
+            </button>
+          </div>
         )}
       </div>
       {showMore && (
-        <Modal size="5xl" isOpen={isOpen} disableAnimation scrollBehavior="inside" onOpenChange={onOpenChange}>
+        <Modal
+          size="3xl"
+          autoFocus={false}
+          isOpen={isOpen}
+          hideCloseButton
+          disableAnimation
+          scrollBehavior="inside"
+          onOpenChange={onOpenChange}
+        >
           <ModalContent>
-            <ModalHeader>{showMore.title}</ModalHeader>
-            <ModalBody className="whitespace-pre-line leading-loose">
-              <ScrollContainer>{showMore.content}</ScrollContainer>
+            <ModalHeader className="text-3xl">{showMore.title}</ModalHeader>
+            <ModalBody className="whitespace-pre-line p-0 leading-loose">
+              <ScrollContainer className="px-6">{showMore.content}</ScrollContainer>
             </ModalBody>
+            <ModalFooter>
+              <Button onPress={onClose}>知道了</Button>
+            </ModalFooter>
           </ModalContent>
         </Modal>
       )}

@@ -1,5 +1,6 @@
 import React from "react";
 
+import { uniqBy } from "es-toolkit";
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Link } from "@heroui/react";
 import { RiMoreLine } from "@remixicon/react";
 
@@ -13,7 +14,7 @@ interface Props {
 const Artists: React.FC<Props> = ({ ars }) => {
   return (
     <div className="flex items-center">
-      {ars?.slice(0, 3)?.map<React.ReactNode>(({ id, name }, i) => (
+      {uniqBy(ars?.slice(0, 3), item => item.id)?.map<React.ReactNode>(({ id, name }, i) => (
         <React.Fragment key={id}>
           {i ? <span className="text-sm text-zinc-500">,</span> : ""}
           <Link

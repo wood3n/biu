@@ -1,10 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { Spinner } from "@heroui/react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface Props<T> {
-  rowHeight: number;
+  maxRowHeight: number;
+  dynamicRowHeight?: boolean;
+  overscan?: number;
   getScrollElement: () => HTMLElement | null;
   children: (index: number, rowData: T) => React.ReactNode;
   scrollMargin?: number;
@@ -15,21 +17,23 @@ interface Props<T> {
 
 const VirtualList = <T extends object = any>({
   data,
+  dynamicRowHeight,
   scrollMargin = 0,
-  rowHeight,
+  overscan = 5,
+  maxRowHeight,
   getScrollElement,
   children,
   hasMore,
   loadMore,
 }: Props<T>) => {
   const listRef = useRef<HTMLDivElement>(null);
-  const [loadingMore, setLoadingMore] = React.useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const virtualizer = useVirtualizer({
     count: hasMore ? (data?.length ?? 0) + 1 : (data?.length ?? 0),
     getScrollElement,
-    estimateSize: () => rowHeight,
-    overscan: 5,
+    estimateSize: () => maxRowHeight,
+    overscan,
     // top content height
     scrollMargin: (listRef.current?.offsetTop ?? 0) - scrollMargin,
   });
@@ -43,15 +47,16 @@ const VirtualList = <T extends object = any>({
     }
   };
 
+  const items = virtualizer.getVirtualItems();
+
   useEffect(() => {
-    const items = virtualizer.getVirtualItems();
     if (!items.length) return;
 
     const lastItem = items[items.length - 1];
-    if (data && lastItem.index >= data.length - 1 && !loadingMore && hasMore) {
+    if (hasMore && !loadingMore && data?.length && lastItem.index >= data.length - 1) {
       loadMoreData();
     }
-  }, [virtualizer.getVirtualItems()]);
+  }, [items, hasMore, loadMore]);
 
   return (
     <div
@@ -62,7 +67,7 @@ const VirtualList = <T extends object = any>({
         position: "relative",
       }}
     >
-      {virtualizer.getVirtualItems().map(virtualRow => {
+      {items.map(virtualRow => {
         const rowData = data?.[virtualRow.index];
         const isLoaderRow = Array.isArray(data) && virtualRow.index > data.length - 1;
 
@@ -73,13 +78,13 @@ const VirtualList = <T extends object = any>({
             ref={virtualizer.measureElement}
             className="absolute left-0 top-0 w-full"
             style={{
-              height: `${virtualRow.size}px`,
+              height: dynamicRowHeight ? undefined : virtualRow.size,
               transform: `translateY(${virtualRow.start - virtualizer.options.scrollMargin}px)`,
             }}
           >
             {isLoaderRow ? (
               <div className="flex h-full items-center justify-center text-sm opacity-70">
-                <Spinner variant="dots" label="加载更多中..." />
+                <Spinner variant="dots" size="sm" label="加载更多中..." />
               </div>
             ) : (
               children(virtualRow.index, rowData!)

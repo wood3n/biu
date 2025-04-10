@@ -10,7 +10,7 @@ export interface ArtistAlbumResponse {
   code: number;
   more: boolean;
   artist: Artist;
-  hotAlbums: HotAlbum[];
+  hotAlbums: Album[];
 }
 
 export interface Artist {
@@ -31,8 +31,8 @@ export interface Artist {
   img1v1Id_str: string;
 }
 
-export interface HotAlbum {
-  songs: any[];
+export interface Album {
+  songs: Song[];
   paid: boolean;
   onSale: boolean;
   mark: number;

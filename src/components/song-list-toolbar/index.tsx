@@ -19,7 +19,7 @@ interface Props {
   className?: string;
 }
 
-const PlaylistToolbar = forwardRef<HTMLDivElement, Props>(
+const SongListToolbar = forwardRef<HTMLDivElement, Props>(
   ({ songs, extra, showSearch, isIconOnly, onSearch, className }, ref) => {
     const { playAll } = usePlayingQueue();
 
@@ -64,4 +64,4 @@ const PlaylistToolbar = forwardRef<HTMLDivElement, Props>(
   },
 );
 
-export default PlaylistToolbar;
+export default SongListToolbar;

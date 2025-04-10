@@ -1,9 +1,3 @@
-import { ContextProp } from "react-virtuoso";
-
-export type ScrollProps = ContextProp<{
-  songs?: Song[];
-}>;
-
 interface RenderCellProps<T> {
   rowData: T;
   index: number;
@@ -16,7 +10,6 @@ export interface ColumnType<T> {
   align?: "center" | "start" | "end" | undefined;
   hidden?: boolean;
   className?: string;
-  fr?: number;
   width?: number;
   headerClassName?: string;
   render: (props: RenderCellProps<T>) => React.ReactNode;

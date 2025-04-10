@@ -5,7 +5,7 @@ import { RiStarFill, RiStarLine } from "@remixicon/react";
 
 import AsyncButton from "@/components/async-button";
 import If from "@/components/if";
-import VirtualListContainer from "@/components/virtual-list-container";
+import VirtualSongListContainer from "@/components/virtual-songlist-container";
 import { getPlaylistDetail, getPlaylistSubscribe, getPlaylistTrackAll } from "@/service";
 import { Playlist as PlaylistType } from "@/service/playlist-detail";
 import { SubscribeState } from "@/service/playlist-subscribe";
@@ -73,7 +73,7 @@ const Playlist = () => {
   };
 
   return (
-    <VirtualListContainer
+    <VirtualSongListContainer
       loading={loading}
       songs={songs}
       trackCount={playlistDetail?.trackCount}
