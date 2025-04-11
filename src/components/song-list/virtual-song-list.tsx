@@ -1,7 +1,5 @@
 import React from "react";
 
-import clx from "classnames";
-
 import { usePlayingQueue } from "@/store/playing-queue";
 
 import VirtualList from "../virtual-list";
@@ -60,10 +58,8 @@ export const VirtualSongList = ({
             <Row
               key={song?.id}
               columns={columns}
-              className={clx("h-full", {
-                "bg-mid-green text-green-500": isSelected,
-                "cursor-pointer hover:bg-zinc-800": !isSelected,
-              })}
+              hoverable
+              isSelected={isSelected}
               render={column => {
                 return column.render({
                   rowData: song,

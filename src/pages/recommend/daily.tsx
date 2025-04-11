@@ -23,8 +23,9 @@ const Daily = ({ songs, className }: Props) => {
         </h1>
       </CardHeader>
       <CardBody className="flex space-x-6">
-        <Img src={firstSong?.al?.picUrl} width={240} height={240} />
-        <div className="flex flex-col"></div>
+        <Card isHoverable isPressable shadow="none">
+          <Img isZoomed src={firstSong?.al?.picUrl} width={240} height={240} />
+        </Card>
       </CardBody>
     </Card>
   );

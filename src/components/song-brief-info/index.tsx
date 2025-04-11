@@ -25,10 +25,10 @@ const SongBriefInfo = ({ name, ars, coverUrl, className }: Props) => {
             loading="lazy"
             width="100%"
             height="100%"
-            src={`${coverUrl}?param=96y96&timestamp=${Date.now()}`}
+            src={`${coverUrl}?param=96y96`}
             fallbackSrc={EmptyImg}
             classNames={{
-              wrapper: "h-full w-full",
+              wrapper: "h-full w-full bg-cover",
             }}
           />
         </div>

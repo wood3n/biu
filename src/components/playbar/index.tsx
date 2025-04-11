@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
-import { useBoolean, useRequest } from "ahooks";
-import { addToast, Button } from "@heroui/react";
+import { useRequest } from "ahooks";
+import { random } from "es-toolkit";
+import { addToast, Button, useDisclosure } from "@heroui/react";
 import { RiPlayList2Fill } from "@remixicon/react";
 
 import { MusicLevel } from "@/common/constants";
@@ -28,12 +29,13 @@ function PlayBar() {
   const [duration, setDuration] = useState<number | null>(null);
   const [paused, setPaused] = useState(true);
   const audioElRef = useRef<HTMLAudioElement>(new Audio());
-  const [playlistDrawerVisible, { toggle }] = useBoolean(false);
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
   const [playMode, setPlayMode] = useState<PlayMode>(PlayMode.Sequential);
   const [isRandom, setIsRandom] = useState(false);
 
-  const { currentSong, list: playlist } = usePlayingQueue();
+  const { isOpen: playlistDrawerVisible, onOpenChange: onPlaylistDrawerOpenChange } = useDisclosure();
+
+  const { currentSong, play, list: playlist, clear: clearPlaylist, delete: deleteSong } = usePlayingQueue();
 
   const init = async () => {
     const oldVolume = await getLocal<number>(STORAGE_KEY.VOLUME);
@@ -54,18 +56,15 @@ function PlayBar() {
     },
   );
 
-  const {
-    data,
-    runAsync: getPlayData,
-    loading,
-  } = useRequest(
+  const { data, loading } = useRequest(
     () =>
       getSongUrlV1({
         id: currentSong?.id,
         level: MusicLevel.Lossless,
       }),
     {
-      manual: true,
+      ready: Boolean(currentSong?.id),
+      refreshDeps: [currentSong?.id],
       onSuccess: res => {
         if (!res?.data?.[0]?.url) {
           addToast({
@@ -78,12 +77,6 @@ function PlayBar() {
       },
     },
   );
-
-  useEffect(() => {
-    if (currentSong?.id) {
-      getPlayData();
-    }
-  }, [currentSong?.id]);
 
   const stopPlay = () => {
     audioElRef.current.pause();
@@ -100,12 +93,35 @@ function PlayBar() {
     }
   };
 
-  const handlePrev = () => {
+  const playPrev = () => {
     stopPlay();
+    const index = playlist.findIndex(item => item.id === currentSong?.id);
+    let prevIndex = (index - 1 + playlist.length) % playlist.length;
+    // 随机播放
+    if (isRandom) {
+      const randomIndex = random(playlist.length);
+      prevIndex = randomIndex === index ? randomIndex + 1 : randomIndex;
+    }
+
+    play(playlist[prevIndex]);
   };
 
-  const handleNext = () => {
+  const playNext = (manual = false) => {
     stopPlay();
+    const index = playlist.findIndex(item => item.id === currentSong?.id);
+    const isLast = index === playlist.length - 1;
+    if (isLast && playMode === PlayMode.Sequential && !isRandom && !manual) {
+      return;
+    }
+
+    let nextIndex = (index + 1) % playlist.length;
+    // 随机播放
+    if (isRandom) {
+      const randomIndex = random(playlist.length);
+      nextIndex = randomIndex === index ? randomIndex + 1 : randomIndex;
+    }
+
+    play(playlist[nextIndex]);
   };
 
   const handleSeek = (playTime: number | number[]) => {
@@ -144,10 +160,10 @@ function PlayBar() {
         artwork: [{ src: currentSong.al?.picUrl as string, sizes: "512x512" }],
       });
       navigator.mediaSession.setActionHandler("previoustrack", () => {
-        handlePrev();
+        playPrev();
       });
       navigator.mediaSession.setActionHandler("nexttrack", () => {
-        handleNext();
+        playNext();
       });
     }
   };
@@ -188,7 +204,7 @@ function PlayBar() {
           return;
         }
 
-        handleNext();
+        playNext();
       };
     }
 
@@ -197,6 +213,19 @@ function PlayBar() {
       audioElRef.current.src = "";
     };
   }, [data?.data?.[0]?.url]);
+
+  const handleDeleteSongFromPlaylist = (song: Song) => {
+    if (currentSong?.id === song.id) {
+      playNext();
+    }
+
+    deleteSong([song]);
+  };
+
+  const handleClearPlaylist = () => {
+    stopPlay();
+    clearPlaylist();
+  };
 
   const isPlaylistEmpty = !playlist?.length;
 
@@ -218,20 +247,31 @@ function PlayBar() {
           isRandom={isRandom}
           onSeek={handleSeek}
           onPlay={togglePlay}
-          onNext={handleNext}
-          onPrev={handlePrev}
+          onNext={() => playNext(true)}
+          onPrev={playPrev}
           onToggleRandomPlay={() => setIsRandom(!isRandom)}
           onChangePlayMode={handleChangeMode}
         />
         <div className="flex h-full items-center justify-end space-x-2">
           <Rate value={rate} onChange={handleChangeRate} />
-          <Button isIconOnly size="sm" variant="light" onPress={toggle} className="hover:text-green-500">
+          <Button
+            isIconOnly
+            size="sm"
+            variant="light"
+            onPress={onPlaylistDrawerOpenChange}
+            className="hover:text-green-500"
+          >
             <RiPlayList2Fill size={18} />
           </Button>
           <Volume value={volume} onChange={handleChangeVolume} isMuted={muted} onChangeMute={setMuted} />
         </div>
       </div>
-      <PlayQueue isOpen={playlistDrawerVisible} onOpenChange={toggle} />
+      <PlayQueue
+        isOpen={playlistDrawerVisible}
+        onOpenChange={onPlaylistDrawerOpenChange}
+        onClearPlaylist={handleClearPlaylist}
+        onDeleteSong={handleDeleteSongFromPlaylist}
+      />
     </div>
   );
 }

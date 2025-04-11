@@ -81,7 +81,7 @@ const VirtualSongListContainer = ({
           <div
             className="flex h-full w-full items-center justify-between px-6"
             style={{
-              backgroundImage: `linear-gradient(to right, rgba(${palette?.join(",")},70%), #18181b)`,
+              backgroundImage: `linear-gradient(to right, rgba(${palette?.join(",")},95%), #18181b)`,
               backgroundRepeat: "no-repeat",
             }}
           >

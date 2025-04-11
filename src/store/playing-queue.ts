@@ -62,10 +62,10 @@ export const usePlayingQueue = create<State & Action>(set => ({
       return { list };
     });
   },
-  delete: song => {
+  delete: songs => {
     set(state => {
-      const filteredIds = song.map(item => item.id);
-      return { list: state.list.filter(item => filteredIds.includes(item.id)) };
+      const filteredIds = songs.map(item => item.id);
+      return { list: state.list.filter(item => !filteredIds.includes(item.id)) };
     });
   },
   clear: () => {
