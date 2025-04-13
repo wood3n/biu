@@ -3,8 +3,6 @@ import React from "react";
 import clx from "classnames";
 import { Image } from "@heroui/react";
 
-import EmptyImg from "@/assets/images/empty.jpg";
-
 import Artists from "../artists";
 
 interface Props {
@@ -26,7 +24,6 @@ const SongBriefInfo = ({ name, ars, coverUrl, className }: Props) => {
             width="100%"
             height="100%"
             src={`${coverUrl}?param=96y96`}
-            fallbackSrc={EmptyImg}
             classNames={{
               wrapper: "h-full w-full bg-cover",
             }}

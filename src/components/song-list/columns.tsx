@@ -4,6 +4,8 @@ import { RiPulseFill, RiTimeLine } from "@remixicon/react";
 import { formatDuration } from "@/common/utils";
 import SongBriefInfo from "@/components/song-brief-info";
 
+import Collection from "../collection";
+import SwitchFavorite from "../switch-favorite";
 import { StyleConfig } from "./config";
 import { ColumnsType } from "./types";
 
@@ -24,8 +26,21 @@ export const getColumns = ({ hideAlbum }: Params) => {
       title: "歌曲",
       key: "song",
       className: "flex-[5_0]",
-      render: ({ rowData }) => (
-        <SongBriefInfo coverUrl={rowData?.al?.picUrl} name={rowData?.name} ars={rowData?.ar} className="w-full" />
+      render: ({ rowData, isHovered }) => (
+        <div className="flex w-full items-center justify-between">
+          <SongBriefInfo
+            coverUrl={rowData?.al?.picUrl}
+            name={rowData?.name}
+            ars={rowData?.ar}
+            className="w-full min-w-0"
+          />
+          {isHovered && (
+            <div className="flex h-full items-center space-x-2">
+              <SwitchFavorite id={rowData.id} />
+              <Collection id={rowData.id} />
+            </div>
+          )}
+        </div>
       ),
     },
     {

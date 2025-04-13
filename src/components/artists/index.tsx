@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 import { uniqBy } from "es-toolkit";
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Link } from "@heroui/react";
@@ -12,6 +13,8 @@ interface Props {
  * 艺人串
  */
 const Artists: React.FC<Props> = ({ ars }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="flex items-center">
       {uniqBy(ars?.slice(0, 3), item => item.id)?.map<React.ReactNode>(({ id, name }, i) => (
@@ -40,7 +43,11 @@ const Artists: React.FC<Props> = ({ ars }) => {
             </Button>
           </DropdownTrigger>
           <DropdownMenu items={ars} aria-label="其他艺人" variant="flat">
-            {item => <DropdownItem key={item.id}>{item.name}</DropdownItem>}
+            {item => (
+              <DropdownItem key={item.id} onPress={() => navigate(`/artist/${item.id}`)}>
+                {item.name}
+              </DropdownItem>
+            )}
           </DropdownMenu>
         </Dropdown>
       )}

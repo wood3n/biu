@@ -1,7 +1,8 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 
 import clx from "classnames";
-import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/react";
+import { Button, Modal, ModalBody, ModalContent, ModalHeader, useDisclosure } from "@heroui/react";
+import { RiCloseLine } from "@remixicon/react";
 
 import ScrollContainer from "../scroll-container";
 
@@ -46,7 +47,7 @@ const Ellipsis = ({ showMore, lines = 2, children, className, style }: Props) =>
             <button
               type="button"
               onClick={onOpen}
-              className="overflow-hidden rounded-l-lg bg-transparent pl-3 font-light italic backdrop-blur-sm hover:text-blue-500 hover:underline"
+              className="overflow-hidden rounded-l-lg bg-transparent pl-3 text-zinc-400 backdrop-blur-sm hover:text-blue-500 hover:underline"
             >
               更多
             </button>
@@ -64,13 +65,15 @@ const Ellipsis = ({ showMore, lines = 2, children, className, style }: Props) =>
           onOpenChange={onOpenChange}
         >
           <ModalContent>
-            <ModalHeader className="text-3xl">{showMore.title}</ModalHeader>
+            <ModalHeader className="flex items-center justify-between">
+              <span className="text-3xl">{showMore.title}</span>
+              <Button isIconOnly size="sm" variant="light" onPress={onClose}>
+                <RiCloseLine />
+              </Button>
+            </ModalHeader>
             <ModalBody className="whitespace-pre-line p-0 leading-loose">
-              <ScrollContainer className="px-6">{showMore.content}</ScrollContainer>
+              <ScrollContainer className="px-6 pb-6">{showMore.content}</ScrollContainer>
             </ModalBody>
-            <ModalFooter>
-              <Button onPress={onClose}>知道了</Button>
-            </ModalFooter>
           </ModalContent>
         </Modal>
       )}

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { Button, Input, Navbar, NavbarContent, NavbarItem, Tooltip } from "@heroui/react";
-import { RiDownloadLine, RiHistoryLine, RiSearchLine } from "@remixicon/react";
+import { RiDownloadCloudLine, RiHistoryLine, RiSearchLine } from "@remixicon/react";
 
 import UserChip from "@/components/user";
 
@@ -21,7 +21,7 @@ const LayoutNavbar = () => {
   }, [location.pathname]);
 
   return (
-    <Navbar isBordered isBlurred={false}>
+    <Navbar isBlurred={false}>
       <NavbarContent justify="start" className="window-no-drag">
         <NavbarContent className="hidden gap-3 sm:flex">
           {navs.map(item => {
@@ -60,7 +60,7 @@ const LayoutNavbar = () => {
         <UserChip />
         <Tooltip content="下载">
           <Button variant="light" isIconOnly size="sm">
-            <RiDownloadLine size={20} />
+            <RiDownloadCloudLine size={20} />
           </Button>
         </Tooltip>
         <Tooltip content="最近播放">

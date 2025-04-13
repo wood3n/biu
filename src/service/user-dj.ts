@@ -1,7 +1,7 @@
 import request from "./request";
 
 export interface UserDjRequestParams {
-  uid: number | undefined;
+  uid: number | string | undefined;
 }
 
 /*

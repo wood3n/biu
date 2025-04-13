@@ -1,11 +1,4 @@
-import {
-  RiBroadcastLine,
-  RiHardDriveFill,
-  RiHardDriveLine,
-  RiRadioLine,
-  RiSparklingFill,
-  RiSparklingLine,
-} from "@remixicon/react";
+import { RiRadioLine, RiSparklingFill, RiSparklingLine } from "@remixicon/react";
 
 const size = 18;
 
@@ -21,21 +14,21 @@ export const navs = [
     label: "漫游",
     icon: <RiRadioLine size={size} />,
   },
-  {
-    key: "broadcast",
-    label: "播客",
-    icon: <RiBroadcastLine size={size} />,
-  },
+  // {
+  //   key: "broadcast",
+  //   label: "播客",
+  //   icon: <RiBroadcastLine size={size} />,
+  // },
   // {
   //   key: "collection",
   //   label: "收藏",
   //   icon: <RiStarSmileLine size={size} />,
   //   selectedIcon: <RiStarSmileFill size={size} />,
   // },
-  {
-    key: "local",
-    label: "本地",
-    icon: <RiHardDriveLine size={size} />,
-    selectedIcon: <RiHardDriveFill size={size} />,
-  },
+  // {
+  //   key: "local",
+  //   label: "本地",
+  //   icon: <RiHardDriveLine size={size} />,
+  //   selectedIcon: <RiHardDriveFill size={size} />,
+  // },
 ];

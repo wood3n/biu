@@ -60,11 +60,12 @@ export const VirtualSongList = ({
               columns={columns}
               hoverable
               isSelected={isSelected}
-              render={column => {
+              render={(column, isHovered) => {
                 return column.render({
                   rowData: song,
                   index,
                   isSelected,
+                  isHovered,
                 });
               }}
               onDoubleClick={() => {

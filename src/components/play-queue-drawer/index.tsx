@@ -26,6 +26,7 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange, onClearPlaylist, onDeleteSong }
   return (
     <Drawer
       disableAnimation
+      backdrop="transparent"
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       classNames={{

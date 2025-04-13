@@ -1,7 +1,7 @@
 import request from "./request";
 
 export interface UserPlaylistRequestParams {
-  uid: number | undefined;
+  uid: number | string | undefined;
   limit: number | undefined;
   offset: number | undefined;
 }

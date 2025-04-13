@@ -31,7 +31,7 @@ const StickyHeader = ({ children, observerTarget, observerRoot, className }: Pro
     // FIXME: backdrop-filter 在这里和 transform 一起使用会有严重的性能问题，无法解决
     <div
       className={clx(
-        "sticky -top-16 z-20 -mt-16 h-16 w-full shadow transition-[transform,top] duration-300",
+        "sticky -top-16 z-20 -mt-16 h-16 w-full bg-second-background shadow-xl transition-[transform,top] duration-300",
         {
           "translate-y-16": visible,
         },

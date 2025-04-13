@@ -28,7 +28,7 @@ function createWindow() {
     // 窗口居中
     center: true,
     // 无边框
-    frame: true,
+    frame: false,
     // macos不需要设置frame-false，只需要titleBarStyle即可隐藏边框，因此也不需要自定义窗口操作
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 14, y: 14 },

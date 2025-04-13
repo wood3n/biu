@@ -55,7 +55,7 @@ const DefaultLayout = () => {
       <div className="window-drag h-16 w-full">
         <Navbar />
       </div>
-      <div className="flex min-h-0 flex-grow space-x-2 p-2">
+      <div className="flex min-h-0 flex-grow space-x-2 px-2">
         <Card className="w-80">
           <CardBody className="p-0">
             <Side />
@@ -67,7 +67,7 @@ const DefaultLayout = () => {
           </CardBody>
         </Card>
       </div>
-      <div className="h-24 w-full border-t-1 border-zinc-800">
+      <div className="h-24 w-full">
         <PlayBar />
       </div>
     </div>

@@ -34,12 +34,12 @@ function Album() {
       coverImageUrl={albumData?.album?.picUrl}
       title={albumData?.album?.name}
       description={albumData?.album?.description}
-      user={{
-        avatarUrl: albumData?.album?.artist?.picUrl,
-        name: albumData?.album?.artist?.name,
-        userId: albumData?.album?.artist?.id,
-        link: `/artist/${albumData?.album?.artist?.id}`,
-      }}
+      user={albumData?.album?.artists?.map(artist => ({
+        avatarUrl: artist?.img1v1Url,
+        name: artist?.name,
+        userId: artist?.id,
+        link: `/artist/${artist?.id}`,
+      }))}
       trackCount={albumData?.album?.size}
       extraTool={
         <AsyncButton isIconOnly onPress={subscribe}>

@@ -2,6 +2,7 @@ interface RenderCellProps<T> {
   rowData: T;
   index: number;
   isSelected?: boolean;
+  isHovered?: boolean;
 }
 
 export interface ColumnType<T> {

@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import ColorThief from "colorthief";
-import { Image as Img, User } from "@heroui/react";
+import { BreadcrumbItem, Breadcrumbs, Image as Img, User } from "@heroui/react";
 
 import Ellipsis from "../ellipsis";
 import If from "../if";
@@ -25,7 +25,7 @@ interface Props {
   title?: string;
   description?: React.ReactNode;
   trackCount?: number;
-  user?: UserInfo;
+  user?: UserInfo | UserInfo[];
   songs?: Song[];
   extraTool?: React.ReactNode;
   hideAlbum?: boolean;
@@ -78,13 +78,7 @@ const VirtualSongListContainer = ({
     <ScrollContainer ref={scrollerRef} className="h-full w-full">
       <If condition={Boolean(songs?.length)}>
         <StickyHeader observerTarget={toolbarRef} observerRoot={scrollerRef.current?.osInstance()?.elements().target}>
-          <div
-            className="flex h-full w-full items-center justify-between px-6"
-            style={{
-              backgroundImage: `linear-gradient(to right, rgba(${palette?.join(",")},95%), #18181b)`,
-              backgroundRepeat: "no-repeat",
-            }}
-          >
+          <div className="flex h-full w-full items-center justify-between px-6">
             <div className="flex items-center space-x-2">
               <Img radius="sm" src={coverImageUrl} className="h-10 w-10" />
               <span className="truncate">{title}</span>
@@ -124,14 +118,30 @@ const VirtualSongListContainer = ({
               <span className="text-sm">{trackCount} 首歌曲</span>
             </If>
             <If condition={Boolean(user)}>
-              <User
-                avatarProps={{
-                  src: `${user?.avatarUrl}?param=90y90`,
-                }}
-                name={user?.name}
-                className="cursor-pointer hover:text-green-500"
-                onPointerDown={() => user?.link && navigate(user?.link)}
-              />
+              {Array.isArray(user) ? (
+                <Breadcrumbs
+                  itemClasses={{
+                    separator: "px-1",
+                  }}
+                  maxItems={100}
+                  separator="/"
+                >
+                  {user.map(item => (
+                    <BreadcrumbItem key={item?.userId} isCurrent={false} onPress={() => navigate(item?.link as string)}>
+                      {item.name}
+                    </BreadcrumbItem>
+                  ))}
+                </Breadcrumbs>
+              ) : (
+                <User
+                  avatarProps={{
+                    src: `${user?.avatarUrl}?param=90y90`,
+                  }}
+                  name={user?.name}
+                  className="cursor-pointer hover:text-green-500"
+                  onPointerDown={() => user?.link && navigate(user?.link)}
+                />
+              )}
             </If>
             <Ellipsis showMore={{ title, content: description }}>{description}</Ellipsis>
           </div>
@@ -139,7 +149,14 @@ const VirtualSongListContainer = ({
       </div>
       <div className="px-6 pb-6">
         <If condition={Boolean(songs?.length)}>
-          <SongListToolbar showSearch ref={toolbarRef} songs={songs!} onSearch={setSearch} className="mb-4" />
+          <SongListToolbar
+            showSearch
+            ref={toolbarRef}
+            songs={songs!}
+            extra={extraTool}
+            onSearch={setSearch}
+            className="mb-4"
+          />
         </If>
         <VirtualSongList
           songs={filteredSongs}

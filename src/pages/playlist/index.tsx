@@ -12,7 +12,7 @@ import { SubscribeState } from "@/service/playlist-subscribe";
 import { useUser } from "@/store/user";
 
 const Playlist = () => {
-  const urlParams = useParams();
+  const { pid } = useParams();
   const user = useUser(store => store.user);
   const [loading, setLoading] = useState(false);
   const [playlistDetail, setPlaylistDetail] = useState<PlaylistType>();
@@ -22,7 +22,7 @@ const Playlist = () => {
   const getSongs = async () => {
     const limit = 500;
     const trackRes = await getPlaylistTrackAll({
-      id: urlParams?.pid,
+      id: pid,
       limit,
       offset: (pageRef.current - 1) * limit,
     });
@@ -36,7 +36,7 @@ const Playlist = () => {
     setLoading(true);
     try {
       const getPlaylistDetailRes = await getPlaylistDetail({
-        id: urlParams?.pid,
+        id: pid,
       });
 
       setPlaylistDetail(getPlaylistDetailRes?.playlist);
@@ -50,12 +50,12 @@ const Playlist = () => {
   };
 
   useEffect(() => {
-    if (urlParams?.pid) {
+    if (pid) {
       setSongs([]);
       pageRef.current = 1;
       init();
     }
-  }, [urlParams?.pid]);
+  }, [pid]);
 
   const loadMore = async () => {
     pageRef.current = pageRef.current + 1;
@@ -67,7 +67,7 @@ const Playlist = () => {
 
   const subscribe = async () => {
     await getPlaylistSubscribe({
-      id: urlParams?.pid,
+      id: pid,
       t: isSubscribed ? SubscribeState.Unsubscribed : SubscribeState.Subscribed,
     });
   };
@@ -90,12 +90,9 @@ const Playlist = () => {
       }}
       extraTool={
         <If condition={!isOwner}>
-          <AsyncButton
-            onPress={subscribe}
-            color="default"
-            isIconOnly
-            startContent={isSubscribed ? <RiStarFill size={20} /> : <RiStarLine size={20} />}
-          />
+          <AsyncButton onPress={subscribe} color="default" isIconOnly>
+            {isSubscribed ? <RiStarFill size={20} /> : <RiStarLine size={20} />}
+          </AsyncButton>
         </If>
       }
     />
