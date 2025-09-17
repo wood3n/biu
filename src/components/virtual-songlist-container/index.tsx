@@ -1,8 +1,8 @@
 import React, { useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
-import ColorThief from "colorthief";
 import { BreadcrumbItem, Breadcrumbs, Image as Img, User } from "@heroui/react";
+import ColorThief from "colorthief";
 
 import Ellipsis from "../ellipsis";
 import If from "../if";

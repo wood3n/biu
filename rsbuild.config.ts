@@ -1,18 +1,14 @@
-import type { RsbuildConfig } from "@rsbuild/core";
-import { pluginLess } from "@rsbuild/plugin-less";
+import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 import { pluginSvgr } from "@rsbuild/plugin-svgr";
 
 import { pluginElectronBuild } from "./plugins/build";
 import { pluginElectronDev } from "./plugins/dev";
 
-const config: RsbuildConfig = {
+export default defineConfig({
   output: {
     distPath: {
       root: "./dist/web",
-    },
-    sourceMap: {
-      js: "source-map",
     },
   },
   performance: {
@@ -23,13 +19,6 @@ const config: RsbuildConfig = {
   },
   plugins: [
     pluginReact(),
-    pluginLess({
-      lessLoaderOptions: {
-        lessOptions: {
-          javascriptEnabled: false,
-        },
-      },
-    }),
     pluginSvgr({
       svgrOptions: {
         exportType: "named",
@@ -39,8 +28,18 @@ const config: RsbuildConfig = {
     pluginElectronBuild(),
   ],
   server: {
-    port: 3456,
+    open: false,
+    proxy: {
+      "/api": {
+        target: "https://api.bilibili.com",
+        changeOrigin: true,
+        pathRewrite: { "^/api": "" },
+      },
+      "/auth": {
+        target: "https://passport.bilibili.com",
+        changeOrigin: true,
+        pathRewrite: { "^/auth": "" },
+      },
+    },
   },
-};
-
-export default config;
+});

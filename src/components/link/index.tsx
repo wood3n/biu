@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import clx from "classnames";
 import { Link as HeroLink, type LinkProps, Tooltip } from "@heroui/react";
+import clx from "classnames";
 
 const Link = ({ children, className, ...props }: LinkProps) => {
   const ref = useRef<HTMLAnchorElement>(null);

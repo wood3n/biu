@@ -1,7 +1,7 @@
-import React, { forwardRef } from "react";
+import React from "react";
 
-import clx from "classnames";
 import { RiDownloadCloudLine, RiPlayCircleLine } from "@remixicon/react";
+import clx from "classnames";
 
 import { usePlayingQueue } from "@/store/playing-queue";
 
@@ -20,45 +20,52 @@ interface Props {
   className?: string;
 }
 
-const SongListToolbar = forwardRef<HTMLDivElement, Props>(
-  ({ songs, size, extra, showSearch, isIconOnly, onSearch, className }, ref) => {
-    const { playAll } = usePlayingQueue();
+const SongListToolbar = ({
+  ref,
+  songs,
+  size,
+  extra,
+  showSearch,
+  isIconOnly,
+  onSearch,
+  className,
+}: Props & { ref?: React.RefObject<HTMLDivElement | null> }) => {
+  const { playAll } = usePlayingQueue();
 
-    const handlePlayAll = () => {
-      playAll(songs);
-    };
+  const handlePlayAll = () => {
+    playAll(songs);
+  };
 
-    const handleDownload = () => {};
+  const handleDownload = () => {};
 
-    return (
-      <div ref={ref} className={clx("flex items-center justify-between", className)}>
-        <div className="flex items-center space-x-2">
-          <If condition={isIconOnly}>
-            <AsyncButton isIconOnly size={size} color="success" onPress={handlePlayAll}>
-              <RiPlayCircleLine size={StyleConfig.ToolbarIconSize} />
-            </AsyncButton>
-          </If>
-          <If condition={!isIconOnly}>
-            <AsyncButton
-              size={size}
-              color="success"
-              startContent={<RiPlayCircleLine size={StyleConfig.ToolbarIconSize} />}
-              onPress={handlePlayAll}
-            >
-              播放
-            </AsyncButton>
-          </If>
-          {extra}
-          <AsyncButton size={size} isIconOnly onPress={handleDownload}>
-            <RiDownloadCloudLine size={StyleConfig.ToolbarIconSize} />
+  return (
+    <div ref={ref} className={clx("flex items-center justify-between", className)}>
+      <div className="flex items-center space-x-2">
+        <If condition={isIconOnly}>
+          <AsyncButton isIconOnly size={size} color="success" onPress={handlePlayAll}>
+            <RiPlayCircleLine size={StyleConfig.ToolbarIconSize} />
           </AsyncButton>
-        </div>
-        <If condition={showSearch}>
-          <Search onSearch={onSearch} />
         </If>
+        <If condition={!isIconOnly}>
+          <AsyncButton
+            size={size}
+            color="success"
+            startContent={<RiPlayCircleLine size={StyleConfig.ToolbarIconSize} />}
+            onPress={handlePlayAll}
+          >
+            播放
+          </AsyncButton>
+        </If>
+        {extra}
+        <AsyncButton size={size} isIconOnly onPress={handleDownload}>
+          <RiDownloadCloudLine size={StyleConfig.ToolbarIconSize} />
+        </AsyncButton>
       </div>
-    );
-  },
-);
+      <If condition={showSearch}>
+        <Search onSearch={onSearch} />
+      </If>
+    </div>
+  );
+};
 
 export default SongListToolbar;

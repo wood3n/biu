@@ -1,8 +1,8 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 
-import clx from "classnames";
 import { Button, Modal, ModalBody, ModalContent, ModalHeader, useDisclosure } from "@heroui/react";
 import { RiCloseLine } from "@remixicon/react";
+import clx from "classnames";
 
 import ScrollContainer from "../scroll-container";
 
@@ -43,7 +43,7 @@ const Ellipsis = ({ showMore, lines = 2, children, className, style }: Props) =>
       <div ref={textElementRef} className={clx(className, lineClampMap[lines], "relative")} style={style}>
         {children}
         {isOverflowed && showMore && (
-          <div className="absolute bottom-0 right-0">
+          <div className="absolute right-0 bottom-0">
             <button
               type="button"
               onClick={onOpen}
@@ -71,7 +71,7 @@ const Ellipsis = ({ showMore, lines = 2, children, className, style }: Props) =>
                 <RiCloseLine />
               </Button>
             </ModalHeader>
-            <ModalBody className="whitespace-pre-line p-0 leading-loose">
+            <ModalBody className="p-0 leading-loose whitespace-pre-line">
               <ScrollContainer className="px-6 pb-6">{showMore.content}</ScrollContainer>
             </ModalBody>
           </ModalContent>

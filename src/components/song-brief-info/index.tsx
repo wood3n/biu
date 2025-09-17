@@ -1,7 +1,7 @@
 import React from "react";
 
-import clx from "classnames";
 import { Image } from "@heroui/react";
+import clx from "classnames";
 
 import Artists from "../artists";
 

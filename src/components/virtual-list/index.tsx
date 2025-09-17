@@ -76,7 +76,7 @@ const VirtualList = <T extends object = any>({
             key={virtualRow.key}
             data-index={virtualRow.index}
             ref={virtualizer.measureElement}
-            className="absolute left-0 top-0 w-full"
+            className="absolute top-0 left-0 w-full"
             style={{
               height: dynamicRowHeight ? undefined : virtualRow.size,
               transform: `translateY(${virtualRow.start - virtualizer.options.scrollMargin}px)`,

@@ -1,7 +1,7 @@
 import React from "react";
 
-import clx from "classnames";
 import { Spinner } from "@heroui/react";
+import clx from "classnames";
 
 interface Props {
   loading: boolean;

@@ -1,38 +1,19 @@
-import axios from "axios";
+import axios, { CreateAxiosDefaults } from "axios";
 
-/**
- * https://github.com/Binaryify/NeteaseCloudMusicApi
- * NeteaseCloudMusicApi 自带服务端跨域头配置，因此本地 server 可以不配置 proxy
- */
-const request = axios.create({
-  baseURL: "http://localhost:3000",
+const axiosConfig: CreateAxiosDefaults = {
   timeout: 10000,
   withCredentials: true,
-  params: {},
+};
+
+export const apiRequest = axios.create({
+  ...axiosConfig,
+  baseURL: process.env.NODE_ENV === "development" ? "/api" : "https://api.bilibili.com",
 });
 
-// 对 post 请求的 url 添加时间戳
-request.interceptors.request.use(({ method, params, data, ...rest }) =>
-  method === "get"
-    ? {
-        method,
-        params: {
-          ...params,
-          timestamp: Date.now(),
-        },
-        ...rest,
-      }
-    : {
-        method,
-        params,
-        data: {
-          ...data,
-          timestamp: Date.now(),
-        },
-        ...rest,
-      },
-);
+export const passportRequest = axios.create({
+  ...axiosConfig,
+  baseURL: process.env.NODE_ENV === "development" ? "/auth" : "https://passport.bilibili.com",
+});
 
-request.interceptors.response.use(res => res.data);
-
-export default request;
+apiRequest.interceptors.response.use(res => res.data);
+passportRequest.interceptors.response.use(res => res.data);

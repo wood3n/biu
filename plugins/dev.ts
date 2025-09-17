@@ -1,6 +1,6 @@
+import { logger, RsbuildPlugin } from "@rsbuild/core";
 import electron from "electron";
 import * as childProcess from "node:child_process";
-import { logger, RsbuildPlugin } from "@rsbuild/core";
 
 export const pluginElectronDev = (): RsbuildPlugin => ({
   name: "plugin-electron-dev",

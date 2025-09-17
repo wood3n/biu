@@ -1,5 +1,5 @@
-import { build as electronBuild } from "electron-builder";
 import { logger, RsbuildPlugin } from "@rsbuild/core";
+import { build as electronBuild } from "electron-builder";
 
 import pkg from "../package.json";
 

@@ -1,63 +1,87 @@
-import importPlugin from "eslint-plugin-import";
-import jsxA11y from "eslint-plugin-jsx-a11y";
-import nodePlugin from "eslint-plugin-n";
-import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
-import simpleImportSort from "eslint-plugin-simple-import-sort";
-import unusedImports from "eslint-plugin-unused-imports";
-import globals from "globals";
 import tseslint from "typescript-eslint";
-import eslintJs from "@eslint/js";
+
+import js from "@eslint/js";
+import { defineConfig, globalIgnores } from "eslint/config";
+import globals from "globals";
+
+import jsxA11y from "eslint-plugin-jsx-a11y";
+import perfectionist from "eslint-plugin-perfectionist";
+import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
+import unusedImports from "eslint-plugin-unused-imports";
+
 import eslintReact from "@eslint-react/eslint-plugin";
 
-export default tseslint.config(
+export default defineConfig([
+  globalIgnores(["dist"]),
   {
-    files: ["**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}"],
-    ignores: ["dist", "node_modules", "public"],
+    files: ["**/*.{ts,tsx}"],
     extends: [
-      eslintJs.configs.recommended,
+      js.configs.recommended,
       tseslint.configs.recommended,
-      eslintReact.configs.recommended,
-      importPlugin.flatConfigs.recommended,
-      importPlugin.flatConfigs.typescript,
-      eslintPluginPrettierRecommended,
+      eslintReact.configs["recommended-typescript"],
       jsxA11y.flatConfigs.recommended,
+      reactHooks.configs["recommended-latest"],
+      reactRefresh.configs.recommended,
     ],
-    plugins: {
-      "unused-imports": unusedImports,
-      "simple-import-sort": simpleImportSort,
-    },
     languageOptions: {
-      parser: tseslint.parser,
-      parserOptions: {
-        projectService: true,
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-      },
-    },
-    settings: {
-      "import/resolver": {
-        typescript: {
-          alwaysTryTypes: true,
-        },
-      },
+      ecmaVersion: "latest",
+      globals: globals.browser,
     },
     rules: {
-      "import/no-named-as-default-member": 0,
-      "unused-imports/no-unused-vars": 0,
-      "@typescript-eslint/no-require-imports": 0,
-      "@eslint-react/prefer-shorthand-boolean": "warn",
+      // https://github.com/shadcn-ui/ui/issues/1534
+      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@eslint-react/hooks-extra/no-direct-set-state-in-use-effect": 0,
-
       "@eslint-react/no-array-index-key": 0,
+      "@eslint-react/no-context-provider": 0,
       "@typescript-eslint/no-explicit-any": 0,
-      "@typescript-eslint/ban-ts-comment": 0,
-      "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": 0,
+    },
+  },
+  {
+    plugins: { perfectionist },
+    rules: {
+      "perfectionist/sort-imports": [
+        "error",
+        {
+          type: "alphabetical",
+          order: "asc",
+          internalPattern: ["^~/.+", "^@/.+"],
+          sortSideEffects: false,
+          groups: [
+            "react",
+            "typescript",
+            "eslint",
+            "eslint-plugin",
+            "type-import",
+            ["value-builtin", "value-external"],
+            "type-internal",
+            "value-internal",
+            ["type-parent", "type-sibling", "type-index"],
+            ["value-parent", "value-sibling", "value-index"],
+            "ts-equals-import",
+            "side-effect",
+            "style",
+            "side-effect-style",
+            "unknown",
+          ],
+          customGroups: {
+            value: {
+              react: ["^react", "^react-dom"],
+              typescript: ["^typescript"],
+              eslint: ["^@eslint/.+", "^eslint/.+", "^globals"],
+              "eslint-plugin": ["^eslint-plugin-.+"],
+            },
+          },
+        },
+      ],
+    },
+  },
+  {
+    plugins: { "unused-imports": unusedImports },
+    rules: {
+      "no-unused-vars": "off", // or "@typescript-eslint/no-unused-vars": "off",
+      "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [
         "warn",
         {
@@ -67,73 +91,18 @@ export default tseslint.config(
           argsIgnorePattern: "^_",
         },
       ],
-      "unused-imports/no-unused-imports": "error",
-      "simple-import-sort/imports": [
-        "error",
-        {
-          groups: [
-            // `react` related packages & side effect imports come first.
-            ["^react", "^\\u0000"],
-            /*
-             * Node.js builtins. You could also generate this regex if you use a `.js` config.
-             * For example: `^(${require("module").builtinModules.join("|")})(/|$)`
-             */
-            [
-              "^(assert|buffer|child_process|cluster|console|constants|crypto|dgram|dns|domain|events|fs|http|https|module|net|os|path|punycode|querystring|readline|repl|stream|string_decoder|sys|timers|tls|tty|url|util|vm|zlib|freelist|v8|process|async_hooks|http2|perf_hooks)(/.*|$)",
-            ],
-            // Other packages.
-            ["^\\w", "^@\\w"],
-            // internal package
-            [
-              "^(@|@assets|assets|@styles|styles|@static|static|@utils|utils|@tools|tools|@hooks|hooks|@pages|pages|@components|components|@component|component|@service|service|@services|services|@constants|@store|store|@types|types|@src|src|@providers|providers|@containers|containers|@layout|layout)(/.*|$)",
-            ],
-            [
-              // Parent imports. Put `..` last.
-              "^\\.\\.(?!/?$)",
-              "^\\.\\./?$",
-              // Other relative imports. Put same-folder imports and `.` last.
-              "^\\./(?=.*/)(?!/?$)",
-              "^\\.(?!/?$)",
-              "^\\./?$",
-            ],
-            [
-              // Image imports.
-              "^.+\\.(gif|png|jpg|jpeg|webp|svg)$",
-              // Style imports.
-              "^.+\\.(sass|scss|less|css)$",
-            ],
-          ],
-        },
-      ],
-      "simple-import-sort/exports": "error",
-      "prettier/prettier": [
-        "error",
-        {
-          endOfLine: "auto",
-        },
-        {
-          usePrettierrc: true,
-        },
-      ],
-      "jsx-a11y/no-autofocus": 0,
     },
   },
+  eslintPluginPrettierRecommended,
   {
-    files: ["**/plugins/*.{ts,js}", "**/electron/**/*.{ts,js}"],
-    extends: [nodePlugin.configs["flat/recommended-script"]],
-    rules: {
-      "n/no-missing-import": 0,
-      "n/no-process-exit": 0,
-      "n/no-missing-require": [
-        "error",
-        {
-          allowModules: ["electron"],
-        },
-      ],
-    },
-  },
-  {
-    files: ["**/*.{js,cjs,mjs}"],
+    files: ["**/*.{js,mjs,cjs}"],
     extends: [tseslint.configs.disableTypeChecked],
+    rules: {
+      // turn off other type-aware rules
+      "other-plugin/typed-rule": "off",
+
+      // turn off rules that don't apply to JS code
+      "@typescript-eslint/explicit-function-return-type": "off",
+    },
   },
-);
+]);

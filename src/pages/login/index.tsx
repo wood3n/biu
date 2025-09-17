@@ -1,78 +1,93 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { useNavigate } from "react-router";
 
+import { addToast, Alert, Card, CardBody, CardHeader, Skeleton } from "@heroui/react";
 import { useRequest } from "ahooks";
-import { addToast, Image } from "@heroui/react";
+import { QRCodeSVG } from "qrcode.react";
 
-import { ImageErr } from "@/common/constants";
-import { checkError } from "@/common/utils";
-import { getLoginQrCheck, getLoginQrCreate, getLoginQrKey } from "@/service";
+import { getPassportLoginWebQrcodeGenerate } from "@/service/passport-login-web-qrcode-generate";
+import { getPassportLoginWebQrcodePoll } from "@/service/passport-login-web-qrcode-poll";
 
-import { QRLoginCode } from "./constants";
+import { QRLoginCode, QRLoginCodeMap, QRLoginStatusColorMap } from "./constants";
 
-const LoginByQr: React.FC = () => {
+const Login = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [src, setSrc] = useState<string>();
 
-  const createQr = async () => {
-    setLoading(true);
-    try {
-      const { data } = await getLoginQrKey();
-      const { data: qrData } = await getLoginQrCreate({
-        key: data.unikey,
-        qrimg: true,
-      });
-      setSrc(qrData.qrimg);
-      return data.unikey;
-    } catch (err) {
-      return Promise.reject(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: qrStatus,
+    runAsync: checkLoginStatus,
+    cancel,
+  } = useRequest(
+    async (qrcodeKey: string) => {
+      const res = await getPassportLoginWebQrcodePoll({ qrcode_key: qrcodeKey });
+      console.log("getPassportLoginWebQrcodePoll>>>>", res);
 
-  const { runAsync, cancel } = useRequest(getLoginQrCheck, {
-    manual: true,
-    pollingInterval: 3000,
-    onSuccess: ({ code }) => {
-      if (code === QRLoginCode.Success) {
-        cancel();
-        addToast({
-          title: "登录成功",
-          color: "success",
-        });
-        navigate("/recommend", { replace: true });
+      if (res?.code === 0) {
+        switch (res.data?.code) {
+          case QRLoginCode.Timeout:
+            cancel();
+            break;
+          case QRLoginCode.Success:
+            cancel();
+            addToast({
+              title: "登录成功",
+              color: "success",
+            });
+            navigate("/", { replace: true });
+            break;
+          default:
+            break;
+        }
+
+        return res?.data?.code;
       }
 
-      if (code === QRLoginCode.Timeout) {
-        cancel();
-      }
+      return null;
     },
+    {
+      manual: true,
+      pollingInterval: 3000,
+      pollingWhenHidden: true,
+    },
+  );
+
+  const { data: loginData } = useRequest(async () => {
+    const res = await getPassportLoginWebQrcodeGenerate();
+
+    if (res?.code === 0 && res?.data) {
+      checkLoginStatus(res.data.qrcode_key);
+      return res?.data;
+    } else {
+      return null;
+    }
   });
 
-  async function checkLogin() {
-    try {
-      const key = await createQr();
-      if (key) {
-        runAsync({ key });
-      }
-    } catch (err) {
-      checkError(err);
-    }
-  }
-
-  useEffect(() => {
-    checkLogin();
-  }, []);
-
-  useEffect(() => cancel, [cancel]);
-
   return (
-    <div className="flex h-full w-full items-center justify-center">
-      <Image isLoading={loading} width={180} fallbackSrc={ImageErr} src={src} />
+    <div className="flex h-full w-full flex-col items-center justify-center">
+      <Card className="w-96 max-w-full">
+        <CardHeader className="flex justify-center pb-0">
+          <h2 className="text-xl font-bold">扫码登录</h2>
+        </CardHeader>
+        <CardBody className="items-center gap-4">
+          {loginData?.url ? (
+            <QRCodeSVG value={loginData.url} />
+          ) : (
+            <Skeleton className="rounded-lg">
+              <div className="bg-default-300 h-24 w-24 rounded-lg" />
+            </Skeleton>
+          )}
+        </CardBody>
+      </Card>
+      {Boolean(qrStatus) && (
+        <div className="mt-4">
+          <Alert
+            color={QRLoginStatusColorMap[qrStatus as QRLoginCode]}
+            title={QRLoginCodeMap[qrStatus as QRLoginCode]}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
-export default LoginByQr;
+export default Login;

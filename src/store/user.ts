@@ -1,22 +1,18 @@
 import { create } from "zustand";
 
-import { getUserDetail, type UserDetail } from "@/service/user-detail";
+import { type UserInfo } from "@/service/user-info";
 
 interface UserState {
-  user: UserDetail | null;
+  user: UserInfo | null;
 }
 
 interface Action {
-  updateUser: (userId: number) => Promise<void>;
+  updateUser: (userId: UserInfo) => void;
 }
 
 export const useUser = create<UserState & Action>(set => ({
   user: null,
-  updateUser: async userId => {
-    const user = await getUserDetail({
-      uid: userId,
-    });
-
-    set(() => ({ user }));
+  updateUser: userInfo => {
+    set(() => ({ user: userInfo }));
   },
 }));

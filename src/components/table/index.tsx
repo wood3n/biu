@@ -1,7 +1,7 @@
 import React from "react";
 
-import clx from "classnames";
 import { Skeleton } from "@heroui/react";
+import clx from "classnames";
 
 import { indexColumn } from "./columns";
 import { ColumnsType } from "./types";

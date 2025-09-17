@@ -1,9 +1,9 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
-import { uniqBy } from "es-toolkit";
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Link } from "@heroui/react";
 import { RiMoreLine } from "@remixicon/react";
+import { uniqBy } from "es-toolkit";
 
 interface Props {
   ars: Ar[];
