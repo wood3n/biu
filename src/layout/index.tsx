@@ -1,10 +1,12 @@
 import React from "react";
 import { Outlet } from "react-router";
 
-import ScrollContainer from "@/components/scroll-container";
+import { Card } from "@heroui/react";
+
 import PlayBar from "@/layout/playbar";
 
 import Navbar from "./navbar";
+import SideNav from "./side";
 
 const Layout = () => {
   return (
@@ -12,12 +14,13 @@ const Layout = () => {
       <div className="window-drag h-16 w-full flex-none">
         <Navbar />
       </div>
-      <div className="bg-content1 flex min-h-0 flex-grow">
-        <ScrollContainer style={{ width: "100%" }}>
+      <div className="flex min-h-0 flex-grow space-x-2 px-2">
+        <SideNav />
+        <Card className="h-full flex-grow">
           <Outlet />
-        </ScrollContainer>
+        </Card>
       </div>
-      <div className="h-23 w-full flex-none">
+      <div className="h-22 w-full flex-none">
         <PlayBar />
       </div>
     </div>

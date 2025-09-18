@@ -14,108 +14,71 @@ import {
   addToast,
   useDisclosure,
 } from "@heroui/react";
+import { JSEncrypt } from "jsencrypt";
 import { QRCodeCanvas } from "qrcode.react";
 
-import { getPassportLoginWebLoginSms } from "@/service/passport-login-web-login-sms";
+import { getPassportLoginWebKey } from "@/service/passport-login-web-key";
+import { postPassportLoginWebLoginPassword } from "@/service/passport-login-web-login-passport";
 import { getPassportLoginWebQrcodeGenerate } from "@/service/passport-login-web-qrcode-generate";
 import { getPassportLoginWebQrcodePoll } from "@/service/passport-login-web-qrcode-poll";
-import { getPassportLoginWebSmsSend } from "@/service/passport-login-web-sms-send";
 
-interface SmsLoginForm {
+interface PasswordLoginForm {
   phone: string;
-  code: string;
+  password: string;
 }
 
 const PHONE_REGEX_CN = /^(?:\+?86)?1\d{10}$/; // 简易中国大陆手机号校验
 
 const Login = () => {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
-  const [activeKey, setActiveKey] = useState<string>("sms");
+  const [activeKey, setActiveKey] = useState<string>("password");
 
-  // ===== 短信登录表单 =====
+  // ===== 手机号+密码 登录表单 =====
   const {
     control,
     handleSubmit,
-    trigger,
     formState: { errors, isSubmitting },
     reset,
-    getValues,
-  } = useForm<SmsLoginForm>({
+  } = useForm<PasswordLoginForm>({
     mode: "onChange",
-    defaultValues: { phone: "", code: "" },
+    defaultValues: { phone: "", password: "" },
   });
 
-  const [countdown, setCountdown] = useState<number>(0); // 获取验证码倒计时（秒）
-  const [sendingCode, setSendingCode] = useState<boolean>(false);
-  const [captchaKey, setCaptchaKey] = useState<string>(""); // 短信登录 token
+  const [isPwdVisible, setPwdVisible] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isOpen) {
       // 关闭弹窗时重置表单与状态
-      reset({ phone: "", code: "" });
-      setCountdown(0);
-      setSendingCode(false);
-      setCaptchaKey("");
-      setActiveKey("sms");
+      reset({ phone: "", password: "" });
+      setActiveKey("password");
+      setPwdVisible(false);
     }
   }, [isOpen, reset]);
 
-  useEffect(() => {
-    if (countdown <= 0) return;
-    const id = setInterval(() => {
-      setCountdown(v => (v > 0 ? v - 1 : 0));
-    }, 1000);
-    return () => clearInterval(id);
-  }, [countdown]);
-
-  const requestSmsCode = async () => {
-    // 触发手机号校验
-    const ok = await trigger("phone");
-    if (!ok) return;
-
-    try {
-      setSendingCode(true);
-      // 使用表单的当前值
-      const purePhone = (getValues("phone") || "").replace(/\D/g, "");
-
-      const resp = await getPassportLoginWebSmsSend({
-        cid: 86,
-        tel: Number(purePhone),
-        source: "main_web",
-        token: "", // 未接入极验，暂置空
-        challenge: "",
-        validate: "",
-        seccode: "",
-      });
-
-      if (resp.code === 0) {
-        setCaptchaKey(resp.data.captcha_key);
-        addToast({ title: "验证码已发送", color: "success" });
-        setCountdown(60);
-      } else {
-        addToast({ title: resp.message || "发送失败", color: "danger" });
-      }
-    } catch (e: any) {
-      addToast({ title: e?.message || "网络异常，稍后重试", color: "danger" });
-    } finally {
-      setSendingCode(false);
-    }
-  };
-
-  const onSubmitSmsLogin = async (values: SmsLoginForm) => {
+  const onSubmitPasswordLogin = async (values: PasswordLoginForm) => {
     try {
       const tel = Number(values.phone.replace(/\D/g, ""));
-      const code = Number(values.code.trim());
-      if (!captchaKey) {
-        addToast({ title: "请先获取验证码", color: "warning" });
+      const rawPwd = values.password;
+
+      const webKey = await getPassportLoginWebKey();
+      if (webKey.code !== 0 || !webKey.data?.key || !webKey.data?.hash) {
+        addToast({ title: webKey.message || "获取登录公钥失败", color: "danger" });
         return;
       }
-      const resp = await getPassportLoginWebLoginSms({
+
+      const encryptor = new JSEncrypt();
+      encryptor.setPublicKey(webKey.data.key);
+      const encrypted = encryptor.encrypt(webKey.data.hash + rawPwd);
+      if (!encrypted) {
+        addToast({ title: "密码加密失败，请重试", color: "danger" });
+        return;
+      }
+
+      const resp = await postPassportLoginWebLoginPassword({
         cid: 86,
         tel,
-        code,
+        password: encrypted,
         source: "main_web",
-        captcha_key: captchaKey,
         keep: true,
       });
       if (resp.code === 0) {
@@ -229,8 +192,8 @@ const Login = () => {
               selectedKey={activeKey}
               onSelectionChange={key => setActiveKey(String(key))}
             >
-              <Tab key="sms" title="手机号登录">
-                <form className="mt-2 space-y-4" onSubmit={handleSubmit(onSubmitSmsLogin)}>
+              <Tab key="password" title="手机号登录">
+                <form className="mt-2 space-y-4" onSubmit={handleSubmit(onSubmitPasswordLogin)}>
                   <Controller
                     control={control}
                     name="phone"
@@ -253,40 +216,37 @@ const Login = () => {
                         startContent={<span className="text-small text-foreground-500 mr-1">+86</span>}
                         isInvalid={!!errors.phone}
                         errorMessage={errors.phone?.message as string}
-                        endContent={
-                          <Button
-                            size="sm"
-                            variant="flat"
-                            className="min-w-24"
-                            isDisabled={sendingCode || countdown > 0}
-                            isLoading={sendingCode}
-                            onPress={requestSmsCode}
-                            type="button"
-                          >
-                            {countdown > 0 ? `${countdown}s` : "获取验证码"}
-                          </Button>
-                        }
                       />
                     )}
                   />
 
                   <Controller
                     control={control}
-                    name="code"
-                    rules={{ required: "请输入短信验证码", minLength: { value: 4, message: "验证码至少4位" } }}
+                    name="password"
+                    rules={{ required: "请输入密码", minLength: { value: 6, message: "密码至少6位" } }}
                     render={({ field }) => (
                       <Input
                         {...field}
-                        type="text"
-                        label="验证码"
-                        placeholder="请输入短信验证码"
+                        type={isPwdVisible ? "text" : "password"}
+                        label="密码"
+                        placeholder="请输入密码"
                         value={field.value}
-                        onValueChange={val => field.onChange(val.replace(/\D/g, ""))}
+                        onValueChange={val => field.onChange(val)}
                         variant="bordered"
-                        maxLength={6}
-                        inputMode="numeric"
-                        isInvalid={!!errors.code}
-                        errorMessage={errors.code?.message as string}
+                        autoComplete="current-password"
+                        isInvalid={!!errors.password}
+                        errorMessage={errors.password?.message as string}
+                        endContent={
+                          <Button
+                            size="sm"
+                            variant="light"
+                            className="min-w-0 px-2"
+                            type="button"
+                            onPress={() => setPwdVisible(v => !v)}
+                          >
+                            {isPwdVisible ? "隐藏" : "显示"}
+                          </Button>
+                        }
                       />
                     )}
                   />

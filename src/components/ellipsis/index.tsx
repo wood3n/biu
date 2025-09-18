@@ -1,21 +1,17 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 
-import { Button, Modal, ModalBody, ModalContent, ModalHeader, useDisclosure } from "@heroui/react";
-import { RiCloseLine } from "@remixicon/react";
+import { Tooltip, type TooltipProps } from "@heroui/react";
 import clx from "classnames";
 
-import ScrollContainer from "../scroll-container";
-
 interface Props {
-  showMore?: {
-    title?: React.ReactNode;
-    content?: React.ReactNode;
-    className?: string;
-  };
   lines?: number;
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  /** 是否在溢出时显示 Tooltip，默认开启 */
+  showTooltip?: boolean;
+  /** 传递给 Tooltip 的配置（不包含 content/children） */
+  tooltipProps?: Omit<TooltipProps, "content" | "children">;
 }
 
 const lineClampMap = {
@@ -27,10 +23,9 @@ const lineClampMap = {
   6: "line-clamp-6",
 };
 
-const Ellipsis = ({ showMore, lines = 2, children, className, style }: Props) => {
+const Ellipsis = ({ lines = 1, children, className, style, showTooltip = true, tooltipProps }: Props) => {
   const [isOverflowed, setIsOverflow] = useState(false);
   const textElementRef = useRef<HTMLDivElement>(null);
-  const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
   useLayoutEffect(() => {
     if (textElementRef.current) {
@@ -38,44 +33,32 @@ const Ellipsis = ({ showMore, lines = 2, children, className, style }: Props) =>
     }
   });
 
+  const contentNode = (
+    <div
+      ref={textElementRef}
+      className={clx(className, lineClampMap[lines as keyof typeof lineClampMap] || `line-clamp-${lines}`, "relative")}
+      style={style}
+    >
+      {children}
+    </div>
+  );
+
   return (
     <>
-      <div ref={textElementRef} className={clx(className, lineClampMap[lines], "relative")} style={style}>
-        {children}
-        {isOverflowed && showMore && (
-          <div className="absolute right-0 bottom-0">
-            <button
-              type="button"
-              onClick={onOpen}
-              className="overflow-hidden rounded-l-lg bg-transparent pl-3 text-zinc-400 backdrop-blur-sm hover:text-blue-500 hover:underline"
-            >
-              更多
-            </button>
-          </div>
-        )}
-      </div>
-      {showMore && (
-        <Modal
-          size="3xl"
-          autoFocus={false}
-          isOpen={isOpen}
-          hideCloseButton
-          disableAnimation
-          scrollBehavior="inside"
-          onOpenChange={onOpenChange}
+      {showTooltip ? (
+        <Tooltip
+          closeDelay={0}
+          isDisabled={!isOverflowed}
+          content={
+            <div className="max-w-[min(80vw,640px)] leading-relaxed break-words whitespace-pre-wrap">{children}</div>
+          }
+          placement="top-start"
+          {...tooltipProps}
         >
-          <ModalContent>
-            <ModalHeader className="flex items-center justify-between">
-              <span className="text-3xl">{showMore.title}</span>
-              <Button isIconOnly size="sm" variant="light" onPress={onClose}>
-                <RiCloseLine />
-              </Button>
-            </ModalHeader>
-            <ModalBody className="p-0 leading-loose whitespace-pre-line">
-              <ScrollContainer className="px-6 pb-6">{showMore.content}</ScrollContainer>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+          {contentNode}
+        </Tooltip>
+      ) : (
+        contentNode
       )}
     </>
   );
