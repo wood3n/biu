@@ -17,6 +17,7 @@ export interface WebSearchPagedMeta {
 export interface WebSearchTypeBaseParams {
   keyword: string; // 关键词（必要）
   page?: number; // 页码，默认 1
+  page_size?: number; // 每页数量
 }
 
 /**
@@ -96,7 +97,7 @@ export interface WebSearchTypeData<T = any> extends WebSearchPagedMeta {
     live_room?: WebSearchPagedMeta;
     live_user?: WebSearchPagedMeta;
   };
-  result: T[] | { live_room: T[]; live_user: T[] };
+  result: T[];
   show_column?: number;
 }
 
@@ -106,6 +107,7 @@ export interface SearchVideoItem {
   bvid?: string;
   title?: string;
   author?: string;
+  pic?: string;
   mid?: number;
   pubdate?: number;
   play?: number;
@@ -145,7 +147,11 @@ export interface SearchPhotoItem {
 
 // ——— 分类筛选条件处理：把“用户排序顺序 / 时长 / 分区 / 分类”等参数统一规范化 ———
 export function normalizeTypeParams(params: WebSearchTypeParams): Record<string, string | number> {
-  const base: Record<string, string | number> = { keyword: params.keyword, page: params.page ?? 1 };
+  const base: Record<string, string | number> = {
+    keyword: params.keyword,
+    page: params.page ?? 1,
+    page_size: params.page_size ?? 24,
+  };
   switch (params.search_type) {
     case "video":
       return {

@@ -7,7 +7,7 @@ import { getMusicComprehensiveWebRank, type Data as MusicItem } from "@/service/
 
 const PAGE_SIZE = 20;
 
-const MusicRecommend: React.FC = () => {
+const MusicRecommend = () => {
   const scrollerRef = useRef<ScrollRefObject>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);

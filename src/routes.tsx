@@ -2,8 +2,9 @@ import type { RouteObject } from "react-router";
 
 import Layout from "./layout";
 import ArtistRank from "./pages/artist-rank";
+import Folder from "./pages/folder";
 import Home from "./pages/home";
-import Login from "./pages/login";
+import Later from "./pages/later";
 import MusicRank from "./pages/music-rank";
 import MusicRecommend from "./pages/music-recommend";
 import NotFound from "./pages/not-found";
@@ -31,14 +32,18 @@ const routes: RouteObject[] = [
         element: <MusicRecommend />,
       },
       {
+        path: "later",
+        element: <Later />,
+      },
+      {
+        path: "folder/:id",
+        element: <Folder />,
+      },
+      {
         path: "profile",
         element: <UserProfile />,
       },
     ],
-  },
-  {
-    path: "/login",
-    element: <Login />,
   },
   {
     path: "*",

@@ -36,6 +36,7 @@ function createWindow() {
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 14, y: 14 },
     webPreferences: {
+      webSecurity: false,
       preload: path.join(__dirname, "preload.mjs"),
       nodeIntegration: true,
     },
@@ -117,17 +118,49 @@ function createWindow() {
 
 app.commandLine.appendSwitch("--in-process-gpu");
 
+function stripDomainFromSetCookie(cookies) {
+  // cookies 是一个数组，每项是单个 Set-Cookie 字符串
+  return cookies.map(cookieStr => {
+    // 移除 Domain=xxx, Secure（及可能的前后分号空格）
+    return (
+      cookieStr
+        // 移除 Domain=xxx
+        .replace(/;\s*Domain=[^;]+/gi, "")
+        // 移除 Secure
+        .replace(/;\s*Secure/gi, "")
+        // 移除 SameSite=None
+        .replace(/;\s*SameSite=None/gi, "")
+        // 清理多余空格和分号
+        .replace(/;\s*;+/g, ";")
+        .replace(/;\s*$/, "")
+    );
+  });
+}
+
 app.whenReady().then(() => {
   // createTray({
   //   onClick: () => mainWindow.show(),
   // });
 
-  const filter = { urls: ["*://*/*"] };
-  session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+  session.defaultSession.webRequest.onBeforeSendHeaders({ urls: ["*://*/*"] }, (details, callback) => {
     details.requestHeaders["Referer"] = "https://www.bilibili.com/";
     details.requestHeaders["Origin"] = "https://www.bilibili.com";
 
     callback({ requestHeaders: details.requestHeaders });
+  });
+
+  session.defaultSession.webRequest.onHeadersReceived({ urls: ["*://*/*"] }, (details, callback) => {
+    const headers = details.responseHeaders || {};
+    const headerName = Object.keys(headers).find(k => k.toLowerCase() === "set-cookie");
+
+    if (headerName) {
+      const setCookieValues = headers[headerName]; // array
+      const newCookies = stripDomainFromSetCookie(setCookieValues);
+      // 重新赋值（保留其他 header 不变）
+      headers[headerName] = newCookies;
+    }
+
+    callback({ responseHeaders: headers });
   });
 
   createWindow();

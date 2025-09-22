@@ -1,14 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Outlet } from "react-router";
 
 import { Card } from "@heroui/react";
 
 import PlayBar from "@/layout/playbar";
+import { useUser } from "@/store/user";
 
 import Navbar from "./navbar";
 import SideNav from "./side";
 
 const Layout = () => {
+  const { updateUser } = useUser();
+
+  useEffect(() => {
+    updateUser();
+  }, []);
+
   return (
     <div className="flex h-full flex-col">
       <div className="window-drag h-16 w-full flex-none">

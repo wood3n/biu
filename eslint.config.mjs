@@ -36,6 +36,8 @@ export default defineConfig([
       "@eslint-react/no-array-index-key": 0,
       "@eslint-react/no-context-provider": 0,
       "@typescript-eslint/no-explicit-any": 0,
+      "@eslint-react/dom/no-dangerously-set-innerhtml": 0,
+      "react-hooks/rules-of-hooks": 0,
     },
   },
   {

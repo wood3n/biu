@@ -21,7 +21,6 @@ const Menu = () => {
               as={HeroLink}
               href={item.href}
               fullWidth
-              size="lg"
               variant={isActive ? "flat" : "light"}
               color={isActive ? "primary" : "default"}
               startContent={<span className="text-base">{Icon}</span>}

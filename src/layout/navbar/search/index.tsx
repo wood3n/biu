@@ -1,55 +1,63 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import {
-  Alert,
   Button,
-  Card,
-  CardBody,
-  Input,
   Modal,
   ModalBody,
   ModalContent,
   ModalHeader,
   Spinner,
-  Tabs,
-  Tab,
   addToast,
   useDisclosure,
+  Pagination,
 } from "@heroui/react";
-import { RiSearchLine } from "@remixicon/react";
-import { useRequest } from "ahooks";
+import { RiCloseLine, RiSearchLine } from "@remixicon/react";
+import { usePagination } from "ahooks";
 
+import ScrollContainer from "@/components/scroll-container";
 import {
   getWebInterfaceWbiSearchType,
-  type SearchUserItem,
+  SearchUserItem,
   type SearchVideoItem,
-  type WebSearchTypeData,
 } from "@/service/web-interface-search-type";
 
-const GRID_CLASS = "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3";
+import SearchInput from "./input";
+import { SearchType, SearchTypeOptions } from "./search-type";
+import SearchUser from "./search-user";
+import SearchVideo from "./search-video";
 
-const SearchBox: React.FC = () => {
+const SearchBox = () => {
   const [keyword, setKeyword] = useState("");
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
+  const [searchType, setSearchType] = useState(SearchType.Video);
 
-  const doSearchService = useCallback(async (kw: string) => {
-    const [videoRes, userRes] = await Promise.all([
-      getWebInterfaceWbiSearchType<SearchVideoItem>({ search_type: "video", keyword: kw, page: 1, order: "totalrank" }),
-      getWebInterfaceWbiSearchType<SearchUserItem>({ search_type: "bili_user", keyword: kw, page: 1, order: 0 }),
-    ]);
-    const videos = Array.isArray(videoRes.data.result) ? (videoRes.data.result as SearchVideoItem[]) : [];
-    const users = Array.isArray(userRes.data.result) ? (userRes.data.result as SearchUserItem[]) : [];
-    return {
-      videos,
-      users,
-      meta: {
-        video: videoRes.data as WebSearchTypeData<SearchVideoItem>,
-        user: userRes.data as WebSearchTypeData<SearchUserItem>,
-      },
-    };
-  }, []);
+  const {
+    loading,
+    data,
+    pagination,
+    error,
+    runAsync: search,
+  } = usePagination(
+    async ({ current = 1, pageSize = 24 }) => {
+      const res = await getWebInterfaceWbiSearchType<
+        typeof searchType extends SearchType.Video ? SearchVideoItem : SearchUserItem
+      >({
+        search_type: searchType,
+        keyword,
+        page: current,
+        page_size: pageSize,
+      });
 
-  const { loading, data, error, run } = useRequest(doSearchService, { manual: true });
+      return {
+        total: res?.data?.numResults ?? 0,
+        list: res?.data?.result ?? [],
+      };
+    },
+    {
+      defaultPageSize: 24,
+      refreshDeps: [searchType],
+    },
+  );
 
   const onSearch = useCallback(
     (kw?: string) => {
@@ -59,139 +67,77 @@ const SearchBox: React.FC = () => {
         return;
       }
       if (!isOpen) onOpen();
-      run(value);
+      search({ keyword: value, current: 1, pageSize: 24 });
     },
-    [keyword, isOpen, onOpen, run],
-  );
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") onSearch();
-  };
-
-  const videos = data?.videos ?? [];
-  const users = data?.users ?? [];
-
-  const hasNoResult = useMemo(
-    () => !loading && !error && videos.length === 0 && users.length === 0,
-    [loading, error, videos.length, users.length],
+    [keyword, isOpen, onOpen, search],
   );
 
   return (
     <>
-      {/* Navbar 区域的搜索框 */}
-      <div className="flex items-center space-x-2">
-        <Input
-          value={keyword}
-          onValueChange={setKeyword}
-          onKeyDown={handleKeyDown}
-          placeholder="搜索视频 / 用户"
-          size="sm"
-          className="w-52 md:w-64 lg:w-80"
-          startContent={<RiSearchLine size={16} />}
-        />
-        <Button color="primary" size="sm" startContent={<RiSearchLine size={16} />} onPress={() => onSearch()}>
-          搜索
-        </Button>
-      </div>
+      <SearchInput value={keyword} onValueChange={setKeyword} onSearch={onSearch} className="w-[360px]" />
 
       {/* 结果弹窗 */}
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="5xl" scrollBehavior="inside">
+      <Modal
+        disableAnimation
+        hideCloseButton
+        isOpen={isOpen}
+        isDismissable={false}
+        onOpenChange={onOpenChange}
+        size="5xl"
+        scrollBehavior="inside"
+      >
         <ModalContent>
-          <ModalHeader className="flex items-center gap-2">
-            <Input
+          <ModalHeader className="flex items-center space-x-2 border-b-1 border-b-zinc-800 py-3">
+            <RiSearchLine color="#71717A" />
+            <input
+              className="h-8 flex-1 border-none pl-2 outline-0"
               value={keyword}
-              onValueChange={setKeyword}
-              onKeyDown={handleKeyDown}
-              placeholder="搜索视频 / 用户"
-              size="sm"
-              startContent={<RiSearchLine size={16} />}
-              className="flex-1"
+              onChange={e => setKeyword(e.target.value)}
             />
-            <Button color="primary" size="sm" startContent={<RiSearchLine size={16} />} onPress={() => onSearch()}>
-              搜索
+            <Button size="sm" variant="light" isIconOnly onPress={onClose}>
+              <RiCloseLine color="#71717A" />
             </Button>
           </ModalHeader>
-          <ModalBody>
-            {loading && (
-              <div className="flex items-center justify-center py-16">
-                <Spinner label="加载中" />
-              </div>
-            )}
-
-            {!!error && (
-              <Alert color="danger" title="搜索失败" description={(error as Error)?.message || "请稍后重试"} />
-            )}
-
-            {!loading && !error && (
-              <div className="flex flex-col gap-6">
-                <Tabs aria-label="搜索结果" color="primary" fullWidth>
-                  <Tab key="video" title={`视频 (${videos.length})`}>
-                    {videos.length === 0 ? (
-                      <div className="text-foreground-500 text-sm">暂无视频结果</div>
-                    ) : (
-                      <div className={GRID_CLASS}>
-                        {videos.map((v, idx) => (
-                          <Card key={(v.bvid || v.aid || idx).toString()} className="h-full">
-                            <CardBody className="space-y-2">
-                              {/* 封面图 */}
-                              {v.pic && (
-                                <img
-                                  src={v.pic}
-                                  alt="cover"
-                                  className="bg-default-100 h-28 w-full rounded object-cover"
-                                  referrerPolicy="no-referrer"
-                                />
-                              )}
-                              <div
-                                className="line-clamp-2 text-base font-medium"
-                                dangerouslySetInnerHTML={{ __html: v.title ?? "" }}
-                              />
-                              <div className="text-small text-foreground-500">UP：{v.author ?? "-"}</div>
-                              <div className="text-tiny text-foreground-400">
-                                播放：{v.play ?? 0} · 弹幕：{v.video_review ?? 0}
-                              </div>
-                            </CardBody>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
-                  </Tab>
-                  <Tab key="user" title={`用户 (${users.length})`}>
-                    {users.length === 0 ? (
-                      <div className="text-foreground-500 text-sm">暂无用户结果</div>
-                    ) : (
-                      <div className={GRID_CLASS}>
-                        {users.map(u => (
-                          <Card key={u.mid} className="h-full">
-                            <CardBody className="space-y-2">
-                              <div className="flex items-center gap-3">
-                                <img
-                                  src={(u as any).upic || (u as any).face}
-                                  alt={u.uname}
-                                  className="h-10 w-10 rounded-full object-cover"
-                                  referrerPolicy="no-referrer"
-                                />
-                                <div className="min-w-0">
-                                  <div className="truncate text-base font-medium" title={u.uname}>
-                                    {u.uname}
-                                  </div>
-                                  <div className="text-tiny text-foreground-400 truncate" title={u.usign ?? ""}>
-                                    {u.usign ?? ""}
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="text-tiny text-foreground-400">粉丝：{u.fans ?? 0}</div>
-                            </CardBody>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
-                  </Tab>
-                </Tabs>
-
-                {hasNoResult && <div className="text-foreground-500 text-sm">没有找到与“{keyword}”相关的结果</div>}
-              </div>
-            )}
+          <ModalBody className="relative flex h-[700px] min-h-[700px] flex-none flex-col gap-0 p-0">
+            <div className="flex items-center space-x-2 p-4">
+              {SearchTypeOptions.map(o => (
+                <Button
+                  size="sm"
+                  key={o.value}
+                  startContent={o.icon}
+                  color={searchType === o.value ? "success" : undefined}
+                  onPress={() => setSearchType(o.value)}
+                >
+                  {o.label}
+                </Button>
+              ))}
+            </div>
+            <ScrollContainer style={{ flexGrow: 1, minHeight: 0 }}>
+              {loading && (
+                <div className="flex h-full items-center justify-center">
+                  <Spinner label="加载中" />
+                </div>
+              )}
+              {!loading && !error && (
+                <div className="flex px-4">
+                  {searchType === SearchType.Video && <SearchVideo items={data?.list ?? []} />}
+                  {searchType === SearchType.User && <SearchUser items={data?.list ?? []} />}
+                </div>
+              )}
+              {data?.list?.length === 0 && (
+                <div className="text-foreground-500 text-sm">没有找到与“{keyword}”相关的结果</div>
+              )}
+              {!loading && !error && (
+                <div className="my-4 flex justify-center">
+                  <Pagination
+                    initialPage={1}
+                    page={pagination?.current ?? 1}
+                    total={pagination?.totalPage}
+                    onChange={page => search({ current: page, pageSize: 24 })}
+                  />
+                </div>
+              )}
+            </ScrollContainer>
           </ModalBody>
         </ModalContent>
       </Modal>

@@ -16,7 +16,7 @@
     "at-rule-no-unknown": [
       true,
       {
-        "ignoreAtRules": ["extends", "tailwind", "plugin", "source", "custom-variant"]
+        "ignoreAtRules": ["extends", "tailwind", "plugin", "source", "custom-variant", "utility"]
       }
     ]
   }

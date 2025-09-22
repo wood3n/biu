@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { Tooltip, type TooltipProps } from "@heroui/react";
 import clx from "classnames";
@@ -27,11 +27,11 @@ const Ellipsis = ({ lines = 1, children, className, style, showTooltip = true, t
   const [isOverflowed, setIsOverflow] = useState(false);
   const textElementRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (textElementRef.current) {
       setIsOverflow(textElementRef.current!.scrollHeight > textElementRef.current!.clientHeight);
     }
-  });
+  }, []);
 
   const contentNode = (
     <div

@@ -4,7 +4,7 @@ import { apiRequest } from "./request";
  * 获取收藏夹内容明细列表 - 请求参数
  */
 export interface FavResourceListRequestParams {
-  media_id: number; // 目标收藏夹mlid(完整id)
+  media_id: string; // 目标收藏夹mlid(完整id)
   tid?: number; // 分区tid 默认为全部分区 0:全部分区
   keyword?: string; // 搜索关键字
   order?: string; // 排序方式 按收藏时间:mtime 按播放量:view 按投稿时间:pubtime
