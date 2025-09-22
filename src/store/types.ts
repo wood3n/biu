@@ -30,7 +30,7 @@ export interface PlayingMV {
   /**
    * 当前播放的分集索引，从1开始
    */
-  currentPage: number;
+  currentPage?: number;
   /**
    * 视频分集
    */

@@ -1,24 +1,20 @@
 import { useState } from "react";
 
-import { Card, CardBody, CardHeader, Skeleton, Image as Img, CardFooter, Select, SelectItem } from "@heroui/react";
+import { Select, SelectItem } from "@heroui/react";
 import { RiCalendarLine } from "@remixicon/react";
 import { useRequest } from "ahooks";
 
 import { formatSecondsToDate } from "@/common/utils";
+import { MVCard, MVCardSkeleton } from "@/components/mv-card";
 import ScrollContainer from "@/components/scroll-container";
-import {
-  type AudioRankPeriodItem,
-  getAudioRankAllPeriod,
-  getAudioRankDetail,
-  getAudioRankMusicList,
-} from "@/service/audio-rank";
-import { usePlayingQueue } from "@/store/playing-queue";
+import { type AudioRankPeriodItem, getAudioRankAllPeriod, getAudioRankMusicList } from "@/service/audio-rank";
+
+const gridClass = "grid grid-cols-1 gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
 
 const Home = () => {
   const [periodId, setPeriodId] = useState<string>("");
-  const { play } = usePlayingQueue();
 
-  const { loading: loadingPeriodList, data: periodList } = useRequest(async () => {
+  const { data: periodList } = useRequest(async () => {
     const res = await getAudioRankAllPeriod({
       list_type: 1,
     });
@@ -31,17 +27,6 @@ const Home = () => {
       return periods;
     }
   });
-
-  const { loading: loadingPeriodData, data: periodData } = useRequest(
-    () =>
-      getAudioRankDetail({
-        list_id: periodId,
-      }),
-    {
-      ready: Boolean(periodId),
-      refreshDeps: [periodId],
-    },
-  );
 
   const { loading: loadingPeriodMusicList, data: periodMusicList } = useRequest(
     async () => {
@@ -61,7 +46,7 @@ const Home = () => {
     <ScrollContainer>
       <div className="p-4">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">音频热榜</h1>
+          <h1 className="text-2xl font-bold">音乐热榜</h1>
           {Boolean(periodList?.length) && (
             <Select
               isVirtualized
@@ -87,46 +72,26 @@ const Home = () => {
           )}
         </div>
         {loadingPeriodMusicList ? (
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className={gridClass}>
             {Array(12)
               .fill(0)
               .map((_, index) => (
-                <Card key={index} className="w-full">
-                  <CardHeader className="flex-col items-start px-4">
-                    <Skeleton className="h-6 w-3/4 rounded-lg" />
-                  </CardHeader>
-                  <CardBody className="overflow-visible py-2">
-                    <Skeleton className="h-40 w-full rounded-xl" />
-                  </CardBody>
-                </Card>
+                <MVCardSkeleton key={index} coverHeight={240} />
               ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className={gridClass}>
             {periodMusicList?.map(item => (
-              <Card
+              <MVCard
+                bvid={item.mv_bvid || item.creation_bvid}
                 key={item.music_id}
-                isPressable
-                isHoverable
-                isFooterBlurred
-                onPress={() =>
-                  play({
-                    bvid: item.mv_bvid || item.creation_bvid,
-                    title: item.music_title,
-                    singer: item.singer,
-                    coverImageUrl: item.mv_cover,
-                    upMid: item.creation_up,
-                    upName: item.creation_nickname,
-                    currentPage: 1,
-                  })
-                }
-              >
-                <Img removeWrapper alt={item.music_title} src={item.mv_cover} />
-                <CardFooter className="absolute bottom-0 z-10 flex flex-col items-stretch space-y-1 border-t-1 border-zinc-100/50 bg-white/30 py-1 text-start">
-                  <h3 className="w-full truncate text-xl font-medium text-black">{item.music_title}</h3>
-                  <p className="text-tiny w-full truncate text-black">{item.singer}</p>
-                </CardFooter>
-              </Card>
+                title={item.music_title}
+                cover={item.mv_cover}
+                coverHeight={220}
+                authorName={item.creation_nickname}
+                authorId={item.creation_up}
+                durationSeconds={item.creation_duration}
+              />
             ))}
           </div>
         )}

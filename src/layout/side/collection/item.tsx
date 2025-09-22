@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 
-import { Button, Image, useDisclosure } from "@heroui/react";
+import { addToast, Button, Image, useDisclosure } from "@heroui/react";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
 import { RiDeleteBinLine, RiEditLine, RiFolderLine, RiFolderOpenLine } from "@remixicon/react";
 import { RiMoreLine } from "@remixicon/react";
@@ -81,7 +81,7 @@ const FolderItem = ({ title, mid, cover, editable }: Props) => {
       fullWidth
       className="group relative justify-start"
       variant={isActive ? "flat" : "light"}
-      color={isActive ? "primary" : "default"}
+      color="default"
     >
       {title}
       {/* 次级按钮容器：仅在父按钮悬停时显示，绝对定位到右侧垂直居中 */}
@@ -151,6 +151,11 @@ const FolderItem = ({ title, mid, cover, editable }: Props) => {
 
           if (res?.code === 0) {
             updateOwnFolder();
+          } else {
+            addToast({
+              title: res.message || "删除失败",
+              color: "danger",
+            });
           }
         }}
       />

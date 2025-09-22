@@ -1,11 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Alert, Button, Card, CardBody, Image, Skeleton, Spinner, addToast } from "@heroui/react";
+import { Alert, Button, Spinner, addToast } from "@heroui/react";
 
+import { MVCard, MVCardSkeleton } from "@/components/mv-card";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import { getMusicComprehensiveWebRank, type Data as MusicItem } from "@/service/music-comprehensive-web-rank";
 
 const PAGE_SIZE = 20;
+
+const gridClass = "grid grid-cols-1 gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
 
 const MusicRecommend = () => {
   const scrollerRef = useRef<ScrollRefObject>(null);
@@ -124,15 +127,9 @@ const MusicRecommend = () => {
 
         {/* 初始加载骨架屏 */}
         {initialLoading && (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className={gridClass}>
             {Array.from({ length: 10 }).map((_, idx) => (
-              <Card key={idx} shadow="sm" radius="lg" className="p-0">
-                <Skeleton className="aspect-square w-full rounded-none" />
-                <CardBody className="space-y-2">
-                  <Skeleton className="h-5 w-3/4 rounded" />
-                  <Skeleton className="h-4 w-1/2 rounded" />
-                </CardBody>
-              </Card>
+              <MVCardSkeleton key={idx} />
             ))}
           </div>
         )}
@@ -142,25 +139,16 @@ const MusicRecommend = () => {
 
         {/* 数据网格 */}
         {!initialLoading && list.length > 0 && (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className={gridClass}>
             {list.map(item => (
-              <Card key={item.id} shadow="sm" radius="lg" isHoverable className="transition-shadow hover:shadow-lg">
-                <Image
-                  removeWrapper
-                  src={item.cover}
-                  alt={item.music_title}
-                  loading="lazy"
-                  className="aspect-square w-full object-cover"
-                />
-                <CardBody className="px-3 py-3">
-                  <p className="truncate text-xl font-medium" title={item.music_title}>
-                    {item.music_title}
-                  </p>
-                  <p className="text-foreground-500 mt-1 truncate text-base" title={item.author}>
-                    {item.author}
-                  </p>
-                </CardBody>
-              </Card>
+              <MVCard
+                key={item.id}
+                bvid={item.bvid}
+                cover={item.cover}
+                title={item.music_title}
+                authorName={item.author}
+                coverHeight={200}
+              />
             ))}
           </div>
         )}

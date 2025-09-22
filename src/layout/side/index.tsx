@@ -5,7 +5,7 @@ import Menu from "./menu";
 
 const SideNav = () => {
   return (
-    <Card className="flex h-full w-[240px] flex-none flex-col">
+    <Card className="flex h-full flex-none flex-col md:w-[240px]">
       <Menu />
       <Collection />
     </Card>

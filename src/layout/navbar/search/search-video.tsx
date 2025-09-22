@@ -36,7 +36,7 @@ export default function SearchVideo({ items }: SearchVideoProps) {
               dangerouslySetInnerHTML={{ __html: v.title as string }}
             />
             <div className="flex w-full items-center justify-between space-x-6 text-sm text-zinc-500">
-              <div className="flex min-w-0 items-center space-x-1">
+              <div className="flex min-w-0 items-center space-x-2">
                 <RiUserLine size={14} className="shrink-0" />
                 <span className="truncate">{v.author}</span>
               </div>

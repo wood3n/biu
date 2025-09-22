@@ -22,7 +22,7 @@ const Menu = () => {
               href={item.href}
               fullWidth
               variant={isActive ? "flat" : "light"}
-              color={isActive ? "primary" : "default"}
+              color="default"
               startContent={<span className="text-base">{Icon}</span>}
               className="justify-start"
             >

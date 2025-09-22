@@ -40,7 +40,7 @@ const routes: RouteObject[] = [
         element: <Folder />,
       },
       {
-        path: "profile",
+        path: "profile/:id",
         element: <UserProfile />,
       },
     ],

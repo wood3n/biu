@@ -39,6 +39,7 @@ const Volume = ({ isMuted, value, onChange, onChangeMute }: Props) => {
     <Slider
       aria-label="音量"
       size="sm"
+      color="success"
       className="w-36"
       value={value}
       minValue={0}

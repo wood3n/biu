@@ -11,7 +11,7 @@ const LayoutNavbar = () => {
   return (
     <div className="flex h-full items-center justify-between gap-4 px-10">
       <div className="flex items-center">
-        <LogoIcon style={{ color: "#006996", width: 40, height: 40 }} />
+        <LogoIcon style={{ color: "#17C964", width: 40, height: 40 }} />
       </div>
       <div className="flex items-center">
         <SearchBox />

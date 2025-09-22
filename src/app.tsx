@@ -22,6 +22,7 @@ export function App() {
         placement="top-center"
         toastOffset={24}
         maxVisibleToasts={3}
+        disableAnimation
         toastProps={{ timeout: 3000, color: "primary" }}
       />
       <main className="bg-background text-foreground dark h-screen w-screen overflow-hidden">{routeElement}</main>

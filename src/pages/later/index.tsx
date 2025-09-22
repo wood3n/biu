@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react";
 
-import { Card, CardBody, Image, Pagination, Skeleton } from "@heroui/react";
+import { Pagination } from "@heroui/react";
 import { useRequest } from "ahooks";
 
-import { formatDuration } from "@/common/utils";
+import { MVCard, MVCardSkeleton } from "@/components/mv-card";
 import ScrollContainer from "@/components/scroll-container";
 import { getHistoryToViewList } from "@/service/history-toview-list";
 
-const PAGE_SIZE = 20; // 每页显示 32 条
+const PAGE_SIZE = 20;
+const gridClass = "grid grid-cols-1 gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
 
 const Later = () => {
   const [page, setPage] = useState(1);
@@ -28,52 +29,27 @@ const Later = () => {
   return (
     <ScrollContainer className="w-full px-4 py-6">
       {loading ? (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className={gridClass}>
           {Array.from({ length: 16 }).map((_, idx) => (
-            <Card key={idx} shadow="sm" radius="lg" className="p-0">
-              <Skeleton className="aspect-video w-full rounded-none" />
-              <CardBody className="space-y-2">
-                <Skeleton className="h-5 w-3/4 rounded" />
-                <Skeleton className="h-4 w-1/2 rounded" />
-              </CardBody>
-            </Card>
+            <MVCardSkeleton key={idx} />
           ))}
         </div>
       ) : totalCount === 0 ? (
         <div className="text-foreground-500 flex h-[40vh] items-center justify-center">暂无数据</div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className={gridClass}>
             {pagedData.map(item => (
-              <Card
-                key={item.bvid || item.aid}
-                shadow="sm"
-                radius="lg"
-                isHoverable
-                isPressable
-                className="transition-shadow hover:shadow-lg"
-              >
-                <div className="relative">
-                  <Image
-                    removeWrapper
-                    src={item.pic}
-                    alt={item.title}
-                    loading="lazy"
-                    className="aspect-video w-full object-cover"
-                  />
-                  <span className="absolute right-2 bottom-2 rounded bg-black/70 px-1.5 py-0.5 text-xs text-white">
-                    {formatDuration(item.duration, false)}
-                  </span>
-                </div>
-                <CardBody className="px-3 py-3">
-                  <p className="truncate text-xl font-medium" title={item.title}>
-                    {item.title}
-                  </p>
-                  <p className="text-foreground-500 mt-1 truncate text-base" title={item.owner?.name}>
-                    {item.owner?.name}
-                  </p>
-                </CardBody>
-              </Card>
+              <MVCard
+                key={item.bvid}
+                bvid={item.bvid}
+                title={item.title}
+                cover={item.pic}
+                coverHeight={200}
+                durationSeconds={item.duration}
+                authorName={item.owner?.name}
+                authorId={item.owner?.mid}
+              />
             ))}
           </div>
 

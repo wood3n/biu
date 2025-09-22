@@ -7,6 +7,8 @@ import Ellipsis from "@/components/ellipsis";
 import ScrollContainer from "@/components/scroll-container";
 import { getMusicianList, type Musician } from "@/service/musician-list";
 
+const gridClass = "grid grid-cols-1 gap-4 lg:grid-cols-3 xl:grid-cols-4";
+
 const ArtistRank = () => {
   const { loading, data, error } = useRequest(async () => {
     const res = await getMusicianList({ level_source: 1 });
@@ -25,7 +27,7 @@ const ArtistRank = () => {
       <div className="w-full px-4 py-6">
         {/* 加载骨架屏 */}
         {loading ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className={gridClass}>
             {Array.from({ length: 12 }).map((_, idx) => (
               <Card key={idx} shadow="sm" radius="lg" className="overflow-hidden">
                 <div className="relative">
@@ -42,10 +44,10 @@ const ArtistRank = () => {
         ) : totalCount === 0 ? (
           <div className="text-foreground-500 flex h-[40vh] items-center justify-center">暂无数据</div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className={gridClass}>
             {allMusicians.map(m => {
               return (
-                <Card key={m.id} shadow="sm" radius="lg" className="overflow-hidden transition-shadow hover:shadow-lg">
+                <Card key={m.id} isHoverable isPressable shadow="sm" radius="lg">
                   {/* 封面 + 标题遮罩 */}
                   <div className="relative">
                     <img

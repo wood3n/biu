@@ -232,8 +232,8 @@ export const usePlayingQueue = create<State & Action>()(
         next: async () => {
           const { list, current } = get();
 
-          if (current?.pages?.length && current.currentPage < current.pages.length) {
-            const nextPageIndex = current.currentPage + 1;
+          if (current?.pages?.length && (current.currentPage ?? 1) < current.pages.length) {
+            const nextPageIndex = (current.currentPage ?? 1) + 1;
             const nextPage = current.pages.find(item => item.pageIndex === nextPageIndex);
             if (nextPage) {
               const url = await getAudioUrl(current.bvid, nextPage.pageCid);
@@ -256,8 +256,8 @@ export const usePlayingQueue = create<State & Action>()(
         },
         prev: async () => {
           const { list, current } = get();
-          if (current?.pages?.length && current.currentPage > 1) {
-            const prevPageIndex = current.currentPage - 1;
+          if (current?.pages?.length && (current.currentPage ?? 1) > 1) {
+            const prevPageIndex = (current.currentPage ?? 1) - 1;
             const prevPage = current.pages.find(item => item.pageIndex === prevPageIndex);
             if (prevPage) {
               const url = await getAudioUrl(current.bvid, prevPage.pageCid);
