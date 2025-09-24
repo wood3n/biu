@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Alert, Button, Spinner, addToast } from "@heroui/react";
+import { twMerge } from "tailwind-merge";
 
 import { MVCard, MVCardSkeleton } from "@/components/mv-card";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
@@ -8,7 +9,7 @@ import { getMusicComprehensiveWebRank, type Data as MusicItem } from "@/service/
 
 const PAGE_SIZE = 20;
 
-const gridClass = "grid grid-cols-1 gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
+const gridClass = twMerge("grid grid-cols-1 gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4");
 
 const MusicRecommend = () => {
   const scrollerRef = useRef<ScrollRefObject>(null);

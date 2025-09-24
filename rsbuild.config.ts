@@ -10,6 +10,9 @@ export default defineConfig({
     distPath: {
       root: "./dist/web",
     },
+    // 生产环境相对路径，保证通过 file:// 加载时静态资源能正确引用
+    assetPrefix: "./",
+    cleanDistPath: true,
   },
   performance: {
     removeMomentLocale: true,

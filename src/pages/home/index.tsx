@@ -5,11 +5,10 @@ import { RiCalendarLine } from "@remixicon/react";
 import { useRequest } from "ahooks";
 
 import { formatSecondsToDate } from "@/common/utils";
-import { MVCard, MVCardSkeleton } from "@/components/mv-card";
+import { MVCard } from "@/components/mv-card";
+import MVCardList from "@/components/mv-card-list";
 import ScrollContainer from "@/components/scroll-container";
 import { type AudioRankPeriodItem, getAudioRankAllPeriod, getAudioRankMusicList } from "@/service/audio-rank";
-
-const gridClass = "grid grid-cols-1 gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
 
 const Home = () => {
   const [periodId, setPeriodId] = useState<string>("");
@@ -71,30 +70,23 @@ const Home = () => {
             </Select>
           )}
         </div>
-        {loadingPeriodMusicList ? (
-          <div className={gridClass}>
-            {Array(12)
-              .fill(0)
-              .map((_, index) => (
-                <MVCardSkeleton key={index} coverHeight={240} />
-              ))}
-          </div>
-        ) : (
-          <div className={gridClass}>
-            {periodMusicList?.map(item => (
-              <MVCard
-                bvid={item.mv_bvid || item.creation_bvid}
-                key={item.music_id}
-                title={item.music_title}
-                cover={item.mv_cover}
-                coverHeight={220}
-                authorName={item.creation_nickname}
-                authorId={item.creation_up}
-                durationSeconds={item.creation_duration}
-              />
-            ))}
-          </div>
-        )}
+
+        <MVCardList
+          data={periodMusicList}
+          loading={loadingPeriodMusicList}
+          itemKey="music_id"
+          renderItem={item => (
+            <MVCard
+              bvid={item.mv_bvid || item.creation_bvid}
+              key={item.music_id}
+              title={item.music_title}
+              cover={item.mv_cover}
+              authorName={item.creation_nickname}
+              authorId={item.creation_up}
+              durationSeconds={item.creation_duration}
+            />
+          )}
+        />
       </div>
     </ScrollContainer>
   );

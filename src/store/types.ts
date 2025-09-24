@@ -58,4 +58,8 @@ export interface PageData {
    * 分集第一帧图片
    */
   pageFirstFrameImageUrl: string;
+  /**
+   * 分集时长（秒）
+   */
+  pageDuration?: number;
 }

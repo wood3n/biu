@@ -3,27 +3,31 @@ import Store from "electron-store";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { createTray, destroyTray } from "./createTray.mjs"; // 托盘功能
+
 const store = new Store();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let mainWindow;
+let onBeforeSendHeadersHandler;
+let onHeadersReceivedHandler;
 
 function createWindow() {
   // 初始打开窗口的配置项
   mainWindow = new BrowserWindow({
-    title: "Tune",
+    title: "Biu",
     // windows taskbar icon
     icon: path.resolve(
       process.cwd(),
-      process.platform === "win32" ? "./public/electron/windows_tray.ico" : "./public/electron/macos_dock.icns",
+      process.platform === "win32" ? "electron/icons/win/logo.ico" : "electron/icons/mac/logo.icns",
     ),
     show: true,
-    hasShadow: false,
+    hasShadow: true,
     width: 1560,
     height: 900,
-    minWidth: 1180,
+    minWidth: 1200,
     minHeight: 800,
     resizable: true,
     // 跟随 web 页面大小
@@ -31,9 +35,22 @@ function createWindow() {
     // 窗口居中
     center: true,
     // 无边框
-    // frame: false,
+    frame: false,
+    transparent: false,
+    hasShadow: false,
     // macos不需要设置frame-false，只需要titleBarStyle即可隐藏边框，因此也不需要自定义窗口操作
-    titleBarStyle: "hiddenInset",
+    // titleBarStyle: "hiddenInset",
+    titleBarStyle: "hidden",
+    // expose window controls in Windows/Linux
+    ...(process.platform !== "darwin"
+      ? {
+          titleBarOverlay: {
+            color: "#00000000",
+            symbolColor: "#ffffff",
+            height: 64,
+          },
+        }
+      : {}),
     trafficLightPosition: { x: 14, y: 14 },
     webPreferences: {
       webSecurity: false,
@@ -44,53 +61,47 @@ function createWindow() {
 
   // MAC dock icon
   if (process.platform === "darwin") {
-    const dockIcon = nativeImage.createFromPath(path.resolve(process.cwd(), "./public/electron/macos_dock.png"));
+    const dockIcon = nativeImage.createFromPath(path.resolve(process.cwd(), "electron/icons/logo.png"));
     app.dock.setIcon(dockIcon);
   }
-
-  // 设置 windows taskbar 图标的操作栏
-  // win.setThumbarButtons([
-  //   {
-  //     tooltip: '上一首',
-  //     icon: path.resolve(process.cwd(), './public/back.png'),
-  //     click() {
-  //       console.log('button1 clicked');
-  //     },
-  //   },
-  //   {
-  //     tooltip: '暂停',
-  //     icon: isPlaying
-  //       ? path.resolve(process.cwd(), './public/pause.png')
-  //       : path.resolve(process.cwd(), './public/play.png'),
-  //     click() {
-  //       console.log('button1 clicked');
-  //     },
-  //   },
-  //   {
-  //     tooltip: '下一首',
-  //     icon: path.resolve(process.cwd(), './public/next.png'),
-  //     click() {
-  //       console.log('button2 clicked.');
-  //     },
-  //   },
-  // ]);
 
   // windows自定义窗口
   if (process.platform === "win32") {
     ipcMain.handle("isMaximized", () => {
-      console.log(mainWindow.isMaximized());
       return mainWindow.isMaximized();
     });
     ipcMain.handle("close-window", () => {
+      app.quitting = true; // 确保关闭不会被隐藏逻辑拦截
       app.quit();
     });
     ipcMain.handle("min-win", () => mainWindow.minimize());
+
+    // 兼容：最大化/还原切换（组件调用）
     ipcMain.handle("resize", () => {
-      const bounds = store.get("bounds");
+      const prevBounds = store.get("bounds");
       if (mainWindow.isMaximized()) {
-        mainWindow.setBounds(bounds || { width: 800, height: 800 });
+        // 还原到上一次记录的窗口大小
+        mainWindow.unmaximize();
+        if (prevBounds && typeof prevBounds === "object") {
+          mainWindow.setBounds(prevBounds);
+        }
       } else {
-        store.set("bounds", bounds);
+        // 记录当前窗口大小，再最大化
+        store.set("bounds", mainWindow.getBounds());
+        mainWindow.maximize();
+      }
+    });
+
+    // 兼容：保留 max-win 通道（与 resize 行为一致，便于旧代码调用）
+    ipcMain.handle("max-win", () => {
+      const prevBounds = store.get("bounds");
+      if (mainWindow.isMaximized()) {
+        mainWindow.unmaximize();
+        if (prevBounds && typeof prevBounds === "object") {
+          mainWindow.setBounds(prevBounds);
+        }
+      } else {
+        store.set("bounds", mainWindow.getBounds());
         mainWindow.maximize();
       }
     });
@@ -98,7 +109,12 @@ function createWindow() {
 
   // https://www.electronjs.org/docs/latest/api/app#appispackaged-readonly
   if (app.isPackaged) {
-    mainWindow.loadFile("./dist/web/index.html");
+    // 使用 __dirname 相对路径，确保打包后在 asar 内正确解析
+    const indexPath = path.resolve(__dirname, "../dist/web/index.html");
+    mainWindow.loadFile(indexPath);
+    mainWindow.webContents.openDevTools({
+      mode: "bottom",
+    });
   } else {
     mainWindow.loadURL(`http://localhost:${process.env.PORT}/`);
     mainWindow.webContents.openDevTools({
@@ -106,6 +122,7 @@ function createWindow() {
     });
   }
 
+  // 关闭按钮改为隐藏窗口，配合托盘保活
   mainWindow.on("close", event => {
     if (app.quitting) {
       mainWindow = null;
@@ -138,18 +155,26 @@ function stripDomainFromSetCookie(cookies) {
 }
 
 app.whenReady().then(() => {
-  // createTray({
-  //   onClick: () => mainWindow.show(),
-  // });
-
-  session.defaultSession.webRequest.onBeforeSendHeaders({ urls: ["*://*/*"] }, (details, callback) => {
-    details.requestHeaders["Referer"] = "https://www.bilibili.com/";
-    details.requestHeaders["Origin"] = "https://www.bilibili.com";
-
-    callback({ requestHeaders: details.requestHeaders });
+  // 接入系统托盘（仅 Windows 生效）
+  createTray({
+    // 获取主窗口实例（惰性读取，避免闭包引用旧值）
+    getMainWindow: () => mainWindow,
+    // 退出：设置 app.quitting 标记，避免 close 事件拦截
+    onExit: () => {
+      app.quitting = true;
+      app.quit();
+    },
   });
 
-  session.defaultSession.webRequest.onHeadersReceived({ urls: ["*://*/*"] }, (details, callback) => {
+  // 保存监听器引用，便于退出时移除
+  onBeforeSendHeadersHandler = (details, callback) => {
+    details.requestHeaders["Referer"] = "https://www.bilibili.com/";
+    details.requestHeaders["Origin"] = "https://www.bilibili.com";
+    callback({ requestHeaders: details.requestHeaders });
+  };
+  session.defaultSession.webRequest.onBeforeSendHeaders({ urls: ["*://*/*"] }, onBeforeSendHeadersHandler);
+
+  onHeadersReceivedHandler = (details, callback) => {
     const headers = details.responseHeaders || {};
     const headerName = Object.keys(headers).find(k => k.toLowerCase() === "set-cookie");
 
@@ -161,15 +186,41 @@ app.whenReady().then(() => {
     }
 
     callback({ responseHeaders: headers });
-  });
+  };
+  session.defaultSession.webRequest.onHeadersReceived({ urls: ["*://*/*"] }, onHeadersReceivedHandler);
 
   createWindow();
 });
 
-app.on("activate", () => mainWindow.show());
+app.on("activate", () => mainWindow?.show());
 
 app.on("before-quit", () => {
   app.quitting = true;
+});
+
+// 在 will-quit 阶段清理资源，确保进程干净退出
+app.on("will-quit", () => {
+  try {
+    destroyTray();
+  } catch {}
+
+  try {
+    if (onBeforeSendHeadersHandler) {
+      session.defaultSession.webRequest.removeListener("onBeforeSendHeaders", onBeforeSendHeadersHandler);
+      onBeforeSendHeadersHandler = undefined;
+    }
+    if (onHeadersReceivedHandler) {
+      session.defaultSession.webRequest.removeListener("onHeadersReceived", onHeadersReceivedHandler);
+      onHeadersReceivedHandler = undefined;
+    }
+  } catch {}
+
+  // 开发环境：Electron 退出时同时结束 Node.js 开发进程
+  if (!app.isPackaged) {
+    try {
+      process.exit(0);
+    } catch {}
+  }
 });
 
 app.on("window-all-closed", () => {
@@ -177,6 +228,17 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
   }
+});
+
+// 全局异常处理，避免未捕获异常导致进程异常驻留
+process.on("uncaughtException", err => {
+  console.error("[uncaughtException]", err);
+  app.quitting = true;
+  app.quit();
+});
+
+process.on("unhandledRejection", reason => {
+  console.error("[unhandledRejection]", reason);
 });
 
 app.disableHardwareAcceleration();

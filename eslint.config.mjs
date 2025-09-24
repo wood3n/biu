@@ -38,6 +38,9 @@ export default defineConfig([
       "@typescript-eslint/no-explicit-any": 0,
       "@eslint-react/dom/no-dangerously-set-innerhtml": 0,
       "react-hooks/rules-of-hooks": 0,
+      // FIXME:MVP版本暂时不处理
+      "jsx-a11y/no-static-element-interactions": 0,
+      "jsx-a11y/click-events-have-key-events": 0,
     },
   },
   {

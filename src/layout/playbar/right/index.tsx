@@ -1,5 +1,5 @@
 import { Button, useDisclosure } from "@heroui/react";
-import { RiPlayList2Fill } from "@remixicon/react";
+import { RiPlayListLine } from "@remixicon/react";
 
 import { usePlayingQueue } from "@/store/playing-queue";
 
@@ -14,10 +14,10 @@ const RightControl = () => {
   return (
     <>
       <div className="flex h-full items-center justify-end space-x-2">
-        <Rate value={rate} onChange={setRate} />
         <Button isIconOnly size="sm" variant="light" className="hover:text-green-500" onPress={onOpen}>
-          <RiPlayList2Fill size={18} />
+          <RiPlayListLine size={18} />
         </Button>
+        <Rate value={rate} onChange={setRate} />
         <Volume value={volume} onChange={setVolume} isMuted={isMuted} onChangeMute={toggleMute} />
       </div>
       <PlayQueueDrawer isOpen={isOpen} onOpenChange={onOpenChange} />

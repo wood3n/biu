@@ -8,10 +8,9 @@ import { RiMoreLine } from "@remixicon/react";
 import clx from "classnames";
 
 import ConfirmModal from "@/components/confirm-modal";
+import EditFolderForm from "@/components/folder/form";
 import { postFavFolderDel } from "@/service/fav-folder-del";
 import { useUser } from "@/store/user";
-
-import EditFolderForm from "./form";
 
 interface Props {
   title: string;
@@ -67,6 +66,7 @@ const FolderItem = ({ title, mid, cover, editable }: Props) => {
 
   return (
     <Button
+      as="div"
       // 使用编程式导航，避免 <a href> 导致整页刷新
       onPress={() => navigate(`/folder/${mid}`)}
       startContent={
@@ -79,7 +79,9 @@ const FolderItem = ({ title, mid, cover, editable }: Props) => {
         )
       }
       fullWidth
-      className="group relative justify-start"
+      className={clx("group relative justify-start", {
+        "text-success": isActive,
+      })}
       variant={isActive ? "flat" : "light"}
       color="default"
     >

@@ -1,4 +1,4 @@
-import { ReactComponent as LogoIcon } from "@/assets/icons/music.svg";
+import { ReactComponent as LogoIcon } from "@/assets/icons/logo.svg";
 import { useUser } from "@/store/user";
 
 import Login from "./login";
@@ -9,14 +9,14 @@ const LayoutNavbar = () => {
   const { user } = useUser();
 
   return (
-    <div className="flex h-full items-center justify-between gap-4 px-10">
-      <div className="flex items-center">
-        <LogoIcon style={{ color: "#17C964", width: 40, height: 40 }} />
+    <div className="grid h-full grid-cols-3 items-center gap-8 px-6">
+      <div className="ml-2 flex items-center">
+        <LogoIcon style={{ color: "#17C964", width: 48, height: 48 }} />
       </div>
-      <div className="flex items-center">
+      <div className="flex items-center justify-center">
         <SearchBox />
       </div>
-      <div className="flex items-center">{user?.isLogin ? <UserCard /> : <Login />}</div>
+      <div className="flex items-center justify-center">{user?.isLogin ? <UserCard /> : <Login />}</div>
     </div>
   );
 };

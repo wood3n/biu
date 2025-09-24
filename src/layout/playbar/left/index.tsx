@@ -1,12 +1,24 @@
-import React from "react";
+import React, { useMemo } from "react";
 
-import { Button, Card, Image } from "@heroui/react";
-import { RiFullscreenLine } from "@remixicon/react";
+import { Button, Image, useDisclosure } from "@heroui/react";
+import { RiListRadio } from "@remixicon/react";
 
+import Ellipsis from "@/components/ellipsis";
 import { usePlayingQueue } from "@/store/playing-queue";
+
+import VideoPageList from "./video-page-list";
 
 const LeftControl = () => {
   const { current } = usePlayingQueue();
+  const { isOpen, onOpen: openPageList, onOpenChange } = useDisclosure();
+
+  const title = useMemo(() => {
+    if ((current?.pages?.length ?? 0) > 1) {
+      return current?.pages?.find(item => item.pageIndex === current.currentPage)?.pageTitle;
+    }
+
+    return current?.title;
+  }, [current]);
 
   if (!current) {
     return null;
@@ -14,27 +26,28 @@ const LeftControl = () => {
 
   return (
     <div className="flex h-full w-full items-center justify-start space-x-4">
-      <div className="flex min-w-0 items-center space-x-4">
-        <Card
-          className="group relative h-14 w-14 flex-none cursor-pointer border-none"
-          radius="sm"
-          isHoverable
-          isPressable
-        >
-          <Image src={current.coverImageUrl} radius="sm" width="100%" height="100%" />
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/10 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
-            <Button isIconOnly size="sm">
-              <RiFullscreenLine size={16} />
-            </Button>
-          </div>
-        </Card>
-        <div className="flex min-w-0 flex-col space-y-1">
-          <span title={current.title} className="truncate text-base">
-            {current.title}
-          </span>
-          {Boolean(current.singer) && <span className="truncate text-zinc-400">{current.singer}</span>}
-        </div>
+      <Image
+        src={current.coverImageUrl}
+        radius="sm"
+        width={56}
+        height={56}
+        classNames={{
+          wrapper: "flex-none",
+        }}
+        className="object-cover"
+      />
+      <div className="flex min-w-0 flex-col space-y-1">
+        <Ellipsis>{title}</Ellipsis>
+        {Boolean(current.singer) && <span className="truncate text-zinc-400">{current.singer}</span>}
       </div>
+      <div>
+        {Boolean((current.pages?.length ?? 0) > 1) && (
+          <Button isIconOnly size="sm" variant="light" onPress={openPageList}>
+            <RiListRadio size={18} />
+          </Button>
+        )}
+      </div>
+      <VideoPageList isOpen={isOpen} onOpenChange={onOpenChange} />
     </div>
   );
 };

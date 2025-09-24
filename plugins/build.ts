@@ -9,37 +9,60 @@ export const pluginElectronBuild = (): RsbuildPlugin => ({
     api.onAfterBuild(async () => {
       await electronBuild({
         config: {
-          appId: "com.tune.wood3n",
-          productName: "Tune",
+          appId: "com.biu.wood3n",
+          productName: "Biu",
+          artifactName: "${productName}-${version}-${os}-${arch}.${ext}",
           copyright: `Copyright © ${new Date().getFullYear()}`,
           nodeVersion: "current",
           buildVersion: pkg.version,
           asar: true,
-          // electronLanguages: ['zh-CN'],
+          // 运行时需要直接读取的资源解压到 asar 之外
+          asarUnpack: ["**/electron/icons/**"],
           electronCompile: false,
-          // "store” | “normal” | "maximum". - For testing builds, use 'store' to reduce build time significantly.
+          // "store” | “normal” | "maximum". - 测试环境用 store 提升构建速度
           compression: "store",
-          // 是否移除 package.json 的 scripts 定义
+          // 是否移除 package.json 的 scripts/keywords 定义
           removePackageScripts: true,
-          // 是否移除 package.json 的 keywords 定义
           removePackageKeywords: false,
           nodeGypRebuild: false,
           buildDependenciesFromSource: false,
-          // directories: {
-          //   output: 'dist/artifacts/local',
-          //   buildResources: 'installer/resources',
-          // },
-          files: ["./dist/web", "electron"],
+          directories: {
+            output: "dist/artifacts",
+            // 构建资源目录（图标等）
+            buildResources: "electron/icons",
+          },
+          // 应用文件打包规则
+          files: ["electron/**", "dist/web/**"],
+          // 运行时附加资源（保持相对路径 electron/icons 可用）
+          extraResources: [{ from: "electron/icons", to: "electron/icons" }],
           win: {
-            // windows 直接打包成便携程序
-            target: "nsis",
-            // 用 png 就行，builder 会自动生成 ico 文件
-            icon: "./public/electron/music.png",
+            target: [
+              { target: "nsis", arch: ["x64"] },
+              { target: "portable", arch: ["x64"] },
+            ],
+            // 用 png 即可，electron-builder 会生成 ico
+            icon: "electron/icons/win/logo.ico",
           },
           nsis: {
             deleteAppDataOnUninstall: true,
-            include: "installer/win/nsis-installer.nsh",
+            oneClick: false,
+            perMachine: false,
+            allowElevation: true,
+            allowToChangeInstallationDirectory: true,
+            artifactName: "${productName}-Setup-${version}.exe",
           },
+          mac: {
+            target: ["dmg"],
+            category: "public.app-category.music",
+            icon: "electron/icons/mac/logo.icns",
+          },
+          linux: {
+            target: ["AppImage"],
+            icon: "electron/icons/linux/logo.png",
+            category: "AudioVideo",
+          },
+          // 不发布
+          publish: null,
         },
       })
         .then((result: unknown) => {

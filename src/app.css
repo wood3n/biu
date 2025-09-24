@@ -6,6 +6,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@layer base {
+  h1 {
+    font-size: var(--text-2xl);
+  }
+  h2 {
+    font-size: var(--text-xl);
+  }
+  h3 {
+    font-size: var(--text-lg);
+  }
+}
+
 @utility window-drag {
   app-region: drag;
 }
@@ -17,20 +29,6 @@
 @utility keyword {
   color: #17C964;
   font-style: normal;
-}
-
-@layer base {
-  html {
-    scroll-behavior: smooth;
-  }
-
-  h1 {
-    @apply text-2xl;
-  }
-
-  h2 {
-    @apply text-xl;
-  }
 }
 
 .os-scrollbar {

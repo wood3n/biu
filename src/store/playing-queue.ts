@@ -31,6 +31,8 @@ interface Action {
   clear: () => void;
   next: () => Promise<void>;
   prev: () => Promise<void>;
+  addToNext: (mv: PlayingMV) => void;
+
   // controls (integrated from play-control)
   togglePlay: () => Promise<void>;
   toggleMute: () => void;
@@ -92,6 +94,7 @@ const getMVPages = async (mv: PlayingMV) => {
       pageIndex: item.page,
       pageTitle: item.part,
       pageFirstFrameImageUrl: item.first_frame,
+      pageDuration: item.duration,
     }));
   }
 
@@ -280,6 +283,19 @@ export const usePlayingQueue = create<State & Action>()(
           } else {
             const newPlayData = await getMVPlayData(prevItem);
             setCurrentAndLoad(newPlayData);
+          }
+        },
+        addToNext: async mv => {
+          const { current, list } = get();
+          if (current) {
+            const currentIndex = list.findIndex(item => item.bvid === current?.bvid);
+            const filteredList = list.filter(item => item.bvid !== mv.bvid);
+
+            set({ list: [...filteredList.slice(0, currentIndex), mv, ...filteredList.slice(currentIndex)] });
+          } else {
+            const newPlayData = await getMVPlayData(mv);
+            setCurrentAndLoad(newPlayData);
+            set({ list: [newPlayData, ...list] });
           }
         },
         deleteMV: bvids => {

@@ -32,7 +32,7 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
         base: "data-[placement=right]:mb-[90px] data-[placement=right]:mt-[65px] data-[placement=right]:mx-2 rounded-medium",
       }}
     >
-      <DrawerContent>
+      <DrawerContent className="bg-content2">
         <DrawerHeader className="flex flex-row items-center space-x-2">
           <h2>播放列表</h2>
           <If condition={Boolean(list?.length)}>
@@ -55,7 +55,7 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
                     <div
                       key={mv.bvid}
                       className={clx(
-                        "group relative flex h-full w-full cursor-pointer items-center justify-between px-6 py-2",
+                        "group relative flex h-full w-full cursor-pointer items-center justify-between space-x-2 px-6 py-2",
                         {
                           "hover:bg-zinc-800": !isSelected,
                           "bg-content3": isSelected,
@@ -65,12 +65,16 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
                         play(mv);
                       }}
                     >
-                      <div className="flex items-center space-x-2">
-                        <Image src={mv.coverImageUrl} alt={mv.title} className="rounded-medium h-12 w-12" />
-                        <div className="flex flex-col space-y-1">
-                          <span className="truncate text-base">{mv.title}</span>
-                          <span className="text-xs text-zinc-400">{mv.singer}</span>
-                        </div>
+                      <Image
+                        radius="sm"
+                        src={mv.coverImageUrl}
+                        alt={mv.title}
+                        classNames={{ wrapper: "flex-none" }}
+                        className="h-12 w-12 object-cover"
+                      />
+                      <div className="flex min-w-0 flex-grow flex-col space-y-1">
+                        <span className="truncate text-base">{mv.title}</span>
+                        <span className="text-xs text-zinc-400">{mv.singer}</span>
                       </div>
                       <div className="absolute top-0 right-0 flex h-full items-center justify-center bg-transparent px-4 opacity-0 backdrop-filter group-hover:opacity-100">
                         <Button isIconOnly variant="light" size="sm" onPress={() => deleteMV([mv.bvid])}>

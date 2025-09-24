@@ -9,7 +9,7 @@ const Login = () => {
 
   return (
     <>
-      <Button color="primary" variant="flat" onPress={onOpen}>
+      <Button color="primary" variant="flat" onPress={onOpen} className="window-no-drag">
         登录
       </Button>
       <Modal size="xs" isOpen={isOpen} isDismissable={false} disableAnimation onOpenChange={onOpenChange}>

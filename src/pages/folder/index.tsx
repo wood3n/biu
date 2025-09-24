@@ -1,14 +1,13 @@
 import React from "react";
 import { useParams } from "react-router";
 
-import { Alert, Button, Pagination, Skeleton } from "@heroui/react";
+import { Alert, Button, Pagination } from "@heroui/react";
 import { usePagination } from "ahooks";
 
-import { MVCard, MVCardSkeleton } from "@/components/mv-card";
+import { MVCard } from "@/components/mv-card";
+import MVCardList from "@/components/mv-card-list";
 import ScrollContainer from "@/components/scroll-container";
 import { getFavResourceList } from "@/service/fav-resource";
-
-const gridClass = "grid grid-cols-1 gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
 
 const Folder: React.FC = () => {
   const { id } = useParams();
@@ -61,34 +60,21 @@ const Folder: React.FC = () => {
         )}
 
         {/* 初始加载骨架屏 */}
-        {loading && (
-          <>
-            <Skeleton className="mb-4 h-8 w-40 rounded" />
-            <div className={gridClass}>
-              {Array.from({ length: 10 }).map((_, idx) => (
-                <MVCardSkeleton key={idx} />
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* 数据网格 */}
-        {!loading && data!.list!.length > 0 && (
-          <div className={gridClass}>
-            {data?.list.map(item => (
-              <MVCard
-                key={item.id}
-                bvid={item.bvid}
-                title={item.title}
-                cover={item.cover}
-                coverHeight={200}
-                authorName={item?.upper?.name}
-                authorId={item.upper?.mid}
-                durationSeconds={item.duration}
-              />
-            ))}
-          </div>
-        )}
+        <MVCardList
+          data={data?.list ?? []}
+          loading={loading}
+          itemKey="id"
+          renderItem={item => (
+            <MVCard
+              bvid={item.bvid}
+              title={item.title}
+              cover={item.cover}
+              authorName={item?.upper?.name}
+              authorId={item.upper?.mid}
+              durationSeconds={item.duration}
+            />
+          )}
+        />
 
         {pagination.totalPage > 1 && (
           <div className="flex w-full items-center justify-center py-6">

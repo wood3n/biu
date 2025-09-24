@@ -46,6 +46,7 @@ export const menus = [
     key: "/later",
     label: "稍后再看",
     href: "/later",
+    needLogin: true,
     icon: <RiHistoryLine size={size} />,
     activeIcon: <RiHistoryFill size={size} />,
   },
