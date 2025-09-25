@@ -40,12 +40,12 @@ const Progress = ({ isDisabled }: SliderProps) => {
       }
       startContent={
         <div className="flex w-12 justify-center text-sm whitespace-nowrap opacity-70">
-          {currentTime ? formatDuration(currentTime, false) : "-:--"}
+          {currentTime ? formatDuration(currentTime) : "-:--"}
         </div>
       }
       endContent={
         <span className="flex w-12 justify-center text-sm whitespace-nowrap opacity-70">
-          {duration ? formatDuration(duration, false) : "-:--"}
+          {duration ? formatDuration(duration) : "-:--"}
         </span>
       }
       className={clx({

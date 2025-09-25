@@ -4,6 +4,7 @@ import { useRequest } from "ahooks";
 import clx from "classnames";
 import { QRCodeCanvas } from "qrcode.react";
 
+import { getUrlParams } from "@/common/utils/url";
 import { getPassportLoginWebQrcodeGenerate } from "@/service/passport-login-web-qrcode-generate";
 import { getPassportLoginWebQrcodePoll } from "@/service/passport-login-web-qrcode-poll";
 import { useToken } from "@/store/token";
@@ -43,7 +44,7 @@ const QrcodeLogin = ({ onClose }: QrcodeLoginProps) => {
 
           const { refresh_token, timestamp, url } = pollData;
 
-          const urlParams = Object.fromEntries(new URLSearchParams(url || "").entries());
+          const urlParams = getUrlParams(url || "");
 
           updateToken({
             refresh_token,
@@ -79,7 +80,7 @@ const QrcodeLogin = ({ onClose }: QrcodeLoginProps) => {
         )}
         <div
           className={clx(
-            "absolute top-0 right-0 h-full w-full flex-col items-center justify-center bg-[hsla(0,0%,100%,.9)] transition",
+            "absolute top-0 right-0 h-full w-full flex-col items-center justify-center bg-gray-300/30 transition",
             {
               hidden: !isOvertime,
               flex: isOvertime,

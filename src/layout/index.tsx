@@ -3,6 +3,7 @@ import { Outlet } from "react-router";
 
 import { Card } from "@heroui/react";
 
+import { refreshCookie } from "@/common/utils/cookie";
 import PlayBar from "@/layout/playbar";
 import { useUser } from "@/store/user";
 
@@ -12,8 +13,16 @@ import SideNav from "./side";
 const Layout = () => {
   const { updateUser } = useUser();
 
+  const getLoginInfo = async () => {
+    try {
+      await refreshCookie();
+    } finally {
+      updateUser();
+    }
+  };
+
   useEffect(() => {
-    updateUser();
+    getLoginInfo();
   }, []);
 
   return (

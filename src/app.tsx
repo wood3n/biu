@@ -20,7 +20,7 @@ export function App() {
     <HeroUIProvider navigate={navigate} useHref={useHref} locale="zh-CN">
       <ToastProvider
         placement="top-center"
-        toastOffset={24}
+        toastOffset={70}
         maxVisibleToasts={3}
         disableAnimation
         toastProps={{ timeout: 3000, color: "primary" }}

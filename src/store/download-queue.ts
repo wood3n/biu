@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { downloadByUrl } from "@/common/utils";
+import { VideoQuality } from "@/common/constants/video";
 import { getPlayerPlayurl } from "@/service/player-playurl";
 
 interface DownloadItem {
@@ -32,19 +32,10 @@ const getVideoUrl = async (item: DownloadItem) => {
     bvid: item.bvid,
     cid: item.cid,
     fnval: 1,
+    qn: VideoQuality.Q1080P,
   });
 
-  const videoQualitySort = [6, 16, 32, 64, 74, 80, 100, 112, 116, 120, 125, 126, 127];
-  const videoTrackList = getAudioInfoRes?.data?.dash?.video?.toSorted((video, b) => {
-    const indexA = videoQualitySort.indexOf(video.id);
-    const indexB = videoQualitySort.indexOf(b.id);
-    // 如果 id 不在 videoQualitySort 中，则放到最后
-    if (indexA === -1) return -1;
-    if (indexB === -1) return 1;
-    return indexB - indexA;
-  });
-
-  return videoTrackList?.[0]?.baseUrl || videoTrackList?.[0]?.backupUrl?.[0];
+  return getAudioInfoRes?.data?.durl?.[0]?.url || getAudioInfoRes?.data?.durl?.[0]?.backup_url?.[0];
 };
 
 export const useDownloadQueue = create<DownloadState & DownloadAction>()(
@@ -55,8 +46,6 @@ export const useDownloadQueue = create<DownloadState & DownloadAction>()(
         const url = await getVideoUrl(item);
 
         if (url) {
-          console.log(url);
-          downloadByUrl(url);
           set(state => ({ list: [...state.list, { ...item, url, status: "downloading", progress: 0 }] }));
         } else {
           set(state => ({ list: [...state.list, { ...item, status: "failed", error: "获取视频地址失败" }] }));

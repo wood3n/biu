@@ -1,12 +1,6 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge } from "electron";
 
-contextBridge.exposeInMainWorld("electron", {
-  isMaximized: () => ipcRenderer.invoke("isMaximized"),
-  close: () => ipcRenderer.invoke("close-window"),
-  maxWin: () => ipcRenderer.invoke("max-win"),
-  minWin: () => ipcRenderer.invoke("min-win"),
-  resize: () => ipcRenderer.invoke("resize"),
-});
+contextBridge.exposeInMainWorld("electron", {});
 
 /**
  * 系统版本信息

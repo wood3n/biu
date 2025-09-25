@@ -183,5 +183,5 @@ export interface SupportFormat {
  * @returns 视频流地址信息
  */
 export const getPlayerPlayurl = (params: PlayerPlayurlRequestParams) => {
-  return apiRequest.get<PlayerPlayurlResponse>("/x/player/wbi/playurl", { params });
+  return apiRequest.get<PlayerPlayurlResponse>("/x/player/wbi/playurl", { params, useWbi: true });
 };

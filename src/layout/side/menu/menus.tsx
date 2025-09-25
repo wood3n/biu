@@ -9,6 +9,8 @@ import {
   RiDiscFill,
   RiHistoryLine,
   RiHistoryFill,
+  RiUserFollowLine,
+  RiUserFollowFill,
 } from "@remixicon/react";
 
 const size = 18;
@@ -41,6 +43,14 @@ export const menus = [
     href: "/music-recommend",
     icon: <RiDiscLine size={size} />,
     activeIcon: <RiDiscFill size={size} />,
+  },
+  {
+    key: "/follow",
+    label: "我的关注",
+    href: "/follow",
+    needLogin: true,
+    icon: <RiUserFollowLine size={size} />,
+    activeIcon: <RiUserFollowFill size={size} />,
   },
   {
     key: "/later",

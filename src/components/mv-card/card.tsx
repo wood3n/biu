@@ -15,6 +15,7 @@ export type MVCardProps = {
   bvid: string;
   cover: string;
   title: string;
+  titleExtra?: React.ReactNode;
   authorName: string;
   actions?: ActionKey[];
   authorId?: string | number;
@@ -137,7 +138,7 @@ export default function MVCard({
               {authorName}
             </div>
             {Boolean(durationSeconds) && (
-              <span className="shrink-0 text-sm/normal">{formatDuration(durationSeconds as number, false)}</span>
+              <span className="shrink-0 text-sm/normal">{formatDuration(durationSeconds as number)}</span>
             )}
           </div>
         </CardFooter>

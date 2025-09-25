@@ -108,7 +108,7 @@ const DownloadModal = ({ bvid, title, isOpen, onOpenChange }: Props) => {
                           <div className="flex min-w-0 flex-1 items-center space-x-2">
                             <span className="truncate">{videoPageLength > 1 ? item.part : title}</span>
                             {Boolean(item.duration) && (
-                              <span className="text-zinc-500">{formatDuration(item.duration, false)}</span>
+                              <span className="text-zinc-500">{formatDuration(item.duration)}</span>
                             )}
                           </div>
                         </div>

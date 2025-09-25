@@ -5,6 +5,7 @@ import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from
 import { RiErrorWarningLine } from "@remixicon/react";
 
 export interface ConfirmModalProps {
+  type: "warning" | "danger";
   // 显示/隐藏控制（受控）
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -14,16 +15,17 @@ export interface ConfirmModalProps {
   description?: ReactNode;
 
   // 行为
-  onConfirm: () => void | Promise<void>;
-  onCancel?: () => void;
+  onConfirm: () => Promise<boolean>;
 
   // 配置
   confirmText?: string;
   cancelText?: string;
-  showCancel?: boolean; // 是否显示取消按钮，默认 true
-  isDanger?: boolean; // 确认为危险操作时，按钮用 danger 颜色
-  closeOnConfirm?: boolean; // 确认后是否自动关闭，默认 true
 }
+
+const colorMap: Record<ConfirmModalProps["type"], string> = {
+  warning: "#F5A524",
+  danger: "#dc1258",
+};
 
 /**
  * 通用确认弹窗（HeroUI）
@@ -31,32 +33,26 @@ export interface ConfirmModalProps {
  * - 支持异步确认：onConfirm 可返回 Promise，期间按钮进入加载态并避免关闭
  */
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
+  type = "danger",
   isOpen,
   onOpenChange,
   title,
   description,
   onConfirm,
-  onCancel,
   confirmText = "确认",
   cancelText = "取消",
-  showCancel = true,
-  isDanger = false,
-  closeOnConfirm = true,
 }) => {
   const [loading, setLoading] = useState(false);
 
   const handleClose = () => onOpenChange(false);
 
-  const handleCancel = async () => {
-    onCancel?.();
-    handleClose();
-  };
-
   const handleConfirm = async () => {
     try {
       setLoading(true);
-      await onConfirm?.();
-      if (closeOnConfirm) handleClose();
+      const result = await onConfirm?.();
+      if (result) {
+        handleClose();
+      }
     } finally {
       setLoading(false);
     }
@@ -68,7 +64,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
         {() => (
           <>
             <ModalHeader className="flex items-center gap-1">
-              <RiErrorWarningLine color="#dc1258" />
+              <RiErrorWarningLine color={colorMap[type]} />
               <span>{title}</span>
             </ModalHeader>
             {description ? (
@@ -77,12 +73,10 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
               </ModalBody>
             ) : null}
             <ModalFooter>
-              {showCancel && (
-                <Button variant="light" onPress={handleCancel} isDisabled={loading}>
-                  {cancelText}
-                </Button>
-              )}
-              <Button color={isDanger ? "danger" : "primary"} onPress={handleConfirm} isLoading={loading}>
+              <Button variant="light" onPress={handleClose} isDisabled={loading}>
+                {cancelText}
+              </Button>
+              <Button color={type} onPress={handleConfirm} isLoading={loading}>
                 {confirmText}
               </Button>
             </ModalFooter>

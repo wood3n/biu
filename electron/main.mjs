@@ -1,4 +1,4 @@
-import { app, BrowserWindow, nativeImage, ipcMain, session } from "electron";
+import { app, BrowserWindow, nativeImage, session } from "electron";
 import Store from "electron-store";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -63,48 +63,6 @@ function createWindow() {
   if (process.platform === "darwin") {
     const dockIcon = nativeImage.createFromPath(path.resolve(process.cwd(), "electron/icons/logo.png"));
     app.dock.setIcon(dockIcon);
-  }
-
-  // windows自定义窗口
-  if (process.platform === "win32") {
-    ipcMain.handle("isMaximized", () => {
-      return mainWindow.isMaximized();
-    });
-    ipcMain.handle("close-window", () => {
-      app.quitting = true; // 确保关闭不会被隐藏逻辑拦截
-      app.quit();
-    });
-    ipcMain.handle("min-win", () => mainWindow.minimize());
-
-    // 兼容：最大化/还原切换（组件调用）
-    ipcMain.handle("resize", () => {
-      const prevBounds = store.get("bounds");
-      if (mainWindow.isMaximized()) {
-        // 还原到上一次记录的窗口大小
-        mainWindow.unmaximize();
-        if (prevBounds && typeof prevBounds === "object") {
-          mainWindow.setBounds(prevBounds);
-        }
-      } else {
-        // 记录当前窗口大小，再最大化
-        store.set("bounds", mainWindow.getBounds());
-        mainWindow.maximize();
-      }
-    });
-
-    // 兼容：保留 max-win 通道（与 resize 行为一致，便于旧代码调用）
-    ipcMain.handle("max-win", () => {
-      const prevBounds = store.get("bounds");
-      if (mainWindow.isMaximized()) {
-        mainWindow.unmaximize();
-        if (prevBounds && typeof prevBounds === "object") {
-          mainWindow.setBounds(prevBounds);
-        }
-      } else {
-        store.set("bounds", mainWindow.getBounds());
-        mainWindow.maximize();
-      }
-    });
   }
 
   // https://www.electronjs.org/docs/latest/api/app#appispackaged-readonly

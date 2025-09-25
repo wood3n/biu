@@ -62,7 +62,7 @@ const VideoPageList: React.FC<VideoPageListProps> = ({ isOpen, onOpenChange }) =
                     </div>
                     {Boolean(p.pageDuration) && (
                       <div className="text-foreground-500 ml-2 flex-none text-right text-sm tabular-nums">
-                        {formatDuration(p.pageDuration as number, false)}
+                        {formatDuration(p.pageDuration as number)}
                       </div>
                     )}
                   </div>

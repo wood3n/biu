@@ -1,9 +1,54 @@
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, User, Avatar } from "@heroui/react";
+import { useNavigate } from "react-router";
 
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  User,
+  Avatar,
+  useDisclosure,
+  addToast,
+} from "@heroui/react";
+import Cookies from "js-cookie";
+
+import ConfirmModal from "@/components/confirm-modal";
+import { postPassportLoginExit } from "@/service/passport-login-exit";
+import { useToken } from "@/store/token";
 import { useUser } from "@/store/user";
 
 const UserCard = () => {
-  const { user } = useUser();
+  const { user, clear: clearUserInfo } = useUser();
+  const { clear: clearToken } = useToken();
+  const navigate = useNavigate();
+  const { isOpen, onOpen: openConfirmLogoutModal, onOpenChange } = useDisclosure();
+
+  const logout = async () => {
+    const csrfToken = Cookies.get("bili_jct");
+    if (!csrfToken) {
+      addToast({
+        title: "CSRF Token 不存在",
+        color: "danger",
+      });
+      return false;
+    }
+
+    const res = await postPassportLoginExit({
+      biliCSRF: csrfToken,
+    });
+    if (res?.code === 0) {
+      clearToken();
+      clearUserInfo();
+      navigate("/");
+      return true;
+    } else {
+      addToast({
+        title: res?.message || "退出登录失败",
+        color: "danger",
+      });
+      return false;
+    }
+  };
 
   return (
     <div className="window-no-drag">
@@ -26,18 +71,25 @@ const UserCard = () => {
                 isBordered: true,
                 src: user?.face,
               }}
-              className="transition-transform"
               name={user?.uname}
               description={`LV${user?.level_info?.current_level}`}
+              onClick={() => navigate(`/user/${user?.mid}`)}
             />
           </DropdownItem>
           <DropdownItem key="settings">设置</DropdownItem>
           <DropdownItem key="help_and_feedback">帮助与反馈</DropdownItem>
-          <DropdownItem key="logout" color="danger" className="text-danger">
+          <DropdownItem key="logout" color="danger" className="text-danger" onPress={openConfirmLogoutModal}>
             退出登录
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
+      <ConfirmModal
+        type="danger"
+        title="确认退出登录？"
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        onConfirm={logout}
+      />
     </div>
   );
 };

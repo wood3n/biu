@@ -3,6 +3,7 @@ import type { RouteObject } from "react-router";
 import Layout from "./layout";
 import ArtistRank from "./pages/artist-rank";
 import Folder from "./pages/folder";
+import UserFollow from "./pages/follow";
 import Home from "./pages/home";
 import Later from "./pages/later";
 import MusicRank from "./pages/music-rank";
@@ -36,11 +37,15 @@ const routes: RouteObject[] = [
         element: <Later />,
       },
       {
+        path: "follow",
+        element: <UserFollow />,
+      },
+      {
         path: "folder/:id",
         element: <Folder />,
       },
       {
-        path: "profile/:id",
+        path: "user/:id",
         element: <UserProfile />,
       },
     ],

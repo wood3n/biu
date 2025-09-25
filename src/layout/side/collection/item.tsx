@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 
-import { addToast, Button, Image, useDisclosure } from "@heroui/react";
+import { addToast, Button, DropdownItemProps, Image, useDisclosure } from "@heroui/react";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
 import { RiDeleteBinLine, RiEditLine, RiFolderLine, RiFolderOpenLine } from "@remixicon/react";
 import { RiMoreLine } from "@remixicon/react";
@@ -135,7 +135,12 @@ const FolderItem = ({ title, mid, cover, editable }: Props) => {
             items={menus}
           >
             {item => (
-              <DropdownItem key={item.key} startContent={item.startContent} className={item.className}>
+              <DropdownItem
+                key={item.key}
+                color={item.color as DropdownItemProps["color"]}
+                startContent={item.startContent}
+                className={item.className}
+              >
                 {item.label}
               </DropdownItem>
             )}
@@ -144,7 +149,7 @@ const FolderItem = ({ title, mid, cover, editable }: Props) => {
       </div>
       <EditFolderForm mid={mid} isOpen={isEditOpen} onOpenChange={onEditOpenChange} />
       <ConfirmModal
-        isDanger
+        type="danger"
         title={`确认删除收藏夹【${title}】？`}
         isOpen={isDelOpen}
         onOpenChange={onDelOpenChange}
@@ -153,11 +158,13 @@ const FolderItem = ({ title, mid, cover, editable }: Props) => {
 
           if (res?.code === 0) {
             updateOwnFolder();
+            return true;
           } else {
             addToast({
               title: res.message || "删除失败",
               color: "danger",
             });
+            return false;
           }
         }}
       />

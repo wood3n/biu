@@ -44,6 +44,10 @@ function createTray({ getMainWindow, onExit } = {}) {
   tray.on("right-click", () => {
     const menuTemplate = [
       {
+        label: "设置",
+        click: () => {},
+      },
+      {
         label: "退出程序",
         click: () => {
           // 将退出逻辑交给主进程，以便设置 app.quitting 标记
