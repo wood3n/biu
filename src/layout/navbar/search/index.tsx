@@ -54,6 +54,7 @@ const SearchBox = () => {
       };
     },
     {
+      manual: true,
       defaultPageSize: 24,
       refreshDeps: [searchType],
     },
@@ -105,7 +106,7 @@ const SearchBox = () => {
                   size="sm"
                   key={o.value}
                   startContent={o.icon}
-                  color={searchType === o.value ? "success" : undefined}
+                  color={searchType === o.value ? "primary" : undefined}
                   onPress={() => setSearchType(o.value)}
                 >
                   {o.label}

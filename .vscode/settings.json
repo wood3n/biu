@@ -15,6 +15,5 @@
   "stylelint.validate": ["css", "less", "postcss", "scss"],
   "files.associations": {
     "*.css": "tailwindcss"
-  },
-  "streamline-icons.downloadPath": "src/assets/images"
+  }
 }

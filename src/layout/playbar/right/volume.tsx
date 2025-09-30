@@ -37,9 +37,15 @@ const Volume = ({ isMuted, value, onChange, onChangeMute }: Props) => {
 
   return (
     <Slider
+      disableAnimation
+      disableThumbScale
       aria-label="音量"
       size="sm"
-      color="success"
+      color="foreground"
+      classNames={{
+        track: "bg-default-500/30",
+        thumb: "w-4 h-4 after:w-4 after:h-4 after:bg-foreground",
+      }}
       className="w-36"
       value={value}
       minValue={0}

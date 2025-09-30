@@ -3,12 +3,13 @@ import React, { useMemo, useState } from "react";
 import { Pagination } from "@heroui/react";
 import { twMerge } from "tailwind-merge";
 
-import { MVCardSkeleton } from "../mv-card";
+import { ReactComponent as Empty } from "@/assets/icons/empty.svg";
+
+import CardSkeleton from "./skeleton";
 
 export interface GridPageListProps<T> {
   data?: T[];
   loading?: boolean;
-  skeletonHeight?: number;
   itemKey: string;
   renderItem: (item: T, index: number) => React.ReactNode;
   enablePagination?: boolean;
@@ -16,12 +17,11 @@ export interface GridPageListProps<T> {
   className?: string;
 }
 
-const MVCardList = <T,>({
+const GridList = <T,>({
   data = [],
   loading = false,
   itemKey,
   renderItem,
-  skeletonHeight = 200,
   enablePagination,
   pageSize = 20,
   className,
@@ -44,14 +44,19 @@ const MVCardList = <T,>({
         {Array(12)
           .fill(0)
           .map((_, index) => (
-            <MVCardSkeleton key={index} coverHeight={skeletonHeight} />
+            <CardSkeleton key={index} />
           ))}
       </div>
     );
   }
 
   if (data?.length === 0) {
-    return <div className="flex h-full w-full items-center justify-center">暂无数据</div>;
+    return (
+      <div className="flex min-h-20 w-full flex-col items-center justify-center text-zinc-600">
+        <Empty />
+        <span>暂无数据</span>
+      </div>
+    );
   }
 
   return (
@@ -70,4 +75,4 @@ const MVCardList = <T,>({
   );
 };
 
-export default MVCardList;
+export default GridList;

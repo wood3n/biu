@@ -32,7 +32,7 @@ const Layout = () => {
       </div>
       <div className="flex min-h-0 flex-grow space-x-2 px-2">
         <SideNav />
-        <Card className="h-full flex-grow">
+        <Card radius="sm" className="h-full flex-grow">
           <Outlet />
         </Card>
       </div>

@@ -25,7 +25,7 @@ const Progress = ({ isDisabled }: SliderProps) => {
       size="sm"
       disableAnimation
       disableThumbScale
-      color={showThumb ? "success" : "foreground"}
+      color={showThumb ? "primary" : "foreground"}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       renderThumb={thumbProps =>

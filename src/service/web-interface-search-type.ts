@@ -216,16 +216,9 @@ export function summarizeTypeResult<T = any>(data: WebSearchTypeData<T>) {
 export async function getWebInterfaceWbiSearchType<T = any>(
   params: WebSearchTypeParams,
 ): Promise<WebSearchTypeResponse<T>> {
-  try {
-    const normalized = normalizeTypeParams(params);
-    const res = await apiRequest.get<WebSearchTypeResponse<T>>("/x/web-interface/wbi/search/type", {
-      params: normalized,
-    });
-    if (res.code !== 0) throw new Error(res.message || `Search type failed: ${res.code}`);
-    return res;
-  } catch (err: any) {
-    throw new Error(err?.message || "Network error");
-  }
+  return apiRequest.get<WebSearchTypeResponse<T>>("/x/web-interface/wbi/search/type", {
+    params,
+  });
 }
 
 /**

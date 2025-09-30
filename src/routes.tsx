@@ -2,14 +2,14 @@ import type { RouteObject } from "react-router";
 
 import Layout from "./layout";
 import ArtistRank from "./pages/artist-rank";
-import Folder from "./pages/folder";
 import UserFollow from "./pages/follow";
-import Home from "./pages/home";
 import Later from "./pages/later";
 import MusicRank from "./pages/music-rank";
 import MusicRecommend from "./pages/music-recommend";
 import NotFound from "./pages/not-found";
+import Settings from "./pages/settings";
 import UserProfile from "./pages/user-profile";
+import Folder from "./pages/video-collection";
 
 const routes: RouteObject[] = [
   {
@@ -18,10 +18,6 @@ const routes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <Home />,
-      },
-      {
-        path: "music-rank",
         element: <MusicRank />,
       },
       {
@@ -41,12 +37,16 @@ const routes: RouteObject[] = [
         element: <UserFollow />,
       },
       {
-        path: "folder/:id",
+        path: "collection/:id",
         element: <Folder />,
       },
       {
         path: "user/:id",
         element: <UserProfile />,
+      },
+      {
+        path: "settings",
+        element: <Settings />,
       },
     ],
   },

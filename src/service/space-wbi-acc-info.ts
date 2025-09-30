@@ -5,8 +5,6 @@ import { apiRequest } from "./request";
  */
 export interface SpaceAccInfoRequestParams {
   mid: number; // 目标用户mid
-  w_rid: string; // Wbi 签名
-  wts: number; // 当前时间戳
 }
 
 /**
@@ -17,6 +15,12 @@ export interface SpaceAccInfoResponse {
   message: string; // 错误信息
   ttl: number; // 1
   data: SpaceAccInfoData;
+}
+
+export interface TopPhotoV2 {
+  l_200h_img: string; // 200px高的头图链接
+  l_img: string; // 原始头图链接
+  sid: number;
 }
 
 /**
@@ -45,6 +49,7 @@ export interface SpaceAccInfoData {
   user_honour_info: UserHonourInfo; // 用户荣誉信息
   is_followed: boolean; // 是否关注此用户
   top_photo: string; // 主页头图链接
+  top_photo_v2: TopPhotoV2; // 主页头图链接v2
   theme: Record<string, any>; // 主题信息
   sys_notice: SysNotice; // 系统通知
   live_room: LiveRoom; // 直播间信息
@@ -103,7 +108,7 @@ export interface Official {
   role: number; // 认证类型
   title: string; // 认证信息
   desc: string; // 认证备注
-  type: number; // 是否认证 -1:无 0:个人认证 1:机构认证
+  type: number; // 是否认证 -1:无 0:个人认证 1:机构认证 2:手工达人 3:官方机构
 }
 
 /**
@@ -284,5 +289,5 @@ export interface Contract {
  * @returns 用户空间详细信息
  */
 export const getSpaceWbiAccInfo = (params: SpaceAccInfoRequestParams) => {
-  return apiRequest.get<SpaceAccInfoResponse>("/x/space/wbi/acc/info", { params });
+  return apiRequest.get<SpaceAccInfoResponse>("/x/space/wbi/acc/info", { params, useWbi: true });
 };

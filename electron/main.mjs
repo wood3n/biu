@@ -1,11 +1,10 @@
 import { app, BrowserWindow, nativeImage, session } from "electron";
-import Store from "electron-store";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { createTray, destroyTray } from "./createTray.mjs"; // 托盘功能
-
-const store = new Store();
+import { registerIpcHandlers } from "./ipc/index.mjs";
+import { store, storeKey } from "./store.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -80,13 +79,17 @@ function createWindow() {
     });
   }
 
-  // 关闭按钮改为隐藏窗口，配合托盘保活
+  // 从store获取配置，判断是否关闭窗口时隐藏还是退出程序
   mainWindow.on("close", event => {
-    if (app.quitting) {
-      mainWindow = null;
-    } else {
+    const closeWindowOption = store.get(storeKey.appSettings).closeWindowOption;
+
+    if (closeWindowOption === "hide") {
       event.preventDefault();
       mainWindow.hide();
+    } else if (closeWindowOption === "exit") {
+      if (app.quitting) {
+        mainWindow = null;
+      }
     }
   });
 }
@@ -147,6 +150,7 @@ app.whenReady().then(() => {
   };
   session.defaultSession.webRequest.onHeadersReceived({ urls: ["*://*/*"] }, onHeadersReceivedHandler);
 
+  registerIpcHandlers({ app });
   createWindow();
 });
 

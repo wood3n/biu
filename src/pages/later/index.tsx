@@ -1,7 +1,7 @@
 import { useRequest } from "ahooks";
 
+import MVCardList from "@/components/grid-list";
 import { MVCard } from "@/components/mv-card";
-import MVCardList from "@/components/mv-card-list";
 import ScrollContainer from "@/components/scroll-container";
 import { getHistoryToViewList } from "@/service/history-toview-list";
 

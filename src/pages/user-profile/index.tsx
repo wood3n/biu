@@ -1,33 +1,50 @@
 import React from "react";
-import { useParams } from "react-router";
 
-import { useRequest } from "ahooks";
+import { Tab, Tabs } from "@heroui/react";
 
-import { getSpaceWbiAccInfo } from "@/service/space-wbi-acc-info";
+import ScrollContainer from "@/components/scroll-container";
 
-// import { useUser } from '@/common/hooks';
+import Favorites from "./favorites";
+import Profile from "./profile";
+import VideoPost from "./video-post";
+import VideoCollection from "./video-series";
 
 /**
  * 用户个人中心
  */
 const UserProfile = () => {
-  const { id } = useParams();
-
-  const { data } = useRequest(
-    async () => {
-      const res = await getSpaceWbiAccInfo({
-        mid: id as number,
-      });
-
-      return res.data;
+  const tabs = [
+    {
+      label: "投稿",
+      key: "video",
+      content: <VideoPost />,
     },
     {
-      ready: !!id,
-      refreshDeps: [id],
+      label: "收藏夹",
+      key: "collection",
+      content: <Favorites />,
     },
-  );
+    {
+      label: "合集",
+      key: "union",
+      content: <VideoCollection />,
+    },
+  ];
 
-  return <div>测试</div>;
+  return (
+    <ScrollContainer>
+      <Profile />
+      <div className="mt-4 p-4">
+        <Tabs disableAnimation size="lg" aria-label="个人资料栏目" variant="solid">
+          {tabs.map(item => (
+            <Tab key={item.key} title={item.label}>
+              {item.content}
+            </Tab>
+          ))}
+        </Tabs>
+      </div>
+    </ScrollContainer>
+  );
 };
 
 export default UserProfile;

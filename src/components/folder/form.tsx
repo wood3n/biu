@@ -185,7 +185,7 @@ const FolderForm = ({ mid, isOpen, onOpenChange }: Props) => {
             >
               取消
             </Button>
-            <Button color="success" type="submit" isLoading={isSubmitting} isDisabled={!isValid || isFetching}>
+            <Button type="submit" isLoading={isSubmitting} isDisabled={!isValid || isFetching}>
               提交
             </Button>
           </ModalFooter>

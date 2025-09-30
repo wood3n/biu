@@ -8,12 +8,13 @@ import { getUserInfo, type UserInfo } from "@/service/user-info";
 interface UserState {
   user: UserInfo | null;
   ownFolder: FavFolderItem[];
-  otherFolder: FavFolderCollectedItem[];
+  collectedFolder: FavFolderCollectedItem[];
 }
 
 interface Action {
-  updateUser: () => void;
-  updateOwnFolder: () => void;
+  updateUser: () => Promise<void>;
+  updateOwnFolder: () => Promise<void>;
+  updateCollectedFolder: () => Promise<void>;
   clear: () => void;
 }
 
@@ -23,7 +24,7 @@ export const useUser = create<UserState & Action>()(
       user: null,
       getUser: () => get().user,
       ownFolder: [],
-      otherFolder: [],
+      collectedFolder: [],
       updateUser: async () => {
         const res = await getUserInfo();
 
@@ -38,6 +39,7 @@ export const useUser = create<UserState & Action>()(
               up_mid: res.data?.mid ?? 0,
               ps: 999,
               pn: 1,
+              platform: "web",
             }),
           ]);
 
@@ -46,7 +48,8 @@ export const useUser = create<UserState & Action>()(
 
           set(() => ({
             ownFolder: getOwnFolderRes?.status === "fulfilled" ? (getOwnFolderRes.value?.data?.list ?? []) : [],
-            otherFolder: getOtherFolderRes?.status === "fulfilled" ? (getOtherFolderRes.value?.data?.list ?? []) : [],
+            collectedFolder:
+              getOtherFolderRes?.status === "fulfilled" ? (getOtherFolderRes.value?.data?.list ?? []) : [],
           }));
         } else {
           set(() => ({ user: null }));
@@ -67,8 +70,26 @@ export const useUser = create<UserState & Action>()(
           set(() => ({ ownFolder: res.data?.list ?? [] }));
         }
       },
+      updateCollectedFolder: async () => {
+        const user = get().user;
+
+        if (!user) {
+          return;
+        }
+
+        const res = await getFavFolderCollectedList({
+          up_mid: user.mid,
+          ps: 999,
+          pn: 1,
+          platform: "web",
+        });
+
+        if (res.code === 0) {
+          set(() => ({ collectedFolder: res.data?.list ?? [] }));
+        }
+      },
       clear: () => {
-        set(() => ({ user: null, ownFolder: [], otherFolder: [] }));
+        set(() => ({ user: null, ownFolder: [], collectedFolder: [] }));
       },
     }),
     {

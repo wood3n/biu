@@ -1,6 +1,4 @@
 import {
-  RiFireLine,
-  RiFireFill,
   RiMvLine,
   RiMvFill,
   RiGroupLine,
@@ -13,51 +11,39 @@ import {
   RiUserFollowFill,
 } from "@remixicon/react";
 
-const size = 18;
+import { type MenuItemProps } from "../menu-item";
 
-export const menus = [
+export const menus: (MenuItemProps & { needLogin?: boolean })[] = [
   {
-    key: "/",
-    label: "音乐热榜",
+    title: "热歌精选",
     href: "/",
-    icon: <RiFireLine size={size} />,
-    activeIcon: <RiFireFill size={size} />,
+    icon: RiMvLine,
+    activeIcon: RiMvFill,
   },
   {
-    key: "/music-rank",
-    label: "热歌精选",
-    href: "/music-rank",
-    icon: <RiMvLine size={size} />,
-    activeIcon: <RiMvFill size={size} />,
-  },
-  {
-    key: "/artist-rank",
-    label: "音乐人",
+    title: "音乐 UP",
     href: "/artist-rank",
-    icon: <RiGroupLine size={size} />,
-    activeIcon: <RiGroupFill size={size} />,
+    icon: RiGroupLine,
+    activeIcon: RiGroupFill,
   },
   {
-    key: "/music-recommend",
-    label: "更多音乐推荐",
+    title: "推荐音乐",
     href: "/music-recommend",
-    icon: <RiDiscLine size={size} />,
-    activeIcon: <RiDiscFill size={size} />,
+    icon: RiDiscLine,
+    activeIcon: RiDiscFill,
   },
   {
-    key: "/follow",
-    label: "我的关注",
+    title: "我的关注",
     href: "/follow",
     needLogin: true,
-    icon: <RiUserFollowLine size={size} />,
-    activeIcon: <RiUserFollowFill size={size} />,
+    icon: RiUserFollowLine,
+    activeIcon: RiUserFollowFill,
   },
   {
-    key: "/later",
-    label: "稍后再看",
+    title: "稍后再看",
     href: "/later",
     needLogin: true,
-    icon: <RiHistoryLine size={size} />,
-    activeIcon: <RiHistoryFill size={size} />,
+    icon: RiHistoryLine,
+    activeIcon: RiHistoryFill,
   },
 ];

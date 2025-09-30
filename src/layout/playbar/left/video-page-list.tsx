@@ -56,7 +56,7 @@ const VideoPageList: React.FC<VideoPageListProps> = ({ isOpen, onOpenChange }) =
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className={clx("truncate", { "text-success": isActive })} title={p.pageTitle}>
+                      <div className={clx("truncate", { "text-primary": isActive })} title={p.pageTitle}>
                         {p.pageTitle}
                       </div>
                     </div>

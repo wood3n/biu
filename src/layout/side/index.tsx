@@ -1,13 +1,17 @@
 import { Card } from "@heroui/react";
 
+import ScrollContainer from "@/components/scroll-container";
+
 import Collection from "./collection";
 import Menu from "./menu";
 
 const SideNav = () => {
   return (
-    <Card className="flex h-full flex-none flex-col md:w-[240px]">
-      <Menu />
-      <Collection />
+    <Card radius="sm" className="h-full flex-none md:w-[260px]">
+      <ScrollContainer className="p-4">
+        <Menu />
+        <Collection />
+      </ScrollContainer>
     </Card>
   );
 };

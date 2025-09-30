@@ -98,15 +98,14 @@ export default function MVCard({
           <div className="group relative">
             <Image
               alt={typeof title === "string" ? title : "video cover"}
-              className={"w-full object-cover"}
+              className={"w-full object-cover hover:scale-105"}
               height={coverHeight}
-              radius="lg"
               shadow="sm"
               src={cover}
               width="100%"
             />
-            <div className="text-success pointer-events-none absolute right-4 bottom-4 z-10 overflow-hidden rounded-full opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100">
-              <RiPlayCircleFill size={48} />
+            <div className="text-primary pointer-events-none absolute right-4 bottom-4 z-10 overflow-hidden rounded-full opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 before:absolute before:inset-0 before:m-auto before:h-1/2 before:w-1/2 before:bg-black before:content-['']">
+              <RiPlayCircleFill size={48} className="relative z-10" />
             </div>
           </div>
         </CardBody>

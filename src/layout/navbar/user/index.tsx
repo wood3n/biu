@@ -52,7 +52,7 @@ const UserCard = () => {
 
   return (
     <div className="window-no-drag">
-      <Dropdown placement="bottom-start">
+      <Dropdown placement="bottom">
         <DropdownTrigger>
           <Avatar
             isBordered
@@ -63,20 +63,21 @@ const UserCard = () => {
           />
         </DropdownTrigger>
         <DropdownMenu aria-label="用户操作" variant="flat">
-          <DropdownItem key="avatar">
+          <DropdownItem key="avatar" className="items-center justify-center">
             <User
               as="button"
               type="button"
               avatarProps={{
-                isBordered: true,
                 src: user?.face,
               }}
               name={user?.uname}
-              description={`LV${user?.level_info?.current_level}`}
+              description={`Lv${user?.level_info?.current_level}`}
               onClick={() => navigate(`/user/${user?.mid}`)}
             />
           </DropdownItem>
-          <DropdownItem key="settings">设置</DropdownItem>
+          <DropdownItem key="settings" onClick={() => navigate("/settings")}>
+            设置
+          </DropdownItem>
           <DropdownItem key="help_and_feedback">帮助与反馈</DropdownItem>
           <DropdownItem key="logout" color="danger" className="text-danger" onPress={openConfirmLogoutModal}>
             退出登录

@@ -45,11 +45,16 @@ export interface FavFolderCollectedListData {
 export interface FavFolderCollectedItem {
   /** 收藏夹 ml */
   id: number;
+  /** 类型 11：视频收藏夹 21：视频合集 */
+  type: number;
   /** 原始收藏夹 mlid（去除两位 mid 尾号） */
   fid: number;
   /** 创建用户 mid */
   mid: number;
-  /** 收藏夹属性，同 attr 二进制位 */
+  /** 收藏夹属性
+   * 0: 私有收藏夹 0：公开 1：私有
+   * 1：是否为默认收藏夹 0：默认收藏夹 1：其他收藏夹
+   */
   attr: number;
   /** 收藏夹标题 */
   title: string;
