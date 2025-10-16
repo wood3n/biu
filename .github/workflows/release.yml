@@ -2,7 +2,7 @@ name: Build and Release on Electron package change
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
     paths:
       - "src/**"
       - "public/**"
@@ -10,8 +10,8 @@ on:
       - "package.json"
       - "pnpm-lock.yaml"
   pull_request:
-    types: [ closed ]
-    branches: [ master ]
+    types: [closed]
+    branches: [master]
   workflow_dispatch:
 
 concurrency:
@@ -39,17 +39,15 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 'lts/*'
-          cache: 'pnpm'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 10
-          run_install: false
+      - name: Use Node.js lts
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
