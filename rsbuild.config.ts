@@ -25,11 +25,34 @@ export default defineConfig({
     pluginSvgr({
       svgrOptions: {
         exportType: "named",
+        // Enable SVGO to optimize inline SVGs
+        svgo: true,
+        svgoConfig: {
+          plugins: [
+            {
+              name: "preset-default",
+              params: { overrides: { removeViewBox: false } },
+            },
+          ],
+        },
       },
     }),
     pluginElectronDev(),
     pluginElectronBuild(),
   ],
+  tools: {
+    // Fine-tune Rspack for production size reduction
+    rspack(config, { env }) {
+      if (env === "production") {
+        // Disable sourcemaps for smallest bundle
+        config.devtool = false;
+        config.optimization = {
+          ...config.optimization,
+          minimize: true,
+        };
+      }
+    },
+  },
   server: {
     open: false,
     proxy: {

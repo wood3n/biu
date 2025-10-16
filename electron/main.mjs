@@ -1,4 +1,6 @@
-import { app, BrowserWindow, nativeImage, session } from "electron";
+import { app, BrowserWindow, nativeImage, session, dialog } from "electron";
+import log from "electron-log/main";
+import { autoUpdater } from "electron-updater";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -94,6 +96,70 @@ function createWindow() {
   });
 }
 
+function initAutoUpdate() {
+  try {
+    autoUpdater.logger = log;
+    log.transports.file.level = "info";
+    autoUpdater.autoDownload = false;
+
+    autoUpdater.on("checking-for-update", () => {
+      log.info("[autoUpdater] checking for update");
+    });
+
+    autoUpdater.on("update-available", () => {
+      log.info("[autoUpdater] update available");
+      dialog
+        .showMessageBox(mainWindow, {
+          type: "info",
+          buttons: ["立即下载", "稍后"],
+          title: "发现新版本",
+          message: "检测到新版本，是否下载并安装？",
+        })
+        .then(({ response }) => {
+          if (response === 0) {
+            autoUpdater.downloadUpdate();
+          }
+        })
+        .catch(err => log.error("[autoUpdater] dialog error:", err));
+    });
+
+    autoUpdater.on("update-not-available", () => {
+      log.info("[autoUpdater] no update available");
+    });
+
+    autoUpdater.on("download-progress", progress => {
+      const percent = Math.round(progress.percent ?? 0);
+      log.info(`[autoUpdater] downloading: ${percent}% (${Math.round(progress.bytesPerSecond || 0)} B/s)`);
+    });
+
+    autoUpdater.on("error", error => {
+      log.error("[autoUpdater] error:", error);
+    });
+
+    autoUpdater.on("update-downloaded", () => {
+      log.info("[autoUpdater] update downloaded");
+      dialog
+        .showMessageBox(mainWindow, {
+          type: "info",
+          buttons: ["重启安装", "稍后"],
+          title: "更新就绪",
+          message: "更新已下载，是否重启安装？",
+        })
+        .then(({ response }) => {
+          if (response === 0) {
+            autoUpdater.quitAndInstall();
+          }
+        })
+        .catch(err => log.error("[autoUpdater] dialog error:", err));
+    });
+
+    // 触发检查（GitHub 公共仓库无需 GH_TOKEN；私有仓库需在环境中提供）
+    autoUpdater.checkForUpdates().catch(err => log.error("[autoUpdater] check failed:", err));
+  } catch (error) {
+    log.error("[autoUpdater] init failed:", error);
+  }
+}
+
 app.commandLine.appendSwitch("--in-process-gpu");
 
 function stripDomainFromSetCookie(cookies) {
@@ -154,6 +220,9 @@ app.whenReady().then(() => {
 
   registerIpcHandlers({ app });
   createWindow();
+  if (app.isPackaged) {
+    initAutoUpdate();
+  }
 });
 
 app.on("activate", () => mainWindow?.show());

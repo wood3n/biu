@@ -1,17 +1,17 @@
 name: Build and Release on Electron package change
 
 on:
-  # push:
-  #   branches: [ master ]
-  #   paths:
-  #     - "src/**"
-  #     - "public/**"
-  #     - "electron/**"
-  #     - "package.json"
-  #     - "pnpm-lock.yaml"
-  # pull_request:
-  #   types: [ closed ]
-  #   branches: [ master ]
+  push:
+    branches: [ master ]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "electron/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+  pull_request:
+    types: [ closed ]
+    branches: [ master ]
   workflow_dispatch:
 
 concurrency:
@@ -20,7 +20,11 @@ concurrency:
 
 jobs:
   build-and-release:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
     permissions:
       contents: write
 
@@ -50,7 +54,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build application
+      - name: Build and package application
+        env:
+          # electron-builder 发布到 GitHub Releases 所需
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 触发 electron-builder 在程序化调用中执行发布
+          ELECTRON_PUBLISH: always
         run: pnpm build
 
       - name: Generate changelog and push tag/commit
