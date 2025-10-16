@@ -9,8 +9,6 @@ export interface HistoryToViewDelParams {
   viewed?: boolean;
   /** 删除的目标记录的 avid，可选 */
   aid?: number;
-  /** CSRF Token（bili_jct） */
-  csrf: string;
 }
 
 /** 顶层响应 */
@@ -24,5 +22,8 @@ export interface HistoryToViewDelResponse {
  * 删除稍后再看视频
  */
 export async function postHistoryToViewDel(data: HistoryToViewDelParams): Promise<HistoryToViewDelResponse> {
-  return apiRequest.post<HistoryToViewDelResponse>("/x/v2/history/toview/del", data);
+  return apiRequest.post<HistoryToViewDelResponse>("/x/v2/history/toview/del", data, {
+    useFormData: true,
+    useCSRF: true,
+  });
 }

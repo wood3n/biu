@@ -26,6 +26,7 @@ interface Action {
   play: (mv: PlayingMV) => Promise<void>;
   playPage: (pageCid: number) => Promise<void>;
   playList: (mvs: PlayingMV[]) => void;
+  replacePlayList: (mvs: PlayingMV[]) => Promise<void>;
   deleteMV: (bvids: string[]) => void;
   deletePage: (pageCids: number[]) => void;
   clear: () => void;
@@ -192,7 +193,13 @@ export const usePlayingQueue = create<State & Action>()(
             return;
           }
 
-          const newPlayData = await getMVPlayData(mv);
+          let newPlayData: PlayingMV;
+          if (mv.cid) {
+            const url = await getAudioUrl(mv.bvid, Number(mv.cid));
+            newPlayData = { ...mv, url };
+          } else {
+            newPlayData = await getMVPlayData(mv);
+          }
           setCurrentAndLoad(newPlayData);
 
           const listItem = list.find(item => item.bvid === mv.bvid);
@@ -220,6 +227,18 @@ export const usePlayingQueue = create<State & Action>()(
           const newPlayData = await getMVPlayData(first);
           setCurrentAndLoad(newPlayData);
           set({ list: [newPlayData, ...newList, ...list] });
+        },
+        replacePlayList: async mvs => {
+          const [first, ...rest] = mvs;
+          const { current } = get();
+
+          if (first.bvid === current?.bvid) {
+            set({ list: [...mvs] });
+          } else {
+            const newPlayData = await getMVPlayData(first);
+            setCurrentAndLoad(newPlayData);
+            set({ list: [newPlayData, ...rest] });
+          }
         },
         playPage: async (pageCid: number) => {
           const { current } = get();

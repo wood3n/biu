@@ -8,7 +8,8 @@ export interface PlayerPlayurlRequestParams {
   bvid?: string; // 稿件bvid
   cid: number; // 视频cid
   qn?: number; // 视频清晰度选择 未登录默认32(480P) 登录后默认64(720P)
-  fnval?: number; // 视频流格式标识 默认1(MP4格式) 16:DASH格式
+  /** 视频流格式标识 默认1(MP4格式) 16:DASH格式 */
+  fnval?: number;
   fnver?: number; // 固定为0
   fourk?: number; // 是否允许4K视频 0:画质最高1080P(默认) 1:画质最高4K
   session?: string; // 从视频播放页的HTML中设置window.__playinfo__处获取

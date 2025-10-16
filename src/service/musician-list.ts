@@ -2,8 +2,8 @@ import { apiRequest } from "./request";
 
 /** 查询参数：根据文档，level_source 仅给出 1 表示“全部” */
 export interface Params {
-  /** 分类来源，1：全部 */
-  level_source: 1;
+  /** 分类来源，1：全部; 2：新注册音乐人 */
+  level_source: 1 | 2;
 }
 
 /** 音乐人条目结构（与 service.md 示例返回一致） */

@@ -2,6 +2,7 @@ import type { RouteObject } from "react-router";
 
 import Layout from "./layout";
 import ArtistRank from "./pages/artist-rank";
+import DownloadList from "./pages/download-list";
 import UserFollow from "./pages/follow";
 import Later from "./pages/later";
 import MusicRank from "./pages/music-rank";
@@ -47,6 +48,10 @@ const routes: RouteObject[] = [
       {
         path: "settings",
         element: <Settings />,
+      },
+      {
+        path: "download-list",
+        element: <DownloadList />,
       },
     ],
   },

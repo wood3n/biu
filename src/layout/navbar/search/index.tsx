@@ -1,16 +1,6 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalHeader,
-  Spinner,
-  addToast,
-  useDisclosure,
-  Pagination,
-} from "@heroui/react";
+import { Button, Modal, ModalBody, ModalContent, ModalHeader, Spinner, useDisclosure, Pagination } from "@heroui/react";
 import { RiCloseLine, RiSearchLine } from "@remixicon/react";
 import { usePagination } from "ahooks";
 
@@ -21,7 +11,6 @@ import {
   type SearchVideoItem,
 } from "@/service/web-interface-search-type";
 
-import SearchInput from "./input";
 import { SearchType, SearchTypeOptions } from "./search-type";
 import SearchUser from "./search-user";
 import SearchVideo from "./search-video";
@@ -30,6 +19,7 @@ const SearchBox = () => {
   const [keyword, setKeyword] = useState("");
   const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
   const [searchType, setSearchType] = useState(SearchType.Video);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   const {
     loading,
@@ -60,40 +50,42 @@ const SearchBox = () => {
     },
   );
 
-  const onSearch = useCallback(
-    (kw?: string) => {
-      const value = (kw ?? keyword).trim();
-      if (!value) {
-        addToast({ title: "请输入搜索内容", description: "关键词不能为空", color: "warning" });
-        return;
-      }
-      if (!isOpen) onOpen();
-      search({ keyword: value, current: 1, pageSize: 24 });
-    },
-    [keyword, isOpen, onOpen, search],
-  );
-
   return (
     <>
-      <SearchInput value={keyword} onValueChange={setKeyword} onSearch={onSearch} className="w-[360px]" />
-
-      {/* 结果弹窗 */}
+      <Button
+        startContent={<RiSearchLine size={16} />}
+        onPress={() => {
+          onOpen();
+          setTimeout(() => {
+            searchInputRef.current?.focus();
+          }, 0);
+        }}
+        className="window-no-drag w-[280px] justify-start text-zinc-500"
+      >
+        搜索
+      </Button>
       <Modal
         disableAnimation
         hideCloseButton
+        shouldBlockScroll={false}
         isOpen={isOpen}
         isDismissable={false}
         onOpenChange={onOpenChange}
         size="5xl"
-        scrollBehavior="inside"
       >
         <ModalContent>
           <ModalHeader className="flex items-center space-x-2 border-b-1 border-b-zinc-800 py-3">
-            <RiSearchLine color="#71717A" />
+            <RiSearchLine color="#71717A" size={20} />
             <input
+              ref={searchInputRef}
               className="h-8 flex-1 border-none pl-2 outline-0"
               value={keyword}
               onChange={e => setKeyword(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === "Enter") {
+                  search({ current: 1, pageSize: 24 });
+                }
+              }}
             />
             <Button size="sm" variant="light" isIconOnly onPress={onClose}>
               <RiCloseLine color="#71717A" />

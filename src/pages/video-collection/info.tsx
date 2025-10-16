@@ -1,12 +1,16 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
-import { Image, Link, Skeleton, User } from "@heroui/react";
-import { RiStarLine, RiStarOffLine } from "@remixicon/react";
+import { Button, Image, Link, Skeleton, useDisclosure, User } from "@heroui/react";
+import { RiDeleteBinLine, RiPencilLine, RiStarFill, RiStarLine } from "@remixicon/react";
 import { useRequest } from "ahooks";
 
 import FallbackImage from "@/assets/images/fallback.png";
 import { CollectionType } from "@/common/constants/collection";
 import AsyncButton from "@/components/async-button";
+import ConfirmModal from "@/components/confirm-modal";
+import Ellipsis from "@/components/ellipsis";
+import EditFavoriteForm from "@/components/folder/form";
+import { postFavFolderDel } from "@/service/fav-folder-del";
 import { postFavFolderFav } from "@/service/fav-folder-fav";
 import { postFavFolderUnfav } from "@/service/fav-folder-unfav";
 import { postFavSeasonFav } from "@/service/fav-season-fav";
@@ -19,17 +23,28 @@ interface Props {
   loading?: boolean;
   cover?: string;
   title?: string;
+  desc?: string;
   upMid?: number;
   upName?: string;
   media_count?: number;
+  afterChangeInfo: VoidFunction;
 }
 
-const Info = ({ type, loading, cover, title, upMid, upName, media_count }: Props) => {
+const Info = ({ type, loading, cover, title, desc, upMid, upName, media_count, afterChangeInfo }: Props) => {
   const { user, collectedFolder, updateCollectedFolder } = useUser();
   const isOwn = upMid === user?.mid;
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const isCollected = collectedFolder?.some(folder => folder.id === Number(id));
+
+  const {
+    isOpen: isDeleteConfirmOpen,
+    onOpen: onDeleteConfirmOpen,
+    onOpenChange: onDeleteConfirmChange,
+  } = useDisclosure();
+
+  const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditChange } = useDisclosure();
 
   const { data: upInfo } = useRequest(
     async () => {
@@ -97,7 +112,7 @@ const Info = ({ type, loading, cover, title, upMid, upName, media_count }: Props
     return (
       <div className="mb-4 flex space-x-4">
         <Skeleton className="h-[230px] w-[230px] rounded-lg" />
-        <div className="flex flex-col items-start justify-end space-y-4">
+        <div className="flex flex-col items-start justify-start space-y-4">
           <Skeleton className="h-12 w-48 rounded-lg" />
           <Skeleton className="h-4 w-24 rounded-lg" />
         </div>
@@ -115,10 +130,14 @@ const Info = ({ type, loading, cover, title, upMid, upName, media_count }: Props
         width={230}
         height={230}
         className="object-cover"
+        classNames={{
+          wrapper: "flex-none",
+        }}
       />
       <div className="flex flex-col justify-between">
         <div className="flex flex-col items-start space-y-4">
           <h1 className="text-3xl">{title}</h1>
+          {Boolean(desc) && <Ellipsis className="text-sm text-zinc-500">{desc}</Ellipsis>}
           {!isOwn && (
             <User
               avatarProps={{
@@ -138,16 +157,52 @@ const Info = ({ type, loading, cover, title, upMid, upName, media_count }: Props
             <span>{media_count} 条视频</span>
           </div>
         </div>
-        <div className="flex items-center justify-between">
-          <AsyncButton
-            color="primary"
-            startContent={isCollected ? <RiStarLine size={18} /> : <RiStarOffLine size={18} />}
-            onPress={toggleCollect}
-          >
-            {isCollected ? "已收藏" : "取消收藏"}
-          </AsyncButton>
+        <div className="flex items-center space-x-2">
+          {isOwn && (
+            <>
+              <Button startContent={<RiPencilLine size={18} />} onPress={onEditOpen}>
+                修改信息
+              </Button>
+              <Button startContent={<RiDeleteBinLine size={18} />} onPress={onDeleteConfirmOpen}>
+                删除
+              </Button>
+            </>
+          )}
+          {!isOwn && (
+            <AsyncButton
+              color="primary"
+              startContent={isCollected ? <RiStarFill size={18} /> : <RiStarLine size={18} />}
+              onPress={toggleCollect}
+            >
+              {isCollected ? "已收藏" : "取消收藏"}
+            </AsyncButton>
+          )}
         </div>
       </div>
+      <ConfirmModal
+        type="danger"
+        isOpen={isDeleteConfirmOpen}
+        onOpenChange={onDeleteConfirmChange}
+        title="确认删除收藏夹吗？"
+        onConfirm={async () => {
+          const res = await postFavFolderDel({
+            media_ids: id as string,
+          });
+
+          if (res.code === 0) {
+            await updateCollectedFolder();
+            navigate("/");
+          }
+
+          return res.code === 0;
+        }}
+      />
+      <EditFavoriteForm
+        mid={Number(id)}
+        isOpen={isEditOpen}
+        onOpenChange={onEditChange}
+        afterSubmit={afterChangeInfo}
+      />
     </div>
   );
 };

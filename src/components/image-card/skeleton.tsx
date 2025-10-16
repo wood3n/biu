@@ -1,10 +1,10 @@
 import { Card, CardBody, CardFooter, Skeleton } from "@heroui/react";
 
-export type MVCardSkeletonProps = {
+export type SkeletonProps = {
   coverHeight?: number;
 };
 
-export default function CardSkeleton({ coverHeight = 188 }: MVCardSkeletonProps) {
+export default function CardSkeleton({ coverHeight = 188 }: SkeletonProps) {
   return (
     <Card className="w-full" shadow="sm" isHoverable={false} isPressable={false}>
       <CardBody className="overflow-visible p-0">

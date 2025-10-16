@@ -1,3 +1,4 @@
+import { isNil } from "es-toolkit/predicate";
 import SparkMD5 from "spark-md5";
 
 import { useUser } from "@/store/user";
@@ -41,6 +42,7 @@ export function encodeParamsWbi(params: { [key: string]: string | number | objec
   Object.assign(params, { wts: curr_time }); // 添加 wts 字段
   // 按照 key 重排参数
   const query = Object.keys(params)
+    .filter(key => !isNil(params[key]))
     .sort()
     .map(key => {
       // 过滤 value 中的 "!'()*" 字符

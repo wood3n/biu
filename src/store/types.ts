@@ -12,6 +12,10 @@ export interface PlayingMV {
    */
   bvid: string;
   /**
+   * 视频分集id
+   */
+  cid?: string | number;
+  /**
    * 封面
    */
   coverImageUrl: string;

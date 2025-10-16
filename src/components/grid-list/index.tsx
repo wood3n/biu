@@ -5,12 +5,13 @@ import { twMerge } from "tailwind-merge";
 
 import { ReactComponent as Empty } from "@/assets/icons/empty.svg";
 
-import CardSkeleton from "./skeleton";
+import ImageCard from "../image-card";
 
 export interface GridPageListProps<T> {
   data?: T[];
   loading?: boolean;
   itemKey: string;
+  skeletonCoverHeight?: number;
   renderItem: (item: T, index: number) => React.ReactNode;
   enablePagination?: boolean;
   pageSize?: number;
@@ -21,6 +22,7 @@ const GridList = <T,>({
   data = [],
   loading = false,
   itemKey,
+  skeletonCoverHeight,
   renderItem,
   enablePagination,
   pageSize = 20,
@@ -36,7 +38,7 @@ const GridList = <T,>({
       return data.slice((page - 1) * pageSize, page * pageSize);
     }
     return data;
-  }, [data, page, pageSize]);
+  }, [enablePagination, data, page, pageSize]);
 
   if (loading) {
     return (
@@ -44,7 +46,7 @@ const GridList = <T,>({
         {Array(12)
           .fill(0)
           .map((_, index) => (
-            <CardSkeleton key={index} />
+            <ImageCard.Skeleton coverHeight={skeletonCoverHeight} key={index} />
           ))}
       </div>
     );

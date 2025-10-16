@@ -3,9 +3,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Alert, Button, Spinner, addToast } from "@heroui/react";
 import { twMerge } from "tailwind-merge";
 
-import { MVCard, MVCardSkeleton } from "@/components/mv-card";
+import ImageCard from "@/components/image-card";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import { getMusicComprehensiveWebRank, type Data as MusicItem } from "@/service/music-comprehensive-web-rank";
+import { usePlayingQueue } from "@/store/playing-queue";
 
 const PAGE_SIZE = 20;
 
@@ -22,6 +23,8 @@ const MusicRecommend = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const playMusic = usePlayingQueue(state => state.play);
 
   const deDupConcat = useCallback((prev: MusicItem[], next: MusicItem[]) => {
     const seen = new Set(prev.map(i => i.id));
@@ -109,11 +112,9 @@ const MusicRecommend = () => {
   const isEmpty = useMemo(() => !initialLoading && list.length === 0 && !error, [initialLoading, list, error]);
 
   return (
-    <ScrollContainer ref={scrollerRef} className="h-full w-full">
-      <div className="w-full px-4 py-6">
-        {/* 顶部标题 */}
-        <h2 className="mb-4 text-2xl font-semibold">更多音乐推荐</h2>
-
+    <ScrollContainer ref={scrollerRef} className="h-full w-full p-4">
+      <h1 className="mb-4">音乐推荐</h1>
+      <div className="w-full">
         {/* 错误提示（整页） */}
         {error && list.length === 0 && (
           <div className="flex h-[40vh] flex-col items-center justify-center space-y-3">
@@ -130,7 +131,7 @@ const MusicRecommend = () => {
         {initialLoading && (
           <div className={gridClass}>
             {Array.from({ length: 10 }).map((_, idx) => (
-              <MVCardSkeleton key={idx} />
+              <ImageCard.Skeleton key={idx} />
             ))}
           </div>
         )}
@@ -142,13 +143,21 @@ const MusicRecommend = () => {
         {!initialLoading && list.length > 0 && (
           <div className={gridClass}>
             {list.map(item => (
-              <MVCard
+              <ImageCard
+                showPlayIcon
                 key={item.id}
-                bvid={item.bvid}
                 cover={item.cover}
                 title={item.music_title}
-                authorName={item.author}
-                coverHeight={200}
+                footer={<div className="w-full truncate text-left text-sm text-zinc-400">{item.author}</div>}
+                onPress={() =>
+                  playMusic({
+                    title: item.music_title,
+                    bvid: item.bvid,
+                    cid: item.cid,
+                    singer: item.author,
+                    coverImageUrl: item.cover,
+                  })
+                }
               />
             ))}
           </div>

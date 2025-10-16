@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 
-import { addToast, Button, Checkbox, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
+import {
+  addToast,
+  Button,
+  Checkbox,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Spinner,
+} from "@heroui/react";
 import { useRequest } from "ahooks";
 
 import { getFavFolderCreatedListAll } from "@/service/fav-folder-created-list-all";
@@ -10,31 +20,42 @@ import { useUser } from "@/store/user";
 import AsyncButton from "../async-button";
 import ScrollContainer from "../scroll-container";
 
-export interface FolderSelectProps {
+export interface FavFolderSelectProps {
   rid: string;
   // 受控：显示/隐藏
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  title?: React.ReactNode;
+  afterSubmit?: (ids: number[]) => void;
 }
 
-const FolderSelect: React.FC<FolderSelectProps> = ({ rid, isOpen, onOpenChange }) => {
+const FavFolderSelect = ({ rid, isOpen, onOpenChange, title, afterSubmit }: FavFolderSelectProps) => {
   const user = useUser(s => s.user);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [submitting, setSubmitting] = useState(false);
 
-  const { data } = useRequest(
+  const { data, loading } = useRequest(
     async () => {
       const res = await getFavFolderCreatedListAll({
+        rid: Number(rid),
+        type: 2,
         up_mid: user?.mid as number,
       });
+
+      const collectedFolders = res?.data?.list?.filter(item => item.fav_state === 1) || [];
+      if (collectedFolders?.length) {
+        setSelectedIds(collectedFolders.map(item => item.id));
+      } else {
+        setSelectedIds([]);
+      }
 
       return res?.data?.list;
     },
     {
       ready: Boolean(isOpen && user?.mid),
+      refreshDeps: [isOpen, rid],
     },
   );
-
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [submitting, setSubmitting] = useState(false);
 
   const toggle = (id: number) => {
     setSelectedIds(prev => {
@@ -54,17 +75,25 @@ const FolderSelect: React.FC<FolderSelectProps> = ({ rid, isOpen, onOpenChange }
   };
 
   const handleConfirm = async () => {
+    const prevSelectedFolderIds = data?.filter(item => item.fav_state === 1)?.map(item => item.id) || [];
+    const delMediaIds = prevSelectedFolderIds.filter(id => !selectedIds.includes(id)).join(",");
+    const addMediaIds = selectedIds.filter(id => !prevSelectedFolderIds.includes(id)).join(",");
+
     try {
       setSubmitting(true);
       const res = await postFavFolderDeal({
         rid,
-        add_media_ids: selectedIds.join(","),
+        add_media_ids: addMediaIds,
+        del_media_ids: delMediaIds,
         type: 2,
         platform: "web",
+        ga: 1,
+        gaia_source: "web_normal",
       });
 
       if (res.code === 0) {
         onOpenChange(false);
+        afterSubmit?.(selectedIds);
       } else {
         addToast({
           title: res.message,
@@ -81,9 +110,13 @@ const FolderSelect: React.FC<FolderSelectProps> = ({ rid, isOpen, onOpenChange }
       <ModalContent>
         {() => (
           <>
-            <ModalHeader className="text-base font-medium">添加到收藏夹</ModalHeader>
-            <ModalBody className="max-h-80 px-0">
-              {data?.length === 0 ? (
+            <ModalHeader className="text-base font-medium">{title}</ModalHeader>
+            <ModalBody className="h-[800px] max-h-[800px] px-0">
+              {loading ? (
+                <div className="flex h-[400px] items-center justify-center">
+                  <Spinner />
+                </div>
+              ) : data?.length === 0 ? (
                 <div className="py-10 text-center text-sm text-zinc-500">暂无收藏夹</div>
               ) : (
                 <ScrollContainer style={{ height: "100%" }}>
@@ -138,4 +171,4 @@ const FolderSelect: React.FC<FolderSelectProps> = ({ rid, isOpen, onOpenChange }
   );
 };
 
-export default FolderSelect;
+export default FavFolderSelect;

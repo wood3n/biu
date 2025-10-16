@@ -16,8 +16,6 @@ export interface FavResourceBatchDelRequestParams {
   media_id: number;
   /** 平台标识，可为 web */
   platform?: string;
-  /** CSRF Token（bili_jct），Cookie 方式必要 */
-  csrf: string;
 }
 
 /**
@@ -37,13 +35,9 @@ export interface FavResourceBatchDelResponse {
 /**
  * 批量删除内容
  */
-export function postFavResourceBatchDel(
-  params: FavResourceBatchDelRequestParams,
-): Promise<FavResourceBatchDelResponse> {
-  const form = new URLSearchParams();
-  form.set("resources", params.resources);
-  form.set("media_id", String(params.media_id));
-  if (params.platform) form.set("platform", params.platform);
-  form.set("csrf", params.csrf);
-  return apiRequest.post<FavResourceBatchDelResponse>("/x/v3/fav/resource/batch-del", form);
+export function postFavResourceBatchDel(data: FavResourceBatchDelRequestParams): Promise<FavResourceBatchDelResponse> {
+  return apiRequest.post<FavResourceBatchDelResponse>("/x/v3/fav/resource/batch-del", data, {
+    useCSRF: true,
+    useFormData: true,
+  });
 }

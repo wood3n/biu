@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { Tooltip, type TooltipProps } from "@heroui/react";
 import clx from "classnames";
+import { twMerge } from "tailwind-merge";
 
 interface Props {
   lines?: number;
@@ -12,6 +13,7 @@ interface Props {
   showTooltip?: boolean;
   /** 传递给 Tooltip 的配置（不包含 content/children） */
   tooltipProps?: Omit<TooltipProps, "content" | "children">;
+  tooltipClassName?: string;
 }
 
 const lineClampMap = {
@@ -23,7 +25,15 @@ const lineClampMap = {
   6: "line-clamp-6",
 };
 
-const Ellipsis = ({ lines = 1, children, className, style, showTooltip = true, tooltipProps }: Props) => {
+const Ellipsis = ({
+  lines = 1,
+  children,
+  className,
+  style,
+  showTooltip = true,
+  tooltipProps,
+  tooltipClassName,
+}: Props) => {
   const [isOverflowed, setIsOverflow] = useState(false);
   const textElementRef = useRef<HTMLDivElement>(null);
 
@@ -50,7 +60,14 @@ const Ellipsis = ({ lines = 1, children, className, style, showTooltip = true, t
           closeDelay={0}
           isDisabled={!isOverflowed}
           content={
-            <div className="max-w-[min(80vw,640px)] leading-relaxed break-words whitespace-pre-wrap">{children}</div>
+            <div
+              className={twMerge(
+                "max-w-[min(80vw,640px)] leading-relaxed break-words whitespace-pre-wrap",
+                tooltipClassName,
+              )}
+            >
+              {children}
+            </div>
           }
           placement="top-start"
           {...tooltipProps}

@@ -14,7 +14,7 @@ export interface FavFolderCreatedListAllRequestParams {
    */
   type?: number;
   /** 目标内容 id（视频稿件：avid） */
-  rid?: number;
+  rid?: string | number;
   /** web 位置标识，如 333.1387 */
   web_location?: string;
 }

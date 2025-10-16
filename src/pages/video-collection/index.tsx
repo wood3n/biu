@@ -10,7 +10,7 @@ import VideoCollectionInfo from "./video-series";
 const Folder: React.FC = () => {
   const [searchParams] = useSearchParams();
 
-  const folderType = useMemo(
+  const collectionType = useMemo(
     () => Number(searchParams.get("type") || CollectionType.Favorite) as CollectionType,
     [searchParams],
   );
@@ -18,8 +18,8 @@ const Folder: React.FC = () => {
   return (
     <ScrollContainer className="h-full w-full">
       <div className="w-full p-4">
-        {folderType === CollectionType.Favorite && <Favorites />}
-        {folderType === CollectionType.VideoSeries && <VideoCollectionInfo />}
+        {collectionType === CollectionType.Favorite && <Favorites />}
+        {collectionType === CollectionType.VideoSeries && <VideoCollectionInfo />}
       </div>
     </ScrollContainer>
   );

@@ -1,4 +1,8 @@
+import { postPassportLoginWebConfirmRefresh } from "@/service/passport-login-web-confirm-refresh";
 import { getPassportLoginWebCookieInfo } from "@/service/passport-login-web-cookie-info";
+import { postPassportLoginWebCookieRefresh } from "@/service/passport-login-web-cookie-refresh";
+import { biliRequest } from "@/service/request";
+import { useToken } from "@/store/token";
 
 async function getCorrespondPath(timestamp: number, publicKey: CryptoKey) {
   const data = new TextEncoder().encode(`refresh_${timestamp}`);
@@ -27,14 +31,46 @@ export const refreshCookie = async () => {
     const publicKey = await getPublicKey();
     const correspondPath = await getCorrespondPath(timestamp, publicKey);
 
-    const htmlRes = await fetch(`https://www.bilibili.com/correspond/1/${correspondPath}`, {
-      method: "GET",
-      credentials: "include",
+    const htmlRes = await biliRequest.get<string>(`/correspond/1/${correspondPath}`, {
+      responseType: "text",
     });
 
-    if (htmlRes.ok) {
-      const html = await htmlRes.text();
-      console.log(html);
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlRes, "text/html");
+    const targetDiv = doc.getElementById("1-name");
+
+    if (targetDiv && targetDiv.textContent) {
+      const refreshCSRF = targetDiv.textContent.trim();
+      const oldRefreshToken = useToken.getState().tokenData?.refresh_token as string;
+
+      const getRefreshCookieRes = await postPassportLoginWebCookieRefresh({
+        refresh_csrf: refreshCSRF,
+        source: "main_web",
+        refresh_token: oldRefreshToken,
+      });
+
+      if (getRefreshCookieRes.code === 0) {
+        const newRefreshToken = getRefreshCookieRes.data?.refresh_token;
+
+        useToken.setState({
+          tokenData: {
+            ...useToken.getState().tokenData,
+            refresh_token: newRefreshToken,
+          },
+        });
+
+        const getRefreshResult = await postPassportLoginWebConfirmRefresh({
+          refresh_token: oldRefreshToken,
+        });
+
+        return getRefreshResult.code === 0;
+      }
+
+      return false;
+    } else {
+      return false;
     }
   }
+
+  return false;
 };

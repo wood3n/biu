@@ -1,5 +1,16 @@
 import { apiRequest } from "./request";
 
+export enum UserRelationAction {
+  /** 关注 */
+  Follow = 1,
+  /** 取关 */
+  Unfollow = 2,
+  /** 拉黑 */
+  Blocked = 5,
+  /** 取消拉黑 */
+  Unblock = 6,
+}
+
 /**
  * 操作用户关系
  * 请求方式：POST

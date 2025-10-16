@@ -1,16 +1,16 @@
 import React, { useMemo } from "react";
 
-import { Button, Image, useDisclosure } from "@heroui/react";
-import { RiListRadio } from "@remixicon/react";
+import { Image } from "@heroui/react";
 
 import Ellipsis from "@/components/ellipsis";
 import { usePlayingQueue } from "@/store/playing-queue";
 
+import Download from "./download";
+import MvFavFolderSelect from "./mv-fav-folder-select";
 import VideoPageList from "./video-page-list";
 
 const LeftControl = () => {
   const { current } = usePlayingQueue();
-  const { isOpen, onOpen: openPageList, onOpenChange } = useDisclosure();
 
   const title = useMemo(() => {
     if ((current?.pages?.length ?? 0) > 1) {
@@ -38,16 +38,13 @@ const LeftControl = () => {
       />
       <div className="flex min-w-0 flex-col space-y-1">
         <Ellipsis>{title}</Ellipsis>
-        {Boolean(current.singer) && <span className="truncate text-zinc-400">{current.singer}</span>}
+        {Boolean(current.singer) && <span className="truncate text-sm text-zinc-400">{current.singer}</span>}
       </div>
-      <div>
-        {Boolean((current.pages?.length ?? 0) > 1) && (
-          <Button isIconOnly size="sm" variant="light" onPress={openPageList}>
-            <RiListRadio size={18} />
-          </Button>
-        )}
+      <div className="flex items-center">
+        {Boolean((current.pages?.length ?? 0) > 1) && <VideoPageList />}
+        <MvFavFolderSelect />
+        {Boolean(current.url) && <Download />}
       </div>
-      <VideoPageList isOpen={isOpen} onOpenChange={onOpenChange} />
     </div>
   );
 };

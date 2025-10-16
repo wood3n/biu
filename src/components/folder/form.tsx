@@ -32,9 +32,10 @@ interface Props {
   mid?: number;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  afterSubmit?: () => void;
 }
 
-const FolderForm = ({ mid, isOpen, onOpenChange }: Props) => {
+const FolderForm = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) => {
   const { updateOwnFolder } = useUser();
   const [isFetching, setIsFetching] = useState(false);
 
@@ -95,9 +96,9 @@ const FolderForm = ({ mid, isOpen, onOpenChange }: Props) => {
 
         if (res?.code === 0) {
           updateOwnFolder();
-          addToast({ color: "success", title: "修改成功" });
           reset();
           onOpenChange(false);
+          afterSubmit?.();
         } else {
           addToast({
             color: "danger",

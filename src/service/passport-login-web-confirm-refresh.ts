@@ -6,8 +6,6 @@ import { passportRequest } from "./request";
  * 认证方式：Cookie（需要携带新的 SESSDATA）
  */
 export interface WebConfirmRefreshRequestParams {
-  /** CSRF Token（bili_jct，位于新的 Cookie 中） */
-  csrf: string;
   /** 旧的持久化刷新口令（刷新前 localStorage 中的 ac_time_value 值） */
   refresh_token: string;
 }
@@ -32,5 +30,8 @@ export interface WebConfirmRefreshResponse {
 export function postPassportLoginWebConfirmRefresh(
   data: WebConfirmRefreshRequestParams | URLSearchParams,
 ): Promise<WebConfirmRefreshResponse> {
-  return passportRequest.post<WebConfirmRefreshResponse>("/x/passport-login/web/confirm/refresh", data);
+  return passportRequest.post<WebConfirmRefreshResponse>("/x/passport-login/web/confirm/refresh", data, {
+    useCSRF: true,
+    useFormData: true,
+  });
 }

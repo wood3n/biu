@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router";
 
 import { Alert, Avatar, Button, Card, CardBody, Pagination, Spinner } from "@heroui/react";
 import { usePagination } from "ahooks";
@@ -9,30 +10,9 @@ import { useUser } from "@/store/user";
 
 const PAGE_SIZE = 20;
 
-const FollowGrid = ({ items }: { items: RelationListItem[] }) => {
-  if (!items || items.length === 0) {
-    return <div className="text-foreground-500 flex h-full items-center justify-center p-8">暂无关注</div>;
-  }
-
-  return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-      {items.map(u => (
-        <Card key={u.mid} isHoverable className="h-full">
-          <CardBody className="flex items-center space-y-2">
-            <Avatar className="text-large h-32 w-32 flex-none" src={u.face} name={u.uname} />
-            <div className="flex w-full flex-col items-center space-y-1">
-              <span className="text-lg">{u.uname}</span>
-              <span className="text-foreground-500 w-full truncate text-center text-sm">{u.sign}</span>
-            </div>
-          </CardBody>
-        </Card>
-      ))}
-    </div>
-  );
-};
-
-const UserFollow: React.FC = () => {
+const UserFollow = () => {
   const { user } = useUser();
+  const navigate = useNavigate();
 
   const {
     data,
@@ -83,7 +63,21 @@ const UserFollow: React.FC = () => {
           </div>
         )}
 
-        {!loading && !error && <FollowGrid items={data?.list ?? []} />}
+        {!loading && !error && (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            {data?.list?.map(u => (
+              <Card key={u.mid} isHoverable isPressable onPress={() => navigate(`/user/${u.mid}`)} className="h-full">
+                <CardBody className="flex items-center space-y-2">
+                  <Avatar className="text-large h-32 w-32 flex-none" src={u.face} name={u.uname} />
+                  <div className="flex w-full flex-col items-center space-y-1">
+                    <span className="text-lg">{u.uname}</span>
+                    <span className="text-foreground-500 w-full truncate text-center text-sm">{u.sign}</span>
+                  </div>
+                </CardBody>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {!error && totalPage > 1 && (
           <div className="flex w-full items-center justify-center py-6">

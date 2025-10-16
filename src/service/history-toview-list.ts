@@ -1,5 +1,14 @@
 import { apiRequest } from "./request";
 
+export interface HistoryToViewListParams {
+  /** 分页参数：当前页码，默认 1 */
+  pn?: number;
+  /** 分页参数：每页数量，默认 20，最大 50 */
+  ps?: number;
+  /** 0: 全部；2：未看完 */
+  viewed?: number;
+}
+
 /** 稍后再看视频条目（字段与 web 接口一致，尽量精确建模） */
 export interface ToViewVideoItem {
   aid: number; // 稿件avid
@@ -43,8 +52,11 @@ export interface HistoryToViewListResponse {
 }
 
 /**
- * 获取稍后再看视频列表 - GET /x/v2/history/toview
+ * 获取稍后再看视频列表 - GET /x/v2/history/toview/web
  */
-export async function getHistoryToViewList(): Promise<HistoryToViewListResponse> {
-  return apiRequest.get<HistoryToViewListResponse>("/x/v2/history/toview");
+export async function getHistoryToViewList(params: HistoryToViewListParams): Promise<HistoryToViewListResponse> {
+  return apiRequest.get<HistoryToViewListResponse>("/x/v2/history/toview/web", {
+    params,
+    useWbi: true,
+  });
 }

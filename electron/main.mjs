@@ -75,7 +75,7 @@ function createWindow() {
   } else {
     mainWindow.loadURL(`http://localhost:${process.env.PORT}/`);
     mainWindow.webContents.openDevTools({
-      mode: "bottom",
+      mode: "detach",
     });
   }
 
@@ -129,8 +129,10 @@ app.whenReady().then(() => {
 
   // 保存监听器引用，便于退出时移除
   onBeforeSendHeadersHandler = (details, callback) => {
-    details.requestHeaders["Referer"] = "https://www.bilibili.com/";
+    details.requestHeaders["Referer"] = "https://www.bilibili.com";
     details.requestHeaders["Origin"] = "https://www.bilibili.com";
+    details.requestHeaders["User-Agent"] =
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
     callback({ requestHeaders: details.requestHeaders });
   };
   session.defaultSession.webRequest.onBeforeSendHeaders({ urls: ["*://*/*"] }, onBeforeSendHeadersHandler);

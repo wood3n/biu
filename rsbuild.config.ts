@@ -43,6 +43,11 @@ export default defineConfig({
         changeOrigin: true,
         pathRewrite: { "^/auth": "" },
       },
+      "/bili": {
+        target: "https://www.bilibili.com",
+        changeOrigin: true,
+        pathRewrite: { "^/bili": "" },
+      },
     },
   },
 });

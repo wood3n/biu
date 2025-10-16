@@ -9,6 +9,8 @@ import {
   RiHistoryFill,
   RiUserFollowLine,
   RiUserFollowFill,
+  RiFileDownloadLine,
+  RiFileDownloadFill,
 } from "@remixicon/react";
 
 import { type MenuItemProps } from "../menu-item";
@@ -21,7 +23,7 @@ export const menus: (MenuItemProps & { needLogin?: boolean })[] = [
     activeIcon: RiMvFill,
   },
   {
-    title: "音乐 UP",
+    title: "音乐大咖",
     href: "/artist-rank",
     icon: RiGroupLine,
     activeIcon: RiGroupFill,
@@ -45,5 +47,12 @@ export const menus: (MenuItemProps & { needLogin?: boolean })[] = [
     needLogin: true,
     icon: RiHistoryLine,
     activeIcon: RiHistoryFill,
+  },
+  {
+    title: "下载列表",
+    href: "/download-list",
+    needLogin: true,
+    icon: RiFileDownloadLine,
+    activeIcon: RiFileDownloadFill,
   },
 ];

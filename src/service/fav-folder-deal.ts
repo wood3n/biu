@@ -10,11 +10,16 @@ export interface FavFolderAddRequestParams {
   rid: string;
   /** 目标收藏夹id，逗号分隔 */
   add_media_ids?: string;
+  /** 目标收藏夹id，逗号分隔 */
+  del_media_ids?: string;
+  /** 视频：2 */
   type: number;
   /** web */
   platform: string;
-  /** CSRF Token（bili_jct），Cookie 方式必要 */
-  csrf?: string;
+  /** 1 */
+  ga: number;
+  /** web_normal */
+  gaia_source: string;
 }
 
 /**
@@ -34,5 +39,8 @@ export interface FavFolderAddResponse {
  * 将视频添加到收藏夹
  */
 export function postFavFolderDeal(data: FavFolderAddRequestParams): Promise<FavFolderAddResponse> {
-  return apiRequest.post<FavFolderAddResponse>("/x/v3/fav/resource/deal", data);
+  return apiRequest.post<FavFolderAddResponse>("/x/v3/fav/resource/deal", data, {
+    useCSRF: true,
+    useFormData: true,
+  });
 }

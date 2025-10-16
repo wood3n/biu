@@ -7,9 +7,7 @@ import { apiRequest } from "./request";
  */
 export interface FavFolderDelRequestParams {
   /** 目标收藏夹 mdid 列表，逗号分隔 */
-  media_ids: number[];
-  /** CSRF Token（bili_jct），Cookie 方式必要 */
-  csrf: string;
+  media_ids: string;
 }
 
 /**
@@ -30,5 +28,5 @@ export interface FavFolderDelResponse {
  * 删除收藏夹
  */
 export function postFavFolderDel(data: FavFolderDelRequestParams): Promise<FavFolderDelResponse> {
-  return apiRequest.post<FavFolderDelResponse>("/x/v3/fav/folder/del", data);
+  return apiRequest.post<FavFolderDelResponse>("/x/v3/fav/folder/del", data, { useCSRF: true, useFormData: true });
 }

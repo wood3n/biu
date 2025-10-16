@@ -6,8 +6,13 @@ export const channel = {
   },
   dialog: {
     selectDirectory: "dialog:select-directory",
+    openDirectory: "dialog:open-directory",
   },
   font: {
     getFonts: "font:get-fonts",
+  },
+  download: {
+    start: "start-download",
+    list: "download:list-files",
   },
 };

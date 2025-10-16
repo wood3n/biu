@@ -18,8 +18,6 @@ export interface FavFolderEditRequestParams {
   privacy?: 0 | 1;
   /** 封面图 url（会被审核） */
   cover?: string;
-  /** CSRF Token（bili_jct），Cookie 方式必要 */
-  csrf?: string;
 }
 
 /**
@@ -41,5 +39,8 @@ export interface FavFolderEditResponse {
  * 修改收藏夹
  */
 export function postFavFolderEdit(data: FavFolderEditRequestParams): Promise<FavFolderEditResponse> {
-  return apiRequest.post<FavFolderEditResponse>("/x/v3/fav/folder/edit", data);
+  return apiRequest.post<FavFolderEditResponse>("/x/v3/fav/folder/edit", data, {
+    useCSRF: true,
+    useFormData: true,
+  });
 }

@@ -22,14 +22,36 @@ interface IFontInfo {
   monospace: boolean;
 }
 
+interface DownloadOptions {
+  /** 下载文件的标题 */
+  title: string;
+  /** 下载文件的视频 url */
+  videoUrl: string;
+  /** 下载文件的音频 url */
+  audioUrl: string;
+}
+
 interface ElectronAPI {
   getSettings: () => Promise<SettingsState>;
   setSettings: (patch: Partial<SettingsState>) => Promise<void>;
   clearSettings: () => Promise<void>;
   /** 打开系统目录选择对话框，返回选中的目录路径 */
   selectDirectory: () => Promise<string | null>;
+  /** 打开本地目录（默认打开下载目录） */
+  openDirectory: (path?: string) => Promise<boolean>;
   /** 获取本地安装的字体列表 */
   getFonts: () => Promise<IFontInfo[]>;
+  /** 开始下载文件 */
+  startDownload: (options: DownloadOptions) => Promise<void>;
+  /** 列出下载目录文件 */
+  listDownloads: () => Promise<
+    {
+      name: string;
+      format: string;
+      size: number;
+      time: number; // mtimeMs
+    }[]
+  >;
 }
 
 type Platform =

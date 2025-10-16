@@ -22,8 +22,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, href, cover, icon: Icon, act
   const location = useLocation();
   const { id } = useParams();
 
-  const isActive = location.pathname === href || (id && href.includes(id));
-  console.log(isActive);
+  const isActive = location.pathname === href || (id && href.split("?")[0].includes(id));
 
   return (
     <Button

@@ -2,26 +2,25 @@ import { Fragment } from "react";
 import { useParams } from "react-router";
 
 import { Avatar, Divider, Image, Skeleton, Tooltip } from "@heroui/react";
-import { RiUserFollowLine, RiUserUnfollowLine, RiVerifiedBadgeFill } from "@remixicon/react";
+import { RiAddLine, RiCheckLine, RiVerifiedBadgeFill } from "@remixicon/react";
 import { useRequest } from "ahooks";
 
 import { UserRelation } from "@/common/constants/relation";
 import AsyncButton from "@/components/async-button";
-import { postRelationModify } from "@/service/relation-modify";
+import { postRelationModify, UserRelationAction } from "@/service/relation-modify";
 import { getRelationStat } from "@/service/relation-stat";
 import { getSpaceWbiAccInfo } from "@/service/space-wbi-acc-info";
-import { getSpaceWbiAccRelation } from "@/service/space-wbi-acc-relation";
+import { useUser } from "@/store/user";
 
-export const UserRelationOperation = {
-  [UserRelation.Unfollowed]: "关注",
-  [UserRelation.QuietFollowed]: "已关注",
-  [UserRelation.Followed]: "已关注",
-  [UserRelation.MutualFollowed]: "已互粉",
-  [UserRelation.Blocked]: "已拉黑",
-};
+interface Props {
+  relationWithMe?: number;
+  refreshRelation: () => Promise<number>;
+}
 
-const Profile = () => {
+const Profile = ({ relationWithMe, refreshRelation }: Props) => {
+  const user = useUser(s => s.user);
   const { id } = useParams();
+  const isSelf = user?.mid === Number(id);
 
   const { data, loading } = useRequest(
     async () => {
@@ -46,31 +45,18 @@ const Profile = () => {
       return res.data;
     },
     {
-      ready: !!id,
+      ready: !!id && relationWithMe !== UserRelation.Blocked,
       refreshDeps: [id],
     },
   );
 
-  const { data: userRelation } = useRequest(
-    async () => {
-      const res = await getSpaceWbiAccRelation({
-        mid: Number(id),
-      });
-
-      return res.data?.relation?.attribute;
-    },
-    {
-      ready: !!id,
-      refreshDeps: [id],
-    },
-  );
-
-  const isFollow = [UserRelation.Followed, UserRelation.MutualFollowed].includes(userRelation as UserRelation);
+  const isFollow = [UserRelation.Followed, UserRelation.MutualFollowed].includes(relationWithMe as UserRelation);
 
   const stats = [
     {
       title: "关注数",
       value: relationData?.following,
+      hidden: !isSelf,
     },
     {
       title: "粉丝数",
@@ -80,28 +66,32 @@ const Profile = () => {
       title: "等  级",
       value: `Lv${data?.level ?? 0}`,
     },
-  ];
+  ].filter(item => !item.hidden);
 
   const toggleFollow = async () => {
     let act = 0;
 
     if (isFollow) {
-      act = 2;
-    } else if (userRelation === UserRelation.Unfollowed) {
-      act = 1;
-    } else if (userRelation === UserRelation.Blocked) {
-      act = 6;
+      act = UserRelationAction.Unfollow;
+    } else if (relationWithMe === UserRelation.Unfollowed) {
+      act = UserRelationAction.Follow;
+    } else if (relationWithMe === UserRelation.Blocked) {
+      act = UserRelationAction.Unblock;
     }
 
-    await postRelationModify({
+    const res = await postRelationModify({
       fid: Number(id),
       act,
     });
+
+    if (res?.code === 0) {
+      await refreshRelation();
+    }
   };
 
   if (loading) {
     return (
-      <div className="flex p-4">
+      <div className="mb-4 flex items-end space-x-4 p-4">
         <Skeleton className="h-[200px] w-[200px] rounded-full" />
         <div className="flex flex-col space-y-2">
           <Skeleton className="h-6 w-[100px] rounded-lg" />
@@ -111,21 +101,25 @@ const Profile = () => {
     );
   }
 
+  if (relationWithMe === UserRelation.Blocked) {
+    return (
+      <div className="flex h-[480px] w-full flex-col items-center justify-center space-y-6">
+        <Avatar src={data?.face} alt={data?.name} className="h-[120px] w-[120px] shadow-lg" />
+        <p className="text-lg">已拉黑</p>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <Image
-        src={data?.top_photo_v2?.l_200h_img}
-        width="100%"
-        height={200}
-        alt={data?.name}
-        className="object-cover"
-        classNames={{
-          wrapper: "opacity-70",
+    <div className="flex flex-col">
+      <div
+        className="flex h-[200px] items-end justify-between bg-cover bg-center px-8 py-4 bg-blend-multiply"
+        style={{
+          background: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${data?.top_photo_v2?.l_200h_img}) center/cover no-repeat`,
         }}
-      />
-      <div className="relative flex justify-between">
-        <div className="absolute top-[50%] left-4 z-10 flex translate-y-[-50%] items-center space-x-4">
-          <Avatar isBordered src={data?.face} alt={data?.name} className="h-30 w-30" />
+      >
+        <div className="flex items-end space-x-4">
+          <Avatar src={data?.face} alt={data?.name} className="h-[140px] w-[140px] shadow-lg" />
           <div className="flex flex-col space-y-2">
             <div className="flex items-center space-x-2">
               <div className="flex items-center space-x-2">
@@ -135,28 +129,30 @@ const Profile = () => {
                   </Tooltip>
                 )}
                 <h1>{data?.name}</h1>
-                <AsyncButton
-                  size="sm"
-                  color="primary"
-                  startContent={isFollow ? <RiUserFollowLine size={18} /> : <RiUserUnfollowLine size={18} />}
-                  onPress={toggleFollow}
-                >
-                  {UserRelationOperation[userRelation as UserRelation]}
-                </AsyncButton>
               </div>
               {Boolean(data?.vip?.status) && (
                 <Image height={24} src={data?.vip?.label?.img_label_uri_hans_static} alt={data?.vip?.label?.text} />
               )}
             </div>
-            <p className="text-sm text-zinc-500">{data?.sign}</p>
+            <p className="truncate text-sm">{data?.sign}</p>
           </div>
         </div>
-        <div className="flex flex-auto items-center justify-end space-x-4 p-4">
+        <div className="flex flex-auto items-center justify-end space-x-4">
+          {!isSelf && (
+            <AsyncButton
+              color={isFollow ? "primary" : "default"}
+              startContent={isFollow ? <RiCheckLine size={18} /> : <RiAddLine size={18} />}
+              onPress={toggleFollow}
+              className="mt-2"
+            >
+              {isFollow ? "已关注" : "关注"}
+            </AsyncButton>
+          )}
           {stats.map((item, idx) => (
             <Fragment key={idx}>
               <div className="flex flex-col items-center justify-center">
                 <span className="text-lg">{item.value}</span>
-                <span className="text-sm text-zinc-500">{item.title}</span>
+                <span className="text-sm">{item.title}</span>
               </div>
               {idx !== stats.length - 1 && <Divider orientation="vertical" className="h-4" />}
             </Fragment>
