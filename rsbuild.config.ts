@@ -41,7 +41,6 @@ export default defineConfig({
     pluginElectronBuild(),
   ],
   tools: {
-    // Fine-tune Rspack for production size reduction
     rspack(config, { env }) {
       if (env === "production") {
         // Disable sourcemaps for smallest bundle

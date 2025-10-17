@@ -24,7 +24,7 @@
 - ♻️ 自动更新（electron-updater），始终保持最新体验
 
 ## 下载和使用
-- 下载页面：`https://github.com/wood3n/tune/releases/latest`
+- 下载页面：`https://github.com/wood3n/biu/releases/latest`
 - 在 Releases 中选择与你系统和架构匹配的安装包；常见文件名示例：
   - Windows 安装包：`Biu-Setup-<version>.exe`（推荐，NSIS 向导）
   - Windows 绿色版：`Biu-<version>-win-x64.exe`（portable，免安装）

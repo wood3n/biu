@@ -90,7 +90,7 @@ export function registerDownloadHandlers() {
     const outputPath = path.join(downloadDir, outputFilename);
 
     // 临时目录与文件
-    const tempDir = path.join(app.getPath("temp"), "tune-downloads");
+    const tempDir = path.join(app.getPath("temp"), "biu-downloads");
     await ensureDir(tempDir);
     const unique = Date.now();
     const tempVideoPath = path.join(tempDir, `${safeTitle}-${unique}.video.tmp`);
