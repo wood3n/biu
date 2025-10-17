@@ -117,4 +117,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # 兜底：即便 core.editor 配置失效，也不调用交互式编辑器
           GIT_EDITOR: true
-        run: npx release-it --ci --github.assets "dist/artifacts/**/*"
+        run: npx release-it --ci
