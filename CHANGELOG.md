@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v1.1.1
+
+[compare changes](https://github.com/wood3n/tune/compare/v1.1.0...v1.1.1)
+
+### 🏡 Chore
+
+- Fix ci ([c96022b](https://github.com/wood3n/tune/commit/c96022b))
+
+### ❤️ Contributors
+
+- Wood3n <wangkka1@163.com>
+
 ## v1.1.0
 
 
