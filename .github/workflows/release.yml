@@ -21,6 +21,8 @@ concurrency:
 jobs:
   build-and-release:
     runs-on: ${{ matrix.os }}
+    env:
+      HUSKY: 0
     strategy:
       fail-fast: false
       matrix:
