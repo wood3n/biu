@@ -37,8 +37,8 @@ jobs:
 
       - name: Setup Git identity
         run: |
-          git config user.name "${GITHUB_ACTOR}"
-          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -64,4 +64,4 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx release-it
+        run: npx release-it --ci
