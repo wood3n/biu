@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.6](https://github.com/wood3n/biu/compare/v1.1.5...v1.1.6) (2025-10-17)
+
+### ⚒️ Chore
+
+* rename name ([20b37d4](https://github.com/wood3n/biu/commit/20b37d4510e27ab207f1a2ebb3bb184196b1b485))
+
 ## [1.1.5](https://github.com/wood3n/tune/compare/v1.1.4...v1.1.5) (2025-10-17)
 
 ### 📖 Documentation
