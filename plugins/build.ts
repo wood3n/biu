@@ -1,12 +1,18 @@
 import { logger, RsbuildPlugin } from "@rsbuild/core";
 import { build as electronBuild } from "electron-builder";
 import isCI from "is-ci";
+import { rimrafSync } from "rimraf";
 
 import pkg from "../package.json";
 
 export const pluginElectronBuild = (): RsbuildPlugin => ({
   name: "plugin-electron-build",
   setup(api) {
+    // 在打包流程开始前清理 dist 目录，确保不会混入旧产物
+    api.onBeforeBuild(() => {
+      rimrafSync("dist");
+    });
+
     api.onAfterBuild(async () => {
       await electronBuild({
         // 不在构建阶段直接发布，统一由 changelogen 上传产物

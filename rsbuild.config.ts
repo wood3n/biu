@@ -12,7 +12,7 @@ export default defineConfig({
     },
     // 生产环境相对路径，保证通过 file:// 加载时静态资源能正确引用
     assetPrefix: "./",
-    cleanDistPath: true,
+    cleanDistPath: false,
   },
   performance: {
     removeMomentLocale: true,

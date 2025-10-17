@@ -70,7 +70,14 @@ jobs:
         with:
           name: electron-artifacts-${{ runner.os }}-${{ github.sha }}
           path: |
-            dist/**
+            dist/artifacts/*.exe
+            dist/artifacts/*.dmg
+            dist/artifacts/*.zip
+            dist/artifacts/*.AppImage
+            dist/artifacts/*.deb
+            dist/artifacts/*.rpm
+            dist/artifacts/*.yml
+            dist/artifacts/*.blockmap
           if-no-files-found: warn
           retention-days: 1
 
