@@ -25,6 +25,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
+        arch: [x64, arm64]
     permissions:
       contents: write
 
@@ -36,8 +37,8 @@ jobs:
 
       - name: Setup Git identity
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4

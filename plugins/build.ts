@@ -9,7 +9,7 @@ export const pluginElectronBuild = (): RsbuildPlugin => ({
   setup(api) {
     api.onAfterBuild(async () => {
       await electronBuild({
-        publish: isCI ? "always" : undefined, // e.g. "always" in CI
+        // 不在构建阶段直接发布，统一由 changelogen 上传产物
         config: {
           appId: "com.biu.wood3n",
           productName: "Biu",
@@ -21,11 +21,13 @@ export const pluginElectronBuild = (): RsbuildPlugin => ({
           // 运行时需要直接读取的资源解压到 asar 之外
           asarUnpack: ["**/electron/icons/**"],
           electronCompile: false,
-          // Use maximum compression for smallest installer size
-          compression: "maximum",
+          // 动态压缩：CI 使用 maximum，本地使用 store 以提升速度
+          compression: isCI ? "maximum" : "store",
           // 是否移除 package.json 的 scripts/keywords 定义
           removePackageScripts: true,
-          removePackageKeywords: false,
+          removePackageKeywords: true,
+          // 无原生模块时关闭重建以提速
+          npmRebuild: false,
           nodeGypRebuild: false,
           buildDependenciesFromSource: false,
           // Only include necessary Electron locales to reduce runtime size
@@ -94,12 +96,12 @@ export const pluginElectronBuild = (): RsbuildPlugin => ({
             vendor: "wood3n",
             executableName: "Biu",
           },
-          // Prune node_modules of test/docs/examples to reduce size further
+          // 在打包前裁剪 node_modules，减少扫描/复制体积以提速
           afterPack: async context => {
             try {
               const { exec } = await import("node:child_process");
               await new Promise((resolve, reject) => {
-                exec("npx --yes node-prune", { cwd: context.appOutDir }, err => (err ? reject(err) : resolve(null)));
+                exec("pnpm dlx node-prune", { cwd: context.appOutDir }, err => (err ? reject(err) : resolve(null)));
               });
             } catch (error) {
               // Non-blocking: pruning failure should not fail the build
