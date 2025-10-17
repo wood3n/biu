@@ -65,7 +65,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm dlx changelogen@latest --release --push
 
-      - name: Sync changelog to GitHub Releases
+      - name: Publish build artifacts to GitHub Releases
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm dlx changelogen@latest gh release --dir .
+        run: pnpm dlx changelogen@latest gh release --dir dist/artifacts --yes
