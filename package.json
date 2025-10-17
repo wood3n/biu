@@ -5,7 +5,7 @@
   "type": "module",
   "description": "music application based on bilibili api",
   "author": "wood3n",
-  "license": "MIT",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "homepage": "https://github.com/wood3n/tune#readme",
   "repository": {
     "type": "git",
