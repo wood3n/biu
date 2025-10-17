@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.4](https://github.com/wood3n/tune/compare/v1.1.3...v1.1.4) (2025-10-17)
+
+### 🤖 CI
+
+* fix release ci ([c4a5e82](https://github.com/wood3n/tune/commit/c4a5e82f21a27cff158eee4ba652a10015ec710b))
+
 ## [1.1.3](https://github.com/wood3n/tune/compare/v1.1.2...v1.1.3) (2025-10-17)
 
 ### 🤖 CI
