@@ -18,7 +18,6 @@
     "music",
     "music desktop application",
     "bilibili music application",
-    "Netease Cloud Music",
     "frontend",
     "react",
     "typescript",
@@ -117,9 +116,6 @@
   "lint-staged": {
     "*.{js,cjs,mjs,json,ts,tsx}": "npx eslint --fix --concurrency auto",
     "*.{css,less}": "npx stylelint --fix"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
   },
   "productName": "Biu"
 }
