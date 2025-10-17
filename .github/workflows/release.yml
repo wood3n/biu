@@ -61,12 +61,7 @@ jobs:
           ELECTRON_PUBLISH: always
         run: pnpm build
 
-      - name: Generate changelog and push tag/commit
+      - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm dlx changelogen@latest --release --push
-
-      - name: Publish build artifacts to GitHub Releases
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm dlx changelogen@latest gh release --dir dist/artifacts --yes
+        run: npx release-it

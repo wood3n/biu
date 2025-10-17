@@ -1,8 +1,8 @@
 {
   "$schema": "https://unpkg.com/release-it@19.0.5/schema/release-it.json",
-  "git": false,
+  "git": true,
   "github": {
-    "release": false,
+    "release": true,
     "assets": ["dist/artifacts/*.{exe,dmg,zip,AppImage,deb,rpm,pacman,blockmap,yml,yaml}"]
   },
   "plugins": {
