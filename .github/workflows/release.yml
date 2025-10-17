@@ -60,16 +60,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build and package application
-        env:
-          # 禁止在构建阶段直接发布
-          ELECTRON_PUBLISH: never
         run: pnpm build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: biu-${{ matrix.os }}-${{ matrix.arch }}
-          path: dist/artifacts/**/*
+          path: dist/artifacts/*
 
   release:
     runs-on: ubuntu-latest

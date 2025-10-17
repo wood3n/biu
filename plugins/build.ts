@@ -108,8 +108,7 @@ export const pluginElectronBuild = (): RsbuildPlugin => ({
               logger.warn(`[node-prune] skipped: ${String(error)}`);
             }
           },
-          // 指定更新源（用于 electron-updater 读取 app-update.yml）
-          publish: [{ provider: "github" }],
+          publish: null,
         },
       })
         .then((result: unknown) => {
