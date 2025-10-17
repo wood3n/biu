@@ -1,6 +1,6 @@
 import { app, BrowserWindow, nativeImage, session, dialog } from "electron";
-import log from "electron-log/main";
-import { autoUpdater } from "electron-updater";
+import log from "electron-log";
+import electronUpdater from "electron-updater";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -10,6 +10,7 @@ import { store, storeKey } from "./store.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const { autoUpdater } = electronUpdater;
 
 let mainWindow;
 let onBeforeSendHeadersHandler;
@@ -84,6 +85,10 @@ function createWindow() {
   // 从store获取配置，判断是否关闭窗口时隐藏还是退出程序
   mainWindow.on("close", event => {
     const closeWindowOption = store.get(storeKey.appSettings).closeWindowOption;
+
+    if (app.quitting) {
+      return;
+    }
 
     if (closeWindowOption === "hide") {
       event.preventDefault();

@@ -22,3 +22,10 @@ contextBridge.exposeInMainWorld("versions", {
   chrome: () => process.versions.chrome,
   electron: () => process.versions.electron,
 });
+
+ipcRenderer.on(channel.router.navigate, (_event, path) => {
+  const hash = path.startsWith("/") ? `#${path}` : `#/${path}`;
+  try {
+    window.location.hash = hash;
+  } catch {}
+});

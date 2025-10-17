@@ -1,6 +1,8 @@
 import { Tray, nativeImage, Menu } from "electron";
 import path from "node:path";
 
+import { channel } from "./ipc/channel.mjs";
+
 /**
  * Windows 系统托盘
  * - 左键：显示/隐藏主窗口
@@ -45,7 +47,15 @@ function createTray({ getMainWindow, onExit } = {}) {
     const menuTemplate = [
       {
         label: "设置",
-        click: () => {},
+        click: () => {
+          const win = getMainWindow?.();
+          if (!win) return;
+          try {
+            win.show();
+            win.focus();
+            win.webContents.send(channel.router.navigate, "/settings");
+          } catch {}
+        },
       },
       {
         label: "退出程序",

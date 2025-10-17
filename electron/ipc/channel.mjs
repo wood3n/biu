@@ -15,4 +15,7 @@ export const channel = {
     start: "start-download",
     list: "download:list-files",
   },
+  router: {
+    navigate: "router:navigate",
+  },
 };
