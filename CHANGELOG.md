@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.5](https://github.com/wood3n/tune/compare/v1.1.4...v1.1.5) (2025-10-17)
+
+### 📖 Documentation
+
+* add readme ([ee56780](https://github.com/wood3n/tune/commit/ee56780d56d30a672fe322f88240ec410df30d35))
+
 ## [1.1.4](https://github.com/wood3n/tune/compare/v1.1.3...v1.1.4) (2025-10-17)
 
 ### 🤖 CI
