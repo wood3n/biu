@@ -72,9 +72,6 @@ function createWindow() {
     // 使用 __dirname 相对路径，确保打包后在 asar 内正确解析
     const indexPath = path.resolve(__dirname, "../dist/web/index.html");
     mainWindow.loadFile(indexPath);
-    mainWindow.webContents.openDevTools({
-      mode: "bottom",
-    });
   } else {
     mainWindow.loadURL(`http://localhost:${process.env.PORT}/`);
     mainWindow.webContents.openDevTools({
