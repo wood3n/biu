@@ -1,11 +1,16 @@
-import { logger, RsbuildPlugin } from "@rsbuild/core";
+import { logger, type RsbuildPlugin } from "@rsbuild/core";
 import electron from "electron";
 import * as childProcess from "node:child_process";
+
+import { compileElectronTypescript } from "./electron-compiler";
 
 export const pluginElectronDev = (): RsbuildPlugin => ({
   name: "plugin-electron-dev",
   setup(api) {
-    api.onAfterStartDevServer(({ port }) => {
+    api.onAfterStartDevServer(async ({ port }) => {
+      logger.info("Bundling Electron with TypeScript...");
+      await compileElectronTypescript();
+
       // @ts-expect-error electron type not match string
       const electronProcess: childProcess.ChildProcessWithoutNullStreams = childProcess.spawn(electron, ["."], {
         stdio: "inherit",

@@ -14,7 +14,7 @@ import unusedImports from "eslint-plugin-unused-imports";
 import eslintReact from "@eslint-react/eslint-plugin";
 
 export default defineConfig([
-  globalIgnores(["dist"]),
+  globalIgnores(["dist", ".electron"]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
@@ -36,6 +36,7 @@ export default defineConfig([
       "@eslint-react/no-array-index-key": 0,
       "@eslint-react/no-context-provider": 0,
       "@typescript-eslint/no-explicit-any": 0,
+      "@typescript-eslint/ban-ts-comment": 0,
       "@eslint-react/dom/no-dangerously-set-innerhtml": 0,
       "react-hooks/rules-of-hooks": 0,
       // FIXME:MVP版本暂时不处理

@@ -104,3 +104,4 @@ dist
 # electron-builder cache
 electron-builder
 api.example.json
+.electron

@@ -1,17 +1,6 @@
 name: Build and Release on Electron package change
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - "src/**"
-      - "public/**"
-      - "electron/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-  pull_request:
-    types: [closed]
-    branches: [master]
   workflow_dispatch:
 
 concurrency:

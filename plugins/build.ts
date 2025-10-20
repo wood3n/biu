@@ -1,16 +1,31 @@
-import { logger, RsbuildPlugin } from "@rsbuild/core";
+import { logger, type RsbuildPlugin } from "@rsbuild/core";
 import { build as electronBuild } from "electron-builder";
 import isCI from "is-ci";
 import { rimrafSync } from "rimraf";
 
 import pkg from "../package.json";
+import { compileElectronTypescript } from "./electron-compiler";
 
 export const pluginElectronBuild = (): RsbuildPlugin => ({
   name: "plugin-electron-build",
   setup(api) {
-    // 在打包流程开始前清理 dist 目录，确保不会混入旧产物
-    api.onBeforeBuild(() => {
-      rimrafSync("dist");
+    // 在打包流程开始前清理 dist 目录，并打包 Electron 主/预加载产物
+    api.onBeforeBuild(async () => {
+      logger.info("Cleaning dist directory...");
+      try {
+        rimrafSync("dist");
+      } catch (err) {
+        logger.warn(`Clean dist failed: ${String((err && (err as any).message) || err)}`);
+        // 退一步至少清理 web 目录，避免构建失败
+        try {
+          rimrafSync("dist/web");
+        } catch (err) {
+          logger.error(`Clean dist/web failed: ${String((err && (err as any).message) || err)}`);
+        }
+      }
+
+      logger.info("Bundling Electron TypeScript...");
+      await compileElectronTypescript();
     });
 
     api.onAfterBuild(async () => {
@@ -43,8 +58,9 @@ export const pluginElectronBuild = (): RsbuildPlugin => ({
             // 构建资源目录（图标等）
             buildResources: "electron/icons",
           },
-          // 应用文件打包规则
+          // 应用文件打包规则：包含 Rspack 产物
           files: [
+            ".electron/**",
             "electron/**",
             "dist/web/**",
             // Exclude sourcemaps and logs
@@ -83,8 +99,8 @@ export const pluginElectronBuild = (): RsbuildPlugin => ({
             icon: "electron/icons/macos/logo.icns",
             hardenedRuntime: true,
             gatekeeperAssess: false,
-            entitlements: "electron/entitlements.mac.plist",
-            entitlementsInherit: "electron/entitlements.mac.plist",
+            entitlements: "plugins/mac/entitlements.mac.plist",
+            entitlementsInherit: "plugins/mac/entitlements.mac.plist",
             // 使用环境变量进行公证配置；未设置时跳过
             notarize: Boolean(process.env.APPLE_ID && process.env.APPLE_TEAM_ID),
           },
@@ -101,18 +117,6 @@ export const pluginElectronBuild = (): RsbuildPlugin => ({
             maintainer: "wood3n",
             vendor: "wood3n",
             executableName: "Biu",
-          },
-          // 在打包前裁剪 node_modules，减少扫描/复制体积以提速
-          afterPack: async context => {
-            try {
-              const { exec } = await import("node:child_process");
-              await new Promise((resolve, reject) => {
-                exec("pnpm dlx node-prune", { cwd: context.appOutDir }, err => (err ? reject(err) : resolve(null)));
-              });
-            } catch (error) {
-              // Non-blocking: pruning failure should not fail the build
-              logger.warn(`[node-prune] skipped: ${String(error)}`);
-            }
           },
           publish: null,
         },

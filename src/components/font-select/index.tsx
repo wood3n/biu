@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { Select, SelectItem } from "@heroui/react";
 
-import { DEFAULT_FONT_FAMILY } from "@/common/constants/font";
+import { defaultAppSettings } from "@/common/constants/default-settings";
 
 export interface FontSelectProps {
   color?: "primary" | "secondary";
@@ -11,12 +11,17 @@ export interface FontSelectProps {
   className?: string;
 }
 
-export default function FontSelect({ color, value = DEFAULT_FONT_FAMILY, onChange, className }: FontSelectProps) {
+export default function FontSelect({
+  color,
+  value = defaultAppSettings.fontFamily,
+  onChange,
+  className,
+}: FontSelectProps) {
   const [fonts, setFonts] = useState<Partial<IFontInfo>[]>([]);
 
   const getFonts = async () => {
     const fonts = await window.electron.getFonts();
-    setFonts([{ name: "系统默认", familyName: DEFAULT_FONT_FAMILY }, ...fonts]);
+    setFonts([{ name: "系统默认", familyName: defaultAppSettings.fontFamily }, ...fonts]);
   };
 
   useEffect(() => {
@@ -28,7 +33,7 @@ export default function FontSelect({ color, value = DEFAULT_FONT_FAMILY, onChang
       color={color}
       aria-label="选择字体"
       placeholder="选择字体"
-      selectedKeys={new Set([value || DEFAULT_FONT_FAMILY])}
+      selectedKeys={new Set([value])}
       onChange={e => onChange?.(e.target.value)}
       items={fonts}
       className={className}

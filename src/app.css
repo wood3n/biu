@@ -31,6 +31,10 @@
   font-style: normal;
 }
 
+:root {
+  text-autospace: normal;
+}
+
 .os-scrollbar {
   --os-size: 10px;
   --os-handle-border-radius: 2px;

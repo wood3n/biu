@@ -1,7 +1,9 @@
-import { Tray, nativeImage, Menu } from "electron";
+import type { BrowserWindow, MenuItemConstructorOptions } from "electron";
+
+import { Tray, nativeImage, Menu, app } from "electron";
 import path from "node:path";
 
-import { channel } from "./ipc/channel.mjs";
+import { channel } from "./ipc/channel";
 
 /**
  * Windows 系统托盘
@@ -9,9 +11,12 @@ import { channel } from "./ipc/channel.mjs";
  * - 右键：弹出上下文菜单（显示/隐藏、退出）
  * 通过传入 getMainWindow 和 onExit 回调与主进程解耦，便于复用与测试。
  */
-let tray;
+let tray: Tray | null = null;
 
-function createTray({ getMainWindow, onExit } = {}) {
+function createTray({
+  getMainWindow,
+  onExit,
+}: { getMainWindow?: () => BrowserWindow | null; onExit?: () => void } = {}) {
   // 仅在 Windows 创建托盘
   if (process.platform !== "win32") return null;
 
@@ -23,8 +28,20 @@ function createTray({ getMainWindow, onExit } = {}) {
     tray = null;
   }
 
-  const trayIcon = nativeImage.createFromPath(path.resolve(process.cwd(), "electron/icons/win/tray.ico"));
-  trayIcon.setTemplateImage(true);
+  const iconBase = app.isPackaged ? process.resourcesPath : process.cwd();
+  const trayIconPath = path.resolve(iconBase, "electron/icons/win/tray.ico");
+  let trayIcon = nativeImage.createFromPath(trayIconPath);
+
+  if (trayIcon.isEmpty()) {
+    const fallbackPath = path.resolve(iconBase, "electron/icons/win/logo.ico");
+    const fallback = nativeImage.createFromPath(fallbackPath);
+    if (!fallback.isEmpty()) {
+      trayIcon = fallback;
+    } else {
+      console.error("[tray] icon not found:", trayIconPath, "fallback:", fallbackPath);
+      return null;
+    }
+  }
 
   tray = new Tray(trayIcon);
   tray.setToolTip("Biu");
@@ -44,7 +61,7 @@ function createTray({ getMainWindow, onExit } = {}) {
 
   // 右键：动态构建菜单以反映当前窗口状态
   tray.on("right-click", () => {
-    const menuTemplate = [
+    const menuTemplate: MenuItemConstructorOptions[] = [
       {
         label: "设置",
         click: () => {
@@ -69,6 +86,7 @@ function createTray({ getMainWindow, onExit } = {}) {
     ];
 
     const menu = Menu.buildFromTemplate(menuTemplate);
+    if (!tray) return;
     tray.popUpContextMenu(menu);
   });
 

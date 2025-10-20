@@ -1,6 +1,7 @@
-{
-  "extends": "stylelint-config-standard",
-  "rules": {
+/** @type {import('stylelint').Config} */
+export default {
+  extends: ["stylelint-config-standard"],
+  rules: {
     "selector-class-pattern": null,
     "property-no-vendor-prefix": null,
     "function-no-unknown": null,
@@ -8,16 +9,16 @@
     "selector-pseudo-class-no-unknown": [
       true,
       {
-        "ignorePseudoClasses": ["global"]
-      }
+        ignorePseudoClasses: ["global"],
+      },
     ],
     "block-no-empty": true,
     "color-hex-length": "short",
     "at-rule-no-unknown": [
       true,
       {
-        "ignoreAtRules": ["extends", "tailwind", "plugin", "source", "custom-variant", "utility"]
-      }
-    ]
-  }
-}
+        ignoreAtRules: ["extends", "tailwind", "plugin", "source", "custom-variant", "utility"],
+      },
+    ],
+  },
+};

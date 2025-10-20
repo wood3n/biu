@@ -3,11 +3,11 @@
  * http://www.electronjs.org/docs/latest/tutorial/context-isolation#usage-with-typescript
  */
 
-interface SettingsState {
+interface AppSettings {
   fontFamily: string;
   color: string;
   borderRadius: number;
-  downloadPath: string;
+  downloadPath?: string;
   closeWindowOption: "hide" | "exit";
   autoStart: boolean;
 }
@@ -32,8 +32,8 @@ interface DownloadOptions {
 }
 
 interface ElectronAPI {
-  getSettings: () => Promise<SettingsState>;
-  setSettings: (patch: Partial<SettingsState>) => Promise<void>;
+  getSettings: () => Promise<AppSettings>;
+  setSettings: (patch: Partial<AppSettings>) => Promise<void>;
   clearSettings: () => Promise<void>;
   /** 打开系统目录选择对话框，返回选中的目录路径 */
   selectDirectory: () => Promise<string | null>;
@@ -52,29 +52,10 @@ interface ElectronAPI {
       time: number; // mtimeMs
     }[]
   >;
-}
-
-type Platform =
-  | "aix"
-  | "android"
-  | "darwin"
-  | "freebsd"
-  | "haiku"
-  | "linux"
-  | "openbsd"
-  | "sunos"
-  | "win32"
-  | "cygwin"
-  | "netbsd";
-
-interface Version {
-  platform: () => Platform;
-  node: () => string;
-  chrome: () => string;
-  electron: () => string;
+  /** 导航到指定路由 */
+  navigate: (cb: (path: string) => void) => Promise<void>;
 }
 
 interface Window {
   electron: ElectronAPI;
-  versions: Version;
 }

@@ -1,31 +1,22 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { DEFAULT_FONT_FAMILY } from "@/common/constants/font";
+import { defaultAppSettings } from "@/common/constants/default-settings";
 
 interface SettingsActions {
-  update: (patch: Partial<SettingsState>) => void;
+  update: (patch: Partial<AppSettings>) => void;
   reset: () => void;
 }
 
-const defaultSettings: SettingsState = {
-  fontFamily: DEFAULT_FONT_FAMILY,
-  color: "#17c964",
-  borderRadius: 4,
-  downloadPath: "",
-  closeWindowOption: "hide",
-  autoStart: false,
-};
-
-export const useSettings = create<SettingsState & SettingsActions>()(
+export const useSettings = create<AppSettings & SettingsActions>()(
   persist(
     set => ({
-      ...defaultSettings,
-      update: (patch: Partial<SettingsState>) => {
+      ...defaultAppSettings,
+      update: (patch: Partial<AppSettings>) => {
         set(patch);
       },
       reset: () => {
-        set(defaultSettings);
+        set(defaultAppSettings);
       },
     }),
     {

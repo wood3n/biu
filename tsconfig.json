@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "esnext",
     "jsx": "preserve",
     "lib": [
       "ESNext",
@@ -18,11 +18,10 @@
     "allowJs": true,
     "strict": true,
     "noEmit": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
+    "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src", "plugins", "rsbuild.config.ts"],
+  "include": ["src", "plugins", "electron", "rsbuild.config.ts"],
   "exclude": ["node_modules", "dist", "public"]
 }
