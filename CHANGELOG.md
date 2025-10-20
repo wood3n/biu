@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.7](https://github.com/wood3n/biu/compare/v1.1.6...v1.1.7) (2025-10-17)
+
+### 🩹 Fixes
+
+* fix module import problem ([ad569eb](https://github.com/wood3n/biu/commit/ad569eb0d23295c3ad79826db9b9fef492b7647b))
+
 ## [1.1.6](https://github.com/wood3n/biu/compare/v1.1.5...v1.1.6) (2025-10-17)
 
 ### ⚒️ Chore
