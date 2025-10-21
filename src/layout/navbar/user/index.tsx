@@ -21,7 +21,11 @@ const UserCard = () => {
   const { user, clear: clearUserInfo } = useUser();
   const { clear: clearToken } = useToken();
   const navigate = useNavigate();
-  const { isOpen, onOpen: openConfirmLogoutModal, onOpenChange } = useDisclosure();
+  const {
+    isOpen: isConfirmLogoutModalOpen,
+    onOpen: openConfirmLogoutModal,
+    onOpenChange: onConfirmLogoutModalOpenChange,
+  } = useDisclosure();
 
   const logout = async () => {
     const csrfToken = Cookies.get("bili_jct");
@@ -78,7 +82,12 @@ const UserCard = () => {
           <DropdownItem key="settings" onClick={() => navigate("/settings")}>
             设置
           </DropdownItem>
-          <DropdownItem key="help_and_feedback">帮助与反馈</DropdownItem>
+          <DropdownItem
+            key="feedback"
+            onPress={() => window.electron.openExternal("https://github.com/wood3n/biu/issues")}
+          >
+            反馈
+          </DropdownItem>
           <DropdownItem key="logout" color="danger" className="text-danger" onPress={openConfirmLogoutModal}>
             退出登录
           </DropdownItem>
@@ -87,8 +96,8 @@ const UserCard = () => {
       <ConfirmModal
         type="danger"
         title="确认退出登录？"
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
+        isOpen={isConfirmLogoutModalOpen}
+        onOpenChange={onConfirmLogoutModalOpenChange}
         onConfirm={logout}
       />
     </div>

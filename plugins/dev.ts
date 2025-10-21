@@ -9,7 +9,7 @@ export const pluginElectronDev = (): RsbuildPlugin => ({
   setup(api) {
     api.onAfterStartDevServer(async ({ port }) => {
       logger.info("Bundling Electron with TypeScript...");
-      await compileElectronTypescript();
+      await compileElectronTypescript("development");
 
       // @ts-expect-error electron type not match string
       const electronProcess: childProcess.ChildProcessWithoutNullStreams = childProcess.spawn(electron, ["."], {

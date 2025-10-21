@@ -1,9 +1,11 @@
 import React, { useEffect } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { Outlet } from "react-router";
 
 import { Card } from "@heroui/react";
 
 import { refreshCookie } from "@/common/utils/cookie";
+import Fallback from "@/components/error-fallback";
 import PlayBar from "@/layout/playbar";
 import { useUser } from "@/store/user";
 
@@ -26,20 +28,22 @@ const Layout = () => {
   }, []);
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="window-drag h-16 w-full flex-none">
-        <Navbar />
+    <ErrorBoundary FallbackComponent={Fallback}>
+      <div className="flex h-full flex-col">
+        <div className="window-drag h-16 w-full flex-none">
+          <Navbar />
+        </div>
+        <div className="flex min-h-0 flex-grow space-x-2 px-2">
+          <SideNav />
+          <Card radius="sm" className="h-full flex-grow">
+            <Outlet />
+          </Card>
+        </div>
+        <div className="h-22 w-full flex-none">
+          <PlayBar />
+        </div>
       </div>
-      <div className="flex min-h-0 flex-grow space-x-2 px-2">
-        <SideNav />
-        <Card radius="sm" className="h-full flex-grow">
-          <Outlet />
-        </Card>
-      </div>
-      <div className="h-22 w-full flex-none">
-        <PlayBar />
-      </div>
-    </div>
+    </ErrorBoundary>
   );
 };
 

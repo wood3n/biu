@@ -39,6 +39,8 @@ interface ElectronAPI {
   selectDirectory: () => Promise<string | null>;
   /** 打开本地目录（默认打开下载目录） */
   openDirectory: (path?: string) => Promise<boolean>;
+  /** 在外部浏览器打开链接 */
+  openExternal: (url: string) => Promise<boolean>;
   /** 获取本地安装的字体列表 */
   getFonts: () => Promise<IFontInfo[]>;
   /** 开始下载文件 */

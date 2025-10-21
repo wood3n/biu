@@ -7,6 +7,7 @@ export const channel = {
   dialog: {
     selectDirectory: "dialog:select-directory",
     openDirectory: "dialog:open-directory",
+    openExternal: "dialog:open-external",
   },
   font: {
     getFonts: "font:get-fonts",

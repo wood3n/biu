@@ -14,6 +14,15 @@ export function registerDialogHandlers() {
     return err === "";
   });
 
+  ipcMain.handle(channel.dialog.openExternal, async (_event: IpcMainInvokeEvent, url: string) => {
+    try {
+      await shell.openExternal(url);
+      return true;
+    } catch {
+      return false;
+    }
+  });
+
   ipcMain.handle(channel.dialog.selectDirectory, async () => {
     const result = await dialog.showOpenDialog({
       properties: ["openDirectory", "createDirectory"],
