@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.2.0](https://github.com/wood3n/biu/compare/v1.1.7...v1.2.0) (2025-10-22)
+
+### 🚀 Enhancements
+
+* add error boundary and feedback ([a21bfb4](https://github.com/wood3n/biu/commit/a21bfb4c0000452ffe6276c57c3e54a8d5ce6a9f))
+* add theme change ([3f64f5e](https://github.com/wood3n/biu/commit/3f64f5e84a621252e7c02ea7e718d9b9b47a035f))
+* electron config use typescript ([1534702](https://github.com/wood3n/biu/commit/1534702ce43f8680fe0ecd67eb318fad57cbe827))
+
+### 🩹 Fixes
+
+* ci problem ([b8231cb](https://github.com/wood3n/biu/commit/b8231cba131e64f80b8157fa76a3f41b15c9e66b))
+* ci problem ([4ae57cf](https://github.com/wood3n/biu/commit/4ae57cf1674fa3c14cb8122bb04adbdad2265872))
+* ci problem ([7a15ad9](https://github.com/wood3n/biu/commit/7a15ad9562e55c66d180b915442e46ed33e37f63))
+* settings change problem ([f8ea9bd](https://github.com/wood3n/biu/commit/f8ea9bdf0bbc6d80163c98c22e1a22eeb55cd818))
+
 ## [1.1.7](https://github.com/wood3n/biu/compare/v1.1.6...v1.1.7) (2025-10-17)
 
 ### 🩹 Fixes
