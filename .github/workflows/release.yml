@@ -75,13 +75,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Git identity
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          # 避免 Git 试图调用本地 Windows 编辑器
-          git config core.editor true
-
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
