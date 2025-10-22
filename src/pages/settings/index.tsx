@@ -3,25 +3,36 @@ import { Controller, useForm } from "react-hook-form";
 
 import { Form, Input, Slider, Switch, Button, RadioGroup, Radio, Divider } from "@heroui/react";
 
+import { defaultAppSettings } from "@/common/constants/default-settings";
 import ColorPicker from "@/components/color-picker";
 import FontSelect from "@/components/font-select";
 import ScrollContainer from "@/components/scroll-container";
 import { useSettings } from "@/store/settings";
 
-type SettingsForm = {
-  fontFamily: string;
-  color: string;
-  borderRadius: number;
-  downloadPath: string;
-  closeWindowOption: "hide" | "exit";
-  autoStart: boolean;
-};
-
 const SettingsPage: React.FC = () => {
-  const { fontFamily, color, borderRadius, downloadPath, closeWindowOption, autoStart, update } = useSettings();
+  const {
+    fontFamily,
+    backgroundColor,
+    contentBackgroundColor,
+    primaryColor,
+    borderRadius,
+    downloadPath,
+    closeWindowOption,
+    autoStart,
+    update,
+  } = useSettings();
 
-  const { control, watch, setValue } = useForm<SettingsForm>({
-    defaultValues: { fontFamily, color, borderRadius, downloadPath, closeWindowOption, autoStart },
+  const { control, watch, setValue } = useForm<AppSettings>({
+    defaultValues: {
+      fontFamily,
+      backgroundColor,
+      contentBackgroundColor,
+      primaryColor,
+      borderRadius,
+      downloadPath,
+      closeWindowOption,
+      autoStart,
+    },
   });
 
   // 表单项变化时自动保存到 store（即改即存）
@@ -48,12 +59,51 @@ const SettingsPage: React.FC = () => {
               <Controller
                 control={control}
                 name="fontFamily"
-                render={({ field }) => <FontSelect color="secondary" value={field.value} onChange={field.onChange} />}
+                render={({ field }) => <FontSelect value={field.value} onChange={field.onChange} />}
               />
             </div>
           </div>
 
-          {/* 主题颜色配置 */}
+          <div className="flex w-full items-center justify-between">
+            <div className="mr-6 space-y-1">
+              <div className="text-medium font-medium">布局颜色</div>
+              <div className="text-sm text-zinc-500">更改应用布局背景颜色</div>
+            </div>
+            <div className="flex w-[360px] justify-end">
+              <Controller
+                control={control}
+                name="backgroundColor"
+                render={({ field }) => (
+                  <ColorPicker
+                    presets={[defaultAppSettings.backgroundColor]}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+          </div>
+
+          <div className="flex w-full items-center justify-between">
+            <div className="mr-6 space-y-1">
+              <div className="text-medium font-medium">内容区域颜色</div>
+              <div className="text-sm text-zinc-500">更改应用内容区域的颜色</div>
+            </div>
+            <div className="flex w-[360px] justify-end">
+              <Controller
+                control={control}
+                name="contentBackgroundColor"
+                render={({ field }) => (
+                  <ColorPicker
+                    presets={[defaultAppSettings.contentBackgroundColor]}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+          </div>
+
           <div className="flex w-full items-center justify-between">
             <div className="mr-6 space-y-1">
               <div className="text-medium font-medium">主题颜色</div>
@@ -62,8 +112,14 @@ const SettingsPage: React.FC = () => {
             <div className="flex w-[360px] justify-end">
               <Controller
                 control={control}
-                name="color"
-                render={({ field }) => <ColorPicker value={field.value} onChange={field.onChange} />}
+                name="primaryColor"
+                render={({ field }) => (
+                  <ColorPicker
+                    presets={[defaultAppSettings.primaryColor]}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
               />
             </div>
           </div>
@@ -82,14 +138,9 @@ const SettingsPage: React.FC = () => {
                   <Slider
                     disableAnimation
                     disableThumbScale
-                    showTooltip
-                    tooltipProps={{
-                      isOpen: true,
-                      disableAnimation: true,
-                      showArrow: false,
-                      content: `${field.value}px`,
-                    }}
+                    showTooltip={false}
                     size="sm"
+                    endContent={<span>{field.value}px</span>}
                     aria-label="全局圆角"
                     value={field.value}
                     onChange={v => field.onChange(Number(v))}
@@ -97,7 +148,7 @@ const SettingsPage: React.FC = () => {
                     maxValue={24}
                     step={1}
                     classNames={{
-                      thumb: "w-4 h-4 after:w-4 after:h-4 after:bg-foreground",
+                      thumb: "w-4 h-4 after:w-4 after:h-4 after:bg-primary",
                     }}
                   />
                 )}
@@ -118,13 +169,7 @@ const SettingsPage: React.FC = () => {
                 name="downloadPath"
                 render={({ field }) => (
                   <div className="flex items-center space-x-1">
-                    <Input
-                      color="secondary"
-                      isDisabled
-                      placeholder="选择文件夹"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    />
+                    <Input isDisabled placeholder="选择文件夹" value={field.value} onValueChange={field.onChange} />
                     <Button
                       variant="flat"
                       onPress={async () => {

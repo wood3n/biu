@@ -3,11 +3,12 @@ import type { RouteObject } from "react-router";
 import Layout from "./layout";
 import ArtistRank from "./pages/artist-rank";
 import DownloadList from "./pages/download-list";
-import UserFollow from "./pages/follow";
+import FollowList from "./pages/follow-list";
 import Later from "./pages/later";
 import MusicRank from "./pages/music-rank";
 import MusicRecommend from "./pages/music-recommend";
 import NotFound from "./pages/not-found";
+import Search from "./pages/search";
 import Settings from "./pages/settings";
 import UserProfile from "./pages/user-profile";
 import Folder from "./pages/video-collection";
@@ -35,7 +36,7 @@ const routes: RouteObject[] = [
       },
       {
         path: "follow",
-        element: <UserFollow />,
+        element: <FollowList />,
       },
       {
         path: "collection/:id",
@@ -52,6 +53,10 @@ const routes: RouteObject[] = [
       {
         path: "download-list",
         element: <DownloadList />,
+      },
+      {
+        path: "search",
+        element: <Search />,
       },
     ],
   },

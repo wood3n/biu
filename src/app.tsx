@@ -6,6 +6,7 @@ import moment from "moment";
 
 import { useSettings } from "@/store/settings";
 
+import { hexToHsl } from "./common/utils/color";
 import routes from "./routes";
 
 import "moment/locale/zh-cn";
@@ -18,13 +19,7 @@ moment.locale("zh-cn");
 export function App() {
   const routeElement = useRoutes(routes);
   const navigate = useNavigate();
-  const { fontFamily, color, borderRadius } = useSettings();
-
-  useEffect(() => {
-    document.documentElement.style.setProperty("--heroui-primary", color);
-    document.documentElement.style.setProperty("font-family", fontFamily);
-    document.documentElement.style.setProperty("--heroui-radius-medium", `${borderRadius}px`);
-  }, [borderRadius, fontFamily, color]);
+  const { fontFamily, backgroundColor, contentBackgroundColor, primaryColor, borderRadius } = useSettings();
 
   useEffect(() => {
     if (window.electron && window.electron.navigate) {
@@ -41,7 +36,18 @@ export function App() {
         disableAnimation
         toastProps={{ timeout: 3000, color: "primary" }}
       />
-      <main className="bg-background text-foreground dark h-screen w-screen overflow-hidden">{routeElement}</main>
+      <main
+        className="bg-background text-foreground dark h-screen w-screen overflow-hidden"
+        style={{
+          fontFamily,
+          ["--heroui-background" as any]: hexToHsl(backgroundColor),
+          ["--heroui-content1" as any]: hexToHsl(contentBackgroundColor),
+          ["--heroui-primary" as any]: hexToHsl(primaryColor),
+          ["--heroui-radius-medium" as any]: `${borderRadius}px`,
+        }}
+      >
+        {routeElement}
+      </main>
     </HeroUIProvider>
   );
 }

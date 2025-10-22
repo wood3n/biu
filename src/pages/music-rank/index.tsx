@@ -26,7 +26,7 @@ const MusicRank = () => {
       <h1 className="mb-4">热歌精选</h1>
       <div className="mb-4">
         <Button
-          color="success"
+          color="primary"
           startContent={<RiPlayFill />}
           onPress={() =>
             playList(

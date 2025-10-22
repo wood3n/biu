@@ -9,7 +9,7 @@ import { CollectionType } from "@/common/constants/collection";
 import AsyncButton from "@/components/async-button";
 import ConfirmModal from "@/components/confirm-modal";
 import Ellipsis from "@/components/ellipsis";
-import EditFavoriteForm from "@/components/folder/form";
+import EditFavoriteForm from "@/components/fav-folder/form";
 import { postFavFolderDel } from "@/service/fav-folder-del";
 import { postFavFolderFav } from "@/service/fav-folder-fav";
 import { postFavFolderUnfav } from "@/service/fav-folder-unfav";
@@ -145,7 +145,7 @@ const Info = ({ type, loading, cover, title, desc, upMid, upName, media_count, a
                 src: upInfo?.card?.face,
               }}
               name={
-                <Link color="foreground" href={`/user/${upMid}`} className="hover:text-blue-400">
+                <Link color="foreground" href={`/user/${upMid}`} className="hover:underline">
                   {upName}
                 </Link>
               }

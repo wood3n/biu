@@ -23,7 +23,10 @@ export function setupAutoUpdater(options: AutoUpdaterOptions): AutoUpdaterContro
   try {
     // 某些运行环境下 transports 可能未初始化，做保护
     log.transports.file.level = "info";
-  } catch {}
+  } catch (err) {
+    // 修改说明：初始化日志级别失败时记录警告，避免静默
+    log.warn("[autoUpdater] set log level failed:", err);
+  }
   autoUpdater.autoDownload = autoDownload;
 
   // 事件监听
@@ -100,7 +103,10 @@ export function setupAutoUpdater(options: AutoUpdaterOptions): AutoUpdaterContro
     dispose: () => {
       try {
         autoUpdater.removeAllListeners();
-      } catch {}
+      } catch (err) {
+        // 修改说明：清理自动更新事件监听失败时记录警告，避免静默
+        log.warn("[autoUpdater] removeAllListeners failed:", err);
+      }
     },
   };
 }

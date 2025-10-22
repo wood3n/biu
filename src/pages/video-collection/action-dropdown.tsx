@@ -3,7 +3,7 @@ import { useParams } from "react-router";
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, useDisclosure } from "@heroui/react";
 import { RiDeleteBinLine, RiFolderTransferLine, RiMore2Line } from "@remixicon/react";
 
-import FavFolderSelect from "@/components/folder/select";
+import FavFolderSelect from "@/components/fav-folder/select";
 import { postFavResourceBatchDel } from "@/service/fav-resource-batch-del";
 
 interface Props {

@@ -70,6 +70,11 @@ export default defineConfig({
         changeOrigin: true,
         pathRewrite: { "^/bili": "" },
       },
+      "/ssearch": {
+        target: "https://s.search.bilibili.com",
+        changeOrigin: true,
+        pathRewrite: { "^/ssearch": "" },
+      },
     },
   },
 });

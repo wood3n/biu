@@ -10,9 +10,11 @@
   h1 {
     font-size: var(--text-2xl);
   }
+
   h2 {
     font-size: var(--text-xl);
   }
+
   h3 {
     font-size: var(--text-lg);
   }
@@ -26,13 +28,13 @@
   app-region: no-drag;
 }
 
-@utility keyword {
-  color: #17C964;
-  font-style: normal;
-}
-
 :root {
   text-autospace: normal;
+}
+
+.suggest_high_light,.keyword {
+  font-style: normal;
+  color: #F54180;
 }
 
 .os-scrollbar {
@@ -40,5 +42,6 @@
   --os-handle-border-radius: 2px;
   --os-handle-bg: #3f3f46;
   --os-handle-bg-hover: #3f3f46;
+
   padding: 0;
 }

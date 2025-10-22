@@ -1,141 +1,137 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 
-import { Button, Modal, ModalBody, ModalContent, ModalHeader, Spinner, useDisclosure, Pagination } from "@heroui/react";
-import { RiCloseLine, RiSearchLine } from "@remixicon/react";
-import { usePagination } from "ahooks";
+import { Chip, Input, Listbox, ListboxItem } from "@heroui/react";
+import { RiSearchLine } from "@remixicon/react";
+import { useRequest } from "ahooks";
+import classNames from "classnames";
 
-import ScrollContainer from "@/components/scroll-container";
-import {
-  getWebInterfaceWbiSearchType,
-  SearchUserItem,
-  type SearchVideoItem,
-} from "@/service/web-interface-search-type";
+import { getSearchSuggestMain } from "@/service/main-suggest";
+import { useSearchHistory } from "@/store/search-history";
+import { useUser } from "@/store/user";
 
-import { SearchType, SearchTypeOptions } from "./search-type";
-import SearchUser from "./search-user";
-import SearchVideo from "./search-video";
+const SearchInput: React.FC = () => {
+  const navigate = useNavigate();
+  const user = useUser(s => s.user);
 
-const SearchBox = () => {
-  const [keyword, setKeyword] = useState("");
-  const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
-  const [searchType, setSearchType] = useState(SearchType.Video);
-  const searchInputRef = React.useRef<HTMLInputElement>(null);
+  const location = useLocation();
+  const { items: searchHistoryItems, add: addSearchHistory, delete: deleteSearchHistory } = useSearchHistory();
 
-  const {
-    loading,
-    data,
-    pagination,
-    error,
-    runAsync: search,
-  } = usePagination(
-    async ({ current = 1, pageSize = 24 }) => {
-      const res = await getWebInterfaceWbiSearchType<
-        typeof searchType extends SearchType.Video ? SearchVideoItem : SearchUserItem
-      >({
-        search_type: searchType,
-        keyword,
-        page: current,
-        page_size: pageSize,
-      });
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const isPointerDownInsideRef = useRef(false);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
 
-      return {
-        total: res?.data?.numResults ?? 0,
-        list: res?.data?.result ?? [],
-      };
+  const { data: suggestionsData } = useRequest(
+    async () => {
+      if (!value?.trim()) {
+        return [];
+      }
+
+      const res = await getSearchSuggestMain({ term: value, userid: user?.mid });
+      return res?.result?.tag || [];
     },
-    {
-      manual: true,
-      defaultPageSize: 24,
-      refreshDeps: [searchType],
-    },
+    { debounceWait: 300, refreshDeps: [value] },
   );
 
+  const submitSearch = (keyword: string) => {
+    addSearchHistory(keyword);
+    if (location.pathname !== "/search") {
+      navigate("/search");
+    }
+  };
+
   return (
-    <>
-      <Button
-        startContent={<RiSearchLine size={16} />}
-        onPress={() => {
-          onOpen();
-          setTimeout(() => {
-            searchInputRef.current?.focus();
-          }, 0);
+    <div
+      ref={containerRef}
+      className="relative w-[360px]"
+      onPointerDownCapture={() => {
+        isPointerDownInsideRef.current = true;
+        setTimeout(() => {
+          isPointerDownInsideRef.current = false;
+        }, 0);
+      }}
+    >
+      <Input
+        value={value}
+        onValueChange={setValue}
+        onKeyDown={e => {
+          if (e.key === "Enter" && e.target?.value?.trim()) {
+            submitSearch(e.target.value);
+          }
         }}
-        className="window-no-drag w-[280px] justify-start text-zinc-500"
+        onFocus={() => setOpen(true)}
+        onBlur={() => {
+          if (isPointerDownInsideRef.current) return;
+          setOpen(false);
+        }}
+        placeholder="搜索"
+        endContent={<RiSearchLine size={16} />}
+        className="window-no-drag w-full"
+      />
+      <div
+        className={classNames(
+          "bg-content1 rounded-medium absolute top-full left-0 z-[100] mt-1 min-h-[200px] w-full px-1 py-2 shadow",
+          {
+            hidden: !open,
+            block: open,
+          },
+        )}
       >
-        搜索
-      </Button>
-      <Modal
-        disableAnimation
-        hideCloseButton
-        shouldBlockScroll={false}
-        isOpen={isOpen}
-        isDismissable={false}
-        onOpenChange={onOpenChange}
-        size="5xl"
-      >
-        <ModalContent>
-          <ModalHeader className="flex items-center space-x-2 border-b-1 border-b-zinc-800 py-3">
-            <RiSearchLine color="#71717A" size={20} />
-            <input
-              ref={searchInputRef}
-              className="h-8 flex-1 border-none pl-2 outline-0"
-              value={keyword}
-              onChange={e => setKeyword(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === "Enter") {
-                  search({ current: 1, pageSize: 24 });
-                }
-              }}
-            />
-            <Button size="sm" variant="light" isIconOnly onPress={onClose}>
-              <RiCloseLine color="#71717A" />
-            </Button>
-          </ModalHeader>
-          <ModalBody className="relative flex h-[700px] min-h-[700px] flex-none flex-col gap-0 p-0">
-            <div className="flex items-center space-x-2 p-4">
-              {SearchTypeOptions.map(o => (
-                <Button
-                  size="sm"
-                  key={o.value}
-                  startContent={o.icon}
-                  color={searchType === o.value ? "primary" : undefined}
-                  onPress={() => setSearchType(o.value)}
-                >
-                  {o.label}
-                </Button>
-              ))}
-            </div>
-            <ScrollContainer style={{ flexGrow: 1, minHeight: 0 }}>
-              {loading && (
-                <div className="flex h-full items-center justify-center">
-                  <Spinner label="加载中" />
+        <Listbox
+          aria-label="搜索建议"
+          selectionMode="single"
+          hideSelectedIcon
+          onSelectionChange={([item]) => {
+            setOpen(false);
+            setValue(item as string);
+            submitSearch(item as string);
+          }}
+          items={
+            suggestionsData?.map(item => ({
+              key: item.value,
+              value: item.value,
+              name: item.name,
+            })) || []
+          }
+          emptyContent="暂无搜索建议"
+          topContent={
+            searchHistoryItems.length > 0 && (
+              <>
+                <span className="mb-2 text-sm">搜索历史</span>
+                <div className="mb-1 flex gap-2">
+                  {searchHistoryItems.map(item => (
+                    <Chip
+                      key={item.time}
+                      isCloseable
+                      size="sm"
+                      onClose={() => {
+                        deleteSearchHistory(item);
+                      }}
+                      onClick={() => {
+                        setOpen(false);
+                        setValue(item.value);
+                        submitSearch(item.value);
+                      }}
+                      className="cursor-pointer"
+                    >
+                      {item.value}
+                    </Chip>
+                  ))}
                 </div>
-              )}
-              {!loading && !error && (
-                <div className="flex px-4">
-                  {searchType === SearchType.Video && <SearchVideo items={data?.list ?? []} />}
-                  {searchType === SearchType.User && <SearchUser items={data?.list ?? []} />}
-                </div>
-              )}
-              {data?.list?.length === 0 && (
-                <div className="text-foreground-500 text-sm">没有找到与“{keyword}”相关的结果</div>
-              )}
-              {!loading && !error && (
-                <div className="my-4 flex justify-center">
-                  <Pagination
-                    initialPage={1}
-                    page={pagination?.current ?? 1}
-                    total={pagination?.totalPage}
-                    onChange={page => search({ current: page, pageSize: 24 })}
-                  />
-                </div>
-              )}
-            </ScrollContainer>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </>
+              </>
+            )
+          }
+        >
+          {item => (
+            <ListboxItem key={item.key}>
+              <span dangerouslySetInnerHTML={{ __html: item.name }} />
+            </ListboxItem>
+          )}
+        </Listbox>
+      </div>
+    </div>
   );
 };
 
-export default SearchBox;
+export default SearchInput;

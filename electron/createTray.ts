@@ -1,6 +1,7 @@
 import type { BrowserWindow, MenuItemConstructorOptions } from "electron";
 
 import { Tray, nativeImage, Menu, app } from "electron";
+import log from "electron-log";
 import path from "node:path";
 
 import { channel } from "./ipc/channel";
@@ -24,7 +25,10 @@ function createTray({
   if (tray) {
     try {
       tray.destroy();
-    } catch {}
+    } catch (err) {
+      // 修改说明：销毁旧托盘失败时记录日志，避免静默
+      log.warn("[tray] destroy old tray failed:", err);
+    }
     tray = null;
   }
 
@@ -71,7 +75,10 @@ function createTray({
             win.show();
             win.focus();
             win.webContents.send(channel.router.navigate, "/settings");
-          } catch {}
+          } catch (err) {
+            // 修改说明：托盘触发的导航失败时记录错误，便于定位
+            log.error("[tray] navigate to settings failed:", err);
+          }
         },
       },
       {
@@ -97,7 +104,10 @@ function destroyTray() {
   if (tray) {
     try {
       tray.destroy();
-    } catch {}
+    } catch (err) {
+      // 修改说明：销毁托盘失败时记录日志，避免静默
+      log.warn("[tray] destroy tray failed:", err);
+    }
     tray = null;
   }
 }

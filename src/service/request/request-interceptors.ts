@@ -1,4 +1,4 @@
-import { InternalAxiosRequestConfig } from "axios";
+import { type InternalAxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
 
 import { encodeParamsWbi } from "@/common/utils/wbi-sign";

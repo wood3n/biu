@@ -5,7 +5,9 @@
 
 interface AppSettings {
   fontFamily: string;
-  color: string;
+  backgroundColor: string;
+  contentBackgroundColor: string;
+  primaryColor: string;
   borderRadius: number;
   downloadPath?: string;
   closeWindowOption: "hide" | "exit";

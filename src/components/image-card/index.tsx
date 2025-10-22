@@ -8,7 +8,7 @@ import Skeleton from "./skeleton";
 export type ImageCardProps = {
   cover: string;
   coverHeight?: number;
-  title: string;
+  title: React.ReactNode;
   titleExtra?: React.ReactNode;
   showPlayIcon?: boolean;
   footer?: React.ReactNode;
@@ -21,7 +21,6 @@ const ImageCard = ({ cover, coverHeight = 188, title, titleExtra, showPlayIcon, 
       <CardBody className="group rounded-large relative flex-grow-0 overflow-hidden bg-none p-0 shadow">
         <Image
           isZoomed
-          alt={title}
           className="object-cover hover:scale-[102%]"
           height={coverHeight}
           src={cover}

@@ -54,12 +54,18 @@ function createWindow() {
           },
         }
       : {}),
-    trafficLightPosition: { x: 14, y: 14 },
+    trafficLightPosition: { x: 0, y: 0 },
     webPreferences: {
       webSecurity: false,
       preload: path.resolve(__dirname, "preload.js"),
       nodeIntegration: true,
     },
+  });
+
+  // 禁止通过中键/target=_blank/window.open 等方式在 Electron 中打开新窗口
+  // 不影响当前窗口内的左键导航与其他鼠标按键行为
+  mainWindow.webContents.setWindowOpenHandler(() => {
+    return { action: "deny" };
   });
 
   // MAC dock icon
@@ -122,7 +128,7 @@ app.whenReady().then(() => {
     autoUpdaterCtl.checkForUpdates().catch(err => log.error("[autoUpdater] check failed:", err));
   }
 
-  registerIpcHandlers({ app });
+  registerIpcHandlers();
   createWindow();
 });
 
@@ -136,24 +142,31 @@ app.on("before-quit", () => {
 app.on("will-quit", () => {
   try {
     destroyTray();
-  } catch {}
+  } catch (err) {
+    // 修改说明：托盘销毁失败时记录日志，避免静默失败
+    log.warn("[main] destroyTray failed:", err);
+  }
 
   try {
     // 停止拦截逻辑
     webRequestDisposer?.dispose();
     webRequestDisposer = undefined;
-  } catch {}
+  } catch (err) {
+    // 修改说明：网络拦截器清理失败时记录日志，便于定位
+    log.warn("[main] webRequest dispose failed:", err);
+  }
 
   try {
     autoUpdaterCtl?.dispose();
     autoUpdaterCtl = undefined;
-  } catch {}
+  } catch (err) {
+    // 修改说明：自动更新模块释放失败时记录日志
+    log.warn("[main] autoUpdater dispose failed:", err);
+  }
 
   // 开发环境：Electron 退出时同时结束 Node.js 开发进程
   if (!app.isPackaged) {
-    try {
-      process.exit(0);
-    } catch {}
+    process.exit(0);
   }
 });
 

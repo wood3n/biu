@@ -103,12 +103,12 @@ export interface WebSearchTypeData<T = any> extends WebSearchPagedMeta {
 
 // ——— 分类返回项：根据类型分别定义最常用字段（可按需扩展） ———
 export interface SearchVideoItem {
-  aid?: number;
-  bvid?: string;
-  title?: string;
-  author?: string;
-  pic?: string;
-  mid?: number;
+  aid: number;
+  bvid: string;
+  title: string;
+  author: string;
+  pic: string;
+  mid: number;
   pubdate?: number;
   play?: number;
   video_review?: number;

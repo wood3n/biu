@@ -1,6 +1,7 @@
 import type { IpcMainInvokeEvent } from "electron";
 
 import { ipcMain, shell, dialog } from "electron";
+import log from "electron-log";
 import path from "node:path";
 
 import { store, storeKey } from "../store";
@@ -18,7 +19,9 @@ export function registerDialogHandlers() {
     try {
       await shell.openExternal(url);
       return true;
-    } catch {
+    } catch (err) {
+      // 修改说明：外部链接打开失败时记录错误并返回失败
+      log.error("[dialog] openExternal failed:", err);
       return false;
     }
   });

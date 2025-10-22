@@ -1,6 +1,7 @@
 import type { IpcMainInvokeEvent } from "electron";
 
 import { ipcMain, app, net } from "electron";
+import log from "electron-log";
 import ffmpeg from "fluent-ffmpeg";
 import fss from "node:fs";
 import fs from "node:fs/promises";
@@ -27,7 +28,10 @@ function sanitizeFilename(filename: string): string {
 async function ensureDir(dir: string): Promise<void> {
   try {
     await fs.mkdir(dir, { recursive: true });
-  } catch {}
+  } catch (err) {
+    // 修改说明：目录创建失败时记录警告，避免静默
+    log.warn("[download] ensureDir failed:", err);
+  }
 }
 
 interface DownloadToFileOptions {
@@ -77,7 +81,10 @@ async function cleanupTempFiles(files: Array<string | undefined | null>): Promis
     try {
       if (!file) continue;
       await fs.unlink(file).catch(() => {});
-    } catch {}
+    } catch (err) {
+      // 修改说明：清理临时文件失败时记录警告，忽略错误
+      log.warn("[download] cleanup temp file failed:", err);
+    }
   }
 }
 
@@ -96,7 +103,10 @@ export function registerDownloadHandlers() {
         if (ffmpegPath) {
           ffmpeg.setFfmpegPath(ffmpegPath);
         }
-      } catch {}
+      } catch (err) {
+        // 修改说明：设置 ffmpeg 路径失败时记录警告，不影响下载逻辑
+        log.warn("[download] setFfmpegPath failed:", err);
+      }
 
       const settings = store.get(storeKey.appSettings);
       const downloadDir = settings?.downloadPath || app.getPath("downloads");
@@ -121,7 +131,9 @@ export function registerDownloadHandlers() {
           if (origin.includes("bilibili")) return "https://www.bilibili.com";
           if (origin.includes("bilivideo")) return "https://www.bilibili.com";
           return origin;
-        } catch {
+        } catch (err) {
+          // 修改说明：URL 解析失败时记录警告并返回空 Referer
+          log.warn("[download] parse URL for referer failed:", err);
           return "";
         }
       };
@@ -142,7 +154,10 @@ export function registerDownloadHandlers() {
             .on("error", async err => {
               try {
                 await fs.unlink(outputPath).catch(() => {});
-              } catch {}
+              } catch (cleanupErr) {
+                // 修改说明：合并失败后的输出文件清理出错时记录警告
+                log.warn("[download] cleanup output file failed:", cleanupErr);
+              }
               reject(err);
             })
             .on("end", () => resolve())
@@ -182,12 +197,16 @@ export function registerDownloadHandlers() {
             size: stat.size,
             time: stat.mtimeMs,
           });
-        } catch {}
+        } catch (err) {
+          // 修改说明：读取文件信息失败时记录警告并跳过
+          log.warn("[download] stat file failed:", err);
+        }
       }
       files.sort((a, b) => b.time - a.time);
       return files;
     } catch (error) {
-      console.error("读取下载目录失败", error);
+      // 修改说明：下载列表读取失败时记录错误，并返回空列表
+      log.error("[download] read download directory failed:", error);
       return [];
     }
   });

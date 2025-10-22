@@ -2,7 +2,7 @@ import { ReactComponent as LogoIcon } from "@/assets/icons/logo.svg";
 import { useUser } from "@/store/user";
 
 import Login from "./login";
-import SearchBox from "./search";
+import Search from "./search";
 import UserCard from "./user";
 
 const LayoutNavbar = () => {
@@ -14,7 +14,7 @@ const LayoutNavbar = () => {
         <LogoIcon style={{ color: "#ffffff", width: 48, height: 48 }} />
       </div>
       <div className="flex items-center justify-center">
-        <SearchBox />
+        <Search />
       </div>
       <div className="flex items-center justify-center">{user?.isLogin ? <UserCard /> : <Login />}</div>
     </div>

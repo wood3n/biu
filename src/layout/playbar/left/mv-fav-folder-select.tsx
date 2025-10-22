@@ -2,7 +2,7 @@ import { Button, useDisclosure } from "@heroui/react";
 import { RiStarLine } from "@remixicon/react";
 import { useRequest } from "ahooks";
 
-import FavFolderSelect from "@/components/folder/select";
+import FavFolderSelect from "@/components/fav-folder/select";
 import { getWebInterfaceView } from "@/service/web-interface-view";
 import { usePlayingQueue } from "@/store/playing-queue";
 

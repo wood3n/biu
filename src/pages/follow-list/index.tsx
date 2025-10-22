@@ -10,7 +10,7 @@ import { useUser } from "@/store/user";
 
 const PAGE_SIZE = 20;
 
-const UserFollow = () => {
+const FollowList = () => {
   const { user } = useUser();
   const navigate = useNavigate();
 
@@ -94,4 +94,4 @@ const UserFollow = () => {
   );
 };
 
-export default UserFollow;
+export default FollowList;

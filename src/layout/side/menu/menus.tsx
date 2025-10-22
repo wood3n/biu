@@ -51,7 +51,6 @@ export const menus: (MenuItemProps & { needLogin?: boolean })[] = [
   {
     title: "下载列表",
     href: "/download-list",
-    needLogin: true,
     icon: RiFileDownloadLine,
     activeIcon: RiFileDownloadFill,
   },

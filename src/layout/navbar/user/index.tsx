@@ -58,13 +58,16 @@ const UserCard = () => {
     <div className="window-no-drag">
       <Dropdown placement="bottom">
         <DropdownTrigger>
-          <Avatar
-            isBordered
-            as="button"
-            type="button"
-            className="transition-transform hover:scale-105"
-            src={user?.face}
-          />
+          <div className="flex cursor-pointer items-center space-x-2">
+            <Avatar
+              isBordered
+              as="button"
+              type="button"
+              className="transition-transform hover:scale-105"
+              src={user?.face}
+            />
+            <div className="text-medium font-medium">{user?.uname}</div>
+          </div>
         </DropdownTrigger>
         <DropdownMenu aria-label="用户操作" variant="flat">
           <DropdownItem key="avatar" className="items-center justify-center">
@@ -72,6 +75,7 @@ const UserCard = () => {
               as="button"
               type="button"
               avatarProps={{
+                isBordered: true,
                 src: user?.face,
               }}
               name={user?.uname}

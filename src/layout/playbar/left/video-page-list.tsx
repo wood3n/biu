@@ -31,7 +31,7 @@ const VideoPageList = () => {
           <ModalHeader>分集</ModalHeader>
           <ModalBody className="p-0">
             <ScrollContainer className="max-h-[60vh]">
-              <div className="mb-4 flex flex-col px-2">
+              <div className="mb-4 flex flex-col px-3">
                 {pages.map(p => {
                   const isActive = p.pageIndex === current?.currentPage;
 

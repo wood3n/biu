@@ -2,7 +2,9 @@ export const defaultAppSettings: AppSettings = {
   autoStart: false,
   closeWindowOption: "hide",
   fontFamily: "system-default",
-  color: "#17c964",
   borderRadius: 8,
   downloadPath: "",
+  backgroundColor: "#000000",
+  contentBackgroundColor: "#18181b",
+  primaryColor: "#17c964",
 };

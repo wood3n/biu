@@ -2,8 +2,8 @@ import React from "react";
 
 import {
   OverlayScrollbarsComponent,
-  OverlayScrollbarsComponentProps,
-  OverlayScrollbarsComponentRef,
+  type OverlayScrollbarsComponentProps,
+  type OverlayScrollbarsComponentRef,
 } from "overlayscrollbars-react";
 
 const ScrollContainer = ({
