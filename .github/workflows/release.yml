@@ -29,11 +29,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Git identity
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
