@@ -53,13 +53,14 @@ const Search = () => {
       <div className="p-4">
         <h1 className="mb-4">搜索【{keyword}】的结果</h1>
         <Tabs
+          radius="full"
           color="primary"
           variant="solid"
           items={SearchTypeOptions}
           selectedKey={searchType}
           onSelectionChange={v => setSearchType(v as SearchType)}
         >
-          {item => <Tab key={item.value} className="text-base" title={item.label} />}
+          {item => <Tab key={item.value} title={item.label} />}
         </Tabs>
       </div>
       <ScrollContainer style={{ flexGrow: 1, minHeight: 0 }}>
@@ -70,8 +71,8 @@ const Search = () => {
         )}
         {!loading && !error && (
           <div className="flex px-4">
-            {searchType === SearchType.Video && <VideoList items={data?.list ?? []} />}
-            {searchType === SearchType.User && <UserList items={data?.list ?? []} />}
+            {searchType === SearchType.Video && <VideoList items={(data?.list ?? []) as SearchVideoItem[]} />}
+            {searchType === SearchType.User && <UserList items={(data?.list ?? []) as SearchUserItem[]} />}
           </div>
         )}
         {data?.list?.length === 0 && <div className="text-foreground-500 text-sm">没有找到与“{keyword}”相关的结果</div>}
