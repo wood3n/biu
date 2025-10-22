@@ -19,6 +19,7 @@ const SearchInput: React.FC = () => {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isPointerDownInsideRef = useRef(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
 
@@ -53,6 +54,7 @@ const SearchInput: React.FC = () => {
       }}
     >
       <Input
+        ref={inputRef}
         value={value}
         onValueChange={setValue}
         onKeyDown={e => {
@@ -80,13 +82,7 @@ const SearchInput: React.FC = () => {
       >
         <Listbox
           aria-label="搜索建议"
-          selectionMode="single"
-          hideSelectedIcon
-          onSelectionChange={([item]) => {
-            setOpen(false);
-            setValue(item as string);
-            submitSearch(item as string);
-          }}
+          selectionMode="none"
           items={
             suggestionsData?.map(item => ({
               key: item.value,
@@ -107,6 +103,7 @@ const SearchInput: React.FC = () => {
                       size="sm"
                       onClose={() => {
                         deleteSearchHistory(item);
+                        inputRef.current?.focus();
                       }}
                       onClick={() => {
                         setOpen(false);
@@ -124,7 +121,14 @@ const SearchInput: React.FC = () => {
           }
         >
           {item => (
-            <ListboxItem key={item.key}>
+            <ListboxItem
+              key={item.key}
+              onPress={() => {
+                setOpen(false);
+                setValue(item.value);
+                submitSearch(item.value);
+              }}
+            >
               <span dangerouslySetInnerHTML={{ __html: item.name }} />
             </ListboxItem>
           )}
