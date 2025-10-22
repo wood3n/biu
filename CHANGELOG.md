@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/wood3n/biu/compare/v1.2.0...v1.2.1) (2025-10-22)
+
+### 🩹 Fixes
+
+* nav search focus problem ([dc89c86](https://github.com/wood3n/biu/commit/dc89c86cefa4e3ba93d999f932cab5dfce720295))
+* theme change problem ([35d92a9](https://github.com/wood3n/biu/commit/35d92a915eae18ec6fbfd413c27f4f52d9b69f2d))
+
 ## [1.2.0](https://github.com/wood3n/biu/compare/v1.1.7...v1.2.0) (2025-10-22)
 
 ### 🚀 Enhancements
