@@ -13,7 +13,7 @@ const Rate = ({ value, onChange }: Props) => {
   return (
     <Dropdown type="listbox" classNames={{ content: "min-w-0" }}>
       <DropdownTrigger>
-        <Button isIconOnly variant="light" size="sm" className="text-medium min-w-fit px-2 hover:text-green-500">
+        <Button isIconOnly variant="light" size="sm" className="text-medium hover:text-primary min-w-fit px-2">
           {value}x
         </Button>
       </DropdownTrigger>

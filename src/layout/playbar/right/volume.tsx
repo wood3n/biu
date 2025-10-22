@@ -54,7 +54,7 @@ const Volume = ({ isMuted, value, onChange, onChangeMute }: Props) => {
       // @ts-expect-error value is number
       onChange={onVolumeChange}
       startContent={
-        <Button isIconOnly size="sm" variant="light" className="hover:text-green-500" onPress={toggleMute}>
+        <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={toggleMute}>
           {isMuted ? (
             <RiVolumeMuteLine size={PlayBarIconSize.SideIconSize} />
           ) : (

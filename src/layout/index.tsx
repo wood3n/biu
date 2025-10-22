@@ -3,6 +3,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Outlet } from "react-router";
 
 import { Card } from "@heroui/react";
+import log from "electron-log/renderer";
 
 import { refreshCookie } from "@/common/utils/cookie";
 import Fallback from "@/components/error-fallback";
@@ -28,7 +29,15 @@ const Layout = () => {
   }, []);
 
   return (
-    <ErrorBoundary FallbackComponent={Fallback}>
+    <ErrorBoundary
+      FallbackComponent={Fallback}
+      onError={(error, info) => {
+        console.log("error", error, info);
+        console.log(log);
+        // 使用 electron-log 记录错误与组件堆栈
+        log.error("[ErrorBoundary]", error, info);
+      }}
+    >
       <div className="flex h-full flex-col">
         <div className="window-drag h-16 w-full flex-none">
           <Navbar />

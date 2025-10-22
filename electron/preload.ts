@@ -2,6 +2,9 @@ import { contextBridge, ipcRenderer } from "electron";
 
 import { channel } from "./ipc/channel";
 
+// 防止重复注册 router:navigate 监听造成 MaxListenersExceededWarning
+let navigateHandler: ((_: Electron.IpcRendererEvent, path: string) => void) | null = null;
+
 const api: ElectronAPI = {
   getSettings: () => ipcRenderer.invoke(channel.store.getSettings),
   setSettings: (value: Partial<AppSettings>) => ipcRenderer.invoke(channel.store.setSettings, value),
@@ -14,9 +17,25 @@ const api: ElectronAPI = {
   listDownloads: () => ipcRenderer.invoke(channel.download.list),
   // 监听来自主进程的导航事件，并将路径回调给渲染端
   navigate: async (cb: (path: string) => void) => {
-    ipcRenderer.on(channel.router.navigate, (_, path: string) => {
-      cb(path);
-    });
+    // 如果已存在监听器，先移除之前的，避免重复累积监听
+    if (navigateHandler) {
+      try {
+        ipcRenderer.removeListener(channel.router.navigate, navigateHandler);
+      } catch {
+        // ignore remove errors
+      }
+      navigateHandler = null;
+    }
+
+    navigateHandler = (_: Electron.IpcRendererEvent, path: string) => {
+      try {
+        cb(path);
+      } catch {
+        // 防御性处理：避免回调抛错影响主进程事件循环
+      }
+    };
+
+    ipcRenderer.on(channel.router.navigate, navigateHandler);
   },
 };
 

@@ -14,7 +14,7 @@ const RightControl = () => {
   return (
     <>
       <div className="flex h-full items-center justify-end space-x-2">
-        <Button isIconOnly size="sm" variant="light" className="hover:text-green-500" onPress={onOpen}>
+        <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={onOpen}>
           <RiPlayListLine size={18} />
         </Button>
         <Rate value={rate} onChange={setRate} />

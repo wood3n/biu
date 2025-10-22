@@ -17,12 +17,13 @@ const Control = () => {
     <div className="flex h-full flex-col items-center justify-center space-y-0.5 px-6">
       <div className="flex items-center space-x-6">
         <Button
+          radius="md"
           onPress={prev}
           isDisabled={disabled}
           isIconOnly
           size="sm"
           variant="light"
-          className="hover:text-green-500"
+          className="hover:text-primary"
         >
           <RiSkipBackFill size={PlayBarIconSize.SecondControlIconSize} />
         </Button>
@@ -31,7 +32,7 @@ const Control = () => {
           isIconOnly
           variant="light"
           radius="full"
-          className="hover:text-green-500"
+          className="hover:text-primary"
           onPress={togglePlay}
         >
           {isPlaying ? (
@@ -41,12 +42,13 @@ const Control = () => {
           )}
         </Button>
         <Button
+          radius="md"
           onPress={next}
           isDisabled={disabled}
           isIconOnly
           size="sm"
           variant="light"
-          className="hover:text-green-500"
+          className="hover:text-primary"
         >
           <RiSkipForwardFill size={PlayBarIconSize.SecondControlIconSize} />
         </Button>

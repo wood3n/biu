@@ -25,7 +25,7 @@ const MvFavFolderSelect = () => {
 
   return (
     <>
-      <Button isIconOnly size="sm" variant="light" onPress={onOpen}>
+      <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={onOpen}>
         <RiStarLine size={18} />
       </Button>
       <FavFolderSelect title="收藏" rid={String(mvData?.aid)} isOpen={isOpen} onOpenChange={onOpenChange} />

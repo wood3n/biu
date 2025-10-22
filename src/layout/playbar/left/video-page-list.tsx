@@ -16,7 +16,7 @@ const VideoPageList = () => {
 
   return (
     <>
-      <Button isIconOnly size="sm" variant="light" onPress={onOpen}>
+      <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={onOpen}>
         <RiListRadio size={18} />
       </Button>
       <Modal

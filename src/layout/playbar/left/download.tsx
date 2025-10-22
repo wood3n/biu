@@ -39,6 +39,11 @@ const Download = () => {
           videoUrl: videoUrl,
           audioUrl: audioUrl,
         });
+
+        addToast({
+          title: "已添加到下载列表",
+          color: "success",
+        });
       } else {
         addToast({
           title: "无法获取视频下载地址",
@@ -55,7 +60,7 @@ const Download = () => {
   };
 
   return (
-    <Button isIconOnly size="sm" variant="light" onPress={download}>
+    <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={download}>
       <RiDownload2Fill size={18} />
     </Button>
   );

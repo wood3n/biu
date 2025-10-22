@@ -29,7 +29,7 @@ const ImageCard = ({ cover, coverHeight = 188, title, titleExtra, showPlayIcon, 
         />
         {showPlayIcon && (
           <div className="absolute right-0 bottom-0 z-30 p-4 opacity-0 transition-opacity group-hover:opacity-100">
-            <RiPlayCircleFill className="text-success" size={48} />
+            <RiPlayCircleFill className="text-primary" size={48} />
           </div>
         )}
       </CardBody>
