@@ -29,7 +29,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, href, cover, icon: Icon, act
       as={href ? HeroLink : "button"}
       href={href}
       fullWidth
-      radius="sm"
+      radius="md"
       variant={isActive ? "flat" : "light"}
       color="default"
       onPress={onPress}

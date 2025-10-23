@@ -115,7 +115,7 @@ const SettingsPage: React.FC = () => {
                 name="primaryColor"
                 render={({ field }) => (
                   <ColorPicker
-                    presets={[defaultAppSettings.primaryColor]}
+                    presets={[defaultAppSettings.primaryColor, "#66cc8a", "#9353d3", "#ffffff", "#db924b"]}
                     value={field.value}
                     onChange={field.onChange}
                   />

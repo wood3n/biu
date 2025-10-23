@@ -58,9 +58,10 @@ const UserCard = () => {
     <div className="window-no-drag">
       <Dropdown placement="bottom">
         <DropdownTrigger>
-          <div className="flex cursor-pointer items-center space-x-2">
+          <div className="mr-4 flex cursor-pointer items-center space-x-2">
             <Avatar
               isBordered
+              size="sm"
               as="button"
               type="button"
               className="transition-transform hover:scale-105"
@@ -75,6 +76,7 @@ const UserCard = () => {
               as="button"
               type="button"
               avatarProps={{
+                size: "sm",
                 isBordered: true,
                 src: user?.face,
               }}

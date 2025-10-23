@@ -4,12 +4,14 @@ import { Image } from "@heroui/react";
 
 import Ellipsis from "@/components/ellipsis";
 import { usePlayingQueue } from "@/store/playing-queue";
+import { useUser } from "@/store/user";
 
 import Download from "./download";
 import MvFavFolderSelect from "./mv-fav-folder-select";
 import VideoPageList from "./video-page-list";
 
 const LeftControl = () => {
+  const user = useUser(s => s.user);
   const { current } = usePlayingQueue();
 
   const title = useMemo(() => {
@@ -42,7 +44,7 @@ const LeftControl = () => {
       </div>
       <div className="flex items-center">
         {Boolean((current.pages?.length ?? 0) > 1) && <VideoPageList />}
-        <MvFavFolderSelect />
+        {Boolean(user?.isLogin) && <MvFavFolderSelect />}
         {Boolean(current.url) && <Download />}
       </div>
     </div>

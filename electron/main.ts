@@ -68,6 +68,12 @@ function createWindow() {
     return { action: "deny" };
   });
 
+  // 拦截 context menu（对所有右键都生效）
+  mainWindow.webContents.on("context-menu", event => {
+    // 阻止默认菜单显示
+    event.preventDefault();
+  });
+
   // MAC dock icon
   if (process.platform === "darwin") {
     const dockIcon = nativeImage.createFromPath(path.resolve(process.cwd(), "electron/icons/logo.png"));

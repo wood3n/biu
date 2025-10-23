@@ -39,12 +39,12 @@ const Layout = () => {
       }}
     >
       <div className="flex h-full flex-col">
-        <div className="window-drag h-16 w-full flex-none">
+        <div className="h-16 w-full flex-none">
           <Navbar />
         </div>
         <div className="flex min-h-0 flex-grow space-x-2 px-2">
           <SideNav />
-          <Card radius="sm" className="h-full flex-grow">
+          <Card radius="md" className="h-full flex-grow">
             <Outlet />
           </Card>
         </div>
