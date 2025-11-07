@@ -14,8 +14,6 @@ const api: ElectronAPI = {
   openDirectory: (path?: string) => ipcRenderer.invoke(channel.dialog.openDirectory, path),
   openExternal: (url: string) => ipcRenderer.invoke(channel.dialog.openExternal, url),
   getFonts: () => ipcRenderer.invoke(channel.font.getFonts),
-  /** 检查文件是否存在 */
-  checkFileExists: (filename: string) => ipcRenderer.invoke(channel.download.checkExists, filename),
   startDownload: (params: DownloadOptions) => ipcRenderer.invoke(channel.download.start, params),
   onDownloadProgress: async (cb: (params: DownloadCallbackParams) => void) => {
     if (downloadProgressHandler) {

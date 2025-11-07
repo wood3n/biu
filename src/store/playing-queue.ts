@@ -1,3 +1,4 @@
+import moment from "moment";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -88,13 +89,14 @@ const getVideoLink = (bvid: string) => `https://www.bilibili.com/video/${bvid}`;
 const getMVPlayData = async (mv: PlayingMV, page: number = 1) => {
   const pages = await getMVPages(mv);
   const cid = pages.find(item => item.pageIndex === page)?.pageCid as number;
-  const { audioUrl } = await getMVUrl(mv.bvid, cid);
+  const { audioUrl, expiredTime } = await getMVUrl(mv.bvid, cid);
   return {
     ...mv,
     currentPage: page,
     cid,
     videoLink: getVideoLink(mv.bvid),
     url: audioUrl,
+    expiredTime,
     pages,
   } as PlayingMV;
 };
@@ -176,8 +178,8 @@ export const usePlayingQueue = create<State & Action>()(
 
           let newPlayData: PlayingMV;
           if (mv.cid) {
-            const { audioUrl } = await getMVUrl(mv.bvid, mv.cid);
-            newPlayData = { ...mv, url: audioUrl };
+            const { audioUrl, expiredTime } = await getMVUrl(mv.bvid, mv.cid);
+            newPlayData = { ...mv, url: audioUrl, expiredTime };
           } else {
             newPlayData = await getMVPlayData(mv);
           }
@@ -226,8 +228,8 @@ export const usePlayingQueue = create<State & Action>()(
           if (current?.pages?.length) {
             const page = current.pages.find(item => item.pageCid === pageCid);
             if (page) {
-              const { audioUrl } = await getMVUrl(current.bvid, page.pageCid);
-              const updated = { ...current, currentPage: page.pageIndex, url: audioUrl } as PlayingMV;
+              const { audioUrl, expiredTime } = await getMVUrl(current.bvid, page.pageCid);
+              const updated = { ...current, currentPage: page.pageIndex, url: audioUrl, expiredTime } as PlayingMV;
               setCurrentAndLoad(updated);
             }
           }
@@ -239,9 +241,9 @@ export const usePlayingQueue = create<State & Action>()(
             const nextPageIndex = (current.currentPage ?? 1) + 1;
             const nextPage = current.pages.find(item => item.pageIndex === nextPageIndex);
             if (nextPage) {
-              const { audioUrl } = await getMVUrl(current.bvid, nextPage.pageCid);
+              const { audioUrl, expiredTime } = await getMVUrl(current.bvid, nextPage.pageCid);
 
-              const updated = { ...current, currentPage: nextPageIndex, url: audioUrl } as PlayingMV;
+              const updated = { ...current, currentPage: nextPageIndex, url: audioUrl, expiredTime } as PlayingMV;
               setCurrentAndLoad(updated);
               return;
             }
@@ -263,8 +265,8 @@ export const usePlayingQueue = create<State & Action>()(
             const prevPageIndex = (current.currentPage ?? 1) - 1;
             const prevPage = current.pages.find(item => item.pageIndex === prevPageIndex);
             if (prevPage) {
-              const { audioUrl } = await getMVUrl(current.bvid, prevPage.pageCid);
-              const updated = { ...current, currentPage: prevPageIndex, url: audioUrl } as PlayingMV;
+              const { audioUrl, expiredTime } = await getMVUrl(current.bvid, prevPage.pageCid);
+              const updated = { ...current, currentPage: prevPageIndex, url: audioUrl, expiredTime } as PlayingMV;
               setCurrentAndLoad(updated);
               return;
             }
@@ -369,10 +371,11 @@ export const usePlayingQueue = create<State & Action>()(
         isMuted: state.isMuted,
         rate: state.rate,
         currentTime: state.currentTime,
+        expiredTime: state.expiredTime,
       }),
       onRehydrateStorage: () => {
-        return state => {
-          const { volume, isMuted, rate, currentTime, current, playMode } = state || initState;
+        return async state => {
+          const { volume, isMuted, rate, currentTime, current, playMode, expiredTime } = state || initState;
           audio.volume = volume;
           if (isMuted) {
             audio.muted = true;
@@ -386,6 +389,24 @@ export const usePlayingQueue = create<State & Action>()(
 
           if (current?.url) {
             audio.src = current.url;
+          }
+
+          // 刷新播放链接
+          if (current?.url && moment.unix(expiredTime ?? 0).isSameOrBefore(moment())) {
+            const cid = current.pages?.find(item => item.pageIndex === (current?.currentPage ?? 1))?.pageCid;
+            if (cid) {
+              const { audioUrl, expiredTime } = await getMVUrl(current.bvid, cid);
+              usePlayingQueue.setState(s => ({
+                ...s,
+                current: { ...(s.current as PlayingMV), url: audioUrl, expiredTime },
+              }));
+              audio.src = audioUrl;
+            } else {
+              usePlayingQueue.setState(s => ({
+                ...s,
+                current: null,
+              }));
+            }
           }
         };
       },

@@ -20,6 +20,15 @@ async function ensureDir(dir: string): Promise<void> {
   }
 }
 
+async function checkFileExists(filePath: string): Promise<boolean> {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 interface DownloadToFileOptions {
   url: string;
   filePath: string;
@@ -97,55 +106,22 @@ async function cleanupTempFiles(files: Array<string | undefined | null>): Promis
   }
 }
 
-// 渲染端调用参数（与 preload 暴露的 DownloadOptions 对齐，并扩展 format）
-interface StartDownloadPayload {
-  id: string;
-  filename: string;
-  audioUrl: string;
-  videoUrl?: string;
-  /** 目标封装格式，未指定时默认 mp3 */
-  format?: "mp3" | "flac";
-}
-
-async function getAudioCodec(input: string): Promise<string | null> {
-  return new Promise(resolve => {
-    try {
-      ffmpeg.ffprobe(input, (err, data) => {
-        if (err) {
-          log.warn("[download] ffprobe failed:", err);
-          resolve(null);
-          return;
-        }
-        const s = data.streams?.find(st => st.codec_type === "audio");
-        console.log("ffprobe audio codec:", s?.codec_name);
-        resolve(s?.codec_name ?? null);
-      });
-    } catch (e) {
-      log.warn("[download] ffprobe exception:", e);
-      resolve(null);
-    }
-  });
-}
-
 export function registerDownloadHandlers() {
   ipcMain.handle(
     channel.download.start,
-    async (event: IpcMainInvokeEvent, { id, filename, audioUrl, format = "mp3" }: StartDownloadPayload) => {
-      try {
-        const ffmpegPath = process.env.FFMPEG_PATH;
-        if (ffmpegPath) {
-          ffmpeg.setFfmpegPath(ffmpegPath);
-        }
-      } catch (err) {
-        // 修改说明：设置 ffmpeg 路径失败时记录警告，不影响下载逻辑
-        log.warn("[download] setFfmpegPath failed:", err);
-      }
-
+    async (
+      event: IpcMainInvokeEvent,
+      { id, filename, audioUrl, isLossless }: DownloadOptions,
+    ): Promise<StartDownloadResponse> => {
       const settings = store.get(storeKey.appSettings);
       const downloadDir = settings?.downloadPath || app.getPath("downloads");
-      console.log("downloadDir:", downloadDir);
       await ensureDir(downloadDir);
       const outputPath = path.join(downloadDir, filename);
+
+      const fileExists = await checkFileExists(outputPath);
+      if (fileExists) {
+        return { success: false, error: "文件已存在" };
+      }
 
       const tempDir = path.join(app.getPath("temp"), "biu-downloads");
       await ensureDir(tempDir);
@@ -181,55 +157,41 @@ export function registerDownloadHandlers() {
         // 封装/转换阶段
         send({ id, status: "merging" });
 
-        // 判断是否需要转码：如果目标为 mp3/aac/wav 且输入已是目标编解码/容器，可直接复制
-        let needTranscode = true;
-        try {
-          const codec = await getAudioCodec(tempAudioPath);
-          if (codec) {
-            if (format === "mp3" && codec.toLowerCase().includes("mp3")) needTranscode = false;
-            if (format === "flac" && codec.toLowerCase().includes("flac")) needTranscode = false;
-          }
-        } catch {
-          // ffprobe 失败时按需转码以保证输出一致
-          needTranscode = true;
-        }
-
-        if (!needTranscode) {
+        if (isLossless) {
           try {
             await fs.copyFile(tempAudioPath, outputPath);
           } catch (copyErr) {
             log.warn("[download] copy passthrough failed:", copyErr);
-            needTranscode = true;
           }
-        }
-
-        if (needTranscode) {
-          await new Promise<void>((resolve, reject) => {
-            const command = ffmpeg().input(tempAudioPath).noVideo();
-
-            if (format === "mp3") {
-              command.audioCodec("libmp3lame").outputOptions(["-q:a 2"]).format("mp3");
+        } else {
+          try {
+            const ffmpegPath = process.env.FFMPEG_PATH;
+            if (ffmpegPath) {
+              ffmpeg.setFfmpegPath(ffmpegPath);
             }
+          } catch (err) {
+            // 修改说明：设置 ffmpeg 路径失败时记录警告，不影响下载逻辑
+            log.warn("[download] setFfmpegPath failed:", err);
+          }
 
-            command
-              .on("progress", info => {
-                const p = Math.max(0, Math.min(100, Math.floor(info.percent ?? 0)));
-                if (p > 0) {
-                  send({ id, status: "merging" });
-                }
-              })
-              .on("error", async err => {
-                try {
-                  await fs.unlink(outputPath).catch(() => {});
-                } catch (cleanupErr) {
-                  log.warn("[download] cleanup output file failed:", cleanupErr);
-                }
-                send({ id: id, status: "failed", error: "audio convert failed" });
-                reject(err);
-              })
-              .on("end", () => resolve())
-              .save(outputPath);
-          });
+          const command = ffmpeg().input(tempAudioPath).noVideo();
+          command.audioCodec("libmp3lame").outputOptions(["-q:a 2"]).format("mp3");
+
+          command
+            .on("progress", info => {
+              const p = Math.max(0, Math.min(100, Math.floor(info.percent ?? 0)));
+              if (p > 0) {
+                send({ id, status: "merging" });
+              }
+            })
+            .on("error", async () => {
+              try {
+                await fs.unlink(outputPath).catch(() => {});
+              } catch (cleanupErr) {
+                log.warn("[download] cleanup output file failed:", cleanupErr);
+              }
+            })
+            .save(outputPath);
         }
 
         await cleanupTempFiles([tempAudioPath]);
@@ -243,20 +205,4 @@ export function registerDownloadHandlers() {
       }
     },
   );
-
-  ipcMain.handle(channel.download.checkExists, async (_, filename: string) => {
-    try {
-      const settings = store.get(storeKey.appSettings);
-      const downloadDir = settings?.downloadPath || app.getPath("downloads");
-      const filePath = path.join(downloadDir, filename);
-      const exists = await fs
-        .access(filePath)
-        .then(() => true)
-        .catch(() => false);
-      return exists;
-    } catch (error) {
-      log.error("[download] check file exists failed:", error);
-      return false;
-    }
-  });
 }

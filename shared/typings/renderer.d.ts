@@ -33,10 +33,10 @@ interface DownloadOptions {
   filename: string;
   /** 下载文件的音频 url */
   audioUrl: string;
+  /** 是否为无损音频 */
+  isLossless: boolean;
   /** 下载文件的视频 url */
   videoUrl?: string;
-  /** 目标封装格式，未指定时默认 mp3 */
-  format?: "mp3" | "flac";
 }
 
 interface DownloadCallbackParams {
@@ -45,6 +45,11 @@ interface DownloadCallbackParams {
   downloadedBytes?: number;
   progress?: number;
   status: DownloadStatus;
+  error?: string;
+}
+
+interface StartDownloadResponse {
+  success: boolean;
   error?: string;
 }
 
@@ -60,10 +65,8 @@ interface ElectronAPI {
   openExternal: (url: string) => Promise<boolean>;
   /** 获取本地安装的字体列表 */
   getFonts: () => Promise<IFontInfo[]>;
-  /** 检查文件是否存在 */
-  checkFileExists: (filename: string) => Promise<boolean>;
   /** 开始下载文件 */
-  startDownload: (options: DownloadOptions) => Promise<void>;
+  startDownload: (options: DownloadOptions) => Promise<StartDownloadResponse>;
   /** 监听下载进度（包含 video/audio/merge 阶段），重复调用会替换旧监听 */
   onDownloadProgress: (cb: (payload: DownloadCallbackParams) => void) => Promise<void>;
   /** 导航到指定路由 */

@@ -1,5 +1,3 @@
-import { useNavigate } from "react-router";
-
 import { addToast, Button } from "@heroui/react";
 import { RiDownload2Fill } from "@remixicon/react";
 
@@ -10,7 +8,6 @@ import { usePlayingQueue } from "@/store/playing-queue";
 const Download = () => {
   const { current } = usePlayingQueue();
   const { add: addToDownloadQueue } = useDownloadQueue();
-  const navigate = useNavigate();
 
   const download = async () => {
     if (!current?.bvid) {
@@ -27,21 +24,11 @@ const Download = () => {
         cid = getPageRes?.data?.find(item => item.page === (current.currentPage ?? 1))?.cid as number;
       }
 
-      addToDownloadQueue({
+      await addToDownloadQueue({
         bvid: current.bvid,
         cid: String(cid),
         title: current.title,
         coverImgUrl: (current as any)?.coverImageUrl || "",
-      });
-
-      addToast({
-        title: "已添加到下载列表",
-        color: "success",
-        endContent: (
-          <Button size="sm" variant="flat" onPress={() => navigate("/download-list")}>
-            查看
-          </Button>
-        ),
       });
     } catch {
       addToast({

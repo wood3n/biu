@@ -1,3 +1,4 @@
+import { addToast } from "@heroui/react";
 import { uniqueId } from "es-toolkit/compat";
 import moment from "moment";
 import { create } from "zustand";
@@ -47,17 +48,16 @@ export const useDownloadQueue = create<DownloadState & DownloadAction>()(
       list: [],
       add: async ({ type = "audio", title, coverImgUrl, bvid, cid }) => {
         const exists = get().list.some(i => i.bvid === bvid && i.cid === cid && i.status !== "completed");
-        if (exists) return;
-
-        const { audioUrl, isLossless } = await getMVUrl(bvid, cid);
-        const ext = isLossless ? "flac" : "mp3";
-        const filename = `${sanitizeFilename(title)}_${bvid}_${cid}.${ext}`;
-        const fileExists = await window.electron.checkFileExists(filename);
-        if (fileExists) {
+        if (exists) {
+          addToast({
+            title: "当前音频正在下载中",
+          });
           return;
         }
 
-        const id = `${bvid}_${cid}_${Date.now()}_${uniqueId()}`;
+        const { audioUrl, isLossless } = await getMVUrl(bvid, cid);
+        const filename = `${sanitizeFilename(title)}_${bvid}_${cid}.${isLossless ? "flac" : "mp3"}`;
+        const id = `${Date.now()}_${uniqueId()}`;
         const createTime = moment().unix();
         // 先入队为 waiting
         set(state => ({
@@ -69,7 +69,7 @@ export const useDownloadQueue = create<DownloadState & DownloadAction>()(
 
         // 启动下载
         try {
-          await window.electron.startDownload({ id, filename, audioUrl });
+          await window.electron.startDownload({ id, filename, audioUrl, isLossless });
           set(state => ({
             list: state.list.map(i => (i.id === id ? { ...i, status: "downloading" } : i)),
           }));

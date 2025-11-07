@@ -43,6 +43,10 @@ export interface PlayingMV {
    * 播放链接
    */
   url?: string;
+  /**
+   * 播放链接过期时间（秒）
+   */
+  expiredTime?: number;
 }
 
 export interface PageData {

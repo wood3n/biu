@@ -7,6 +7,7 @@ import {
   Chip,
   Image,
   Input,
+  Progress,
   Tab,
   Table,
   TableBody,
@@ -21,6 +22,8 @@ import { filesize } from "filesize";
 import { formatSecondsToDate } from "@/common/utils";
 import { useDownloadQueue } from "@/store/download-queue";
 import { useSettings } from "@/store/settings";
+
+import { StatusDesc } from "./status-desc";
 
 const DownloadList = () => {
   const { downloadPath, update } = useSettings();
@@ -80,27 +83,53 @@ const DownloadList = () => {
             >
               <TableHeader>
                 <TableColumn>文件</TableColumn>
+                <TableColumn width={180}>状态</TableColumn>
                 <TableColumn width={120}>大小</TableColumn>
                 <TableColumn width={140}>下载时间</TableColumn>
               </TableHeader>
               <TableBody items={downloadList.filter(item => item.type === fileType)}>
-                {item => (
-                  <TableRow key={item.id}>
-                    <TableCell className="max-w-[280px] truncate">
-                      <div className="flex items-center space-x-1">
-                        <Image src={item.coverImgUrl} width={48} height={48} className="mr-2 object-cover" />
-                        <div className="flex min-w-0 flex-1 flex-col space-y-1 overflow-hidden">
-                          <span className="truncate">{item.title}</span>
-                          <Chip size="sm" radius="sm" variant="flat">
-                            {item.type === "audio" ? "音频" : "视频"}
-                          </Chip>
+                {item => {
+                  const showProgress = ["downloading", "failed"].includes(item.status as DownloadStatus);
+                  const statusDesc = StatusDesc[item.status as DownloadStatus];
+                  const isFailed = item.status === "failed";
+                  const progressColor = isFailed ? "danger" : "primary";
+
+                  return (
+                    <TableRow key={item.id}>
+                      <TableCell className="max-w-[280px] truncate">
+                        <div className="flex items-center space-x-1">
+                          <Image src={item.coverImgUrl} width={48} height={48} className="mr-2 object-cover" />
+                          <div className="flex min-w-0 flex-1 flex-col space-y-1 overflow-hidden">
+                            <span className="truncate">{item.title}</span>
+                            <Chip size="sm" radius="sm" variant="flat">
+                              {item.type === "audio" ? "音频" : "视频"}
+                            </Chip>
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{item.totalBytes ? filesize(item.totalBytes) : "-"}</TableCell>
-                    <TableCell>{item.createTime ? formatSecondsToDate(item.createTime) : "-"}</TableCell>
-                  </TableRow>
-                )}
+                      </TableCell>
+                      <TableCell>
+                        {showProgress ? (
+                          <Progress
+                            value={item.progress}
+                            maxValue={100}
+                            showValueLabel
+                            size="sm"
+                            radius="sm"
+                            className="w-full"
+                            label={isFailed ? item.error || "下载出错" : statusDesc}
+                            color={progressColor}
+                          />
+                        ) : (
+                          <Chip size="sm" radius="sm" variant="flat">
+                            {statusDesc}
+                          </Chip>
+                        )}
+                      </TableCell>
+                      <TableCell>{item.totalBytes ? filesize(item.totalBytes) : "-"}</TableCell>
+                      <TableCell>{item.createTime ? formatSecondsToDate(item.createTime) : "-"}</TableCell>
+                    </TableRow>
+                  );
+                }}
               </TableBody>
             </Table>
           </div>
