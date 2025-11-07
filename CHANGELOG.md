@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.3.0](https://github.com/wood3n/biu/compare/v1.2.1...v1.3.0) (2025-11-07)
+
+### 🚀 Enhancements
+
+* improve the download function ([72c4cc6](https://github.com/wood3n/biu/commit/72c4cc6af425355d88c868f2dda792683760f33a))
+
+### 🩹 Fixes
+
+* theme problem ([8436419](https://github.com/wood3n/biu/commit/84364193b92eca206eb0f46fc854bf8ac12a2337))
+
 ## [1.2.1](https://github.com/wood3n/biu/compare/v1.2.0...v1.2.1) (2025-10-22)
 
 ### 🩹 Fixes
