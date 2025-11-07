@@ -63,13 +63,14 @@ export function App() {
 
   return (
     <HeroUIProvider navigate={navigate} useHref={useHref} locale="zh-CN">
-      <ToastProvider
-        placement="top-center"
-        toastOffset={70}
-        maxVisibleToasts={3}
-        disableAnimation
-        toastProps={{ timeout: 3000, color: "primary" }}
-      />
+      <div className="fixed z-[100]">
+        <ToastProvider
+          placement="bottom-right"
+          toastOffset={90}
+          maxVisibleToasts={3}
+          toastProps={{ timeout: 3000, color: "primary" }}
+        />
+      </div>
       <main
         className="bg-background text-foreground dark h-screen w-screen overflow-hidden"
         style={{

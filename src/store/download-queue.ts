@@ -51,12 +51,22 @@ export const useDownloadQueue = create<DownloadState & DownloadAction>()(
         if (exists) {
           addToast({
             title: "当前音频正在下载中",
+            color: "warning",
           });
           return;
         }
 
         const { audioUrl, isLossless } = await getMVUrl(bvid, cid);
         const filename = `${sanitizeFilename(title)}_${bvid}_${cid}.${isLossless ? "flac" : "mp3"}`;
+        const fileExists = await window.electron.checkFileExists(filename);
+        if (fileExists) {
+          addToast({
+            title: "文件已存在",
+            color: "warning",
+          });
+          return;
+        }
+
         const id = `${Date.now()}_${uniqueId()}`;
         const createTime = moment().unix();
         // 先入队为 waiting

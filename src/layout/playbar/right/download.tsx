@@ -1,5 +1,6 @@
 import { addToast, Button } from "@heroui/react";
 import { RiDownload2Fill } from "@remixicon/react";
+import log from "electron-log/renderer";
 
 import { getPlayerPagelist } from "@/service/player-pagelist";
 import { useDownloadQueue } from "@/store/download-queue";
@@ -30,7 +31,8 @@ const Download = () => {
         title: current.title,
         coverImgUrl: (current as any)?.coverImageUrl || "",
       });
-    } catch {
+    } catch (error) {
+      log.error("[download]", error);
       addToast({
         title: "下载失败",
         color: "danger",

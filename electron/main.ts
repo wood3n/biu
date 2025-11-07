@@ -17,6 +17,8 @@ let autoUpdaterCtl: { checkForUpdates: () => Promise<void>; dispose: () => void 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+log.initialize();
+
 function createWindow() {
   // 计算图标基准路径：打包后使用 resourcesPath，开发用 cwd
   const iconBase = app.isPackaged ? process.resourcesPath : process.cwd();
@@ -57,7 +59,7 @@ function createWindow() {
       : {}),
     trafficLightPosition: { x: 0, y: 0 },
     webPreferences: {
-      preload: path.resolve(__dirname, "preload.cjs"),
+      preload: path.join(__dirname, "preload.mjs"),
       webSecurity: true,
       contextIsolation: true,
       nodeIntegration: false,

@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
+import log from "electron-log/renderer";
 
 import { channel } from "./ipc/channel";
 
@@ -14,13 +15,14 @@ const api: ElectronAPI = {
   openDirectory: (path?: string) => ipcRenderer.invoke(channel.dialog.openDirectory, path),
   openExternal: (url: string) => ipcRenderer.invoke(channel.dialog.openExternal, url),
   getFonts: () => ipcRenderer.invoke(channel.font.getFonts),
+  checkFileExists: (filename: string) => ipcRenderer.invoke(channel.download.checkExists, filename),
   startDownload: (params: DownloadOptions) => ipcRenderer.invoke(channel.download.start, params),
   onDownloadProgress: async (cb: (params: DownloadCallbackParams) => void) => {
     if (downloadProgressHandler) {
       try {
         ipcRenderer.removeListener(channel.download.progress, downloadProgressHandler);
-      } catch {
-        // ignore remove errors
+      } catch (error) {
+        log.error("[preload] 移除下载进度监听器失败:", error);
       }
       downloadProgressHandler = null;
     }
@@ -37,8 +39,8 @@ const api: ElectronAPI = {
     if (navigateHandler) {
       try {
         ipcRenderer.removeListener(channel.router.navigate, navigateHandler);
-      } catch {
-        // ignore remove errors
+      } catch (error) {
+        log.error("[preload] 移除导航监听器失败:", error);
       }
       navigateHandler = null;
     }
@@ -46,8 +48,8 @@ const api: ElectronAPI = {
     navigateHandler = (_: Electron.IpcRendererEvent, path: string) => {
       try {
         cb(path);
-      } catch {
-        // 防御性处理：避免回调抛错影响主进程事件循环
+      } catch (error) {
+        log.error("[preload] 导航回调失败:", error);
       }
     };
 

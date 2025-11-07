@@ -20,15 +20,6 @@ async function ensureDir(dir: string): Promise<void> {
   }
 }
 
-async function checkFileExists(filePath: string): Promise<boolean> {
-  try {
-    await fs.access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 interface DownloadToFileOptions {
   url: string;
   filePath: string;
@@ -107,6 +98,20 @@ async function cleanupTempFiles(files: Array<string | undefined | null>): Promis
 }
 
 export function registerDownloadHandlers() {
+  // 预检查：文件是否已存在
+  ipcMain.handle(channel.download.checkExists, async (_event, filename: string): Promise<boolean> => {
+    const settings = store.get(storeKey.appSettings);
+    const downloadDir = settings?.downloadPath || app.getPath("downloads");
+    await ensureDir(downloadDir);
+    const outputPath = path.join(downloadDir, filename);
+    try {
+      await fs.access(outputPath);
+      return true;
+    } catch {
+      return false;
+    }
+  });
+
   ipcMain.handle(
     channel.download.start,
     async (
@@ -117,11 +122,6 @@ export function registerDownloadHandlers() {
       const downloadDir = settings?.downloadPath || app.getPath("downloads");
       await ensureDir(downloadDir);
       const outputPath = path.join(downloadDir, filename);
-
-      const fileExists = await checkFileExists(outputPath);
-      if (fileExists) {
-        return { success: false, error: "文件已存在" };
-      }
 
       const tempDir = path.join(app.getPath("temp"), "biu-downloads");
       await ensureDir(tempDir);
@@ -177,21 +177,27 @@ export function registerDownloadHandlers() {
           const command = ffmpeg().input(tempAudioPath).noVideo();
           command.audioCodec("libmp3lame").outputOptions(["-q:a 2"]).format("mp3");
 
-          command
-            .on("progress", info => {
-              const p = Math.max(0, Math.min(100, Math.floor(info.percent ?? 0)));
-              if (p > 0) {
-                send({ id, status: "merging" });
-              }
-            })
-            .on("error", async () => {
-              try {
-                await fs.unlink(outputPath).catch(() => {});
-              } catch (cleanupErr) {
-                log.warn("[download] cleanup output file failed:", cleanupErr);
-              }
-            })
-            .save(outputPath);
+          await new Promise<void>((resolve, reject) => {
+            command
+              .on("progress", info => {
+                const p = Math.max(0, Math.min(100, Math.floor(info.percent ?? 0)));
+                if (p > 0) {
+                  send({ id, status: "merging" });
+                }
+              })
+              .on("end", () => resolve())
+              .on("error", async err => {
+                log.error("[download] ffmpeg error:", err);
+                send({ id, status: "failed", error: "文件编码出错" });
+                try {
+                  await fs.unlink(outputPath).catch(() => {});
+                } catch (cleanupErr) {
+                  log.warn("[download] cleanup output file failed:", cleanupErr);
+                }
+                reject(err);
+              })
+              .save(outputPath);
+          });
         }
 
         await cleanupTempFiles([tempAudioPath]);
@@ -200,8 +206,9 @@ export function registerDownloadHandlers() {
         return { success: true } as const;
       } catch (error) {
         await cleanupTempFiles([tempAudioPath]);
-        send({ id, status: "failed", error: "download error" });
-        throw error instanceof Error ? error : new Error(String(error));
+        log.error("[download] start error:", error);
+        send({ id, status: "failed", error: "下载错误" });
+        return { success: false, error: "下载错误" } as const;
       }
     },
   );

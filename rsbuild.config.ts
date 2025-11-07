@@ -41,6 +41,7 @@ export default defineConfig({
   dev: {
     writeToDisk: true,
     lazyCompilation: false,
+    cliShortcuts: false,
     // 开发环境相对路径，保证通过 file:// 加载时静态资源能正确引用
     assetPrefix: "./",
   },

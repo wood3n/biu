@@ -65,6 +65,8 @@ interface ElectronAPI {
   openExternal: (url: string) => Promise<boolean>;
   /** 获取本地安装的字体列表 */
   getFonts: () => Promise<IFontInfo[]>;
+  /** 检查目标下载文件是否已存在（在下载目录中） */
+  checkFileExists: (filename: string) => Promise<boolean>;
   /** 开始下载文件 */
   startDownload: (options: DownloadOptions) => Promise<StartDownloadResponse>;
   /** 监听下载进度（包含 video/audio/merge 阶段），重复调用会替换旧监听 */
