@@ -7,30 +7,16 @@ import fss from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 
+import { UserAgent } from "../network/user-agent";
 import { store, storeKey } from "../store";
 import { channel } from "./channel";
-
-// 清理文件名中的非法字符（适配 Windows/macOS/Linux）
-function sanitizeFilename(filename: string): string {
-  return (
-    filename
-      .replace(/[<>:"|?*\\/]/g, "")
-      // eslint-disable-next-line no-control-regex
-      .replace(/[\x00-\x1f\x80-\x9f]/g, "")
-      .replace(/^\.+/, "")
-      .replace(/\.+$/, "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .substring(0, 200)
-  );
-}
 
 async function ensureDir(dir: string): Promise<void> {
   try {
     await fs.mkdir(dir, { recursive: true });
   } catch (err) {
     // 修改说明：目录创建失败时记录警告，避免静默
-    log.warn("[download] ensureDir failed:", err);
+    log.error("[download] ensureDir failed:", err);
   }
 }
 
@@ -39,31 +25,54 @@ interface DownloadToFileOptions {
   filePath: string;
   referer?: string;
   userAgent?: string;
+  onProgress: (downloadedBytes: number, totalBytes: number) => void;
 }
 
-// 使用 Electron net 模块下载到指定文件，并附带自定义 HTTP 头
-function downloadToFile({ url, filePath, referer, userAgent }: DownloadToFileOptions): Promise<string> {
+// 支持断点续传与进度回调
+function downloadToFileWithResume({ url, filePath, onProgress }: DownloadToFileOptions) {
   return new Promise((resolve, reject) => {
     try {
+      let start = 0;
+      try {
+        const stat = fss.statSync(filePath);
+        start = stat.size || 0;
+      } catch {
+        // 如果文件不存在，视为从0开始下载
+        start = 0;
+      }
+
       const request = net.request(url);
-      if (referer) request.setHeader("Referer", referer);
-      if (userAgent) request.setHeader("User-Agent", userAgent);
+      request.setHeader("Referer", "https://www.bilibili.com");
+      request.setHeader("User-Agent", UserAgent);
+      if (start > 0) request.setHeader("Range", `bytes=${start}-`);
 
       request.on("response", response => {
-        if ((response.statusCode ?? 0) >= 400) {
-          reject(new Error(`下载失败，HTTP ${response.statusCode}`));
+        const statusCode = response.statusCode ?? 0;
+        if (statusCode >= 400) {
+          reject(new Error(`下载失败，HTTP ${statusCode}`));
           return;
         }
 
-        const writeStream = fss.createWriteStream(filePath);
+        const contentLengthHeader = response.headers["content-length"];
+        const remainingBytes = Number(contentLengthHeader ?? 0);
+        const totalBytes = remainingBytes + start;
+
+        const writeStream = fss.createWriteStream(filePath, { flags: start > 0 ? "a" : "w" });
+        let downloaded = start;
+
+        response.on("data", (chunk: Buffer) => {
+          downloaded += chunk.length;
+          onProgress(downloaded, totalBytes);
+        });
+
         response.on("error", err => {
           writeStream.destroy();
           reject(err);
         });
-        writeStream.on("error", err => {
-          reject(err);
-        });
-        writeStream.on("finish", () => resolve(filePath));
+
+        writeStream.on("error", err => reject(err));
+        writeStream.on("finish", () => resolve({ filePath, totalBytes }));
+
         (response as any).pipe(writeStream);
       });
 
@@ -88,16 +97,40 @@ async function cleanupTempFiles(files: Array<string | undefined | null>): Promis
   }
 }
 
+// 渲染端调用参数（与 preload 暴露的 DownloadOptions 对齐，并扩展 format）
 interface StartDownloadPayload {
-  title: string;
-  videoUrl: string;
+  id: string;
+  filename: string;
   audioUrl: string;
+  videoUrl?: string;
+  /** 目标封装格式，未指定时默认 mp3 */
+  format?: "mp3" | "flac";
+}
+
+async function getAudioCodec(input: string): Promise<string | null> {
+  return new Promise(resolve => {
+    try {
+      ffmpeg.ffprobe(input, (err, data) => {
+        if (err) {
+          log.warn("[download] ffprobe failed:", err);
+          resolve(null);
+          return;
+        }
+        const s = data.streams?.find(st => st.codec_type === "audio");
+        console.log("ffprobe audio codec:", s?.codec_name);
+        resolve(s?.codec_name ?? null);
+      });
+    } catch (e) {
+      log.warn("[download] ffprobe exception:", e);
+      resolve(null);
+    }
+  });
 }
 
 export function registerDownloadHandlers() {
   ipcMain.handle(
     channel.download.start,
-    async (event: IpcMainInvokeEvent, { title, videoUrl, audioUrl }: StartDownloadPayload) => {
+    async (event: IpcMainInvokeEvent, { id, filename, audioUrl, format = "mp3" }: StartDownloadPayload) => {
       try {
         const ffmpegPath = process.env.FFMPEG_PATH;
         if (ffmpegPath) {
@@ -110,104 +143,120 @@ export function registerDownloadHandlers() {
 
       const settings = store.get(storeKey.appSettings);
       const downloadDir = settings?.downloadPath || app.getPath("downloads");
+      console.log("downloadDir:", downloadDir);
       await ensureDir(downloadDir);
-
-      const safeTitle = sanitizeFilename(title || "download");
-      const outputFilename = `${safeTitle}.mp4`;
-      const outputPath = path.join(downloadDir, outputFilename);
+      const outputPath = path.join(downloadDir, filename);
 
       const tempDir = path.join(app.getPath("temp"), "biu-downloads");
       await ensureDir(tempDir);
-      const unique = Date.now();
-      const tempVideoPath = path.join(tempDir, `${safeTitle}-${unique}.video.tmp`);
-      const tempAudioPath = path.join(tempDir, `${safeTitle}-${unique}.audio.tmp`);
+      const tempAudioPath = path.join(tempDir, `${id}.audio.tmp`);
 
-      const userAgent =
-        (event?.sender?.getUserAgent?.() as string | undefined) ||
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36";
-      const getReferer = (u: string): string => {
+      const send = (params: DownloadCallbackParams) => {
         try {
-          const origin = new URL(u).origin;
-          if (origin.includes("bilibili")) return "https://www.bilibili.com";
-          if (origin.includes("bilivideo")) return "https://www.bilibili.com";
-          return origin;
-        } catch (err) {
-          // 修改说明：URL 解析失败时记录警告并返回空 Referer
-          log.warn("[download] parse URL for referer failed:", err);
-          return "";
+          event.sender.send(channel.download.progress, params);
+        } catch (e) {
+          log.warn("[download] send progress failed:", e);
         }
       };
-      const videoReferer = getReferer(videoUrl);
-      const audioReferer = getReferer(audioUrl);
 
       try {
-        await Promise.all([
-          downloadToFile({ url: videoUrl, filePath: tempVideoPath, referer: videoReferer, userAgent }),
-          downloadToFile({ url: audioUrl, filePath: tempAudioPath, referer: audioReferer, userAgent }),
-        ]);
-
-        await new Promise<void>((resolve, reject) => {
-          ffmpeg()
-            .input(tempVideoPath)
-            .input(tempAudioPath)
-            .outputOptions(["-c:v copy", "-c:a copy", "-map 0:v:0", "-map 1:a:0"])
-            .on("error", async err => {
-              try {
-                await fs.unlink(outputPath).catch(() => {});
-              } catch (cleanupErr) {
-                // 修改说明：合并失败后的输出文件清理出错时记录警告
-                log.warn("[download] cleanup output file failed:", cleanupErr);
-              }
-              reject(err);
-            })
-            .on("end", () => resolve())
-            .save(outputPath);
+        // 音频下载
+        let audioTotal = 0;
+        await downloadToFileWithResume({
+          url: audioUrl,
+          filePath: tempAudioPath,
+          onProgress: (downloaded, total) => {
+            audioTotal = total || audioTotal;
+            const progress = total > 0 ? Math.floor((downloaded / total) * 100) : undefined;
+            send({
+              id,
+              status: "downloading",
+              progress,
+              downloadedBytes: downloaded,
+              totalBytes: total,
+            });
+          },
         });
 
-        await cleanupTempFiles([tempVideoPath, tempAudioPath]);
+        // 封装/转换阶段
+        send({ id, status: "merging" });
 
-        return {
-          success: true,
-          filePath: outputPath,
-          filename: outputFilename,
-        } as const;
+        // 判断是否需要转码：如果目标为 mp3/aac/wav 且输入已是目标编解码/容器，可直接复制
+        let needTranscode = true;
+        try {
+          const codec = await getAudioCodec(tempAudioPath);
+          if (codec) {
+            if (format === "mp3" && codec.toLowerCase().includes("mp3")) needTranscode = false;
+            if (format === "flac" && codec.toLowerCase().includes("flac")) needTranscode = false;
+          }
+        } catch {
+          // ffprobe 失败时按需转码以保证输出一致
+          needTranscode = true;
+        }
+
+        if (!needTranscode) {
+          try {
+            await fs.copyFile(tempAudioPath, outputPath);
+          } catch (copyErr) {
+            log.warn("[download] copy passthrough failed:", copyErr);
+            needTranscode = true;
+          }
+        }
+
+        if (needTranscode) {
+          await new Promise<void>((resolve, reject) => {
+            const command = ffmpeg().input(tempAudioPath).noVideo();
+
+            if (format === "mp3") {
+              command.audioCodec("libmp3lame").outputOptions(["-q:a 2"]).format("mp3");
+            }
+
+            command
+              .on("progress", info => {
+                const p = Math.max(0, Math.min(100, Math.floor(info.percent ?? 0)));
+                if (p > 0) {
+                  send({ id, status: "merging" });
+                }
+              })
+              .on("error", async err => {
+                try {
+                  await fs.unlink(outputPath).catch(() => {});
+                } catch (cleanupErr) {
+                  log.warn("[download] cleanup output file failed:", cleanupErr);
+                }
+                send({ id: id, status: "failed", error: "audio convert failed" });
+                reject(err);
+              })
+              .on("end", () => resolve())
+              .save(outputPath);
+          });
+        }
+
+        await cleanupTempFiles([tempAudioPath]);
+
+        send({ id, status: "completed", progress: 100 });
+        return { success: true } as const;
       } catch (error) {
-        await cleanupTempFiles([tempVideoPath, tempAudioPath]);
+        await cleanupTempFiles([tempAudioPath]);
+        send({ id, status: "failed", error: "download error" });
         throw error instanceof Error ? error : new Error(String(error));
       }
     },
   );
 
-  ipcMain.handle(channel.download.list, async () => {
+  ipcMain.handle(channel.download.checkExists, async (_, filename: string) => {
     try {
       const settings = store.get(storeKey.appSettings);
       const downloadDir = settings?.downloadPath || app.getPath("downloads");
-      const entries = await fs.readdir(downloadDir, { withFileTypes: true });
-
-      const files: Array<{ name: string; format: string; size: number; time: number }> = [];
-      for (const entry of entries) {
-        if (!entry.isFile()) continue;
-        const filePath = path.join(downloadDir, entry.name);
-        try {
-          const stat = await fs.stat(filePath);
-          const ext = path.extname(entry.name).replace(/^\./, "").toLowerCase();
-          files.push({
-            name: entry.name,
-            format: ext || "unknown",
-            size: stat.size,
-            time: stat.mtimeMs,
-          });
-        } catch (err) {
-          // 修改说明：读取文件信息失败时记录警告并跳过
-          log.warn("[download] stat file failed:", err);
-        }
-      }
-      files.sort((a, b) => b.time - a.time);
-      return files;
+      const filePath = path.join(downloadDir, filename);
+      const exists = await fs
+        .access(filePath)
+        .then(() => true)
+        .catch(() => false);
+      return exists;
     } catch (error) {
-      // 修改说明：下载列表读取失败时记录错误，并返回空列表
-      log.error("[download] read download directory failed:", error);
-      return [];
+      log.error("[download] check file exists failed:", error);
+      return false;
     }
   });
 }

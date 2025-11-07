@@ -32,9 +32,6 @@ const Layout = () => {
     <ErrorBoundary
       FallbackComponent={Fallback}
       onError={(error, info) => {
-        console.log("error", error, info);
-        console.log(log);
-        // 使用 electron-log 记录错误与组件堆栈
         log.error("[ErrorBoundary]", error, info);
       }}
     >

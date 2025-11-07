@@ -27,6 +27,10 @@ export function App() {
     }
   }, [navigate]);
 
+  // useEffect(() => {
+  //   axios.head("https://bilibili.com/");
+  // }, []);
+
   // 将主题相关样式应用到 :root 和 body，确保挂载在 body 上的组件可读取到
   useEffect(() => {
     const rootStyle = document.documentElement.style;

@@ -10,7 +10,8 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@shared/*": ["./shared/*"],
     },
     "resolveJsonModule": true,
     "noImplicitAny": false,
@@ -22,6 +23,6 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src", "plugins", "electron", "rsbuild.config.ts"],
+  "include": ["src", "shared", "plugins", "electron", "rsbuild.config.ts"],
   "exclude": ["node_modules", "dist", "public"]
 }

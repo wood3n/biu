@@ -24,13 +24,28 @@ interface IFontInfo {
   monospace: boolean;
 }
 
+type DownloadStatus = "waiting" | "downloading" | "merging" | "completed" | "failed";
+
 interface DownloadOptions {
+  /** 唯一标识（推荐传入 bvid），用于进度回调匹配 */
+  id: string;
   /** 下载文件的标题 */
-  title: string;
-  /** 下载文件的视频 url */
-  videoUrl: string;
+  filename: string;
   /** 下载文件的音频 url */
   audioUrl: string;
+  /** 下载文件的视频 url */
+  videoUrl?: string;
+  /** 目标封装格式，未指定时默认 mp3 */
+  format?: "mp3" | "flac";
+}
+
+interface DownloadCallbackParams {
+  id: string;
+  totalBytes?: number;
+  downloadedBytes?: number;
+  progress?: number;
+  status: DownloadStatus;
+  error?: string;
 }
 
 interface ElectronAPI {
@@ -45,17 +60,12 @@ interface ElectronAPI {
   openExternal: (url: string) => Promise<boolean>;
   /** 获取本地安装的字体列表 */
   getFonts: () => Promise<IFontInfo[]>;
+  /** 检查文件是否存在 */
+  checkFileExists: (filename: string) => Promise<boolean>;
   /** 开始下载文件 */
   startDownload: (options: DownloadOptions) => Promise<void>;
-  /** 列出下载目录文件 */
-  listDownloads: () => Promise<
-    {
-      name: string;
-      format: string;
-      size: number;
-      time: number; // mtimeMs
-    }[]
-  >;
+  /** 监听下载进度（包含 video/audio/merge 阶段），重复调用会替换旧监听 */
+  onDownloadProgress: (cb: (payload: DownloadCallbackParams) => void) => Promise<void>;
   /** 导航到指定路由 */
   navigate: (cb: (path: string) => void) => Promise<void>;
 }

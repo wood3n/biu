@@ -1,70 +1,43 @@
 import { Fragment } from "react";
 import { useParams } from "react-router";
 
-import { Avatar, Divider, Image, Skeleton, Tooltip } from "@heroui/react";
+import { Avatar, Divider, Image, Tooltip } from "@heroui/react";
 import { RiAddLine, RiCheckLine, RiVerifiedBadgeFill } from "@remixicon/react";
-import { useRequest } from "ahooks";
 
 import { UserRelation } from "@/common/constants/relation";
 import AsyncButton from "@/components/async-button";
 import { postRelationModify, UserRelationAction } from "@/service/relation-modify";
-import { getRelationStat } from "@/service/relation-stat";
-import { getSpaceWbiAccInfo } from "@/service/space-wbi-acc-info";
+import { type RelationStatData } from "@/service/relation-stat";
+import { type SpaceAccInfoData } from "@/service/space-wbi-acc-info";
 import { useUser } from "@/store/user";
 
 interface Props {
+  spaceInfo?: SpaceAccInfoData;
+  relationStats?: RelationStatData;
   relationWithMe?: number;
   refreshRelation: () => Promise<number>;
 }
 
-const Profile = ({ relationWithMe, refreshRelation }: Props) => {
+const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }: Props) => {
   const user = useUser(s => s.user);
   const { id } = useParams();
   const isSelf = user?.mid === Number(id);
-
-  const { data, loading } = useRequest(
-    async () => {
-      const res = await getSpaceWbiAccInfo({
-        mid: Number(id),
-      });
-
-      return res.data;
-    },
-    {
-      ready: !!id,
-      refreshDeps: [id],
-    },
-  );
-
-  const { data: relationData } = useRequest(
-    async () => {
-      const res = await getRelationStat({
-        vmid: Number(id),
-      });
-
-      return res.data;
-    },
-    {
-      ready: !!id && relationWithMe !== UserRelation.Blocked,
-      refreshDeps: [id],
-    },
-  );
 
   const isFollow = [UserRelation.Followed, UserRelation.MutualFollowed].includes(relationWithMe as UserRelation);
 
   const stats = [
     {
       title: "关注数",
-      value: relationData?.following,
+      value: relationStats?.following,
       hidden: !isSelf,
     },
     {
       title: "粉丝数",
-      value: relationData?.follower,
+      value: relationStats?.follower,
     },
     {
       title: "等  级",
-      value: `Lv${data?.level ?? 0}`,
+      value: `Lv${spaceInfo?.level ?? 0}`,
     },
   ].filter(item => !item.hidden);
 
@@ -89,22 +62,10 @@ const Profile = ({ relationWithMe, refreshRelation }: Props) => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="mb-4 flex items-end space-x-4 p-4">
-        <Skeleton className="h-[200px] w-[200px] rounded-full" />
-        <div className="flex flex-col space-y-2">
-          <Skeleton className="h-6 w-[100px] rounded-lg" />
-          <Skeleton className="h-6 w-[200px] rounded-lg" />
-        </div>
-      </div>
-    );
-  }
-
   if (relationWithMe === UserRelation.Blocked) {
     return (
       <div className="flex h-[480px] w-full flex-col items-center justify-center space-y-6">
-        <Avatar src={data?.face} alt={data?.name} className="h-[120px] w-[120px] shadow-lg" />
+        <Avatar src={spaceInfo?.face} alt={spaceInfo?.name} className="h-[120px] w-[120px] shadow-lg" />
         <p className="text-lg">已拉黑</p>
       </div>
     );
@@ -115,30 +76,34 @@ const Profile = ({ relationWithMe, refreshRelation }: Props) => {
       <div
         className="flex h-[200px] items-end justify-between bg-cover bg-center px-8 py-4 bg-blend-multiply"
         style={{
-          background: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${data?.top_photo_v2?.l_200h_img}) center/cover no-repeat`,
+          background: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${spaceInfo?.top_photo_v2?.l_200h_img}) center/cover no-repeat`,
         }}
       >
         <div className="flex items-end space-x-4">
-          <Avatar src={data?.face} alt={data?.name} className="h-[140px] w-[140px] shadow-lg" />
+          <Avatar src={spaceInfo?.face} alt={spaceInfo?.name} className="h-[140px] w-[140px] shadow-lg" />
           <div className="flex flex-col space-y-2">
             <div className="flex items-center space-x-2">
               <div className="flex items-center space-x-2">
-                {Boolean(data?.official?.role) && (
-                  <Tooltip closeDelay={0} content={data?.official?.title}>
+                {Boolean(spaceInfo?.official?.role) && (
+                  <Tooltip closeDelay={0} content={spaceInfo?.official?.title}>
                     <RiVerifiedBadgeFill color="#66AAF9" />
                   </Tooltip>
                 )}
-                <h1>{data?.name}</h1>
+                <h1>{spaceInfo?.name}</h1>
               </div>
-              {Boolean(data?.vip?.status) && (
-                <Image height={24} src={data?.vip?.label?.img_label_uri_hans_static} alt={data?.vip?.label?.text} />
+              {Boolean(spaceInfo?.vip?.status) && (
+                <Image
+                  height={24}
+                  src={spaceInfo?.vip?.label?.img_label_uri_hans_static}
+                  alt={spaceInfo?.vip?.label?.text}
+                />
               )}
             </div>
-            <p className="truncate text-sm">{data?.sign}</p>
+            <p className="truncate text-sm">{spaceInfo?.sign}</p>
           </div>
         </div>
         <div className="flex flex-auto items-center justify-end space-x-4">
-          {!isSelf && (
+          {Boolean(user?.isLogin) && !isSelf && (
             <AsyncButton
               color={isFollow ? "primary" : "default"}
               startContent={isFollow ? <RiCheckLine size={18} /> : <RiAddLine size={18} />}
@@ -163,4 +128,4 @@ const Profile = ({ relationWithMe, refreshRelation }: Props) => {
   );
 };
 
-export default Profile;
+export default SpaceInfo;

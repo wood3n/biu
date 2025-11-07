@@ -1,17 +1,20 @@
 import React from "react";
 import { useParams } from "react-router";
 
-import { Tab, Tabs } from "@heroui/react";
+import { addToast, Spinner, Tab, Tabs } from "@heroui/react";
 import { useRequest } from "ahooks";
 import { isNil } from "es-toolkit/predicate";
 
 import { UserRelation } from "@/common/constants/relation";
 import ScrollContainer from "@/components/scroll-container";
+import { getRelationStat } from "@/service/relation-stat";
+import { getXSpaceSettings } from "@/service/space-setting";
+import { getSpaceWbiAccInfo } from "@/service/space-wbi-acc-info";
 import { getSpaceWbiAccRelation } from "@/service/space-wbi-acc-relation";
 import { useUser } from "@/store/user";
 
 import Favorites from "./favorites";
-import Profile from "./profile";
+import SpaceInfo from "./space-info";
 import VideoPost from "./video-post";
 import VideoSeries from "./video-series";
 
@@ -22,6 +25,28 @@ const UserProfile = () => {
   const { id } = useParams();
   const user = useUser(s => s.user);
 
+  const { data: userInfo, loading } = useRequest(
+    async () => {
+      const res = await getSpaceWbiAccInfo({
+        mid: id as string,
+      });
+
+      if (res.code === 0) {
+        return res.data;
+      } else {
+        addToast({
+          title: "无法验证身份，请登录后操作",
+          color: "danger",
+        });
+        return undefined;
+      }
+    },
+    {
+      ready: !!id,
+      refreshDeps: [id],
+    },
+  );
+
   const { data: relationWithMe, refreshAsync: refreshRelation } = useRequest(
     async () => {
       const res = await getSpaceWbiAccRelation({
@@ -31,6 +56,35 @@ const UserProfile = () => {
       return res.data?.relation?.attribute;
     },
     {
+      ready: Boolean(user?.isLogin) && !!id,
+      refreshDeps: [id],
+    },
+  );
+
+  const { data: relationStats } = useRequest(
+    async () => {
+      const res = await getRelationStat({
+        vmid: Number(id),
+      });
+
+      return res.data;
+    },
+    {
+      ready: Boolean(user?.isLogin) && Boolean(id) && relationWithMe !== UserRelation.Blocked,
+      refreshDeps: [id],
+    },
+  );
+
+  const { data: spacePrivacy } = useRequest(
+    async () => {
+      const res = await getXSpaceSettings({
+        mid: Number(id),
+        web_location: "333.1387",
+      });
+
+      return res.data?.privacy;
+    },
+    {
       ready: !!id,
       refreshDeps: [id],
     },
@@ -38,15 +92,15 @@ const UserProfile = () => {
 
   const tabs = [
     {
-      label: "收藏夹",
-      key: "collection",
-      hidden: id !== String(user?.mid),
-      content: <Favorites />,
-    },
-    {
       label: "投稿",
       key: "video",
       content: <VideoPost />,
+    },
+    {
+      label: "收藏夹",
+      key: "collection",
+      hidden: !spacePrivacy?.fav_video,
+      content: <Favorites />,
     },
     {
       label: "合集",
@@ -55,9 +109,22 @@ const UserProfile = () => {
     },
   ].filter(item => !item.hidden);
 
+  if (loading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <Spinner size="lg" color="primary" />
+      </div>
+    );
+  }
+
   return (
     <ScrollContainer>
-      <Profile relationWithMe={relationWithMe} refreshRelation={refreshRelation} />
+      <SpaceInfo
+        spaceInfo={userInfo}
+        relationStats={relationStats}
+        relationWithMe={relationWithMe}
+        refreshRelation={refreshRelation}
+      />
       {!isNil(relationWithMe) && relationWithMe !== UserRelation.Blocked && (
         <div className="p-4">
           <Tabs disableAnimation size="lg" aria-label="个人资料栏目" variant="solid">

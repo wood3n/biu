@@ -1,28 +1,18 @@
-import type { Session } from "electron";
-import type { OnBeforeSendHeadersListenerDetails, OnHeadersReceivedListenerDetails } from "electron";
+import type { OnBeforeSendHeadersListenerDetails } from "electron";
 
-export function stripDomainFromSetCookie(cookies: string[]): string[] {
-  return cookies.map(cookieStr =>
-    cookieStr
-      .replace(/;\s*Domain=[^;]+/gi, "")
-      .replace(/;\s*Secure/gi, "")
-      .replace(/;\s*SameSite=None/gi, "")
-      .replace(/;\s*;+/g, ";")
-      .replace(/;\s*$/, ""),
-  );
-}
+import { session } from "electron";
 
-export function installWebRequestInterceptors(sess: Session): { dispose: () => void } {
-  const urls = ["*://*/*"],
-    referer = "https://www.bilibili.com",
+import { UserAgent } from "./user-agent";
+
+export function installWebRequestInterceptors(): { dispose: () => void } {
+  const urls = ["http://*/*", "https://*/*"],
     origin = "https://www.bilibili.com",
-    userAgent =
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
+    referer = "https://www.bilibili.com";
 
   let active = true;
   const filter = { urls };
 
-  const onBeforeSendHeadersHandler = (
+  const onBeforeSendHeadersHandler = async (
     details: OnBeforeSendHeadersListenerDetails,
     callback: (response: { requestHeaders?: Record<string, string> }) => void,
   ) => {
@@ -30,36 +20,17 @@ export function installWebRequestInterceptors(sess: Session): { dispose: () => v
       callback({ requestHeaders: details.requestHeaders });
       return;
     }
+
     const headers = details.requestHeaders || {};
+
     headers["Referer"] = referer;
-    headers["Origin"] = origin;
-    headers["User-Agent"] = userAgent;
+    headers["Origin"] = origin; // 与响应注入的 Allow-Origin 保持一致
+    headers["User-Agent"] = UserAgent;
+
     callback({ requestHeaders: headers });
   };
 
-  const onHeadersReceivedHandler = (
-    details: OnHeadersReceivedListenerDetails,
-    callback: (response: { responseHeaders?: Record<string, string | string[]> }) => void,
-  ) => {
-    if (!active) {
-      callback({ responseHeaders: details.responseHeaders });
-      return;
-    }
-    const headers = details.responseHeaders || {};
-    const headerName = Object.keys(headers).find(k => k.toLowerCase() === "set-cookie");
-
-    if (headerName) {
-      const setCookieValues = headers[headerName];
-      if (Array.isArray(setCookieValues)) {
-        headers[headerName] = stripDomainFromSetCookie(setCookieValues);
-      }
-    }
-
-    callback({ responseHeaders: headers });
-  };
-
-  sess.webRequest.onBeforeSendHeaders(filter, onBeforeSendHeadersHandler);
-  sess.webRequest.onHeadersReceived(filter, onHeadersReceivedHandler);
+  session.defaultSession.webRequest.onBeforeSendHeaders(filter, onBeforeSendHeadersHandler);
 
   return {
     dispose: () => {

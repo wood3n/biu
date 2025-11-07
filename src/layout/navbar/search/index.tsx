@@ -60,6 +60,7 @@ const SearchInput: React.FC = () => {
         onKeyDown={e => {
           if (e.key === "Enter" && e.target?.value?.trim()) {
             submitSearch(e.target.value);
+            setOpen(false);
           }
         }}
         onFocus={() => setOpen(true)}

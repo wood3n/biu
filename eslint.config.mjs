@@ -52,7 +52,7 @@ export default defineConfig([
         {
           type: "alphabetical",
           order: "asc",
-          internalPattern: ["^~/.+", "^@/.+"],
+          internalPattern: ["^~/.+", "^@/.+", "^@shared/.+"],
           sortSideEffects: false,
           groups: [
             "react",

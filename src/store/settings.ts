@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { defaultAppSettings } from "@/common/constants/default-settings";
+import { defaultAppSettings } from "@shared/settings/app-settings";
 
 interface SettingsActions {
   update: (patch: Partial<AppSettings>) => void;

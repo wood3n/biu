@@ -53,7 +53,6 @@ const Search = () => {
       <div className="p-4">
         <h1 className="mb-4">搜索【{keyword}】的结果</h1>
         <Tabs
-          radius="full"
           color="primary"
           variant="solid"
           items={SearchTypeOptions}
@@ -75,7 +74,6 @@ const Search = () => {
             {searchType === SearchType.User && <UserList items={(data?.list ?? []) as SearchUserItem[]} />}
           </div>
         )}
-        {data?.list?.length === 0 && <div className="text-foreground-500 text-sm">没有找到与“{keyword}”相关的结果</div>}
         {!loading && !error && (
           <div className="my-4 flex justify-center">
             <Pagination

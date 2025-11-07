@@ -1,6 +1,7 @@
 import { isNil } from "es-toolkit/predicate";
 import SparkMD5 from "spark-md5";
 
+import { getUserInfo } from "@/service/user-info";
 import { useUser } from "@/store/user";
 
 const mixinKeyEncTab = [
@@ -17,19 +18,37 @@ const getMixinKey = (orig: string) =>
     .slice(0, 32);
 
 // 获取最新的 img_key 和 sub_key
-function getWbiKeys() {
+async function getWbiKeys() {
   const user = useUser.getState().user;
-  const { img_url, sub_url } = user?.wbi_img || {};
+  if (user) {
+    const { img_url, sub_url } = user?.wbi_img || {};
+
+    return {
+      img_key: img_url?.slice(img_url.lastIndexOf("/") + 1, img_url.lastIndexOf(".")),
+      sub_key: sub_url?.slice(sub_url.lastIndexOf("/") + 1, sub_url.lastIndexOf(".")),
+    };
+  }
+
+  const getUserSignRes = await getUserInfo();
+
+  if (getUserSignRes?.data?.wbi_img) {
+    const { img_url, sub_url } = getUserSignRes?.data?.wbi_img || {};
+
+    return {
+      img_key: img_url?.slice(img_url.lastIndexOf("/") + 1, img_url.lastIndexOf(".")),
+      sub_key: sub_url?.slice(sub_url.lastIndexOf("/") + 1, sub_url.lastIndexOf(".")),
+    };
+  }
 
   return {
-    img_key: img_url?.slice(img_url.lastIndexOf("/") + 1, img_url.lastIndexOf(".")),
-    sub_key: sub_url?.slice(sub_url.lastIndexOf("/") + 1, sub_url.lastIndexOf(".")),
+    img_key: "",
+    sub_key: "",
   };
 }
 
 // 为请求参数进行 wbi 签名
-export function encodeParamsWbi(params: { [key: string]: string | number | object }) {
-  const { img_key, sub_key } = getWbiKeys();
+export async function encodeParamsWbi(params: { [key: string]: string | number | object }) {
+  const { img_key, sub_key } = await getWbiKeys();
 
   if (!img_key || !sub_key) {
     return params;

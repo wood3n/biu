@@ -42,7 +42,7 @@ function createTray({
     if (!fallback.isEmpty()) {
       trayIcon = fallback;
     } else {
-      console.error("[tray] icon not found:", trayIconPath, "fallback:", fallbackPath);
+      log.error("[tray] icon not found:", trayIconPath, "fallback:", fallbackPath);
       return null;
     }
   }

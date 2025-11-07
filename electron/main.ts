@@ -1,10 +1,11 @@
-import { app, BrowserWindow, nativeImage, session } from "electron";
+import { app, BrowserWindow, nativeImage } from "electron";
 import log from "electron-log";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { createTray, destroyTray } from "./createTray"; // 托盘功能
 import { registerIpcHandlers } from "./ipc/index";
+import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
 import { store, storeKey } from "./store";
 import { setupAutoUpdater } from "./updater";
@@ -56,9 +57,10 @@ function createWindow() {
       : {}),
     trafficLightPosition: { x: 0, y: 0 },
     webPreferences: {
-      webSecurity: false,
-      preload: path.resolve(__dirname, "preload.js"),
-      nodeIntegration: true,
+      preload: path.resolve(__dirname, "preload.cjs"),
+      webSecurity: true,
+      contextIsolation: true,
+      nodeIntegration: false,
     },
   });
 
@@ -80,13 +82,9 @@ function createWindow() {
     app.dock?.setIcon(dockIcon);
   }
 
-  // https://www.electronjs.org/docs/latest/api/app#appispackaged-readonly
-  if (app.isPackaged) {
-    // 使用 __dirname 相对路径，确保打包后在 asar 内正确解析
-    const indexPath = path.resolve(__dirname, "../dist/web/index.html");
-    mainWindow.loadFile(indexPath);
-  } else {
-    mainWindow.loadURL(`http://localhost:${process.env.PORT}/`);
+  const indexPath = path.resolve(__dirname, "../dist/web/index.html");
+  mainWindow.loadFile(indexPath);
+  if (!app.isPackaged) {
     mainWindow.webContents.openDevTools({
       mode: "detach",
     });
@@ -125,8 +123,10 @@ app.whenReady().then(() => {
     },
   });
 
+  injectAuthCookie();
+
   // 安装统一的 webRequest 拦截器
-  webRequestDisposer = installWebRequestInterceptors(session.defaultSession);
+  webRequestDisposer = installWebRequestInterceptors();
 
   // 初始化并触发自动更新检查（仅打包环境）
   if (app.isPackaged) {
@@ -185,13 +185,11 @@ app.on("window-all-closed", () => {
 
 // 全局异常处理，避免未捕获异常导致进程异常驻留
 process.on("uncaughtException", err => {
-  console.error("[uncaughtException]", err);
+  log.error("[uncaughtException]", err);
   (app as any).quitting = true;
   app.quit();
 });
 
 process.on("unhandledRejection", reason => {
-  console.error("[unhandledRejection]", reason);
+  log.error("[unhandledRejection]", reason);
 });
-
-app.disableHardwareAcceleration();

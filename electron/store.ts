@@ -1,7 +1,7 @@
 import { app } from "electron";
 import Store from "electron-store";
 
-import { defaultAppSettings } from "@/common/constants/default-settings";
+import { defaultAppSettings } from "@shared/settings/app-settings";
 
 export const storeKey = {
   appSettings: "appSettings",
@@ -14,7 +14,7 @@ const settingsSchema = {
 } as const;
 
 export const store = new Store<{ appSettings: AppSettings }>({
-  name: "biu-settings",
+  name: "app-settings",
   fileExtension: "json",
   schema: settingsSchema,
   defaults: {

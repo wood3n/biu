@@ -1,4 +1,3 @@
-import { ReactComponent as LogoIcon } from "@/assets/icons/logo.svg";
 import { useUser } from "@/store/user";
 
 import Login from "./login";
@@ -9,14 +8,12 @@ const LayoutNavbar = () => {
   const { user } = useUser();
 
   return (
-    <div className="grid h-full grid-cols-3 items-center gap-8">
-      <div className="window-drag ml-6 flex items-center">
-        <LogoIcon style={{ color: "#ffffff", width: 48, height: 48 }} />
-      </div>
-      <div className="flex items-center justify-center">
+    <div className="window-drag grid h-full grid-cols-3 items-center gap-8">
+      <div className="ml-6 flex items-center"></div>
+      <div className="window-no-drag flex items-center justify-center">
         <Search />
       </div>
-      <div className="window-drag flex items-center justify-center">{user?.isLogin ? <UserCard /> : <Login />}</div>
+      <div className="flex items-center justify-center">{user?.isLogin ? <UserCard /> : <Login />}</div>
     </div>
   );
 };

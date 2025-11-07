@@ -4,16 +4,18 @@ import { RiPlayListLine } from "@remixicon/react";
 import { usePlayingQueue } from "@/store/playing-queue";
 
 import PlayQueueDrawer from "../play-queue";
+import Download from "./download";
 import Rate from "./rate";
 import Volume from "./volume";
 
 const RightControl = () => {
-  const { rate, volume, isMuted, setRate, setVolume, toggleMute } = usePlayingQueue();
+  const { current, rate, volume, isMuted, setRate, setVolume, toggleMute } = usePlayingQueue();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
     <>
       <div className="flex h-full items-center justify-end space-x-2">
+        {Boolean(current) && <Download />}
         <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={onOpen}>
           <RiPlayListLine size={18} />
         </Button>

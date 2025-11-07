@@ -7,24 +7,26 @@ const axiosConfig: CreateAxiosDefaults = {
   withCredentials: true,
 };
 
+export const axiosInstance = axios.create(axiosConfig);
+
 export const searchRequest = axios.create({
   ...axiosConfig,
-  baseURL: process.env.NODE_ENV === "development" ? "/ssearch" : "https://s.search.bilibili.com",
+  baseURL: "https://s.search.bilibili.com",
 });
 
 export const biliRequest = axios.create({
   ...axiosConfig,
-  baseURL: process.env.NODE_ENV === "development" ? "/bili" : "https://www.bilibili.com",
+  baseURL: "https://www.bilibili.com",
 });
 
 export const apiRequest = axios.create({
   ...axiosConfig,
-  baseURL: process.env.NODE_ENV === "development" ? "/api" : "https://api.bilibili.com",
+  baseURL: "https://api.bilibili.com",
 });
 
 export const passportRequest = axios.create({
   ...axiosConfig,
-  baseURL: process.env.NODE_ENV === "development" ? "/auth" : "https://passport.bilibili.com",
+  baseURL: "https://passport.bilibili.com",
 });
 
 apiRequest.interceptors.request.use(requestInterceptors);

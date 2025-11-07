@@ -2,8 +2,7 @@ import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 import { pluginSvgr } from "@rsbuild/plugin-svgr";
 
-import { pluginElectronBuild } from "./plugins/build";
-import { pluginElectronDev } from "./plugins/dev";
+import { pluginElectron } from "./plugins/rsbuild-plugin-electron";
 
 export default defineConfig({
   output: {
@@ -12,7 +11,7 @@ export default defineConfig({
     },
     // 生产环境相对路径，保证通过 file:// 加载时静态资源能正确引用
     assetPrefix: "./",
-    cleanDistPath: false,
+    cleanDistPath: true,
   },
   performance: {
     removeMomentLocale: true,
@@ -37,44 +36,17 @@ export default defineConfig({
         },
       },
     }),
-    pluginElectronDev(),
-    pluginElectronBuild(),
+    pluginElectron(),
   ],
-  tools: {
-    rspack(config, { env }) {
-      if (env === "production") {
-        // Disable sourcemaps for smallest bundle
-        config.devtool = false;
-        config.optimization = {
-          ...config.optimization,
-          minimize: true,
-        };
-      }
-    },
+  dev: {
+    writeToDisk: true,
+    lazyCompilation: false,
+    // 开发环境相对路径，保证通过 file:// 加载时静态资源能正确引用
+    assetPrefix: "./",
   },
   server: {
+    printUrls: false,
     open: false,
-    proxy: {
-      "/api": {
-        target: "https://api.bilibili.com",
-        changeOrigin: true,
-        pathRewrite: { "^/api": "" },
-      },
-      "/auth": {
-        target: "https://passport.bilibili.com",
-        changeOrigin: true,
-        pathRewrite: { "^/auth": "" },
-      },
-      "/bili": {
-        target: "https://www.bilibili.com",
-        changeOrigin: true,
-        pathRewrite: { "^/bili": "" },
-      },
-      "/ssearch": {
-        target: "https://s.search.bilibili.com",
-        changeOrigin: true,
-        pathRewrite: { "^/ssearch": "" },
-      },
-    },
+    compress: false,
   },
 });

@@ -1,91 +1,52 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 
 import {
   Button,
   Card,
   CardBody,
-  CardHeader,
+  Chip,
+  Image,
   Input,
+  Tab,
   Table,
   TableBody,
   TableCell,
   TableColumn,
   TableHeader,
   TableRow,
+  Tabs,
 } from "@heroui/react";
+import { filesize } from "filesize";
 
-interface FileItem {
-  name: string;
-  format: string;
-  size: number;
-  time: number; // mtimeMs
-}
-
-const formatBytes = (bytes: number) => {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
-};
-
-const formatTime = (ms: number) => {
-  const d = new Date(ms);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-};
+import { formatSecondsToDate } from "@/common/utils";
+import { useDownloadQueue } from "@/store/download-queue";
+import { useSettings } from "@/store/settings";
 
 const DownloadList = () => {
-  const [settings, setSettings] = useState<SettingsState | null>(null);
-  const [files, setFiles] = useState<FileItem[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const currentPath = useMemo(() => settings?.downloadPath ?? "", [settings]);
-
-  const loadSettings = async () => {
-    const s = await window.electron.getSettings();
-    setSettings(s);
-  };
-
-  const loadFiles = async () => {
-    setLoading(true);
-    try {
-      const list = await window.electron.listDownloads();
-      setFiles(list ?? []);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  useEffect(() => {
-    loadFiles();
-  }, [settings?.downloadPath]);
+  const { downloadPath, update } = useSettings();
+  const { list: downloadList, clear: clearDownloadList } = useDownloadQueue();
+  const [fileType, setFileType] = useState<string | number>("audio");
 
   const pickDirectory = async () => {
     const dir = await window.electron.selectDirectory();
     if (dir) {
-      await window.electron.setSettings({ downloadPath: dir });
-      await loadSettings();
+      update({ downloadPath: dir });
     }
   };
 
   const openDirectory = async () => {
-    await window.electron.openDirectory(currentPath);
+    await window.electron.openDirectory(downloadPath);
   };
 
   return (
     <div className="w-full p-4">
+      <h1 className="mb-4">下载记录</h1>
       {/* 顶部下载目录管理 */}
       <Card className="mb-4">
         <CardBody>
           <div className="flex flex-col gap-2 md:flex-row md:items-center">
-            <div className="text-lg">下载目录</div>
             <div className="flex-1">
-              <Input isDisabled value={currentPath} placeholder="当前下载目录" />
+              <Input isDisabled value={downloadPath} placeholder="当前下载目录" />
             </div>
             <div className="flex gap-2">
               <Button variant="flat" onPress={pickDirectory}>
@@ -101,25 +62,43 @@ const DownloadList = () => {
 
       {/* 下载文件列表 */}
       <Card>
-        <CardHeader className="flex items-center justify-between">
-          <div className="text-lg">下载列表</div>
-        </CardHeader>
         <CardBody>
           <div className="w-full overflow-x-auto">
-            <Table aria-label="下载列表" removeWrapper className="min-w-[640px]">
+            <Table
+              fullWidth
+              aria-label="下载列表"
+              removeWrapper
+              topContent={
+                <div className="flex justify-between">
+                  <Tabs aria-label="切换文件类型" selectedKey={fileType} onSelectionChange={setFileType}>
+                    <Tab key="audio" title="音频" />
+                    <Tab key="video" title="视频" />
+                  </Tabs>
+                  <Button onPress={clearDownloadList}>清空记录</Button>
+                </div>
+              }
+            >
               <TableHeader>
-                <TableColumn>文件名</TableColumn>
-                <TableColumn>文件格式</TableColumn>
-                <TableColumn>文件大小</TableColumn>
-                <TableColumn>下载时间</TableColumn>
+                <TableColumn>文件</TableColumn>
+                <TableColumn width={120}>大小</TableColumn>
+                <TableColumn width={140}>下载时间</TableColumn>
               </TableHeader>
-              <TableBody emptyContent={loading ? "加载中..." : "暂无下载文件"} items={files}>
-                {(item: FileItem) => (
-                  <TableRow key={item.name}>
-                    <TableCell className="max-w-[280px] truncate">{item.name}</TableCell>
-                    <TableCell className="uppercase">{item.format}</TableCell>
-                    <TableCell>{formatBytes(item.size)}</TableCell>
-                    <TableCell>{formatTime(item.time)}</TableCell>
+              <TableBody items={downloadList.filter(item => item.type === fileType)}>
+                {item => (
+                  <TableRow key={item.id}>
+                    <TableCell className="max-w-[280px] truncate">
+                      <div className="flex items-center space-x-1">
+                        <Image src={item.coverImgUrl} width={48} height={48} className="mr-2 object-cover" />
+                        <div className="flex min-w-0 flex-1 flex-col space-y-1 overflow-hidden">
+                          <span className="truncate">{item.title}</span>
+                          <Chip size="sm" radius="sm" variant="flat">
+                            {item.type === "audio" ? "音频" : "视频"}
+                          </Chip>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{item.totalBytes ? filesize(item.totalBytes) : "-"}</TableCell>
+                    <TableCell>{item.createTime ? formatSecondsToDate(item.createTime) : "-"}</TableCell>
                   </TableRow>
                 )}
               </TableBody>

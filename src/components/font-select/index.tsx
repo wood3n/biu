@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { Select, SelectItem } from "@heroui/react";
 
-import { defaultAppSettings } from "@/common/constants/default-settings";
+import { defaultAppSettings } from "@shared/settings/app-settings";
 
 export interface FontSelectProps {
   color?: "primary" | "secondary";

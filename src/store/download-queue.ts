@@ -1,18 +1,29 @@
+import { uniqueId } from "es-toolkit/compat";
+import moment from "moment";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { VideoQuality } from "@/common/constants/video";
-import { getPlayerPlayurl } from "@/service/player-playurl";
+import { getMVUrl } from "@/common/utils/audio";
+import { sanitizeFilename } from "@/common/utils/file";
 
-interface DownloadItem {
-  bvid: string;
-  cid: number;
+interface DownloadParams {
   title: string;
-  cover: string;
-  duration: number;
-  url?: string;
-  progress?: number;
-  status?: "downloading" | "paused" | "completed" | "failed";
+  coverImgUrl: string;
+  bvid: string;
+  cid: string;
+  type?: "video" | "audio";
+}
+
+interface DownloadItem extends DownloadParams {
+  id: string;
+  audioUrl: string;
+  videoUrl?: string;
+  filename?: string;
+  totalBytes?: number;
+  downloadedBytes?: number;
+  progress?: number; // 0-100
+  createTime?: number;
+  status?: DownloadStatus;
   error?: string;
 }
 
@@ -21,34 +32,90 @@ interface DownloadState {
 }
 
 interface DownloadAction {
-  add: (item: DownloadItem) => Promise<void>;
-  addList: (items: DownloadItem[]) => Promise<void>;
-  remove: (item: DownloadItem) => void;
+  add: (item: DownloadParams) => Promise<void>;
+  addList: (items: DownloadParams[]) => Promise<void>;
+  remove: (id: string) => void;
+  clear: () => void;
   updateProgress: (id: string, progress: number) => void;
 }
 
-const getVideoUrl = async (item: DownloadItem) => {
-  const getAudioInfoRes = await getPlayerPlayurl({
-    bvid: item.bvid,
-    cid: item.cid,
-    fnval: 1,
-    qn: VideoQuality.Q1080P,
-  });
-
-  return getAudioInfoRes?.data?.durl?.[0]?.url || getAudioInfoRes?.data?.durl?.[0]?.backup_url?.[0];
-};
+let subscribed = false;
 
 export const useDownloadQueue = create<DownloadState & DownloadAction>()(
   persist(
     (set, get) => ({
       list: [],
-      add: async item => {
-        const url = await getVideoUrl(item);
+      add: async ({ type = "audio", title, coverImgUrl, bvid, cid }) => {
+        const exists = get().list.some(i => i.bvid === bvid && i.cid === cid && i.status !== "completed");
+        if (exists) return;
 
-        if (url) {
-          set(state => ({ list: [...state.list, { ...item, url, status: "downloading", progress: 0 }] }));
-        } else {
-          set(state => ({ list: [...state.list, { ...item, status: "failed", error: "获取视频地址失败" }] }));
+        const { audioUrl, isLossless } = await getMVUrl(bvid, cid);
+        const ext = isLossless ? "flac" : "mp3";
+        const filename = `${sanitizeFilename(title)}_${bvid}_${cid}.${ext}`;
+        const fileExists = await window.electron.checkFileExists(filename);
+        if (fileExists) {
+          return;
+        }
+
+        const id = `${bvid}_${cid}_${Date.now()}_${uniqueId()}`;
+        const createTime = moment().unix();
+        // 先入队为 waiting
+        set(state => ({
+          list: [
+            ...state.list,
+            { id, type, title, bvid, cid, coverImgUrl, audioUrl, status: "waiting", progress: 0, createTime },
+          ],
+        }));
+
+        // 启动下载
+        try {
+          await window.electron.startDownload({ id, filename, audioUrl });
+          set(state => ({
+            list: state.list.map(i => (i.id === id ? { ...i, status: "downloading" } : i)),
+          }));
+        } catch (e) {
+          set(state => ({
+            list: state.list.map(i => (i.id === id ? { ...i, status: "failed", error: String(e) } : i)),
+          }));
+        }
+
+        // 仅注册一次进度监听
+        if (!subscribed) {
+          subscribed = true;
+          try {
+            await window.electron.onDownloadProgress(({ id, downloadedBytes, totalBytes, progress, status, error }) => {
+              set(state => ({
+                list: state.list.map(i => {
+                  if (i.id !== id) return i;
+
+                  if (status === "downloading") {
+                    return {
+                      ...i,
+                      downloadedBytes,
+                      totalBytes,
+                      progress,
+                    };
+                  }
+
+                  if (status === "merging") {
+                    return { ...i, status };
+                  }
+
+                  if (status === "completed") {
+                    return { ...i, status, progress: 100 };
+                  }
+
+                  if (status === "failed") {
+                    return { ...i, status, error };
+                  }
+
+                  return i;
+                }),
+              }));
+            });
+          } catch {
+            // ignore subscribe errors
+          }
         }
       },
       addList: async items => {
@@ -56,13 +123,14 @@ export const useDownloadQueue = create<DownloadState & DownloadAction>()(
           await get().add(item);
         }
       },
-      remove: item =>
+      remove: id =>
         set(state => ({
-          list: state.list.filter(i => i.bvid !== item.bvid),
+          list: state.list.filter(i => i.id !== id),
         })),
+      clear: () => set({ list: [] }),
       updateProgress: (id, progress) =>
         set(state => ({
-          list: state.list.map(i => (i.bvid === id ? { ...i, progress } : i)),
+          list: state.list.map(i => (i.id === id ? { ...i, progress } : i)),
         })),
     }),
     {

@@ -6,9 +6,9 @@ import { apiRequest } from "./request";
 export interface PlayerPlayurlRequestParams {
   avid?: number; // 稿件avid
   bvid?: string; // 稿件bvid
-  cid: number; // 视频cid
+  cid: number | string; // 视频cid
   qn?: number; // 视频清晰度选择 未登录默认32(480P) 登录后默认64(720P)
-  /** 视频流格式标识 默认1(MP4格式) 16:DASH格式 */
+  /** 视频流格式标识 默认1(MP4格式) 16:DASH格式，4048:所有可用 DASH 视频流 */
   fnval?: number;
   fnver?: number; // 固定为0
   fourk?: number; // 是否允许4K视频 0:画质最高1080P(默认) 1:画质最高4K
@@ -109,16 +109,6 @@ export interface DashVideo {
  * DASH格式音频流
  */
 export interface DashAudio {
-  /**
-   * 30257: 45K
-   * 30216: 64K
-   * 30259: 103K
-   * 30260: 190K
-   * 30232: 132K
-   * 30280: 192~256 kbps
-   * 30250: 杜比全景声
-   * 30251: Hi-Res无损
-   */
   id: number;
   baseUrl: string; // 音频流URL
   base_url: string; // 音频流URL
@@ -180,8 +170,7 @@ export interface SupportFormat {
 
 /**
  * 获取视频流地址(web端)
- * @param params 请求参数
- * @returns 视频流地址信息
+ * 获取 url 有效时间为 120min，超时失效需要重新获取
  */
 export const getPlayerPlayurl = (params: PlayerPlayurlRequestParams) => {
   return apiRequest.get<PlayerPlayurlResponse>("/x/player/wbi/playurl", { params, useWbi: true });

@@ -4,7 +4,7 @@ import { apiRequest } from "./request";
  * 用户空间详细信息 - 请求参数类型
  */
 export interface SpaceAccInfoRequestParams {
-  mid: number; // 目标用户mid
+  mid: number | string; // 目标用户mid
 }
 
 /**
@@ -67,6 +67,7 @@ export interface SpaceAccInfoData {
   contract: Contract; // 是否显示老粉计划
   certificate_show: boolean; // 未知字段
   name_render: Record<string, any> | null; // 昵称渲染信息
+  v_voucher?: string;
 }
 
 /**

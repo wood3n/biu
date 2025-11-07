@@ -49,7 +49,7 @@ export const menus: (MenuItemProps & { needLogin?: boolean })[] = [
     activeIcon: RiHistoryFill,
   },
   {
-    title: "下载列表",
+    title: "下载记录",
     href: "/download-list",
     icon: RiFileDownloadLine,
     activeIcon: RiFileDownloadFill,

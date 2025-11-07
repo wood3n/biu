@@ -1,7 +1,6 @@
 /**
  * Bilibili 视频清晰度（qn）
- * Source: https://socialsisteryi.github.io/bilibili-API-collect/docs/bangumi/videostream_url.html
- * 说明：该值在 DASH 模式且非下载模式时无效
+ * 获取 720P 及以上清晰度视频时需要登录（Cookie）
  */
 export enum VideoQuality {
   /**
@@ -79,4 +78,43 @@ export enum VideoQuality {
    * 备注：仅支持 DASH 格式；需要 fnval & 1024 = 1024；大多情况需要大会员认证
    */
   Q8K = 127,
+}
+
+export enum VideoFnval {
+  /**
+   * MP4 格式，仅 H.264 编码
+   */
+  MP4 = 1,
+  /**
+   * DASH 格式
+   */
+  Dash = 16,
+  /**
+   * HDR 视频, 仅 H.265 编码需要qn=125, 大会员认证
+   */
+  HDR = 64,
+  /**
+   * 4K 分辨率, 与fourk字段协同作用,需要qn=120,大会员认证
+   */
+  FourK = 128,
+  /**
+   * 杜比音频，大会员认证
+   */
+  DolbyAudio = 256,
+  /**
+   * 杜比视界, 大会员认证
+   */
+  DolbyVideo = 512,
+  /**
+   * 8K 分辨率，需要qn=127，大会员认证
+   */
+  EightK = 1024,
+  /**
+   * AV1 编码
+   */
+  AV1 = 2048,
+  /**
+   * 所有可用 DASH 视频流
+   */
+  AllDash = 4048,
 }

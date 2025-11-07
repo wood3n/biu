@@ -3,11 +3,11 @@ import { Controller, useForm } from "react-hook-form";
 
 import { Form, Input, Slider, Switch, Button, RadioGroup, Radio, Divider } from "@heroui/react";
 
-import { defaultAppSettings } from "@/common/constants/default-settings";
 import ColorPicker from "@/components/color-picker";
 import FontSelect from "@/components/font-select";
 import ScrollContainer from "@/components/scroll-container";
 import { useSettings } from "@/store/settings";
+import { defaultAppSettings } from "@shared/settings/app-settings";
 
 const SettingsPage: React.FC = () => {
   const {

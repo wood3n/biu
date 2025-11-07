@@ -12,9 +12,13 @@ export const channel = {
   font: {
     getFonts: "font:get-fonts",
   },
+  file: {
+    getSize: "file:get-size",
+  },
   download: {
+    checkExists: "download:check-exists",
     start: "start-download",
-    list: "download:list-files",
+    progress: "download:progress",
   },
   router: {
     navigate: "router:navigate",
