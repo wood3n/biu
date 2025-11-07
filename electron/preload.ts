@@ -1,5 +1,4 @@
 import { contextBridge, ipcRenderer } from "electron";
-import log from "electron-log/renderer";
 
 import { channel } from "./ipc/channel";
 
@@ -22,7 +21,7 @@ const api: ElectronAPI = {
       try {
         ipcRenderer.removeListener(channel.download.progress, downloadProgressHandler);
       } catch (error) {
-        log.error("[preload] 移除下载进度监听器失败:", error);
+        console.error("[preload] 移除下载进度监听器失败:", error);
       }
       downloadProgressHandler = null;
     }
@@ -40,7 +39,7 @@ const api: ElectronAPI = {
       try {
         ipcRenderer.removeListener(channel.router.navigate, navigateHandler);
       } catch (error) {
-        log.error("[preload] 移除导航监听器失败:", error);
+        console.error("[preload] 移除导航监听器失败:", error);
       }
       navigateHandler = null;
     }
@@ -49,7 +48,7 @@ const api: ElectronAPI = {
       try {
         cb(path);
       } catch (error) {
-        log.error("[preload] 导航回调失败:", error);
+        console.error("[preload] 导航回调失败:", error);
       }
     };
 

@@ -77,6 +77,11 @@ export const useDownloadQueue = create<DownloadState & DownloadAction>()(
           ],
         }));
 
+        addToast({
+          title: "已添加下载任务",
+          color: "success",
+        });
+
         // 启动下载
         try {
           await window.electron.startDownload({ id, filename, audioUrl, isLossless });

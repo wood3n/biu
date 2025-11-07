@@ -41,9 +41,7 @@ function createOutput(format: "es" | "cjs", entryName: "main" | "preload"): Outp
     format,
     sourcemap: false,
     // 保持独立产物：主进程输出 main.js，预加载输出 preload.cjs
-    entryFileNames: entryName === "main" ? "main.js" : "preload.cjs",
-    // 避免共享 chunk 名冲突（仍然独立构建，不会互相引用）
-    chunkFileNames: `${entryName}-shared-[hash].js`,
+    entryFileNames: entryName === "main" ? "main.mjs" : "preload.cjs",
   };
 }
 
@@ -63,6 +61,10 @@ async function waitForFirstBuild(watcher: RollupWatcher) {
   });
 }
 
+/**
+ * electron preload无法使用esm，如果使用esm，在网页环境无法正常访问 window.electron
+ * https://github.com/electron/electron/issues/40777
+ */
 export async function buildElectronConfig(mode: "development" | "production" = "production") {
   // 独立构建 main (ESM) 与 preload (CJS)
   const mainOptions = createRollupOptions(MAIN_ENTRY);

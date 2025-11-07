@@ -23,7 +23,7 @@
     "typescript",
     "electron"
   ],
-  "main": ".electron/main.js",
+  "main": ".electron/main.mjs",
   "scripts": {
     "postinstall": "node node_modules/electron/install.js",
     "prepare": "husky install",
