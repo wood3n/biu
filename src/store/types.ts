@@ -47,6 +47,10 @@ export interface PlayingMV {
    * 播放链接过期时间（秒）
    */
   expiredTime?: number;
+  /**
+   * 是否为无损音频
+   */
+  isLossless?: boolean;
 }
 
 export interface PageData {

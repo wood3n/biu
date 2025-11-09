@@ -127,7 +127,13 @@ const UserProfile = () => {
       />
       {!isNil(relationWithMe) && relationWithMe !== UserRelation.Blocked && (
         <div className="p-4">
-          <Tabs disableAnimation size="lg" aria-label="个人资料栏目" variant="solid">
+          <Tabs
+            size="lg"
+            radius="md"
+            classNames={{ cursor: "rounded-medium" }}
+            aria-label="个人资料栏目"
+            variant="solid"
+          >
             {tabs.map(item => (
               <Tab key={item.key} title={item.label}>
                 {item.content}

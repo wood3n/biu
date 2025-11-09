@@ -19,14 +19,7 @@ const ImageCard = ({ cover, coverHeight = 188, title, titleExtra, showPlayIcon, 
   return (
     <Card as="div" isHoverable shadow="sm" isPressable onPress={onPress} className="w-full">
       <CardBody className="group rounded-large relative flex-grow-0 overflow-hidden bg-none p-0 shadow">
-        <Image
-          isZoomed
-          className="object-cover hover:scale-[102%]"
-          height={coverHeight}
-          src={cover}
-          fallbackSrc={FallbackImage}
-          width="100%"
-        />
+        <Image className="object-cover" height={coverHeight} src={cover} fallbackSrc={FallbackImage} width="100%" />
         {showPlayIcon && (
           <div className="absolute right-0 bottom-0 z-30 p-4 opacity-0 transition-opacity group-hover:opacity-100">
             <RiPlayCircleFill className="text-primary" size={48} />

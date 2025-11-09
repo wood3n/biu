@@ -17,7 +17,7 @@ const Control = () => {
     <div className="flex h-full flex-col items-center justify-center space-y-0.5 px-6">
       <div className="flex items-center space-x-6">
         <Button
-          radius="md"
+          radius="sm"
           onPress={prev}
           isDisabled={disabled}
           isIconOnly
@@ -42,7 +42,7 @@ const Control = () => {
           )}
         </Button>
         <Button
-          radius="md"
+          radius="sm"
           onPress={next}
           isDisabled={disabled}
           isIconOnly

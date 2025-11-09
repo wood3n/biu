@@ -45,16 +45,16 @@ function createOutput(format: "es" | "cjs", entryName: "main" | "preload"): Outp
   };
 }
 
-async function waitForFirstBuild(watcher: RollupWatcher) {
+async function waitForFirstBuild(watcher: RollupWatcher, entryName: "main" | "preload") {
   return new Promise<void>((resolve, reject) => {
     watcher.on("event", event => {
       if (event.code === "START") {
-        logger.info("[electron] config rebuild started");
+        logger.info(`[electron] ${entryName} config build started`);
       } else if (event.code === "ERROR") {
-        logger.error("[electron] config rebuild error:", event.error);
+        logger.error(`[electron] ${entryName} config build error:`, event.error);
         reject(event.error);
       } else if (event.code === "END") {
-        logger.info("[electron] config rebuild finished");
+        logger.info(`[electron] ${entryName} config build finished`);
         resolve();
       }
     });
@@ -75,7 +75,7 @@ export async function buildElectronConfig(mode: "development" | "production" = "
   if (mode === "development") {
     const mainWatcher = watch({ ...mainOptions, output: mainOutput });
     const preloadWatcher = watch({ ...preloadOptions, output: preloadOutput });
-    await Promise.all([waitForFirstBuild(mainWatcher), waitForFirstBuild(preloadWatcher)]);
+    await Promise.all([waitForFirstBuild(mainWatcher, "main"), waitForFirstBuild(preloadWatcher, "preload")]);
     return { mainWatcher, preloadWatcher } as unknown as RollupWatcher;
   }
 

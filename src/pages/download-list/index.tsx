@@ -73,7 +73,15 @@ const DownloadList = () => {
               removeWrapper
               topContent={
                 <div className="flex justify-between">
-                  <Tabs aria-label="切换文件类型" selectedKey={fileType} onSelectionChange={setFileType}>
+                  <Tabs
+                    radius="md"
+                    classNames={{
+                      cursor: "rounded-medium",
+                    }}
+                    aria-label="切换文件类型"
+                    selectedKey={fileType}
+                    onSelectionChange={setFileType}
+                  >
                     <Tab key="audio" title="音频" />
                     <Tab key="video" title="视频" />
                   </Tabs>

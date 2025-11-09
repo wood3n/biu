@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 
-import { Button, Slider } from "@heroui/react";
-import { RiVolumeMuteLine, RiVolumeUpLine } from "@remixicon/react";
+import { Button, Tooltip, Slider, type PressEvent } from "@heroui/react";
+import { RiVolumeDownLine, RiVolumeMuteLine, RiVolumeUpLine } from "@remixicon/react";
 
 import { PlayBarIconSize } from "../constants";
 
@@ -15,17 +15,18 @@ interface Props {
 const Volume = ({ isMuted, value, onChange, onChangeMute }: Props) => {
   const previousVolume = useRef(value);
 
-  const onVolumeChange = (value: number) => {
+  const onVolumeChange = (val: number) => {
     if (isMuted) {
       onChangeMute(false);
     }
-    if (value === 0) {
+    if (val === 0) {
       onChangeMute(true);
     }
-    onChange(value);
+    onChange(val);
   };
 
-  const toggleMute = () => {
+  const toggleMute = (e: PressEvent) => {
+    e.continuePropagation();
     if (!isMuted) {
       previousVolume.current = value;
       onChange(0);
@@ -35,34 +36,58 @@ const Volume = ({ isMuted, value, onChange, onChangeMute }: Props) => {
     onChangeMute(!isMuted);
   };
 
+  const tooltipId = "volume-tooltip";
+
   return (
-    <Slider
-      disableAnimation
-      disableThumbScale
-      aria-label="音量"
-      size="sm"
-      color="foreground"
+    <Tooltip
+      id={tooltipId}
+      placement="top"
+      delay={200}
+      showArrow={false}
       classNames={{
-        track: "bg-default-500/30",
-        thumb: "w-4 h-4 after:w-4 after:h-4 after:bg-foreground",
+        content: "py-4 w-[60px] min-w-[60px] flex justify-center items-center",
       }}
-      className="w-36"
-      value={value}
-      minValue={0}
-      maxValue={1}
-      step={0.01}
-      // @ts-expect-error value is number
-      onChange={onVolumeChange}
-      startContent={
-        <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={toggleMute}>
-          {isMuted ? (
-            <RiVolumeMuteLine size={PlayBarIconSize.SideIconSize} />
-          ) : (
-            <RiVolumeUpLine size={PlayBarIconSize.SideIconSize} />
-          )}
-        </Button>
+      content={
+        <Slider
+          aria-label="音量"
+          color="primary"
+          radius="full"
+          orientation="vertical"
+          className="h-40 w-7"
+          value={value}
+          size="sm"
+          minValue={0}
+          maxValue={1}
+          step={0.01}
+          // @ts-expect-error value is number
+          onChange={onVolumeChange}
+          classNames={{
+            thumb: "after:hidden",
+          }}
+          endContent={
+            <span className="text-foreground/60 w-8 text-center text-xs tabular-nums">{Math.round(value * 100)}%</span>
+          }
+        />
       }
-    />
+    >
+      <Button
+        isIconOnly
+        size="sm"
+        variant="light"
+        className="hover:text-primary"
+        onPress={toggleMute}
+        aria-label={isMuted ? "取消静音" : "静音"}
+        aria-describedby={tooltipId}
+      >
+        {isMuted ? (
+          <RiVolumeMuteLine size={PlayBarIconSize.SideIconSize} />
+        ) : value > 0.5 ? (
+          <RiVolumeUpLine size={PlayBarIconSize.SideIconSize} />
+        ) : (
+          <RiVolumeDownLine size={PlayBarIconSize.SideIconSize} />
+        )}
+      </Button>
+    </Tooltip>
   );
 };
 

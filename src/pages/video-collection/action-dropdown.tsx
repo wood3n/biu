@@ -36,7 +36,7 @@ const ActionDropdown = ({ mvId, type, refreshCollectedFolder }: Props) => {
   return (
     <>
       <div className="relative h-6 w-5 shrink-0">
-        <Dropdown disableAnimation placement="bottom-end" classNames={{ content: "min-w-[140px]" }}>
+        <Dropdown placement="bottom-end" classNames={{ content: "min-w-[140px]" }}>
           <DropdownTrigger>
             <Button
               isIconOnly

@@ -30,7 +30,8 @@
     "dev": "rsbuild dev",
     "build": "rsbuild build",
     "dev:rsdoctor": "cross-env RSDOCTOR=true rsbuild dev",
-    "build:rsdoctor": "cross-env RSDOCTOR=true rsbuild build"
+    "build:rsdoctor": "cross-env RSDOCTOR=true rsbuild build",
+    "test": "vitest run"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -120,7 +121,8 @@
     "stylelint-config-standard": "^39.0.0",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.42.0"
+    "typescript-eslint": "^8.42.0",
+    "vitest": "^2.1.5"
   },
   "lint-staged": {
     "*.{js,cjs,mjs,json,ts,tsx}": "npx eslint --fix --concurrency auto",

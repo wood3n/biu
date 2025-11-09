@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Slider, SliderProps } from "@heroui/react";
+import { Slider, type SliderProps } from "@heroui/react";
 import clx from "classnames";
 
 import { formatDuration } from "@/common/utils";
@@ -23,7 +23,6 @@ const Progress = ({ isDisabled }: SliderProps) => {
       onChange={v => seek(v as number)}
       isDisabled={isDisabled}
       size="sm"
-      disableAnimation
       disableThumbScale
       color={showThumb ? "primary" : "foreground"}
       onMouseEnter={() => setHovered(true)}

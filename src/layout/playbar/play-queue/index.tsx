@@ -5,7 +5,7 @@ import { RiDeleteBinLine } from "@remixicon/react";
 import clx from "classnames";
 
 import If from "@/components/if";
-import ScrollContainer, { ScrollRefObject } from "@/components/scroll-container";
+import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import { usePlayingQueue } from "@/store/playing-queue";
 
 interface Props {

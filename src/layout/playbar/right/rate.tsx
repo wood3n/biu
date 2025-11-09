@@ -20,7 +20,6 @@ const Rate = ({ value, onChange }: Props) => {
       <DropdownMenu
         aria-label="播放速率"
         hideSelectedIcon
-        disableAnimation
         selectionMode="single"
         selectedKeys={new Set([String(value)])}
         onSelectionChange={keys => onChange(Number([...keys].at(0)))}

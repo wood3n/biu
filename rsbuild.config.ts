@@ -4,6 +4,8 @@ import { pluginSvgr } from "@rsbuild/plugin-svgr";
 
 import { pluginElectron } from "./plugins/rsbuild-plugin-electron";
 
+const isDev = process.env.NODE_ENV === "development";
+
 export default defineConfig({
   output: {
     distPath: {
@@ -12,6 +14,7 @@ export default defineConfig({
     // 生产环境相对路径，保证通过 file:// 加载时静态资源能正确引用
     assetPrefix: "./",
     cleanDistPath: true,
+    sourceMap: isDev,
   },
   performance: {
     removeMomentLocale: true,
@@ -44,6 +47,9 @@ export default defineConfig({
     cliShortcuts: false,
     // 开发环境相对路径，保证通过 file:// 加载时静态资源能正确引用
     assetPrefix: "./",
+    watchFiles: {
+      paths: [".electron"],
+    },
   },
   server: {
     printUrls: false,

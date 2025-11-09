@@ -136,7 +136,6 @@ const SettingsPage: React.FC = () => {
                 name="borderRadius"
                 render={({ field }) => (
                   <Slider
-                    disableAnimation
                     disableThumbScale
                     showTooltip={false}
                     size="sm"
