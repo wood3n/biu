@@ -8,6 +8,8 @@ import { getPlayerPagelist } from "@/service/player-pagelist";
 
 import type { PlayingMV } from "./types";
 
+import { usePlayerControls } from "./player-controls";
+
 interface State {
   current?: PlayingMV | null;
   list: PlayingMV[];
@@ -112,36 +114,67 @@ const audio = createAudio();
 export const usePlayingQueue = create<State & Action>()(
   persist(
     (set, get) => {
+      // 初始化 audio 属性来自独立的 player-controls 状态
+      const controlsInit = usePlayerControls.getState();
+      audio.volume = (controlsInit.volume ?? 50) / 100;
+      audio.muted = controlsInit.isMuted ?? false;
+      audio.playbackRate = controlsInit.rate ?? 1;
+      audio.currentTime = Math.floor((controlsInit.currentTime ?? 0) / 1000);
+      audio.loop = (controlsInit.playMode ?? PlayMode.Loop) === PlayMode.Single;
+
+      // 订阅控制状态变化以同步 audio 属性和本地镜像字段（isPlaying 由 audio 事件驱动）
+      usePlayerControls.subscribe(state => {
+        audio.volume = (state.volume ?? 50) / 100;
+        audio.muted = state.isMuted ?? false;
+        audio.playbackRate = state.rate ?? 1;
+        audio.loop = (state.playMode ?? PlayMode.Loop) === PlayMode.Single;
+        set({
+          isMuted: state.isMuted,
+          volume: (state.volume ?? 50) / 100,
+          playMode: state.playMode,
+          rate: state.rate,
+        });
+      });
+
       audio.onloadedmetadata = () => {
+        // 同步总时长（秒 & 毫秒）
+        usePlayerControls.setState({ duration: Math.round(audio.duration * 1000) });
         set({ duration: audio.duration });
       };
 
       audio.ontimeupdate = () => {
+        // 同步当前时间（秒 & 毫秒）
+        usePlayerControls.setState({ currentTime: Math.round(audio.currentTime * 1000) });
         set({ currentTime: audio.currentTime });
       };
 
       audio.onplay = () => {
+        usePlayerControls.setState({ isPlaying: true });
         set({ isPlaying: true });
       };
 
       audio.onpause = () => {
+        usePlayerControls.setState({ isPlaying: false });
         set({ isPlaying: false });
       };
 
       audio.oncanplay = () => {
-        if (get().isPlaying) {
+        // 根据控制状态决定是否自动播放
+        if (usePlayerControls.getState().isPlaying) {
           audio.play();
         }
       };
 
       audio.onended = () => {
-        if (get().playMode === PlayMode.Single) {
+        if (usePlayerControls.getState().playMode === PlayMode.Single) {
           return;
         }
         get().next();
       };
 
       const setCurrentAndLoad = (mv: PlayingMV) => {
+        // 切歌即视为播放开始
+        usePlayerControls.setState({ isPlaying: true });
         set({ isPlaying: true, current: mv });
         if (mv?.url) {
           audio.src = mv.url;
@@ -162,6 +195,14 @@ export const usePlayingQueue = create<State & Action>()(
 
       return {
         ...initState,
+        // 镜像初始控制状态（保持对现有 UI 的兼容）
+        isPlaying: controlsInit.isPlaying,
+        isMuted: controlsInit.isMuted,
+        volume: (controlsInit.volume ?? 50) / 100,
+        playMode: controlsInit.playMode,
+        rate: controlsInit.rate,
+        currentTime: Math.floor((controlsInit.currentTime ?? 0) / 1000),
+        duration: Math.floor((controlsInit.duration ?? 0) / 1000),
         audio,
 
         // actions
@@ -330,10 +371,11 @@ export const usePlayingQueue = create<State & Action>()(
         },
         clear: () => {
           audio.src = "";
+          usePlayerControls.setState({ isPlaying: false, duration: 0, currentTime: 0 });
           set({ list: [], current: null, isPlaying: false, duration: 0, currentTime: 0 });
         },
         togglePlay: async () => {
-          const { isPlaying } = get();
+          const { isPlaying } = usePlayerControls.getState();
           if (isPlaying) {
             audio.pause();
           } else {
@@ -341,20 +383,24 @@ export const usePlayingQueue = create<State & Action>()(
           }
         },
         toggleMute: () => {
-          const value = !get().isMuted;
+          const value = !usePlayerControls.getState().isMuted;
           audio.muted = value;
+          usePlayerControls.setState({ isMuted: value });
           set({ isMuted: value });
         },
         setVolume: (volume: number) => {
           const v = Math.max(0, Math.min(1, volume));
           audio.volume = v;
+          usePlayerControls.setState({ volume: Math.round(v * 100) });
           set({ volume: v });
         },
         setRate: (rate: number) => {
           audio.playbackRate = rate;
+          usePlayerControls.setState({ rate });
           set({ rate });
         },
         setPlayMode: playMode => {
+          usePlayerControls.setState({ playMode });
           set({ playMode });
           if (playMode === PlayMode.Single) {
             audio.loop = true;
@@ -364,12 +410,15 @@ export const usePlayingQueue = create<State & Action>()(
         },
         seek: (time: number) => {
           audio.currentTime = time;
+          usePlayerControls.setState({ currentTime: Math.round(time * 1000) });
         },
         setDuration: (duration: number) => {
+          usePlayerControls.setState({ duration: Math.round(duration * 1000) });
           set({ duration });
         },
         reset: () => {
           audio.src = "";
+          usePlayerControls.setState({ isPlaying: false, duration: 0, currentTime: 0 });
           set({ isPlaying: false, duration: 0, currentTime: 0 });
         },
       };
@@ -379,28 +428,11 @@ export const usePlayingQueue = create<State & Action>()(
       partialize: state => ({
         current: state.current,
         list: state.list,
-        // control states
-        volume: state.volume,
-        playMode: state.playMode,
-        isMuted: state.isMuted,
-        rate: state.rate,
-        currentTime: state.currentTime,
         expiredTime: state.expiredTime,
       }),
       onRehydrateStorage: () => {
         return async state => {
-          const { volume, isMuted, rate, currentTime, current, playMode, expiredTime } = state || initState;
-          audio.volume = volume;
-          if (isMuted) {
-            audio.muted = true;
-          }
-          audio.playbackRate = rate;
-          audio.currentTime = currentTime;
-
-          if (playMode === PlayMode.Single) {
-            audio.loop = true;
-          }
-
+          const { current, expiredTime } = state || initState;
           if (current?.url) {
             audio.src = current.url;
           }
