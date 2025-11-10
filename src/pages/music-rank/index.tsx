@@ -1,5 +1,3 @@
-import { Button } from "@heroui/react";
-import { RiPlayFill } from "@remixicon/react";
 import { useRequest } from "ahooks";
 
 import GridList from "@/components/grid-list";
@@ -10,7 +8,6 @@ import { usePlayingQueue } from "@/store/playing-queue";
 
 const MusicRank = () => {
   const play = usePlayingQueue(s => s.play);
-  const playList = usePlayingQueue(s => s.playList);
 
   const { loading, data } = useRequest(async () => {
     const res = await getMusicHotRank({
@@ -24,26 +21,6 @@ const MusicRank = () => {
   return (
     <ScrollContainer className="p-4">
       <h1 className="mb-4">热歌精选</h1>
-      <div className="mb-4">
-        <Button
-          color="primary"
-          startContent={<RiPlayFill />}
-          onPress={() =>
-            playList(
-              data?.map(item => ({
-                id: item.id,
-                bvid: item.bvid,
-                cid: item.cid,
-                title: item.music_title,
-                singer: item.author,
-                coverImageUrl: item.cover,
-              })) || [],
-            )
-          }
-        >
-          播放全部
-        </Button>
-      </div>
       <GridList
         data={data}
         loading={loading}

@@ -1,18 +1,18 @@
 import React from "react";
-import { useNavigate } from "react-router";
 
-import { Alert, Avatar, Button, Card, CardBody, Pagination, Spinner } from "@heroui/react";
+import { Alert, Button, Pagination, Spinner } from "@heroui/react";
 import { usePagination } from "ahooks";
 
 import ScrollContainer from "@/components/scroll-container";
 import { getRelationFollowings, type RelationListItem } from "@/service/relation-followings";
 import { useUser } from "@/store/user";
 
+import UserCard from "./user-card";
+
 const PAGE_SIZE = 20;
 
 const FollowList = () => {
   const { user } = useUser();
-  const navigate = useNavigate();
 
   const {
     data,
@@ -66,15 +66,7 @@ const FollowList = () => {
         {!loading && !error && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             {data?.list?.map(u => (
-              <Card key={u.mid} isHoverable isPressable onPress={() => navigate(`/user/${u.mid}`)} className="h-full">
-                <CardBody className="flex items-center space-y-2">
-                  <Avatar className="text-large h-32 w-32 flex-none" src={u.face} name={u.uname} />
-                  <div className="flex w-full flex-col items-center space-y-1">
-                    <span className="text-lg">{u.uname}</span>
-                    <span className="text-foreground-500 w-full truncate text-center text-sm">{u.sign}</span>
-                  </div>
-                </CardBody>
-              </Card>
+              <UserCard key={u.mid} u={u} refresh={refreshAsync} />
             ))}
           </div>
         )}

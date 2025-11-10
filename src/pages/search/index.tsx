@@ -55,6 +55,10 @@ const Search = () => {
         <Tabs
           color="primary"
           variant="solid"
+          radius="md"
+          classNames={{
+            cursor: "rounded-medium",
+          }}
           items={SearchTypeOptions}
           selectedKey={searchType}
           onSelectionChange={v => setSearchType(v as SearchType)}
