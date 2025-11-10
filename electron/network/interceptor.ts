@@ -1,4 +1,4 @@
-import type { OnBeforeSendHeadersListenerDetails } from "electron";
+import type { OnBeforeSendHeadersListenerDetails, OnHeadersReceivedListenerDetails } from "electron";
 
 import { session } from "electron";
 
@@ -31,6 +31,50 @@ export function installWebRequestInterceptors(): { dispose: () => void } {
   };
 
   session.defaultSession.webRequest.onBeforeSendHeaders(filter, onBeforeSendHeadersHandler);
+
+  // 新增：响应头拦截，重写 Set-Cookie 的 SameSite 与 Secure
+  const onHeadersReceivedHandler = (
+    details: OnHeadersReceivedListenerDetails,
+    callback: (response: { responseHeaders?: Record<string, string | string[]> }) => void,
+  ) => {
+    if (!active) {
+      callback({ responseHeaders: details.responseHeaders });
+      return;
+    }
+
+    const responseHeaders = details.responseHeaders || {};
+    const setCookieKey = Object.keys(responseHeaders).find(k => k.toLowerCase() === "set-cookie");
+
+    if (!setCookieKey) {
+      callback({ responseHeaders });
+      return;
+    }
+
+    const raw = responseHeaders[setCookieKey];
+    const cookies = Array.isArray(raw) ? raw : typeof raw === "string" ? [raw] : [];
+
+    const rewritten = cookies.map(cookie => {
+      let c = cookie;
+
+      // 统一移除已存在的 SameSite=...，避免重复或冲突
+      c = c.replace(/;?\s*SameSite=[^;]+/i, "");
+      // 如果原始值中没有 SameSite=None，则追加
+      if (!/;\s*SameSite=None/i.test(cookie)) {
+        c += "; SameSite=None";
+      }
+      // 如果原始值中没有 Secure，则追加
+      if (!/;\s*Secure/i.test(cookie)) {
+        c += "; Secure";
+      }
+
+      return c;
+    });
+
+    responseHeaders[setCookieKey] = rewritten;
+    callback({ responseHeaders });
+  };
+
+  session.defaultSession.webRequest.onHeadersReceived(filter, onHeadersReceivedHandler);
 
   return {
     dispose: () => {

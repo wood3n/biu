@@ -46,7 +46,6 @@ const UserCard = ({ u, refresh }: Props) => {
           <span className="text-foreground-500 line-clamp-2 w-full text-center text-sm">{u.sign}</span>
         </div>
       </CardBody>
-
       <AsyncButton
         size="sm"
         color="danger"
@@ -55,7 +54,7 @@ const UserCard = ({ u, refresh }: Props) => {
         onPress={handleUnfollow}
         aria-label="取消关注"
         title="取消关注"
-        className="absolute right-[10px] bottom-[10px] opacity-0 transition-opacity duration-300 ease-in-out group-hover:pointer-events-auto group-hover:opacity-100"
+        className="absolute right-[10px] bottom-[10px] opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100"
         style={{
           willChange: "opacity, box-shadow",
           boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.28), 0 0 8px rgba(255, 255, 255, 0.18)",

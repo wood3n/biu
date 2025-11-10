@@ -73,6 +73,17 @@ interface ElectronAPI {
   onDownloadProgress: (cb: (payload: DownloadCallbackParams) => void) => Promise<void>;
   /** 导航到指定路由 */
   navigate: (cb: (path: string) => void) => Promise<void>;
+  /** 使用主进程的 net.request 发起 GET 请求（只返回 data） */
+  httpGet: <T = any>(
+    url: string,
+    options?: { params?: Record<string, any>; headers?: Record<string, string>; timeout?: number },
+  ) => Promise<T>;
+  /** 使用主进程的 net.request 发起 POST 请求（只返回 data） */
+  httpPost: <T = any>(
+    url: string,
+    body?: unknown,
+    options?: { params?: Record<string, any>; headers?: Record<string, string>; timeout?: number },
+  ) => Promise<T>;
 }
 
 interface Window {

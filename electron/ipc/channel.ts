@@ -23,4 +23,8 @@ export const channel = {
   router: {
     navigate: "router:navigate",
   },
+  http: {
+    get: "http:get",
+    post: "http:post",
+  },
 };

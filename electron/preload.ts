@@ -54,6 +54,16 @@ const api: ElectronAPI = {
 
     ipcRenderer.on(channel.router.navigate, navigateHandler);
   },
+  // 通过主进程 http 封装发起请求（只返回 data，风格与 axios 保持一致）
+  httpGet: <T = any>(
+    url: string,
+    options?: { params?: Record<string, any>; headers?: Record<string, string>; timeout?: number },
+  ) => ipcRenderer.invoke(channel.http.get, { url, ...options }) as Promise<T>,
+  httpPost: <T = any>(
+    url: string,
+    body?: unknown,
+    options?: { params?: Record<string, any>; headers?: Record<string, string>; timeout?: number },
+  ) => ipcRenderer.invoke(channel.http.post, { url, body, ...options }) as Promise<T>,
 };
 
 contextBridge.exposeInMainWorld("electron", api);

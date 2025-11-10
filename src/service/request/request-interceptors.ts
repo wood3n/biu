@@ -1,11 +1,11 @@
 import { type InternalAxiosRequestConfig } from "axios";
-import Cookies from "js-cookie";
 
 import { encodeParamsWbi } from "@/common/utils/wbi-sign";
+import { useToken } from "@/store/token";
 
 export const requestInterceptors = async (config: InternalAxiosRequestConfig) => {
   if (config.useCSRF) {
-    const csrfToken = Cookies.get("bili_jct");
+    const csrfToken = useToken.getState().tokenData?.bili_jct;
     if (csrfToken) {
       if (config.method === "post") {
         config.data ??= {};
