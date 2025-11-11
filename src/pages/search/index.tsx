@@ -53,7 +53,6 @@ const Search = () => {
       <div className="p-4">
         <h1 className="mb-4">搜索【{keyword}】的结果</h1>
         <Tabs
-          color="primary"
           variant="solid"
           radius="md"
           classNames={{

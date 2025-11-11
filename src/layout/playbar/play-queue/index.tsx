@@ -4,6 +4,7 @@ import { Button, Drawer, DrawerBody, DrawerContent, DrawerHeader, Image } from "
 import { RiDeleteBinLine } from "@remixicon/react";
 import clx from "classnames";
 
+import { formatUrlProtocal } from "@/common/utils/url";
 import If from "@/components/if";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import { usePlayingQueue } from "@/store/playing-queue";
@@ -67,7 +68,7 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
                     >
                       <Image
                         radius="sm"
-                        src={mv.coverImageUrl}
+                        src={formatUrlProtocal(mv.coverImageUrl)}
                         alt={mv.title}
                         classNames={{ wrapper: "flex-none" }}
                         className="h-12 w-12 object-cover"

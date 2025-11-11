@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 
 import { Chip, Image } from "@heroui/react";
 
+import { formatUrlProtocal } from "@/common/utils/url";
 import Ellipsis from "@/components/ellipsis";
 import { usePlayingQueue } from "@/store/playing-queue";
 
@@ -25,7 +26,7 @@ const LeftControl = () => {
   return (
     <div className="flex h-full w-full items-center justify-start space-x-4">
       <Image
-        src={current.coverImageUrl}
+        src={formatUrlProtocal(current.coverImageUrl)}
         width={56}
         height={56}
         classNames={{
