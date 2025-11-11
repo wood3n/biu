@@ -134,7 +134,14 @@ const FolderForm = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={!isSubmitting} size="md" disableAnimation>
+    <Modal
+      radius="md"
+      size="md"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      isDismissable={!isSubmitting}
+      disableAnimation
+    >
       <ModalContent>
         <form onSubmit={handleSubmit(onSubmit)}>
           <ModalHeader className="border-b-1 border-b-zinc-800 py-3">{mid ? "修改收藏夹" : "新建收藏夹"}</ModalHeader>

@@ -17,7 +17,7 @@ export interface ColorPickerProps {
 
 const ColorPicker: React.FC<ColorPickerProps> = ({ presets, value, onChange, className }) => {
   return (
-    <Popover placement="bottom-start" offset={8}>
+    <Popover radius="md" placement="bottom-start" offset={8}>
       <PopoverTrigger>
         <Button style={{ backgroundColor: value }} className={twMerge("border-2 border-[#ffffff]", className)} />
       </PopoverTrigger>

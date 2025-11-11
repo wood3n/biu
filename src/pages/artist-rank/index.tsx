@@ -35,7 +35,7 @@ const ArtistRank = () => {
         {loading ? (
           <div className={gridClass}>
             {Array.from({ length: 12 }).map((_, idx) => (
-              <Card key={idx} shadow="sm" radius="lg" className="overflow-hidden">
+              <Card key={idx} radius="md" className="overflow-hidden">
                 <Skeleton className="h-40 w-full md:h-48" />
                 <CardBody className="flex flex-row items-center space-x-2 px-4 py-3">
                   <Skeleton className="h-12 w-12 rounded-full" />

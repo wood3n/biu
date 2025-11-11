@@ -59,7 +59,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   };
 
   return (
-    <Modal disableAnimation isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false}>
+    <Modal disableAnimation radius="md" isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false}>
       <ModalContent>
         {() => (
           <>

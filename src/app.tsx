@@ -4,9 +4,7 @@ import { useHref, useNavigate, useRoutes } from "react-router";
 import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import moment from "moment";
 
-import { useSettings } from "@/store/settings";
-
-import { hexToHsl } from "./common/utils/color";
+import Theme from "./components/theme";
 import routes from "./routes";
 
 import "moment/locale/zh-cn";
@@ -19,7 +17,6 @@ moment.locale("zh-cn");
 export function App() {
   const routeElement = useRoutes(routes);
   const navigate = useNavigate();
-  const { fontFamily, backgroundColor, contentBackgroundColor, primaryColor, borderRadius } = useSettings();
 
   useEffect(() => {
     if (window.electron && window.electron.navigate) {
@@ -38,26 +35,13 @@ export function App() {
 
   return (
     <HeroUIProvider navigate={navigate} useHref={useHref} locale="zh-CN">
-      <div className="fixed z-[100]">
-        <ToastProvider
-          placement="bottom-right"
-          toastOffset={90}
-          maxVisibleToasts={3}
-          toastProps={{ timeout: 3000, color: "primary" }}
-        />
-      </div>
-      <main
-        className="bg-background text-foreground dark h-screen w-screen overflow-hidden"
-        style={{
-          fontFamily,
-          ["--heroui-background" as any]: hexToHsl(backgroundColor),
-          ["--heroui-content1" as any]: hexToHsl(contentBackgroundColor),
-          ["--heroui-primary" as any]: hexToHsl(primaryColor),
-          ["--heroui-radius-medium" as any]: `${borderRadius}px`,
-        }}
-      >
-        {routeElement}
-      </main>
+      <ToastProvider
+        placement="bottom-right"
+        toastOffset={90}
+        maxVisibleToasts={3}
+        toastProps={{ timeout: 3000, color: "primary" }}
+      />
+      <Theme>{routeElement}</Theme>
     </HeroUIProvider>
   );
 }

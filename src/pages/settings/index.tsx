@@ -136,7 +136,6 @@ const SettingsPage: React.FC = () => {
                 name="borderRadius"
                 render={({ field }) => (
                   <Slider
-                    disableThumbScale
                     showTooltip={false}
                     size="sm"
                     endContent={<span>{field.value}px</span>}
@@ -147,7 +146,7 @@ const SettingsPage: React.FC = () => {
                     maxValue={24}
                     step={1}
                     classNames={{
-                      thumb: "w-4 h-4 after:w-4 after:h-4 after:bg-primary",
+                      thumb: "after:hidden",
                     }}
                   />
                 )}

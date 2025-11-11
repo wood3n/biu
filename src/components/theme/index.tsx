@@ -1,0 +1,59 @@
+import { useEffect } from "react";
+
+import { hexToHsl } from "@/common/utils/color";
+import { useSettings } from "@/store/settings";
+
+interface Props {
+  children: React.ReactNode;
+}
+
+const Theme = ({ children }: Props) => {
+  const { fontFamily, backgroundColor, contentBackgroundColor, primaryColor, borderRadius } = useSettings();
+
+  // 将主题相关样式应用到 :root 和 body，确保挂载在 body 上的组件可读取到
+  useEffect(() => {
+    const rootStyle = document.documentElement.style;
+    const bodyStyle = document.body.style;
+
+    const bg = hexToHsl(backgroundColor);
+    const content = hexToHsl(contentBackgroundColor);
+    const primary = hexToHsl(primaryColor);
+    const radius = `${borderRadius}px`;
+
+    // :root 级变量（全局）
+    rootStyle.setProperty("--heroui-background", bg);
+    rootStyle.setProperty("--heroui-content1", content);
+    rootStyle.setProperty("--heroui-primary", primary);
+    rootStyle.setProperty("--primary", primary);
+    rootStyle.setProperty("--heroui-radius-medium", radius);
+    rootStyle.setProperty("--radius-medium", radius);
+    rootStyle.setProperty("--radius", radius);
+
+    // body 级变量与字体（用于挂载在 body 的 Portal 组件）
+    bodyStyle.setProperty("--heroui-background", bg);
+    bodyStyle.setProperty("--heroui-content1", content);
+    bodyStyle.setProperty("--heroui-primary", primary);
+    bodyStyle.setProperty("--primary", primary);
+    bodyStyle.setProperty("--heroui-radius-medium", radius);
+    bodyStyle.setProperty("--radius-medium", radius);
+    bodyStyle.setProperty("--radius", radius);
+    bodyStyle.fontFamily = fontFamily || bodyStyle.fontFamily;
+  }, [fontFamily, backgroundColor, contentBackgroundColor, primaryColor, borderRadius]);
+
+  return (
+    <main
+      className="bg-background text-foreground dark h-screen w-screen overflow-hidden"
+      style={{
+        fontFamily,
+        ["--heroui-background" as any]: hexToHsl(backgroundColor),
+        ["--heroui-content1" as any]: hexToHsl(contentBackgroundColor),
+        ["--heroui-primary" as any]: hexToHsl(primaryColor),
+        ["--heroui-radius-medium" as any]: `${borderRadius}px`,
+      }}
+    >
+      {children}
+    </main>
+  );
+};
+
+export default Theme;

@@ -47,20 +47,6 @@ function buildQuery(params?: HttpInvokePayload["params"]): string {
 }
 
 /**
- * 过滤敏感头（例如 Cookie、Set-Cookie）
- */
-function sanitizeHeaders(headers?: Record<string, string>): Record<string, string> {
-  if (!headers) return {};
-  const result: Record<string, string> = {};
-  for (const [k, v] of Object.entries(headers)) {
-    const key = k.toLowerCase();
-    if (key === "cookie" || key === "set-cookie") continue;
-    result[k] = v;
-  }
-  return result;
-}
-
-/**
  * 使用 Electron 的 net.request 发起请求
  */
 async function doRequest<T = any>(payload: HttpInvokePayload): Promise<HttpResponse<T>> {
@@ -70,21 +56,19 @@ async function doRequest<T = any>(payload: HttpInvokePayload): Promise<HttpRespo
   const req = net.request({ method, url: fullURL });
 
   // 设置安全头
-  const safeHeaders = sanitizeHeaders(headers);
-  for (const [k, v] of Object.entries(safeHeaders)) {
-    try {
-      req.setHeader(k, v);
-    } catch {
-      // 忽略无效头设置
+  if (headers) {
+    for (const [k, v] of Object.entries(headers)) {
+      try {
+        req.setHeader(k, v);
+      } catch {
+        // 忽略无效头设置
+      }
     }
   }
 
   // 默认按 JSON 发送（POST）
   if (method === "POST") {
-    const hasContentType = Object.keys(safeHeaders).some(h => h.toLowerCase() === "content-type");
-    if (!hasContentType) {
-      req.setHeader("Content-Type", "application/json; charset=utf-8");
-    }
+    req.setHeader("Content-Type", "application/json; charset=utf-8");
   }
 
   return await new Promise<HttpResponse<T>>((resolve, reject) => {

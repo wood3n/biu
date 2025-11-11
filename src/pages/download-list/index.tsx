@@ -45,7 +45,7 @@ const DownloadList = () => {
     <div className="w-full p-4">
       <h1 className="mb-4">下载记录</h1>
       {/* 顶部下载目录管理 */}
-      <Card className="mb-4">
+      <Card radius="md" className="mb-4">
         <CardBody>
           <div className="flex flex-col gap-2 md:flex-row md:items-center">
             <div className="flex-1">
@@ -64,11 +64,12 @@ const DownloadList = () => {
       </Card>
 
       {/* 下载文件列表 */}
-      <Card>
+      <Card radius="md">
         <CardBody>
           <div className="w-full overflow-x-auto">
             <Table
               fullWidth
+              radius="md"
               aria-label="下载列表"
               removeWrapper
               topContent={
