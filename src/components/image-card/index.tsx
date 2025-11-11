@@ -17,9 +17,17 @@ export type ImageCardProps = {
 
 const ImageCard = ({ cover, coverHeight = 188, title, titleExtra, showPlayIcon, footer, onPress }: ImageCardProps) => {
   return (
-    <Card as="div" isHoverable shadow="sm" isPressable onPress={onPress} className="w-full">
-      <CardBody className="group rounded-large relative flex-grow-0 overflow-hidden bg-none p-0 shadow">
-        <Image className="object-cover" height={coverHeight} src={cover} fallbackSrc={FallbackImage} width="100%" />
+    <Card as="div" isHoverable radius="md" isPressable onPress={onPress} className="w-full">
+      <CardBody className="group rounded-medium relative flex-grow-0 overflow-hidden bg-none p-0 shadow">
+        <Image
+          radius="md"
+          removeWrapper
+          className="object-cover"
+          height={coverHeight}
+          src={cover}
+          fallbackSrc={FallbackImage}
+          width="100%"
+        />
         {showPlayIcon && (
           <div className="absolute right-0 bottom-0 z-30 p-4 opacity-0 transition-opacity group-hover:opacity-100">
             <RiPlayCircleFill className="text-primary" size={48} />

@@ -27,39 +27,14 @@ export function App() {
     }
   }, [navigate]);
 
-  // useEffect(() => {
-  //   axios.head("https://bilibili.com/");
-  // }, []);
+  const test = async () => {
+    const res = await window.electron.httpGet("https://api.bilibili.com/x/web-interface/nav");
+    console.log("nav res:", res);
+  };
 
-  // 将主题相关样式应用到 :root 和 body，确保挂载在 body 上的组件可读取到
   useEffect(() => {
-    const rootStyle = document.documentElement.style;
-    const bodyStyle = document.body.style;
-
-    const bg = hexToHsl(backgroundColor);
-    const content = hexToHsl(contentBackgroundColor);
-    const primary = hexToHsl(primaryColor);
-    const radius = `${borderRadius}px`;
-
-    // :root 级变量（全局）
-    rootStyle.setProperty("--heroui-background", bg);
-    rootStyle.setProperty("--heroui-content1", content);
-    rootStyle.setProperty("--heroui-primary", primary);
-    rootStyle.setProperty("--primary", primary);
-    rootStyle.setProperty("--heroui-radius-medium", radius);
-    rootStyle.setProperty("--radius-medium", radius);
-    rootStyle.setProperty("--radius", radius);
-
-    // body 级变量与字体（用于挂载在 body 的 Portal 组件）
-    bodyStyle.setProperty("--heroui-background", bg);
-    bodyStyle.setProperty("--heroui-content1", content);
-    bodyStyle.setProperty("--heroui-primary", primary);
-    bodyStyle.setProperty("--primary", primary);
-    bodyStyle.setProperty("--heroui-radius-medium", radius);
-    bodyStyle.setProperty("--radius-medium", radius);
-    bodyStyle.setProperty("--radius", radius);
-    bodyStyle.fontFamily = fontFamily || bodyStyle.fontFamily;
-  }, [fontFamily, backgroundColor, contentBackgroundColor, primaryColor, borderRadius]);
+    test();
+  }, []);
 
   return (
     <HeroUIProvider navigate={navigate} useHref={useHref} locale="zh-CN">

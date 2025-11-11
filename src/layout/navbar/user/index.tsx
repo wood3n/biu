@@ -10,7 +10,6 @@ import {
   useDisclosure,
   addToast,
 } from "@heroui/react";
-import Cookies from "js-cookie";
 
 import ConfirmModal from "@/components/confirm-modal";
 import { postPassportLoginExit } from "@/service/passport-login-exit";
@@ -28,7 +27,7 @@ const UserCard = () => {
   } = useDisclosure();
 
   const logout = async () => {
-    const csrfToken = Cookies.get("bili_jct");
+    const csrfToken = useToken.getState().tokenData?.bili_jct;
     if (!csrfToken) {
       addToast({
         title: "CSRF Token 不存在",

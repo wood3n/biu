@@ -62,9 +62,6 @@ importers:
       immer:
         specifier: ^10.1.3
         version: 10.1.3
-      js-cookie:
-        specifier: ^3.0.5
-        version: 3.0.5
       jsencrypt:
         specifier: ^3.5.4
         version: 3.5.4
