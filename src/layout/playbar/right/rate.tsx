@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
+import { Button, Tooltip } from "@heroui/react";
 
 import { PlayRate } from "../constants";
 
@@ -10,26 +10,47 @@ interface Props {
 }
 
 const Rate = ({ value, onChange }: Props) => {
+  const tooltipId = "rate-tooltip";
+
   return (
-    <Dropdown type="listbox" classNames={{ content: "min-w-0" }}>
-      <DropdownTrigger>
-        <Button isIconOnly variant="light" size="sm" className="text-medium hover:text-primary min-w-fit px-2">
-          {value}x
-        </Button>
-      </DropdownTrigger>
-      <DropdownMenu
+    <Tooltip
+      id={tooltipId}
+      placement="top"
+      delay={200}
+      showArrow={false}
+      classNames={{
+        content: "py-3 px-2 w-[60px] min-w-[60px] flex flex-col items-center gap-1",
+      }}
+      content={
+        <div className="flex flex-col items-center gap-1">
+          {PlayRate.map(v => (
+            <Button
+              key={v}
+              isIconOnly
+              size="sm"
+              color={v === value ? "primary" : "default"}
+              variant={v === value ? "solid" : "light"}
+              className="min-w-[40px]"
+              aria-label={`${v}倍速`}
+              onPress={() => onChange(v)}
+            >
+              {v}x
+            </Button>
+          ))}
+        </div>
+      }
+    >
+      <Button
+        isIconOnly
+        variant="light"
+        size="sm"
+        className="text-medium hover:text-primary min-w-fit px-2"
         aria-label="播放速率"
-        hideSelectedIcon
-        selectionMode="single"
-        selectedKeys={new Set([String(value)])}
-        onSelectionChange={keys => onChange(Number([...keys].at(0)))}
-        className="w-fit"
+        aria-describedby={tooltipId}
       >
-        {PlayRate.map(v => (
-          <DropdownItem key={String(v)}>{v}x</DropdownItem>
-        ))}
-      </DropdownMenu>
-    </Dropdown>
+        {value}x
+      </Button>
+    </Tooltip>
   );
 };
 

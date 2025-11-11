@@ -1,4 +1,4 @@
-import { ipcMain, net } from "electron";
+import { ipcMain, net, session } from "electron";
 
 import { channel } from "./channel";
 
@@ -15,7 +15,7 @@ export interface HttpInvokePayload {
   method: HttpMethod;
   /** 查询参数（将自动编码到 URL） */
   params?: Record<string, string | number | boolean | null | undefined>;
-  /** 仅允许安全头，自动过滤敏感头（如 Cookie） */
+  /** 仅允许安全头，自动过滤敏感头（如 Cookie，改由会话自动管理） */
   headers?: Record<string, string>;
   /** 超时时间，单位毫秒（默认 10000ms） */
   timeout?: number;
@@ -47,22 +47,53 @@ function buildQuery(params?: HttpInvokePayload["params"]): string {
 }
 
 /**
+ * 根据会话获取将要随请求发送的 Cookie，并拼接为请求头字符串。
+ * 仅在 http/https URL 上生效；其它协议将跳过。
+ */
+async function buildCookieHeader(url: string): Promise<string | undefined> {
+  try {
+    const u = new URL(url);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return undefined;
+    const cookies = await session.defaultSession.cookies.get({ url });
+    if (!cookies || cookies.length === 0) return undefined;
+    return cookies.map(c => `${c.name}=${c.value}`).join("; ");
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * 使用 Electron 的 net.request 发起请求
  */
 async function doRequest<T = any>(payload: HttpInvokePayload): Promise<HttpResponse<T>> {
   const { url, method, params, headers, timeout = 10000, body } = payload;
 
   const fullURL = `${url}${buildQuery(params)}`;
+
+  // 在创建请求前，基于会话构建 Cookie 头，确保自动附带凭据
+  const cookieHeader = await buildCookieHeader(fullURL);
+
   const req = net.request({ method, url: fullURL });
 
-  // 设置安全头
+  // 设置安全头（过滤 Cookie：由会话管理）
   if (headers) {
     for (const [k, v] of Object.entries(headers)) {
+      const keyLower = k.toLowerCase();
+      if (keyLower === "cookie") continue; // 避免渲染进程注入 Cookie
       try {
         req.setHeader(k, v);
       } catch {
         // 忽略无效头设置
       }
+    }
+  }
+
+  // 自动附加 Cookie（若存在）
+  if (cookieHeader) {
+    try {
+      req.setHeader("Cookie", cookieHeader);
+    } catch {
+      // 忽略设置失败（极端情况）
     }
   }
 
