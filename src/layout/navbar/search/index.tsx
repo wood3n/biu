@@ -43,16 +43,7 @@ const SearchInput: React.FC = () => {
   };
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-[360px]"
-      onPointerDownCapture={() => {
-        isPointerDownInsideRef.current = true;
-        setTimeout(() => {
-          isPointerDownInsideRef.current = false;
-        }, 0);
-      }}
-    >
+    <div ref={containerRef} className="window-no-drag relative w-[360px] pr-[100px]">
       <Input
         ref={inputRef}
         value={value}
@@ -65,7 +56,6 @@ const SearchInput: React.FC = () => {
         }}
         onFocus={() => setOpen(true)}
         onBlur={() => {
-          if (isPointerDownInsideRef.current) return;
           setOpen(false);
         }}
         placeholder="搜索"

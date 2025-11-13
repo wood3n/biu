@@ -16,13 +16,13 @@ const Theme = ({ children }: Props) => {
     const bodyStyle = document.body.style;
 
     const bg = hexToHsl(backgroundColor);
-    const content = hexToHsl(contentBackgroundColor);
+    const contentBg = hexToHsl(contentBackgroundColor);
     const primary = hexToHsl(primaryColor);
     const radius = `${borderRadius}px`;
 
     // :root 级变量（全局）
-    rootStyle.setProperty("--heroui-background", bg);
-    rootStyle.setProperty("--heroui-content1", content);
+    rootStyle.setProperty("--heroui-background", contentBg);
+    rootStyle.setProperty("--heroui-content1", bg);
     rootStyle.setProperty("--heroui-primary", primary);
     rootStyle.setProperty("--primary", primary);
     rootStyle.setProperty("--heroui-radius-medium", radius);
@@ -30,8 +30,8 @@ const Theme = ({ children }: Props) => {
     rootStyle.setProperty("--radius", radius);
 
     // body 级变量与字体（用于挂载在 body 的 Portal 组件）
-    bodyStyle.setProperty("--heroui-background", bg);
-    bodyStyle.setProperty("--heroui-content1", content);
+    bodyStyle.setProperty("--heroui-background", contentBg);
+    bodyStyle.setProperty("--heroui-content1", bg);
     bodyStyle.setProperty("--heroui-primary", primary);
     bodyStyle.setProperty("--primary", primary);
     bodyStyle.setProperty("--heroui-radius-medium", radius);
@@ -45,8 +45,8 @@ const Theme = ({ children }: Props) => {
       className="bg-background text-foreground dark h-screen w-screen overflow-hidden"
       style={{
         fontFamily,
-        ["--heroui-background" as any]: hexToHsl(backgroundColor),
-        ["--heroui-content1" as any]: hexToHsl(contentBackgroundColor),
+        ["--heroui-background" as any]: hexToHsl(contentBackgroundColor),
+        ["--heroui-content1" as any]: hexToHsl(backgroundColor),
         ["--heroui-primary" as any]: hexToHsl(primaryColor),
         ["--heroui-radius-medium" as any]: `${borderRadius}px`,
       }}

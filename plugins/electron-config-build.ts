@@ -92,8 +92,8 @@ export async function buildElectronConfig(mode: "development" | "production" = "
   const preloadFiles = preloadWrite.output.map(o => o.fileName).join(", ");
   logger.info(`[electron] main (esm) files: ${mainFiles}`);
   logger.info(`[electron] preload (cjs) files: ${preloadFiles}`);
-  if (!mainFiles.includes("main.js")) {
-    logger.warn("[electron] expected main.js not found in ESM build");
+  if (!mainFiles.includes("main.mjs")) {
+    logger.warn("[electron] expected main.mjs not found in ESM build");
   }
   if (!preloadFiles.includes("preload.cjs")) {
     logger.warn("[electron] expected preload.cjs not found in CJS build");

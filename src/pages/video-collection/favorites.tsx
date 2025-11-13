@@ -55,6 +55,7 @@ const Favorites: React.FC = () => {
         loading={loading}
         type={CollectionType.Favorite}
         cover={data?.info?.cover}
+        attr={data?.info?.attr}
         title={data?.info?.title}
         desc={data?.info?.intro}
         upMid={data?.info?.upper?.mid}

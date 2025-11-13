@@ -84,6 +84,8 @@ interface ElectronAPI {
     body?: unknown,
     options?: { params?: Record<string, any>; headers?: Record<string, string>; timeout?: number },
   ) => Promise<T>;
+  /** 获取当前应用平台：macos | windows | linux */
+  getPlatform: () => "macos" | "windows" | "linux";
 }
 
 interface Window {

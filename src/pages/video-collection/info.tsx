@@ -21,6 +21,7 @@ import { useUser } from "@/store/user";
 interface Props {
   type: CollectionType;
   loading?: boolean;
+  attr?: number;
   cover?: string;
   title?: string;
   desc?: string;
@@ -30,7 +31,7 @@ interface Props {
   afterChangeInfo: VoidFunction;
 }
 
-const Info = ({ type, loading, cover, title, desc, upMid, upName, media_count, afterChangeInfo }: Props) => {
+const Info = ({ type, loading, attr, cover, title, desc, upMid, upName, media_count, afterChangeInfo }: Props) => {
   const { user, collectedFolder, updateCollectedFolder } = useUser();
   const isOwn = upMid === user?.mid;
   const { id } = useParams();
@@ -158,13 +159,13 @@ const Info = ({ type, loading, cover, title, desc, upMid, upName, media_count, a
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          {isOwn && (
+          {isOwn && attr !== 0 && (
             <>
               <Button startContent={<RiPencilLine size={18} />} onPress={onEditOpen}>
                 修改信息
               </Button>
-              <Button startContent={<RiDeleteBinLine size={18} />} onPress={onDeleteConfirmOpen}>
-                删除
+              <Button isIconOnly onPress={onDeleteConfirmOpen}>
+                <RiDeleteBinLine size={18} />
               </Button>
             </>
           )}

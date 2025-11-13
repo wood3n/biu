@@ -66,26 +66,6 @@ const SettingsPage: React.FC = () => {
 
           <div className="flex w-full items-center justify-between">
             <div className="mr-6 space-y-1">
-              <div className="text-medium font-medium">布局颜色</div>
-              <div className="text-sm text-zinc-500">更改应用布局背景颜色</div>
-            </div>
-            <div className="flex w-[360px] justify-end">
-              <Controller
-                control={control}
-                name="backgroundColor"
-                render={({ field }) => (
-                  <ColorPicker
-                    presets={[defaultAppSettings.backgroundColor]}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-            </div>
-          </div>
-
-          <div className="flex w-full items-center justify-between">
-            <div className="mr-6 space-y-1">
               <div className="text-medium font-medium">内容区域颜色</div>
               <div className="text-sm text-zinc-500">更改应用内容区域的颜色</div>
             </div>
@@ -96,6 +76,26 @@ const SettingsPage: React.FC = () => {
                 render={({ field }) => (
                   <ColorPicker
                     presets={[defaultAppSettings.contentBackgroundColor]}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+          </div>
+
+          <div className="flex w-full items-center justify-between">
+            <div className="mr-6 space-y-1">
+              <div className="text-medium font-medium">布局颜色</div>
+              <div className="text-sm text-zinc-500">更改应用布局背景颜色</div>
+            </div>
+            <div className="flex w-[360px] justify-end">
+              <Controller
+                control={control}
+                name="backgroundColor"
+                render={({ field }) => (
+                  <ColorPicker
+                    presets={[defaultAppSettings.backgroundColor]}
                     value={field.value}
                     onChange={field.onChange}
                   />

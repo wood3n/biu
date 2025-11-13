@@ -1,3 +1,5 @@
+import { Card } from "@heroui/react";
+
 import { usePlayingQueue } from "@/store/playing-queue";
 
 import Center from "./center";
@@ -11,11 +13,15 @@ function PlayBar() {
   const { current } = usePlayingQueue();
 
   return (
-    <div className="grid h-full grid-cols-[minmax(0,1fr)_minmax(0,3fr)_minmax(0,1fr)] space-x-6 px-6">
+    <Card
+      radius="none"
+      shadow="sm"
+      className="grid h-full grid-cols-[minmax(0,1fr)_minmax(0,3fr)_minmax(0,1fr)] space-x-6 px-6"
+    >
       <div className="h-full">{Boolean(current?.title) && <Left />}</div>
       <Center />
       <Right />
-    </div>
+    </Card>
   );
 }
 

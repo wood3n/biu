@@ -4,7 +4,7 @@ export const getUrlParams = (url: string) => {
 };
 
 export const formatUrlProtocal = (url: string) => {
-  if (!url.startsWith("http")) {
+  if (url && !url.startsWith("http")) {
     return `https:${url}`;
   }
 

@@ -6,6 +6,10 @@ import { channel } from "./ipc/channel";
 let navigateHandler: ((_: Electron.IpcRendererEvent, path: string) => void) | null = null;
 let downloadProgressHandler: ((_: Electron.IpcRendererEvent, params: DownloadCallbackParams) => void) | null = null;
 
+// 统一平台字符串：macos | windows | linux
+const platform: "macos" | "windows" | "linux" =
+  process.platform === "darwin" ? "macos" : process.platform === "win32" ? "windows" : "linux";
+
 const api: ElectronAPI = {
   getSettings: () => ipcRenderer.invoke(channel.store.getSettings),
   setSettings: (value: Partial<AppSettings>) => ipcRenderer.invoke(channel.store.setSettings, value),
@@ -64,6 +68,8 @@ const api: ElectronAPI = {
     body?: unknown,
     options?: { params?: Record<string, any>; headers?: Record<string, string>; timeout?: number },
   ) => ipcRenderer.invoke(channel.http.post, { url, body, ...options }) as Promise<T>,
+  // 返回当前应用运行的平台（macos/windows/linux）
+  getPlatform: () => platform,
 };
 
 contextBridge.exposeInMainWorld("electron", api);

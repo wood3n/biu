@@ -54,7 +54,7 @@ const UserCard = () => {
   };
 
   return (
-    <div className="window-no-drag">
+    <>
       <Dropdown placement="bottom">
         <DropdownTrigger>
           <div className="mr-4 flex cursor-pointer items-center space-x-2">
@@ -105,7 +105,7 @@ const UserCard = () => {
         onOpenChange={onConfirmLogoutModalOpenChange}
         onConfirm={logout}
       />
-    </div>
+    </>
   );
 };
 

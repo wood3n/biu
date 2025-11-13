@@ -4,7 +4,7 @@ export const defaultAppSettings: AppSettings = {
   fontFamily: "system-default",
   borderRadius: 8,
   downloadPath: "",
-  backgroundColor: "#000000",
-  contentBackgroundColor: "#18181b",
+  backgroundColor: "#18181b",
+  contentBackgroundColor: "#000000",
   primaryColor: "#17c964",
 };

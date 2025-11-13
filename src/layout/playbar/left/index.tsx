@@ -35,7 +35,7 @@ const LeftControl = () => {
         className="object-cover"
       />
       <div className="flex min-w-0 flex-col space-y-1">
-        <span className="flex items-center">
+        <span className="flex items-center space-x-2">
           <Ellipsis>{title}</Ellipsis>
           {Boolean(current.isLossless) && <Chip size="sm">无损</Chip>}
         </span>

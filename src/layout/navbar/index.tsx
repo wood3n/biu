@@ -1,19 +1,30 @@
+import clx from "classnames";
+
 import { useUser } from "@/store/user";
 
 import Login from "./login";
+import Navigation from "./navigation";
 import Search from "./search";
 import UserCard from "./user";
 
 const LayoutNavbar = () => {
   const { user } = useUser();
 
+  const platform = window.electron.getPlatform();
+
   return (
-    <div className="window-drag grid h-full grid-cols-3 items-center gap-8">
-      <div className="ml-6 flex items-center"></div>
-      <div className="window-no-drag flex items-center justify-center">
+    <div className="window-drag flex h-full items-center justify-between px-4">
+      <div className="flex items-center justify-start space-x-2">
+        <Navigation />
         <Search />
       </div>
-      <div className="flex items-center justify-center">{user?.isLogin ? <UserCard /> : <Login />}</div>
+      <div
+        className={clx("window-no-drag flex items-center justify-center", {
+          "pr-[140px]": platform === "windows",
+        })}
+      >
+        {user?.isLogin ? <UserCard /> : <Login />}
+      </div>
     </div>
   );
 };

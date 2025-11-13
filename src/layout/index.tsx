@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Outlet } from "react-router";
 
-import { Card } from "@heroui/react";
 import log from "electron-log/renderer";
 
 import { refreshCookie } from "@/common/utils/cookie";
@@ -36,16 +35,16 @@ const Layout = () => {
       }}
     >
       <div className="flex h-full flex-col">
-        <div className="h-16 w-full flex-none">
-          <Navbar />
-        </div>
-        <div className="flex min-h-0 flex-grow space-x-2 px-2">
+        <div className="flex min-h-0 w-full flex-1">
           <SideNav />
-          <Card radius="md" className="h-full flex-grow">
+          <div className="flex flex-1 flex-col">
+            <div className="h-16 flex-none">
+              <Navbar />
+            </div>
             <Outlet />
-          </Card>
+          </div>
         </div>
-        <div className="h-22 w-full flex-none">
+        <div className="h-[88px] w-full shrink-0">
           <PlayBar />
         </div>
       </div>

@@ -373,6 +373,11 @@ export const usePlayingQueue = create<State & Action>()(
           audio.src = "";
           usePlayerControls.setState({ isPlaying: false, duration: 0, currentTime: 0 });
           set({ list: [], current: null, isPlaying: false, duration: 0, currentTime: 0 });
+          usePlayerControls.setState({
+            isPlaying: false,
+            duration: 0,
+            currentTime: 0,
+          });
         },
         togglePlay: async () => {
           const { isPlaying } = usePlayerControls.getState();
