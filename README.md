@@ -1,6 +1,6 @@
 <h1 align="center">Bilibili音乐播放器</h1>
 <p align="center">
-  <img src="./public/logo.svg" alt="Biu logo" width="120" />
+  <img src="./screenshots/logo.svg" alt="Biu logo" width="120" />
 </p>
 <p align="center">
   基于 Bilibili API 的跨平台桌面音乐播放器 🎧🎶
