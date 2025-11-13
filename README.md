@@ -12,6 +12,17 @@
   <img src="https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript" alt="TypeScript" />
 </p>
 
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./screenshots/home.png" alt="home" width="100%" />
+    </td>
+    <td width="50%" align="center">
+      <img src="./screenshots/main.png" alt="main" width="100%" />
+    </td>
+  </tr>
+</table>
+
 ---
 
 ## ✨ 特色功能
