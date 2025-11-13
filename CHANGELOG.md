@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.4.0](https://github.com/wood3n/biu/compare/v1.3.0...v1.4.0) (2025-11-13)
+
+### 🚀 Enhancements
+
+* change layout style ([20c9927](https://github.com/wood3n/biu/commit/20c99272e027348797b812a5b49d84f9bc1b0773))
+* improve the download feature ([709d137](https://github.com/wood3n/biu/commit/709d1372ba331886b322d9846a00a74fe3b2e646))
+
+### 🩹 Fixes
+
+* download problem ([74eea60](https://github.com/wood3n/biu/commit/74eea60e3aac2359266643648a38c4c7e33cffb7))
+* download problem ([0a8ea9c](https://github.com/wood3n/biu/commit/0a8ea9c83e2596ea6e6553828e88ceae2c18f5ca))
+* page style ([e8dfb6f](https://github.com/wood3n/biu/commit/e8dfb6fd11d2e4da1b29465809e7b70ab7b49ec1))
+* page style and dev reload ([5aa9e28](https://github.com/wood3n/biu/commit/5aa9e280a37dd83ab9f7f8f6c32ffb1b5d742c1c))
+* play component lag issue ([c144a91](https://github.com/wood3n/biu/commit/c144a919e95bb9607f53ddb917650f9c2fb005cf))
+* pnpm lock verion ([e06d5ae](https://github.com/wood3n/biu/commit/e06d5ae12fa8aa6e164d2a54ebcada1b803e0a74))
+* request interceptor ([bde3a82](https://github.com/wood3n/biu/commit/bde3a822b277d39a7cb8366431a3bf088c746e93))
+* search style problem ([3a17ce6](https://github.com/wood3n/biu/commit/3a17ce65c1efad36e1b6be9af856bfa5c9e8e77c))
+* some image url ([2617511](https://github.com/wood3n/biu/commit/2617511184f40272f82c9104ee4059e57853c450))
+* some page style problem ([80c8b32](https://github.com/wood3n/biu/commit/80c8b324e474d16b7208c0081cc847393dbde9a2))
+* ui ([e772dc6](https://github.com/wood3n/biu/commit/e772dc6f38122d53f4ba5953eb3b4d7ddb9eea49))
+* ui style ([c1c7a84](https://github.com/wood3n/biu/commit/c1c7a846fcb9ab42e8bfd1f45bc90e291a280edb))
+* ui style and directory name ([09ecd5e](https://github.com/wood3n/biu/commit/09ecd5e473d4c49ee54a14ab691a8fdb5ef076f5))
+
+### 📖 Documentation
+
+* prettify readme ([04e08d3](https://github.com/wood3n/biu/commit/04e08d36d9763e0dafdf16a07ba343103c9e0e69))
+* prettify readme ([5664267](https://github.com/wood3n/biu/commit/5664267d28adf752fb0abc9d7d9f7036c32d8df8))
+* remove readme useless introduction ([2ccb700](https://github.com/wood3n/biu/commit/2ccb700599711f7060fed21e47ead80c636e7445))
+
 ## [1.3.0](https://github.com/wood3n/biu/compare/v1.2.1...v1.3.0) (2025-11-07)
 
 ### 🚀 Enhancements
