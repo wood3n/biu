@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router";
 
 import { Chip, Input, Listbox, ListboxItem } from "@heroui/react";
 import { RiSearchLine } from "@remixicon/react";
-import { useRequest } from "ahooks";
+import { useRequest, useClickAway } from "ahooks";
 import classNames from "classnames";
 
 import { getSearchSuggestMain } from "@/service/main-suggest";
@@ -18,10 +18,13 @@ const SearchInput: React.FC = () => {
   const { items: searchHistoryItems, add: addSearchHistory, delete: deleteSearchHistory } = useSearchHistory();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const isPointerDownInsideRef = useRef(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
+
+  useClickAway(() => {
+    setOpen(false);
+  }, containerRef);
 
   const { data: suggestionsData } = useRequest(
     async () => {
@@ -43,7 +46,7 @@ const SearchInput: React.FC = () => {
   };
 
   return (
-    <div ref={containerRef} className="window-no-drag relative w-[360px] pr-[100px]">
+    <div ref={containerRef} className="window-no-drag relative w-[280px]">
       <Input
         ref={inputRef}
         value={value}
@@ -55,16 +58,13 @@ const SearchInput: React.FC = () => {
           }
         }}
         onFocus={() => setOpen(true)}
-        onBlur={() => {
-          setOpen(false);
-        }}
         placeholder="搜索"
         endContent={<RiSearchLine size={16} />}
         className="window-no-drag w-full"
       />
       <div
         className={classNames(
-          "bg-content1 rounded-medium absolute top-full left-0 z-[100] mt-1 min-h-[200px] w-full px-1 py-2 shadow",
+          "bg-content1 rounded-medium absolute top-full left-0 z-[100] mt-1 min-h-[200px] w-[360px] px-1 py-2 shadow",
           {
             hidden: !open,
             block: open,
@@ -85,8 +85,8 @@ const SearchInput: React.FC = () => {
           topContent={
             searchHistoryItems.length > 0 && (
               <>
-                <span className="mb-2 text-sm">搜索历史</span>
-                <div className="mb-1 flex gap-2">
+                <span className="mb-1 px-1 text-sm">搜索历史</span>
+                <div className="mb-1 flex flex-wrap gap-2">
                   {searchHistoryItems.map(item => (
                     <Chip
                       key={item.time}

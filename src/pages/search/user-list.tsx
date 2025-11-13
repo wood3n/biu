@@ -16,7 +16,7 @@ export default function SearchUser({ items }: SearchUserProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-3 lg:grid-cols-4">
       {items.map(u => (
         <Card key={u.mid} isHoverable isPressable className="h-full">
           <CardBody className="flex items-center space-y-2">

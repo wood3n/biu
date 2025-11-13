@@ -72,10 +72,10 @@ const Search = () => {
           </div>
         )}
         {!loading && !error && (
-          <div className="flex px-4">
+          <>
             {searchType === SearchType.Video && <VideoList items={(data?.list ?? []) as SearchVideoItem[]} />}
             {searchType === SearchType.User && <UserList items={(data?.list ?? []) as SearchUserItem[]} />}
-          </div>
+          </>
         )}
         {!loading && !error && (
           <div className="my-4 flex justify-center">

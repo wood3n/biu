@@ -20,6 +20,7 @@ export default function SearchVideo({ items }: SearchVideoProps) {
     <GridList
       data={items ?? []}
       itemKey="id"
+      className="px-4"
       renderItem={item => (
         <ImageCard
           showPlayIcon
