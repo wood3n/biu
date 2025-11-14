@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.1](https://github.com/wood3n/biu/compare/v1.4.0...v1.4.1) (2025-11-14)
+
+### 🩹 Fixes
+
+* video card actions ([750ed04](https://github.com/wood3n/biu/commit/750ed04cd7919fbf2bef3331ecc4e58ae64590cd))
+
 ## [1.4.0](https://github.com/wood3n/biu/compare/v1.3.0...v1.4.0) (2025-11-13)
 
 ### 🚀 Enhancements
