@@ -7,7 +7,7 @@ import ScrollContainer from "@/components/scroll-container";
 import Favorites from "./favorites";
 import VideoCollectionInfo from "./video-series";
 
-const Folder: React.FC = () => {
+const Folder = () => {
   const [searchParams] = useSearchParams();
 
   const collectionType = useMemo(

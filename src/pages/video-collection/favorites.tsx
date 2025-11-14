@@ -7,17 +7,18 @@ import { usePagination } from "ahooks";
 import { CollectionType } from "@/common/constants/collection";
 import { formatDuration } from "@/common/utils";
 import GridList from "@/components/grid-list";
-import ImageCard from "@/components/image-card";
+import MVCard from "@/components/mv-card";
 import { getFavResourceList } from "@/service/fav-resource";
 import { usePlayingQueue } from "@/store/playing-queue";
 import { useUser } from "@/store/user";
 
-import ActionDropdown from "./action-dropdown";
 import Info from "./info";
 
+/** 收藏夹详情 */
 const Favorites: React.FC = () => {
   const { id: favFolderId } = useParams();
-  const { user, collectedFolder } = useUser();
+  const { ownFolder, collectedFolder } = useUser();
+  const isOwn = ownFolder?.some(item => item.id === Number(favFolderId));
   const isCollected = collectedFolder?.some(item => item.id === Number(favFolderId));
   const play = usePlayingQueue(s => s.play);
 
@@ -68,17 +69,12 @@ const Favorites: React.FC = () => {
         loading={loading}
         itemKey="id"
         renderItem={item => (
-          <ImageCard
-            showPlayIcon
+          <MVCard
+            bvid={item.bvid}
+            aid={String(item.id)}
             title={item.title}
-            titleExtra={
-              isCollected ? (
-                <div className="ml-2 text-zinc-500">{formatDuration(item.duration as number)}</div>
-              ) : data?.info?.upper?.mid === user?.mid ? (
-                <ActionDropdown mvId={item.id} type={item.type} refreshCollectedFolder={refreshAsync} />
-              ) : null
-            }
             cover={item.cover}
+            collectMenuTitle={isOwn ? "修改收藏夹" : "收藏"}
             footer={
               !isCollected && (
                 <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
@@ -97,6 +93,7 @@ const Favorites: React.FC = () => {
                 coverImageUrl: item.cover,
               })
             }
+            onChangeFavSuccess={refreshAsync}
           />
         )}
       />

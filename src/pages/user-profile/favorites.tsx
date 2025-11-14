@@ -9,6 +9,7 @@ import GridList from "@/components/grid-list";
 import ImageCard from "@/components/image-card";
 import { getFavFolderCreatedList } from "@/service/fav-folder-created-list";
 
+/** 收藏夹 */
 const Favorites = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ const Favorites = () => {
         renderItem={item => (
           <ImageCard
             title={item.title}
-            cover={item.cover}
+            imageUrl={item.cover}
             footer={
               <div className="flex w-full justify-between text-sm text-zinc-500">
                 <span>{formatSecondsToDate(item.ctime)}</span>

@@ -6,7 +6,7 @@ import type { SearchVideoItem } from "@/service/web-interface-search-type";
 
 import { formatUrlProtocal } from "@/common/utils/url";
 import GridList from "@/components/grid-list";
-import ImageCard from "@/components/image-card";
+import MVCard from "@/components/mv-card";
 import { usePlayingQueue } from "@/store/playing-queue";
 
 export type SearchVideoProps = {
@@ -22,8 +22,9 @@ export default function SearchVideo({ items }: SearchVideoProps) {
       itemKey="id"
       className="px-4"
       renderItem={item => (
-        <ImageCard
-          showPlayIcon
+        <MVCard
+          bvid={item.bvid}
+          aid={String(item.aid)}
           title={<p dangerouslySetInnerHTML={{ __html: item.title }} />}
           cover={formatUrlProtocal(item.pic)}
           footer={

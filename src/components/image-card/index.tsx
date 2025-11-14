@@ -1,40 +1,47 @@
 import { Card, CardBody, CardFooter, Image } from "@heroui/react";
-import { RiPlayCircleFill } from "@remixicon/react";
+import { twMerge } from "tailwind-merge";
 
 import FallbackImage from "@/assets/images/fallback.png";
+import { formatUrlProtocal } from "@/common/utils/url";
 
 import Skeleton from "./skeleton";
 
-export type ImageCardProps = {
-  cover: string;
-  coverHeight?: number;
+export interface ImageCardProps {
+  imageUrl: string;
   title: React.ReactNode;
+  imageHeight?: number;
+  imageMask?: React.ReactNode;
+  bodyClassName?: string;
   titleExtra?: React.ReactNode;
-  showPlayIcon?: boolean;
   footer?: React.ReactNode;
   onPress?: () => void;
-};
+}
 
-const ImageCard = ({ cover, coverHeight = 188, title, titleExtra, showPlayIcon, footer, onPress }: ImageCardProps) => {
+const ImageCard = ({
+  imageUrl,
+  imageHeight = 188,
+  bodyClassName,
+  imageMask,
+  title,
+  titleExtra,
+  footer,
+  onPress,
+}: ImageCardProps) => {
   return (
-    <Card as="div" isHoverable radius="md" isPressable onPress={onPress} className="w-full">
-      <CardBody className="group rounded-medium relative flex-grow-0 overflow-hidden bg-none p-0 shadow">
+    <Card as="div" isHoverable radius="md" shadow="none" isPressable onPress={onPress} className="w-full">
+      <CardBody className={twMerge("rounded-medium flex-grow-0 overflow-hidden bg-none p-0", bodyClassName)}>
         <Image
           radius="md"
           removeWrapper
           className="object-cover"
-          height={coverHeight}
-          src={cover}
+          height={imageHeight}
+          src={formatUrlProtocal(imageUrl)}
           fallbackSrc={FallbackImage}
           width="100%"
         />
-        {showPlayIcon && (
-          <div className="absolute right-0 bottom-0 z-30 p-4 opacity-0 transition-opacity group-hover:opacity-100">
-            <RiPlayCircleFill className="text-primary" size={48} />
-          </div>
-        )}
+        {imageMask}
       </CardBody>
-      <CardFooter className="relative flex flex-grow-1 flex-col items-start justify-between space-y-1">
+      <CardFooter className="flex flex-grow-1 flex-col items-start justify-between space-y-1">
         <div className="flex w-full items-stretch justify-between">
           <div className="line-clamp-2 min-w-0 flex-grow text-start text-base wrap-anywhere break-all">{title}</div>
           {titleExtra}

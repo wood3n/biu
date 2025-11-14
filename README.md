@@ -1,4 +1,4 @@
-<h1 align="center">Bilibili音乐播放器</h1>
+<h1 align="center">【WIP】Bilibili音乐播放器</h1>
 <p align="center">
   <img src="./screenshots/logo.svg" alt="Biu logo" width="120" />
 </p>

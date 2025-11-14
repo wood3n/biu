@@ -125,6 +125,7 @@ const Info = ({ type, loading, attr, cover, title, desc, upMid, upName, media_co
     <div className="mb-6 flex space-x-4">
       <Image
         isBlurred
+        radius="md"
         src={cover || FallbackImage}
         fallbackSrc={FallbackImage}
         alt={title}
@@ -161,21 +162,21 @@ const Info = ({ type, loading, attr, cover, title, desc, upMid, upName, media_co
         <div className="flex items-center space-x-2">
           {isOwn && attr !== 0 && (
             <>
-              <Button startContent={<RiPencilLine size={18} />} onPress={onEditOpen}>
+              <Button size="sm" startContent={<RiPencilLine size={18} />} onPress={onEditOpen}>
                 修改信息
               </Button>
-              <Button isIconOnly onPress={onDeleteConfirmOpen}>
+              <Button isIconOnly size="sm" onPress={onDeleteConfirmOpen}>
                 <RiDeleteBinLine size={18} />
               </Button>
             </>
           )}
           {!isOwn && (
             <AsyncButton
-              color="primary"
+              color={isCollected ? "default" : "primary"}
               startContent={isCollected ? <RiStarFill size={18} /> : <RiStarLine size={18} />}
               onPress={toggleCollect}
             >
-              {isCollected ? "已收藏" : "取消收藏"}
+              {isCollected ? "取消收藏" : "收藏"}
             </AsyncButton>
           )}
         </div>

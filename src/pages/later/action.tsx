@@ -3,7 +3,7 @@ import { RiDeleteBinLine } from "@remixicon/react";
 
 import ConfirmModal from "@/components/confirm-modal";
 import { postHistoryToViewDel } from "@/service/history-toview-del";
-import { ToViewVideoItem } from "@/service/history-toview-list";
+import { type ToViewVideoItem } from "@/service/history-toview-list";
 
 interface Props {
   data?: ToViewVideoItem;

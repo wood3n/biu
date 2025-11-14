@@ -4,6 +4,7 @@ import { Alert, Button, Spinner, addToast } from "@heroui/react";
 import { twMerge } from "tailwind-merge";
 
 import ImageCard from "@/components/image-card";
+import MVCard from "@/components/mv-card";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import { getMusicComprehensiveWebRank, type Data as MusicItem } from "@/service/music-comprehensive-web-rank";
 import { usePlayingQueue } from "@/store/playing-queue";
@@ -143,8 +144,9 @@ const MusicRecommend = () => {
         {!initialLoading && list.length > 0 && (
           <div className={gridClass}>
             {list.map(item => (
-              <ImageCard
-                showPlayIcon
+              <MVCard
+                bvid={item.bvid}
+                aid={String(item.id)}
                 key={item.id}
                 cover={item.cover}
                 title={item.music_title}

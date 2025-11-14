@@ -6,7 +6,7 @@ import { useRequest } from "ahooks";
 import { CollectionType } from "@/common/constants/collection";
 import { formatDuration } from "@/common/utils";
 import GridList from "@/components/grid-list";
-import ImageCard from "@/components/image-card";
+import MVCard from "@/components/mv-card";
 import { getUserVideoArchivesList } from "@/service/user-video-archives-list";
 import { usePlayingQueue } from "@/store/playing-queue";
 import { useUser } from "@/store/user";
@@ -51,12 +51,10 @@ const VideoSeries = () => {
         loading={loading}
         itemKey="bvid"
         renderItem={item => (
-          <ImageCard
-            showPlayIcon
+          <MVCard
+            bvid={item.bvid}
+            aid={String(item.id)}
             title={item.title}
-            titleExtra={
-              isCollected ? <div className="ml-2 text-zinc-500">{formatDuration(item.duration as number)}</div> : null
-            }
             cover={item.cover}
             footer={
               !isCollected && (

@@ -15,7 +15,7 @@ const ScrollContainer = ({
   return (
     <OverlayScrollbarsComponent
       ref={ref}
-      options={{ scrollbars: { autoHide: "leave", theme: "os-theme-light" }, ...options }}
+      options={{ scrollbars: { autoHide: "leave", autoHideDelay: 2000, theme: "os-theme-light" }, ...options }}
       {...props}
     >
       {children}

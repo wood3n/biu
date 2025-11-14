@@ -1,7 +1,7 @@
 import { useRequest } from "ahooks";
 
 import GridList from "@/components/grid-list";
-import ImageCard from "@/components/image-card";
+import MVCard from "@/components/mv-card";
 import ScrollContainer from "@/components/scroll-container";
 import { getMusicHotRank } from "@/service/music-hot-rank";
 import { usePlayingQueue } from "@/store/playing-queue";
@@ -28,8 +28,9 @@ const MusicRank = () => {
         enablePagination
         itemKey="bvid"
         renderItem={item => (
-          <ImageCard
-            showPlayIcon
+          <MVCard
+            bvid={item.bvid}
+            aid={item.aid}
             title={item.music_title}
             cover={item.cover}
             coverHeight={240}

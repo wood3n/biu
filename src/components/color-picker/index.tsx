@@ -29,7 +29,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ presets, value, onChange, cla
               type="button"
               key={preset}
               style={{ backgroundColor: preset }}
-              className="h-6 w-6 cursor-pointer rounded"
+              className="rounded-medium h-6 w-6 cursor-pointer"
               onClick={() => {
                 onChange?.(preset);
               }}

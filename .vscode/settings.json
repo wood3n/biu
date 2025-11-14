@@ -15,5 +15,20 @@
   "stylelint.validate": ["css", "less", "postcss", "scss"],
   "files.associations": {
     "*.css": "tailwindcss"
-  }
+  },
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript",
+  },
+  "tailwindCSS.classAttributes": [
+    "class",
+    "className",
+    "ngClass",
+    "classNames",
+    ".*ClassName",
+    ".*Classes"
+  ]
 }

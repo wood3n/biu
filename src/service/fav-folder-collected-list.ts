@@ -43,7 +43,7 @@ export interface FavFolderCollectedListData {
  * 收藏夹条目
  */
 export interface FavFolderCollectedItem {
-  /** 收藏夹 ml */
+  /** 收藏夹 */
   id: number;
   /** 类型 11：视频收藏夹 21：视频合集 */
   type: number;

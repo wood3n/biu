@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router";
 
 import { Avatar, Card, CardBody, addToast } from "@heroui/react";
+import { RiDislikeLine } from "@remixicon/react";
 
 import type { RelationListItem } from "@/service/relation-followings";
 
@@ -48,19 +49,16 @@ const UserCard = ({ u, refresh }: Props) => {
       </CardBody>
       <AsyncButton
         size="sm"
-        color="danger"
+        color="default"
         radius="md"
-        variant="solid"
+        variant="light"
+        isIconOnly
         onPress={handleUnfollow}
         aria-label="取消关注"
         title="取消关注"
-        className="absolute right-[10px] bottom-[10px] opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100"
-        style={{
-          willChange: "opacity, box-shadow",
-          boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.28), 0 0 8px rgba(255, 255, 255, 0.18)",
-        }}
+        className="absolute top-2 right-2 opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100"
       >
-        取消关注
+        <RiDislikeLine />
       </AsyncButton>
     </Card>
   );

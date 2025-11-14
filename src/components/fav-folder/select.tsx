@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import {
   addToast,
@@ -12,6 +12,7 @@ import {
   Spinner,
 } from "@heroui/react";
 import { useRequest } from "ahooks";
+import { isEqual } from "es-toolkit/predicate";
 
 import { getFavFolderCreatedListAll } from "@/service/fav-folder-created-list-all";
 import { postFavFolderDeal } from "@/service/fav-folder-deal";
@@ -34,6 +35,8 @@ const FavFolderSelect = ({ rid, isOpen, onOpenChange, title, afterSubmit }: FavF
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
+  const prevSelectedRef = useRef<number[]>([]);
+
   const { data, loading } = useRequest(
     async () => {
       const res = await getFavFolderCreatedListAll({
@@ -44,7 +47,8 @@ const FavFolderSelect = ({ rid, isOpen, onOpenChange, title, afterSubmit }: FavF
 
       const collectedFolders = res?.data?.list?.filter(item => item.fav_state === 1) || [];
       if (collectedFolders?.length) {
-        setSelectedIds(collectedFolders.map(item => item.id));
+        prevSelectedRef.current = collectedFolders.map(item => item.id);
+        setSelectedIds(prevSelectedRef.current);
       } else {
         setSelectedIds([]);
       }
@@ -157,7 +161,7 @@ const FavFolderSelect = ({ rid, isOpen, onOpenChange, title, afterSubmit }: FavF
           <AsyncButton
             color="primary"
             onPress={handleConfirm}
-            isDisabled={data?.length === 0 || selectedIds.length === 0}
+            isDisabled={isEqual(selectedIds, prevSelectedRef.current)}
           >
             确认
           </AsyncButton>

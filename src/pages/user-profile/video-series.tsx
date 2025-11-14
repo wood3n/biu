@@ -9,6 +9,7 @@ import GridList from "@/components/grid-list";
 import ImageCard from "@/components/image-card";
 import { getSpaceSeasonsSeriesList } from "@/service/space-seasons-series-list";
 
+/** 个人空间视频合集 */
 const VideoSeries = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -65,7 +66,7 @@ const VideoSeries = () => {
         renderItem={item => (
           <ImageCard
             title={item?.title}
-            cover={item?.cover}
+            imageUrl={item?.cover}
             onPress={() => navigate(`/collection/${item.id}?type=${CollectionType.VideoSeries}`)}
             footer={
               <div className="flex w-full justify-between text-sm text-zinc-500">

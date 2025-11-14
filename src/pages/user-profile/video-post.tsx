@@ -5,10 +5,11 @@ import { usePagination } from "ahooks";
 
 import { formatSecondsToDate } from "@/common/utils";
 import GridList from "@/components/grid-list";
-import ImageCard from "@/components/image-card";
+import MVCard from "@/components/mv-card";
 import { getSpaceWbiArcSearch } from "@/service/space-wbi-arc-search";
 import { usePlayingQueue } from "@/store/playing-queue";
 
+/** 个人投稿视频 */
 const VideoPost = () => {
   const { id } = useParams();
   const play = usePlayingQueue(s => s.play);
@@ -45,8 +46,9 @@ const VideoPost = () => {
         loading={loading}
         itemKey="id"
         renderItem={item => (
-          <ImageCard
-            showPlayIcon
+          <MVCard
+            bvid={item.bvid}
+            aid={String(item.aid)}
             title={item.title}
             cover={item.pic}
             footer={

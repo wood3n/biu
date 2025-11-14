@@ -44,7 +44,6 @@ const DownloadList = () => {
   return (
     <div className="w-full p-4">
       <h1 className="mb-4">下载记录</h1>
-      {/* 顶部下载目录管理 */}
       <Card radius="md" className="mb-4">
         <CardBody>
           <div className="flex flex-col gap-2 md:flex-row md:items-center">
@@ -62,8 +61,6 @@ const DownloadList = () => {
           </div>
         </CardBody>
       </Card>
-
-      {/* 下载文件列表 */}
       <Card radius="md">
         <CardBody>
           <div className="w-full overflow-x-auto">
@@ -89,8 +86,11 @@ const DownloadList = () => {
                   <Button onPress={clearDownloadList}>清空记录</Button>
                 </div>
               }
+              classNames={{
+                th: "first:rounded-s-medium last:rounded-e-medium",
+              }}
             >
-              <TableHeader>
+              <TableHeader className="rounded-medium">
                 <TableColumn>文件</TableColumn>
                 <TableColumn width={180}>状态</TableColumn>
                 <TableColumn width={120}>大小</TableColumn>
