@@ -17,7 +17,7 @@ const VideoSeries = () => {
   const { id } = useParams();
   const { collectedFolder } = useUser();
   const isCollected = collectedFolder?.some(item => item.id === Number(id));
-  const play = usePlayingQueue(s => s.play);
+  const { play, playList } = usePlayingQueue();
 
   const { data, loading, refreshAsync } = useRequest(
     async () => {
@@ -32,6 +32,19 @@ const VideoSeries = () => {
     },
   );
 
+  const onPlayAll = () => {
+    const mvs = data?.medias?.map(item => ({
+      bvid: item.bvid,
+      title: item.title,
+      singer: item.upper?.name,
+      coverImageUrl: item.cover,
+    }));
+
+    if (mvs?.length) {
+      playList(mvs);
+    }
+  };
+
   return (
     <>
       <Info
@@ -42,8 +55,9 @@ const VideoSeries = () => {
         cover={data?.info?.cover}
         upMid={data?.info?.upper?.mid}
         upName={data?.info?.upper?.name}
-        media_count={data?.info?.media_count}
+        mediaCount={data?.info?.media_count}
         afterChangeInfo={refreshAsync}
+        onPlayAll={onPlayAll}
       />
       <GridList
         enablePagination

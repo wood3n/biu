@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams } from "react-router";
 
-import { Link, Pagination } from "@heroui/react";
+import { addToast, Link, Pagination } from "@heroui/react";
 import { usePagination } from "ahooks";
 
 import { CollectionType } from "@/common/constants/collection";
@@ -20,7 +20,7 @@ const Favorites: React.FC = () => {
   const { ownFolder, collectedFolder } = useUser();
   const isOwn = ownFolder?.some(item => item.id === Number(favFolderId));
   const isCollected = collectedFolder?.some(item => item.id === Number(favFolderId));
-  const play = usePlayingQueue(s => s.play);
+  const { play, playList } = usePlayingQueue();
 
   const {
     data,
@@ -50,6 +50,33 @@ const Favorites: React.FC = () => {
     },
   );
 
+  const onPlayAll = async () => {
+    const ps = (data?.info?.media_count ?? 0) > 999 ? 999 : (data?.info?.media_count ?? 0);
+
+    const getAllMVRes = await getFavResourceList({
+      media_id: String(favFolderId ?? ""),
+      ps,
+      pn: 1,
+      platform: "web",
+    });
+
+    if (getAllMVRes.code === 0 && getAllMVRes?.data?.medias?.length) {
+      const mvs = getAllMVRes?.data?.medias?.map(item => ({
+        bvid: item.bvid,
+        title: item.title,
+        singer: item.upper?.name,
+        coverImageUrl: item.cover,
+      }));
+
+      playList(mvs);
+    } else {
+      addToast({
+        title: "无法获取收藏夹全部歌曲",
+        color: "danger",
+      });
+    }
+  };
+
   return (
     <>
       <Info
@@ -61,8 +88,9 @@ const Favorites: React.FC = () => {
         desc={data?.info?.intro}
         upMid={data?.info?.upper?.mid}
         upName={data?.info?.upper?.name}
-        media_count={data?.info?.media_count}
+        mediaCount={data?.info?.media_count}
         afterChangeInfo={refreshAsync}
+        onPlayAll={onPlayAll}
       />
       <GridList
         data={data?.list ?? []}

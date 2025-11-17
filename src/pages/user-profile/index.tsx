@@ -3,7 +3,6 @@ import { useParams } from "react-router";
 
 import { addToast, Spinner, Tab, Tabs } from "@heroui/react";
 import { useRequest } from "ahooks";
-import { isNil } from "es-toolkit/predicate";
 
 import { UserRelation } from "@/common/constants/relation";
 import ScrollContainer from "@/components/scroll-container";
@@ -24,6 +23,7 @@ import VideoSeries from "./video-series";
 const UserProfile = () => {
   const { id } = useParams();
   const user = useUser(s => s.user);
+  const isSelf = String(user?.mid) === id;
 
   const { data: userInfo, loading } = useRequest(
     async () => {
@@ -70,7 +70,7 @@ const UserProfile = () => {
       return res.data;
     },
     {
-      ready: Boolean(user?.isLogin) && Boolean(id) && relationWithMe !== UserRelation.Blocked,
+      ready: !isSelf && Boolean(id) && relationWithMe !== UserRelation.Blocked,
       refreshDeps: [id],
     },
   );
@@ -125,7 +125,7 @@ const UserProfile = () => {
         relationWithMe={relationWithMe}
         refreshRelation={refreshRelation}
       />
-      {!isNil(relationWithMe) && relationWithMe !== UserRelation.Blocked && (
+      {(isSelf || relationWithMe !== UserRelation.Blocked) && (
         <div className="p-4">
           <Tabs radius="md" classNames={{ cursor: "rounded-medium" }} aria-label="个人资料栏目" variant="solid">
             {tabs.map(item => (

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-import { addToast, Link, Pagination, useDisclosure } from "@heroui/react";
-import { RiDeleteBinLine } from "@remixicon/react";
+import { addToast, Button, Link, Pagination, useDisclosure } from "@heroui/react";
+import { RiDeleteBinLine, RiRefreshLine } from "@remixicon/react";
 import { usePagination } from "ahooks";
 
 import { formatDuration } from "@/common/utils";
@@ -59,7 +59,12 @@ const Later = () => {
   return (
     <>
       <ScrollContainer className="w-full p-4">
-        <h1 className="mb-4">稍后再看</h1>
+        <div className="mb-4 flex items-center space-x-1">
+          <h1>稍后再看</h1>
+          <Button isIconOnly variant="light" size="sm" onPress={refreshAsync}>
+            <RiRefreshLine size={18} />
+          </Button>
+        </div>
         <GridList
           loading={initialLoading}
           data={data?.list}

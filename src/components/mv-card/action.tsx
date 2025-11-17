@@ -6,11 +6,14 @@ import {
   DropdownItem,
   type MenuItemProps,
   useDisclosure,
+  addToast,
 } from "@heroui/react";
-import { RiDownloadLine, RiMore2Line, RiStarLine } from "@remixicon/react";
+import { RiDownloadLine, RiHistoryLine, RiMore2Line, RiPlayListAddLine, RiStarLine } from "@remixicon/react";
 
 import FavFolderSelect from "@/components/fav-folder/select";
 import MVDownloadModal from "@/components/mv-download-modal";
+import { postHistoryToViewAdd } from "@/service/history-toview-add";
+import { usePlayingQueue } from "@/store/playing-queue";
 import { useUser } from "@/store/user";
 
 export interface ImageCardMenu {
@@ -23,15 +26,19 @@ export interface ImageCardMenu {
 }
 
 export interface ActionProps {
+  title: string;
+  cover: string;
   bvid: string;
   aid: string;
+  cid?: string;
   menus?: ImageCardMenu[];
   collectMenuTitle?: string;
   onChangeFavSuccess?: () => void;
 }
 
-const Action = ({ bvid, aid, menus, collectMenuTitle, onChangeFavSuccess }: ActionProps) => {
+const Action = ({ title, cover, bvid, aid, cid, menus, collectMenuTitle, onChangeFavSuccess }: ActionProps) => {
   const user = useUser(s => s.user);
+  const { current: currentPlayMV, addToNext } = usePlayingQueue();
 
   const {
     isOpen: isOpenDownloadModal,
@@ -44,13 +51,46 @@ const Action = ({ bvid, aid, menus, collectMenuTitle, onChangeFavSuccess }: Acti
     onOpenChange: onOpenChangeFavSelectModal,
   } = useDisclosure();
 
+  const addToLater = async () => {
+    await postHistoryToViewAdd({
+      bvid,
+    });
+
+    addToast({
+      title: "已添加到稍后再看",
+      color: "success",
+    });
+  };
+
   const menuItems: ImageCardMenu[] = [
+    {
+      key: "nextPlay",
+      icon: <RiPlayListAddLine size={16} />,
+      title: "下一首播放",
+      hidden: currentPlayMV?.bvid === bvid,
+      onPress: () => {
+        addToNext({
+          title,
+          bvid,
+          cid,
+          coverImageUrl: cover,
+          singer: "",
+        });
+      },
+    },
     {
       key: "collect",
       icon: <RiStarLine size={16} />,
       title: collectMenuTitle || "收藏",
       hidden: !user?.isLogin,
       onPress: onOpenFavSelectModal,
+    },
+    {
+      key: "addToLater",
+      icon: <RiHistoryLine size={16} />,
+      title: "添加到稍后再看",
+      hidden: !user?.isLogin,
+      onPress: addToLater,
     },
     {
       key: "download",

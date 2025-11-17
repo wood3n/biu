@@ -1,22 +1,21 @@
-import { useNavigate, useParams } from "react-router";
+import { useParams } from "react-router";
 
-import { Button, Image, Link, Skeleton, useDisclosure, User } from "@heroui/react";
-import { RiDeleteBinLine, RiPencilLine, RiStarFill, RiStarLine } from "@remixicon/react";
+import { Image, Link, Skeleton, User } from "@heroui/react";
+import { RiPlayFill, RiStarFill, RiStarLine } from "@remixicon/react";
 import { useRequest } from "ahooks";
 
 import FallbackImage from "@/assets/images/fallback.png";
 import { CollectionType } from "@/common/constants/collection";
 import AsyncButton from "@/components/async-button";
-import ConfirmModal from "@/components/confirm-modal";
 import Ellipsis from "@/components/ellipsis";
-import EditFavoriteForm from "@/components/fav-folder/form";
-import { postFavFolderDel } from "@/service/fav-folder-del";
 import { postFavFolderFav } from "@/service/fav-folder-fav";
 import { postFavFolderUnfav } from "@/service/fav-folder-unfav";
 import { postFavSeasonFav } from "@/service/fav-season-fav";
 import { postFavSeasonUnfav } from "@/service/fav-season-unfav";
 import { getWebInterfaceCard } from "@/service/user-account";
 import { useUser } from "@/store/user";
+
+import Menu from "./menu";
 
 interface Props {
   type: CollectionType;
@@ -27,25 +26,28 @@ interface Props {
   desc?: string;
   upMid?: number;
   upName?: string;
-  media_count?: number;
+  mediaCount?: number;
   afterChangeInfo: VoidFunction;
+  onPlayAll: VoidFunction;
 }
 
-const Info = ({ type, loading, attr, cover, title, desc, upMid, upName, media_count, afterChangeInfo }: Props) => {
+const Info = ({
+  type,
+  loading,
+  attr,
+  cover,
+  title,
+  desc,
+  upMid,
+  upName,
+  mediaCount,
+  afterChangeInfo,
+  onPlayAll,
+}: Props) => {
   const { user, collectedFolder, updateCollectedFolder } = useUser();
   const isOwn = upMid === user?.mid;
   const { id } = useParams();
-  const navigate = useNavigate();
-
   const isCollected = collectedFolder?.some(folder => folder.id === Number(id));
-
-  const {
-    isOpen: isDeleteConfirmOpen,
-    onOpen: onDeleteConfirmOpen,
-    onOpenChange: onDeleteConfirmChange,
-  } = useDisclosure();
-
-  const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditChange } = useDisclosure();
 
   const { data: upInfo } = useRequest(
     async () => {
@@ -156,20 +158,16 @@ const Info = ({ type, loading, attr, cover, title, desc, upMid, upName, media_co
           <div className="flex items-center space-x-2 text-sm text-zinc-400">
             <span>{type === CollectionType.Favorite ? "收藏夹" : "视频合集"}</span>
             <span>•</span>
-            <span>{media_count} 条视频</span>
+            <span>{mediaCount} 条视频</span>
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          {isOwn && attr !== 0 && (
-            <>
-              <Button size="sm" startContent={<RiPencilLine size={18} />} onPress={onEditOpen}>
-                修改信息
-              </Button>
-              <Button isIconOnly size="sm" onPress={onDeleteConfirmOpen}>
-                <RiDeleteBinLine size={18} />
-              </Button>
-            </>
+          {(mediaCount ?? 0) > 0 && (
+            <AsyncButton color="primary" startContent={<RiPlayFill className="text-inherit" />} onPress={onPlayAll}>
+              播放全部
+            </AsyncButton>
           )}
+          {isOwn && attr !== 0 && <Menu afterChangeInfo={afterChangeInfo} />}
           {!isOwn && (
             <AsyncButton
               color={isCollected ? "default" : "primary"}
@@ -181,30 +179,6 @@ const Info = ({ type, loading, attr, cover, title, desc, upMid, upName, media_co
           )}
         </div>
       </div>
-      <ConfirmModal
-        type="danger"
-        isOpen={isDeleteConfirmOpen}
-        onOpenChange={onDeleteConfirmChange}
-        title="确认删除收藏夹吗？"
-        onConfirm={async () => {
-          const res = await postFavFolderDel({
-            media_ids: id as string,
-          });
-
-          if (res.code === 0) {
-            await updateCollectedFolder();
-            navigate("/");
-          }
-
-          return res.code === 0;
-        }}
-      />
-      <EditFavoriteForm
-        mid={Number(id)}
-        isOpen={isEditOpen}
-        onOpenChange={onEditChange}
-        afterSubmit={afterChangeInfo}
-      />
     </div>
   );
 };

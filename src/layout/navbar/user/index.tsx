@@ -55,7 +55,7 @@ const UserCard = () => {
 
   return (
     <>
-      <Dropdown placement="bottom">
+      <Dropdown disableAnimation shouldBlockScroll={false} placement="bottom">
         <DropdownTrigger>
           <div className="mr-4 flex cursor-pointer items-center space-x-2">
             <Avatar

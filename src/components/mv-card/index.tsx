@@ -4,8 +4,6 @@ import ImageCard from "../image-card";
 import Action, { type ActionProps } from "./action";
 
 interface Props extends ActionProps {
-  title: React.ReactNode;
-  cover: string;
   coverHeight?: number;
   footer?: React.ReactNode;
   onPress?: () => void;
@@ -14,6 +12,7 @@ interface Props extends ActionProps {
 const MVCard = ({
   bvid,
   aid,
+  cid,
   title,
   cover,
   coverHeight = 188,
@@ -36,8 +35,11 @@ const MVCard = ({
       title={title}
       titleExtra={
         <Action
+          title={title as string}
+          cover={cover}
           bvid={bvid}
           aid={String(aid)}
+          cid={cid}
           menus={menus}
           collectMenuTitle={collectMenuTitle}
           onChangeFavSuccess={onChangeFavSuccess}

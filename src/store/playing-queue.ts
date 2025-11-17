@@ -31,7 +31,6 @@ interface Action {
   play: (mv: PlayingMV) => Promise<void>;
   playPage: (pageCid: number) => Promise<void>;
   playList: (mvs: PlayingMV[]) => void;
-  replacePlayList: (mvs: PlayingMV[]) => Promise<void>;
   deleteMV: (bvids: string[]) => void;
   deletePage: (pageCids: number[]) => void;
   clear: () => void;
@@ -231,25 +230,6 @@ export const usePlayingQueue = create<State & Action>()(
         },
         playList: async mvs => {
           const [first, ...rest] = mvs;
-          const { current, list } = get();
-          const currentListBvids = list.map(item => item.bvid);
-          const newList = rest.filter(item => !currentListBvids.includes(item.bvid));
-
-          if (first.bvid === current?.bvid) {
-            const currentIndex = list.findIndex(item => item.bvid === current.bvid);
-
-            if (newList.length) {
-              set({ list: list.toSpliced(currentIndex, 0, ...newList) });
-            }
-            return;
-          }
-
-          const newPlayData = await getMVPlayData(first);
-          setCurrentAndLoad(newPlayData);
-          set({ list: [newPlayData, ...newList, ...list] });
-        },
-        replacePlayList: async mvs => {
-          const [first, ...rest] = mvs;
           const { current } = get();
 
           if (first.bvid === current?.bvid) {
@@ -257,7 +237,7 @@ export const usePlayingQueue = create<State & Action>()(
           } else {
             const newPlayData = await getMVPlayData(first);
             setCurrentAndLoad(newPlayData);
-            set({ list: [newPlayData, ...rest] });
+            set({ current: newPlayData, list: [newPlayData, ...rest] });
           }
         },
         playPage: async (pageCid: number) => {
