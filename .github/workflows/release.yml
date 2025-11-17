@@ -1,4 +1,4 @@
-name: Build and Release on Electron package change
+name: Release
 
 on:
   workflow_dispatch:

@@ -70,7 +70,7 @@ const UserProfile = () => {
       return res.data;
     },
     {
-      ready: !isSelf && Boolean(id) && relationWithMe !== UserRelation.Blocked,
+      ready: Boolean(id) && relationWithMe !== UserRelation.Blocked,
       refreshDeps: [id],
     },
   );

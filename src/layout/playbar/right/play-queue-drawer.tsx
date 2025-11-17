@@ -63,7 +63,7 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
                       }}
                       className="group flex h-auto min-h-auto w-full min-w-auto items-center justify-between space-y-2 p-2"
                     >
-                      <div className="m-0 flex flex-1 items-center">
+                      <div className="m-0 flex min-w-0 flex-1 items-center">
                         <div className="relative h-12 w-12 flex-none">
                           <Image
                             removeWrapper
@@ -80,7 +80,7 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
                             </div>
                           )}
                         </div>
-                        <div className="ml-2 flex min-w-0 flex-grow flex-col space-y-1">
+                        <div className="ml-2 flex min-w-0 flex-1 flex-grow flex-col space-y-1">
                           <span className="truncate text-base">{mv.title}</span>
                           <span className="text-sm text-zinc-400">{mv.singer}</span>
                         </div>

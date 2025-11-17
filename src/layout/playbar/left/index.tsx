@@ -26,6 +26,7 @@ const LeftControl = () => {
   return (
     <div className="flex h-full w-full items-center justify-start space-x-4">
       <Image
+        radius="md"
         src={formatUrlProtocal(current.coverImageUrl)}
         width={56}
         height={56}

@@ -4,6 +4,7 @@ import { RiPlayListLine } from "@remixicon/react";
 import { usePlayingQueue } from "@/store/playing-queue";
 import { useUser } from "@/store/user";
 
+import { PlayBarIconSize } from "../constants";
 import Download from "./download";
 import MvFavFolderSelect from "./mv-fav-folder-select";
 import PlayQueueDrawer from "./play-queue-drawer";
@@ -21,7 +22,7 @@ const RightControl = () => {
         {Boolean(user?.isLogin) && Boolean(current) && <MvFavFolderSelect />}
         {Boolean(current) && <Download />}
         <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={onOpen}>
-          <RiPlayListLine size={18} />
+          <RiPlayListLine size={PlayBarIconSize.SideIconSize} />
         </Button>
         <Volume value={volume} onChange={setVolume} isMuted={isMuted} onChangeMute={toggleMute} />
         <Rate value={rate} onChange={setRate} />

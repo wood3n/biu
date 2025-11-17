@@ -6,6 +6,8 @@ import { getPlayerPagelist } from "@/service/player-pagelist";
 import { useDownloadQueue } from "@/store/download-queue";
 import { usePlayingQueue } from "@/store/playing-queue";
 
+import { PlayBarIconSize } from "../constants";
+
 const Download = () => {
   const { current } = usePlayingQueue();
   const { add: addToDownloadQueue } = useDownloadQueue();
@@ -42,7 +44,7 @@ const Download = () => {
 
   return (
     <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={download}>
-      <RiDownload2Fill size={18} />
+      <RiDownload2Fill size={PlayBarIconSize.SideIconSize} />
     </Button>
   );
 };
