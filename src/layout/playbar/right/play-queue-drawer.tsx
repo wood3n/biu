@@ -1,6 +1,7 @@
 import { Button, Drawer, DrawerBody, DrawerContent, DrawerHeader, Image } from "@heroui/react";
 import { RiDeleteBinLine } from "@remixicon/react";
 
+import { ReactComponent as AudioAnimation } from "@/assets/icons/audio-animation.svg";
 import { formatUrlProtocal } from "@/common/utils/url";
 import Empty from "@/components/empty";
 import If from "@/components/if";
@@ -26,7 +27,7 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       classNames={{
-        base: "data-[placement=right]:mb-[90px] data-[placement=right]:mt-[65px] data-[placement=right]:mx-2 rounded-medium",
+        base: "data-[placement=right]:mb-[90px] data-[placement=right]:mt-[65px] rounded-medium",
       }}
     >
       <DrawerContent className="bg-content2">
@@ -63,13 +64,22 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
                       className="group flex h-auto min-h-auto w-full min-w-auto items-center justify-between space-y-2 p-2"
                     >
                       <div className="m-0 flex flex-1 items-center">
-                        <Image
-                          radius="sm"
-                          removeWrapper
-                          src={formatUrlProtocal(mv.coverImageUrl)}
-                          alt={mv.title}
-                          className="m-0 h-12 w-12 flex-none object-cover"
-                        />
+                        <div className="relative h-12 w-12 flex-none">
+                          <Image
+                            removeWrapper
+                            radius="md"
+                            src={formatUrlProtocal(mv.coverImageUrl)}
+                            alt={mv.title}
+                            width="100%"
+                            height="100%"
+                            className="m-0 object-cover"
+                          />
+                          {isSelected && (
+                            <div className="text-primary rounded-medium absolute top-0 left-0 z-10 flex h-full w-full items-center justify-center bg-[rgba(0,0,0,0.2)]">
+                              <AudioAnimation style={{ width: 20, height: 20 }} />
+                            </div>
+                          )}
+                        </div>
                         <div className="ml-2 flex min-w-0 flex-grow flex-col space-y-1">
                           <span className="truncate text-base">{mv.title}</span>
                           <span className="text-sm text-zinc-400">{mv.singer}</span>
