@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.1](https://github.com/wood3n/biu/compare/v1.5.0...v1.5.1) (2025-11-17)
+
+### 🩹 Fixes
+
+* 修复部分样式问题 ([3263f81](https://github.com/wood3n/biu/commit/3263f811e9451d1ee9ca95c9cc16de122f56ed66))
+
 ## [1.5.0](https://github.com/wood3n/biu/compare/v1.4.1...v1.5.0) (2025-11-17)
 
 ### 🚀 Enhancements
