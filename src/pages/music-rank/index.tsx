@@ -31,6 +31,7 @@ const MusicRank = () => {
           <MVCard
             bvid={item.bvid}
             aid={item.aid}
+            cid={item.cid}
             title={item.music_title}
             cover={item.cover}
             coverHeight={240}

@@ -5,6 +5,7 @@ import { Link } from "@heroui/react";
 import type { SearchVideoItem } from "@/service/web-interface-search-type";
 
 import { formatUrlProtocal } from "@/common/utils/url";
+import Empty from "@/components/empty";
 import GridList from "@/components/grid-list";
 import MVCard from "@/components/mv-card";
 import { usePlayingQueue } from "@/store/playing-queue";
@@ -15,6 +16,8 @@ export type SearchVideoProps = {
 
 export default function SearchVideo({ items }: SearchVideoProps) {
   const play = usePlayingQueue(s => s.play);
+
+  if (!items?.length) return <Empty className="min-h-[280px]" />;
 
   return (
     <GridList

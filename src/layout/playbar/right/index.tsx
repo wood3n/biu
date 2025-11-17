@@ -4,9 +4,9 @@ import { RiPlayListLine } from "@remixicon/react";
 import { usePlayingQueue } from "@/store/playing-queue";
 import { useUser } from "@/store/user";
 
-import PlayQueueDrawer from "../play-queue";
 import Download from "./download";
 import MvFavFolderSelect from "./mv-fav-folder-select";
+import PlayQueueDrawer from "./play-queue-drawer";
 import Rate from "./rate";
 import Volume from "./volume";
 

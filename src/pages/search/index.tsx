@@ -67,7 +67,7 @@ const Search = () => {
       </div>
       <ScrollContainer style={{ flexGrow: 1, minHeight: 0 }}>
         {loading && (
-          <div className="flex h-full items-center justify-center">
+          <div className="flex min-h-[280px] items-center justify-center">
             <Spinner label="加载中" />
           </div>
         )}

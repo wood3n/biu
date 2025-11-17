@@ -3,8 +3,7 @@ import React, { useMemo, useState } from "react";
 import { Pagination } from "@heroui/react";
 import { twMerge } from "tailwind-merge";
 
-import { ReactComponent as Empty } from "@/assets/icons/empty.svg";
-
+import Empty from "../empty";
 import ImageCard from "../image-card";
 
 export interface GridPageListProps<T> {
@@ -53,12 +52,7 @@ const GridList = <T,>({
   }
 
   if (data?.length === 0) {
-    return (
-      <div className="flex min-h-20 w-full flex-col items-center justify-center text-zinc-600">
-        <Empty />
-        <span>暂无数据</span>
-      </div>
-    );
+    return <Empty className="min-h-20" />;
   }
 
   return (

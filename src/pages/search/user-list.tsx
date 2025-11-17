@@ -5,6 +5,7 @@ import { Card, CardBody, Avatar } from "@heroui/react";
 import type { SearchUserItem } from "@/service/web-interface-search-type";
 
 import { formatUrlProtocal } from "@/common/utils/url";
+import Empty from "@/components/empty";
 
 export type SearchUserProps = {
   items: SearchUserItem[];
@@ -12,7 +13,7 @@ export type SearchUserProps = {
 
 export default function SearchUser({ items }: SearchUserProps) {
   if (!items || items.length === 0) {
-    return <div className="text-foreground-500 text-sm">暂无用户结果</div>;
+    return <Empty className="min-h-[280px]" />;
   }
 
   return (

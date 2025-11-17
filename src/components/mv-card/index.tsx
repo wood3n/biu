@@ -35,7 +35,7 @@ const MVCard = ({
       title={title}
       titleExtra={
         <Action
-          title={title as string}
+          title={title}
           cover={cover}
           bvid={bvid}
           aid={String(aid)}

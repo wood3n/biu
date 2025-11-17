@@ -26,7 +26,7 @@ export interface ImageCardMenu {
 }
 
 export interface ActionProps {
-  title: string;
+  title: React.ReactNode;
   cover: string;
   bvid: string;
   aid: string;
@@ -70,7 +70,7 @@ const Action = ({ title, cover, bvid, aid, cid, menus, collectMenuTitle, onChang
       hidden: currentPlayMV?.bvid === bvid,
       onPress: () => {
         addToNext({
-          title,
+          title: title as string,
           bvid,
           cid,
           coverImageUrl: cover,
