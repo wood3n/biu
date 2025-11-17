@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.0](https://github.com/wood3n/biu/compare/v1.4.1...v1.5.0) (2025-11-17)
+
+### 🚀 Enhancements
+
+* 收藏夹支持播放全部功能，修复个人资料页面显示问题 ([0ce59bf](https://github.com/wood3n/biu/commit/0ce59bfc998160880d8b3e84a4be403504e6ad98))
+
+### 🩹 Fixes
+
+* 修复播放列表显示问题 ([b240d24](https://github.com/wood3n/biu/commit/b240d24a3775642c15a08addb5f28a9e0be677cd))
+
+### 🎨 Styles
+
+* 优化播放队列显示 ([9530c1d](https://github.com/wood3n/biu/commit/9530c1d4ed40f02c4b7efa03607bf2ba9ed76de9))
+
 ## [1.4.1](https://github.com/wood3n/biu/compare/v1.4.0...v1.4.1) (2025-11-14)
 
 ### 🩹 Fixes
