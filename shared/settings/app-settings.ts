@@ -5,6 +5,6 @@ export const defaultAppSettings: AppSettings = {
   borderRadius: 8,
   downloadPath: "",
   backgroundColor: "#18181b",
-  contentBackgroundColor: "#000000",
+  contentBackgroundColor: "#1f1f1f",
   primaryColor: "#17c964",
 };

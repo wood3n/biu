@@ -22,15 +22,14 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
 
   return (
     <Drawer
-      disableAnimation
       backdrop="transparent"
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       classNames={{
-        base: "data-[placement=right]:mb-[90px] data-[placement=right]:mt-[65px] rounded-medium",
+        base: "data-[placement=right]:mb-[85px] data-[placement=right]:mt-[60px] rounded-medium",
       }}
     >
-      <DrawerContent className="bg-content2">
+      <DrawerContent>
         <DrawerHeader className="flex flex-row items-center space-x-2 px-4 pt-4">
           <h2>播放列表</h2>
           <If condition={Boolean(list?.length)}>
@@ -56,7 +55,7 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
                       fullWidth
                       disableAnimation
                       radius="md"
-                      variant="light"
+                      variant={isSelected ? "flat" : "light"}
                       color={isSelected ? "primary" : "default"}
                       onPress={() => {
                         play(mv);

@@ -5,12 +5,12 @@ import {
   RiGroupFill,
   RiDiscLine,
   RiDiscFill,
-  RiHistoryLine,
-  RiHistoryFill,
   RiUserFollowLine,
   RiUserFollowFill,
   RiFileDownloadLine,
   RiFileDownloadFill,
+  RiTimeLine,
+  RiTimeFill,
 } from "@remixicon/react";
 
 import { type MenuItemProps } from "../menu-item";
@@ -45,8 +45,8 @@ export const menus: (MenuItemProps & { needLogin?: boolean })[] = [
     title: "稍后再看",
     href: "/later",
     needLogin: true,
-    icon: RiHistoryLine,
-    activeIcon: RiHistoryFill,
+    icon: RiTimeLine,
+    activeIcon: RiTimeFill,
   },
   {
     title: "下载记录",

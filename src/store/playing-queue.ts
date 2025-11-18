@@ -324,11 +324,20 @@ export const usePlayingQueue = create<State & Action>()(
         },
         addToNext: async mv => {
           const { current, list } = get();
-          if (current) {
-            const currentIndex = list.findIndex(item => item.bvid === current?.bvid);
-            const filteredList = list.filter(item => item.bvid !== mv.bvid);
+          if (mv.bvid === current?.bvid) {
+            return;
+          }
 
-            set({ list: [...filteredList.slice(0, currentIndex), mv, ...filteredList.slice(currentIndex)] });
+          if (current) {
+            const currentIndex = list.findIndex(item => item.bvid === current.bvid);
+            const insertIndex = currentIndex + 1;
+            if (list[insertIndex]?.bvid === mv.bvid) {
+              return;
+            }
+            const newPlayData = await getMVPlayData(mv);
+            const newList = [...list];
+            newList.splice(insertIndex, 0, newPlayData);
+            set({ list: newList });
           } else {
             const newPlayData = await getMVPlayData(mv);
             setCurrentAndLoad(newPlayData);

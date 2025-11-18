@@ -39,8 +39,8 @@
 
 .os-scrollbar {
   --os-size: 10px;
-  --os-handle-border-radius: var(--heroui-radius-medium);
-  --os-handle-bg: #595959;
+  --os-handle-border-radius: 2px;
+  --os-handle-bg: #595959aa;
   --os-handle-bg-hover: #888888;
 
   padding: 0;

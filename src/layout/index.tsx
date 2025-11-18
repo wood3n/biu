@@ -37,7 +37,7 @@ const Layout = () => {
       <div className="flex h-full flex-col">
         <div className="flex min-h-0 w-full flex-1">
           <SideNav />
-          <div className="flex flex-1 flex-col">
+          <div className="flex min-w-0 flex-1 flex-col">
             <div className="h-16 flex-none">
               <Navbar />
             </div>

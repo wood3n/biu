@@ -72,57 +72,55 @@ const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }
   }
 
   return (
-    <div className="flex flex-col">
-      <div
-        className="flex h-[200px] items-end justify-between bg-cover bg-center px-8 py-4 bg-blend-multiply"
-        style={{
-          background: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${spaceInfo?.top_photo_v2?.l_200h_img}) center/cover no-repeat`,
-        }}
-      >
-        <div className="flex items-end space-x-4">
-          <Avatar src={spaceInfo?.face} alt={spaceInfo?.name} className="h-[140px] w-[140px] shadow-lg" />
-          <div className="flex flex-col space-y-2">
+    <div
+      className="flex h-[200px] items-end justify-between space-x-8 bg-cover bg-center px-8 py-4 bg-blend-multiply"
+      style={{
+        background: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${spaceInfo?.top_photo_v2?.l_200h_img}) center/cover no-repeat`,
+      }}
+    >
+      <div className="flex min-w-0 flex-grow items-end space-x-4">
+        <Avatar src={spaceInfo?.face} alt={spaceInfo?.name} className="h-[140px] w-[140px] flex-none shadow-lg" />
+        <div className="flex min-w-0 flex-1 flex-col space-y-2">
+          <div className="flex items-center space-x-2">
             <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-2">
-                {Boolean(spaceInfo?.official?.role) && (
-                  <Tooltip closeDelay={0} content={spaceInfo?.official?.title}>
-                    <RiVerifiedBadgeFill color="#66AAF9" />
-                  </Tooltip>
-                )}
-                <h1>{spaceInfo?.name}</h1>
-              </div>
-              {Boolean(spaceInfo?.vip?.status) && (
-                <Image
-                  height={24}
-                  src={spaceInfo?.vip?.label?.img_label_uri_hans_static}
-                  alt={spaceInfo?.vip?.label?.text}
-                />
+              {Boolean(spaceInfo?.official?.role) && (
+                <Tooltip closeDelay={0} content={spaceInfo?.official?.title}>
+                  <RiVerifiedBadgeFill color="#66AAF9" />
+                </Tooltip>
               )}
+              <h1>{spaceInfo?.name}</h1>
             </div>
-            <p className="truncate text-sm">{spaceInfo?.sign}</p>
+            {Boolean(spaceInfo?.vip?.status) && (
+              <Image
+                height={24}
+                src={spaceInfo?.vip?.label?.img_label_uri_hans_static}
+                alt={spaceInfo?.vip?.label?.text}
+              />
+            )}
           </div>
+          <p className="line-clamp-2 text-sm">{spaceInfo?.sign}</p>
         </div>
-        <div className="flex flex-auto items-center justify-end space-x-4">
-          {Boolean(user?.isLogin) && !isSelf && (
-            <AsyncButton
-              color={isFollow ? "primary" : "default"}
-              startContent={isFollow ? <RiCheckLine size={18} /> : <RiAddLine size={18} />}
-              onPress={toggleFollow}
-              className="mt-2"
-            >
-              {isFollow ? "已关注" : "关注"}
-            </AsyncButton>
-          )}
-          {stats.map((item, idx) => (
-            <Fragment key={idx}>
-              <div className="flex flex-col items-center justify-center">
-                <span className="text-lg">{item.value}</span>
-                <span className="text-sm">{item.title}</span>
-              </div>
-              {idx !== stats.length - 1 && <Divider orientation="vertical" className="h-4" />}
-            </Fragment>
-          ))}
-        </div>
+      </div>
+      <div className="flex flex-none items-center space-x-4">
+        {Boolean(user?.isLogin) && !isSelf && (
+          <AsyncButton
+            color={isFollow ? "primary" : "default"}
+            startContent={isFollow ? <RiCheckLine size={18} /> : <RiAddLine size={18} />}
+            onPress={toggleFollow}
+            className="mt-2"
+          >
+            {isFollow ? "已关注" : "关注"}
+          </AsyncButton>
+        )}
+        {stats.map((item, idx) => (
+          <Fragment key={idx}>
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-lg">{item.value}</span>
+              <span className="text-sm whitespace-nowrap">{item.title}</span>
+            </div>
+            {idx !== stats.length - 1 && <Divider orientation="vertical" className="h-4" />}
+          </Fragment>
+        ))}
       </div>
     </div>
   );

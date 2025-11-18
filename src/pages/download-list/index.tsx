@@ -20,6 +20,7 @@ import {
 import { filesize } from "filesize";
 
 import { formatSecondsToDate } from "@/common/utils";
+import Empty from "@/components/empty";
 import { useDownloadQueue } from "@/store/download-queue";
 import { useSettings } from "@/store/settings";
 
@@ -96,7 +97,7 @@ const DownloadList = () => {
                 <TableColumn width={120}>大小</TableColumn>
                 <TableColumn width={140}>下载时间</TableColumn>
               </TableHeader>
-              <TableBody items={downloadList.filter(item => item.type === fileType)}>
+              <TableBody items={downloadList.filter(item => item.type === fileType)} emptyContent={<Empty />}>
                 {item => {
                   const showProgress = ["downloading", "failed"].includes(item.status as DownloadStatus);
                   const statusDesc = StatusDesc[item.status as DownloadStatus];

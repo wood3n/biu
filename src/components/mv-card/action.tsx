@@ -1,3 +1,5 @@
+import { useLocation } from "react-router";
+
 import {
   Dropdown,
   DropdownTrigger,
@@ -8,7 +10,7 @@ import {
   useDisclosure,
   addToast,
 } from "@heroui/react";
-import { RiDownloadLine, RiHistoryLine, RiMore2Line, RiPlayListAddLine, RiStarLine } from "@remixicon/react";
+import { RiDownloadLine, RiMore2Line, RiPlayListAddLine, RiStarLine, RiTimeLine } from "@remixicon/react";
 
 import FavFolderSelect from "@/components/fav-folder/select";
 import MVDownloadModal from "@/components/mv-download-modal";
@@ -39,6 +41,7 @@ export interface ActionProps {
 const Action = ({ title, cover, bvid, aid, cid, menus, collectMenuTitle, onChangeFavSuccess }: ActionProps) => {
   const user = useUser(s => s.user);
   const { current: currentPlayMV, addToNext } = usePlayingQueue();
+  const location = useLocation();
 
   const {
     isOpen: isOpenDownloadModal,
@@ -87,9 +90,9 @@ const Action = ({ title, cover, bvid, aid, cid, menus, collectMenuTitle, onChang
     },
     {
       key: "addToLater",
-      icon: <RiHistoryLine size={16} />,
+      icon: <RiTimeLine size={16} />,
       title: "添加到稍后再看",
-      hidden: !user?.isLogin,
+      hidden: !user?.isLogin || location.pathname === "/later",
       onPress: addToLater,
     },
     {
