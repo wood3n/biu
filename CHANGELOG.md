@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.2](https://github.com/wood3n/biu/compare/v1.5.1...v1.5.2) (2025-11-22)
+
+### 🔥 Performance
+
+* 优化播放列表 ([f244246](https://github.com/wood3n/biu/commit/f244246ede1346c753c32dd4ceb3caa6e490c2b4))
+
+### 🩹 Fixes
+
+* 修复下载文件进度显示问题 ([06b4363](https://github.com/wood3n/biu/commit/06b4363fbe44b4286d2431ef675594e4b54fe5c9))
+* 修复白屏问题,移除electron main中调试代码([#3](https://github.com/wood3n/biu/issues/3)) ([fe1f3ae](https://github.com/wood3n/biu/commit/fe1f3aeca6bdac1cc5411f8cd4b6f79f211f9aad))
+* 修复部分样式问题 ([c6ef3ee](https://github.com/wood3n/biu/commit/c6ef3ee2b68f383c9276a0d99571b97cc98e88ce))
+
 ## [1.5.1](https://github.com/wood3n/biu/compare/v1.5.0...v1.5.1) (2025-11-17)
 
 ### 🩹 Fixes
