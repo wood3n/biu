@@ -111,8 +111,6 @@ function createWindow() {
   });
 }
 
-app.commandLine.appendSwitch("--in-process-gpu");
-
 app.whenReady().then(() => {
   // 接入系统托盘（仅 Windows 生效）
   createTray({
