@@ -15,7 +15,9 @@ const SearchInput: React.FC = () => {
   const user = useUser(s => s.user);
 
   const location = useLocation();
-  const { items: searchHistoryItems, add: addSearchHistory, delete: deleteSearchHistory } = useSearchHistory();
+  const searchHistoryItems = useSearchHistory(s => s.items);
+  const addSearchHistory = useSearchHistory(s => s.add);
+  const deleteSearchHistory = useSearchHistory(s => s.delete);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);

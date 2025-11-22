@@ -27,14 +27,15 @@ import { useSettings } from "@/store/settings";
 import { StatusDesc } from "./status-desc";
 
 const DownloadList = () => {
-  const { downloadPath, update } = useSettings();
+  const downloadPath = useSettings(s => s.downloadPath);
+  const updateDownloadPath = useSettings(s => s.update);
   const { list: downloadList, clear: clearDownloadList } = useDownloadQueue();
   const [fileType, setFileType] = useState<string | number>("audio");
 
   const pickDirectory = async () => {
     const dir = await window.electron.selectDirectory();
     if (dir) {
-      update({ downloadPath: dir });
+      updateDownloadPath({ downloadPath: dir });
     }
   };
 

@@ -1,27 +1,14 @@
 import { Button, useDisclosure } from "@heroui/react";
 import { RiStarLine } from "@remixicon/react";
-import { useRequest } from "ahooks";
 
 import FavFolderSelect from "@/components/fav-folder/select";
-import { getWebInterfaceView } from "@/service/web-interface-view";
-import { usePlayingQueue } from "@/store/playing-queue";
+import { usePlayQueue } from "@/store/play-queue";
 
 const MvFavFolderSelect = () => {
-  const { current } = usePlayingQueue();
+  const mvData = usePlayQueue(s => {
+    return s.list?.find(item => item.bvid === s.currentBvid);
+  });
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
-  const { data: mvData } = useRequest(
-    async () => {
-      const res = await getWebInterfaceView({
-        bvid: current?.bvid,
-      });
-      return res?.data;
-    },
-    {
-      ready: Boolean(current?.bvid),
-      refreshDeps: [current?.bvid],
-    },
-  );
 
   return (
     <>

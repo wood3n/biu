@@ -9,7 +9,7 @@ import { formatDuration } from "@/common/utils";
 import GridList from "@/components/grid-list";
 import MVCard from "@/components/mv-card";
 import { getFavResourceList } from "@/service/fav-resource";
-import { usePlayingQueue } from "@/store/playing-queue";
+import { usePlayQueue } from "@/store/play-queue";
 import { useUser } from "@/store/user";
 
 import Info from "./info";
@@ -20,7 +20,8 @@ const Favorites: React.FC = () => {
   const { ownFolder, collectedFolder } = useUser();
   const isOwn = ownFolder?.some(item => item.id === Number(favFolderId));
   const isCollected = collectedFolder?.some(item => item.id === Number(favFolderId));
-  const { play, playList } = usePlayingQueue();
+  const playMV = usePlayQueue(s => s.play);
+  const playList = usePlayQueue(s => s.playList);
 
   const {
     data,
@@ -61,14 +62,15 @@ const Favorites: React.FC = () => {
     });
 
     if (getAllMVRes.code === 0 && getAllMVRes?.data?.medias?.length) {
-      const mvs = getAllMVRes?.data?.medias?.map(item => ({
-        bvid: item.bvid,
-        title: item.title,
-        singer: item.upper?.name,
-        coverImageUrl: item.cover,
-      }));
-
-      playList(mvs);
+      playList(
+        getAllMVRes?.data?.medias.map(item => ({
+          bvid: item.bvid,
+          title: item.title,
+          cover: item.cover,
+          ownerMid: item.upper?.mid,
+          ownerName: item.upper?.name,
+        })),
+      );
     } else {
       addToast({
         title: "无法获取收藏夹全部歌曲",
@@ -113,14 +115,7 @@ const Favorites: React.FC = () => {
                 </div>
               )
             }
-            onPress={() =>
-              play({
-                bvid: item.bvid,
-                title: item.title,
-                singer: item.upper?.name,
-                coverImageUrl: item.cover,
-              })
-            }
+            onPress={() => playMV(item.bvid)}
             onChangeFavSuccess={refreshAsync}
           />
         )}

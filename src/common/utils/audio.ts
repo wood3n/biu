@@ -57,17 +57,16 @@ export async function getMVUrl(bvid: string, cid: string | number) {
     }
 
     const audioTrackList = sortAudio(getAudioInfoRes?.data?.dash?.audio || []);
+    const audioTrack = audioTrackList?.[0];
     return {
       isLossless: false,
-      audioUrl: audioTrackList?.[0]?.baseUrl || audioTrackList?.[0]?.backupUrl?.[0] || "",
+      audioUrl: audioTrack?.baseUrl || audioTrack?.backupUrl?.[0] || "",
       videoUrl,
       expiredTime,
     };
   } catch (error) {
     log.error("[Get video play url error]", error);
     return {
-      audioUrl: "",
-      videoUrl: "",
       isLossless: false,
     };
   }

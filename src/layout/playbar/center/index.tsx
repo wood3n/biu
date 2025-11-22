@@ -3,18 +3,22 @@ import React from "react";
 import { Button } from "@heroui/react";
 import { RiPauseCircleFill, RiPlayCircleFill, RiSkipBackFill, RiSkipForwardFill } from "@remixicon/react";
 
-import { usePlayingQueue } from "@/store/playing-queue";
+import { usePlayQueue } from "@/store/play-queue";
 
 import { PlayBarIconSize } from "../constants";
 import Progress from "./progress";
 
 const Control = () => {
-  const { prev, next, list, isPlaying, togglePlay } = usePlayingQueue();
+  const prev = usePlayQueue(state => state.prev);
+  const next = usePlayQueue(state => state.next);
+  const list = usePlayQueue(state => state.list);
+  const togglePlay = usePlayQueue(state => state.togglePlay);
+  const isPlaying = usePlayQueue(state => state.isPlaying);
 
-  const disabled = !isPlaying && list.length === 0;
+  const disabled = list.length === 0;
 
   return (
-    <div className="flex h-full flex-col items-center justify-center space-y-0.5 px-6">
+    <div className="flex h-full flex-col items-center justify-center space-y-0.5 overflow-hidden px-6">
       <div className="flex items-center space-x-6">
         <Button
           radius="sm"

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import { Form, Input, Slider, Switch, Button, RadioGroup, Radio, Divider } from "@heroui/react";
+import { useShallow } from "zustand/react/shallow";
 
 import ColorPicker from "@/components/color-picker";
 import FontSelect from "@/components/font-select";
@@ -19,8 +20,19 @@ const SettingsPage: React.FC = () => {
     downloadPath,
     closeWindowOption,
     autoStart,
-    update,
-  } = useSettings();
+  } = useSettings(
+    useShallow(s => ({
+      fontFamily: s.fontFamily,
+      backgroundColor: s.backgroundColor,
+      contentBackgroundColor: s.contentBackgroundColor,
+      primaryColor: s.primaryColor,
+      borderRadius: s.borderRadius,
+      downloadPath: s.downloadPath,
+      closeWindowOption: s.closeWindowOption,
+      autoStart: s.autoStart,
+    })),
+  );
+  const updateSettings = useSettings(s => s.update);
 
   const { control, watch, setValue } = useForm<AppSettings>({
     defaultValues: {
@@ -38,10 +50,10 @@ const SettingsPage: React.FC = () => {
   // 表单项变化时自动保存到 store（即改即存）
   useEffect(() => {
     const subscription = watch(values => {
-      update(values);
+      updateSettings(values);
     });
     return () => subscription.unsubscribe();
-  }, [watch, update]);
+  }, [watch, updateSettings]);
 
   return (
     <ScrollContainer className="h-full w-full">

@@ -8,14 +8,14 @@ import { formatUrlProtocal } from "@/common/utils/url";
 import Empty from "@/components/empty";
 import GridList from "@/components/grid-list";
 import MVCard from "@/components/mv-card";
-import { usePlayingQueue } from "@/store/playing-queue";
+import { usePlayQueue } from "@/store/play-queue";
 
 export type SearchVideoProps = {
   items: SearchVideoItem[];
 };
 
 export default function SearchVideo({ items }: SearchVideoProps) {
-  const play = usePlayingQueue(s => s.play);
+  const play = usePlayQueue(s => s.play);
 
   if (!items?.length) return <Empty className="min-h-[280px]" />;
 
@@ -38,14 +38,7 @@ export default function SearchVideo({ items }: SearchVideoProps) {
               <span>{item.duration}</span>
             </div>
           }
-          onPress={() =>
-            play({
-              bvid: item.bvid,
-              title: item.title,
-              singer: item.author,
-              coverImageUrl: item.pic,
-            })
-          }
+          onPress={() => play(item.bvid)}
         />
       )}
     />

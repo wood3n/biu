@@ -2,24 +2,23 @@ import React from "react";
 
 import { Button, Tooltip } from "@heroui/react";
 
+import { usePlayQueue } from "@/store/play-queue";
+
 import { PlayRate } from "../constants";
 
-interface Props {
-  value: number;
-  onChange: (value: number) => void;
-}
+const Rate = () => {
+  const rate = usePlayQueue(s => s.rate);
+  const setRate = usePlayQueue(s => s.setRate);
 
-const Rate = ({ value, onChange }: Props) => {
   const tooltipId = "rate-tooltip";
 
   return (
     <Tooltip
-      id={tooltipId}
       placement="top"
       delay={200}
       showArrow={false}
       classNames={{
-        content: "py-3 px-2 w-[60px] min-w-[60px] flex flex-col items-center gap-1",
+        content: "py-3 px-2 w-[60px] min-w-[60px]",
       }}
       content={
         <div className="flex flex-col items-center gap-1">
@@ -28,11 +27,11 @@ const Rate = ({ value, onChange }: Props) => {
               key={v}
               isIconOnly
               size="sm"
-              color={v === value ? "primary" : "default"}
-              variant={v === value ? "solid" : "light"}
+              color={v === rate ? "primary" : "default"}
+              variant={v === rate ? "solid" : "light"}
               className="min-w-[40px]"
               aria-label={`${v}倍速`}
-              onPress={() => onChange(v)}
+              onPress={() => setRate(v)}
             >
               {v}x
             </Button>
@@ -44,11 +43,11 @@ const Rate = ({ value, onChange }: Props) => {
         isIconOnly
         variant="light"
         size="sm"
-        className="text-medium hover:text-primary min-w-fit px-2"
+        className="hover:text-primary min-w-fit text-[16px]"
         aria-label="播放速率"
         aria-describedby={tooltipId}
       >
-        {value}x
+        {rate}x
       </Button>
     </Tooltip>
   );

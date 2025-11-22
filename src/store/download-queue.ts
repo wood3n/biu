@@ -73,7 +73,18 @@ export const useDownloadQueue = create<DownloadState & DownloadAction>()(
         set(state => ({
           list: [
             ...state.list,
-            { id, type, title, bvid, cid, coverImgUrl, audioUrl, status: "waiting", progress: 0, createTime },
+            {
+              id,
+              type,
+              title,
+              bvid,
+              cid,
+              coverImgUrl,
+              audioUrl: audioUrl as string,
+              status: "waiting",
+              progress: 0,
+              createTime,
+            },
           ],
         }));
 
@@ -84,7 +95,7 @@ export const useDownloadQueue = create<DownloadState & DownloadAction>()(
 
         // 启动下载
         try {
-          await window.electron.startDownload({ id, filename, audioUrl, isLossless });
+          await window.electron.startDownload({ id, filename, audioUrl: audioUrl as string, isLossless });
           set(state => ({
             list: state.list.map(i => (i.id === id ? { ...i, status: "downloading" } : i)),
           }));

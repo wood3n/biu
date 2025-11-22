@@ -24,15 +24,6 @@ export function App() {
     }
   }, [navigate]);
 
-  const test = async () => {
-    const res = await window.electron.httpGet("https://api.bilibili.com/x/web-interface/nav");
-    console.log("nav res:", res);
-  };
-
-  useEffect(() => {
-    test();
-  }, []);
-
   return (
     <HeroUIProvider navigate={navigate} useHref={useHref} locale="zh-CN">
       <ToastProvider

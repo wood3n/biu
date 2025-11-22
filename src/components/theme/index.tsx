@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 
+import { useShallow } from "zustand/react/shallow";
+
 import { hexToHsl } from "@/common/utils/color";
 import { useSettings } from "@/store/settings";
 
@@ -8,7 +10,15 @@ interface Props {
 }
 
 const Theme = ({ children }: Props) => {
-  const { fontFamily, backgroundColor, contentBackgroundColor, primaryColor, borderRadius } = useSettings();
+  const { fontFamily, backgroundColor, contentBackgroundColor, primaryColor, borderRadius } = useSettings(
+    useShallow(s => ({
+      fontFamily: s.fontFamily,
+      backgroundColor: s.backgroundColor,
+      contentBackgroundColor: s.contentBackgroundColor,
+      primaryColor: s.primaryColor,
+      borderRadius: s.borderRadius,
+    })),
+  );
 
   // 将主题相关样式应用到 :root 和 body，确保挂载在 body 上的组件可读取到
   useEffect(() => {

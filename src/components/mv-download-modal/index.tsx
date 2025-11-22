@@ -44,7 +44,7 @@ const MVDownloadModal = ({ bvid, isOpen, onOpenChange }: Props) => {
           bvid,
           cid: String(item.cid),
           title: item.part,
-          coverImgUrl: "",
+          coverImgUrl: item.first_frame,
         })),
     );
   };

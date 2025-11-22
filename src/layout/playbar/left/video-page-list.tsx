@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 
 import { Button, Image, Modal, ModalBody, ModalContent, ModalHeader, useDisclosure } from "@heroui/react";
 import { RiListRadio, RiPlayFill } from "@remixicon/react";
@@ -6,13 +6,13 @@ import clx from "classnames";
 
 import { formatDuration } from "@/common/utils";
 import ScrollContainer from "@/components/scroll-container";
-import { usePlayingQueue } from "@/store/playing-queue";
+import { usePlayQueue } from "@/store/play-queue";
 
 const VideoPageList = () => {
-  const { current, playPage } = usePlayingQueue();
+  const pages = usePlayQueue(s => s.list.find(item => item.bvid === s.currentBvid)?.pages ?? []);
+  const currentCid = usePlayQueue(s => s.currentCid);
+  const playPage = usePlayQueue(s => s.playPage);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
-  const pages = useMemo(() => current?.pages ?? [], [current?.pages]);
 
   return (
     <>
@@ -33,19 +33,19 @@ const VideoPageList = () => {
             <ScrollContainer className="max-h-[60vh]">
               <div className="mb-4 flex flex-col px-3">
                 {pages.map(p => {
-                  const isActive = p.pageIndex === current?.currentPage;
+                  const isActive = p.cid === currentCid;
 
                   return (
                     <div
-                      key={p.pageCid}
+                      key={p.cid}
                       className="group flex cursor-default items-center gap-3 rounded-xl p-3 hover:bg-zinc-700"
-                      onClick={() => playPage(p.pageCid)}
+                      onClick={() => playPage(p.cid)}
                     >
                       <div className="relative h-12 w-12 flex-none overflow-hidden rounded-md">
                         <Image
                           radius="sm"
-                          alt={p.pageTitle}
-                          src={p.pageFirstFrameImageUrl}
+                          alt={p.title}
+                          src={p.cover}
                           className="h-full w-full object-cover"
                           removeWrapper
                         />
@@ -56,13 +56,13 @@ const VideoPageList = () => {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className={clx("truncate", { "text-primary": isActive })} title={p.pageTitle}>
-                          {p.pageTitle}
+                        <div className={clx("truncate", { "text-primary": isActive })} title={p.title}>
+                          {p.title}
                         </div>
                       </div>
-                      {Boolean(p.pageDuration) && (
+                      {Boolean(p.duration) && (
                         <div className="text-foreground-500 ml-2 flex-none text-right text-sm tabular-nums">
-                          {formatDuration(p.pageDuration as number)}
+                          {formatDuration(p.duration as number)}
                         </div>
                       )}
                     </div>

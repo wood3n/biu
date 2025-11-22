@@ -8,7 +8,7 @@ import { formatDuration } from "@/common/utils";
 import GridList from "@/components/grid-list";
 import MVCard from "@/components/mv-card";
 import { getUserVideoArchivesList } from "@/service/user-video-archives-list";
-import { usePlayingQueue } from "@/store/playing-queue";
+import { usePlayQueue } from "@/store/play-queue";
 import { useUser } from "@/store/user";
 
 import Info from "./info";
@@ -17,7 +17,8 @@ const VideoSeries = () => {
   const { id } = useParams();
   const { collectedFolder } = useUser();
   const isCollected = collectedFolder?.some(item => item.id === Number(id));
-  const { play, playList } = usePlayingQueue();
+  const playMV = usePlayQueue(s => s.play);
+  const playList = usePlayQueue(s => s.playList);
 
   const { data, loading, refreshAsync } = useRequest(
     async () => {
@@ -33,15 +34,16 @@ const VideoSeries = () => {
   );
 
   const onPlayAll = () => {
-    const mvs = data?.medias?.map(item => ({
-      bvid: item.bvid,
-      title: item.title,
-      singer: item.upper?.name,
-      coverImageUrl: item.cover,
-    }));
-
-    if (mvs?.length) {
-      playList(mvs);
+    if (Array.isArray(data?.medias)) {
+      playList(
+        data.medias.map(item => ({
+          bvid: item.bvid,
+          title: item.title,
+          cover: item.cover,
+          ownerMid: item.upper?.mid,
+          ownerName: item.upper?.name,
+        })),
+      );
     }
   };
 
@@ -80,14 +82,7 @@ const VideoSeries = () => {
                 </div>
               )
             }
-            onPress={() =>
-              play({
-                bvid: item.bvid,
-                title: item.title,
-                singer: item.upper?.name,
-                coverImageUrl: item.cover,
-              })
-            }
+            onPress={() => playMV(item.bvid)}
           />
         )}
       />

@@ -4,12 +4,14 @@ import { Slider, type SliderProps } from "@heroui/react";
 import clx from "classnames";
 
 import { formatDuration } from "@/common/utils";
-import { usePlayingQueue } from "@/store/playing-queue";
+import { usePlayQueue } from "@/store/play-queue";
 
 const Progress = ({ isDisabled }: SliderProps) => {
   const [hovered, setHovered] = useState(false);
 
-  const { duration, currentTime, seek } = usePlayingQueue();
+  const duration = usePlayQueue(s => s.duration);
+  const currentTime = usePlayQueue(s => s.currentTime);
+  const seek = usePlayQueue(s => s.seek);
 
   const showThumb = hovered && !isDisabled;
 
@@ -22,7 +24,7 @@ const Progress = ({ isDisabled }: SliderProps) => {
         aria-label="播放进度"
         hideThumb={!showThumb}
         minValue={0}
-        maxValue={duration || 0}
+        maxValue={duration}
         value={currentTime}
         onChange={v => seek(v as number)}
         isDisabled={isDisabled}

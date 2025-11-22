@@ -10,7 +10,7 @@ import { installWebRequestInterceptors } from "./network/interceptor";
 import { store, storeKey } from "./store";
 import { setupAutoUpdater } from "./updater";
 
-let mainWindow: BrowserWindow;
+let mainWindow: BrowserWindow | null;
 let webRequestDisposer: { dispose: () => void } | undefined;
 let autoUpdaterCtl: { checkForUpdates: () => Promise<void>; dispose: () => void } | undefined;
 
@@ -102,10 +102,10 @@ function createWindow() {
 
     if (closeWindowOption === "hide") {
       event.preventDefault();
-      mainWindow.hide();
+      mainWindow?.hide();
     } else if (closeWindowOption === "exit") {
       if ((app as any).quitting) {
-        mainWindow = null as any;
+        mainWindow = null;
       }
     }
   });

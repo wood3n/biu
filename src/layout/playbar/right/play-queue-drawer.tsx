@@ -1,4 +1,4 @@
-import { Button, Drawer, DrawerBody, DrawerContent, DrawerHeader, Image } from "@heroui/react";
+import { Button, Drawer, DrawerBody, DrawerContent, DrawerHeader, Image, Link } from "@heroui/react";
 import { RiDeleteBinLine } from "@remixicon/react";
 
 import { ReactComponent as AudioAnimation } from "@/assets/icons/audio-animation.svg";
@@ -6,7 +6,7 @@ import { formatUrlProtocal } from "@/common/utils/url";
 import Empty from "@/components/empty";
 import If from "@/components/if";
 import ScrollContainer from "@/components/scroll-container";
-import { usePlayingQueue } from "@/store/playing-queue";
+import { usePlayQueue } from "@/store/play-queue";
 
 interface Props {
   isOpen: boolean;
@@ -14,11 +14,11 @@ interface Props {
 }
 
 const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
-  const { list, current, play, clear, deleteMV } = usePlayingQueue();
-
-  const clearList = () => {
-    clear();
-  };
+  const currentBvid = usePlayQueue(s => s.currentBvid);
+  const list = usePlayQueue(s => s.list);
+  const play = usePlayQueue(s => s.play);
+  const clear = usePlayQueue(s => s.clear);
+  const delMV = usePlayQueue(s => s.delMV);
 
   return (
     <Drawer
@@ -33,7 +33,7 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
         <DrawerHeader className="flex flex-row items-center space-x-2 px-4 pt-4">
           <h2>播放列表</h2>
           <If condition={Boolean(list?.length)}>
-            <Button isIconOnly size="sm" variant="light" onPress={clearList} className="text-foreground">
+            <Button isIconOnly size="sm" variant="light" onPress={clear} className="text-foreground">
               <RiDeleteBinLine size={16} />
             </Button>
           </If>
@@ -46,7 +46,7 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
             <If condition={Boolean(list?.length)}>
               <div className="mb-4 flex flex-col px-2">
                 {list.map(mv => {
-                  const isSelected = current?.bvid === mv.bvid;
+                  const isSelected = currentBvid === mv.bvid;
 
                   return (
                     <Button
@@ -58,7 +58,7 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
                       variant={isSelected ? "flat" : "light"}
                       color={isSelected ? "primary" : "default"}
                       onPress={() => {
-                        play(mv);
+                        play(mv.bvid);
                       }}
                       className="group flex h-auto min-h-auto w-full min-w-auto items-center justify-between space-y-2 p-2"
                     >
@@ -67,7 +67,7 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
                           <Image
                             removeWrapper
                             radius="md"
-                            src={formatUrlProtocal(mv.coverImageUrl)}
+                            src={formatUrlProtocal(mv.cover)}
                             alt={mv.title}
                             width="100%"
                             height="100%"
@@ -79,16 +79,21 @@ const PlayQueueDrawer = ({ isOpen, onOpenChange }: Props) => {
                             </div>
                           )}
                         </div>
-                        <div className="ml-2 flex min-w-0 flex-1 flex-grow flex-col space-y-1">
-                          <span className="truncate text-base">{mv.title}</span>
-                          <span className="text-sm text-zinc-400">{mv.singer}</span>
+                        <div className="ml-2 flex min-w-0 flex-auto flex-col items-start space-y-1">
+                          <span className="w-full min-w-0 truncate text-base">{mv.title}</span>
+                          <Link
+                            href={`/user/${mv?.ownerMid}`}
+                            className="text-foreground-500 w-fit truncate text-sm hover:underline"
+                          >
+                            {mv?.ownerName}
+                          </Link>
                         </div>
                       </div>
                       <Button
                         isIconOnly
                         variant="light"
                         size="sm"
-                        onPress={() => deleteMV([mv.bvid])}
+                        onPress={() => delMV(mv.bvid)}
                         className="hidden flex-none opacity-0 transition-opacity duration-200 group-hover:inline-flex group-hover:opacity-100"
                       >
                         <RiDeleteBinLine size={16} />

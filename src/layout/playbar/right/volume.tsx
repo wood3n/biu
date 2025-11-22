@@ -1,39 +1,38 @@
 import React, { useRef } from "react";
 
-import { Button, Tooltip, Slider, type PressEvent } from "@heroui/react";
+import { Button, Tooltip, Slider } from "@heroui/react";
 import { RiVolumeDownLine, RiVolumeMuteLine, RiVolumeUpLine } from "@remixicon/react";
+
+import { usePlayQueue } from "@/store/play-queue";
 
 import { PlayBarIconSize } from "../constants";
 
-interface Props {
-  isMuted: boolean;
-  value: number;
-  onChange: (value: number) => void;
-  onChangeMute: (isMuted: boolean) => void;
-}
+const Volume = () => {
+  const volume = usePlayQueue(s => s.volume);
+  const isMuted = usePlayQueue(s => s.isMuted);
+  const toggleMute = usePlayQueue(s => s.toggleMute);
+  const setVolume = usePlayQueue(s => s.setVolume);
 
-const Volume = ({ isMuted, value, onChange, onChangeMute }: Props) => {
-  const previousVolume = useRef(value);
+  const previousVolume = useRef(volume);
 
   const onVolumeChange = (val: number) => {
     if (isMuted) {
-      onChangeMute(false);
+      toggleMute();
     }
     if (val === 0) {
-      onChangeMute(true);
+      toggleMute();
     }
-    onChange(val);
+    setVolume(val);
   };
 
-  const toggleMute = (e: PressEvent) => {
-    e.continuePropagation();
+  const onToggleMute = () => {
     if (!isMuted) {
-      previousVolume.current = value;
-      onChange(0);
+      previousVolume.current = volume;
+      setVolume(0);
     } else {
-      onChange(previousVolume.current);
+      setVolume(previousVolume.current);
     }
-    onChangeMute(!isMuted);
+    toggleMute();
   };
 
   const tooltipId = "volume-tooltip";
@@ -42,32 +41,35 @@ const Volume = ({ isMuted, value, onChange, onChangeMute }: Props) => {
     <Tooltip
       id={tooltipId}
       placement="top"
-      delay={200}
+      delay={300}
       showArrow={false}
-      classNames={{
-        content: "py-4 w-[60px] min-w-[60px] flex justify-center items-center",
-      }}
+      shouldCloseOnBlur={false}
       content={
-        <Slider
-          aria-label="音量"
-          color="primary"
-          radius="full"
-          orientation="vertical"
-          className="h-40 w-7"
-          value={value}
-          size="sm"
-          minValue={0}
-          maxValue={1}
-          step={0.01}
-          // @ts-expect-error value is number
-          onChange={onVolumeChange}
-          classNames={{
-            thumb: "after:hidden",
-          }}
-          endContent={
-            <span className="text-foreground/60 w-8 text-center text-xs tabular-nums">{Math.round(value * 100)}%</span>
-          }
-        />
+        <div className="flex items-center justify-center p-3">
+          <Slider
+            disableAnimation
+            aria-label="音量"
+            color="primary"
+            radius="full"
+            size="sm"
+            orientation="vertical"
+            value={volume}
+            minValue={0}
+            maxValue={1}
+            step={0.01}
+            // @ts-expect-error volume is number
+            onChange={onVolumeChange}
+            classNames={{
+              trackWrapper: "h-40 w-[32px]",
+              thumb: "after:hidden",
+            }}
+            endContent={
+              <span className="text-foreground/60 w-8 text-center text-xs tabular-nums">
+                {Math.round(volume * 100)}%
+              </span>
+            }
+          />
+        </div>
       }
     >
       <Button
@@ -75,13 +77,13 @@ const Volume = ({ isMuted, value, onChange, onChangeMute }: Props) => {
         size="sm"
         variant="light"
         className="hover:text-primary"
-        onPress={toggleMute}
+        onPress={onToggleMute}
         aria-label={isMuted ? "取消静音" : "静音"}
         aria-describedby={tooltipId}
       >
         {isMuted ? (
           <RiVolumeMuteLine size={PlayBarIconSize.SideIconSize} />
-        ) : value > 0.5 ? (
+        ) : volume > 0.5 ? (
           <RiVolumeUpLine size={PlayBarIconSize.SideIconSize} />
         ) : (
           <RiVolumeDownLine size={PlayBarIconSize.SideIconSize} />

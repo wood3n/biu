@@ -7,12 +7,12 @@ import { formatSecondsToDate } from "@/common/utils";
 import GridList from "@/components/grid-list";
 import MVCard from "@/components/mv-card";
 import { getSpaceWbiArcSearch } from "@/service/space-wbi-arc-search";
-import { usePlayingQueue } from "@/store/playing-queue";
+import { usePlayQueue } from "@/store/play-queue";
 
 /** 个人投稿视频 */
 const VideoPost = () => {
   const { id } = useParams();
-  const play = usePlayingQueue(s => s.play);
+  const play = usePlayQueue(s => s.play);
 
   const {
     data,
@@ -57,14 +57,7 @@ const VideoPost = () => {
                 <span>{item.length}</span>
               </div>
             }
-            onPress={() =>
-              play({
-                bvid: item.bvid,
-                title: item.title,
-                coverImageUrl: item.pic,
-                singer: item.author,
-              })
-            }
+            onPress={() => play(item.bvid)}
           />
         )}
       />

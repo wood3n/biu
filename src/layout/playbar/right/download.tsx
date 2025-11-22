@@ -1,45 +1,30 @@
-import { addToast, Button } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { RiDownload2Fill } from "@remixicon/react";
-import log from "electron-log/renderer";
 
-import { getPlayerPagelist } from "@/service/player-pagelist";
 import { useDownloadQueue } from "@/store/download-queue";
-import { usePlayingQueue } from "@/store/playing-queue";
+import { usePlayQueue } from "@/store/play-queue";
 
 import { PlayBarIconSize } from "../constants";
 
 const Download = () => {
-  const { current } = usePlayingQueue();
-  const { add: addToDownloadQueue } = useDownloadQueue();
+  const currentBvid = usePlayQueue(s => s.currentBvid);
+  const currentCid = usePlayQueue(s => s.currentCid);
+  const list = usePlayQueue(s => s.list);
+  const mvData = list.find(item => item.bvid === currentBvid);
+  const pageData = mvData?.pages?.find(item => item.cid === currentCid);
+  const addDownloadTask = useDownloadQueue(s => s.add);
 
   const download = async () => {
-    if (!current?.bvid) {
+    if (!currentBvid || !currentCid) {
       return;
     }
 
-    try {
-      let cid = current.cid as number;
-      if (!cid) {
-        const getPageRes = await getPlayerPagelist({
-          bvid: current.bvid,
-        });
-
-        cid = getPageRes?.data?.find(item => item.page === (current.currentPage ?? 1))?.cid as number;
-      }
-
-      await addToDownloadQueue({
-        bvid: current.bvid,
-        cid: String(cid),
-        title: current.title,
-        coverImgUrl: (current as any)?.coverImageUrl || "",
-      });
-    } catch (error) {
-      log.error("[download]", error);
-      addToast({
-        title: "下载失败",
-        color: "danger",
-      });
-    }
+    addDownloadTask({
+      bvid: currentBvid,
+      cid: currentCid,
+      title: pageData?.title as string,
+      coverImgUrl: pageData?.cover as string,
+    });
   };
 
   return (

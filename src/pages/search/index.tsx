@@ -17,7 +17,7 @@ import VideoList from "./video-list";
 
 const Search = () => {
   const [searchType, setSearchType] = useState(SearchType.Video);
-  const { keyword } = useSearchHistory();
+  const keyword = useSearchHistory(s => s.keyword);
 
   const {
     loading,

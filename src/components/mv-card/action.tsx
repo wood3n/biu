@@ -15,7 +15,7 @@ import { RiDownloadLine, RiMore2Line, RiPlayListAddLine, RiStarLine, RiTimeLine 
 import FavFolderSelect from "@/components/fav-folder/select";
 import MVDownloadModal from "@/components/mv-download-modal";
 import { postHistoryToViewAdd } from "@/service/history-toview-add";
-import { usePlayingQueue } from "@/store/playing-queue";
+import { usePlayQueue } from "@/store/play-queue";
 import { useUser } from "@/store/user";
 
 export interface ImageCardMenu {
@@ -28,19 +28,16 @@ export interface ImageCardMenu {
 }
 
 export interface ActionProps {
-  title: React.ReactNode;
-  cover: string;
   bvid: string;
   aid: string;
-  cid?: string;
   menus?: ImageCardMenu[];
   collectMenuTitle?: string;
   onChangeFavSuccess?: () => void;
 }
 
-const Action = ({ title, cover, bvid, aid, cid, menus, collectMenuTitle, onChangeFavSuccess }: ActionProps) => {
+const Action = ({ bvid, aid, menus, collectMenuTitle, onChangeFavSuccess }: ActionProps) => {
   const user = useUser(s => s.user);
-  const { current: currentPlayMV, addToNext } = usePlayingQueue();
+  const addToNext = usePlayQueue(s => s.addToNext);
   const location = useLocation();
 
   const {
@@ -70,15 +67,8 @@ const Action = ({ title, cover, bvid, aid, cid, menus, collectMenuTitle, onChang
       key: "nextPlay",
       icon: <RiPlayListAddLine size={16} />,
       title: "下一首播放",
-      hidden: currentPlayMV?.bvid === bvid,
       onPress: () => {
-        addToNext({
-          title: title as string,
-          bvid,
-          cid,
-          coverImageUrl: cover,
-          singer: "",
-        });
+        addToNext(bvid);
       },
     },
     {

@@ -11,11 +11,11 @@ import MVCard from "@/components/mv-card";
 import ScrollContainer from "@/components/scroll-container";
 import { postHistoryToViewDel } from "@/service/history-toview-del";
 import { getHistoryToViewList } from "@/service/history-toview-list";
-import { usePlayingQueue } from "@/store/playing-queue";
+import { usePlayQueue } from "@/store/play-queue";
 
 const Later = () => {
   const [initialLoading, setInitialLoading] = useState(true);
-  const play = usePlayingQueue(s => s.play);
+  const play = usePlayQueue(s => s.play);
 
   const { isOpen: isOpenDelete, onOpen: onOpenDelete, onOpenChange: onOpenChangeDelete } = useDisclosure();
 
@@ -93,15 +93,7 @@ const Later = () => {
                     <span>{formatDuration(item.duration as number)}</span>
                   </div>
                 }
-                onPress={() =>
-                  play({
-                    title: item.title,
-                    singer: item.owner?.name,
-                    bvid: item.bvid,
-                    cid: item.cid,
-                    coverImageUrl: item.pic,
-                  })
-                }
+                onPress={() => play(item.bvid)}
               />
               <ConfirmModal
                 isOpen={isOpenDelete}
