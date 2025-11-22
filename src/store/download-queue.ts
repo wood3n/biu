@@ -93,23 +93,11 @@ export const useDownloadQueue = create<DownloadState & DownloadAction>()(
           color: "success",
         });
 
-        // 启动下载
-        try {
-          await window.electron.startDownload({ id, filename, audioUrl: audioUrl as string, isLossless });
-          set(state => ({
-            list: state.list.map(i => (i.id === id ? { ...i, status: "downloading" } : i)),
-          }));
-        } catch (e) {
-          set(state => ({
-            list: state.list.map(i => (i.id === id ? { ...i, status: "failed", error: String(e) } : i)),
-          }));
-        }
-
-        // 仅注册一次进度监听
+        // 仅注册一次进度监听（在启动下载前，确保不会错过早期事件）
         if (!subscribed) {
           subscribed = true;
           try {
-            await window.electron.onDownloadProgress(({ id, downloadedBytes, totalBytes, progress, status, error }) => {
+            window.electron.onDownloadProgress(({ id, downloadedBytes, totalBytes, progress, status, error }) => {
               set(state => ({
                 list: state.list.map(i => {
                   if (i.id !== id) return i;
@@ -143,6 +131,16 @@ export const useDownloadQueue = create<DownloadState & DownloadAction>()(
             // ignore subscribe errors
           }
         }
+
+        // 启动下载（不阻塞等待，避免覆盖事件驱动的状态）
+        set(state => ({
+          list: state.list.map(i => (i.id === id ? { ...i, status: "downloading" } : i)),
+        }));
+        window.electron.startDownload({ id, filename, audioUrl: audioUrl as string, isLossless }).catch(e => {
+          set(state => ({
+            list: state.list.map(i => (i.id === id ? { ...i, status: "failed", error: String(e) } : i)),
+          }));
+        });
       },
       addList: async items => {
         for (const item of items) {
