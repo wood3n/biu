@@ -86,6 +86,10 @@ interface ElectronAPI {
   ) => Promise<T>;
   /** 获取当前应用平台：macos | windows | linux */
   getPlatform: () => "macos" | "windows" | "linux";
+  /** 上报当前播放状态到主进程（用于任务栏按钮切换） */
+  updatePlaybackState: (isPlaying: boolean) => void;
+  /** 订阅主进程下发的播放器命令（上一首、下一首、播放/暂停） */
+  onPlayerCommand: (cb: (cmd: "prev" | "next" | "toggle") => void) => Promise<void>;
 }
 
 interface Window {

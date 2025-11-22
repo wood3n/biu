@@ -134,6 +134,15 @@ const updatePlaybackState = () => {
   if ("mediaSession" in navigator) {
     navigator.mediaSession.playbackState = audio.paused ? "paused" : "playing";
   }
+  try {
+    if (window.electron && window.electron.updatePlaybackState) {
+      console.log("updatePlaybackState", !audio.paused);
+      window.electron.updatePlaybackState(!audio.paused);
+    }
+  } catch (err) {
+    // 渲染端上报失败不影响本地状态；仅记录日志便于定位
+    console.warn("[renderer] updatePlaybackState IPC failed:", err);
+  }
 };
 
 const updatePositionState = () => {
@@ -198,8 +207,8 @@ export const usePlayQueue = create<State & Action>()(
       const resetProgress = () => {
         if (audio) {
           audio.pause();
+          set({ currentTime: undefined, duration: undefined });
         }
-        set({ currentTime: undefined, duration: undefined });
       };
 
       return {
@@ -296,7 +305,7 @@ export const usePlayQueue = create<State & Action>()(
           }
         },
         togglePlay: () => {
-          if (audio) {
+          if (audio?.src) {
             if (audio.paused) {
               audio.play().catch(err => toastError(err));
             } else {
@@ -409,7 +418,17 @@ export const usePlayQueue = create<State & Action>()(
           }
         },
         next: async () => {
+          if (!get().list.length) {
+            return;
+          }
+
           resetProgress();
+
+          if (get().list.length === 1) {
+            await loadAndPlayCurrent();
+            return;
+          }
+
           const { playMode, nextBvid, list, currentBvid, currentCid } = get();
           const currentIndex = list.findIndex(item => item.bvid === currentBvid);
 
@@ -418,9 +437,12 @@ export const usePlayQueue = create<State & Action>()(
           }
 
           if (nextBvid) {
-            await get().play(nextBvid);
-            set({ nextBvid: undefined });
-            return;
+            const nextMVData = list.find(item => item.bvid === nextBvid);
+            if (nextMVData) {
+              await get().play(nextMVData.bvid);
+              set({ nextBvid: undefined });
+              return;
+            }
           }
 
           const currentMVData = list[currentIndex];
@@ -434,6 +456,7 @@ export const usePlayQueue = create<State & Action>()(
             let nextIndex = (currentIndex + 1) % list.length;
             if (playMode === PlayMode.Loop) {
               const nextMVData = list[nextIndex];
+              console.log("nextMVData", nextMVData);
               await get().play(nextMVData.bvid);
             }
 
@@ -457,6 +480,10 @@ export const usePlayQueue = create<State & Action>()(
           }
         },
         prev: async () => {
+          if (get().list.length <= 1) {
+            return;
+          }
+
           resetProgress();
 
           const { list, prevBvid, prevCid } = get();
@@ -549,18 +576,21 @@ export const usePlayQueue = create<State & Action>()(
           }
         },
         delMV: bvid => {
-          const currentIndex = get().list.findIndex(item => item.bvid === get().currentBvid);
-          if (bvid === get().currentBvid) {
-            const nextIndex = (currentIndex + 1) % get().list.length;
-            get().play(get().list[nextIndex].bvid);
-          } else {
-            set(state => {
-              const removeIndex = state.list.findIndex(item => item.bvid === bvid);
-              if (removeIndex !== -1) {
-                state.list.splice(removeIndex, 1);
-              }
-            });
+          if (get().list.length === 1) {
+            get().clear();
+            return;
           }
+
+          if (bvid === get().currentBvid) {
+            get().next();
+          }
+
+          set(state => {
+            const removeIndex = state.list.findIndex(item => item.bvid === bvid);
+            if (removeIndex !== -1) {
+              state.list.splice(removeIndex, 1);
+            }
+          });
         },
         delPage: cid => {
           set(state => {
@@ -576,12 +606,10 @@ export const usePlayQueue = create<State & Action>()(
             audio.pause();
             audio.src = "";
           }
+          updatePlaybackState();
+          updatePositionState();
           set({
             isPlaying: false,
-            isMuted: false,
-            volume: 0.5,
-            playMode: PlayMode.Loop,
-            rate: 1,
             currentTime: undefined,
             duration: undefined,
             list: [],

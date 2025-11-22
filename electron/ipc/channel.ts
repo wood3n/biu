@@ -27,4 +27,10 @@ export const channel = {
     get: "http:get",
     post: "http:post",
   },
+  player: {
+    state: "player:state",
+    prev: "player:prev",
+    next: "player:next",
+    toggle: "player:toggle",
+  },
 };

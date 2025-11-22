@@ -3,16 +3,20 @@ import log from "electron-log";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { createTray, destroyTray } from "./createTray"; // 托盘功能
+import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
+
 import { registerIpcHandlers } from "./ipc/index";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
 import { store, storeKey } from "./store";
 import { setupAutoUpdater } from "./updater";
+import { setupWindowsThumbar } from "./windows/thumbar";
+import { createTray, destroyTray } from "./windows/tray"; // 托盘功能
 
 let mainWindow: BrowserWindow | null;
 let webRequestDisposer: { dispose: () => void } | undefined;
 let autoUpdaterCtl: { checkForUpdates: () => Promise<void>; dispose: () => void } | undefined;
+let windowsThumbarCtl: { dispose: () => void } | undefined;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,11 +29,7 @@ function createWindow() {
 
   mainWindow = new BrowserWindow({
     title: "Biu",
-    // windows taskbar icon
-    icon: path.resolve(
-      iconBase,
-      process.platform === "win32" ? "electron/icons/win/logo.ico" : "electron/icons/macos/logo.icns",
-    ),
+    icon: path.resolve(iconBase, ELECTRON_ICON_BASE_PATH, process.platform === "win32" ? "logo.ico" : "logo.icns"),
     show: true,
     hasShadow: true,
     width: 1560,
@@ -80,7 +80,7 @@ function createWindow() {
 
   // MAC dock icon
   if (process.platform === "darwin") {
-    const dockIcon = nativeImage.createFromPath(path.resolve(process.cwd(), "electron/icons/logo.png"));
+    const dockIcon = nativeImage.createFromPath(path.resolve(iconBase, ELECTRON_ICON_BASE_PATH, "logo.png"));
     app.dock?.setIcon(dockIcon);
   }
 
@@ -91,6 +91,9 @@ function createWindow() {
       mode: "detach",
     });
   }
+
+  // 初始化 Windows 任务栏缩略按钮，并监听播放状态更新
+  windowsThumbarCtl = setupWindowsThumbar(mainWindow!, iconBase);
 
   // 从store获取配置，判断是否关闭窗口时隐藏还是退出程序
   mainWindow.on("close", event => {
@@ -168,6 +171,13 @@ app.on("will-quit", () => {
   } catch (err) {
     // 修改说明：自动更新模块释放失败时记录日志
     log.warn("[main] autoUpdater dispose failed:", err);
+  }
+
+  try {
+    windowsThumbarCtl?.dispose();
+    windowsThumbarCtl = undefined;
+  } catch (err) {
+    log.warn("[main] windowsThumbar dispose failed:", err);
   }
 
   // 开发环境：Electron 退出时同时结束 Node.js 开发进程

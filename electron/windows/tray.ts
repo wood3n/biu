@@ -4,7 +4,9 @@ import { Tray, nativeImage, Menu, app } from "electron";
 import log from "electron-log";
 import path from "node:path";
 
-import { channel } from "./ipc/channel";
+import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
+
+import { channel } from "../ipc/channel";
 
 /**
  * Windows 系统托盘
@@ -33,11 +35,11 @@ function createTray({
   }
 
   const iconBase = app.isPackaged ? process.resourcesPath : process.cwd();
-  const trayIconPath = path.resolve(iconBase, "electron/icons/win/tray.ico");
+  const trayIconPath = path.resolve(iconBase, ELECTRON_ICON_BASE_PATH, "tray.ico");
   let trayIcon = nativeImage.createFromPath(trayIconPath);
 
   if (trayIcon.isEmpty()) {
-    const fallbackPath = path.resolve(iconBase, "electron/icons/win/logo.ico");
+    const fallbackPath = path.resolve(iconBase, ELECTRON_ICON_BASE_PATH, "logo.ico");
     const fallback = nativeImage.createFromPath(fallbackPath);
     if (!fallback.isEmpty()) {
       trayIcon = fallback;

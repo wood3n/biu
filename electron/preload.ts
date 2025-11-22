@@ -5,6 +5,9 @@ import { channel } from "./ipc/channel";
 // 防止重复注册 router:navigate 监听造成 MaxListenersExceededWarning
 let navigateHandler: ((_: Electron.IpcRendererEvent, path: string) => void) | null = null;
 let downloadProgressHandler: ((_: Electron.IpcRendererEvent, params: DownloadCallbackParams) => void) | null = null;
+let playerPrevHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
+let playerNextHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
+let playerToggleHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
 
 // 统一平台字符串：macos | windows | linux
 const platform: "macos" | "windows" | "linux" =
@@ -70,6 +73,68 @@ const api: ElectronAPI = {
   ) => ipcRenderer.invoke(channel.http.post, { url, body, ...options }) as Promise<T>,
   // 返回当前应用运行的平台（macos/windows/linux）
   getPlatform: () => platform,
+  // 上报当前播放状态（播放/暂停）给主进程，用于更新任务栏缩略按钮
+  updatePlaybackState: (isPlaying: boolean) => {
+    try {
+      ipcRenderer.send(channel.player.state, isPlaying);
+    } catch (error) {
+      console.error("[preload] 上报播放状态失败:", error);
+    }
+  },
+  // 订阅主进程下发的播放器命令（上一首、下一首、播放/暂停）
+  onPlayerCommand: async (cb: (cmd: "prev" | "next" | "toggle") => void) => {
+    // 先移除旧的监听，避免重复
+    if (playerPrevHandler) {
+      try {
+        ipcRenderer.removeListener(channel.player.prev, playerPrevHandler);
+      } catch (error) {
+        console.error("[preload] 移除上一首监听器失败:", error);
+      }
+      playerPrevHandler = null;
+    }
+    if (playerNextHandler) {
+      try {
+        ipcRenderer.removeListener(channel.player.next, playerNextHandler);
+      } catch (error) {
+        console.error("[preload] 移除下一首监听器失败:", error);
+      }
+      playerNextHandler = null;
+    }
+    if (playerToggleHandler) {
+      try {
+        ipcRenderer.removeListener(channel.player.toggle, playerToggleHandler);
+      } catch (error) {
+        console.error("[preload] 移除播放/暂停监听器失败:", error);
+      }
+      playerToggleHandler = null;
+    }
+
+    playerPrevHandler = () => {
+      try {
+        cb("prev");
+      } catch (error) {
+        console.error("[preload] player prev 回调失败:", error);
+      }
+    };
+    playerNextHandler = () => {
+      try {
+        cb("next");
+      } catch (error) {
+        console.error("[preload] player next 回调失败:", error);
+      }
+    };
+    playerToggleHandler = () => {
+      try {
+        cb("toggle");
+      } catch (error) {
+        console.error("[preload] player toggle 回调失败:", error);
+      }
+    };
+
+    ipcRenderer.on(channel.player.prev, playerPrevHandler);
+    ipcRenderer.on(channel.player.next, playerNextHandler);
+    ipcRenderer.on(channel.player.toggle, playerToggleHandler);
+  },
 };
 
 contextBridge.exposeInMainWorld("electron", api);

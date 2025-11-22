@@ -1,13 +1,16 @@
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import { logger } from "@rsbuild/core";
+import fs from "node:fs/promises";
 import path from "node:path";
 import { rollup, watch, type RollupOptions, type OutputOptions, type RollupWatcher } from "rollup";
 import esbuild from "rollup-plugin-esbuild";
 import tsconfigPaths from "rollup-plugin-tsconfig-paths";
 
-const ELECTRON_OUT_DIR = path.resolve(".electron");
-const MAIN_ENTRY = path.resolve("electron/main.ts");
-const PRELOAD_ENTRY = path.resolve("electron/preload.ts");
+import { ELECTRON_OUT_DIR, ICONS_DST_DIR } from "../shared/path";
+
+export const MAIN_ENTRY = path.resolve(process.cwd(), "electron/main.ts");
+export const PRELOAD_ENTRY = path.resolve(process.cwd(), "electron/preload.ts");
+export const ICONS_SRC_DIR = path.resolve(process.cwd(), "electron/icons");
 
 function createRollupOptions(input: string): RollupOptions {
   return {
@@ -72,10 +75,62 @@ export async function buildElectronConfig(mode: "development" | "production" = "
   const preloadOptions = createRollupOptions(PRELOAD_ENTRY);
   const preloadOutput = createOutput("cjs", "preload");
 
+  async function ensureDir(dir: string) {
+    await fs.mkdir(dir, { recursive: true }).catch(() => void 0);
+  }
+
+  async function pathExists(p: string) {
+    try {
+      await fs.access(p);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async function copyIconsForPlatform() {
+    const srcExists = await pathExists(ICONS_SRC_DIR);
+    if (!srcExists) {
+      logger.warn(`[electron] icons source not found: ${ICONS_SRC_DIR}`);
+      return;
+    }
+    await ensureDir(ICONS_DST_DIR);
+
+    const platform = process.platform;
+    const rootLogo = path.join(ICONS_SRC_DIR, "logo.png");
+    if (await pathExists(rootLogo)) {
+      try {
+        await fs.copyFile(rootLogo, path.join(ICONS_DST_DIR, "logo.png"));
+      } catch (err) {
+        logger.warn(`[electron] failed to copy root logo.png: ${String((err && (err as any).message) || err)}`);
+      }
+    }
+
+    const platformDir = platform === "win32" ? "win" : platform === "darwin" ? "macos" : null;
+    if (platformDir) {
+      const srcDir = path.join(ICONS_SRC_DIR, platformDir);
+      const hasPlatformDir = await pathExists(srcDir);
+      if (!hasPlatformDir) {
+        logger.warn(`[electron] icons platform dir not found: ${srcDir}`);
+        return;
+      }
+      try {
+        await ensureDir(ICONS_DST_DIR);
+        await fs.cp(srcDir, ICONS_DST_DIR, { recursive: true });
+        logger.info(`[electron] copied icons dir '${platformDir}' → ${ICONS_DST_DIR}`);
+      } catch (err) {
+        logger.warn(
+          `[electron] failed to copy icons dir '${platformDir}': ${String((err && (err as any).message) || err)}`,
+        );
+      }
+    }
+  }
+
   if (mode === "development") {
     const mainWatcher = watch({ ...mainOptions, output: mainOutput });
     const preloadWatcher = watch({ ...preloadOptions, output: preloadOutput });
     await Promise.all([waitForFirstBuild(mainWatcher, "main"), waitForFirstBuild(preloadWatcher, "preload")]);
+    await copyIconsForPlatform();
     return { mainWatcher, preloadWatcher } as unknown as RollupWatcher;
   }
 
@@ -99,4 +154,7 @@ export async function buildElectronConfig(mode: "development" | "production" = "
     logger.warn("[electron] expected preload.cjs not found in CJS build");
   }
   logger.info(`[electron] bundles written to ${ELECTRON_OUT_DIR}`);
+
+  // Copy platform-specific icons into .electron/icons for runtime/dev convenience
+  await copyIconsForPlatform();
 }

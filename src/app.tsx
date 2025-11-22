@@ -6,6 +6,7 @@ import moment from "moment";
 
 import Theme from "./components/theme";
 import routes from "./routes";
+import { usePlayQueue } from "./store/play-queue";
 
 import "moment/locale/zh-cn";
 
@@ -23,6 +24,22 @@ export function App() {
       window.electron.navigate(path => navigate(path));
     }
   }, [navigate]);
+
+  // 订阅来自主进程的任务栏缩略按钮命令
+  useEffect(() => {
+    if (window.electron && window.electron.onPlayerCommand) {
+      window.electron.onPlayerCommand(cmd => {
+        const { prev, next, togglePlay } = usePlayQueue.getState();
+        if (cmd === "prev") {
+          prev();
+        } else if (cmd === "next") {
+          next();
+        } else if (cmd === "toggle") {
+          togglePlay();
+        }
+      });
+    }
+  }, []);
 
   return (
     <HeroUIProvider navigate={navigate} useHref={useHref} locale="zh-CN">
