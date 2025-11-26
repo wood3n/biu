@@ -27,4 +27,7 @@ export const channel = {
     get: "http:get",
     post: "http:post",
   },
+  cookie: {
+    setLoginCookies: "cookie:set-login-cookies",
+  },
 };

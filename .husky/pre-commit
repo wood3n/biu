@@ -1,1 +1,28 @@
-npx lint-staged
+#!/usr/bin/env sh
+
+# 获取脚本所在目录的绝对路径
+cd "$(dirname "$0")/.." || exit
+
+# 添加 Node.js 到 PATH（Windows Git Bash 环境）
+# 尝试多个可能的 Node.js 路径
+if [ -d "/e/Program Files/nodejs" ]; then
+  export PATH="/e/Program Files/nodejs:$PATH"
+elif [ -d "/c/Program Files/nodejs" ]; then
+  export PATH="/c/Program Files/nodejs:$PATH"
+elif [ -d "$HOME/AppData/Roaming/npm" ]; then
+  export PATH="$HOME/AppData/Roaming/npm:$PATH"
+fi
+
+# 优先使用 node_modules/.bin 中的工具（最可靠）
+if [ -f "node_modules/.bin/lint-staged" ]; then
+  node_modules/.bin/lint-staged
+elif command -v pnpm >/dev/null 2>&1; then
+  pnpm exec lint-staged
+elif command -v npm >/dev/null 2>&1; then
+  npm exec lint-staged
+elif command -v npx >/dev/null 2>&1; then
+  npx lint-staged
+else
+  echo "Error: Cannot find lint-staged. Please install dependencies first."
+  exit 1
+fi

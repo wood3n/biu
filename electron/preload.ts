@@ -70,6 +70,9 @@ const api: ElectronAPI = {
   ) => ipcRenderer.invoke(channel.http.post, { url, body, ...options }) as Promise<T>,
   // 返回当前应用运行的平台（macos/windows/linux）
   getPlatform: () => platform,
+  // 设置登录 Cookie
+  setLoginCookies: (cookies: Array<{ name: string; value: string; expirationDate?: number }>) =>
+    ipcRenderer.invoke(channel.cookie.setLoginCookies, cookies) as Promise<boolean>,
 };
 
 contextBridge.exposeInMainWorld("electron", api);

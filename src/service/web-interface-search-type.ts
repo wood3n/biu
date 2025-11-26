@@ -218,6 +218,7 @@ export async function getWebInterfaceWbiSearchType<T = any>(
 ): Promise<WebSearchTypeResponse<T>> {
   return apiRequest.get<WebSearchTypeResponse<T>>("/x/web-interface/wbi/search/type", {
     params,
+    useWbi: true,
   });
 }
 
