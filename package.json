@@ -1,6 +1,6 @@
 {
   "name": "biu",
-  "version": "1.5.2",
+  "version": "1.5.1",
   "private": true,
   "type": "module",
   "description": "music application based on bilibili api",

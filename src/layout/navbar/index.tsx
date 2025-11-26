@@ -1,15 +1,10 @@
 import clx from "classnames";
 
-import { useUser } from "@/store/user";
-
-import Login from "./login";
 import Navigation from "./navigation";
 import Search from "./search";
 import UserCard from "./user";
 
 const LayoutNavbar = () => {
-  const { user } = useUser();
-
   const platform = window.electron.getPlatform();
 
   return (
@@ -20,10 +15,10 @@ const LayoutNavbar = () => {
       </div>
       <div
         className={clx("window-no-drag flex items-center justify-center", {
-          "pr-[140px]": platform === "windows",
+          "pr-[140px]": platform === "windows" || platform === "linux",
         })}
       >
-        {user?.isLogin ? <UserCard /> : <Login />}
+        <UserCard />
       </div>
     </div>
   );

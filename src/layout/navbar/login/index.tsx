@@ -1,27 +1,25 @@
 import React from "react";
 
-import { Button, Modal, ModalBody, ModalContent, useDisclosure } from "@heroui/react";
+import { Modal, ModalBody, ModalContent } from "@heroui/react";
 
 import QrcodeLogin from "./qrcode-login";
 
-const Login = () => {
-  const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
+interface Props {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+}
 
+const Login = ({ isOpen, onOpenChange }: Props) => {
   return (
-    <>
-      <Button color="primary" variant="flat" onPress={onOpen} className="window-no-drag text-white">
-        登录
-      </Button>
-      <Modal size="xs" isOpen={isOpen} isDismissable={false} onOpenChange={onOpenChange}>
-        <ModalContent>
-          <ModalBody className="flex-row items-center justify-center">
-            <QrcodeLogin onClose={onClose} />
-            {/* <Divider className="mt-6 h-42" orientation="vertical" />
-            <PasswordLogin onSuccess={onClose} /> */}
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </>
+    <Modal size="xs" isOpen={isOpen} isDismissable={false} onOpenChange={onOpenChange}>
+      <ModalContent>
+        <ModalBody className="flex-row items-center justify-center">
+          <QrcodeLogin onClose={() => onOpenChange(false)} />
+          {/* <Divider className="mt-6 h-42" orientation="vertical" />
+          <PasswordLogin onSuccess={onClose} /> */}
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   );
 };
 

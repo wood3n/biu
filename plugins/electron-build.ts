@@ -5,7 +5,7 @@ import pkg from "../package.json";
 
 export async function buildElectron() {
   await electronBuild({
-    // 不在构建阶段直接发布，统一由 changelogen 上传产物
+    publish: "never",
     config: {
       appId: "com.biu.wood3n",
       productName: "Biu",
@@ -93,7 +93,12 @@ export async function buildElectron() {
         vendor: "wood3n",
         executableName: "Biu",
       },
-      publish: null,
+      publish: {
+        provider: "github",
+        owner: "wood3n",
+        repo: "biu",
+        releaseType: "release",
+      },
     },
   })
     .then(result => {
