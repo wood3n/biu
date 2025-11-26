@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.5.3-beta.1](https://github.com/wood3n/biu/compare/v1.5.3-beta.0...v1.5.3-beta.1) (2025-11-26)
+
 ## [1.5.3-beta.0](https://github.com/wood3n/biu/compare/v1.5.2...v1.5.3-beta.0) (2025-11-26)
 
 ### 🩹 Fixes
