@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.3-beta.0](https://github.com/wood3n/biu/compare/v1.5.2...v1.5.3-beta.0) (2025-11-26)
+
+### 🩹 Fixes
+
+* 修复登录按钮显示问题 ([b75e775](https://github.com/wood3n/biu/commit/b75e775e62596e8f042c6d0b6e35b852f8c2e5f6))
+
+### ⚒️ Chore
+
+* 修改版本号错误 ([3a4c9f0](https://github.com/wood3n/biu/commit/3a4c9f0d08acbafbe1065de669b694488815cbd4))
+
+### 🤖 CI
+
+* 修改打包CI配置 ([78e520e](https://github.com/wood3n/biu/commit/78e520eec410ae8cb4a05ae4244568d185723ebd))
+
 ## [1.5.2](https://github.com/wood3n/biu/compare/v1.5.1...v1.5.2) (2025-11-22)
 
 ### 🔥 Performance
