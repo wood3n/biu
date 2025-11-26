@@ -38,13 +38,30 @@ const QrcodeLogin = ({ onClose }: QrcodeLoginProps) => {
       refreshDeps: [qrcodeData?.qrcode_key],
       pollingInterval: 2000,
       pollingWhenHidden: false,
-      onSuccess: pollData => {
+      onSuccess: async pollData => {
         if (pollData?.code === 0) {
-          updateUser();
-
           const { refresh_token, timestamp, url } = pollData;
 
           const urlParams = getUrlParams(url || "");
+
+          // 手动设置登录 Cookie 到 Electron session
+          if (window.electron?.setLoginCookies && urlParams.SESSDATA) {
+            const expires = urlParams.Expires ? Number(urlParams.Expires) : 30 * 24 * 3600;
+            const expirationDate = Math.floor(Date.now() / 1000 + expires);
+            const cookies = [
+              { name: "SESSDATA", value: urlParams.SESSDATA as string, expirationDate },
+              ...(urlParams.bili_jct
+                ? [{ name: "bili_jct", value: urlParams.bili_jct as string, expirationDate }]
+                : []),
+              ...(urlParams.DedeUserID
+                ? [{ name: "DedeUserID", value: urlParams.DedeUserID as string, expirationDate }]
+                : []),
+              ...(urlParams.DedeUserID__ckMd5
+                ? [{ name: "DedeUserID__ckMd5", value: urlParams.DedeUserID__ckMd5 as string, expirationDate }]
+                : []),
+            ];
+            await window.electron.setLoginCookies(cookies);
+          }
 
           updateToken({
             refresh_token,
@@ -52,6 +69,13 @@ const QrcodeLogin = ({ onClose }: QrcodeLoginProps) => {
             url,
             ...urlParams,
           });
+
+          // 等待用户信息更新完成
+          try {
+            await updateUser();
+          } catch (error) {
+            console.error("[qrcode-login] 更新用户信息失败:", error);
+          }
 
           addToast({ title: "登录成功", color: "success" });
           onClose();

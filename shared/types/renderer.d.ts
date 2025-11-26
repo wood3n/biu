@@ -86,6 +86,8 @@ interface ElectronAPI {
   ) => Promise<T>;
   /** 获取当前应用平台：macos | windows | linux */
   getPlatform: () => "macos" | "windows" | "linux";
+  /** 设置登录 Cookie 到 Electron session */
+  setLoginCookies: (cookies: Array<{ name: string; value: string; expirationDate?: number }>) => Promise<boolean>;
 }
 
 interface Window {
