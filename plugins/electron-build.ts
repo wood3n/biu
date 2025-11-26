@@ -5,7 +5,7 @@ import pkg from "../package.json";
 
 export async function buildElectron() {
   await electronBuild({
-    publish: "never",
+    publish: process.env.GH_TOKEN ? "always" : "never",
     config: {
       appId: "com.biu.wood3n",
       productName: "Biu",
