@@ -6,7 +6,7 @@ import { ELECTRON_OUT_DIRNAME, ELECTRON_ICON_BASE_PATH } from "../shared/path";
 
 export async function buildElectron() {
   await electronBuild({
-    // 不在构建阶段直接发布，统一由 changelogen 上传产物
+    publish: process.env.GH_TOKEN ? "always" : "never",
     config: {
       appId: "com.biu.wood3n",
       productName: "Biu",
@@ -16,21 +16,16 @@ export async function buildElectron() {
       buildVersion: pkg.version,
       asar: true,
       electronCompile: false,
-      // 动态压缩：CI 使用 maximum，本地使用 store 以提升速度
-      compression: process.env.NODE_ENV === "production" ? "maximum" : "store",
-      // 是否移除 package.json 的 scripts/keywords 定义
+      compression: "maximum",
       removePackageScripts: true,
       removePackageKeywords: true,
-      // 无原生模块时关闭重建以提速
       npmRebuild: false,
       nodeGypRebuild: false,
       buildDependenciesFromSource: false,
-      // Only include necessary Electron locales to reduce runtime size
       electronLanguages: ["zh-CN"],
       directories: {
         output: "dist/artifacts",
       },
-      // 运行时附加资源（保持相对路径 electron/icons 可用）
       extraResources: [{ from: ELECTRON_ICON_BASE_PATH, to: ELECTRON_ICON_BASE_PATH }],
       files: [
         `${ELECTRON_OUT_DIRNAME}/**`,
@@ -87,7 +82,12 @@ export async function buildElectron() {
         vendor: "wood3n",
         executableName: "Biu",
       },
-      publish: null,
+      publish: {
+        provider: "github",
+        owner: "wood3n",
+        repo: "biu",
+        releaseType: "release",
+      },
     },
   })
     .then(result => {

@@ -1,0 +1,60 @@
+name: Test Build
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: test-build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    env:
+      HUSKY: 0
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+        arch: [x64, arm64]
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Use Node.js lts
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and package application
+        run: pnpm build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: biu-test-${{ matrix.os }}-${{ matrix.arch }}
+          path: |
+            dist/artifacts/*.exe
+            dist/artifacts/*.dmg
+            dist/artifacts/*.zip
+            dist/artifacts/*.AppImage
+            dist/artifacts/*.deb
+            dist/artifacts/*.rpm
+            dist/artifacts/*.yml
+            dist/artifacts/*.blockmap
+          if-no-files-found: warn
+          retention-days: 2

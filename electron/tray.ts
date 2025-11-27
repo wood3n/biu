@@ -1,12 +1,13 @@
 import type { BrowserWindow, MenuItemConstructorOptions } from "electron";
 
-import { Tray, nativeImage, Menu, app } from "electron";
+import { Tray, nativeImage, Menu } from "electron";
 import log from "electron-log";
 import path from "node:path";
 
 import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
 
-import { channel } from "../ipc/channel";
+import { channel } from "./ipc/channel";
+import { IconBase } from "./path";
 
 /**
  * Windows 系统托盘
@@ -20,9 +21,6 @@ function createTray({
   getMainWindow,
   onExit,
 }: { getMainWindow?: () => BrowserWindow | null; onExit?: () => void } = {}) {
-  // 仅在 Windows 创建托盘
-  if (process.platform !== "win32") return null;
-
   // 若已存在旧实例，先销毁避免重复创建
   if (tray) {
     try {
@@ -34,22 +32,8 @@ function createTray({
     tray = null;
   }
 
-  const iconBase = app.isPackaged ? process.resourcesPath : process.cwd();
-  const trayIconPath = path.resolve(iconBase, ELECTRON_ICON_BASE_PATH, "tray.ico");
-  let trayIcon = nativeImage.createFromPath(trayIconPath);
-
-  if (trayIcon.isEmpty()) {
-    const fallbackPath = path.resolve(iconBase, ELECTRON_ICON_BASE_PATH, "logo.ico");
-    const fallback = nativeImage.createFromPath(fallbackPath);
-    if (!fallback.isEmpty()) {
-      trayIcon = fallback;
-    } else {
-      log.error("[tray] icon not found:", trayIconPath, "fallback:", fallbackPath);
-      return null;
-    }
-  }
-
-  tray = new Tray(trayIcon);
+  const trayIconPath = path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, "tray.ico");
+  tray = new Tray(nativeImage.createFromPath(trayIconPath));
   tray.setToolTip("Biu");
 
   // 左键单击：显示/隐藏主窗口

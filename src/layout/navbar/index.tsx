@@ -1,16 +1,36 @@
+import { useEffect } from "react";
+
 import clx from "classnames";
 
-import { useUser } from "@/store/user";
+import { useAppUpdateStore } from "@/store/app-update";
 
-import Login from "./login";
 import Navigation from "./navigation";
 import Search from "./search";
+import UpdateNotify from "./update-notify";
 import UserCard from "./user";
 
-const LayoutNavbar = () => {
-  const { user } = useUser();
+const platform = window.electron.getPlatform();
 
-  const platform = window.electron.getPlatform();
+const LayoutNavbar = () => {
+  const hasUpdate = useAppUpdateStore(s => s.hasUpdate);
+  const setUpdate = useAppUpdateStore(s => s.setUpdate);
+
+  useEffect(() => {
+    const removeListener = window.electron.onDownloadAppProgress(info => {
+      if (info.type === "downloaded" && info.releaseInfo) {
+        setUpdate({
+          hasUpdate: true,
+          isDownloaded: true,
+          latestVersion: info.releaseInfo.latestVersion,
+          releaseNotes: info.releaseInfo.releaseNotes,
+        });
+      }
+    });
+
+    return () => {
+      removeListener();
+    };
+  }, []);
 
   return (
     <div className="window-drag flex h-full items-center justify-between px-4">
@@ -19,11 +39,12 @@ const LayoutNavbar = () => {
         <Search />
       </div>
       <div
-        className={clx("window-no-drag flex items-center justify-center", {
-          "pr-[140px]": platform === "windows",
+        className={clx("window-no-drag flex items-center justify-center space-x-4", {
+          "pr-[140px]": platform === "windows" || platform === "linux",
         })}
       >
-        {user?.isLogin ? <UserCard /> : <Login />}
+        {hasUpdate && <UpdateNotify />}
+        <UserCard />
       </div>
     </div>
   );

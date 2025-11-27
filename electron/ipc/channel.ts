@@ -33,4 +33,11 @@ export const channel = {
     next: "player:next",
     toggle: "player:toggle",
   },
+  app: {
+    getVersion: "app:get-version",
+    checkUpdate: "app:check-update",
+    downloadUpdate: "app:download-update",
+    updateMessage: "app:update-message",
+    quitAndInstall: "app:quit-and-install",
+  },
 };

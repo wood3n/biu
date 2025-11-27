@@ -1,16 +1,19 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import { Form, Input, Slider, Switch, Button, RadioGroup, Radio, Divider } from "@heroui/react";
+import { RiArrowRightLongLine } from "@remixicon/react";
 import { useShallow } from "zustand/react/shallow";
 
 import ColorPicker from "@/components/color-picker";
 import FontSelect from "@/components/font-select";
 import ScrollContainer from "@/components/scroll-container";
+import { useAppUpdateStore } from "@/store/app-update";
 import { useSettings } from "@/store/settings";
 import { defaultAppSettings } from "@shared/settings/app-settings";
 
-const SettingsPage: React.FC = () => {
+const SettingsPage = () => {
+  const [appVersion, setAppVersion] = useState<string>("");
   const {
     fontFamily,
     backgroundColor,
@@ -33,6 +36,8 @@ const SettingsPage: React.FC = () => {
     })),
   );
   const updateSettings = useSettings(s => s.update);
+  const hasUpdate = useAppUpdateStore(s => s.hasUpdate);
+  const latestVersion = useAppUpdateStore(s => s.latestVersion);
 
   const { control, watch, setValue } = useForm<AppSettings>({
     defaultValues: {
@@ -55,9 +60,13 @@ const SettingsPage: React.FC = () => {
     return () => subscription.unsubscribe();
   }, [watch, updateSettings]);
 
+  useEffect(() => {
+    window.electron.getAppVersion().then(v => setAppVersion(v));
+  }, []);
+
   return (
     <ScrollContainer className="h-full w-full">
-      <div className="m-auto max-w-[900px] px-8 py-6">
+      <div className="m-auto max-w-[900px] px-8 py-10">
         <Form className="space-y-6">
           <h1>设置</h1>
           <h2>外观</h2>
@@ -226,6 +235,24 @@ const SettingsPage: React.FC = () => {
                 render={({ field }) => <Switch isSelected={field.value} onValueChange={field.onChange} />}
               />
             </div>
+          </div>
+          <Divider />
+          <h2>关于应用</h2>
+          <div className="flex w-full items-center justify-between">
+            <div className="mr-6 flex items-center space-x-1">
+              <span>当前版本 {appVersion}</span>
+              {hasUpdate && Boolean(latestVersion) && (
+                <>
+                  <RiArrowRightLongLine size={16} />
+                  <span className="text-primary">{latestVersion}</span>
+                </>
+              )}
+            </div>
+            {hasUpdate && (
+              <Button color="primary" onPress={window.electron.quitAndInstall}>
+                安装新版本
+              </Button>
+            )}
           </div>
         </Form>
       </div>

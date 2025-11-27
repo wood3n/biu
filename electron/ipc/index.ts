@@ -1,3 +1,4 @@
+import { registerAppHandlers } from "./app";
 import { registerDialogHandlers } from "./dialog";
 import { registerDownloadHandlers } from "./download";
 import { registerFontHandlers } from "./font";
@@ -10,4 +11,5 @@ export function registerIpcHandlers() {
   registerFontHandlers();
   registerDownloadHandlers();
   registerRequestHandlers();
+  registerAppHandlers();
 }

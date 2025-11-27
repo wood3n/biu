@@ -1,4 +1,5 @@
 import { app, BrowserWindow, nativeImage } from "electron";
+import isDev from "electron-is-dev";
 import log from "electron-log";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,28 +9,22 @@ import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
 import { registerIpcHandlers } from "./ipc/index";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
+import { IconBase } from "./path";
 import { store, storeKey } from "./store";
-import { setupAutoUpdater } from "./updater";
+import { createTray, destroyTray } from "./tray"; // 托盘功能
+import { autoUpdater, setupAutoUpdater, stopCheckForUpdates } from "./updater";
 import { setupWindowsThumbar } from "./windows/thumbar";
-import { createTray, destroyTray } from "./windows/tray"; // 托盘功能
-
-let mainWindow: BrowserWindow | null;
-let webRequestDisposer: { dispose: () => void } | undefined;
-let autoUpdaterCtl: { checkForUpdates: () => Promise<void>; dispose: () => void } | undefined;
-let windowsThumbarCtl: { dispose: () => void } | undefined;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 log.initialize();
 
+let mainWindow: BrowserWindow | null;
 function createWindow() {
-  // 计算图标基准路径：打包后使用 resourcesPath，开发用 cwd
-  const iconBase = app.isPackaged ? process.resourcesPath : process.cwd();
-
   mainWindow = new BrowserWindow({
     title: "Biu",
-    icon: path.resolve(iconBase, ELECTRON_ICON_BASE_PATH, process.platform === "win32" ? "logo.ico" : "logo.icns"),
+    icon: path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, process.platform === "win32" ? "logo.ico" : "logo.icns"),
     show: true,
     hasShadow: true,
     width: 1560,
@@ -44,14 +39,14 @@ function createWindow() {
     // 无边框
     frame: false,
     transparent: false,
-    // macos不需要设置frame-false，只需要titleBarStyle即可隐藏边框，因此也不需要自定义窗口操作
     // titleBarStyle: "hiddenInset",
     titleBarStyle: "hidden",
+    titleBarOverlay: false,
     // expose window controls in Windows/Linux
     ...(process.platform !== "darwin"
       ? {
           titleBarOverlay: {
-            color: "#00000000",
+            color: "rgba(0,0,0,0)",
             symbolColor: "#ffffff",
             height: 64,
           },
@@ -63,6 +58,7 @@ function createWindow() {
       webSecurity: true,
       contextIsolation: true,
       nodeIntegration: false,
+      devTools: isDev,
     },
   });
 
@@ -80,20 +76,22 @@ function createWindow() {
 
   // MAC dock icon
   if (process.platform === "darwin") {
-    const dockIcon = nativeImage.createFromPath(path.resolve(iconBase, ELECTRON_ICON_BASE_PATH, "logo.png"));
+    const dockIcon = nativeImage.createFromPath(path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, "logo.png"));
     app.dock?.setIcon(dockIcon);
   }
 
   const indexPath = path.resolve(__dirname, "../dist/web/index.html");
   mainWindow.loadFile(indexPath);
-  if (!app.isPackaged) {
+  if (isDev) {
     mainWindow.webContents.openDevTools({
-      mode: "detach",
+      mode: "bottom",
     });
   }
 
   // 初始化 Windows 任务栏缩略按钮，并监听播放状态更新
-  windowsThumbarCtl = setupWindowsThumbar(mainWindow!, iconBase);
+  if (process.platform === "win32") {
+    setupWindowsThumbar(mainWindow);
+  }
 
   // 从store获取配置，判断是否关闭窗口时隐藏还是退出程序
   mainWindow.on("close", event => {
@@ -115,9 +113,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  // 接入系统托盘（仅 Windows 生效）
   createTray({
-    // 获取主窗口实例（惰性读取，避免闭包引用旧值）
     getMainWindow: () => mainWindow,
     // 退出：设置 app.quitting 标记，避免 close 事件拦截
     onExit: () => {
@@ -128,16 +124,12 @@ app.whenReady().then(() => {
 
   injectAuthCookie();
 
-  // 安装统一的 webRequest 拦截器
-  webRequestDisposer = installWebRequestInterceptors();
-
-  // 初始化并触发自动更新检查（仅打包环境）
-  if (app.isPackaged) {
-    autoUpdaterCtl = setupAutoUpdater({ getMainWindow: () => mainWindow });
-    autoUpdaterCtl.checkForUpdates().catch(err => log.error("[autoUpdater] check failed:", err));
-  }
+  installWebRequestInterceptors();
 
   registerIpcHandlers();
+
+  setupAutoUpdater();
+
   createWindow();
 });
 
@@ -156,32 +148,11 @@ app.on("will-quit", () => {
     log.warn("[main] destroyTray failed:", err);
   }
 
-  try {
-    // 停止拦截逻辑
-    webRequestDisposer?.dispose();
-    webRequestDisposer = undefined;
-  } catch (err) {
-    // 修改说明：网络拦截器清理失败时记录日志，便于定位
-    log.warn("[main] webRequest dispose failed:", err);
-  }
-
-  try {
-    autoUpdaterCtl?.dispose();
-    autoUpdaterCtl = undefined;
-  } catch (err) {
-    // 修改说明：自动更新模块释放失败时记录日志
-    log.warn("[main] autoUpdater dispose failed:", err);
-  }
-
-  try {
-    windowsThumbarCtl?.dispose();
-    windowsThumbarCtl = undefined;
-  } catch (err) {
-    log.warn("[main] windowsThumbar dispose failed:", err);
-  }
+  stopCheckForUpdates();
+  autoUpdater.removeAllListeners();
 
   // 开发环境：Electron 退出时同时结束 Node.js 开发进程
-  if (!app.isPackaged) {
+  if (isDev) {
     process.exit(0);
   }
 });
@@ -192,6 +163,28 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
+
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  // 2. 如果获取锁失败，说明已经有实例在运行了
+  // 直接退出当前这个新的实例
+  app.quit();
+} else {
+  // 3. 如果获取锁成功，说明这是第一个实例
+
+  // 监听 'second-instance' 事件
+  // 当用户尝试启动第二个实例时，第一个实例（持有锁的实例）会收到这个事件
+  app.on("second-instance", () => {
+    // 这里的逻辑是：如果有人试图打开第二个，我们就把第一个实例窗口置顶显示
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore(); // 如果窗口最小化了，先恢复
+      }
+      mainWindow.focus(); // 聚焦窗口
+    }
+  });
+}
 
 // 全局异常处理，避免未捕获异常导致进程异常驻留
 process.on("uncaughtException", err => {

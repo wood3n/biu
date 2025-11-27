@@ -48,6 +48,7 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           contentBackgroundColor: state.contentBackgroundColor,
           primaryColor: state.primaryColor,
           borderRadius: state.borderRadius,
+          appUpdate: state.appUpdate,
         };
       },
     },

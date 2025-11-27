@@ -1,6 +1,6 @@
 {
   "name": "biu",
-  "version": "1.5.1",
+  "version": "1.5.3-beta.0",
   "private": true,
   "type": "module",
   "description": "music application based on bilibili api",
@@ -30,7 +30,10 @@
     "dev": "rsbuild dev",
     "build": "rsbuild build",
     "dev:rsdoctor": "cross-env RSDOCTOR=true rsbuild dev",
-    "build:rsdoctor": "cross-env RSDOCTOR=true rsbuild build"
+    "build:rsdoctor": "cross-env RSDOCTOR=true rsbuild build",
+    "release": "release-it",
+    "release:beta": "release-it --preRelease=beta",
+    "release:alpha": "release-it --preRelease=alpha"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -42,6 +45,7 @@
     "ahooks": "^3.9.5",
     "axios": "^1.11.0",
     "classnames": "^2.5.1",
+    "electron-is-dev": "^3.0.1",
     "electron-log": "^5.1.2",
     "electron-store": "^10.1.0",
     "electron-updater": "^6.2.1",
@@ -80,6 +84,7 @@
     "@rsbuild/plugin-svgr": "^1.2.2",
     "@rsdoctor/rspack-plugin": "^1.2.3",
     "@tailwindcss/postcss": "^4.1.13",
+    "@tailwindcss/typography": "^0.5.19",
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/chokidar": "^2.1.7",
     "@types/fluent-ffmpeg": "^2.1.27",

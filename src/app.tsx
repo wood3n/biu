@@ -21,7 +21,8 @@ export function App() {
 
   useEffect(() => {
     if (window.electron && window.electron.navigate) {
-      window.electron.navigate(path => navigate(path));
+      const removeListener = window.electron.navigate(path => navigate(path));
+      return removeListener;
     }
   }, [navigate]);
 
