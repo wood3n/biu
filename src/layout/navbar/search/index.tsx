@@ -41,10 +41,18 @@ const SearchInput: React.FC = () => {
   );
 
   const submitSearch = (keyword: string) => {
+    if (!keyword?.trim()) {
+      return;
+    }
     addSearchHistory(keyword);
     if (location.pathname !== "/search") {
       navigate("/search");
     }
+    setOpen(false);
+  };
+
+  const handleSearchClick = () => {
+    submitSearch(value);
   };
 
   return (
@@ -54,14 +62,29 @@ const SearchInput: React.FC = () => {
         value={value}
         onValueChange={setValue}
         onKeyDown={e => {
-          if (e.key === "Enter" && e.target?.value?.trim()) {
+          if (e.key === "Enter") {
             submitSearch(e.target.value);
-            setOpen(false);
           }
         }}
         onFocus={() => setOpen(true)}
         placeholder="搜索"
-        endContent={<RiSearchLine size={16} />}
+        endContent={
+          <div
+            onClick={handleSearchClick}
+            className="bg-content2 hover:bg-content3 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md transition-colors"
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleSearchClick();
+              }
+            }}
+            aria-label="搜索"
+          >
+            <RiSearchLine size={16} />
+          </div>
+        }
         className="window-no-drag w-full"
       />
       <div
