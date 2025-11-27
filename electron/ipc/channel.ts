@@ -40,4 +40,7 @@ export const channel = {
     updateMessage: "app:update-message",
     quitAndInstall: "app:quit-and-install",
   },
+  cookie: {
+    setLoginCookies: "cookie:set-login-cookies",
+  },
 };

@@ -1,14 +1,19 @@
 {
   "$schema": "https://unpkg.com/release-it@19.0.5/schema/release-it.json",
   "git": {
-    "commitMessage": "chore:📦 release v${version}"
+    "requireCleanWorkDir": true,
+    "tagName": "v${version}",
+    "commitMessage": "chore: release v${version}",
+    "push": true
   },
   "npm": {
     "publish": false
   },
   "github": {
     "release": true,
-    "assets": ["dist/artifacts/*.{exe,dmg,zip,AppImage,deb,rpm,pacman,blockmap,yml,yaml}"]
+    "releaseName": "v${version}",
+    "draft": true,
+    "tokenRef": "GH_TOKEN"
   },
   "plugins": {
     "@release-it/conventional-changelog": {
