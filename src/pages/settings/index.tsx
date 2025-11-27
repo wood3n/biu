@@ -10,6 +10,8 @@ import ScrollContainer from "@/components/scroll-container";
 import { useSettings } from "@/store/settings";
 import { defaultAppSettings } from "@shared/settings/app-settings";
 
+import pkg from "../../../package.json";
+
 const SettingsPage: React.FC = () => {
   const {
     fontFamily,
@@ -225,6 +227,16 @@ const SettingsPage: React.FC = () => {
                 name="autoStart"
                 render={({ field }) => <Switch isSelected={field.value} onValueChange={field.onChange} />}
               />
+            </div>
+          </div>
+          {/* 版本信息 */}
+          <div className="flex w-full items-center justify-between">
+            <div className="mr-6 space-y-1">
+              <div className="text-medium font-medium">版本号</div>
+              <div className="text-sm text-zinc-500">当前软件版本</div>
+            </div>
+            <div className="flex w-[360px] justify-end">
+              <div className="text-sm text-zinc-600">{pkg.version}</div>
             </div>
           </div>
         </Form>
