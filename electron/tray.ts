@@ -98,4 +98,4 @@ function destroyTray() {
   }
 }
 
-export { tray, createTray, destroyTray };
+export { createTray, destroyTray };
