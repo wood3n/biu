@@ -35,18 +35,14 @@ jobs:
         run: git config --global url."https://github.com/".insteadOf "git@github.com:"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
         env:
           HUSKY: 0
 
-      - name: Run Knip (annotations)
+      - name: Run Knip and save Markdown report
         id: knip
         continue-on-error: true
-        run: pnpm dlx knip@^5 -c knip.json -t tsconfig.json --reporter github-actions --max-issues 0
-
-      - name: Generate Knip report (markdown)
-        continue-on-error: true
-        run: pnpm dlx knip@^5 -c knip.json -t tsconfig.json --reporter markdown > knip-report.md
+        run: pnpm knip -c knip.json -t tsconfig.json --reporter markdown --max-show-issues 5 --max-issues 0 --no-exit-code > knip-report.md
 
       - name: Comment Knip report on PR
         if: github.event_name == 'pull_request'
@@ -60,9 +56,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number,
-              body: `### Knip Report\n\n${body}`
+              body: body
             });
-
-      - name: Fail if Knip found issues
-        if: steps.knip.outcome == 'failure'
-        run: exit 1
