@@ -12,9 +12,6 @@ import { useAppUpdateStore } from "@/store/app-update";
 import { useSettings } from "@/store/settings";
 import { defaultAppSettings } from "@shared/settings/app-settings";
 
-import pkg from "../../../package.json";
-
-const SettingsPage: React.FC = () => {
 const SettingsPage = () => {
   const [appVersion, setAppVersion] = useState<string>("");
   const {
@@ -239,15 +236,6 @@ const SettingsPage = () => {
               />
             </div>
           </div>
-          {/* 版本信息 */}
-          <div className="flex w-full items-center justify-between">
-            <div className="mr-6 space-y-1">
-              <div className="text-medium font-medium">版本号</div>
-              <div className="text-sm text-zinc-500">当前软件版本</div>
-            </div>
-            <div className="flex w-[360px] justify-end">
-              <div className="text-sm text-zinc-600">{pkg.version}</div>
-            </div>
           <Divider />
           <h2>关于应用</h2>
           <div className="flex w-full items-center justify-between">
