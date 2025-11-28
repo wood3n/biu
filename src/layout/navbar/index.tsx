@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { Button, Tooltip } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { RiPictureInPicture2Line } from "@remixicon/react";
 import clx from "classnames";
 
@@ -50,11 +50,9 @@ const LayoutNavbar = () => {
         })}
       >
         {hasUpdate && <UpdateNotify />}
-        <Tooltip content="Mini 播放器">
-          <Button isIconOnly size="sm" variant="light" onPress={handleSwitchToMini}>
-            <RiPictureInPicture2Line size={18} />
-          </Button>
-        </Tooltip>
+        <Button isIconOnly size="sm" variant="light" onPress={handleSwitchToMini}>
+          <RiPictureInPicture2Line size={18} />
+        </Button>
         <UserCard />
       </div>
     </div>

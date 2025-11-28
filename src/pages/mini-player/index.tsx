@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 import { Button, Image, Slider } from "@heroui/react";
 import {
@@ -10,7 +10,6 @@ import {
 } from "@remixicon/react";
 
 import { formatDuration } from "@/common/utils";
-import Ellipsis from "@/components/ellipsis";
 import { usePlayQueue } from "@/store/play-queue";
 
 const MiniPlayer = () => {
@@ -44,30 +43,30 @@ const MiniPlayer = () => {
 
   return (
     <div className="flex h-screen w-screen flex-col bg-zinc-900 select-none">
-      <div className="window-drag flex h-full items-center space-x-3 px-4">
+      <div className="window-drag flex h-full items-center space-x-2 px-3">
         {currentBvid && (
           <Image
             radius="md"
             src={cover}
-            width={72}
-            height={72}
+            width={64}
+            height={64}
             classNames={{ wrapper: "flex-none" }}
             className="object-cover"
           />
         )}
-        <div className="window-no-drag flex min-w-0 flex-1 flex-col space-y-2">
+        <div className="window-no-drag flex min-w-0 flex-1 flex-col space-y-1">
           <div className="flex min-w-0 flex-col">
             {currentBvid ? (
               <>
-                <Ellipsis className="text-sm font-medium">{title}</Ellipsis>
-                <span className="text-xs text-zinc-400">{ownerName}</span>
+                <span className="truncate text-sm font-medium">{title}</span>
+                <span className="text-center text-xs text-zinc-400">{ownerName}</span>
               </>
             ) : (
               <span className="text-sm text-zinc-500">暂无播放内容</span>
             )}
           </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-9 text-xs whitespace-nowrap opacity-70">
+          <div className="flex items-center space-x-1">
+            <span className="w-8 text-xs whitespace-nowrap opacity-70">
               {currentTime ? formatDuration(currentTime) : "-:--"}
             </span>
             <Slider
@@ -82,11 +81,12 @@ const MiniPlayer = () => {
               className="flex-1"
               classNames={{ track: "h-[3px]" }}
             />
-            <span className="w-9 text-xs whitespace-nowrap opacity-70">
+            <span className="w-8 text-xs whitespace-nowrap opacity-70">
               {duration ? formatDuration(duration) : "-:--"}
             </span>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between space-x-1">
+            <span className="w-8"></span>
             <div className="flex items-center space-x-1">
               <Button
                 isDisabled={disabled}
@@ -106,7 +106,7 @@ const MiniPlayer = () => {
                 onPress={togglePlay}
                 className="hover:text-primary"
               >
-                {isPlaying ? <RiPauseCircleFill size={32} /> : <RiPlayCircleFill size={32} />}
+                {isPlaying ? <RiPauseCircleFill size={28} /> : <RiPlayCircleFill size={28} />}
               </Button>
               <Button
                 isDisabled={disabled}
