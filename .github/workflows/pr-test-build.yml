@@ -10,6 +10,10 @@ permissions:
   issues: write
   pull-requests: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Build (${{ matrix.os }}-${{ matrix.arch }})
@@ -49,7 +53,7 @@ jobs:
       - name: Bundle Analysis
         uses: web-infra-dev/rsdoctor-action@main
         with:
-          file_path: "dist/.rsdoctor/rsdoctor-data.json"
+          file_path: "dist/web/rsdoctor-data.json"
           target_branch: "master"
 
       - name: Upload build artifacts
