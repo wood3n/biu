@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["src/index.tsx", "electron/main.ts", "electron/preload.ts", "plugins/rsbuild-plugin-electron.ts"],
+  "project": ["src/**", "electron/**", "shared/**", "plugins/**"],
+  "ignore": ["dist/**", ".electron/**"],
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  },
+  "tags": ["-lintignore"]
+}

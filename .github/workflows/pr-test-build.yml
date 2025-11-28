@@ -51,6 +51,7 @@ jobs:
         run: pnpm build:test
 
       - name: Bundle Analysis
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.arch == 'x64' }}
         uses: web-infra-dev/rsdoctor-action@main
         with:
           file_path: "dist/web/rsdoctor-data.json"
@@ -59,13 +60,10 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: electron-artifacts-${{ runner.os }}-${{ github.sha }}
+          name: biu-${{ matrix.os }}-${{ matrix.arch }}
           path: |
             dist/artifacts/*.exe
             dist/artifacts/*.dmg
-            dist/artifacts/*.zip
             dist/artifacts/*.AppImage
-            dist/artifacts/*.deb
-            dist/artifacts/*.rpm
           if-no-files-found: warn
           retention-days: 5
