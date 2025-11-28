@@ -2,6 +2,10 @@
 
 ## [1.5.3-beta.1](https://github.com/wood3n/biu/compare/v1.5.3-beta.0...v1.5.3-beta.1) (2025-11-26)
 
+### 🩹 Fixes
+
+* 修复登录问题和搜索显示问题（[0835b83](https://github.com/wood3n/biu/pull/10/commits/0835b830bbc428105e3b00728282200b2df47516)）
+
 ## [1.5.3-beta.0](https://github.com/wood3n/biu/compare/v1.5.2...v1.5.3-beta.0) (2025-11-26)
 
 ### 🩹 Fixes
