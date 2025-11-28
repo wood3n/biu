@@ -40,4 +40,4 @@ jobs:
           HUSKY: 0
 
       - name: Run Knip (dependencies)
-        run: pnpm knip -no-exit-code --dependencies --production --reporter github-actions
+        run: pnpm knip --no-exit-code --dependencies --production --reporter github-actions
