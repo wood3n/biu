@@ -12,8 +12,7 @@
   "github": {
     "release": true,
     "releaseName": "v${version}",
-    "draft": true,
-    "tokenRef": "GH_TOKEN"
+    "draft": true
   },
   "plugins": {
     "@release-it/conventional-changelog": {
