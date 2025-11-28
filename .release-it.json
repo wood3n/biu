@@ -13,14 +13,13 @@
   "github": {
     "release": true,
     "releaseName": "v${version}",
-    "draft": true,
-    "tokenRef": "GH_TOKEN"
+    "draft": true
   },
   "plugins": {
     "@release-it/conventional-changelog": {
       "infile": "CHANGELOG.md",
       "preset": {
-        "name": "conventionalcommits",
+        "name": "angular",
         "types": [
           { "type": "feat", "section": "🚀 Enhancements" },
           { "type": "perf", "section": "🔥 Performance" },
