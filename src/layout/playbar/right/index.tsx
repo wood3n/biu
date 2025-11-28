@@ -15,7 +15,7 @@ import Volume from "./volume";
 const RightControl = () => {
   const user = useUser(s => s.user);
   const currentBvid = usePlayQueue(s => s.currentBvid);
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen: isQueueOpen, onOpen: onQueueOpen, onOpenChange: onQueueOpenChange } = useDisclosure();
 
   return (
     <>
@@ -23,13 +23,13 @@ const RightControl = () => {
         <PlayModeSwitch />
         {Boolean(user?.isLogin) && Boolean(currentBvid) && <MvFavFolderSelect />}
         {Boolean(currentBvid) && <Download />}
-        <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={onOpen}>
+        <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={onQueueOpen}>
           <RiPlayListLine size={PlayBarIconSize.SideIconSize} />
         </Button>
         <Volume />
         <Rate />
       </div>
-      <PlayQueueDrawer isOpen={isOpen} onOpenChange={onOpenChange} />
+      <PlayQueueDrawer isOpen={isQueueOpen} onOpenChange={onQueueOpenChange} />
     </>
   );
 };
