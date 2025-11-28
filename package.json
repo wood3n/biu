@@ -35,6 +35,7 @@
     "build:test": "cross-env TEST_BUILD=true RSDOCTOR=true rsbuild build",
     "dev:rsdoctor": "cross-env RSDOCTOR=true rsbuild dev",
     "build:rsdoctor": "cross-env RSDOCTOR=true rsbuild build",
+    "knip": "knip -c knip.json -t tsconfig.json",
     "release": "release-it",
     "release:beta": "release-it --preRelease=beta",
     "release:alpha": "release-it --preRelease=alpha"

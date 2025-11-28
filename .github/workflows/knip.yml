@@ -8,6 +8,8 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  issues: write
+  checks: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -39,22 +41,12 @@ jobs:
         env:
           HUSKY: 0
 
-      - name: Run Knip and save Markdown report
-        id: knip
-        continue-on-error: true
-        run: pnpm knip -c knip.json -t tsconfig.json --reporter markdown --max-show-issues 5 --max-issues 0 --no-exit-code > knip-report.md
-
-      - name: Comment Knip report on PR
+      - name: Knip Reporter (sticky comment)
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: Codex-/knip-reporter@v2
         with:
-          script: |
-            const fs = require('fs');
-            const body = fs.readFileSync('knip-report.md', 'utf8');
-            const issue_number = context.payload.pull_request.number;
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number,
-              body: body
-            });
+          comment_id: knip-report
+          command_script_name: knip
+          annotations: true
+          verbose: false
+          ignore_results: true
