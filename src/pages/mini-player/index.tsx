@@ -13,9 +13,6 @@ import { formatDuration } from "@/common/utils";
 import Ellipsis from "@/components/ellipsis";
 import { usePlayQueue } from "@/store/play-queue";
 
-/**
- * Mini 播放器页面
- */
 const MiniPlayer = () => {
   const init = usePlayQueue(s => s.init);
   const currentBvid = usePlayQueue(s => s.currentBvid);
@@ -47,9 +44,7 @@ const MiniPlayer = () => {
 
   return (
     <div className="flex h-screen w-screen flex-col bg-zinc-900 select-none">
-      {/* 可拖动区域 */}
       <div className="window-drag flex h-full items-center space-x-3 px-4">
-        {/* 封面 */}
         {currentBvid && (
           <Image
             radius="md"
@@ -60,9 +55,7 @@ const MiniPlayer = () => {
             className="object-cover"
           />
         )}
-        {/* 信息和控制 */}
         <div className="window-no-drag flex min-w-0 flex-1 flex-col space-y-2">
-          {/* 标题和作者 */}
           <div className="flex min-w-0 flex-col">
             {currentBvid ? (
               <>
@@ -73,7 +66,6 @@ const MiniPlayer = () => {
               <span className="text-sm text-zinc-500">暂无播放内容</span>
             )}
           </div>
-          {/* 进度条 */}
           <div className="flex items-center space-x-2">
             <span className="w-9 text-xs whitespace-nowrap opacity-70">
               {currentTime ? formatDuration(currentTime) : "-:--"}
@@ -94,7 +86,6 @@ const MiniPlayer = () => {
               {duration ? formatDuration(duration) : "-:--"}
             </span>
           </div>
-          {/* 控制按钮 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-1">
               <Button

@@ -9,10 +9,7 @@ import { getMVUrl } from "@/common/utils/audio";
 import { formatUrlProtocal } from "@/common/utils/url";
 import { getWebInterfaceView } from "@/service/web-interface-view";
 
-// 判断是否是 mini 播放器窗口
 const isMiniPlayer = window.location.hash === "#mini-player" || window.location.hash === "#/mini-player";
-
-// 创建广播频道用于窗口间通信
 const playQueueChannel = new BroadcastChannel("play-queue-sync");
 
 interface PlayMVList {
@@ -127,7 +124,6 @@ const updateMediaSession = ({ title, artist, cover }: { title: string; artist: s
 };
 
 const createAudio = (): HTMLAudioElement | null => {
-  // Mini 播放器窗口不创建 Audio 元素
   if (isMiniPlayer) return null;
   const audio = new Audio();
   audio.preload = "metadata";
@@ -168,14 +164,12 @@ const updatePositionState = () => {
   }
 };
 
-// 广播状态到其他窗口（只广播关键字段，避免频繁广播）
 const broadcastState = (state: Partial<State>) => {
   if (!isMiniPlayer) {
     playQueueChannel.postMessage({ type: "state-sync", payload: state });
   }
 };
 
-// 发送控制命令到主窗口
 const sendCommand = (command: string, payload?: any) => {
   if (isMiniPlayer) {
     playQueueChannel.postMessage({ type: "command", command, payload });
@@ -246,7 +240,6 @@ export const usePlayQueue = create<State & Action>()(
         duration: undefined,
         list: [],
         init: async () => {
-          // Mini 播放器：监听状态同步和处理命令
           if (isMiniPlayer) {
             playQueueChannel.onmessage = event => {
               const { type, payload } = event.data;
@@ -254,12 +247,10 @@ export const usePlayQueue = create<State & Action>()(
                 set(payload);
               }
             };
-            // 请求主窗口同步当前状态
             playQueueChannel.postMessage({ type: "request-sync" });
             return;
           }
 
-          // 主窗口：监听来自 mini 窗口的命令
           playQueueChannel.onmessage = event => {
             const { type, command, payload } = event.data;
             if (type === "command") {
@@ -278,7 +269,6 @@ export const usePlayQueue = create<State & Action>()(
                   break;
               }
             } else if (type === "request-sync") {
-              // 响应 mini 窗口的同步请求
               const state = get();
               broadcastState({
                 isPlaying: state.isPlaying,
@@ -737,7 +727,6 @@ export const usePlayQueue = create<State & Action>()(
   ),
 );
 
-// 在主窗口中自动广播关键状态变化到 mini 窗口
 if (!isMiniPlayer) {
   let prevState: { currentBvid?: string; currentCid?: string; list: MVData[] } | null = null;
   usePlayQueue.subscribe(state => {
@@ -746,7 +735,6 @@ if (!isMiniPlayer) {
       currentCid: state.currentCid,
       list: state.list,
     };
-    // 只在关键字段变化时广播（避免频繁广播）
     if (
       !prevState ||
       selectedState.currentBvid !== prevState.currentBvid ||
