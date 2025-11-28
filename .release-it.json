@@ -10,10 +10,7 @@
     "publish": false
   },
   "github": {
-    "release": true,
-    "releaseName": "v${version}",
-    "draft": true,
-    "tokenRef": "GH_TOKEN"
+    "release": true
   },
   "plugins": {
     "@release-it/conventional-changelog": {
