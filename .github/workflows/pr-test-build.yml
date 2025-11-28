@@ -67,3 +67,9 @@ jobs:
             dist/artifacts/*.AppImage
           if-no-files-found: warn
           retention-days: 5
+  build-gate:
+    name: Build Gate
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - run: echo "all builds succeeded"
