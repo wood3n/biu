@@ -9,6 +9,12 @@ import { getMVUrl } from "@/common/utils/audio";
 import { formatUrlProtocal } from "@/common/utils/url";
 import { getWebInterfaceView } from "@/service/web-interface-view";
 
+// 判断是否是 mini 播放器窗口
+const isMiniPlayer = window.location.hash === "#mini-player" || window.location.hash === "#/mini-player";
+
+// 创建广播频道用于窗口间通信
+const playQueueChannel = new BroadcastChannel("play-queue-sync");
+
 interface PlayMVList {
   bvid: string;
   title: string;
@@ -120,7 +126,9 @@ const updateMediaSession = ({ title, artist, cover }: { title: string; artist: s
   }
 };
 
-const createAudio = (): HTMLAudioElement => {
+const createAudio = (): HTMLAudioElement | null => {
+  // Mini 播放器窗口不创建 Audio 元素
+  if (isMiniPlayer) return null;
   const audio = new Audio();
   audio.preload = "metadata";
   audio.controls = false;
@@ -131,6 +139,7 @@ const createAudio = (): HTMLAudioElement => {
 const audio = createAudio();
 
 const updatePlaybackState = () => {
+  if (!audio) return;
   if ("mediaSession" in navigator) {
     navigator.mediaSession.playbackState = audio.paused ? "paused" : "playing";
   }
@@ -146,6 +155,7 @@ const updatePlaybackState = () => {
 };
 
 const updatePositionState = () => {
+  if (!audio) return;
   if ("mediaSession" in navigator) {
     const dur = audio.duration;
     if (!Number.isNaN(dur) && dur !== Infinity) {
@@ -158,10 +168,25 @@ const updatePositionState = () => {
   }
 };
 
+// 广播状态到其他窗口（只广播关键字段，避免频繁广播）
+const broadcastState = (state: Partial<State>) => {
+  if (!isMiniPlayer) {
+    playQueueChannel.postMessage({ type: "state-sync", payload: state });
+  }
+};
+
+// 发送控制命令到主窗口
+const sendCommand = (command: string, payload?: any) => {
+  if (isMiniPlayer) {
+    playQueueChannel.postMessage({ type: "command", command, payload });
+  }
+};
+
 export const usePlayQueue = create<State & Action>()(
   persist(
     immer((set, get) => {
       const loadAndPlayCurrent = async (autoPlay: boolean = true) => {
+        if (!audio) return;
         const { currentBvid, currentCid, list } = get();
         if (!currentBvid || !currentCid) return;
 
@@ -221,6 +246,55 @@ export const usePlayQueue = create<State & Action>()(
         duration: undefined,
         list: [],
         init: async () => {
+          // Mini 播放器：监听状态同步和处理命令
+          if (isMiniPlayer) {
+            playQueueChannel.onmessage = event => {
+              const { type, payload } = event.data;
+              if (type === "state-sync") {
+                set(payload);
+              }
+            };
+            // 请求主窗口同步当前状态
+            playQueueChannel.postMessage({ type: "request-sync" });
+            return;
+          }
+
+          // 主窗口：监听来自 mini 窗口的命令
+          playQueueChannel.onmessage = event => {
+            const { type, command, payload } = event.data;
+            if (type === "command") {
+              switch (command) {
+                case "togglePlay":
+                  get().togglePlay();
+                  break;
+                case "prev":
+                  get().prev();
+                  break;
+                case "next":
+                  get().next();
+                  break;
+                case "seek":
+                  get().seek(payload);
+                  break;
+              }
+            } else if (type === "request-sync") {
+              // 响应 mini 窗口的同步请求
+              const state = get();
+              broadcastState({
+                isPlaying: state.isPlaying,
+                isMuted: state.isMuted,
+                volume: state.volume,
+                playMode: state.playMode,
+                rate: state.rate,
+                currentTime: state.currentTime,
+                duration: state.duration,
+                list: state.list,
+                currentBvid: state.currentBvid,
+                currentCid: state.currentCid,
+              });
+            }
+          };
+
           if (audio) {
             audio.volume = get().volume;
             audio.muted = get().isMuted;
@@ -230,13 +304,17 @@ export const usePlayQueue = create<State & Action>()(
             audio.ondurationchange = () => {
               const dur = audio.duration;
               if (!Number.isNaN(dur) && dur !== Infinity) {
-                set({ duration: Math.round(dur * 100) / 100 });
+                const duration = Math.round(dur * 100) / 100;
+                set({ duration });
+                broadcastState({ duration });
                 updatePositionState();
               }
             };
 
             audio.ontimeupdate = () => {
-              set({ currentTime: Math.round(audio.currentTime * 100) / 100 });
+              const currentTime = Math.round(audio.currentTime * 100) / 100;
+              set({ currentTime });
+              broadcastState({ currentTime });
             };
 
             audio.onseeked = () => {
@@ -249,12 +327,14 @@ export const usePlayQueue = create<State & Action>()(
 
             audio.onplay = () => {
               set({ isPlaying: true });
+              broadcastState({ isPlaying: true });
               updatePlaybackState();
               updatePositionState();
             };
 
             audio.onpause = () => {
               set({ isPlaying: false });
+              broadcastState({ isPlaying: false });
               updatePlaybackState();
               updatePositionState();
             };
@@ -305,6 +385,10 @@ export const usePlayQueue = create<State & Action>()(
           }
         },
         togglePlay: () => {
+          if (isMiniPlayer) {
+            sendCommand("togglePlay");
+            return;
+          }
           if (audio?.src) {
             if (audio.paused) {
               audio.play().catch(err => toastError(err));
@@ -338,6 +422,10 @@ export const usePlayQueue = create<State & Action>()(
           set({ rate });
         },
         seek: s => {
+          if (isMiniPlayer) {
+            sendCommand("seek", s);
+            return;
+          }
           if (audio) {
             audio.currentTime = s;
           }
@@ -418,6 +506,10 @@ export const usePlayQueue = create<State & Action>()(
           }
         },
         next: async () => {
+          if (isMiniPlayer) {
+            sendCommand("next");
+            return;
+          }
           if (!get().list.length) {
             return;
           }
@@ -480,6 +572,10 @@ export const usePlayQueue = create<State & Action>()(
           }
         },
         prev: async () => {
+          if (isMiniPlayer) {
+            sendCommand("prev");
+            return;
+          }
           if (get().list.length <= 1) {
             return;
           }
@@ -640,3 +736,29 @@ export const usePlayQueue = create<State & Action>()(
     },
   ),
 );
+
+// 在主窗口中自动广播关键状态变化到 mini 窗口
+if (!isMiniPlayer) {
+  let prevState: { currentBvid?: string; currentCid?: string; list: MVData[] } | null = null;
+  usePlayQueue.subscribe(state => {
+    const selectedState = {
+      currentBvid: state.currentBvid,
+      currentCid: state.currentCid,
+      list: state.list,
+    };
+    // 只在关键字段变化时广播（避免频繁广播）
+    if (
+      !prevState ||
+      selectedState.currentBvid !== prevState.currentBvid ||
+      selectedState.currentCid !== prevState.currentCid ||
+      selectedState.list !== prevState.list
+    ) {
+      broadcastState({
+        currentBvid: selectedState.currentBvid,
+        currentCid: selectedState.currentCid,
+        list: selectedState.list,
+      });
+      prevState = selectedState;
+    }
+  });
+}

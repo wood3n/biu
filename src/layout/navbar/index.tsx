@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 
+import { Button, Tooltip } from "@heroui/react";
+import { RiPictureInPicture2Line } from "@remixicon/react";
 import clx from "classnames";
 
 import { useAppUpdateStore } from "@/store/app-update";
@@ -32,6 +34,10 @@ const LayoutNavbar = () => {
     };
   }, []);
 
+  const handleSwitchToMini = () => {
+    window.electron.switchToMiniPlayer();
+  };
+
   return (
     <div className="window-drag flex h-full items-center justify-between px-4">
       <div className="flex items-center justify-start space-x-2">
@@ -44,6 +50,11 @@ const LayoutNavbar = () => {
         })}
       >
         {hasUpdate && <UpdateNotify />}
+        <Tooltip content="Mini 播放器">
+          <Button isIconOnly size="sm" variant="light" onPress={handleSwitchToMini}>
+            <RiPictureInPicture2Line size={18} />
+          </Button>
+        </Tooltip>
         <UserCard />
       </div>
     </div>
