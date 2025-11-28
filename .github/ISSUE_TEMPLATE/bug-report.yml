@@ -1,0 +1,43 @@
+name: 🐛 Bug 反馈 (Bug Report)
+description: 提交一个 Bug 报告帮助我们改进
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢您反馈 Bug！请填写以下表单。
+
+  - type: input
+    id: version
+    attributes:
+      label: 应用版本
+      description: 您当前使用的版本号是多少？
+      placeholder: v1.0.0
+    validations:
+      required: true  # 🔴 关键：设置为必填项
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 操作系统
+      options:
+        - Windows 10/11
+        - macOS
+        - Linux
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 问题描述
+      description: |
+        请描述该问题并附带问题截图，方便我们定位问题并排查：
+        1. ...
+        2. ...
+        3. ...
+      placeholder: 详细描述...
+    validations:
+      required: true
+

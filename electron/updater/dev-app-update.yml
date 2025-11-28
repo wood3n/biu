@@ -1,0 +1,5 @@
+provider: github
+owner: wood3n
+repo: biu
+# 如果是私有仓库，可能需要 token
+# token: ...

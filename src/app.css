@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 
 @plugin './hero.ts';
+@plugin "@tailwindcss/typography";
 
 @source '../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
 
@@ -41,7 +42,7 @@
   --os-size: 10px;
   --os-handle-border-radius: 2px;
   --os-handle-bg: #595959aa;
-  --os-handle-bg-hover: #888888;
+  --os-handle-bg-hover: #888;
 
   padding: 0;
 }

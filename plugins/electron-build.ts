@@ -2,6 +2,7 @@ import { logger } from "@rsbuild/core";
 import { build as electronBuild } from "electron-builder";
 
 import pkg from "../package.json";
+import { ELECTRON_OUT_DIRNAME, ELECTRON_ICON_BASE_PATH } from "../shared/path";
 
 export async function buildElectron() {
   await electronBuild({
@@ -14,29 +15,20 @@ export async function buildElectron() {
       nodeVersion: "current",
       buildVersion: pkg.version,
       asar: true,
-      // 运行时需要直接读取的资源解压到 asar 之外
-      asarUnpack: ["**/electron/icons/**"],
       electronCompile: false,
-      // 动态压缩：CI 使用 maximum，本地使用 store 以提升速度
-      compression: process.env.NODE_ENV === "production" ? "maximum" : "store",
-      // 是否移除 package.json 的 scripts/keywords 定义
+      compression: "maximum",
       removePackageScripts: true,
       removePackageKeywords: true,
-      // 无原生模块时关闭重建以提速
       npmRebuild: false,
       nodeGypRebuild: false,
       buildDependenciesFromSource: false,
-      // Only include necessary Electron locales to reduce runtime size
       electronLanguages: ["zh-CN"],
       directories: {
         output: "dist/artifacts",
-        // 构建资源目录（图标等）
-        buildResources: "electron/icons",
       },
-      // 应用文件打包规则：包含 Rspack 产物
+      extraResources: [{ from: ELECTRON_ICON_BASE_PATH, to: ELECTRON_ICON_BASE_PATH }],
       files: [
-        ".electron/**",
-        "electron/**",
+        `${ELECTRON_OUT_DIRNAME}/**`,
         "dist/web/**",
         // Exclude sourcemaps and logs
         "!**/*.map",
@@ -46,15 +38,12 @@ export async function buildElectron() {
         // Exclude changelogs (keep README for license transparency)
         "!**/{CHANGELOG*,changelog*}.md",
       ],
-      // 运行时附加资源（保持相对路径 electron/icons 可用）
-      extraResources: [{ from: "electron/icons", to: "electron/icons" }],
       win: {
         target: [
           { target: "nsis", arch: ["x64"] },
           { target: "portable", arch: ["x64"] },
         ],
-        // 用 png 即可，electron-builder 会生成 ico
-        icon: "electron/icons/win/logo.ico",
+        icon: `${ELECTRON_ICON_BASE_PATH}/logo.ico`,
       },
       nsis: {
         deleteAppDataOnUninstall: true,
@@ -71,7 +60,7 @@ export async function buildElectron() {
           { target: "zip", arch: ["x64", "arm64"] },
         ],
         category: "public.app-category.music",
-        icon: "electron/icons/macos/logo.icns",
+        icon: `${ELECTRON_ICON_BASE_PATH}/logo.icns`,
         hardenedRuntime: true,
         gatekeeperAssess: false,
         entitlements: "plugins/mac/entitlements.mac.plist",
@@ -86,7 +75,7 @@ export async function buildElectron() {
           { target: "deb", arch: ["x64", "arm64"] },
           { target: "rpm", arch: ["x64", "arm64"] },
         ],
-        icon: "electron/icons/logo.png",
+        icon: `${ELECTRON_ICON_BASE_PATH}/logo.png`,
         category: "AudioVideo",
         synopsis: "Biu - bilibili music desktop application",
         maintainer: "wood3n",

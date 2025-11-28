@@ -2,13 +2,9 @@ import { contextBridge, ipcRenderer } from "electron";
 
 import { channel } from "./ipc/channel";
 
-// 防止重复注册 router:navigate 监听造成 MaxListenersExceededWarning
-let navigateHandler: ((_: Electron.IpcRendererEvent, path: string) => void) | null = null;
-let downloadProgressHandler: ((_: Electron.IpcRendererEvent, params: DownloadCallbackParams) => void) | null = null;
-
-// 统一平台字符串：macos | windows | linux
-const platform: "macos" | "windows" | "linux" =
-  process.platform === "darwin" ? "macos" : process.platform === "win32" ? "windows" : "linux";
+let playerPrevHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
+let playerNextHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
+let playerToggleHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
 
 const api: ElectronAPI = {
   getSettings: () => ipcRenderer.invoke(channel.store.getSettings),
@@ -20,35 +16,18 @@ const api: ElectronAPI = {
   getFonts: () => ipcRenderer.invoke(channel.font.getFonts),
   checkFileExists: (filename: string) => ipcRenderer.invoke(channel.download.checkExists, filename),
   startDownload: (params: DownloadOptions) => ipcRenderer.invoke(channel.download.start, params),
-  onDownloadProgress: async (cb: (params: DownloadCallbackParams) => void) => {
-    if (downloadProgressHandler) {
-      try {
-        ipcRenderer.removeListener(channel.download.progress, downloadProgressHandler);
-      } catch (error) {
-        console.error("[preload] 移除下载进度监听器失败:", error);
-      }
-      downloadProgressHandler = null;
-    }
-
-    downloadProgressHandler = (_, params) => {
+  onDownloadProgress: cb => {
+    const downloadProgressHandler = (_, params: DownloadCallbackParams) => {
       cb(params);
     };
 
     ipcRenderer.on(channel.download.progress, downloadProgressHandler);
+
+    return () => ipcRenderer.removeListener(channel.download.progress, downloadProgressHandler);
   },
   // 监听来自主进程的导航事件，并将路径回调给渲染端
-  navigate: async (cb: (path: string) => void) => {
-    // 如果已存在监听器，先移除之前的，避免重复累积监听
-    if (navigateHandler) {
-      try {
-        ipcRenderer.removeListener(channel.router.navigate, navigateHandler);
-      } catch (error) {
-        console.error("[preload] 移除导航监听器失败:", error);
-      }
-      navigateHandler = null;
-    }
-
-    navigateHandler = (_: Electron.IpcRendererEvent, path: string) => {
+  navigate: cb => {
+    const navigateHandler = (_: Electron.IpcRendererEvent, path: string) => {
       try {
         cb(path);
       } catch (error) {
@@ -57,6 +36,8 @@ const api: ElectronAPI = {
     };
 
     ipcRenderer.on(channel.router.navigate, navigateHandler);
+
+    return () => ipcRenderer.removeListener(channel.router.navigate, navigateHandler);
   },
   // 通过主进程 http 封装发起请求（只返回 data，风格与 axios 保持一致）
   httpGet: <T = any>(
@@ -69,7 +50,83 @@ const api: ElectronAPI = {
     options?: { params?: Record<string, any>; headers?: Record<string, string>; timeout?: number },
   ) => ipcRenderer.invoke(channel.http.post, { url, body, ...options }) as Promise<T>,
   // 返回当前应用运行的平台（macos/windows/linux）
-  getPlatform: () => platform,
+  getPlatform: () => {
+    const platform: AppPlatForm =
+      process.platform === "darwin" ? "macos" : process.platform === "win32" ? "windows" : "linux";
+
+    return platform;
+  },
+  // 上报当前播放状态（播放/暂停）给主进程，用于更新任务栏缩略按钮
+  updatePlaybackState: isPlaying => {
+    try {
+      ipcRenderer.send(channel.player.state, isPlaying);
+    } catch (error) {
+      console.error("[preload] 上报播放状态失败:", error);
+    }
+  },
+  // 订阅主进程下发的播放器命令（上一首、下一首、播放/暂停）
+  onPlayerCommand: async (cb: (cmd: "prev" | "next" | "toggle") => void) => {
+    // 先移除旧的监听，避免重复
+    if (playerPrevHandler) {
+      try {
+        ipcRenderer.removeListener(channel.player.prev, playerPrevHandler);
+      } catch (error) {
+        console.error("[preload] 移除上一首监听器失败:", error);
+      }
+      playerPrevHandler = null;
+    }
+    if (playerNextHandler) {
+      try {
+        ipcRenderer.removeListener(channel.player.next, playerNextHandler);
+      } catch (error) {
+        console.error("[preload] 移除下一首监听器失败:", error);
+      }
+      playerNextHandler = null;
+    }
+    if (playerToggleHandler) {
+      try {
+        ipcRenderer.removeListener(channel.player.toggle, playerToggleHandler);
+      } catch (error) {
+        console.error("[preload] 移除播放/暂停监听器失败:", error);
+      }
+      playerToggleHandler = null;
+    }
+
+    playerPrevHandler = () => {
+      try {
+        cb("prev");
+      } catch (error) {
+        console.error("[preload] player prev 回调失败:", error);
+      }
+    };
+    playerNextHandler = () => {
+      try {
+        cb("next");
+      } catch (error) {
+        console.error("[preload] player next 回调失败:", error);
+      }
+    };
+    playerToggleHandler = () => {
+      try {
+        cb("toggle");
+      } catch (error) {
+        console.error("[preload] player toggle 回调失败:", error);
+      }
+    };
+
+    ipcRenderer.on(channel.player.prev, playerPrevHandler);
+    ipcRenderer.on(channel.player.next, playerNextHandler);
+    ipcRenderer.on(channel.player.toggle, playerToggleHandler);
+  },
+  getAppVersion: () => ipcRenderer.invoke(channel.app.getVersion),
+  checkAppUpdate: () => ipcRenderer.invoke(channel.app.checkUpdate),
+  downloadAppUpdate: () => ipcRenderer.invoke(channel.app.downloadUpdate),
+  onDownloadAppProgress: cb => {
+    const handler = (_, payload: DownloadAppMessage) => cb(payload);
+    ipcRenderer.on(channel.app.updateMessage, handler);
+    return () => ipcRenderer.removeListener(channel.app.updateMessage, handler);
+  },
+  quitAndInstall: () => ipcRenderer.invoke(channel.app.quitAndInstall),
   // 设置登录 Cookie
   setLoginCookies: (cookies: Array<{ name: string; value: string; expirationDate?: number }>) =>
     ipcRenderer.invoke(channel.cookie.setLoginCookies, cookies) as Promise<boolean>,

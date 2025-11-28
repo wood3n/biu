@@ -4,6 +4,8 @@ import electron from "electron";
 import * as childProcess from "node:child_process";
 import path from "node:path";
 
+import { ELECTRON_OUT_DIR } from "../shared/path";
+
 export function startElectronDev() {
   let electronProcess: childProcess.ChildProcessWithoutNullStreams | null = null;
   let isRestarting = false;
@@ -57,7 +59,7 @@ export function startElectronDev() {
   spawnElectron();
 
   // Watch .electron folder and restart on changes
-  const watchDir = path.resolve(process.cwd(), ".electron");
+  const watchDir = ELECTRON_OUT_DIR;
   logger.info(`Watching '${watchDir}' for changes to restart Electron`);
 
   const watcher = chokidar.watch(watchDir, {

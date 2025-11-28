@@ -27,6 +27,19 @@ export const channel = {
     get: "http:get",
     post: "http:post",
   },
+  player: {
+    state: "player:state",
+    prev: "player:prev",
+    next: "player:next",
+    toggle: "player:toggle",
+  },
+  app: {
+    getVersion: "app:get-version",
+    checkUpdate: "app:check-update",
+    downloadUpdate: "app:download-update",
+    updateMessage: "app:update-message",
+    quitAndInstall: "app:quit-and-install",
+  },
   cookie: {
     setLoginCookies: "cookie:set-login-cookies",
   },

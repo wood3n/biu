@@ -4,23 +4,15 @@ import { session } from "electron";
 
 import { UserAgent } from "./user-agent";
 
-export function installWebRequestInterceptors(): { dispose: () => void } {
+export function installWebRequestInterceptors() {
   const urls = ["http://*/*", "https://*/*"],
     origin = "https://www.bilibili.com",
     referer = "https://www.bilibili.com";
-
-  let active = true;
-  const filter = { urls };
 
   const onBeforeSendHeadersHandler = async (
     details: OnBeforeSendHeadersListenerDetails,
     callback: (response: { requestHeaders?: Record<string, string> }) => void,
   ) => {
-    if (!active) {
-      callback({ requestHeaders: details.requestHeaders });
-      return;
-    }
-
     const headers = details.requestHeaders || {};
 
     headers["Referer"] = referer;
@@ -30,18 +22,11 @@ export function installWebRequestInterceptors(): { dispose: () => void } {
     callback({ requestHeaders: headers });
   };
 
-  session.defaultSession.webRequest.onBeforeSendHeaders(filter, onBeforeSendHeadersHandler);
-
   // 新增：响应头拦截，重写 Set-Cookie 的 SameSite 与 Secure
   const onHeadersReceivedHandler = (
     details: OnHeadersReceivedListenerDetails,
     callback: (response: { responseHeaders?: Record<string, string | string[]> }) => void,
   ) => {
-    if (!active) {
-      callback({ responseHeaders: details.responseHeaders });
-      return;
-    }
-
     const responseHeaders = details.responseHeaders || {};
     const setCookieKey = Object.keys(responseHeaders).find(k => k.toLowerCase() === "set-cookie");
 
@@ -74,11 +59,6 @@ export function installWebRequestInterceptors(): { dispose: () => void } {
     callback({ responseHeaders });
   };
 
-  session.defaultSession.webRequest.onHeadersReceived(filter, onHeadersReceivedHandler);
-
-  return {
-    dispose: () => {
-      active = false;
-    },
-  };
+  session.defaultSession.webRequest.onBeforeSendHeaders({ urls }, onBeforeSendHeadersHandler);
+  session.defaultSession.webRequest.onHeadersReceived({ urls }, onHeadersReceivedHandler);
 }
