@@ -2,6 +2,9 @@
   "name": "biu",
   "version": "1.5.3-beta.1",
   "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "type": "module",
   "description": "music application based on bilibili api",
   "author": "wood3n",
@@ -129,5 +132,6 @@
     "*.{js,cjs,mjs,json,ts,tsx}": "npx eslint --fix --concurrency auto",
     "*.{css,less}": "npx stylelint --fix"
   },
+  "packageManager": "pnpm@10.20.0",
   "productName": "Biu"
 }
