@@ -1,6 +1,7 @@
 import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 import { pluginSvgr } from "@rsbuild/plugin-svgr";
+import { RsdoctorRspackPlugin } from "@rsdoctor/rspack-plugin";
 
 import { pluginElectron } from "./plugins/rsbuild-plugin-electron";
 
@@ -38,6 +39,22 @@ export default defineConfig({
     }),
     pluginElectron(),
   ],
+  tools: {
+    rspack: {
+      plugins: [
+        process.env.RSDOCTOR === "true" &&
+          new RsdoctorRspackPlugin({
+            features: ["bundle"],
+            output: {
+              mode: "brief",
+              options: {
+                type: ["json"],
+              },
+            },
+          }),
+      ],
+    },
+  },
   dev: {
     writeToDisk: true,
     lazyCompilation: false,
