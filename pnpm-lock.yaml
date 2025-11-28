@@ -165,6 +165,9 @@ importers:
       chokidar:
         specifier: ^4.0.3
         version: 4.0.3
+      conventional-changelog-conventionalcommits:
+        specifier: ^9.1.0
+        version: 9.1.0
       cross-env:
         specifier: ^10.0.0
         version: 10.1.0

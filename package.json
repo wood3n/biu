@@ -94,6 +94,7 @@
     "@types/react-dom": "^19.1.9",
     "@types/spark-md5": "^3.0.5",
     "chokidar": "^4.0.3",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
     "cross-env": "^10.0.0",
     "electron": "38.6.0",
     "electron-builder": "^26.0.12",

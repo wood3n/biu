@@ -19,7 +19,7 @@
     "@release-it/conventional-changelog": {
       "infile": "CHANGELOG.md",
       "preset": {
-        "name": "angular",
+        "name": "conventionalcommits",
         "types": [
           { "type": "feat", "section": "🚀 Enhancements" },
           { "type": "perf", "section": "🔥 Performance" },
