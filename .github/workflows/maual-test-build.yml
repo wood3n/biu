@@ -1,10 +1,10 @@
-name: Test Build
+name: Manual Test Build
 
 on:
   workflow_dispatch:
 
 concurrency:
-  group: test-build-${{ github.ref }}
+  group: biu-test-build-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -40,21 +40,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build and package application
-        run: pnpm build
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: biu-test-${{ matrix.os }}-${{ matrix.arch }}
-          path: |
-            dist/artifacts/*.exe
-            dist/artifacts/*.dmg
-            dist/artifacts/*.zip
-            dist/artifacts/*.AppImage
-            dist/artifacts/*.deb
-            dist/artifacts/*.rpm
-            dist/artifacts/*.yml
-            dist/artifacts/*.blockmap
-          if-no-files-found: warn
-          retention-days: 2
+      - name: Build & Publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm build:test

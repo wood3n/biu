@@ -29,6 +29,7 @@
     "prepare": "husky install",
     "dev": "rsbuild dev",
     "build": "rsbuild build",
+    "build:test": "cross-env TEST_BUILD=true rsbuild build",
     "dev:rsdoctor": "cross-env RSDOCTOR=true rsbuild dev",
     "build:rsdoctor": "cross-env RSDOCTOR=true rsbuild build",
     "release": "release-it",
