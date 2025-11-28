@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  conventional-changelog-conventionalcommits: 8.0.0
+
 importers:
 
   .:
@@ -118,7 +121,7 @@ importers:
         specifier: ^9.35.0
         version: 9.39.1
       '@release-it/conventional-changelog':
-        specifier: ^10.0.1
+        specifier: ^10.0.2
         version: 10.0.2(conventional-commits-filter@5.0.0)(conventional-commits-parser@6.2.1)(release-it@19.0.6(@types/node@24.10.1))
       '@rollup/plugin-node-resolve':
         specifier: ^16.0.3
@@ -165,9 +168,6 @@ importers:
       chokidar:
         specifier: ^4.0.3
         version: 4.0.3
-      conventional-changelog-conventionalcommits:
-        specifier: ^9.1.0
-        version: 9.1.0
       cross-env:
         specifier: ^10.0.0
         version: 10.1.0
@@ -3417,12 +3417,8 @@ packages:
     resolution: {integrity: sha512-GGf2Nipn1RUCAktxuVauVr1e3r8QrLP/B0lEUsFktmGqc3ddbQkhoJZHJctVU829U1c6mTSWftrVOCHaL85Q3w==}
     engines: {node: '>=18'}
 
-  conventional-changelog-conventionalcommits@7.0.2:
-    resolution: {integrity: sha512-NKXYmMR/Hr1DevQegFB4MwfM5Vv0m4UIxKZTTYuD98lpTknaZlSRrDOG4X7wIXpGkfsYxZTghUN+Qq+T0YQI7w==}
-    engines: {node: '>=16'}
-
-  conventional-changelog-conventionalcommits@9.1.0:
-    resolution: {integrity: sha512-MnbEysR8wWa8dAEvbj5xcBgJKQlX/m0lhS8DsyAAWDHdfs2faDJxTgzRYlRYpXSe7UiKrIIlB4TrBKU9q9DgkA==}
+  conventional-changelog-conventionalcommits@8.0.0:
+    resolution: {integrity: sha512-eOvlTO6OcySPyyyk8pKz2dP4jjElYunj9hn9/s0OB+gapTO8zwS9UQWrZ1pmF2hFs3vw1xhonOLGcGjy/zgsuA==}
     engines: {node: '>=18'}
 
   conventional-changelog-preset-loader@5.0.0:
@@ -6866,7 +6862,7 @@ snapshots:
   '@commitlint/config-conventional@20.0.0':
     dependencies:
       '@commitlint/types': 20.0.0
-      conventional-changelog-conventionalcommits: 7.0.2
+      conventional-changelog-conventionalcommits: 8.0.0
 
   '@commitlint/config-validator@20.0.0':
     dependencies:
@@ -9572,7 +9568,7 @@ snapshots:
       concat-stream: 2.0.0
       conventional-changelog: 7.1.1(conventional-commits-filter@5.0.0)
       conventional-changelog-angular: 8.1.0
-      conventional-changelog-conventionalcommits: 9.1.0
+      conventional-changelog-conventionalcommits: 8.0.0
       conventional-recommended-bump: 11.2.0
       release-it: 19.0.6(@types/node@24.10.1)
       semver: 7.7.3
@@ -10893,11 +10889,7 @@ snapshots:
     dependencies:
       compare-func: 2.0.0
 
-  conventional-changelog-conventionalcommits@7.0.2:
-    dependencies:
-      compare-func: 2.0.0
-
-  conventional-changelog-conventionalcommits@9.1.0:
+  conventional-changelog-conventionalcommits@8.0.0:
     dependencies:
       compare-func: 2.0.0
 
