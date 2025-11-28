@@ -39,5 +39,30 @@ jobs:
         env:
           HUSKY: 0
 
-      - name: Run Knip (dependencies)
-        run: pnpm knip --no-exit-code --dependencies --production --reporter github-actions
+      - name: Run Knip (annotations)
+        id: knip
+        continue-on-error: true
+        run: pnpm dlx knip@^5 -c knip.json -t tsconfig.json --reporter github-actions --max-issues 0
+
+      - name: Generate Knip report (markdown)
+        continue-on-error: true
+        run: pnpm dlx knip@^5 -c knip.json -t tsconfig.json --reporter markdown > knip-report.md
+
+      - name: Comment Knip report on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('knip-report.md', 'utf8');
+            const issue_number = context.payload.pull_request.number;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              body: `### Knip Report\n\n${body}`
+            });
+
+      - name: Fail if Knip found issues
+        if: steps.knip.outcome == 'failure'
+        run: exit 1

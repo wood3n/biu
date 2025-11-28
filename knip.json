@@ -7,5 +7,9 @@
     "interface": true,
     "type": true
   },
+  "ignoreDependencies": ["@tailwindcss/postcss"],
+  "ignoreFiles": ["dist/**", "public/**", ".electron/**"],
+  "include": ["files", "dependencies", "exports"],
+  "includeEntryExports": true,
   "tags": ["-lintignore"]
 }
