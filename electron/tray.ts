@@ -32,17 +32,17 @@ function createTray({
     tray = null;
   }
 
-  let iconName = "tray.ico";
-  // Linux (Wayland/X11) 常用 png 图标，ico 可能不显示
-  if (process.platform === "linux") {
-    iconName = "logo.png";
-  }
-
+  const isLinux = process.platform === "linux";
+  const iconName = isLinux ? "logo.png" : "tray.ico";
   const trayIconPath = path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, iconName);
   let icon = nativeImage.createFromPath(trayIconPath);
 
+  if (icon.isEmpty()) {
+    log.warn(`[tray] Tray icon not found or failed to load: ${trayIconPath}`);
+  }
+
   // Linux 下为了避免图标过大，调整尺寸（通常 32x32 足够清晰且适配）
-  if (process.platform === "linux") {
+  if (isLinux) {
     icon = icon.resize({ width: 32, height: 32 });
   }
 
