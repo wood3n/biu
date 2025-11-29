@@ -52,6 +52,11 @@ const Favorites: React.FC = () => {
   );
 
   const onPlayAll = async () => {
+    if (!favFolderId) {
+      addToast({ title: "收藏夹 ID 无效", color: "danger" });
+      return;
+    }
+
     const totalCount = data?.info?.media_count ?? 0;
     if (!totalCount) {
       addToast({ title: "收藏夹为空", color: "warning" });
@@ -59,23 +64,25 @@ const Favorites: React.FC = () => {
     }
 
     try {
-      const pageSize = 20;
-      const allRes = await Promise.all(
-        Array.from({ length: Math.ceil(totalCount / pageSize) }, (_, i) =>
+      const FAVORITES_PAGE_SIZE = 20;
+      const allResSettled = await Promise.allSettled(
+        Array.from({ length: Math.ceil(totalCount / FAVORITES_PAGE_SIZE) }, (_, i) =>
           getFavResourceList({
-            media_id: String(favFolderId ?? ""),
-            ps: pageSize,
+            media_id: String(favFolderId),
+            ps: FAVORITES_PAGE_SIZE,
             pn: i + 1,
             platform: "web",
           }),
         ),
       );
 
-      const allMedias = allRes
+      const allMedias = allResSettled
+        .filter((res): res is PromiseFulfilledResult<any> => res.status === "fulfilled")
+        .map(res => res.value)
         .filter(res => res.code === 0 && res?.data?.medias?.length)
         .flatMap(res =>
           res.data.medias
-            .filter(item => item.attr === 0) // 过滤失效稿件
+            .filter(item => item.attr === 0) // 过滤失效稿件：0=正常，1/9=失效
             .map(item => ({
               bvid: item.bvid,
               title: item.title,
