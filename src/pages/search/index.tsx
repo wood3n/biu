@@ -61,10 +61,10 @@ const Search = () => {
   );
 
   return (
-    <>
+    <ScrollContainer className="h-full w-full">
       <div className="p-4">
         <h1 className="mb-4">搜索【{keyword}】的结果</h1>
-        <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <Tabs
             variant="solid"
             radius="md"
@@ -84,7 +84,7 @@ const Search = () => {
           )}
         </div>
       </div>
-      <ScrollContainer style={{ flexGrow: 1, minHeight: 0 }}>
+      <div style={{ flexGrow: 1, minHeight: 0 }}>
         {loading && (
           <div className="flex min-h-[280px] items-center justify-center">
             <Spinner label="加载中" />
@@ -106,8 +106,8 @@ const Search = () => {
             />
           </div>
         )}
-      </ScrollContainer>
-    </>
+      </div>
+    </ScrollContainer>
   );
 };
 

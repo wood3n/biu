@@ -28,7 +28,7 @@ const ArtistRank = () => {
   }
 
   return (
-    <ScrollContainer className="p-4">
+    <ScrollContainer className="h-full p-4">
       <h1 className="mb-4">音乐大咖</h1>
       <div className="w-full">
         {/* 加载骨架屏 */}

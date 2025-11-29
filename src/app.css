@@ -33,6 +33,11 @@
   text-autospace: normal;
 }
 
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
 .suggest_high_light,.keyword {
   font-style: normal;
   color: #F54180;

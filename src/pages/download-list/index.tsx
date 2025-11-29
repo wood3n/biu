@@ -21,6 +21,7 @@ import { filesize } from "filesize";
 
 import { formatSecondsToDate } from "@/common/utils";
 import Empty from "@/components/empty";
+import ScrollContainer from "@/components/scroll-container";
 import { useDownloadQueue } from "@/store/download-queue";
 import { useSettings } from "@/store/settings";
 
@@ -44,7 +45,7 @@ const DownloadList = () => {
   };
 
   return (
-    <div className="w-full p-4">
+    <ScrollContainer className="h-full w-full p-4">
       <h1 className="mb-4">下载记录</h1>
       <Card radius="md" className="mb-4">
         <CardBody>
@@ -146,7 +147,7 @@ const DownloadList = () => {
           </div>
         </CardBody>
       </Card>
-    </div>
+    </ScrollContainer>
   );
 };
 
