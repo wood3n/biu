@@ -1,0 +1,78 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "group:monorepos", ":semanticCommits", "helpers:pinGitHubActionDigests"],
+  "baseBranches": ["master"],
+  "timezone": "Asia/Shanghai",
+  "schedule": ["every weekend"],
+  "dependencyDashboard": true,
+  "labels": ["dependencies"],
+  "rebaseWhen": "behind-base-branch",
+  "prConcurrentLimit": 3,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on sunday"]
+  },
+  "npm": {
+    "rangeStrategy": "bump"
+  },
+  "postUpdateOptions": ["pnpmDedupe"],
+  "platformAutomerge": false,
+  "automerge": false,
+  "packageRules": [
+    {
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": false,
+      "groupName": "devDependencies (minor/patch)",
+      "labels": ["deps:dev"]
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "npm major updates",
+      "labels": ["deps:major", "breaking-change"],
+      "stabilityDays": 3,
+      "automerge": false
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "labels": ["deps:actions"],
+      "automerge": false
+    },
+    {
+      "matchPackagePatterns": ["^@rsbuild/"],
+      "groupName": "rsbuild monorepo",
+      "labels": ["deps:rsbuild"],
+      "automerge": false
+    },
+    {
+      "matchPackagePatterns": ["^@types/"],
+      "groupName": "@types packages",
+      "automerge": false,
+      "labels": ["deps:types"]
+    },
+    {
+      "matchPackagePatterns": ["^eslint", "^@eslint", "^@eslint-react"],
+      "groupName": "eslint ecosystem",
+      "automerge": false,
+      "labels": ["deps:eslint"]
+    },
+    {
+      "matchPackagePatterns": ["^electron$"],
+      "groupName": "electron runtime",
+      "automerge": false,
+      "stabilityDays": 7,
+      "schedule": ["before 6am on monday"],
+      "labels": ["deps:electron"]
+    },
+    {
+      "matchPackagePatterns": ["^react$", "^react-dom$"],
+      "groupName": "react ecosystem",
+      "automerge": false,
+      "stabilityDays": 3,
+      "labels": ["deps:react"]
+    }
+  ]
+}
