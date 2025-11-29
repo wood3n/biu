@@ -52,30 +52,47 @@ const Favorites: React.FC = () => {
   );
 
   const onPlayAll = async () => {
-    const ps = (data?.info?.media_count ?? 0) > 999 ? 999 : (data?.info?.media_count ?? 0);
+    const totalCount = data?.info?.media_count ?? 0;
+    if (!totalCount) {
+      addToast({ title: "收藏夹为空", color: "warning" });
+      return;
+    }
 
-    const getAllMVRes = await getFavResourceList({
-      media_id: String(favFolderId ?? ""),
-      ps,
-      pn: 1,
-      platform: "web",
-    });
-
-    if (getAllMVRes.code === 0 && getAllMVRes?.data?.medias?.length) {
-      playList(
-        getAllMVRes?.data?.medias.map(item => ({
-          bvid: item.bvid,
-          title: item.title,
-          cover: item.cover,
-          ownerMid: item.upper?.mid,
-          ownerName: item.upper?.name,
-        })),
+    try {
+      const pageSize = 20;
+      const allRes = await Promise.all(
+        Array.from({ length: Math.ceil(totalCount / pageSize) }, (_, i) =>
+          getFavResourceList({
+            media_id: String(favFolderId ?? ""),
+            ps: pageSize,
+            pn: i + 1,
+            platform: "web",
+          }),
+        ),
       );
-    } else {
-      addToast({
-        title: "无法获取收藏夹全部歌曲",
-        color: "danger",
-      });
+
+      const allMedias = allRes
+        .filter(res => res.code === 0 && res?.data?.medias?.length)
+        .flatMap(res =>
+          res.data.medias
+            .filter(item => item.attr === 0) // 过滤失效稿件
+            .map(item => ({
+              bvid: item.bvid,
+              title: item.title,
+              cover: item.cover,
+              ownerMid: item.upper?.mid,
+              ownerName: item.upper?.name,
+            })),
+        );
+
+      if (allMedias.length) {
+        playList(allMedias);
+      } else {
+        addToast({ title: "无法获取收藏夹全部歌曲", color: "danger" });
+      }
+    } catch (error) {
+      console.error("[Favorites] 获取收藏夹全部歌曲失败:", error);
+      addToast({ title: "获取收藏夹全部歌曲失败", color: "danger" });
     }
   };
 
