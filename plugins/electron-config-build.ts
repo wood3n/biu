@@ -8,9 +8,9 @@ import tsconfigPaths from "rollup-plugin-tsconfig-paths";
 
 import { ELECTRON_OUT_DIR, ICONS_DST_DIR } from "../shared/path";
 
-export const MAIN_ENTRY = path.resolve(process.cwd(), "electron/main.ts");
-export const PRELOAD_ENTRY = path.resolve(process.cwd(), "electron/preload.ts");
-export const ICONS_SRC_DIR = path.resolve(process.cwd(), "electron/icons");
+const MAIN_ENTRY = path.resolve(process.cwd(), "electron/main.ts");
+const PRELOAD_ENTRY = path.resolve(process.cwd(), "electron/preload.ts");
+const ICONS_SRC_DIR = path.resolve(process.cwd(), "electron/icons");
 
 function createRollupOptions(input: string): RollupOptions {
   return {

@@ -1,6 +1,23 @@
 # Changelog
 
+## [1.6.0-beta.0](///compare/v1.5.3-beta.1...v1.6.0-beta.0) (2025-11-28)
+
+### Features
+
+* 补充自动检测应用版本更新功能 f0652d8
+
+### Bug Fixes
+
+* 修改打包配置，修复音频跳转问题 3c74a0e
+* remove useless exports 9be3a18
+
 ## [1.5.3-beta.1](https://github.com/wood3n/biu/compare/v1.5.3-beta.0...v1.5.3-beta.1) (2025-11-26)
+
+### 🩹 Fixes
+* fix search and login function by @flystar233 in https://github.com/wood3n/biu/pull/10
+
+### ♥️ New Contributors
+* @flystar233 made their first contribution in https://github.com/wood3n/biu/pull/10
 
 ## [1.5.3-beta.0](https://github.com/wood3n/biu/compare/v1.5.2...v1.5.3-beta.0) (2025-11-26)
 

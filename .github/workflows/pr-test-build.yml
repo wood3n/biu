@@ -1,21 +1,28 @@
-name: PR Electron Test Build
+name: PR Test Build
 
 on:
   pull_request:
-    branches: [main]
+    branches: [master]
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
+  issues: write
   pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    name: Build (${\{ matrix.os \}})
+    name: Build (${{ matrix.os }}-${{ matrix.arch }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        arch: [x64, arm64]
 
     steps:
       - name: Checkout
@@ -25,37 +32,15 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "lts/*"
+          node-version-file: ".nvmrc"
           cache: "pnpm"
 
-      - name: Cache Electron/Rspack (macOS/Linux)
-        if: runner.os != 'Windows'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/electron
-            ~/.cache/electron-builder
-            ~/.cache/rspack
-          key: pr-${{ runner.os }}-electron-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            pr-${{ runner.os }}-electron-
-
-      - name: Cache Electron/Rspack (Windows)
-        if: runner.os == 'Windows'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~\AppData\Local\electron\Cache
-            ~\AppData\Local\electron-builder\Cache
-          key: pr-${{ runner.os }}-electron-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            pr-${{ runner.os }}-electron-
+      - name: Configure Git to use HTTPS instead of SSH
+        run: git config --global url."https://github.com/".insteadOf "git@github.com:"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -63,60 +48,28 @@ jobs:
           HUSKY: 0
 
       - name: Build Electron (test mode)
-        run: pnpm build
+        run: pnpm build:test
+
+      - name: Bundle Analysis
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.arch == 'x64' }}
+        uses: web-infra-dev/rsdoctor-action@main
+        with:
+          file_path: "dist/web/rsdoctor-data.json"
+          target_branch: "master"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: electron-artifacts-${{ runner.os }}-${{ github.sha }}
+          name: biu-${{ matrix.os }}-${{ matrix.arch }}
           path: |
             dist/artifacts/*.exe
             dist/artifacts/*.dmg
-            dist/artifacts/*.zip
             dist/artifacts/*.AppImage
-            dist/artifacts/*.deb
-            dist/artifacts/*.rpm
-            dist/artifacts/*.yml
-            dist/artifacts/*.blockmap
           if-no-files-found: warn
-          retention-days: 1
-
-      - name: Comment success on PR
-        if: ${{ success() }}
-        uses: actions/github-script@v7
-        env:
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        with:
-          script: |
-            const body = `✅ Electron test build succeeded on **${process.env.RUN_URL.split('/')[6]}** runner.
-
-            • OS: ${context.runner?.os || 'unknown'}
-            • Artifacts: Download from the workflow run → ${process.env.RUN_URL}
-
-            _This is an automated build preview for this pull request._`;
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body
-            });
-
-      - name: Comment failure on PR
-        if: ${{ failure() }}
-        uses: actions/github-script@v7
-        env:
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        with:
-          script: |
-            const body = `❌ Electron test build failed.
-
-            • OS: ${context.runner?.os || 'unknown'}
-            • Logs: See workflow run → ${process.env.RUN_URL}
-
-            Please check the build logs and fix the failure.`;
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body
-            });
+          retention-days: 5
+  build-gate:
+    name: Build Gate
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - run: echo "all builds succeeded"

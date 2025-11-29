@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: biu-release-${{ github.ref }}
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -31,14 +31,15 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Use Node.js lts
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version-file: ".nvmrc"
           cache: "pnpm"
+
+      - name: Configure Git to use HTTPS instead of SSH
+        run: git config --global url."https://github.com/".insteadOf "git@github.com:"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

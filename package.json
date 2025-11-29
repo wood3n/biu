@@ -1,7 +1,10 @@
 {
   "name": "biu",
-  "version": "1.5.3-beta.1",
+  "version": "1.6.0-beta.0",
   "private": true,
+  "engines": {
+    "node": "22.17.1"
+  },
   "type": "module",
   "description": "music application based on bilibili api",
   "author": "wood3n",
@@ -29,6 +32,7 @@
     "prepare": "husky install",
     "dev": "rsbuild dev",
     "build": "rsbuild build",
+    "build:test": "cross-env TEST_BUILD=true RSDOCTOR=true rsbuild build",
     "dev:rsdoctor": "cross-env RSDOCTOR=true rsbuild dev",
     "build:rsdoctor": "cross-env RSDOCTOR=true rsbuild build",
     "release": "release-it",
@@ -36,9 +40,6 @@
     "release:alpha": "release-it --preRelease=alpha"
   },
   "dependencies": {
-    "@dnd-kit/core": "^6.3.1",
-    "@dnd-kit/sortable": "^10.0.0",
-    "@dnd-kit/utilities": "^3.2.2",
     "@heroui/react": "^2.8.3",
     "@hookform/resolvers": "^5.2.2",
     "@remixicon/react": "^4.6.0",
@@ -60,7 +61,6 @@
     "moment-duration-format": "^2.3.2",
     "overlayscrollbars": "^2.12.0",
     "overlayscrollbars-react": "^0.5.6",
-    "p-queue": "^9.0.0",
     "qrcode.react": "^4.2.0",
     "react": "19.1.1",
     "react-colorful": "^5.6.1",
@@ -68,7 +68,6 @@
     "react-error-boundary": "^6.0.0",
     "react-hook-form": "^7.62.0",
     "react-router": "^7.8.2",
-    "react-virtuoso": "^4.14.0",
     "spark-md5": "^3.0.2",
     "tailwind-merge": "^3.3.1",
     "zod": "^4.1.11",
@@ -79,23 +78,20 @@
     "@commitlint/config-conventional": "^20.0.0",
     "@eslint-react/eslint-plugin": "^1.53.0",
     "@eslint/js": "^9.35.0",
-    "@release-it/conventional-changelog": "^10.0.1",
+    "@release-it/conventional-changelog": "^10.0.2",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rsbuild/core": "^1.5.4",
     "@rsbuild/plugin-react": "^1.4.0",
     "@rsbuild/plugin-svgr": "^1.2.2",
-    "@rsdoctor/rspack-plugin": "^1.2.3",
+    "@rsdoctor/rspack-plugin": "^1.3.11",
     "@tailwindcss/postcss": "^4.1.13",
     "@tailwindcss/typography": "^0.5.19",
     "@total-typescript/ts-reset": "^0.6.1",
-    "@types/chokidar": "^2.1.7",
     "@types/fluent-ffmpeg": "^2.1.27",
     "@types/moment-duration-format": "^2.2.6",
     "@types/node": "^24.3.1",
     "@types/react": "^19.1.12",
-    "@types/react-color": "^3.0.13",
     "@types/react-dom": "^19.1.9",
-    "@types/react-virtualized": "^9.22.2",
     "@types/spark-md5": "^3.0.5",
     "chokidar": "^4.0.3",
     "cross-env": "^10.0.0",
@@ -113,7 +109,7 @@
     "eslint-plugin-unused-imports": "^4.2.0",
     "globals": "^16.3.0",
     "husky": "^9.1.7",
-    "is-ci": "^4.1.0",
+    "knip": "^5.70.2",
     "lint-staged": "^16.1.6",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
@@ -128,9 +124,16 @@
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.42.0"
   },
-  "lint-staged": {
-    "*.{js,cjs,mjs,json,ts,tsx}": "npx eslint --fix --concurrency auto",
-    "*.{css,less}": "npx stylelint --fix"
+  "pnpm": {
+    "overrides": {
+      "conventional-changelog-conventionalcommits": "8.0.0"
+    }
   },
+  "lint-staged": {
+    "*.{js,cjs,mjs,ts,tsx}": "eslint --fix --concurrency auto",
+    "*.{css,less}": "stylelint --fix",
+    "*.json": "prettier --write"
+  },
+  "packageManager": "pnpm@10.20.0",
   "productName": "Biu"
 }

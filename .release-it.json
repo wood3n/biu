@@ -1,6 +1,7 @@
 {
   "$schema": "https://unpkg.com/release-it@19.0.5/schema/release-it.json",
   "git": {
+    "requireBranch": "master",
     "requireCleanWorkDir": true,
     "tagName": "v${version}",
     "commitMessage": "chore: release v${version}",
@@ -12,8 +13,7 @@
   "github": {
     "release": true,
     "releaseName": "v${version}",
-    "draft": true,
-    "tokenRef": "GH_TOKEN"
+    "draft": true
   },
   "plugins": {
     "@release-it/conventional-changelog": {
