@@ -32,8 +32,21 @@ function createTray({
     tray = null;
   }
 
-  const trayIconPath = path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, "tray.ico");
-  tray = new Tray(nativeImage.createFromPath(trayIconPath));
+  let iconName = "tray.ico";
+  // Linux (Wayland/X11) 常用 png 图标，ico 可能不显示
+  if (process.platform === "linux") {
+    iconName = "logo.png";
+  }
+
+  const trayIconPath = path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, iconName);
+  let icon = nativeImage.createFromPath(trayIconPath);
+
+  // Linux 下为了避免图标过大，调整尺寸（通常 32x32 足够清晰且适配）
+  if (process.platform === "linux") {
+    icon = icon.resize({ width: 32, height: 32 });
+  }
+
+  tray = new Tray(icon);
   tray.setToolTip("Biu");
 
   // 左键单击：显示/隐藏主窗口
