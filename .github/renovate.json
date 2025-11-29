@@ -73,6 +73,23 @@
       "automerge": false,
       "stabilityDays": 3,
       "labels": ["deps:react"]
+    },
+    {
+      "description": "Disable Node updates in package.json engines",
+      "matchPackageNames": ["node"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["engines"],
+      "enabled": false
+    },
+    {
+      "description": "Disable Node updates from .nvmrc",
+      "matchManagers": ["nvm"],
+      "enabled": false
+    },
+    {
+      "description": "Disable updates for selected packages",
+      "matchPackageNames": ["fluent-ffmpeg", "framer-motion"],
+      "enabled": false
     }
   ]
 }
