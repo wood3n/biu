@@ -15,8 +15,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect Core Changes
+    runs-on: ubuntu-latest
+    outputs:
+      core: ${{ steps.filter.outputs.core }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Paths Filter
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            core:
+              - 'src/**'
+              - 'electron/**'
+              - 'shared/**'
+              - 'plugins/**'
+              - 'rsbuild.config.ts'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - '.nvmrc'
+              - 'tsconfig.json'
+              - '.github/workflows/pr-test-build.yml'
+
   build:
     name: Build (${{ matrix.os }}-${{ matrix.arch }})
+    needs: changes
+    if: ${{ needs.changes.outputs.core == 'true' }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -50,13 +79,6 @@ jobs:
       - name: Build Electron (test mode)
         run: pnpm build:test
 
-      - name: Bundle Analysis
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.arch == 'x64' }}
-        uses: web-infra-dev/rsdoctor-action@main
-        with:
-          file_path: "dist/web/rsdoctor-data.json"
-          target_branch: "master"
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -67,9 +89,17 @@ jobs:
             dist/artifacts/*.AppImage
           if-no-files-found: warn
           retention-days: 5
+
+  no-build:
+    name: No Build (docs or non-core)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ needs.changes.outputs.core != 'true' }}
+    steps:
+      - run: echo "No core code changes detected; skipping build."
   build-gate:
     name: Build Gate
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build, no-build]
     steps:
       - run: echo "all builds succeeded"

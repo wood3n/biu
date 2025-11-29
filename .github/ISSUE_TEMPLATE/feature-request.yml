@@ -1,7 +1,6 @@
 name: ✨ 提需求 (Feature Request)
 description: 建议添加新功能
-title: "[Feature]: "
-labels: ["enhancement"]
+labels: ["feature"]
 body:
   - type: textarea
     id: description

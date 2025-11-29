@@ -1,6 +1,5 @@
 name: 🐛 Bug 反馈 (Bug Report)
 description: 提交一个 Bug 报告帮助我们改进
-title: "[Bug]: "
 labels: ["bug", "triage"]
 body:
   - type: markdown
@@ -40,4 +39,3 @@ body:
       placeholder: 详细描述...
     validations:
       required: true
-
