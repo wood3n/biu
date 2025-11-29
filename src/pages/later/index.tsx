@@ -58,7 +58,7 @@ const Later = () => {
 
   return (
     <>
-      <ScrollContainer className="w-full p-4">
+      <ScrollContainer className="h-full w-full p-4">
         <div className="mb-4 flex items-center space-x-1">
           <h1>稍后再看</h1>
           <Button isIconOnly variant="light" size="sm" onPress={refreshAsync}>

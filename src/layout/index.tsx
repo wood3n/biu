@@ -37,14 +37,16 @@ const Layout = () => {
       <div className="flex h-full flex-col">
         <div className="flex min-h-0 w-full flex-1">
           <SideNav />
-          <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             <div className="h-16 flex-none">
               <Navbar />
             </div>
-            <Outlet />
+            <div className="min-h-0 flex-1 overflow-hidden">
+              <Outlet />
+            </div>
           </div>
         </div>
-        <div className="h-[88px] w-full shrink-0">
+        <div className="relative z-50 h-[88px] w-full flex-none">
           <PlayBar />
         </div>
       </div>

@@ -118,7 +118,7 @@ const UserProfile = () => {
   }
 
   return (
-    <ScrollContainer className="w-full">
+    <ScrollContainer className="h-full w-full">
       <SpaceInfo
         spaceInfo={userInfo}
         relationStats={relationStats}
