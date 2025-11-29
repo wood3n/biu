@@ -26,8 +26,13 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
 
+      - name: Configure Git to use HTTPS instead of SSH
+        run: git config --global url."https://github.com/".insteadOf "git@github.com:"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          HUSKY: 0
 
       - name: Run ESLint with Reviewdog
         uses: reviewdog/action-eslint@v1
