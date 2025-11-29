@@ -2,7 +2,6 @@ name: Web Analysis
 
 on:
   pull_request:
-    branches: [master]
     types: [opened, synchronize, reopened, closed]
 
 permissions:
@@ -15,7 +14,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect Core Changes
+    runs-on: ubuntu-latest
+    outputs:
+      core: ${{ steps.filter.outputs.core }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Paths Filter
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            core:
+              - 'src/**'
+              - 'rsbuild.config.ts'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - '.nvmrc'
+              - 'tsconfig.json'
+
   build:
+    needs: changes
+    if: ${{ needs.changes.outputs.core == 'true' }}
     runs-on: ubuntu-latest
 
     steps:

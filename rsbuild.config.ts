@@ -44,7 +44,7 @@ export default defineConfig({
       plugins: [
         process.env.RSDOCTOR === "true" &&
           new RsdoctorRspackPlugin({
-            features: ["bundle"],
+            disableClientServer: true,
             output: {
               mode: "brief",
               options: {
