@@ -6,10 +6,10 @@
   基于 Bilibili API 的跨平台桌面音乐播放器 🎧🎶
 </p>
 <p align="center">
+  <a href="https://github.com/wood3n/biu/releases">
+    <img src="https://img.shields.io/github/v/release/wood3n/biu?include_prereleases&label=latest&color=blueviolet" alt="Latest Version" />
+  </a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-orange.svg" alt="License" /></a>
-  <img src="https://img.shields.io/badge/Electron-38+-47848F?logo=electron" alt="Electron" />
-  <img src="https://img.shields.io/badge/pnpm-10+-F69220?logo=pnpm" alt="pnpm" />
-  <img src="https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript" alt="TypeScript" />
 </p>
 
 <table>
@@ -31,10 +31,10 @@
 - 🎧 高品质音频播放，优先拉取更高码率音频流（如无损 Flac，192K/Hi-Res）
 - 🧩 轻量界面，内置深色主题，同时可自定义部分主题样式，细腻的滚动与动效体验
 - 💿 系统托盘与最小化隐藏（Windows），便捷控制播放
-- ♻️ 自动更新（electron-updater），始终保持最新体验
+- ♻️ 自动检测更新，始终保持最新体验
 
 ## 下载和使用
-- 下载页面：`https://github.com/wood3n/biu/releases/latest`
+- 下载页面：[Github Release](https://github.com/wood3n/biu/releases/latest)
 - 在 Releases 中选择与你系统和架构匹配的安装包；常见文件名示例：
   - Windows 安装包：`Biu-Setup-<version>.exe`（推荐，NSIS 向导）
   - Windows 绿色版：`Biu-<version>-win-x64.exe`（portable，免安装）
@@ -78,8 +78,7 @@
 如果你喜欢这个项目，欢迎 ⭐️ Star 支持！也欢迎提出 Issue 交流与反馈 🙌
 
 ## 🙏 鸣谢
-- 特别感谢 `SocialSisterYi/bilibili-API-collect` 对哔哩哔哩 API 的长期收集与整理，为本项目相关接口的使用提供了重要参考。
-- 项目地址：`https://github.com/SocialSisterYi/bilibili-API-collect`
+- 特别感谢 [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) 对哔哩哔哩 API 的长期收集与整理，为本项目相关接口的使用提供了重要参考。
 - 在引用与使用相关资料时，我们遵循其许可条款（`CC-BY-NC 4.0`），仅用于学习与研究，不涉及任何商业用途。
 
 ## ⚖️ 法律声明与使用限制

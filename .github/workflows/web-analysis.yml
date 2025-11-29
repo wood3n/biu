@@ -1,0 +1,51 @@
+name: Web Analysis
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Configure Git to use HTTPS instead of SSH
+        run: git config --global url."https://github.com/".insteadOf "git@github.com:"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          HUSKY: 0
+
+      - name: Build Web Resources
+        run: pnpm build:web
+
+      - name: Bundle Analysis
+        uses: web-infra-dev/rsdoctor-action@main
+        with:
+          file_path: "dist/web/rsdoctor-data.json"
+          target_branch: "master"

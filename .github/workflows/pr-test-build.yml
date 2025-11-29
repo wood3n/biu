@@ -50,13 +50,6 @@ jobs:
       - name: Build Electron (test mode)
         run: pnpm build:test
 
-      - name: Bundle Analysis
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.arch == 'x64' }}
-        uses: web-infra-dev/rsdoctor-action@main
-        with:
-          file_path: "dist/web/rsdoctor-data.json"
-          target_branch: "master"
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
