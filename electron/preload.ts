@@ -25,6 +25,7 @@ const api: ElectronAPI = {
 
     return () => ipcRenderer.removeListener(channel.download.progress, downloadProgressHandler);
   },
+  getCookie: (key: string) => ipcRenderer.invoke(channel.cookie.get, key),
   // 监听来自主进程的导航事件，并将路径回调给渲染端
   navigate: cb => {
     const navigateHandler = (_: Electron.IpcRendererEvent, path: string) => {

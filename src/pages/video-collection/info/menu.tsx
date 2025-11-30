@@ -16,7 +16,7 @@ const Menu = ({ afterChangeInfo }: MenuProps) => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { updateCollectedFolder } = useUser();
+  const updateCollectedFolder = useUser(state => state.updateCollectedFolder);
 
   const {
     isOpen: isDeleteConfirmOpen,

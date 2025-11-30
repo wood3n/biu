@@ -15,10 +15,11 @@ import Info from "./info";
 
 const VideoSeries = () => {
   const { id } = useParams();
-  const { collectedFolder } = useUser();
+  const collectedFolder = useUser(state => state.collectedFolder);
+
   const isCollected = collectedFolder?.some(item => item.id === Number(id));
-  const playMV = usePlayQueue(s => s.play);
-  const playList = usePlayQueue(s => s.playList);
+  const playMV = usePlayQueue(state => state.play);
+  const playList = usePlayQueue(state => state.playList);
 
   const { data, loading, refreshAsync } = useRequest(
     async () => {

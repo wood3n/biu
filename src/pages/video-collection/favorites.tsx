@@ -17,11 +17,13 @@ import Info from "./info";
 /** 收藏夹详情 */
 const Favorites: React.FC = () => {
   const { id: favFolderId } = useParams();
-  const { ownFolder, collectedFolder } = useUser();
+  const ownFolder = useUser(state => state.ownFolder);
+  const collectedFolder = useUser(state => state.collectedFolder);
+
   const isOwn = ownFolder?.some(item => item.id === Number(favFolderId));
   const isCollected = collectedFolder?.some(item => item.id === Number(favFolderId));
-  const playMV = usePlayQueue(s => s.play);
-  const playList = usePlayQueue(s => s.playList);
+  const playMV = usePlayQueue(state => state.play);
+  const playList = usePlayQueue(state => state.playList);
 
   const {
     data,

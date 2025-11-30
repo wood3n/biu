@@ -6,6 +6,7 @@ import moment from "moment";
 
 import Theme from "./components/theme";
 import routes from "./routes";
+import { axiosInstance } from "./service/request";
 import { usePlayQueue } from "./store/play-queue";
 
 import "moment/locale/zh-cn";
@@ -18,6 +19,16 @@ moment.locale("zh-cn");
 export function App() {
   const routeElement = useRoutes(routes);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // 注入 buvid3 和 b_nut cookie
+    axiosInstance.get("https://www.bilibili.com/", {
+      headers: {
+        accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+      },
+    });
+  }, []);
 
   useEffect(() => {
     if (window.electron && window.electron.navigate) {

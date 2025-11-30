@@ -15,8 +15,8 @@ type QrcodeLoginProps = {
 };
 
 const QrcodeLogin = ({ onClose }: QrcodeLoginProps) => {
-  const { updateUser } = useUser();
-  const { updateToken } = useToken();
+  const updateUser = useUser(state => state.updateUser);
+  const updateToken = useToken(state => state.updateToken);
 
   const {
     loading: genLoading,
@@ -43,25 +43,6 @@ const QrcodeLogin = ({ onClose }: QrcodeLoginProps) => {
           const { refresh_token, timestamp, url } = pollData;
 
           const urlParams = getUrlParams(url || "");
-
-          // 手动设置登录 Cookie 到 Electron session
-          if (window.electron?.setLoginCookies && urlParams.SESSDATA) {
-            const expires = urlParams.Expires ? Number(urlParams.Expires) : 30 * 24 * 3600;
-            const expirationDate = Math.floor(Date.now() / 1000 + expires);
-            const cookies = [
-              { name: "SESSDATA", value: urlParams.SESSDATA as string, expirationDate },
-              ...(urlParams.bili_jct
-                ? [{ name: "bili_jct", value: urlParams.bili_jct as string, expirationDate }]
-                : []),
-              ...(urlParams.DedeUserID
-                ? [{ name: "DedeUserID", value: urlParams.DedeUserID as string, expirationDate }]
-                : []),
-              ...(urlParams.DedeUserID__ckMd5
-                ? [{ name: "DedeUserID__ckMd5", value: urlParams.DedeUserID__ckMd5 as string, expirationDate }]
-                : []),
-            ];
-            await window.electron.setLoginCookies(cookies);
-          }
 
           updateToken({
             refresh_token,

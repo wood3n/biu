@@ -16,7 +16,7 @@ export interface WebBuvidData {
  * 获取buvid
  */
 export const getWebBuvid = async () => {
-  const response = await fetch("https://api.bilibili.com/x/frontend/finger/spi", {
+  const response = await fetch("https://api.bilibili.com/x/frontend/finger/spi_v2", {
     method: "GET",
     headers: {
       "User-Agent": UserAgent,

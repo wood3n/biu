@@ -41,7 +41,7 @@ const UserCard = () => {
   } = useDisclosure();
 
   const logout = async () => {
-    const csrfToken = useToken.getState().tokenData?.bili_jct;
+    const csrfToken = await window.electron.getCookie("bili_jct");
     if (!csrfToken) {
       addToast({
         title: "CSRF Token 不存在",

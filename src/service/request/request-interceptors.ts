@@ -1,11 +1,10 @@
 import { type InternalAxiosRequestConfig } from "axios";
 
 import { encodeParamsWbi } from "@/common/utils/wbi-sign";
-import { useToken } from "@/store/token";
 
 export const requestInterceptors = async (config: InternalAxiosRequestConfig) => {
   if (config.useCSRF) {
-    const csrfToken = useToken.getState().tokenData?.bili_jct;
+    const csrfToken = await window.electron.getCookie("bili_jct");
     if (csrfToken) {
       if (config.method === "post") {
         config.data ??= {};
