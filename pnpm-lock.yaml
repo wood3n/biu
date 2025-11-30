@@ -148,19 +148,19 @@ importers:
         specifier: ^0.6.1
         version: 0.6.1
       '@types/fluent-ffmpeg':
-        specifier: ^2.1.27
+        specifier: ^2.1.28
         version: 2.1.28
       '@types/moment-duration-format':
-        specifier: ^2.2.6
+        specifier: ^2.2.7
         version: 2.2.7
       '@types/node':
-        specifier: ^24.3.1
+        specifier: ^24.10.1
         version: 24.10.1
       '@types/react':
-        specifier: ^19.1.12
+        specifier: ^19.2.7
         version: 19.2.7
       '@types/react-dom':
-        specifier: ^19.1.9
+        specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.7)
       '@types/spark-md5':
         specifier: ^3.0.5
@@ -7076,7 +7076,7 @@ snapshots:
 
   '@electron/universal@2.0.1':
     dependencies:
-      '@electron/asar': 3.2.18
+      '@electron/asar': 3.4.1
       '@malept/cross-spawn-promise': 2.0.0
       debug: 4.4.3
       dir-compare: 4.2.0
