@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 
-import { addToast, Button, Link, Pagination } from "@heroui/react";
+import { addToast, Button, Link } from "@heroui/react";
 import { RiRefreshLine } from "@remixicon/react";
-import { usePagination } from "ahooks";
 import moment from "moment";
 
 import { formatDuration } from "@/common/utils";
@@ -19,81 +18,81 @@ import { usePlayQueue } from "@/store/play-queue";
 const HISTORY_PAGE_SIZE = 30;
 
 const History = () => {
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [allList, setAllList] = useState<HistoryListItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [list, setList] = useState<HistoryListItem[]>([]);
+  const [cursor, setCursor] = useState<{ max: number; business: HistoryBusinessType | ""; view_at: number } | null>(
+    null,
+  );
+  const [hasMore, setHasMore] = useState(true);
   const playMV = usePlayQueue(s => s.play);
 
-  const {
-    data,
-    pagination,
-    runAsync: getPageData,
-  } = usePagination(
-    async ({ current, pageSize }) => {
-      // 从已加载的所有数据中分页返回
-      const start = (current - 1) * pageSize;
-      const end = start + pageSize;
-      return {
-        total: allList.length,
-        list: allList.slice(start, end),
-      };
-    },
-    {
-      ready: allList.length > 0,
-      defaultPageSize: HISTORY_PAGE_SIZE,
-    },
-  );
-
-  const fetchAllHistory = async () => {
+  const fetchHistory = async (isLoadMore = false) => {
     try {
-      setInitialLoading(true);
-      const allHistoryList: HistoryListItem[] = [];
-      let cursor: { max: number; business: string; view_at: number } | null = null;
-      let hasMore = true;
-
-      while (hasMore) {
-        const res = await getWebInterfaceHistoryCursor({
-          type: "archive",
-          ps: HISTORY_PAGE_SIZE,
-          max: cursor ? cursor.max : 0,
-          business: cursor?.business ? (cursor.business as HistoryBusinessType) : undefined,
-          view_at: cursor ? cursor.view_at : 0,
-        });
-
-        if (res.code !== 0) {
-          if (res.code === -101) {
-            throw new Error("请先登录");
-          }
-          throw new Error(res.message || "获取历史记录失败");
-        }
-
-        const newList = res.data?.list || [];
-        allHistoryList.push(...newList);
-
-        if (newList.length > 0 && res.data.cursor) {
-          cursor = {
-            max: res.data.cursor.max,
-            business: res.data.cursor.business || "",
-            view_at: res.data.cursor.view_at,
-          };
-          hasMore = true;
-        } else {
-          hasMore = false;
-        }
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
       }
 
-      setAllList(allHistoryList);
+      const res = await getWebInterfaceHistoryCursor({
+        type: "archive",
+        ps: HISTORY_PAGE_SIZE,
+        max: cursor ? cursor.max : 0,
+        business: cursor?.business || undefined,
+        view_at: cursor ? cursor.view_at : 0,
+      });
+
+      if (res.code !== 0) {
+        if (res.code === -101) {
+          throw new Error("请先登录");
+        }
+        throw new Error(res.message || "获取历史记录失败");
+      }
+
+      const newList = res.data?.list || [];
+      if (isLoadMore) {
+        setList(prev => [...prev, ...newList]);
+      } else {
+        setList(newList);
+      }
+
+      if (newList.length > 0 && res.data.cursor) {
+        setCursor({
+          max: res.data.cursor.max,
+          business: res.data.cursor.business || "",
+          view_at: res.data.cursor.view_at,
+        });
+      }
+      setHasMore(!!(newList.length > 0 && res.data.cursor));
     } catch (error: any) {
       addToast({
         title: error?.message || "获取历史记录失败",
         color: "danger",
       });
     } finally {
-      setInitialLoading(false);
+      if (isLoadMore) {
+        setLoadingMore(false);
+      } else {
+        setLoading(false);
+      }
     }
   };
 
+  const handleLoadMore = () => {
+    fetchHistory(true);
+  };
+
+  const handleRefresh = () => {
+    setList([]);
+    setCursor(null);
+    setHasMore(true);
+    fetchHistory(false);
+  };
+
   useEffect(() => {
-    fetchAllHistory();
+    fetchHistory(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handlePlay = (item: HistoryListItem) => {
@@ -112,21 +111,13 @@ const History = () => {
       <ScrollContainer className="h-full w-full p-4">
         <div className="mb-4 flex items-center justify-between">
           <h1>历史记录</h1>
-          <Button
-            isIconOnly
-            variant="light"
-            size="sm"
-            onPress={() => {
-              setAllList([]);
-              fetchAllHistory();
-            }}
-          >
+          <Button isIconOnly variant="light" size="sm" onPress={handleRefresh}>
             <RiRefreshLine size={18} />
           </Button>
         </div>
         <GridList
-          loading={initialLoading}
-          data={data?.list}
+          loading={loading}
+          data={list}
           itemKey={item => `${item.history.oid}-${item.view_at}`}
           renderItem={item => (
             <MVCard
@@ -137,7 +128,7 @@ const History = () => {
               coverHeight={200}
               footer={
                 <div className="flex w-full flex-col space-y-1 text-sm">
-                  <div className="text-foreground-500 flex items-center justify-between">
+                  <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
                     {item.author_mid ? (
                       <Link href={`/user/${item.author_mid}`} className="text-foreground-500 text-sm hover:underline">
                         {item.author_name}
@@ -147,7 +138,7 @@ const History = () => {
                     )}
                     {item.duration && <span>{formatDuration(item.duration)}</span>}
                   </div>
-                  <div className="text-foreground-400 flex items-center justify-between text-xs">
+                  <div className="text-foreground-400 flex w-full items-center justify-between text-xs">
                     <span>{moment.unix(item.view_at).format("YYYY-MM-DD HH:mm")}</span>
                     {item.progress !== undefined && item.duration && (
                       <span>
@@ -161,14 +152,17 @@ const History = () => {
             />
           )}
         />
-        {pagination.totalPage > 1 && (
+        {hasMore && (
           <div className="flex w-full items-center justify-center py-6">
-            <Pagination
-              initialPage={1}
-              total={pagination.totalPage}
-              page={pagination.current}
-              onChange={next => getPageData({ current: next, pageSize: HISTORY_PAGE_SIZE })}
-            />
+            <Button
+              variant="flat"
+              color="primary"
+              isLoading={loadingMore}
+              onPress={handleLoadMore}
+              disabled={loadingMore}
+            >
+              {loadingMore ? "加载中..." : "加载更多"}
+            </Button>
           </div>
         )}
       </ScrollContainer>
