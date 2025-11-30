@@ -11,6 +11,8 @@ import {
   RiFileDownloadFill,
   RiTimeLine,
   RiTimeFill,
+  RiHistoryLine,
+  RiHistoryFill,
 } from "@remixicon/react";
 
 import { type MenuItemProps } from "../menu-item";
@@ -47,6 +49,13 @@ export const menus: (MenuItemProps & { needLogin?: boolean })[] = [
     needLogin: true,
     icon: RiTimeLine,
     activeIcon: RiTimeFill,
+  },
+  {
+    title: "历史记录",
+    href: "/history",
+    needLogin: true,
+    icon: RiHistoryLine,
+    activeIcon: RiHistoryFill,
   },
   {
     title: "下载记录",

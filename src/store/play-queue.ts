@@ -110,6 +110,13 @@ const toastError = (error: unknown) => {
   });
 };
 
+const handlePlayError = (error: any) => {
+  const errorMsg = error?.message || error?.name || "";
+  if (!errorMsg.includes("interrupted") && !errorMsg.includes("NotAllowed")) {
+    toastError(error);
+  }
+};
+
 const updateMediaSession = ({ title, artist, cover }: { title: string; artist: string; cover: string }) => {
   if ("mediaSession" in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -192,8 +199,8 @@ export const usePlayQueue = create<State & Action>()(
           if (autoPlay) {
             try {
               await audio.play();
-            } catch (error) {
-              toastError(error);
+            } catch (error: any) {
+              handlePlayError(error);
             }
           }
           updateMediaSession({
@@ -307,7 +314,7 @@ export const usePlayQueue = create<State & Action>()(
         togglePlay: () => {
           if (audio?.src) {
             if (audio.paused) {
-              audio.play().catch(err => toastError(err));
+              audio.play().catch(handlePlayError);
             } else {
               audio.pause();
             }
@@ -476,6 +483,11 @@ export const usePlayQueue = create<State & Action>()(
               const nextMVData = list[nextIndex];
               await get().play(nextMVData.bvid);
               set({ prevBvid: currentBvid, prevCid: currentCid });
+            }
+
+            if (playMode === PlayMode.Single) {
+              const nextMVData = list[nextIndex];
+              await get().play(nextMVData.bvid);
             }
           }
         },
