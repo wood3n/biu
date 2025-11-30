@@ -87,3 +87,7 @@
 - 数据来源于用户调用的公开接口与个人账户授权；使用时需遵守 Bilibili 的《用户协议》《社区规则》及相关法律法规。
 - 禁止绕过登录/会员权限、DRM/加密措施，或进行批量爬取、恶意抓取等违反平台规则的行为。
 - 如需商业授权或调整许可，请联系作者；如涉及权利或合规问题，请通过 Issues 反馈以便及时处理。
+---
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=wood3n/biu&type=date&legend=top-left)](https://www.star-history.com/#wood3n/biu&type=date&legend=top-left)
