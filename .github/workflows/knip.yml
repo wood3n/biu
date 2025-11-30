@@ -6,7 +6,9 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
+  contents: write
   pull-requests: write
+  issues: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
