@@ -36,7 +36,7 @@ interface Props {
 }
 
 const FolderForm = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) => {
-  const { updateOwnFolder } = useUser();
+  const updateOwnFolder = useUser(state => state.updateOwnFolder);
   const [isFetching, setIsFetching] = useState(false);
 
   const {

@@ -1,4 +1,5 @@
 import { registerAppHandlers } from "./app";
+import { registerCookieIpcHandlers } from "./cookie";
 import { registerDialogHandlers } from "./dialog";
 import { registerDownloadHandlers } from "./download";
 import { registerFontHandlers } from "./font";
@@ -12,4 +13,5 @@ export function registerIpcHandlers() {
   registerDownloadHandlers();
   registerRequestHandlers();
   registerAppHandlers();
+  registerCookieIpcHandlers();
 }

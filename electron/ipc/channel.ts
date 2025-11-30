@@ -41,6 +41,7 @@ export const channel = {
     quitAndInstall: "app:quit-and-install",
   },
   cookie: {
+    get: "cookie:get",
     setLoginCookies: "cookie:set-login-cookies",
   },
 };

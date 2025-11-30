@@ -3,6 +3,7 @@ import { useParams } from "react-router";
 import { Image, Link, Skeleton, User } from "@heroui/react";
 import { RiPlayFill, RiStarFill, RiStarLine } from "@remixicon/react";
 import { useRequest } from "ahooks";
+import { useShallow } from "zustand/react/shallow";
 
 import FallbackImage from "@/assets/images/fallback.png";
 import { CollectionType } from "@/common/constants/collection";
@@ -44,7 +45,14 @@ const Info = ({
   afterChangeInfo,
   onPlayAll,
 }: Props) => {
-  const { user, collectedFolder, updateCollectedFolder } = useUser();
+  const { user, collectedFolder, updateCollectedFolder } = useUser(
+    useShallow(state => ({
+      user: state.user,
+      collectedFolder: state.collectedFolder,
+      updateCollectedFolder: state.updateCollectedFolder,
+    })),
+  );
+
   const isOwn = upMid === user?.mid;
   const { id } = useParams();
   const isCollected = collectedFolder?.some(folder => folder.id === Number(id));

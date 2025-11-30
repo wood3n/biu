@@ -50,6 +50,7 @@ export const refreshCookie = async () => {
       });
 
       if (getRefreshCookieRes.code === 0) {
+        // 如果刷新成功，这一步会通过 set-cookie 注入新的 cookie
         const newRefreshToken = getRefreshCookieRes.data?.refresh_token;
 
         useToken.setState({

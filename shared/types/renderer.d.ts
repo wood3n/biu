@@ -103,6 +103,8 @@ interface ElectronAPI {
   onDownloadProgress: (cb: (payload: DownloadCallbackParams) => void) => VoidFunction;
   /** 导航到指定路由 */
   navigate: (cb: (path: string) => void) => VoidFunction;
+  /** 获取某个 cookie */
+  getCookie: (key: string) => Promise<string | null>;
   /** 使用主进程的 net.request 发起 GET 请求（只返回 data） */
   httpGet: <T = any>(
     url: string,

@@ -7,7 +7,7 @@
 </p>
 <p align="center">
   <a href="https://github.com/wood3n/biu/releases">
-    <img src="https://img.shields.io/github/v/release/wood3n/biu?include_prereleases&label=latest&color=blueviolet" alt="Latest Version" />
+    <img src="https://img.shields.io/github/v/release/wood3n/biu?include_prereleases&label=最新版本&color=blueviolet" alt="Latest Version" />
   </a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-orange.svg" alt="License" /></a>
 </p>

@@ -13,7 +13,7 @@ import Navbar from "./navbar";
 import SideNav from "./side";
 
 const Layout = () => {
-  const { updateUser } = useUser();
+  const updateUser = useUser(state => state.updateUser);
 
   const getLoginInfo = async () => {
     try {
