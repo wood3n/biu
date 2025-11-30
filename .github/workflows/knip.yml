@@ -6,9 +6,7 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
-  contents: write
   pull-requests: write
-  issues: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -46,7 +44,6 @@ jobs:
         run: pnpm knip -c knip.json -t tsconfig.json --reporter markdown --max-show-issues 5 --max-issues 0 --no-exit-code > knip-report.md
 
       - name: Comment Knip report on PR
-        if: github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: knip-report
