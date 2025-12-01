@@ -1,13 +1,13 @@
 export const isMiniPlayer = window.location.hash === "#mini-player" || window.location.hash === "#/mini-player";
 const miniPlayerChannel = new BroadcastChannel("mini-player-sync");
 
-export const broadcastState = (payload: any) => {
+export const broadcastState = (payload: Record<string, unknown>) => {
   if (!isMiniPlayer) {
     miniPlayerChannel.postMessage({ type: "state-sync", payload });
   }
 };
 
-export const sendCommand = (command: string, payload?: any) => {
+export const sendCommand = (command: string, payload?: unknown) => {
   if (isMiniPlayer) {
     miniPlayerChannel.postMessage({ type: "command", command, payload });
   }
