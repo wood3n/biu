@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { Button, Image, Slider } from "@heroui/react";
 import {
@@ -49,31 +49,34 @@ const MiniPlayer = () => {
     })),
   );
 
-  const { title, cover, ownerName, disabled } = useMemo(() => {
+  const { title, cover, disabled } = useMemo(() => {
     const mvData = list.find(item => item.bvid === currentBvid);
     const pageData = mvData?.pages?.find(item => item.cid === currentCid);
     const hasPages = (mvData?.pages?.length ?? 0) > 1;
     return {
       title: hasPages ? pageData?.title : mvData?.title,
       cover: hasPages ? pageData?.cover : mvData?.cover,
-      ownerName: mvData?.ownerName,
       disabled: list.length === 0,
     };
   }, [list, currentBvid, currentCid]);
+
+  const playModeIcon = useMemo(() => {
+    return PlayModeList.find(item => item.value === playMode)?.icon;
+  }, [playMode]);
 
   useEffect(() => {
     init();
   }, [init]);
 
-  const handleSwitchToMain = () => {
+  const handleSwitchToMain = useCallback(() => {
     window.electron.switchToMainWindow();
-  };
+  }, []);
 
-  const togglePlayMode = () => {
+  const togglePlayMode = useCallback(() => {
     const currentIndex = PlayModeList.findIndex(item => item.value === playMode);
     const nextIndex = (currentIndex + 1) % PlayModeList.length;
     setPlayMode(PlayModeList[nextIndex].value);
-  };
+  }, [playMode, setPlayMode]);
 
   return (
     <div className="flex h-screen w-screen flex-col bg-zinc-900 select-none">
@@ -91,12 +94,9 @@ const MiniPlayer = () => {
         <div className="window-no-drag flex min-w-0 flex-1 flex-col space-y-1">
           <div className="flex min-w-0 flex-col">
             {currentBvid ? (
-              <>
-                <span className="truncate text-sm font-medium">{title}</span>
-                <span className="text-center text-xs text-zinc-400">{ownerName}</span>
-              </>
+              <span className="truncate text-center text-sm font-medium">{title}</span>
             ) : (
-              <span className="text-sm text-zinc-500">暂无播放内容</span>
+              <span className="text-center text-sm text-zinc-500">暂无播放内容</span>
             )}
           </div>
           <div className="flex items-center space-x-1">
@@ -128,7 +128,7 @@ const MiniPlayer = () => {
               className="hover:text-primary"
               aria-label="播放模式"
             >
-              {PlayModeList.find(item => item.value === playMode)?.icon}
+              {playModeIcon}
             </Button>
             <div className="flex items-center space-x-1">
               <Button
