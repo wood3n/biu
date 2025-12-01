@@ -41,14 +41,8 @@ export function installWebRequestInterceptors() {
 
     const rewritten = cookies.map(cookie => {
       const setCookieObject = httpCookie.parseSetCookie(cookie);
-
-      if (setCookieObject.sameSite !== "none") {
-        setCookieObject.sameSite = "none";
-      }
-
-      if (!setCookieObject.secure) {
-        setCookieObject.secure = true;
-      }
+      setCookieObject.sameSite = "none";
+      setCookieObject.secure = true;
 
       return httpCookie.stringifySetCookie(setCookieObject);
     });
