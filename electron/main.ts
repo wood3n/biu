@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
 
 import { registerIpcHandlers } from "./ipc/index";
+import { setupMacDock } from "./mac/dock";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
 import { IconBase } from "./path";
@@ -110,15 +111,6 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  createTray({
-    getMainWindow: () => mainWindow,
-    // 退出：设置 app.quitting 标记，避免 close 事件拦截
-    onExit: () => {
-      (app as any).quitting = true;
-      app.quit();
-    },
-  });
-
   injectAuthCookie();
 
   installWebRequestInterceptors();
@@ -128,6 +120,21 @@ app.whenReady().then(() => {
   setupAutoUpdater();
 
   createWindow();
+
+  if (process.platform === "darwin" && mainWindow) {
+    setupMacDock(mainWindow);
+  }
+
+  if (process.platform !== "darwin") {
+    createTray({
+      getMainWindow: () => mainWindow,
+      // 退出：设置 app.quitting 标记，避免 close 事件拦截
+      onExit: () => {
+        (app as any).quitting = true;
+        app.quit();
+      },
+    });
+  }
 });
 
 app.on("activate", () => mainWindow?.show());
