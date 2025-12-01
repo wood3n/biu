@@ -354,6 +354,9 @@ export const usePlayQueue = create<State & Action>()(
           const { currentBvid, list } = get();
 
           if (currentBvid === bvid) {
+            if (!get().isPlaying) {
+              audio.play();
+            }
             return;
           }
 

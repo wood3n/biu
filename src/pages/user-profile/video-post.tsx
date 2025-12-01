@@ -44,7 +44,7 @@ const VideoPost = () => {
       <GridList
         data={data?.list ?? []}
         loading={loading}
-        itemKey="id"
+        itemKey="bvid"
         renderItem={item => (
           <MVCard
             bvid={item.bvid}

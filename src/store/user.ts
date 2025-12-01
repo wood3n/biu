@@ -22,7 +22,6 @@ export const useUser = create<UserState & Action>()(
   persist(
     (set, get) => ({
       user: null,
-      getUser: () => get().user,
       ownFolder: [],
       collectedFolder: [],
       updateUser: async () => {
