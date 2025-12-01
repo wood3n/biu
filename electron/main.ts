@@ -1,4 +1,4 @@
-import { app, BrowserWindow, nativeImage } from "electron";
+import { app, BrowserWindow } from "electron";
 import isDev from "electron-is-dev";
 import log from "electron-log";
 import path from "node:path";
@@ -24,7 +24,10 @@ let mainWindow: BrowserWindow | null;
 function createWindow() {
   mainWindow = new BrowserWindow({
     title: "Biu",
-    icon: path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, process.platform === "win32" ? "logo.ico" : "logo.icns"),
+    icon:
+      process.platform === "darwin"
+        ? undefined
+        : path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, process.platform === "win32" ? "logo.ico" : "logo.png"),
     show: true,
     hasShadow: true,
     width: 1200,
@@ -52,7 +55,7 @@ function createWindow() {
           },
         }
       : {}),
-    trafficLightPosition: { x: 0, y: 0 },
+    trafficLightPosition: { x: 16, y: 18 },
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       webSecurity: true,
@@ -73,12 +76,6 @@ function createWindow() {
     // 阻止默认菜单显示
     event.preventDefault();
   });
-
-  // MAC dock icon
-  if (process.platform === "darwin") {
-    const dockIcon = nativeImage.createFromPath(path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, "logo.png"));
-    app.dock?.setIcon(dockIcon);
-  }
 
   const indexPath = path.resolve(__dirname, "../dist/web/index.html");
   mainWindow.loadFile(indexPath);
