@@ -46,7 +46,7 @@ jobs:
         run: pnpm knip -c knip.json -t tsconfig.json --reporter markdown --max-show-issues 5 --max-issues 0 --no-exit-code > knip-report.md
 
       - name: Comment Knip report on PR
-        uses: actions/github-script@v8
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
