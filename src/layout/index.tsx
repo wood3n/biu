@@ -4,7 +4,6 @@ import { Outlet } from "react-router";
 
 import log from "electron-log/renderer";
 
-import { refreshCookie } from "@/common/utils/cookie";
 import Fallback from "@/components/error-fallback";
 import PlayBar from "@/layout/playbar";
 import { useUser } from "@/store/user";
@@ -15,16 +14,8 @@ import SideNav from "./side";
 const Layout = () => {
   const updateUser = useUser(state => state.updateUser);
 
-  const getLoginInfo = async () => {
-    try {
-      await refreshCookie();
-    } finally {
-      updateUser();
-    }
-  };
-
   useEffect(() => {
-    getLoginInfo();
+    updateUser();
   }, []);
 
   return (

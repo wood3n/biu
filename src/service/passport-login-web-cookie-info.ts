@@ -35,5 +35,8 @@ export interface WebCookieInfoResponse {
  * @returns 是否需要刷新及当前时间戳
  */
 export function getPassportLoginWebCookieInfo(params?: WebCookieInfoRequestParams): Promise<WebCookieInfoResponse> {
-  return passportRequest.get<WebCookieInfoResponse>("/x/passport-login/web/cookie/info", { params });
+  return passportRequest.get<WebCookieInfoResponse>("/x/passport-login/web/cookie/info", {
+    params,
+    skipRefreshCheck: true,
+  });
 }

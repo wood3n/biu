@@ -41,7 +41,6 @@ export async function injectBiliTicketCookie() {
 
 /**
  * buvid4: 过期时间：30天
- * buvid3 & b_nut: 过期时间：1年
  */
 export async function injectBuvidCookie() {
   const buvid = await getWebBuvid();

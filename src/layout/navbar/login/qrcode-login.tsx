@@ -2,9 +2,9 @@ import { Button, addToast, Skeleton } from "@heroui/react";
 import { RiRefreshLine } from "@remixicon/react";
 import { useRequest } from "ahooks";
 import clx from "classnames";
+import moment from "moment";
 import { QRCodeCanvas } from "qrcode.react";
 
-import { getUrlParams } from "@/common/utils/url";
 import { getPassportLoginWebQrcodeGenerate } from "@/service/passport-login-web-qrcode-generate";
 import { getPassportLoginWebQrcodePoll } from "@/service/passport-login-web-qrcode-poll";
 import { useToken } from "@/store/token";
@@ -40,23 +40,18 @@ const QrcodeLogin = ({ onClose }: QrcodeLoginProps) => {
       pollingWhenHidden: false,
       onSuccess: async pollData => {
         if (pollData?.code === 0) {
-          const { refresh_token, timestamp, url } = pollData;
-
-          const urlParams = getUrlParams(url || "");
-
-          updateToken({
-            refresh_token,
-            timestamp,
-            url,
-            ...urlParams,
-          });
-
-          // 等待用户信息更新完成
           try {
             await updateUser();
           } catch (error) {
             console.error("[qrcode-login] 更新用户信息失败:", error);
           }
+
+          const { refresh_token } = pollData;
+
+          updateToken({
+            tokenData: { refresh_token },
+            nextCheckRefreshTime: moment().add(2, "days").unix(),
+          });
 
           addToast({ title: "登录成功", color: "success" });
           onClose();
