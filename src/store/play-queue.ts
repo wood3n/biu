@@ -77,6 +77,7 @@ interface Action {
   clear: () => void;
   next: () => Promise<void>;
   prev: () => Promise<void>;
+  getAudio: () => HTMLAudioElement;
 }
 
 const getMVData = async (bvid: string) => {
@@ -635,6 +636,7 @@ export const usePlayQueue = create<State & Action>()(
             nextBvid: undefined,
           });
         },
+        getAudio: () => audio,
       };
     }),
     {
