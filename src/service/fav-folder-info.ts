@@ -35,7 +35,7 @@ export interface FavFolderInfoData {
   fid: number;
   /** 创建者 mid */
   mid: number;
-  /** 属性位（文档未完全定义） */
+  /** 二进制位属性, 0：公开, 1：私密 */
   attr: number;
   /** 收藏夹标题 */
   title: string;

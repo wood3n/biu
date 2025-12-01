@@ -3,10 +3,12 @@ import { useParams } from "react-router";
 import { Image, Link, Skeleton, User } from "@heroui/react";
 import { RiPlayFill, RiStarFill, RiStarLine } from "@remixicon/react";
 import { useRequest } from "ahooks";
+import clx from "classnames";
 import { useShallow } from "zustand/react/shallow";
 
 import FallbackImage from "@/assets/images/fallback.png";
 import { CollectionType } from "@/common/constants/collection";
+import { isPrivateFav } from "@/common/utils/fav";
 import AsyncButton from "@/components/async-button";
 import Ellipsis from "@/components/ellipsis";
 import { postFavFolderFav } from "@/service/fav-folder-fav";
@@ -141,7 +143,9 @@ const Info = ({
         alt={title}
         width={230}
         height={230}
-        className="object-cover"
+        className={clx("object-cover", {
+          "border-content3 border": !cover,
+        })}
         classNames={{
           wrapper: "flex-none",
         }}
@@ -164,7 +168,11 @@ const Info = ({
             />
           )}
           <div className="flex items-center space-x-2 text-sm text-zinc-400">
-            <span>{type === CollectionType.Favorite ? "收藏夹" : "视频合集"}</span>
+            <span>
+              {type === CollectionType.Favorite
+                ? `${isOwn && Boolean(attr) ? (isPrivateFav(attr as number) ? "私密" : "公开") : ""}收藏夹`
+                : "视频合集"}
+            </span>
             <span>•</span>
             <span>{mediaCount} 条视频</span>
           </div>

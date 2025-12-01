@@ -14,7 +14,7 @@ export interface FavFolderEditRequestParams {
   title: string;
   /** 修改后的收藏夹简介 */
   intro?: string;
-  /** 是否公开 0：公开 1：私密，默认公开 */
+  /** 0：公开 1：私密 */
   privacy?: 0 | 1;
   /** 封面图 url（会被审核） */
   cover?: string;

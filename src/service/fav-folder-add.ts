@@ -12,7 +12,7 @@ export interface FavFolderAddRequestParams {
   title: string;
   /** 收藏夹简介，默认空 */
   intro?: string;
-  /** 是否公开 0：公开 1：私密，默认公开 */
+  /** 0：公开; 1：私密 */
   privacy?: 0 | 1;
   /** 封面图 url（会被审核） */
   cover?: string;
@@ -39,5 +39,8 @@ export interface FavFolderAddResponse {
  * 新建收藏夹
  */
 export function postFavFolderAdd(data: FavFolderAddRequestParams): Promise<FavFolderAddResponse> {
-  return apiRequest.post<FavFolderAddResponse>("/x/v3/fav/folder/add", data);
+  return apiRequest.post<FavFolderAddResponse>("/x/v3/fav/folder/add", data, {
+    useFormData: true,
+    useCSRF: true,
+  });
 }

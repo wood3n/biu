@@ -1,7 +1,6 @@
 import moment from "moment";
 import momentDurationFormatSetup from "moment-duration-format";
 
-// @ts-expect-error moment
 momentDurationFormatSetup(moment);
 
 export function formatDuration(seconds: number) {
