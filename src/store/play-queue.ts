@@ -3,6 +3,7 @@ import moment from "moment";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
+import { shallow } from "zustand/shallow";
 
 import { PlayMode } from "@/common/constants/audio";
 import { getMVUrl } from "@/common/utils/audio";
@@ -170,6 +171,57 @@ const updatePositionState = () => {
   }
 };
 
+const setupMiniPlayerListener = (set: (fn: (state: State) => void) => void) => {
+  onMessage(event => {
+    const { type, payload } = event.data;
+    if (type === "state-sync") {
+      set(state => {
+        Object.assign(state, payload);
+      });
+    }
+  });
+  requestSync();
+};
+
+const setupMainWindowListener = (get: () => State & Action) => {
+  onMessage(event => {
+    const { type, command, payload } = event.data;
+    if (type === "command") {
+      switch (command) {
+        case "togglePlay":
+          get().togglePlay();
+          break;
+        case "prev":
+          get().prev();
+          break;
+        case "next":
+          get().next();
+          break;
+        case "seek":
+          get().seek(payload);
+          break;
+        case "setPlayMode":
+          get().setPlayMode(payload);
+          break;
+      }
+    } else if (type === "request-sync") {
+      const state = get();
+      broadcastState({
+        isPlaying: state.isPlaying,
+        isMuted: state.isMuted,
+        volume: state.volume,
+        playMode: state.playMode,
+        rate: state.rate,
+        currentTime: state.currentTime,
+        duration: state.duration,
+        list: state.list,
+        currentBvid: state.currentBvid,
+        currentCid: state.currentCid,
+      });
+    }
+  });
+};
+
 export const usePlayQueue = create<State & Action>()(
   persist(
     immer((set, get) => {
@@ -235,52 +287,11 @@ export const usePlayQueue = create<State & Action>()(
         list: [],
         init: async () => {
           if (isMiniPlayer) {
-            onMessage(event => {
-              const { type, payload } = event.data;
-              if (type === "state-sync") {
-                set(payload);
-              }
-            });
-            requestSync();
+            setupMiniPlayerListener(set);
             return;
           }
 
-          onMessage(event => {
-            const { type, command, payload } = event.data;
-            if (type === "command") {
-              switch (command) {
-                case "togglePlay":
-                  get().togglePlay();
-                  break;
-                case "prev":
-                  get().prev();
-                  break;
-                case "next":
-                  get().next();
-                  break;
-                case "seek":
-                  get().seek(payload);
-                  break;
-                case "setPlayMode":
-                  get().setPlayMode(payload);
-                  break;
-              }
-            } else if (type === "request-sync") {
-              const state = get();
-              broadcastState({
-                isPlaying: state.isPlaying,
-                isMuted: state.isMuted,
-                volume: state.volume,
-                playMode: state.playMode,
-                rate: state.rate,
-                currentTime: state.currentTime,
-                duration: state.duration,
-                list: state.list,
-                currentBvid: state.currentBvid,
-                currentCid: state.currentCid,
-              });
-            }
-          });
+          setupMainWindowListener(get);
 
           if (audio) {
             audio.volume = get().volume;
@@ -745,17 +756,8 @@ if (!isMiniPlayer) {
       currentCid: state.currentCid,
       list: state.list,
     };
-    if (
-      !prevState ||
-      selectedState.currentBvid !== prevState.currentBvid ||
-      selectedState.currentCid !== prevState.currentCid ||
-      selectedState.list !== prevState.list
-    ) {
-      broadcastState({
-        currentBvid: selectedState.currentBvid,
-        currentCid: selectedState.currentCid,
-        list: selectedState.list,
-      });
+    if (!prevState || !shallow(prevState, selectedState)) {
+      broadcastState(selectedState);
       prevState = selectedState;
     }
   });

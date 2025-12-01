@@ -125,10 +125,6 @@ function createMiniWindow() {
     hasShadow: true,
     width: 320,
     height: 100,
-    minWidth: 320,
-    minHeight: 100,
-    maxWidth: 320,
-    maxHeight: 100,
     resizable: false,
     // 窗口居中
     center: true,
