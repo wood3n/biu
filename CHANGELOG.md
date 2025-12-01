@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.6.0-beta.3
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.3...v1.6.0-beta.3)
+
+### 🏡 Chore
+
+- 使用changelogen替换release-it ([c8055eb](https://github.com/wood3n/biu/commit/c8055eb))
+
+### ❤️ Contributors
+
+- Wood3n <wangkka1@163.com>
+
 ## [1.6.0-beta.2](///compare/v1.6.0-beta.1...v1.6.0-beta.2) (2025-11-30)
 
 ### Features
