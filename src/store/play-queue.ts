@@ -9,8 +9,7 @@ import { getMVUrl } from "@/common/utils/audio";
 import { formatUrlProtocal } from "@/common/utils/url";
 import { getWebInterfaceView } from "@/service/web-interface-view";
 
-const isMiniPlayer = window.location.hash === "#mini-player" || window.location.hash === "#/mini-player";
-const playQueueChannel = new BroadcastChannel("play-queue-sync");
+import { broadcastState, isMiniPlayer, onMessage, requestSync, sendCommand } from "./mini-player-sync";
 
 interface PlayMVList {
   bvid: string;
@@ -171,18 +170,6 @@ const updatePositionState = () => {
   }
 };
 
-const broadcastState = (state: Partial<State>) => {
-  if (!isMiniPlayer) {
-    playQueueChannel.postMessage({ type: "state-sync", payload: state });
-  }
-};
-
-const sendCommand = (command: string, payload?: any) => {
-  if (isMiniPlayer) {
-    playQueueChannel.postMessage({ type: "command", command, payload });
-  }
-};
-
 export const usePlayQueue = create<State & Action>()(
   persist(
     immer((set, get) => {
@@ -248,17 +235,17 @@ export const usePlayQueue = create<State & Action>()(
         list: [],
         init: async () => {
           if (isMiniPlayer) {
-            playQueueChannel.onmessage = event => {
+            onMessage(event => {
               const { type, payload } = event.data;
               if (type === "state-sync") {
                 set(payload);
               }
-            };
-            playQueueChannel.postMessage({ type: "request-sync" });
+            });
+            requestSync();
             return;
           }
 
-          playQueueChannel.onmessage = event => {
+          onMessage(event => {
             const { type, command, payload } = event.data;
             if (type === "command") {
               switch (command) {
@@ -273,6 +260,9 @@ export const usePlayQueue = create<State & Action>()(
                   break;
                 case "seek":
                   get().seek(payload);
+                  break;
+                case "setPlayMode":
+                  get().setPlayMode(payload);
                   break;
               }
             } else if (type === "request-sync") {
@@ -290,7 +280,7 @@ export const usePlayQueue = create<State & Action>()(
                 currentCid: state.currentCid,
               });
             }
-          };
+          });
 
           if (audio) {
             audio.volume = get().volume;
@@ -407,10 +397,15 @@ export const usePlayQueue = create<State & Action>()(
           set({ volume });
         },
         setPlayMode: mode => {
+          if (isMiniPlayer) {
+            sendCommand("setPlayMode", mode);
+            return;
+          }
           if (audio) {
             audio.loop = mode === PlayMode.Single;
           }
           set({ playMode: mode });
+          broadcastState({ playMode: mode });
         },
         setRate: rate => {
           if (audio) {

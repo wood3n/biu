@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import { Button, Image, Slider } from "@heroui/react";
 import {
@@ -8,30 +8,58 @@ import {
   RiSkipBackFill,
   RiSkipForwardFill,
 } from "@remixicon/react";
+import { useShallow } from "zustand/react/shallow";
 
+import { getPlayModeList } from "@/common/constants/audio";
 import { formatDuration } from "@/common/utils";
 import { usePlayQueue } from "@/store/play-queue";
 
-const MiniPlayer = () => {
-  const init = usePlayQueue(s => s.init);
-  const currentBvid = usePlayQueue(s => s.currentBvid);
-  const currentCid = usePlayQueue(s => s.currentCid);
-  const isPlaying = usePlayQueue(s => s.isPlaying);
-  const duration = usePlayQueue(s => s.duration);
-  const currentTime = usePlayQueue(s => s.currentTime);
-  const togglePlay = usePlayQueue(s => s.togglePlay);
-  const prev = usePlayQueue(s => s.prev);
-  const next = usePlayQueue(s => s.next);
-  const seek = usePlayQueue(s => s.seek);
-  const list = usePlayQueue(s => s.list);
+const PlayModeList = getPlayModeList(18);
 
-  const mvData = usePlayQueue(s => s.list.find(item => item.bvid === s.currentBvid));
-  const pageData = mvData?.pages?.find(item => item.cid === currentCid);
-  const hasPages = (mvData?.pages?.length ?? 0) > 1;
-  const title = hasPages ? pageData?.title : mvData?.title;
-  const cover = hasPages ? pageData?.cover : mvData?.cover;
-  const ownerName = mvData?.ownerName;
-  const disabled = list.length === 0;
+const MiniPlayer = () => {
+  const {
+    init,
+    currentBvid,
+    currentCid,
+    isPlaying,
+    duration,
+    currentTime,
+    togglePlay,
+    prev,
+    next,
+    seek,
+    list,
+    playMode,
+    setPlayMode,
+  } = usePlayQueue(
+    useShallow(s => ({
+      init: s.init,
+      currentBvid: s.currentBvid,
+      currentCid: s.currentCid,
+      isPlaying: s.isPlaying,
+      duration: s.duration,
+      currentTime: s.currentTime,
+      togglePlay: s.togglePlay,
+      prev: s.prev,
+      next: s.next,
+      seek: s.seek,
+      list: s.list,
+      playMode: s.playMode,
+      setPlayMode: s.setPlayMode,
+    })),
+  );
+
+  const { title, cover, ownerName, disabled } = useMemo(() => {
+    const mvData = list.find(item => item.bvid === currentBvid);
+    const pageData = mvData?.pages?.find(item => item.cid === currentCid);
+    const hasPages = (mvData?.pages?.length ?? 0) > 1;
+    return {
+      title: hasPages ? pageData?.title : mvData?.title,
+      cover: hasPages ? pageData?.cover : mvData?.cover,
+      ownerName: mvData?.ownerName,
+      disabled: list.length === 0,
+    };
+  }, [list, currentBvid, currentCid]);
 
   useEffect(() => {
     init();
@@ -39,6 +67,12 @@ const MiniPlayer = () => {
 
   const handleSwitchToMain = () => {
     window.electron.switchToMainWindow();
+  };
+
+  const togglePlayMode = () => {
+    const currentIndex = PlayModeList.findIndex(item => item.value === playMode);
+    const nextIndex = (currentIndex + 1) % PlayModeList.length;
+    setPlayMode(PlayModeList[nextIndex].value);
   };
 
   return (
@@ -86,7 +120,16 @@ const MiniPlayer = () => {
             </span>
           </div>
           <div className="flex items-center justify-between space-x-1">
-            <span className="w-8"></span>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              onPress={togglePlayMode}
+              className="hover:text-primary"
+              aria-label="播放模式"
+            >
+              {PlayModeList.find(item => item.value === playMode)?.icon}
+            </Button>
             <div className="flex items-center space-x-1">
               <Button
                 isDisabled={disabled}
