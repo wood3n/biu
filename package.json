@@ -124,11 +124,6 @@
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.42.0"
   },
-  "pnpm": {
-    "overrides": {
-      "conventional-changelog-conventionalcommits": "8.0.0"
-    }
-  },
   "lint-staged": {
     "*.{js,cjs,mjs,ts,tsx}": "eslint --fix --concurrency auto",
     "*.{css,less}": "stylelint --fix",
