@@ -96,13 +96,14 @@ const AudioWaveform = ({
 
         ctx.clearRect(0, 0, width, height);
 
+        const WAVEFORM_HEIGHT_SCALE_FACTOR = 0.8;
         const barWidth = width / barCount;
         const barGap = barWidth * 0.2;
         const actualBarWidth = barWidth - barGap;
 
         for (let i = 0; i < barCount; i++) {
           const dataIndex = Math.floor((i / barCount) * bufferLength);
-          const barHeight = (dataArray[dataIndex] / 255) * height * 0.8; // 0.8 是为了留出一些边距
+          const barHeight = (dataArray[dataIndex] / 255) * height * WAVEFORM_HEIGHT_SCALE_FACTOR;
 
           const x = i * barWidth + barGap / 2;
           const y = height - barHeight;
@@ -130,8 +131,8 @@ const AudioWaveform = ({
       if (analyserRef.current && source) {
         try {
           source.disconnect(analyserRef.current);
-        } catch {
-          // 忽略断开连接错误
+        } catch (error) {
+          console.warn("Failed to disconnect analyser:", error);
         }
       }
       analyserRef.current = null;
