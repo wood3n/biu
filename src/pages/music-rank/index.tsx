@@ -19,7 +19,7 @@ const MusicRank = () => {
   });
 
   return (
-    <ScrollContainer className="p-4">
+    <ScrollContainer className="h-full p-4">
       <h1 className="mb-4">热歌精选</h1>
       <GridList
         data={data}

@@ -1,10 +1,49 @@
 # Changelog
 
+## [1.6.0-beta.2](///compare/v1.6.0-beta.1...v1.6.0-beta.2) (2025-11-30)
+
+### Features
+
+* 添加视频播放历史记录页面 @flystar233
+* 修复播放问题(#52)
+
+### Contributors
+
+Thanks to [@flystar233](https://github.com/flystar233)
+
+## [1.6.0-beta.1](///compare/v1.6.0-beta.0...v1.6.0-beta.1) (2025-11-29)
+
+### Bug Fixes
+
+* 修复无法全部播放收藏夹的问题 @flystar233
+* 对收藏夹无效视频进行过滤 @flystar233
+* 修复tray右键点击事件
+* 修改linux tray图标
+* 移除无用的样式,修复搜索用户点击跳转问题
+* 修复分辨率兼容问题
+
+### Contributors
+
+Thanks to [@flystar233](https://github.com/flystar233)
+
+## [1.6.0-beta.0](///compare/v1.5.3-beta.1...v1.6.0-beta.0) (2025-11-28)
+
+### Features
+
+* 补充自动检测应用版本更新功能 f0652d8
+
+### Bug Fixes
+
+* 修改打包配置，修复音频跳转问题 3c74a0e
+* remove useless exports 9be3a18
+
 ## [1.5.3-beta.1](https://github.com/wood3n/biu/compare/v1.5.3-beta.0...v1.5.3-beta.1) (2025-11-26)
 
 ### 🩹 Fixes
+* fix search and login function by @flystar233 in https://github.com/wood3n/biu/pull/10
 
-* 修复登录问题和搜索显示问题（[0835b83](https://github.com/wood3n/biu/pull/10/commits/0835b830bbc428105e3b00728282200b2df47516)）
+### ♥️ New Contributors
+* @flystar233 made their first contribution in https://github.com/wood3n/biu/pull/10
 
 ## [1.5.3-beta.0](https://github.com/wood3n/biu/compare/v1.5.2...v1.5.3-beta.0) (2025-11-26)
 

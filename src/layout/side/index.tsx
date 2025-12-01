@@ -13,7 +13,7 @@ const SideNav = () => {
         <Logo className="h-10 w-10" />
         <span className="text-3xl leading-none font-bold">Biu</span>
       </div>
-      <ScrollContainer className="min-h-0 flex-1 px-4">
+      <ScrollContainer className="min-h-0 flex-1 px-4 pb-4">
         <Menu />
         <Collection />
       </ScrollContainer>

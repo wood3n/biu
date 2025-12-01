@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
 
 import { registerIpcHandlers } from "./ipc/index";
+import { setMainWindow, setMiniWindow } from "./ipc/window";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
 import { IconBase } from "./path";
@@ -21,16 +22,18 @@ const __dirname = path.dirname(__filename);
 log.initialize();
 
 let mainWindow: BrowserWindow | null;
+let miniWindow: BrowserWindow | null;
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     title: "Biu",
     icon: path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, process.platform === "win32" ? "logo.ico" : "logo.icns"),
     show: true,
     hasShadow: true,
-    width: 1560,
-    height: 900,
-    minWidth: 1200,
-    minHeight: 800,
+    width: 1200,
+    height: 720,
+    minWidth: 1000,
+    minHeight: 600,
     resizable: true,
     // 跟随 web 页面大小
     useContentSize: true,
@@ -110,6 +113,58 @@ function createWindow() {
       }
     }
   });
+
+  setMainWindow(mainWindow);
+}
+
+function createMiniWindow() {
+  miniWindow = new BrowserWindow({
+    title: "Biu Mini",
+    icon: path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, process.platform === "win32" ? "logo.ico" : "logo.icns"),
+    show: false,
+    hasShadow: true,
+    width: 320,
+    height: 100,
+    resizable: false,
+    // 窗口居中
+    center: true,
+    // 无边框
+    frame: false,
+    transparent: false,
+    titleBarStyle: "hidden",
+    titleBarOverlay: false,
+    alwaysOnTop: true,
+    skipTaskbar: false,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.cjs"),
+      webSecurity: true,
+      contextIsolation: true,
+      nodeIntegration: false,
+      devTools: isDev,
+    },
+  });
+
+  miniWindow.webContents.setWindowOpenHandler(() => {
+    return { action: "deny" };
+  });
+
+  miniWindow.webContents.on("context-menu", event => {
+    event.preventDefault();
+  });
+
+  const indexPath = path.resolve(__dirname, "../dist/web/index.html");
+  miniWindow.loadFile(indexPath, { hash: "mini-player" });
+
+  miniWindow.on("close", event => {
+    if ((app as any).quitting) {
+      return;
+    }
+    event.preventDefault();
+    miniWindow?.hide();
+    mainWindow?.show();
+  });
+
+  setMiniWindow(miniWindow);
 }
 
 app.whenReady().then(() => {
@@ -131,6 +186,7 @@ app.whenReady().then(() => {
   setupAutoUpdater();
 
   createWindow();
+  createMiniWindow();
 });
 
 app.on("activate", () => mainWindow?.show());

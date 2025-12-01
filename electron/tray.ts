@@ -32,11 +32,57 @@ function createTray({
     tray = null;
   }
 
-  const trayIconPath = path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, "tray.ico");
-  tray = new Tray(nativeImage.createFromPath(trayIconPath));
+  const isLinux = process.platform === "linux";
+  const iconName = isLinux ? "logo.png" : "tray.ico";
+  const trayIconPath = path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, iconName);
+  let icon = nativeImage.createFromPath(trayIconPath);
+
+  if (icon.isEmpty()) {
+    log.warn(`[tray] Tray icon not found or failed to load: ${trayIconPath}`);
+  }
+
+  // Linux 下为了避免图标过大，调整尺寸（通常 32x32 足够清晰且适配）
+  if (isLinux) {
+    icon = icon.resize({ width: 32, height: 32 });
+  }
+
+  tray = new Tray(icon);
   tray.setToolTip("Biu");
 
+  const menuTemplate: MenuItemConstructorOptions[] = [
+    {
+      label: "设置",
+      click: () => {
+        const win = getMainWindow?.();
+        if (!win) return;
+        try {
+          win.show();
+          win.focus();
+          win.webContents.send(channel.router.navigate, "/settings");
+        } catch (err) {
+          // 修改说明：托盘触发的导航失败时记录错误，便于定位
+          log.error("[tray] navigate to settings failed:", err);
+        }
+      },
+    },
+    {
+      label: "退出程序",
+      click: () => {
+        // 将退出逻辑交给主进程，以便设置 app.quitting 标记
+        if (typeof onExit === "function") {
+          onExit();
+        }
+      },
+    },
+  ];
+
+  // Linux 下必须使用 setContextMenu 才能正常弹出菜单（尤其是 Wayland/AppIndicator 环境）
+  // Windows/macOS 也推荐使用 setContextMenu，系统会自动处理右键行为
+  const menu = Menu.buildFromTemplate(menuTemplate);
+  tray.setContextMenu(menu);
+
   // 左键单击：显示/隐藏主窗口
+  // 注意：Linux (AppIndicator) 可能会忽略 click 事件，用户主要通过右键菜单交互
   tray.on("click", () => {
     const win = getMainWindow?.();
     if (!win) return;
@@ -47,40 +93,6 @@ function createTray({
     } else {
       win.show();
     }
-  });
-
-  // 右键：动态构建菜单以反映当前窗口状态
-  tray.on("right-click", () => {
-    const menuTemplate: MenuItemConstructorOptions[] = [
-      {
-        label: "设置",
-        click: () => {
-          const win = getMainWindow?.();
-          if (!win) return;
-          try {
-            win.show();
-            win.focus();
-            win.webContents.send(channel.router.navigate, "/settings");
-          } catch (err) {
-            // 修改说明：托盘触发的导航失败时记录错误，便于定位
-            log.error("[tray] navigate to settings failed:", err);
-          }
-        },
-      },
-      {
-        label: "退出程序",
-        click: () => {
-          // 将退出逻辑交给主进程，以便设置 app.quitting 标记
-          if (typeof onExit === "function") {
-            onExit();
-          }
-        },
-      },
-    ];
-
-    const menu = Menu.buildFromTemplate(menuTemplate);
-    if (!tray) return;
-    tray.popUpContextMenu(menu);
   });
 
   return tray;
@@ -98,4 +110,4 @@ function destroyTray() {
   }
 }
 
-export { tray, createTray, destroyTray };
+export { createTray, destroyTray };

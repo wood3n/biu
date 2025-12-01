@@ -1,7 +1,6 @@
 name: ✨ 提需求 (Feature Request)
 description: 建议添加新功能
-title: "[Feature]: "
-labels: ["enhancement"]
+labels: ["✨feature"]
 body:
   - type: textarea
     id: description
@@ -10,4 +9,4 @@ body:
       description: 请描述你想要的功能是什么。
       placeholder: 我希望添加一个...功能，因为...
     validations:
-      required: true # 设为必填，防止用户交白卷
+      required: true

@@ -1,7 +1,6 @@
 name: 🐛 Bug 反馈 (Bug Report)
 description: 提交一个 Bug 报告帮助我们改进
-title: "[Bug]: "
-labels: ["bug", "triage"]
+labels: ["🐛bug"]
 body:
   - type: markdown
     attributes:
@@ -15,7 +14,7 @@ body:
       description: 您当前使用的版本号是多少？
       placeholder: v1.0.0
     validations:
-      required: true  # 🔴 关键：设置为必填项
+      required: true
 
   - type: dropdown
     id: os
@@ -40,4 +39,3 @@ body:
       placeholder: 详细描述...
     validations:
       required: true
-

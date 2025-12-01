@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router";
 
 import { Card, CardBody, Avatar } from "@heroui/react";
 
@@ -12,6 +13,8 @@ export type SearchUserProps = {
 };
 
 export default function SearchUser({ items }: SearchUserProps) {
+  const navigate = useNavigate();
+
   if (!items || items.length === 0) {
     return <Empty className="min-h-[280px]" />;
   }
@@ -19,7 +22,7 @@ export default function SearchUser({ items }: SearchUserProps) {
   return (
     <div className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-3 lg:grid-cols-4">
       {items.map(u => (
-        <Card key={u.mid} isHoverable isPressable className="h-full">
+        <Card key={u.mid} isHoverable isPressable className="h-full" onPress={() => navigate(`/user/${u.mid}`)}>
           <CardBody className="flex items-center space-y-2">
             <Avatar className="text-large h-32 w-32 flex-none" src={formatUrlProtocal(u.upic as string)} />
             <div className="flex w-full flex-col items-center space-y-1">
