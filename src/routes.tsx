@@ -6,6 +6,7 @@ import DownloadList from "./pages/download-list";
 import FollowList from "./pages/follow-list";
 import History from "./pages/history";
 import Later from "./pages/later";
+import MiniPlayer from "./pages/mini-player";
 import MusicRank from "./pages/music-rank";
 import MusicRecommend from "./pages/music-recommend";
 import NotFound from "./pages/not-found";
@@ -64,6 +65,10 @@ const routes: RouteObject[] = [
         element: <Search />,
       },
     ],
+  },
+  {
+    path: "mini-player",
+    element: <MiniPlayer />,
   },
   {
     path: "*",
