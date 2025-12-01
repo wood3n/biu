@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.6.0-beta.2](///compare/v1.6.0-beta.1...v1.6.0-beta.2) (2025-11-30)
+
+### Features
+
+* 添加视频播放历史记录页面 @flystar233
+* 修复播放问题(#52)
+
+### Contributors
+
+Thanks to [@flystar233](https://github.com/flystar233)
+
+## [1.6.0-beta.1](///compare/v1.6.0-beta.0...v1.6.0-beta.1) (2025-11-29)
+
+### Bug Fixes
+
+* 修复无法全部播放收藏夹的问题 @flystar233
+* 对收藏夹无效视频进行过滤 @flystar233
+* 修复tray右键点击事件
+* 修改linux tray图标
+* 移除无用的样式,修复搜索用户点击跳转问题
+* 修复分辨率兼容问题
+
+### Contributors
+
+Thanks to [@flystar233](https://github.com/flystar233)
+
 ## [1.6.0-beta.0](///compare/v1.5.3-beta.1...v1.6.0-beta.0) (2025-11-28)
 
 ### Features

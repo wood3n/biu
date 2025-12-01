@@ -4,6 +4,7 @@ import Layout from "./layout";
 import ArtistRank from "./pages/artist-rank";
 import DownloadList from "./pages/download-list";
 import FollowList from "./pages/follow-list";
+import History from "./pages/history";
 import Later from "./pages/later";
 import MiniPlayer from "./pages/mini-player";
 import MusicRank from "./pages/music-rank";
@@ -34,6 +35,10 @@ const routes: RouteObject[] = [
       {
         path: "later",
         element: <Later />,
+      },
+      {
+        path: "history",
+        element: <History />,
       },
       {
         path: "follow",

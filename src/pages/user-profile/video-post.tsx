@@ -62,7 +62,7 @@ const VideoPost = () => {
         )}
       />
       {pagination.totalPage > 1 && (
-        <div className="flex w-full items-center justify-center py-6">
+        <div className="flex w-full items-center justify-center py-4">
           <Pagination
             initialPage={1}
             total={pagination.totalPage}

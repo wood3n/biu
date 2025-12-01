@@ -9,7 +9,7 @@ import ImageCard from "../image-card";
 export interface GridPageListProps<T> {
   data?: T[];
   loading?: boolean;
-  itemKey: string;
+  itemKey: string | ((item: T) => string | number);
   skeletonCoverHeight?: number;
   renderItem: (item: T, index: number) => React.ReactNode;
   enablePagination?: boolean;
@@ -17,8 +17,10 @@ export interface GridPageListProps<T> {
   className?: string;
 }
 
+const EMPTY_ARRAY: never[] = [];
+
 const GridList = <T,>({
-  data = [],
+  data = EMPTY_ARRAY as T[],
   loading = false,
   itemKey,
   skeletonCoverHeight,
@@ -59,7 +61,8 @@ const GridList = <T,>({
     <>
       <div className={gridClassName}>
         {pagedData.map((item, idx) => {
-          return <React.Fragment key={item[itemKey]}>{renderItem(item, idx)}</React.Fragment>;
+          const key = typeof itemKey === "function" ? itemKey(item) : item[itemKey];
+          return <React.Fragment key={key}>{renderItem(item, idx)}</React.Fragment>;
         })}
       </div>
       {enablePagination && totalPage > 1 && (

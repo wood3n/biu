@@ -113,6 +113,13 @@ const toastError = (error: unknown) => {
   });
 };
 
+const handlePlayError = (error: any) => {
+  const errorMsg = error?.message || error?.name || "";
+  if (!errorMsg.includes("interrupted") && !errorMsg.includes("NotAllowed")) {
+    toastError(error);
+  }
+};
+
 const updateMediaSession = ({ title, artist, cover }: { title: string; artist: string; cover: string }) => {
   if ("mediaSession" in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -211,8 +218,8 @@ export const usePlayQueue = create<State & Action>()(
           if (autoPlay) {
             try {
               await audio.play();
-            } catch (error) {
-              toastError(error);
+            } catch (error: any) {
+              handlePlayError(error);
             }
           }
           updateMediaSession({
@@ -381,7 +388,7 @@ export const usePlayQueue = create<State & Action>()(
           }
           if (audio?.src) {
             if (audio.paused) {
-              audio.play().catch(err => toastError(err));
+              audio.play().catch(handlePlayError);
             } else {
               audio.pause();
             }
@@ -535,29 +542,37 @@ export const usePlayQueue = create<State & Action>()(
             const nextPage = pages[currentPageIndex + 1];
             await get().playPage(nextPage.cid);
           } else {
-            let nextIndex = (currentIndex + 1) % list.length;
-            if (playMode === PlayMode.Loop) {
-              const nextMVData = list[nextIndex];
-              console.log("nextMVData", nextMVData);
-              await get().play(nextMVData.bvid);
-            }
-
-            if (playMode === PlayMode.Sequence) {
-              if (nextIndex === 0) {
-                return;
-              } else {
+            const nextIndex = (currentIndex + 1) % list.length;
+            switch (playMode) {
+              case PlayMode.Loop: {
+                const nextMVData = list[nextIndex];
+                console.log("nextMVData", nextMVData);
+                await get().play(nextMVData.bvid);
+                break;
+              }
+              case PlayMode.Sequence: {
+                if (nextIndex === 0) {
+                  return;
+                }
                 const nextMVData = list[nextIndex];
                 await get().play(nextMVData.bvid);
+                break;
               }
-            }
-
-            if (playMode === PlayMode.Random) {
-              do {
-                nextIndex = Math.floor(Math.random() * list.length);
-              } while (nextIndex === currentIndex);
-              const nextMVData = list[nextIndex];
-              await get().play(nextMVData.bvid);
-              set({ prevBvid: currentBvid, prevCid: currentCid });
+              case PlayMode.Random: {
+                let randomIndex: number;
+                do {
+                  randomIndex = Math.floor(Math.random() * list.length);
+                } while (randomIndex === currentIndex);
+                const nextMVData = list[randomIndex];
+                await get().play(nextMVData.bvid);
+                set({ prevBvid: currentBvid, prevCid: currentCid });
+                break;
+              }
+              case PlayMode.Single: {
+                const nextMVData = list[nextIndex];
+                await get().play(nextMVData.bvid);
+                break;
+              }
             }
           }
         },
