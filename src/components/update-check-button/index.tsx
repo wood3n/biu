@@ -16,7 +16,9 @@ const UpdateCheckButton = () => {
 
   const checkUpdate = async () => {
     if (isUpdateAvailable) {
-      return Promise.resolve();
+      onReleaseNoteModalOpen();
+
+      return;
     }
 
     const res = await window.electron.checkAppUpdate();
