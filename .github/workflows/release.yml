@@ -18,8 +18,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-        arch: [x64, arm64]
+        include:
+          # Windows
+          - os: windows-latest
+            arch: x64
+          - os: windows-latest
+            arch: arm64
+          # Ubuntu
+          - os: ubuntu-latest
+            arch: x64
+          - os: ubuntu-latest
+            arch: arm64
+          # macOS
+          - os: macos-13
+            arch: x64
+          - os: macos-latest
+            arch: arm64
     permissions:
       contents: write
 
