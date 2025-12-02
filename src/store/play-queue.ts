@@ -79,7 +79,7 @@ interface Action {
   clear: () => void;
   next: () => Promise<void>;
   prev: () => Promise<void>;
-  getAudio: () => HTMLAudioElement | null;
+  getAudio: () => HTMLAudioElement;
 }
 
 const getMVData = async (bvid: string) => {
@@ -543,6 +543,11 @@ export const usePlayQueue = create<State & Action>()(
 
           resetProgress();
 
+          if (get().list.length === 1) {
+            await loadAndPlayCurrent();
+            return;
+          }
+
           const { playMode, nextBvid, list, currentBvid, currentCid } = get();
           const currentIndex = list.findIndex(item => item.bvid === currentBvid);
 
@@ -566,15 +571,12 @@ export const usePlayQueue = create<State & Action>()(
           if (pages.length > 1 && currentPageIndex < pages.length - 1) {
             const nextPage = pages[currentPageIndex + 1];
             await get().playPage(nextPage.cid);
-          } else if (list.length === 1) {
-            if (playMode !== PlayMode.Sequence) {
-              await loadAndPlayCurrent();
-            }
           } else {
             const nextIndex = (currentIndex + 1) % list.length;
             switch (playMode) {
               case PlayMode.Loop: {
                 const nextMVData = list[nextIndex];
+                console.log("nextMVData", nextMVData);
                 await get().play(nextMVData.bvid);
                 break;
               }
