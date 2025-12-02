@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import { Form, Input, Slider, Switch, Button, RadioGroup, Radio, Divider } from "@heroui/react";
+import { Form, Input, Slider, Switch, Button, RadioGroup, Radio, Divider, Select, SelectItem } from "@heroui/react";
 import { RiArrowRightLongLine } from "@remixicon/react";
 import { useShallow } from "zustand/react/shallow";
 
@@ -23,6 +23,7 @@ const SettingsPage = () => {
     downloadPath,
     closeWindowOption,
     autoStart,
+    audioQuality,
   } = useSettings(
     useShallow(s => ({
       fontFamily: s.fontFamily,
@@ -33,6 +34,7 @@ const SettingsPage = () => {
       downloadPath: s.downloadPath,
       closeWindowOption: s.closeWindowOption,
       autoStart: s.autoStart,
+      audioQuality: s.audioQuality,
     })),
   );
   const updateSettings = useSettings(s => s.update);
@@ -49,6 +51,7 @@ const SettingsPage = () => {
       downloadPath,
       closeWindowOption,
       autoStart,
+      audioQuality,
     },
   });
 
@@ -170,6 +173,37 @@ const SettingsPage = () => {
                       thumb: "after:hidden",
                     }}
                   />
+                )}
+              />
+            </div>
+          </div>
+          <Divider />
+          <h2>播放</h2>
+          {/* 音质选择 */}
+          <div className="flex w-full items-center justify-between">
+            <div className="mr-6 space-y-1">
+              <div className="text-medium font-medium">音质偏好</div>
+              <div className="text-sm text-zinc-500">选择优先播放的音频质量</div>
+            </div>
+            <div className="w-[200px]">
+              <Controller
+                control={control}
+                name="audioQuality"
+                render={({ field }) => (
+                  <Select
+                    aria-label="音质偏好"
+                    selectedKeys={[field.value]}
+                    onSelectionChange={keys => {
+                      const value = Array.from(keys)[0] as AudioQuality;
+                      field.onChange(value);
+                    }}
+                  >
+                    <SelectItem key="auto">自动（优先最高）</SelectItem>
+                    <SelectItem key="lossless">无损（FLAC / Hi-Res）</SelectItem>
+                    <SelectItem key="high">高品质（192 kbps）</SelectItem>
+                    <SelectItem key="medium">中等（132 kbps）</SelectItem>
+                    <SelectItem key="low">低品质（64 kbps）</SelectItem>
+                  </Select>
                 )}
               />
             </div>

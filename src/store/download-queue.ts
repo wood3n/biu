@@ -7,6 +7,8 @@ import { persist } from "zustand/middleware";
 import { getMVUrl } from "@/common/utils/audio";
 import { sanitizeFilename } from "@/common/utils/file";
 
+import { useSettings } from "./settings";
+
 interface DownloadParams {
   title: string;
   coverImgUrl: string;
@@ -26,6 +28,8 @@ interface DownloadItem extends DownloadParams {
   createTime?: number;
   status?: DownloadStatus;
   error?: string;
+  isLossless?: boolean;
+  audioBandwidth?: number;
 }
 
 interface DownloadState {
@@ -56,7 +60,8 @@ export const useDownloadQueue = create<DownloadState & DownloadAction>()(
           return;
         }
 
-        const { audioUrl, isLossless } = await getMVUrl(bvid, cid);
+        const audioQuality = useSettings.getState().audioQuality;
+        const { audioUrl, isLossless, audioBandwidth } = await getMVUrl(bvid, cid, audioQuality);
         const filename = `${sanitizeFilename(title)}_${bvid}_${cid}.${isLossless ? "flac" : "mp3"}`;
         const fileExists = await window.electron.checkFileExists(filename);
         if (fileExists) {
@@ -84,6 +89,8 @@ export const useDownloadQueue = create<DownloadState & DownloadAction>()(
               status: "waiting",
               progress: 0,
               createTime,
+              isLossless,
+              audioBandwidth,
             },
           ],
         }));

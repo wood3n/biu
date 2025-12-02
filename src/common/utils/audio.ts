@@ -15,7 +15,6 @@ export function sortAudio(audio: DashAudio[]) {
 
     const indexA = audioQualitySort.indexOf(a.id);
     const indexB = audioQualitySort.indexOf(b.id);
-    // 如果 id 不在 audioQualitySort 中，则放到最后
     if (indexA === -1) return -1;
     if (indexB === -1) return 1;
     return indexB - indexA;
@@ -32,7 +31,26 @@ export function sortVideo(video: DashVideo[]) {
   });
 }
 
-export async function getMVUrl(bvid: string, cid: string | number) {
+function selectAudioByQuality(audioList: DashAudio[], quality: AudioQuality): DashAudio | undefined {
+  if (!audioList.length) return undefined;
+
+  const sortedList = sortAudio(audioList);
+
+  switch (quality) {
+    case "high":
+      return sortedList[0];
+    case "medium": {
+      const midIndex = Math.floor(sortedList.length / 2);
+      return sortedList[midIndex];
+    }
+    case "low":
+      return sortedList[sortedList.length - 1];
+    default:
+      return sortedList[0];
+  }
+}
+
+export async function getMVUrl(bvid: string, cid: string | number, audioQuality: AudioQuality = "auto") {
   try {
     const getAudioInfoRes = await getPlayerPlayurl({
       bvid,
@@ -44,23 +62,26 @@ export async function getMVUrl(bvid: string, cid: string | number) {
     const videoUrl = videoTrackList?.[0]?.baseUrl || videoTrackList?.[0]?.backupUrl?.[0] || "";
     const expiredTime = moment().add(110, "m").unix();
 
-    if (getAudioInfoRes?.data?.dash?.flac?.audio) {
-      return {
-        isLossless: true,
-        audioUrl:
-          getAudioInfoRes?.data?.dash?.flac?.audio?.baseUrl ||
-          getAudioInfoRes?.data?.dash?.flac?.audio?.backupUrl?.[0] ||
-          "",
-        videoUrl,
-        expiredTime,
-      };
+    const flacAudio = getAudioInfoRes?.data?.dash?.flac?.audio;
+    const audioList = getAudioInfoRes?.data?.dash?.audio || [];
+
+    if (audioQuality === "auto" || audioQuality === "lossless") {
+      if (flacAudio) {
+        return {
+          isLossless: true,
+          audioBandwidth: flacAudio.bandwidth,
+          audioUrl: flacAudio.baseUrl || flacAudio.backupUrl?.[0] || "",
+          videoUrl,
+          expiredTime,
+        };
+      }
     }
 
-    const audioTrackList = sortAudio(getAudioInfoRes?.data?.dash?.audio || []);
-    const audioTrack = audioTrackList?.[0];
+    const selectedAudio = selectAudioByQuality(audioList, audioQuality);
     return {
       isLossless: false,
-      audioUrl: audioTrack?.baseUrl || audioTrack?.backupUrl?.[0] || "",
+      audioBandwidth: selectedAudio?.bandwidth,
+      audioUrl: selectedAudio?.baseUrl || selectedAudio?.backupUrl?.[0] || "",
       videoUrl,
       expiredTime,
     };
