@@ -130,6 +130,6 @@
     "*.{css,less}": "stylelint --fix",
     "*.json": "prettier --write"
   },
-  "packageManager": "pnpm@10.20.0",
+  "packageManager": "pnpm@10.24.0",
   "productName": "Biu"
 }
