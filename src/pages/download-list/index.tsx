@@ -113,9 +113,23 @@ const DownloadList = () => {
                           <Image src={item.coverImgUrl} width={48} height={48} className="mr-2 object-cover" />
                           <div className="flex min-w-0 flex-1 flex-col space-y-1 overflow-hidden">
                             <span className="truncate">{item.title}</span>
-                            <Chip size="sm" radius="sm" variant="flat">
-                              {item.type === "audio" ? "音频" : "视频"}
-                            </Chip>
+                            <div className="flex gap-1">
+                              <Chip size="sm" radius="sm" variant="flat">
+                                {item.type === "audio" ? "音频" : "视频"}
+                              </Chip>
+                              <Chip
+                                size="sm"
+                                radius="sm"
+                                variant="flat"
+                                color={item.isLossless ? "success" : "default"}
+                              >
+                                {item.isLossless
+                                  ? "无损"
+                                  : item.audioBandwidth
+                                    ? `${Math.round(item.audioBandwidth / 1000)} kbps`
+                                    : "-"}
+                              </Chip>
+                            </div>
                           </div>
                         </div>
                       </TableCell>

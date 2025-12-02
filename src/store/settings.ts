@@ -49,6 +49,7 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           primaryColor: state.primaryColor,
           borderRadius: state.borderRadius,
           appUpdate: state.appUpdate,
+          audioQuality: state.audioQuality,
         };
       },
     },

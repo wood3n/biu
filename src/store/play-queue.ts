@@ -11,6 +11,7 @@ import { formatUrlProtocal, getUrlParams } from "@/common/utils/url";
 import { getWebInterfaceView } from "@/service/web-interface-view";
 
 import { broadcastState, isMiniPlayer, onMessage, requestSync, sendCommand } from "./mini-player-sync";
+import { useSettings } from "./settings";
 
 interface PlayMVList {
   bvid: string;
@@ -235,7 +236,8 @@ export const usePlayQueue = create<State & Action>()(
 
         if (!isUrlValid(pageData?.audioUrl)) {
           try {
-            const playData = await getMVUrl(currentBvid, currentCid);
+            const audioQuality = useSettings.getState().audioQuality;
+            const playData = await getMVUrl(currentBvid, currentCid, audioQuality);
             audioUrl = playData.audioUrl;
             set(state => {
               const pd = state.list?.find(item => item.bvid === currentBvid)?.pages?.find(p => p.cid === currentCid);
@@ -396,7 +398,8 @@ export const usePlayQueue = create<State & Action>()(
               if (isUrlValid(audio.src)) {
                 audio.play().catch(handlePlayError);
               } else {
-                const playData = await getMVUrl(get().currentBvid as string, get().currentCid as string);
+                const audioQuality = useSettings.getState().audioQuality;
+                const playData = await getMVUrl(get().currentBvid as string, get().currentCid as string, audioQuality);
                 set(state => {
                   const pd = state.list
                     ?.find(item => item.bvid === get().currentBvid)
@@ -684,7 +687,8 @@ export const usePlayQueue = create<State & Action>()(
           } else {
             try {
               const mvData = await getMVData(first.bvid);
-              const playData = await getMVUrl(first.bvid, mvData.cid);
+              const audioQuality = useSettings.getState().audioQuality;
+              const playData = await getMVUrl(first.bvid, mvData.cid, audioQuality);
               mvData.pages = mvData.pages?.map(page =>
                 page.cid === mvData.cid
                   ? {

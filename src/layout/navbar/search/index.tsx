@@ -18,6 +18,7 @@ const SearchInput: React.FC = () => {
   const searchHistoryItems = useSearchHistory(s => s.items);
   const addSearchHistory = useSearchHistory(s => s.add);
   const deleteSearchHistory = useSearchHistory(s => s.delete);
+  const clearSearchHistory = useSearchHistory(s => s.clear);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -110,7 +111,18 @@ const SearchInput: React.FC = () => {
           topContent={
             searchHistoryItems.length > 0 && (
               <>
-                <span className="mb-1 px-1 text-sm">搜索历史</span>
+                <div className="mb-1 flex items-center justify-between px-1">
+                  <span className="text-sm">搜索历史</span>
+                  <span
+                    className="text-foreground-400 hover:text-foreground-600 cursor-pointer text-xs"
+                    onClick={() => {
+                      clearSearchHistory();
+                      inputRef.current?.focus();
+                    }}
+                  >
+                    清除全部
+                  </span>
+                </div>
                 <div className="mb-1 flex flex-wrap gap-2">
                   {searchHistoryItems.map(item => (
                     <Chip
