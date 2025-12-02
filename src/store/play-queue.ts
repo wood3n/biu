@@ -398,7 +398,8 @@ export const usePlayQueue = create<State & Action>()(
               if (isUrlValid(audio.src)) {
                 audio.play().catch(handlePlayError);
               } else {
-                const playData = await getMVUrl(get().currentBvid as string, get().currentCid as string);
+                const audioQuality = useSettings.getState().audioQuality;
+                const playData = await getMVUrl(get().currentBvid as string, get().currentCid as string, audioQuality);
                 set(state => {
                   const pd = state.list
                     ?.find(item => item.bvid === get().currentBvid)
