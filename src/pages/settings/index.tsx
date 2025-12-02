@@ -8,6 +8,7 @@ import { useShallow } from "zustand/react/shallow";
 import ColorPicker from "@/components/color-picker";
 import FontSelect from "@/components/font-select";
 import ScrollContainer from "@/components/scroll-container";
+import UpdateCheckButton from "@/components/update-check-button";
 import { useAppUpdateStore } from "@/store/app-update";
 import { useSettings } from "@/store/settings";
 import { defaultAppSettings } from "@shared/settings/app-settings";
@@ -38,8 +39,12 @@ const SettingsPage = () => {
     })),
   );
   const updateSettings = useSettings(s => s.update);
-  const hasUpdate = useAppUpdateStore(s => s.hasUpdate);
-  const latestVersion = useAppUpdateStore(s => s.latestVersion);
+  const { isUpdateAvailable, latestVersion } = useAppUpdateStore(
+    useShallow(s => ({
+      isUpdateAvailable: s.isUpdateAvailable,
+      latestVersion: s.latestVersion,
+    })),
+  );
 
   const { control, watch, setValue } = useForm<AppSettings>({
     defaultValues: {
@@ -281,18 +286,14 @@ const SettingsPage = () => {
           <div className="flex w-full items-center justify-between">
             <div className="mr-6 flex items-center space-x-1">
               <span>当前版本 {appVersion}</span>
-              {hasUpdate && Boolean(latestVersion) && (
+              {isUpdateAvailable && Boolean(latestVersion) && (
                 <>
                   <RiArrowRightLongLine size={16} />
                   <span className="text-primary">{latestVersion}</span>
                 </>
               )}
             </div>
-            {hasUpdate && (
-              <Button color="primary" onPress={window.electron.quitAndInstall}>
-                安装新版本
-              </Button>
-            )}
+            <UpdateCheckButton />
           </div>
         </Form>
       </div>

@@ -7,6 +7,7 @@ import moment from "moment";
 import { getCookitFromBSite } from "./common/utils/cookie";
 import Theme from "./components/theme";
 import routes from "./routes";
+import { useAppUpdateStore } from "./store/app-update";
 import { usePlayQueue } from "./store/play-queue";
 
 import "moment/locale/zh-cn";
@@ -19,6 +20,7 @@ moment.locale("zh-cn");
 export function App() {
   const routeElement = useRoutes(routes);
   const navigate = useNavigate();
+  const setUpdate = useAppUpdateStore(s => s.setUpdate);
 
   useEffect(() => {
     getCookitFromBSite();
@@ -45,6 +47,20 @@ export function App() {
         }
       });
     }
+  }, []);
+
+  useEffect(() => {
+    const removeListener = window.electron.onUpdateAvailable(updateInfo => {
+      setUpdate({
+        isUpdateAvailable: true,
+        latestVersion: updateInfo.latestVersion,
+        releaseNotes: updateInfo.releaseNotes,
+      });
+    });
+
+    return () => {
+      removeListener();
+    };
   }, []);
 
   return (

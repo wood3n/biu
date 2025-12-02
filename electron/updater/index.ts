@@ -12,7 +12,7 @@ let checkForUpdatesInterval: NodeJS.Timeout | null = null;
 function setupAutoUpdater() {
   autoUpdater.logger = log;
   log.transports.file.level = "info";
-  autoUpdater.autoDownload = true;
+  autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = false;
   autoUpdater.autoRunAppAfterInstall = true;
   autoUpdater.allowPrerelease = true;
@@ -23,14 +23,37 @@ function setupAutoUpdater() {
     autoUpdater.autoRunAppAfterInstall = false;
   }
 
-  autoUpdater.on("update-downloaded", e => {
+  autoUpdater.on("update-available", info => {
+    BrowserWindow.getAllWindows().forEach(w =>
+      w.webContents.send(channel.app.onUpdateAvailable, {
+        latestVersion: info.version,
+        releaseNotes: info.releaseNotes,
+      }),
+    );
+  });
+
+  autoUpdater.on("download-progress", progressObj => {
     BrowserWindow.getAllWindows().forEach(w =>
       w.webContents.send(channel.app.updateMessage, {
-        type: "downloaded",
-        releaseInfo: {
-          latestVersion: e?.version,
-          releaseNotes: e?.releaseNotes,
-        },
+        status: "downloading",
+        processInfo: progressObj,
+      }),
+    );
+  });
+
+  autoUpdater.on("error", error => {
+    BrowserWindow.getAllWindows().forEach(w =>
+      w.webContents.send(channel.app.updateMessage, {
+        status: "error",
+        error: error instanceof Error ? error.message : String(error),
+      }),
+    );
+  });
+
+  autoUpdater.on("update-downloaded", () => {
+    BrowserWindow.getAllWindows().forEach(w =>
+      w.webContents.send(channel.app.updateMessage, {
+        status: "downloaded",
       }),
     );
   });

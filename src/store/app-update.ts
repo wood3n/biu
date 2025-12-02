@@ -1,24 +1,14 @@
 import { create } from "zustand";
 
-interface AppUpdateState {
-  hasUpdate: boolean;
-  isDownloaded: boolean;
-  latestVersion?: string;
-  releaseNotes?: string;
-}
-
 interface AppUpdateActions {
-  setUpdate: (updateInfo: AppUpdateState) => void;
+  setUpdate: (updateInfo: CheckAppUpdateResult) => void;
 }
 
-export const useAppUpdateStore = create<AppUpdateState & AppUpdateActions>(set => ({
-  hasUpdate: false,
-  isDownloaded: false,
+export const useAppUpdateStore = create<CheckAppUpdateResult & AppUpdateActions>(set => ({
+  isUpdateAvailable: false,
   setUpdate: updateInfo =>
-    set({
-      hasUpdate: updateInfo.hasUpdate,
-      isDownloaded: updateInfo.isDownloaded,
-      latestVersion: updateInfo.latestVersion,
-      releaseNotes: updateInfo.releaseNotes,
-    }),
+    set(state => ({
+      ...state,
+      ...updateInfo,
+    })),
 }));

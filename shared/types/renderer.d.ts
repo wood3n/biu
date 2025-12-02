@@ -66,7 +66,6 @@ interface AppUpdateReleaseInfo {
 }
 
 interface CheckAppUpdateResult extends AppUpdateReleaseInfo {
-  hasUpdate: boolean;
   isUpdateAvailable?: boolean;
   error?: string;
 }
@@ -79,10 +78,11 @@ interface DownloadAppProgressInfo {
   bytesPerSecond: number;
 }
 
+type DownloadAppUpdateStatus = "downloading" | "downloaded" | "error";
+
 interface DownloadAppMessage {
-  type: "progress" | "downloaded" | "error";
+  status: DownloadAppUpdateStatus;
   processInfo?: DownloadAppProgressInfo;
-  releaseInfo?: AppUpdateReleaseInfo;
   error?: string;
 }
 
@@ -129,6 +129,8 @@ interface ElectronAPI {
   getAppVersion: () => Promise<string>;
   /** 检查更新 */
   checkAppUpdate: () => Promise<CheckAppUpdateResult>;
+  /** 监听应用更新下载进度 */
+  onUpdateAvailable: (cb: (updateInfo: AppUpdateReleaseInfo) => void) => VoidFunction;
   /** 下载更新 */
   downloadAppUpdate: () => Promise<void>;
   /** 监听应用更新下载进度 */

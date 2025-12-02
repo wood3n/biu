@@ -121,6 +121,11 @@ const api: ElectronAPI = {
   },
   getAppVersion: () => ipcRenderer.invoke(channel.app.getVersion),
   checkAppUpdate: () => ipcRenderer.invoke(channel.app.checkUpdate),
+  onUpdateAvailable: cb => {
+    const handler = (_, payload: AppUpdateReleaseInfo) => cb(payload);
+    ipcRenderer.on(channel.app.onUpdateAvailable, handler);
+    return () => ipcRenderer.removeListener(channel.app.onUpdateAvailable, handler);
+  },
   downloadAppUpdate: () => ipcRenderer.invoke(channel.app.downloadUpdate),
   onDownloadAppProgress: cb => {
     const handler = (_, payload: DownloadAppMessage) => cb(payload);
