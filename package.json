@@ -37,7 +37,7 @@
     "dev:rsdoctor": "cross-env RSDOCTOR=true rsbuild dev",
     "build:rsdoctor": "cross-env RSDOCTOR=true rsbuild build",
     "release": "changelogen --release --push",
-    "release:beta": "changelogen --release --prerelease beta",
+    "release:beta": "changelogen --release --push --prerelease beta",
     "release:alpha": "changelogen --release --push --prerelease alpha"
   },
   "dependencies": {
