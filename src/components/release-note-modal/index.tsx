@@ -19,12 +19,13 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
   const [downloadProgress, setDownloadProgress] = useState<DownloadAppProgressInfo>();
   const [error, setError] = useState<string>();
 
-  const startDownload = () => {
+  const startDownload = async () => {
+    setStatus("downloading");
     try {
-      window.electron.downloadAppUpdate();
-      setStatus("downloading");
-    } catch {
+      await window.electron.downloadAppUpdate();
+    } catch (e) {
       setStatus("error");
+      setError(e instanceof Error ? e.message : String(e));
     }
   };
 
