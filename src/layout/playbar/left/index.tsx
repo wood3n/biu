@@ -60,8 +60,8 @@ const LeftControl = () => {
     <div className="flex h-full w-full items-center justify-start space-x-4">
       {showWaveform ? (
         <div ref={waveformContainerRef} className="relative min-w-0 flex-1 cursor-pointer" onClick={handleCoverClick}>
-          {waveformWidth > 0 && (
-            <AudioWaveform audioElement={getAudio()} width={waveformWidth} height={56} barColor={primaryColor} />
+          {waveformWidth > 0 && getAudio() && (
+            <AudioWaveform audioElement={getAudio()!} width={waveformWidth} height={56} barColor={primaryColor} />
           )}
         </div>
       ) : (
