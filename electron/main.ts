@@ -6,8 +6,8 @@ import { fileURLToPath } from "node:url";
 
 import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
 
+import { channel } from "./ipc/channel";
 import { registerIpcHandlers } from "./ipc/index";
-import { setMainWindow, setMiniWindow } from "./ipc/window";
 import { setupMacDock } from "./mac/dock";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
@@ -46,19 +46,8 @@ function createWindow() {
     // 无边框
     frame: false,
     transparent: false,
-    // titleBarStyle: "hiddenInset",
     titleBarStyle: "hidden",
     titleBarOverlay: false,
-    // expose window controls in Windows/Linux
-    ...(process.platform !== "darwin"
-      ? {
-          titleBarOverlay: {
-            color: "rgba(0,0,0,0)",
-            symbolColor: "#ffffff",
-            height: 64,
-          },
-        }
-      : {}),
     trafficLightPosition: { x: 16, y: 18 },
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
@@ -94,6 +83,22 @@ function createWindow() {
     setupWindowsThumbar(mainWindow);
   }
 
+  mainWindow.on("maximize", () => {
+    mainWindow?.webContents.send(channel.window.maximize);
+  });
+
+  mainWindow.on("unmaximize", () => {
+    mainWindow?.webContents.send(channel.window.unmaximize);
+  });
+
+  mainWindow.on("enter-full-screen", () => {
+    mainWindow?.webContents.send(channel.window.enterFullScreen);
+  });
+
+  mainWindow.on("leave-full-screen", () => {
+    mainWindow?.webContents.send(channel.window.leaveFullScreen);
+  });
+
   // 从store获取配置，判断是否关闭窗口时隐藏还是退出程序
   mainWindow.on("close", event => {
     const closeWindowOption = store.get(storeKey.appSettings).closeWindowOption;
@@ -111,8 +116,6 @@ function createWindow() {
       }
     }
   });
-
-  setMainWindow(mainWindow);
 }
 
 function createMiniWindow() {
@@ -161,21 +164,19 @@ function createMiniWindow() {
     miniWindow?.hide();
     mainWindow?.show();
   });
-
-  setMiniWindow(miniWindow);
 }
 
 app.whenReady().then(() => {
+  createWindow();
+  createMiniWindow();
+
   injectAuthCookie();
 
   installWebRequestInterceptors();
 
-  registerIpcHandlers();
+  registerIpcHandlers({ mainWindow, miniWindow });
 
   setupAutoUpdater();
-
-  createWindow();
-  createMiniWindow();
 
   if (process.platform === "darwin" && mainWindow) {
     setupMacDock(mainWindow);
@@ -184,6 +185,7 @@ app.whenReady().then(() => {
   if (process.platform !== "darwin") {
     createTray({
       getMainWindow: () => mainWindow,
+      getMiniWindow: () => miniWindow,
       // 退出：设置 app.quitting 标记，避免 close 事件拦截
       onExit: () => {
         (app as any).quitting = true;

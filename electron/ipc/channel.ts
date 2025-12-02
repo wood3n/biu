@@ -47,5 +47,14 @@ export const channel = {
   window: {
     switchToMini: "window:switch-to-mini",
     switchToMain: "window:switch-to-main",
+    minimize: "window:minimize",
+    toggleMaximize: "window:toggle-maximize",
+    close: "window:close",
+    maximize: "window:maximize",
+    unmaximize: "window:unmaximize",
+    isMaximized: "window:is-maximized",
+    enterFullScreen: "window:enter-full-screen",
+    leaveFullScreen: "window:leave-full-screen",
+    isFullScreen: "window:is-full-screen",
   },
 };

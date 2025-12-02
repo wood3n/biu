@@ -138,6 +138,20 @@ interface ElectronAPI {
   switchToMiniPlayer: () => Promise<void>;
   /** 切换到主窗口 */
   switchToMainWindow: () => Promise<void>;
+  /** 最小化窗口 */
+  minimizeWindow: () => void;
+  /** 最大化/还原窗口 */
+  toggleMaximizeWindow: () => void;
+  /** 关闭窗口 */
+  closeWindow: () => void;
+  /** 判断窗口是否最大化 */
+  isMaximized: () => Promise<boolean>;
+  /** 监听窗口最大化状态变化 */
+  onWindowMaximizeChange: (cb: (isMaximized: boolean) => void) => VoidFunction;
+  /** 判断窗口是否全屏 */
+  isFullScreen: () => Promise<boolean>;
+  /** 监听窗口全屏状态变化 */
+  onWindowFullScreenChange: (cb: (isFullScreen: boolean) => void) => VoidFunction;
 }
 
 interface Window {

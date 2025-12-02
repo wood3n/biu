@@ -1,3 +1,5 @@
+import type { IpcHandlerProps } from "./types";
+
 import { registerAppHandlers } from "./app";
 import { registerCookieIpcHandlers } from "./cookie";
 import { registerDialogHandlers } from "./dialog";
@@ -7,7 +9,7 @@ import { registerRequestHandlers } from "./request";
 import { registerStoreHandlers } from "./store";
 import { registerWindowHandlers } from "./window";
 
-export function registerIpcHandlers() {
+export function registerIpcHandlers(props: IpcHandlerProps) {
   registerStoreHandlers();
   registerDialogHandlers();
   registerFontHandlers();
@@ -15,5 +17,5 @@ export function registerIpcHandlers() {
   registerRequestHandlers();
   registerAppHandlers();
   registerCookieIpcHandlers();
-  registerWindowHandlers();
+  registerWindowHandlers(props);
 }

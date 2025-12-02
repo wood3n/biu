@@ -19,8 +19,13 @@ let tray: Tray | null = null;
 
 function createTray({
   getMainWindow,
+  getMiniWindow,
   onExit,
-}: { getMainWindow?: () => BrowserWindow | null; onExit?: () => void } = {}) {
+}: {
+  getMainWindow?: () => BrowserWindow | null;
+  getMiniWindow?: () => BrowserWindow | null;
+  onExit?: () => void;
+} = {}) {
   // 若已存在旧实例，先销毁避免重复创建
   if (tray) {
     try {
@@ -81,9 +86,13 @@ function createTray({
   const menu = Menu.buildFromTemplate(menuTemplate);
   tray.setContextMenu(menu);
 
-  // 左键单击：显示/隐藏主窗口
-  // 注意：Linux (AppIndicator) 可能会忽略 click 事件，用户主要通过右键菜单交互
+  // 左键单击：显示主窗口；若迷你窗口已显示，则关闭它
   tray.on("click", () => {
+    const miniWin = getMiniWindow?.();
+    if (miniWin && miniWin.isVisible()) {
+      miniWin.hide();
+    }
+
     const win = getMainWindow?.();
     if (!win) return;
     if (win.isVisible()) {

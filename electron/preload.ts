@@ -135,6 +135,42 @@ const api: ElectronAPI = {
   switchToMiniPlayer: () => ipcRenderer.invoke(channel.window.switchToMini),
   // 切换到主窗口
   switchToMainWindow: () => ipcRenderer.invoke(channel.window.switchToMain),
+  // 最小化窗口
+  minimizeWindow: () => ipcRenderer.send(channel.window.minimize),
+  // 最大化/还原窗口
+  toggleMaximizeWindow: () => ipcRenderer.send(channel.window.toggleMaximize),
+  // 关闭窗口
+  closeWindow: () => ipcRenderer.send(channel.window.close),
+  // 判断窗口是否最大化
+  isMaximized: () => ipcRenderer.invoke(channel.window.isMaximized),
+  // 监听窗口最大化状态变化
+  onWindowMaximizeChange: cb => {
+    const maximizeHandler = () => cb(true);
+    const unmaximizeHandler = () => cb(false);
+
+    ipcRenderer.on(channel.window.maximize, maximizeHandler);
+    ipcRenderer.on(channel.window.unmaximize, unmaximizeHandler);
+
+    return () => {
+      ipcRenderer.removeListener(channel.window.maximize, maximizeHandler);
+      ipcRenderer.removeListener(channel.window.unmaximize, unmaximizeHandler);
+    };
+  },
+  // 判断窗口是否全屏
+  isFullScreen: () => ipcRenderer.invoke(channel.window.isFullScreen),
+  // 监听窗口全屏状态变化
+  onWindowFullScreenChange: cb => {
+    const enterFullScreenHandler = () => cb(true);
+    const leaveFullScreenHandler = () => cb(false);
+
+    ipcRenderer.on(channel.window.enterFullScreen, enterFullScreenHandler);
+    ipcRenderer.on(channel.window.leaveFullScreen, leaveFullScreenHandler);
+
+    return () => {
+      ipcRenderer.removeListener(channel.window.enterFullScreen, enterFullScreenHandler);
+      ipcRenderer.removeListener(channel.window.leaveFullScreen, leaveFullScreenHandler);
+    };
+  },
 };
 
 contextBridge.exposeInMainWorld("electron", api);

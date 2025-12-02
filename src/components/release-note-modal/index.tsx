@@ -1,5 +1,4 @@
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
-import { RiSparklingLine } from "@remixicon/react";
 
 import Typography from "../typography";
 
@@ -25,8 +24,7 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange, releaseNotes, footer }: Props)
         <ModalContent>
           <ModalHeader>
             <div className="flex items-center">
-              <RiSparklingLine size={18} className="mr-2" />
-              <span>新版本更新</span>
+              <span>✨ 新版本更新</span>
             </div>
           </ModalHeader>
           <ModalBody className="px-0">

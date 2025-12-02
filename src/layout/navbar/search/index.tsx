@@ -56,7 +56,7 @@ const SearchInput: React.FC = () => {
   };
 
   return (
-    <div ref={containerRef} className="window-no-drag relative w-[280px]">
+    <div ref={containerRef} className="relative w-[280px]">
       <Input
         ref={inputRef}
         value={value}
