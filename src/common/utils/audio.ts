@@ -40,7 +40,7 @@ function selectAudioByQuality(audioList: DashAudio[], quality: AudioQuality): Da
     case "high":
       return sortedList[0];
     case "medium": {
-      const midIndex = Math.floor(sortedList.length / 2);
+      const midIndex = Math.floor((sortedList.length - 1) / 2);
       return sortedList[midIndex];
     }
     case "low":
