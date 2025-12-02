@@ -3,6 +3,8 @@
  * http://www.electronjs.org/docs/latest/tutorial/context-isolation#usage-with-typescript
  */
 
+type AudioQuality = "auto" | "lossless" | "high" | "medium" | "low";
+
 interface AppSettings {
   fontFamily: string;
   backgroundColor: string;
@@ -12,6 +14,7 @@ interface AppSettings {
   downloadPath?: string;
   closeWindowOption: "hide" | "exit";
   autoStart: boolean;
+  audioQuality: AudioQuality;
 }
 
 interface IFontInfo {
