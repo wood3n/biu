@@ -183,9 +183,15 @@ const SettingsPage = () => {
           <div className="flex w-full items-center justify-between">
             <div className="mr-6 space-y-1">
               <div className="text-medium font-medium">音质偏好</div>
-              <div className="text-sm text-zinc-500">选择优先播放的音频质量</div>
+              <div className="text-sm text-zinc-500">
+                {audioQuality === "auto" && "自动选择最高音质"}
+                {audioQuality === "lossless" && "FLAC / Hi-Res"}
+                {audioQuality === "high" && "180-320 kbps"}
+                {audioQuality === "medium" && "100-140 kbps"}
+                {audioQuality === "low" && "60-80 kbps"}
+              </div>
             </div>
-            <div className="w-[200px]">
+            <div className="w-[140px]">
               <Controller
                 control={control}
                 name="audioQuality"
@@ -198,11 +204,11 @@ const SettingsPage = () => {
                       field.onChange(value);
                     }}
                   >
-                    <SelectItem key="auto">自动（优先最高）</SelectItem>
-                    <SelectItem key="lossless">无损（FLAC / Hi-Res）</SelectItem>
-                    <SelectItem key="high">高品质（192 kbps）</SelectItem>
-                    <SelectItem key="medium">中等（132 kbps）</SelectItem>
-                    <SelectItem key="low">低品质（64 kbps）</SelectItem>
+                    <SelectItem key="auto">自动</SelectItem>
+                    <SelectItem key="lossless">无损</SelectItem>
+                    <SelectItem key="high">高品质</SelectItem>
+                    <SelectItem key="medium">中等</SelectItem>
+                    <SelectItem key="low">低品质</SelectItem>
                   </Select>
                 )}
               />
