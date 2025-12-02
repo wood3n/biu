@@ -9,13 +9,11 @@ export function registerAppHandlers() {
   });
 
   ipcMain.handle(channel.app.checkUpdate, async (): Promise<CheckAppUpdateResult> => {
-    const currentVersion = app.getVersion();
     try {
       const res = await autoUpdater.checkForUpdates();
 
-      if (res?.updateInfo && res?.updateInfo?.version && res.updateInfo.version !== currentVersion) {
+      if (res?.isUpdateAvailable) {
         return {
-          hasUpdate: true,
           isUpdateAvailable: res?.isUpdateAvailable,
           latestVersion: res?.updateInfo?.version as string,
           releaseNotes: res?.updateInfo?.releaseNotes as string,
@@ -23,11 +21,11 @@ export function registerAppHandlers() {
       }
 
       return {
-        hasUpdate: false,
+        isUpdateAvailable: false,
       };
     } catch (error) {
       return {
-        hasUpdate: false,
+        isUpdateAvailable: false,
         error: String(error instanceof Error ? error?.message : "无法获取更新信息"),
       };
     }

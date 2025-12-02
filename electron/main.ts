@@ -64,17 +64,18 @@ function createWindow() {
     return { action: "deny" };
   });
 
-  // 拦截 context menu（对所有右键都生效）
-  mainWindow.webContents.on("context-menu", event => {
-    // 阻止默认菜单显示
-    event.preventDefault();
+  // 禁止 Ctrl+R / Cmd+R 刷新页面
+  mainWindow.webContents.on("before-input-event", (event, input) => {
+    if ((input.control || input.meta) && input.key.toLowerCase() === "r") {
+      event.preventDefault();
+    }
   });
 
   const indexPath = path.resolve(__dirname, "../dist/web/index.html");
   mainWindow.loadFile(indexPath);
   if (isDev) {
     mainWindow.webContents.openDevTools({
-      mode: "bottom",
+      mode: "detach",
     });
   }
 
@@ -149,8 +150,11 @@ function createMiniWindow() {
     return { action: "deny" };
   });
 
-  miniWindow.webContents.on("context-menu", event => {
-    event.preventDefault();
+  // 禁止 Ctrl+R / Cmd+R 刷新页面
+  miniWindow.webContents.on("before-input-event", (event, input) => {
+    if ((input.control || input.meta) && input.key.toLowerCase() === "r") {
+      event.preventDefault();
+    }
   });
 
   const indexPath = path.resolve(__dirname, "../dist/web/index.html");
@@ -165,6 +169,8 @@ function createMiniWindow() {
     mainWindow?.show();
   });
 }
+
+app.commandLine.appendSwitch("disable-features", "WidgetLayering");
 
 app.whenReady().then(() => {
   createWindow();

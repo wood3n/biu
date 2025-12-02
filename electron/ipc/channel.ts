@@ -36,13 +36,13 @@ export const channel = {
   app: {
     getVersion: "app:get-version",
     checkUpdate: "app:check-update",
+    onUpdateAvailable: "app:on-update-available",
     downloadUpdate: "app:download-update",
     updateMessage: "app:update-message",
     quitAndInstall: "app:quit-and-install",
   },
   cookie: {
     get: "cookie:get",
-    setLoginCookies: "cookie:set-login-cookies",
   },
   window: {
     switchToMini: "window:switch-to-mini",

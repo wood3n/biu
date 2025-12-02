@@ -6,7 +6,6 @@ import log from "electron-log/renderer";
 
 import Fallback from "@/components/error-fallback";
 import PlayBar from "@/layout/playbar";
-import { useAppUpdateStore } from "@/store/app-update";
 import { useUser } from "@/store/user";
 
 import Navbar from "./navbar";
@@ -14,24 +13,6 @@ import SideNav from "./side";
 
 const Layout = () => {
   const updateUser = useUser(state => state.updateUser);
-  const setUpdate = useAppUpdateStore(s => s.setUpdate);
-
-  useEffect(() => {
-    const removeListener = window.electron.onDownloadAppProgress(info => {
-      if (info.type === "downloaded" && info.releaseInfo) {
-        setUpdate({
-          hasUpdate: true,
-          isDownloaded: true,
-          latestVersion: info.releaseInfo.latestVersion,
-          releaseNotes: info.releaseInfo.releaseNotes,
-        });
-      }
-    });
-
-    return () => {
-      removeListener();
-    };
-  }, []);
 
   useEffect(() => {
     updateUser();

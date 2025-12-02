@@ -1,5 +1,4 @@
-import { Badge, Button, Tooltip, useDisclosure } from "@heroui/react";
-import { RiLogoutBoxLine } from "@remixicon/react";
+import { Badge, Tooltip, useDisclosure } from "@heroui/react";
 import { twMerge } from "tailwind-merge";
 
 import { ReactComponent as LogoIcon } from "@/assets/icons/logo.svg";
@@ -9,9 +8,8 @@ import { useAppUpdateStore } from "@/store/app-update";
 const isMac = window.electron?.getPlatform() === "macos";
 
 const Logo = () => {
-  const hasUpdate = useAppUpdateStore(s => s.hasUpdate);
-  const releaseNotes = useAppUpdateStore(s => s.releaseNotes);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const isUpdateAvailable = useAppUpdateStore(s => s.isUpdateAvailable);
 
   return (
     <>
@@ -22,15 +20,15 @@ const Logo = () => {
         )}
       >
         <LogoIcon className="h-10 w-10" />
-        {hasUpdate ? (
+        {isUpdateAvailable ? (
           <Badge
             color="danger"
             content="new"
             size="sm"
             classNames={{
-              base: "window-no-drag cursor-pointer",
-              badge: "-right-1/5",
+              badge: "window-no-drag cursor-pointer -right-1/5",
             }}
+            onClick={onOpen}
           >
             <Tooltip title="新版本更新">
               <div className="window-no-drag cursor-pointer text-2xl leading-none font-bold" onClick={onOpen}>
@@ -42,16 +40,7 @@ const Logo = () => {
           <span className="text-2xl leading-none font-bold">Biu</span>
         )}
       </div>
-      <ReleaseNoteModal
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        releaseNotes={releaseNotes}
-        footer={
-          <Button color="primary" startContent={<RiLogoutBoxLine size={18} />} onPress={window.electron.quitAndInstall}>
-            退出并安装
-          </Button>
-        }
-      />
+      <ReleaseNoteModal isOpen={isOpen} onOpenChange={onOpenChange} />
     </>
   );
 };

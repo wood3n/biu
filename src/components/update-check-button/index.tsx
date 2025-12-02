@@ -1,16 +1,12 @@
-import { addToast, Button, useDisclosure } from "@heroui/react";
-import { useRequest } from "ahooks";
+import { addToast, useDisclosure } from "@heroui/react";
 
 import { useAppUpdateStore } from "@/store/app-update";
 
+import AsyncButton from "../async-button";
 import ReleaseNoteModal from "../release-note-modal";
-import DownloadModal from "./download-modal";
 
-/**
- * 【WIP】：手动检查更新
- */
 const UpdateCheckButton = () => {
-  const hasUpdate = useAppUpdateStore(s => s.hasUpdate);
+  const isUpdateAvailable = useAppUpdateStore(s => s.isUpdateAvailable);
 
   const {
     isOpen: isReleaseNoteModalOpen,
@@ -18,58 +14,32 @@ const UpdateCheckButton = () => {
     onOpenChange: onReleaseNoteModalOpenChange,
   } = useDisclosure();
 
-  const {
-    isOpen: isDownloadModalOpen,
-    onOpen: onDownloadModalOpen,
-    onOpenChange: onDownloadModalOpenChange,
-  } = useDisclosure();
+  const checkUpdate = async () => {
+    if (isUpdateAvailable) {
+      return Promise.resolve();
+    }
 
-  const {
-    data,
-    loading,
-    runAsync: checkUpdate,
-  } = useRequest(
-    async () => {
-      const res = await window.electron.checkAppUpdate();
+    const res = await window.electron.checkAppUpdate();
 
-      if (res?.hasUpdate) {
-        onReleaseNoteModalOpen();
-      } else {
-        addToast({
-          title: "当前版本为最新版本",
-        });
-      }
-
-      return res;
-    },
-    {
-      manual: true,
-      refreshDeps: [hasUpdate],
-    },
-  );
+    if (res?.error) {
+      addToast({
+        title: "检查更新失败",
+        description: res.error,
+        color: "danger",
+      });
+    } else if (res?.isUpdateAvailable) {
+      onReleaseNoteModalOpen();
+    } else {
+      addToast({
+        title: "当前版本为最新版本",
+      });
+    }
+  };
 
   return (
     <>
-      <Button isLoading={loading} onPress={checkUpdate}>
-        检查更新
-      </Button>
-      <ReleaseNoteModal
-        isOpen={isReleaseNoteModalOpen}
-        onOpenChange={onReleaseNoteModalOpenChange}
-        releaseNotes={data?.releaseNotes}
-        footer={
-          <Button
-            color="primary"
-            onPress={() => {
-              window.electron.downloadAppUpdate();
-              onDownloadModalOpen();
-            }}
-          >
-            下载更新
-          </Button>
-        }
-      />
-      <DownloadModal isOpen={isDownloadModalOpen} onOpenChange={onDownloadModalOpenChange} />
+      <AsyncButton onPress={checkUpdate}>{isUpdateAvailable ? "查看更新内容" : "检查更新"}</AsyncButton>
+      <ReleaseNoteModal isOpen={isReleaseNoteModalOpen} onOpenChange={onReleaseNoteModalOpenChange} />
     </>
   );
 };
