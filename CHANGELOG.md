@@ -1,5 +1,42 @@
 # Changelog
 
+## v1.6.0-beta.5
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.4...v1.6.0-beta.5)
+
+### 🚀 新功能
+
+- Add audio quality preference settings ([52b06f3](https://github.com/wood3n/biu/commit/52b06f3))
+
+### 🔥 功能优化
+
+- 优化检查更新功能, 增加手动检查更新按钮 ([#63](https://github.com/wood3n/biu/pull/63))
+
+### 🩹 修复问题
+
+- Handle next track navigation for single item playlist ([22ee09b](https://github.com/wood3n/biu/commit/22ee09b))
+- Release script ([ecfc510](https://github.com/wood3n/biu/commit/ecfc510))
+- Handle next track navigation for single item playlist" ([2ca8842](https://github.com/wood3n/biu/commit/2ca8842))
+- Correct audio quality sort order for unknown IDs ([42f8b30](https://github.com/wood3n/biu/commit/42f8b30))
+- Prefer higher quality track when selecting medium quality ([fa0f90c](https://github.com/wood3n/biu/commit/fa0f90c))
+- Apply audio quality preference when URL expires in togglePlay ([504bde8](https://github.com/wood3n/biu/commit/504bde8))
+- Review problem ([f4e7c1c](https://github.com/wood3n/biu/commit/f4e7c1c))
+- Fix startDownload check ([1279830](https://github.com/wood3n/biu/commit/1279830))
+
+### ✅ Tests
+
+- Fix test version ([c17a345](https://github.com/wood3n/biu/commit/c17a345))
+
+### 🎨 UI 调整
+
+- Improve audio quality settings UI display ([06eb971](https://github.com/wood3n/biu/commit/06eb971))
+
+### ❤️ Contributors
+
+- Oxyg3n
+- Wood3n
+- Xfly
+
 ## v1.6.0-beta.4
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.3...v1.6.0-beta.4)
