@@ -103,6 +103,8 @@ interface ElectronAPI {
   onDownloadProgress: (cb: (payload: DownloadCallbackParams) => void) => VoidFunction;
   /** 导航到指定路由 */
   navigate: (cb: (path: string) => void) => VoidFunction;
+  /** 获取某个 cookie */
+  getCookie: (key: string) => Promise<string | null>;
   /** 使用主进程的 net.request 发起 GET 请求（只返回 data） */
   httpGet: <T = any>(
     url: string,
@@ -130,12 +132,24 @@ interface ElectronAPI {
   onDownloadAppProgress: (cb: (payload: DownloadAppMessage) => void) => VoidFunction;
   /** 安装更新 */
   quitAndInstall: () => Promise<void>;
-  /** 设置登录 Cookie 到 Electron session */
-  setLoginCookies: (cookies: Array<{ name: string; value: string; expirationDate?: number }>) => Promise<boolean>;
   /** 切换到 mini 播放器窗口 */
   switchToMiniPlayer: () => Promise<void>;
   /** 切换到主窗口 */
   switchToMainWindow: () => Promise<void>;
+  /** 最小化窗口 */
+  minimizeWindow: () => void;
+  /** 最大化/还原窗口 */
+  toggleMaximizeWindow: () => void;
+  /** 关闭窗口 */
+  closeWindow: () => void;
+  /** 判断窗口是否最大化 */
+  isMaximized: () => Promise<boolean>;
+  /** 监听窗口最大化状态变化 */
+  onWindowMaximizeChange: (cb: (isMaximized: boolean) => void) => VoidFunction;
+  /** 判断窗口是否全屏 */
+  isFullScreen: () => Promise<boolean>;
+  /** 监听窗口全屏状态变化 */
+  onWindowFullScreenChange: (cb: (isFullScreen: boolean) => void) => VoidFunction;
 }
 
 interface Window {

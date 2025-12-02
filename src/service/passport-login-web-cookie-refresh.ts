@@ -46,5 +46,6 @@ export function postPassportLoginWebCookieRefresh(
   return passportRequest.post<WebCookieRefreshResponse>("/x/passport-login/web/cookie/refresh", data, {
     useCSRF: true,
     useFormData: true,
+    skipRefreshCheck: true,
   });
 }

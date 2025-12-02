@@ -16,7 +16,7 @@ const Menu = ({ afterChangeInfo }: MenuProps) => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { updateCollectedFolder } = useUser();
+  const updateUser = useUser(state => state.updateUser);
 
   const {
     isOpen: isDeleteConfirmOpen,
@@ -67,7 +67,7 @@ const Menu = ({ afterChangeInfo }: MenuProps) => {
           });
 
           if (res.code === 0) {
-            await updateCollectedFolder();
+            await updateUser();
             navigate("/");
           }
 

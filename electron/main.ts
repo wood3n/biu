@@ -1,4 +1,4 @@
-import { app, BrowserWindow, nativeImage } from "electron";
+import { app, BrowserWindow } from "electron";
 import isDev from "electron-is-dev";
 import log from "electron-log";
 import path from "node:path";
@@ -6,8 +6,9 @@ import { fileURLToPath } from "node:url";
 
 import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
 
+import { channel } from "./ipc/channel";
 import { registerIpcHandlers } from "./ipc/index";
-import { setMainWindow, setMiniWindow } from "./ipc/window";
+import { setupMacDock } from "./mac/dock";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
 import { IconBase } from "./path";
@@ -27,7 +28,10 @@ let miniWindow: BrowserWindow | null;
 function createWindow() {
   mainWindow = new BrowserWindow({
     title: "Biu",
-    icon: path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, process.platform === "win32" ? "logo.ico" : "logo.icns"),
+    icon:
+      process.platform === "darwin"
+        ? undefined
+        : path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, process.platform === "win32" ? "logo.ico" : "logo.png"),
     show: true,
     hasShadow: true,
     width: 1200,
@@ -42,20 +46,9 @@ function createWindow() {
     // 无边框
     frame: false,
     transparent: false,
-    // titleBarStyle: "hiddenInset",
     titleBarStyle: "hidden",
     titleBarOverlay: false,
-    // expose window controls in Windows/Linux
-    ...(process.platform !== "darwin"
-      ? {
-          titleBarOverlay: {
-            color: "rgba(0,0,0,0)",
-            symbolColor: "#ffffff",
-            height: 64,
-          },
-        }
-      : {}),
-    trafficLightPosition: { x: 0, y: 0 },
+    trafficLightPosition: { x: 16, y: 18 },
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       webSecurity: true,
@@ -77,12 +70,6 @@ function createWindow() {
     event.preventDefault();
   });
 
-  // MAC dock icon
-  if (process.platform === "darwin") {
-    const dockIcon = nativeImage.createFromPath(path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, "logo.png"));
-    app.dock?.setIcon(dockIcon);
-  }
-
   const indexPath = path.resolve(__dirname, "../dist/web/index.html");
   mainWindow.loadFile(indexPath);
   if (isDev) {
@@ -95,6 +82,22 @@ function createWindow() {
   if (process.platform === "win32") {
     setupWindowsThumbar(mainWindow);
   }
+
+  mainWindow.on("maximize", () => {
+    mainWindow?.webContents.send(channel.window.maximize);
+  });
+
+  mainWindow.on("unmaximize", () => {
+    mainWindow?.webContents.send(channel.window.unmaximize);
+  });
+
+  mainWindow.on("enter-full-screen", () => {
+    mainWindow?.webContents.send(channel.window.enterFullScreen);
+  });
+
+  mainWindow.on("leave-full-screen", () => {
+    mainWindow?.webContents.send(channel.window.leaveFullScreen);
+  });
 
   // 从store获取配置，判断是否关闭窗口时隐藏还是退出程序
   mainWindow.on("close", event => {
@@ -113,8 +116,6 @@ function createWindow() {
       }
     }
   });
-
-  setMainWindow(mainWindow);
 }
 
 function createMiniWindow() {
@@ -163,30 +164,35 @@ function createMiniWindow() {
     miniWindow?.hide();
     mainWindow?.show();
   });
-
-  setMiniWindow(miniWindow);
 }
 
 app.whenReady().then(() => {
-  createTray({
-    getMainWindow: () => mainWindow,
-    // 退出：设置 app.quitting 标记，避免 close 事件拦截
-    onExit: () => {
-      (app as any).quitting = true;
-      app.quit();
-    },
-  });
+  createWindow();
+  createMiniWindow();
 
   injectAuthCookie();
 
   installWebRequestInterceptors();
 
-  registerIpcHandlers();
+  registerIpcHandlers({ mainWindow, miniWindow });
 
   setupAutoUpdater();
 
-  createWindow();
-  createMiniWindow();
+  if (process.platform === "darwin" && mainWindow) {
+    setupMacDock(mainWindow);
+  }
+
+  if (process.platform !== "darwin") {
+    createTray({
+      getMainWindow: () => mainWindow,
+      getMiniWindow: () => miniWindow,
+      // 退出：设置 app.quitting 标记，避免 close 事件拦截
+      onExit: () => {
+        (app as any).quitting = true;
+        app.quit();
+      },
+    });
+  }
 });
 
 app.on("activate", () => mainWindow?.show());

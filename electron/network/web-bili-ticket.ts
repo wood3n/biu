@@ -40,7 +40,7 @@ export interface GenWebTicketResponse {
 /**
  * 计算 HMAC-SHA256 十六进制签名
  */
-function hmacSha256(message) {
+function hmacSha256(message: string) {
   const hmac = crypto.createHmac("sha256", "XgwSnGZ1p");
   hmac.update(message);
   return hmac.digest("hex");

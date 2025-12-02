@@ -1,0 +1,16 @@
+{
+  "types": {
+    "feat": { "title": "🚀 新功能", "semver": "minor" },
+    "perf": { "title": "🔥 功能优化", "semver": "patch" },
+    "fix": { "title": "🩹 修复问题", "semver": "patch" },
+    "style": { "title": "🎨 UI 调整" },
+    "refactor": { "title": "💅 Refactors", "semver": "patch" },
+    "docs": { "title": "📖 Documentation", "semver": "patch" },
+    "build": { "title": "📦 Build", "semver": "patch" },
+    "types": { "title": "🌊 Types", "semver": "patch" },
+    "chore": { "title": "🏡 Chore" },
+    "examples": { "title": "🏀 Examples" },
+    "test": { "title": "✅ Tests" },
+    "ci": { "title": "🤖 CI" }
+  }
+}

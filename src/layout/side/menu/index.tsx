@@ -6,7 +6,7 @@ import MenuItem from "../menu-item";
 import { menus } from "./menus";
 
 const Menu = () => {
-  const { user } = useUser();
+  const user = useUser(state => state.user);
 
   return (
     <div className="flex flex-col space-y-1">

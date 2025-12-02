@@ -78,7 +78,7 @@ const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }
         background: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${spaceInfo?.top_photo_v2?.l_200h_img}) center/cover no-repeat`,
       }}
     >
-      <div className="flex min-w-0 flex-grow items-end space-x-4">
+      <div className="flex min-w-0 grow items-end space-x-4">
         <Avatar src={spaceInfo?.face} alt={spaceInfo?.name} className="h-[140px] w-[140px] flex-none shadow-lg" />
         <div className="flex min-w-0 flex-1 flex-col space-y-2">
           <div className="flex items-center space-x-2">
@@ -112,15 +112,17 @@ const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }
             {isFollow ? "已关注" : "关注"}
           </AsyncButton>
         )}
-        {stats.map((item, idx) => (
-          <Fragment key={idx}>
-            <div className="flex flex-col items-center justify-center">
-              <span className="text-lg">{item.value}</span>
-              <span className="text-sm whitespace-nowrap">{item.title}</span>
-            </div>
-            {idx !== stats.length - 1 && <Divider orientation="vertical" className="h-4" />}
-          </Fragment>
-        ))}
+        {user?.isLogin
+          ? stats.map((item, idx) => (
+              <Fragment key={idx}>
+                <div className="flex flex-col items-center justify-center">
+                  <span className="text-lg">{item.value}</span>
+                  <span className="text-sm whitespace-nowrap">{item.title}</span>
+                </div>
+                {idx !== stats.length - 1 && <Divider orientation="vertical" className="h-4" />}
+              </Fragment>
+            ))
+          : null}
       </div>
     </div>
   );
