@@ -15,8 +15,8 @@ export function sortAudio(audio: DashAudio[]) {
 
     const indexA = audioQualitySort.indexOf(a.id);
     const indexB = audioQualitySort.indexOf(b.id);
-    if (indexA === -1) return -1;
-    if (indexB === -1) return 1;
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
     return indexB - indexA;
   });
 }
