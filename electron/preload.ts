@@ -128,9 +128,6 @@ const api: ElectronAPI = {
     return () => ipcRenderer.removeListener(channel.app.updateMessage, handler);
   },
   quitAndInstall: () => ipcRenderer.invoke(channel.app.quitAndInstall),
-  // 设置登录 Cookie
-  setLoginCookies: (cookies: Array<{ name: string; value: string; expirationDate?: number }>) =>
-    ipcRenderer.invoke(channel.cookie.setLoginCookies, cookies) as Promise<boolean>,
   // 切换到 mini 播放器窗口
   switchToMiniPlayer: () => ipcRenderer.invoke(channel.window.switchToMini),
   // 切换到主窗口
