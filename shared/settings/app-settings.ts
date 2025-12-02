@@ -7,4 +7,5 @@ export const defaultAppSettings: AppSettings = {
   backgroundColor: "#18181b",
   contentBackgroundColor: "#1f1f1f",
   primaryColor: "#17c964",
+  audioQuality: "auto",
 };
