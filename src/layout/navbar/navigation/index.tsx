@@ -18,7 +18,7 @@ const Navigation: React.FC = () => {
       radius="md"
       isDisabled={!canGoBack}
       onPress={() => navigate(-1)}
-      className="window-no-drag w-8 min-w-8"
+      className="w-8 min-w-8"
     >
       <RiArrowLeftSLine size={20} className="text-content1-foreground" />
     </Button>

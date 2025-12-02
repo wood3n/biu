@@ -1,7 +1,7 @@
 import { postPassportLoginWebConfirmRefresh } from "@/service/passport-login-web-confirm-refresh";
 import { getPassportLoginWebCookieInfo } from "@/service/passport-login-web-cookie-info";
 import { postPassportLoginWebCookieRefresh } from "@/service/passport-login-web-cookie-refresh";
-import { biliRequest } from "@/service/request";
+import { axiosInstance, biliRequest } from "@/service/request";
 import { useToken } from "@/store/token";
 
 async function getCorrespondPath(timestamp: number, publicKey: CryptoKey) {
@@ -33,6 +33,7 @@ export const refreshCookie = async () => {
 
     const htmlRes = await biliRequest.get<string>(`/correspond/1/${correspondPath}`, {
       responseType: "text",
+      skipRefreshCheck: true,
     });
 
     const parser = new DOMParser();
@@ -41,7 +42,7 @@ export const refreshCookie = async () => {
 
     if (targetDiv && targetDiv.textContent) {
       const refreshCSRF = targetDiv.textContent.trim();
-      const oldRefreshToken = useToken.getState().tokenData?.refresh_token as string;
+      const oldRefreshToken = useToken.getState()?.tokenData?.refresh_token as string;
 
       const getRefreshCookieRes = await postPassportLoginWebCookieRefresh({
         refresh_csrf: refreshCSRF,
@@ -49,19 +50,19 @@ export const refreshCookie = async () => {
         refresh_token: oldRefreshToken,
       });
 
+      // 如果刷新成功，这一步会通过 set-cookie 注入新的 sid、DedeUserID、DedeUserID__ckMd5、SESSDATA、bili_jct
       if (getRefreshCookieRes.code === 0) {
-        const newRefreshToken = getRefreshCookieRes.data?.refresh_token;
-
-        useToken.setState({
-          tokenData: {
-            ...useToken.getState().tokenData,
-            refresh_token: newRefreshToken,
-          },
-        });
-
         const getRefreshResult = await postPassportLoginWebConfirmRefresh({
           refresh_token: oldRefreshToken,
         });
+
+        if (getRefreshResult.code === 0) {
+          const newRefreshToken = getRefreshCookieRes.data?.refresh_token;
+
+          useToken.setState({
+            tokenData: { refresh_token: newRefreshToken },
+          });
+        }
 
         return getRefreshResult.code === 0;
       }
@@ -71,6 +72,14 @@ export const refreshCookie = async () => {
       return false;
     }
   }
-
   return false;
+};
+
+export const getCookitFromBSite = () => {
+  axiosInstance.get("https://www.bilibili.com/", {
+    headers: {
+      Accept:
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    },
+  });
 };

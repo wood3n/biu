@@ -25,6 +25,7 @@ const api: ElectronAPI = {
 
     return () => ipcRenderer.removeListener(channel.download.progress, downloadProgressHandler);
   },
+  getCookie: (key: string) => ipcRenderer.invoke(channel.cookie.get, key),
   // 监听来自主进程的导航事件，并将路径回调给渲染端
   navigate: cb => {
     const navigateHandler = (_: Electron.IpcRendererEvent, path: string) => {
@@ -127,13 +128,46 @@ const api: ElectronAPI = {
     return () => ipcRenderer.removeListener(channel.app.updateMessage, handler);
   },
   quitAndInstall: () => ipcRenderer.invoke(channel.app.quitAndInstall),
-  // 设置登录 Cookie
-  setLoginCookies: (cookies: Array<{ name: string; value: string; expirationDate?: number }>) =>
-    ipcRenderer.invoke(channel.cookie.setLoginCookies, cookies) as Promise<boolean>,
   // 切换到 mini 播放器窗口
   switchToMiniPlayer: () => ipcRenderer.invoke(channel.window.switchToMini),
   // 切换到主窗口
   switchToMainWindow: () => ipcRenderer.invoke(channel.window.switchToMain),
+  // 最小化窗口
+  minimizeWindow: () => ipcRenderer.send(channel.window.minimize),
+  // 最大化/还原窗口
+  toggleMaximizeWindow: () => ipcRenderer.send(channel.window.toggleMaximize),
+  // 关闭窗口
+  closeWindow: () => ipcRenderer.send(channel.window.close),
+  // 判断窗口是否最大化
+  isMaximized: () => ipcRenderer.invoke(channel.window.isMaximized),
+  // 监听窗口最大化状态变化
+  onWindowMaximizeChange: cb => {
+    const maximizeHandler = () => cb(true);
+    const unmaximizeHandler = () => cb(false);
+
+    ipcRenderer.on(channel.window.maximize, maximizeHandler);
+    ipcRenderer.on(channel.window.unmaximize, unmaximizeHandler);
+
+    return () => {
+      ipcRenderer.removeListener(channel.window.maximize, maximizeHandler);
+      ipcRenderer.removeListener(channel.window.unmaximize, unmaximizeHandler);
+    };
+  },
+  // 判断窗口是否全屏
+  isFullScreen: () => ipcRenderer.invoke(channel.window.isFullScreen),
+  // 监听窗口全屏状态变化
+  onWindowFullScreenChange: cb => {
+    const enterFullScreenHandler = () => cb(true);
+    const leaveFullScreenHandler = () => cb(false);
+
+    ipcRenderer.on(channel.window.enterFullScreen, enterFullScreenHandler);
+    ipcRenderer.on(channel.window.leaveFullScreen, leaveFullScreenHandler);
+
+    return () => {
+      ipcRenderer.removeListener(channel.window.enterFullScreen, enterFullScreenHandler);
+      ipcRenderer.removeListener(channel.window.leaveFullScreen, leaveFullScreenHandler);
+    };
+  },
 };
 
 contextBridge.exposeInMainWorld("electron", api);

@@ -4,27 +4,37 @@ import { Outlet } from "react-router";
 
 import log from "electron-log/renderer";
 
-import { refreshCookie } from "@/common/utils/cookie";
 import Fallback from "@/components/error-fallback";
 import PlayBar from "@/layout/playbar";
+import { useAppUpdateStore } from "@/store/app-update";
 import { useUser } from "@/store/user";
 
 import Navbar from "./navbar";
 import SideNav from "./side";
 
 const Layout = () => {
-  const { updateUser } = useUser();
-
-  const getLoginInfo = async () => {
-    try {
-      await refreshCookie();
-    } finally {
-      updateUser();
-    }
-  };
+  const updateUser = useUser(state => state.updateUser);
+  const setUpdate = useAppUpdateStore(s => s.setUpdate);
 
   useEffect(() => {
-    getLoginInfo();
+    const removeListener = window.electron.onDownloadAppProgress(info => {
+      if (info.type === "downloaded" && info.releaseInfo) {
+        setUpdate({
+          hasUpdate: true,
+          isDownloaded: true,
+          latestVersion: info.releaseInfo.latestVersion,
+          releaseNotes: info.releaseInfo.releaseNotes,
+        });
+      }
+    });
+
+    return () => {
+      removeListener();
+    };
+  }, []);
+
+  useEffect(() => {
+    updateUser();
   }, []);
 
   return (

@@ -16,5 +16,6 @@ declare module 'axios' {
     useFormData?: boolean;
     useWbi?: boolean;
     useCSRF?: boolean;
+    skipRefreshCheck?: boolean;
   }
 }

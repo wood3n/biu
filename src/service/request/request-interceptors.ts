@@ -1,11 +1,30 @@
 import { type InternalAxiosRequestConfig } from "axios";
+import moment from "moment";
 
-import { encodeParamsWbi } from "@/common/utils/wbi-sign";
+import { refreshCookie } from "@/common/utils/cookie";
 import { useToken } from "@/store/token";
 
+import { encodeParamsWbi } from "./wbi-sign";
+
+let refreshCookiePromise: Promise<any> | null = null;
+
 export const requestInterceptors = async (config: InternalAxiosRequestConfig) => {
+  if (!config.skipRefreshCheck && (useToken.getState().nextCheckRefreshTime || 0) < moment().unix()) {
+    if (!refreshCookiePromise) {
+      useToken.setState({ nextCheckRefreshTime: moment().add(30, "seconds").unix() });
+      refreshCookiePromise = refreshCookie().finally(() => {
+        refreshCookiePromise = null;
+      });
+    }
+    try {
+      await refreshCookiePromise;
+    } finally {
+      useToken.setState({ nextCheckRefreshTime: moment().add(2, "days").unix() });
+    }
+  }
+
   if (config.useCSRF) {
-    const csrfToken = useToken.getState().tokenData?.bili_jct;
+    const csrfToken = await window.electron.getCookie("bili_jct");
     if (csrfToken) {
       if (config.method === "post") {
         config.data ??= {};

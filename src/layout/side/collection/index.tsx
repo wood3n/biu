@@ -7,7 +7,9 @@ import { useUser } from "@/store/user";
 import MenuGroup from "../menu-group";
 
 const Collection = () => {
-  const { user, ownFolder, collectedFolder } = useUser();
+  const user = useUser(state => state.user);
+  const ownFolder = useUser(state => state.ownFolder);
+  const collectedFolder = useUser(state => state.collectedFolder);
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 

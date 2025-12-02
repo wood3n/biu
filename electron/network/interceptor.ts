@@ -1,5 +1,6 @@
 import type { OnBeforeSendHeadersListenerDetails, OnHeadersReceivedListenerDetails } from "electron";
 
+import httpCookie from "cookie";
 import { session } from "electron";
 
 import { UserAgent } from "./user-agent";
@@ -35,24 +36,15 @@ export function installWebRequestInterceptors() {
       return;
     }
 
-    const raw = responseHeaders[setCookieKey];
+    const raw = responseHeaders[setCookieKey.toLowerCase()];
     const cookies = Array.isArray(raw) ? raw : typeof raw === "string" ? [raw] : [];
 
     const rewritten = cookies.map(cookie => {
-      let c = cookie;
+      const setCookieObject = httpCookie.parseSetCookie(cookie);
+      setCookieObject.sameSite = "none";
+      setCookieObject.secure = true;
 
-      // 统一移除已存在的 SameSite=...，避免重复或冲突
-      c = c.replace(/;?\s*SameSite=[^;]+/i, "");
-      // 如果原始值中没有 SameSite=None，则追加
-      if (!/;\s*SameSite=None/i.test(cookie)) {
-        c += "; SameSite=None";
-      }
-      // 如果原始值中没有 Secure，则追加
-      if (!/;\s*Secure/i.test(cookie)) {
-        c += "; Secure";
-      }
-
-      return c;
+      return httpCookie.stringifySetCookie(setCookieObject);
     });
 
     responseHeaders[setCookieKey] = rewritten;

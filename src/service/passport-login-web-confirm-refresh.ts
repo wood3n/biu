@@ -33,5 +33,6 @@ export function postPassportLoginWebConfirmRefresh(
   return passportRequest.post<WebConfirmRefreshResponse>("/x/passport-login/web/confirm/refresh", data, {
     useCSRF: true,
     useFormData: true,
+    skipRefreshCheck: true,
   });
 }

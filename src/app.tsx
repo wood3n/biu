@@ -4,6 +4,7 @@ import { useHref, useNavigate, useRoutes } from "react-router";
 import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import moment from "moment";
 
+import { getCookitFromBSite } from "./common/utils/cookie";
 import Theme from "./components/theme";
 import routes from "./routes";
 import { usePlayQueue } from "./store/play-queue";
@@ -18,6 +19,10 @@ moment.locale("zh-cn");
 export function App() {
   const routeElement = useRoutes(routes);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getCookitFromBSite();
+  }, []);
 
   useEffect(() => {
     if (window.electron && window.electron.navigate) {

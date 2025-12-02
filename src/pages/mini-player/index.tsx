@@ -79,8 +79,8 @@ const MiniPlayer = () => {
   }, [playMode, setPlayMode]);
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-zinc-900 select-none">
-      <div className="window-drag flex h-full items-center space-x-2 px-3">
+    <div className="window-drag flex h-screen w-screen flex-col bg-zinc-900 select-none">
+      <div className="flex h-full items-center space-x-2 px-3">
         {currentBvid && (
           <Image
             radius="md"
@@ -91,7 +91,7 @@ const MiniPlayer = () => {
             className="object-cover"
           />
         )}
-        <div className="window-no-drag flex min-w-0 flex-1 flex-col space-y-1">
+        <div className="flex min-w-0 flex-1 flex-col space-y-1">
           <div className="flex min-w-0 flex-col">
             {currentBvid ? (
               <span className="truncate text-center text-sm font-medium">{title}</span>
@@ -99,7 +99,7 @@ const MiniPlayer = () => {
               <span className="text-center text-sm text-zinc-500">暂无播放内容</span>
             )}
           </div>
-          <div className="flex items-center space-x-1">
+          <div className="window-no-drag flex items-center space-x-1">
             <span className="w-8 text-xs whitespace-nowrap opacity-70">
               {currentTime ? formatDuration(currentTime) : "-:--"}
             </span>
@@ -125,7 +125,7 @@ const MiniPlayer = () => {
               size="sm"
               variant="light"
               onPress={togglePlayMode}
-              className="hover:text-primary"
+              className="hover:text-primary window-no-drag"
               aria-label="播放模式"
             >
               {playModeIcon}
@@ -137,7 +137,7 @@ const MiniPlayer = () => {
                 size="sm"
                 variant="light"
                 onPress={prev}
-                className="hover:text-primary"
+                className="hover:text-primary window-no-drag"
               >
                 <RiSkipBackFill size={18} />
               </Button>
@@ -147,7 +147,7 @@ const MiniPlayer = () => {
                 size="sm"
                 variant="light"
                 onPress={togglePlay}
-                className="hover:text-primary"
+                className="hover:text-primary window-no-drag"
               >
                 {isPlaying ? <RiPauseCircleFill size={28} /> : <RiPlayCircleFill size={28} />}
               </Button>
@@ -157,12 +157,18 @@ const MiniPlayer = () => {
                 size="sm"
                 variant="light"
                 onPress={next}
-                className="hover:text-primary"
+                className="hover:text-primary window-no-drag"
               >
                 <RiSkipForwardFill size={18} />
               </Button>
             </div>
-            <Button isIconOnly size="sm" variant="light" onPress={handleSwitchToMain} className="hover:text-primary">
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              onPress={handleSwitchToMain}
+              className="hover:text-primary window-no-drag"
+            >
               <RiExpandDiagonalLine size={16} />
             </Button>
           </div>

@@ -9,12 +9,14 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Switch,
   Textarea,
   addToast,
 } from "@heroui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
+import { isPrivateFav } from "@/common/utils/fav";
 import { postFavFolderAdd } from "@/service/fav-folder-add";
 import { postFavFolderEdit } from "@/service/fav-folder-edit";
 import { getFavFolderInfo } from "@/service/fav-folder-info";
@@ -24,6 +26,7 @@ import { useUser } from "@/store/user";
 const schema = z.object({
   title: z.string().trim().min(1, "名称为必填项"),
   intro: z.string().optional(),
+  isPublic: z.boolean().default(true),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -36,7 +39,7 @@ interface Props {
 }
 
 const FolderForm = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) => {
-  const { updateOwnFolder } = useUser();
+  const updateOwnFolder = useUser(state => state.updateOwnFolder);
   const [isFetching, setIsFetching] = useState(false);
 
   const {
@@ -47,7 +50,7 @@ const FolderForm = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) => {
     formState: { touchedFields, isSubmitting, isSubmitted, isValid },
   } = useForm({
     resolver: zodResolver(schema),
-    defaultValues: { title: "", intro: "" },
+    defaultValues: { title: "", intro: "", isPublic: true },
     mode: "onChange",
   });
 
@@ -64,6 +67,7 @@ const FolderForm = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) => {
             if (res?.code === 0 && res.data) {
               setValue("title", res.data.title ?? "");
               setValue("intro", res.data.intro ?? "");
+              setValue("isPublic", !isPrivateFav(res.data.attr));
             } else {
               addToast({ color: "danger", title: "加载失败", description: res?.message || "请稍后再试" });
             }
@@ -81,7 +85,7 @@ const FolderForm = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) => {
       };
     } else {
       // 新建模式下清空表单
-      reset({ title: "", intro: "" });
+      reset({ title: "", intro: "", isPublic: true });
     }
   }, [isOpen, mid, reset]);
 
@@ -91,7 +95,8 @@ const FolderForm = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) => {
         const res = await postFavFolderEdit({
           media_id: mid,
           title: values.title.trim(),
-          intro: values.intro?.trim() ? values.intro.trim() : undefined,
+          intro: values.intro?.trim() ? values.intro.trim() : "",
+          privacy: values.isPublic ? 0 : 1,
         });
 
         if (res?.code === 0) {
@@ -109,7 +114,8 @@ const FolderForm = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) => {
       } else {
         const res = await postFavFolderAdd({
           title: values.title.trim(),
-          intro: values.intro?.trim() ? values.intro.trim() : undefined,
+          intro: values.intro?.trim() ? values.intro.trim() : "",
+          privacy: values.isPublic ? 0 : 1,
         });
         if (res?.code === 0) {
           updateOwnFolder();
@@ -179,6 +185,20 @@ const FolderForm = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) => {
                   minRows={4}
                   isDisabled={isFetching || isSubmitting}
                 />
+              )}
+            />
+
+            <Controller
+              name="isPublic"
+              control={control}
+              render={({ field }) => (
+                <Switch
+                  isSelected={Boolean(field.value)}
+                  onValueChange={field.onChange}
+                  isDisabled={isFetching || isSubmitting}
+                >
+                  {field.value ? "公开" : "私密"}
+                </Switch>
               )}
             />
           </ModalBody>

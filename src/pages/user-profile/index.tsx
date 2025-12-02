@@ -43,7 +43,7 @@ const UserProfile = () => {
     },
     {
       ready: !!id,
-      refreshDeps: [id],
+      refreshDeps: [user?.isLogin, id],
     },
   );
 
@@ -125,7 +125,7 @@ const UserProfile = () => {
         relationWithMe={relationWithMe}
         refreshRelation={refreshRelation}
       />
-      {(isSelf || relationWithMe !== UserRelation.Blocked) && (
+      {user?.isLogin && (isSelf || relationWithMe !== UserRelation.Blocked) && (
         <div className="p-4">
           <Tabs radius="md" classNames={{ cursor: "rounded-medium" }} aria-label="个人资料栏目" variant="solid">
             {tabs.map(item => (

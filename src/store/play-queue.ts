@@ -7,7 +7,7 @@ import { shallow } from "zustand/shallow";
 
 import { PlayMode } from "@/common/constants/audio";
 import { getMVUrl } from "@/common/utils/audio";
-import { formatUrlProtocal } from "@/common/utils/url";
+import { formatUrlProtocal, getUrlParams } from "@/common/utils/url";
 import { getWebInterfaceView } from "@/service/web-interface-view";
 
 import { broadcastState, isMiniPlayer, onMessage, requestSync, sendCommand } from "./mini-player-sync";
@@ -27,7 +27,6 @@ interface MVPageData {
   cover: string;
   audioUrl?: string;
   videoUrl?: string;
-  expiredTime?: number; // url过期时间（秒）
   isLossless?: boolean; // 是否为无损音频
 }
 
@@ -103,8 +102,8 @@ const getMVData = async (bvid: string) => {
   };
 };
 
-const isUrlValid = (url?: string, expiredTime?: number): url is string => {
-  return Boolean(url) && Boolean(expiredTime) && moment().isBefore(moment.unix(expiredTime as number));
+const isUrlValid = (url?: string): url is string => {
+  return Boolean(url) && moment().isBefore(moment.unix(Number(getUrlParams(url as string).deadline)));
 };
 
 const toastError = (error: unknown) => {
@@ -149,7 +148,6 @@ const updatePlaybackState = () => {
   }
   try {
     if (window.electron && window.electron.updatePlaybackState) {
-      console.log("updatePlaybackState", !audio.paused);
       window.electron.updatePlaybackState(!audio.paused);
     }
   } catch (err) {
@@ -235,7 +233,7 @@ export const usePlayQueue = create<State & Action>()(
         const pageData = mvData?.pages?.find(page => page.cid === currentCid);
         let audioUrl = pageData?.audioUrl;
 
-        if (!isUrlValid(pageData?.audioUrl, pageData?.expiredTime)) {
+        if (!isUrlValid(pageData?.audioUrl)) {
           try {
             const playData = await getMVUrl(currentBvid, currentCid);
             audioUrl = playData.audioUrl;
@@ -250,11 +248,15 @@ export const usePlayQueue = create<State & Action>()(
         }
 
         if (audioUrl) {
-          audio.src = audioUrl;
+          if (audio.src !== audioUrl) {
+            audio.src = audioUrl;
+          }
+
           const { duration, currentTime } = get();
           if (duration && currentTime) {
             audio.currentTime = currentTime;
           }
+
           if (autoPlay) {
             try {
               await audio.play();
@@ -262,6 +264,7 @@ export const usePlayQueue = create<State & Action>()(
               handlePlayError(error);
             }
           }
+
           updateMediaSession({
             title: pageData?.title || "",
             artist: mvData?.ownerName || "",
@@ -383,14 +386,31 @@ export const usePlayQueue = create<State & Action>()(
             }
           }
         },
-        togglePlay: () => {
+        togglePlay: async () => {
           if (isMiniPlayer) {
             sendCommand("togglePlay");
             return;
           }
           if (audio?.src) {
             if (audio.paused) {
-              audio.play().catch(handlePlayError);
+              if (isUrlValid(audio.src)) {
+                audio.play().catch(handlePlayError);
+              } else {
+                const playData = await getMVUrl(get().currentBvid as string, get().currentCid as string);
+                set(state => {
+                  const pd = state.list
+                    ?.find(item => item.bvid === get().currentBvid)
+                    ?.pages?.find(p => p.cid === get().currentCid);
+                  if (pd && playData.audioUrl) {
+                    audio.src = pd.audioUrl as string;
+                    if (get().currentTime) {
+                      audio.currentTime = get().currentTime as number;
+                    }
+
+                    Object.assign(pd, playData);
+                  }
+                });
+              }
             } else {
               audio.pause();
             }
@@ -439,6 +459,9 @@ export const usePlayQueue = create<State & Action>()(
           const { currentBvid, list } = get();
 
           if (currentBvid === bvid) {
+            if (!get().isPlaying && audio) {
+              audio.play();
+            }
             return;
           }
 
@@ -666,7 +689,6 @@ export const usePlayQueue = create<State & Action>()(
                       ...page,
                       audioUrl: playData.audioUrl,
                       videoUrl: playData.videoUrl,
-                      expiredTime: playData.expiredTime,
                       isLossless: playData.isLossless,
                     }
                   : page,

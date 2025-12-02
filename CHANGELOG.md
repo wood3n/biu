@@ -1,5 +1,38 @@
 # Changelog
 
+## v1.6.0-beta.4
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.3...v1.6.0-beta.4)
+
+### 🚀 新功能
+
+- 补充macos dock右键菜单 ([1d54ef9](https://github.com/wood3n/biu/commit/1d54ef9))
+
+### 🩹 修复问题
+
+- 优化cookie注入的逻辑和user store的使用 ([5e713af](https://github.com/wood3n/biu/commit/5e713af))
+- Knip ci config ([a8e2d38](https://github.com/wood3n/biu/commit/a8e2d38))
+- Review problem ([bc96515](https://github.com/wood3n/biu/commit/bc96515))
+- 修复csrf token校验问题 ([c900d45](https://github.com/wood3n/biu/commit/c900d45))
+- 补充cookie刷新检测频率 ([e778708](https://github.com/wood3n/biu/commit/e778708))
+- 补充点击视频切换播放检测 ([d3497e9](https://github.com/wood3n/biu/commit/d3497e9))
+- 补充切换播放url可用检测 ([f5fcd46](https://github.com/wood3n/biu/commit/f5fcd46))
+- 修改macos窗口按钮和icon显示 ([d20f0d2](https://github.com/wood3n/biu/commit/d20f0d2))
+- Knip version ([3c1f8fb](https://github.com/wood3n/biu/commit/3c1f8fb))
+- Remove useless file ([ade08c0](https://github.com/wood3n/biu/commit/ade08c0))
+
+### 📖 Documentation
+
+- Readme perf ([6fd2ab3](https://github.com/wood3n/biu/commit/6fd2ab3))
+
+### 🎨 UI 调整
+
+- 调整windows和linux右上角窗口按钮 ([8292041](https://github.com/wood3n/biu/commit/8292041))
+
+### ❤️ Contributors
+
+- Wood3n <wangkka1@163.com>
+
 ## v1.6.0-beta.3
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.5.3-beta.1...v1.6.0-beta.3)
