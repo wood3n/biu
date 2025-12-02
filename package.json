@@ -1,6 +1,6 @@
 {
   "name": "biu",
-  "version": "1.6.0-beta.2",
+  "version": "1.6.0-beta.3",
   "private": true,
   "engines": {
     "node": "22.17.1"
@@ -36,9 +36,9 @@
     "build:test": "cross-env TEST_BUILD=true RSDOCTOR=true rsbuild build",
     "dev:rsdoctor": "cross-env RSDOCTOR=true rsbuild dev",
     "build:rsdoctor": "cross-env RSDOCTOR=true rsbuild build",
-    "release": "release-it",
-    "release:beta": "release-it --preRelease=beta",
-    "release:alpha": "release-it --preRelease=alpha"
+    "release": "changelogen --release --push",
+    "release:beta": "changelogen --release --prerelease beta",
+    "release:alpha": "changelogen --release --push --prerelease alpha"
   },
   "dependencies": {
     "@heroui/react": "^2.8.3",
@@ -80,7 +80,6 @@
     "@commitlint/config-conventional": "^20.0.0",
     "@eslint-react/eslint-plugin": "^1.53.0",
     "@eslint/js": "^9.35.0",
-    "@release-it/conventional-changelog": "^10.0.2",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rsbuild/core": "^1.5.4",
     "@rsbuild/plugin-react": "^1.4.0",
@@ -95,6 +94,7 @@
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@types/spark-md5": "^3.0.5",
+    "changelogen": "^0.6.2",
     "chokidar": "^4.0.3",
     "cross-env": "^10.0.0",
     "electron": "38.6.0",
@@ -115,7 +115,6 @@
     "lint-staged": "^16.1.6",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
-    "release-it": "^19.0.5",
     "rimraf": "^6.0.1",
     "rollup": "^4.52.5",
     "rollup-plugin-esbuild": "^6.2.1",
@@ -125,11 +124,6 @@
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.42.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "conventional-changelog-conventionalcommits": "8.0.0"
-    }
   },
   "lint-staged": {
     "*.{js,cjs,mjs,ts,tsx}": "eslint --fix --concurrency auto",

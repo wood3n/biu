@@ -134,6 +134,10 @@ interface ElectronAPI {
   quitAndInstall: () => Promise<void>;
   /** 设置登录 Cookie 到 Electron session */
   setLoginCookies: (cookies: Array<{ name: string; value: string; expirationDate?: number }>) => Promise<boolean>;
+  /** 切换到 mini 播放器窗口 */
+  switchToMiniPlayer: () => Promise<void>;
+  /** 切换到主窗口 */
+  switchToMainWindow: () => Promise<void>;
 }
 
 interface Window {

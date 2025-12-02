@@ -1,5 +1,108 @@
 # Changelog
 
+## v1.6.0-beta.3
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.5.3-beta.1...v1.6.0-beta.3)
+
+### 🚀 Enhancements
+
+- 补充自动检测应用版本更新功能 ([f0652d8](https://github.com/wood3n/biu/commit/f0652d8))
+- 添加 mini 播放器功能 ([8643934](https://github.com/wood3n/biu/commit/8643934))
+- Add history page and optimize playback logic ([50fd57f](https://github.com/wood3n/biu/commit/50fd57f))
+- 添加 mini-player 播放模式按钮并重命名同步模块 ([0f220ed](https://github.com/wood3n/biu/commit/0f220ed))
+- Add audio waveform visualization feature ([d244e18](https://github.com/wood3n/biu/commit/d244e18))
+
+### 🩹 Fixes
+
+- 修改打包配置，修复音频跳转问题 ([3c74a0e](https://github.com/wood3n/biu/commit/3c74a0e))
+- Remove useless exports ([9be3a18](https://github.com/wood3n/biu/commit/9be3a18))
+- **layout:** 修改分辨率兼容问题 ([#13](https://github.com/wood3n/biu/pull/13))
+- **layout:** 修改分辨率兼容问题 ([#13](https://github.com/wood3n/biu/pull/13))
+- 移除无用的样式,修复搜索用户点击跳转问题 ([7abbd84](https://github.com/wood3n/biu/commit/7abbd84))
+- 修改linux tray图标 ([eed09fe](https://github.com/wood3n/biu/commit/eed09fe))
+- Fix favorites play all feature and optimize experience ([dea650d](https://github.com/wood3n/biu/commit/dea650d))
+- 修复tray右键点击事件 ([ed6e258](https://github.com/wood3n/biu/commit/ed6e258))
+- Add issues write permission to knip workflow ([07ab409](https://github.com/wood3n/biu/commit/07ab409))
+
+### 💅 Refactors
+
+- 删除不必要的注释 ([ae728fd](https://github.com/wood3n/biu/commit/ae728fd))
+- Improve favorites play all robustness and code quality ([a9dea8b](https://github.com/wood3n/biu/commit/a9dea8b))
+- Optimize history page and play queue code ([3c751d3](https://github.com/wood3n/biu/commit/3c751d3))
+- 重命名 mini-player-sync 中的 channel 变量和通道名称 ([2876c7a](https://github.com/wood3n/biu/commit/2876c7a))
+- Extract magic number and improve error handling ([8d29f4b](https://github.com/wood3n/biu/commit/8d29f4b))
+- Optimize mini player performance and UI ([628148b](https://github.com/wood3n/biu/commit/628148b))
+- Improve code quality based on code review suggestions ([04eea2a](https://github.com/wood3n/biu/commit/04eea2a))
+- Improve type safety in mini-player communication ([15fb360](https://github.com/wood3n/biu/commit/15fb360))
+
+### 📖 Documentation
+
+- Fix changelog ([db566f7](https://github.com/wood3n/biu/commit/db566f7))
+- Add changelog ([536ba1a](https://github.com/wood3n/biu/commit/536ba1a))
+- Fix issue_template labels ([c029b8b](https://github.com/wood3n/biu/commit/c029b8b))
+- Add star history chart to README ([cb8d72c](https://github.com/wood3n/biu/commit/cb8d72c))
+
+### 🏡 Chore
+
+- 补充commitlint以生成更好的changelog和release-note ([b288dfb](https://github.com/wood3n/biu/commit/b288dfb))
+- 补充issue和feature模板 ([7d2d487](https://github.com/wood3n/biu/commit/7d2d487))
+- Fix release config ([0daae72](https://github.com/wood3n/biu/commit/0daae72))
+- Fix release-it config ([2f69c1a](https://github.com/wood3n/biu/commit/2f69c1a))
+- Add package tools restriction ([6fa0a0b](https://github.com/wood3n/biu/commit/6fa0a0b))
+- Fix package tools restriction ([a468962](https://github.com/wood3n/biu/commit/a468962))
+- Fix dependencies lock ([3933415](https://github.com/wood3n/biu/commit/3933415))
+- Fix rcdoctor config ([177eecc](https://github.com/wood3n/biu/commit/177eecc))
+- Fix rcdoctor config ([8d16302](https://github.com/wood3n/biu/commit/8d16302))
+- Fix release-it bump problem ([8f962f5](https://github.com/wood3n/biu/commit/8f962f5))
+- Add conventionalcommits deps ([2138880](https://github.com/wood3n/biu/commit/2138880))
+- Fix conventionalcommits version ([2845130](https://github.com/wood3n/biu/commit/2845130))
+- Release v1.6.0-beta.0 ([bc5301e](https://github.com/wood3n/biu/commit/bc5301e))
+- Release v1.6.0-beta.1 ([0c1f08c](https://github.com/wood3n/biu/commit/0c1f08c))
+- Release v1.6.0-beta.2 ([d875672](https://github.com/wood3n/biu/commit/d875672))
+- 使用changelogen替换release-it ([1cb1c89](https://github.com/wood3n/biu/commit/1cb1c89))
+- **release:** V1.6.0-beta.3 ([febd640](https://github.com/wood3n/biu/commit/febd640))
+- 使用changelogen替换release-it ([c8055eb](https://github.com/wood3n/biu/commit/c8055eb))
+- Remove test tag ([dd3ac1f](https://github.com/wood3n/biu/commit/dd3ac1f))
+- Remove test changelog ([70e8ce9](https://github.com/wood3n/biu/commit/70e8ce9))
+- Remove conventional-commits version overrides ([4a51326](https://github.com/wood3n/biu/commit/4a51326))
+- Fix lock file ([529b562](https://github.com/wood3n/biu/commit/529b562))
+
+### 🎨 Styles
+
+- 一些细节调整 ([c84623b](https://github.com/wood3n/biu/commit/c84623b))
+
+### 🤖 CI
+
+- Add pr test check ([8565ed6](https://github.com/wood3n/biu/commit/8565ed6))
+- Add CODEOWNERS ([329c51c](https://github.com/wood3n/biu/commit/329c51c))
+- Fix pr test build config ([0fbd189](https://github.com/wood3n/biu/commit/0fbd189))
+- Add rsdoctor check ([cde514c](https://github.com/wood3n/biu/commit/cde514c))
+- Fix pr test build config ([0bdc11e](https://github.com/wood3n/biu/commit/0bdc11e))
+- Fix knip cli ([f9c0ddb](https://github.com/wood3n/biu/commit/f9c0ddb))
+- Add knip check reporter ([264c1f8](https://github.com/wood3n/biu/commit/264c1f8))
+- Add pr build gate check ([c81615b](https://github.com/wood3n/biu/commit/c81615b))
+- Remove knip githubactions reporter ([61e2328](https://github.com/wood3n/biu/commit/61e2328))
+- Fix knip ci deps install problem ([0ec9bb7](https://github.com/wood3n/biu/commit/0ec9bb7))
+- Fix knip ci deps install problem ([c74cd8c](https://github.com/wood3n/biu/commit/c74cd8c))
+- Use Codex/knip-reporter ([beec5ca](https://github.com/wood3n/biu/commit/beec5ca))
+- Update knip config ([107d331](https://github.com/wood3n/biu/commit/107d331))
+- Add eslint review and fix web analysis ([bfcc37b](https://github.com/wood3n/biu/commit/bfcc37b))
+- Add file change filter in pr-test-build ([2b6c5bc](https://github.com/wood3n/biu/commit/2b6c5bc))
+- Fix problem ([f7532e4](https://github.com/wood3n/biu/commit/f7532e4))
+- Add web analysis run condition ([be48630](https://github.com/wood3n/biu/commit/be48630))
+- Config renovate ([d5b6f78](https://github.com/wood3n/biu/commit/d5b6f78))
+- Config renovate add ignore package ([19bcf39](https://github.com/wood3n/biu/commit/19bcf39))
+- Fix build-gate be skiped ([370d468](https://github.com/wood3n/biu/commit/370d468))
+- 修改knip实现 ([aff36ee](https://github.com/wood3n/biu/commit/aff36ee))
+- 修改knip comment配置 ([fe25e7d](https://github.com/wood3n/biu/commit/fe25e7d))
+- 补充knip权限 ([7edcfb8](https://github.com/wood3n/biu/commit/7edcfb8))
+
+### ❤️ Contributors
+
+- Xfly <18374858141@163.com>
+- Wood3n <wangkka1@163.com>
+- Fly ([@flystar233](https://github.com/flystar233))
+
 ## [1.6.0-beta.2](///compare/v1.6.0-beta.1...v1.6.0-beta.2) (2025-11-30)
 
 ### Features

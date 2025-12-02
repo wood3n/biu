@@ -44,4 +44,8 @@ export const channel = {
     get: "cookie:get",
     setLoginCookies: "cookie:set-login-cookies",
   },
+  window: {
+    switchToMini: "window:switch-to-mini",
+    switchToMain: "window:switch-to-main",
+  },
 };

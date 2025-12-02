@@ -3,11 +3,14 @@ import moment from "moment";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
+import { shallow } from "zustand/shallow";
 
 import { PlayMode } from "@/common/constants/audio";
 import { getMVUrl } from "@/common/utils/audio";
 import { formatUrlProtocal, getUrlParams } from "@/common/utils/url";
 import { getWebInterfaceView } from "@/service/web-interface-view";
+
+import { broadcastState, isMiniPlayer, onMessage, requestSync, sendCommand } from "./mini-player-sync";
 
 interface PlayMVList {
   bvid: string;
@@ -76,6 +79,7 @@ interface Action {
   clear: () => void;
   next: () => Promise<void>;
   prev: () => Promise<void>;
+  getAudio: () => HTMLAudioElement | null;
 }
 
 const getMVData = async (bvid: string) => {
@@ -126,7 +130,8 @@ const updateMediaSession = ({ title, artist, cover }: { title: string; artist: s
   }
 };
 
-const createAudio = (): HTMLAudioElement => {
+const createAudio = (): HTMLAudioElement | null => {
+  if (isMiniPlayer) return null;
   const audio = new Audio();
   audio.preload = "metadata";
   audio.controls = false;
@@ -137,6 +142,7 @@ const createAudio = (): HTMLAudioElement => {
 const audio = createAudio();
 
 const updatePlaybackState = () => {
+  if (!audio) return;
   if ("mediaSession" in navigator) {
     navigator.mediaSession.playbackState = audio.paused ? "paused" : "playing";
   }
@@ -151,6 +157,7 @@ const updatePlaybackState = () => {
 };
 
 const updatePositionState = () => {
+  if (!audio) return;
   if ("mediaSession" in navigator) {
     const dur = audio.duration;
     if (!Number.isNaN(dur) && dur !== Infinity) {
@@ -163,10 +170,62 @@ const updatePositionState = () => {
   }
 };
 
+const setupMiniPlayerListener = (set: (fn: (state: State) => void) => void) => {
+  onMessage(event => {
+    const { type, payload } = event.data;
+    if (type === "state-sync") {
+      set(state => {
+        Object.assign(state, payload);
+      });
+    }
+  });
+  requestSync();
+};
+
+const setupMainWindowListener = (get: () => State & Action) => {
+  onMessage(event => {
+    const { type, command, payload } = event.data;
+    if (type === "command") {
+      switch (command) {
+        case "togglePlay":
+          get().togglePlay();
+          break;
+        case "prev":
+          get().prev();
+          break;
+        case "next":
+          get().next();
+          break;
+        case "seek":
+          get().seek(payload);
+          break;
+        case "setPlayMode":
+          get().setPlayMode(payload);
+          break;
+      }
+    } else if (type === "request-sync") {
+      const state = get();
+      broadcastState({
+        isPlaying: state.isPlaying,
+        isMuted: state.isMuted,
+        volume: state.volume,
+        playMode: state.playMode,
+        rate: state.rate,
+        currentTime: state.currentTime,
+        duration: state.duration,
+        list: state.list,
+        currentBvid: state.currentBvid,
+        currentCid: state.currentCid,
+      });
+    }
+  });
+};
+
 export const usePlayQueue = create<State & Action>()(
   persist(
     immer((set, get) => {
       const loadAndPlayCurrent = async (autoPlay: boolean = true) => {
+        if (!audio) return;
         const { currentBvid, currentCid, list } = get();
         if (!currentBvid || !currentCid) return;
 
@@ -231,6 +290,13 @@ export const usePlayQueue = create<State & Action>()(
         duration: undefined,
         list: [],
         init: async () => {
+          if (isMiniPlayer) {
+            setupMiniPlayerListener(set);
+            return;
+          }
+
+          setupMainWindowListener(get);
+
           if (audio) {
             audio.volume = get().volume;
             audio.muted = get().isMuted;
@@ -240,13 +306,17 @@ export const usePlayQueue = create<State & Action>()(
             audio.ondurationchange = () => {
               const dur = audio.duration;
               if (!Number.isNaN(dur) && dur !== Infinity) {
-                set({ duration: Math.round(dur * 100) / 100 });
+                const duration = Math.round(dur * 100) / 100;
+                set({ duration });
+                broadcastState({ duration });
                 updatePositionState();
               }
             };
 
             audio.ontimeupdate = () => {
-              set({ currentTime: Math.round(audio.currentTime * 100) / 100 });
+              const currentTime = Math.round(audio.currentTime * 100) / 100;
+              set({ currentTime });
+              broadcastState({ currentTime });
             };
 
             audio.onseeked = () => {
@@ -259,12 +329,14 @@ export const usePlayQueue = create<State & Action>()(
 
             audio.onplay = () => {
               set({ isPlaying: true });
+              broadcastState({ isPlaying: true });
               updatePlaybackState();
               updatePositionState();
             };
 
             audio.onpause = () => {
               set({ isPlaying: false });
+              broadcastState({ isPlaying: false });
               updatePlaybackState();
               updatePositionState();
             };
@@ -315,6 +387,10 @@ export const usePlayQueue = create<State & Action>()(
           }
         },
         togglePlay: async () => {
+          if (isMiniPlayer) {
+            sendCommand("togglePlay");
+            return;
+          }
           if (audio?.src) {
             if (audio.paused) {
               if (isUrlValid(audio.src)) {
@@ -353,10 +429,15 @@ export const usePlayQueue = create<State & Action>()(
           set({ volume });
         },
         setPlayMode: mode => {
+          if (isMiniPlayer) {
+            sendCommand("setPlayMode", mode);
+            return;
+          }
           if (audio) {
             audio.loop = mode === PlayMode.Single;
           }
           set({ playMode: mode });
+          broadcastState({ playMode: mode });
         },
         setRate: rate => {
           if (audio) {
@@ -365,6 +446,10 @@ export const usePlayQueue = create<State & Action>()(
           set({ rate });
         },
         seek: s => {
+          if (isMiniPlayer) {
+            sendCommand("seek", s);
+            return;
+          }
           if (audio) {
             audio.currentTime = s;
           }
@@ -374,7 +459,7 @@ export const usePlayQueue = create<State & Action>()(
           const { currentBvid, list } = get();
 
           if (currentBvid === bvid) {
-            if (!get().isPlaying) {
+            if (!get().isPlaying && audio) {
               audio.play();
             }
             return;
@@ -448,6 +533,10 @@ export const usePlayQueue = create<State & Action>()(
           }
         },
         next: async () => {
+          if (isMiniPlayer) {
+            sendCommand("next");
+            return;
+          }
           if (!get().list.length) {
             return;
           }
@@ -518,6 +607,10 @@ export const usePlayQueue = create<State & Action>()(
           }
         },
         prev: async () => {
+          if (isMiniPlayer) {
+            sendCommand("prev");
+            return;
+          }
           if (get().list.length <= 1) {
             return;
           }
@@ -657,6 +750,7 @@ export const usePlayQueue = create<State & Action>()(
             nextBvid: undefined,
           });
         },
+        getAudio: () => audio,
       };
     }),
     {
@@ -677,3 +771,18 @@ export const usePlayQueue = create<State & Action>()(
     },
   ),
 );
+
+if (!isMiniPlayer) {
+  let prevState: { currentBvid?: string; currentCid?: string; list: MVData[] } | null = null;
+  usePlayQueue.subscribe(state => {
+    const selectedState = {
+      currentBvid: state.currentBvid,
+      currentCid: state.currentCid,
+      list: state.list,
+    };
+    if (!prevState || !shallow(prevState, selectedState)) {
+      broadcastState(selectedState);
+      prevState = selectedState;
+    }
+  });
+}

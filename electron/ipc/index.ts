@@ -5,6 +5,7 @@ import { registerDownloadHandlers } from "./download";
 import { registerFontHandlers } from "./font";
 import { registerRequestHandlers } from "./request";
 import { registerStoreHandlers } from "./store";
+import { registerWindowHandlers } from "./window";
 
 export function registerIpcHandlers() {
   registerStoreHandlers();
@@ -14,4 +15,5 @@ export function registerIpcHandlers() {
   registerRequestHandlers();
   registerAppHandlers();
   registerCookieIpcHandlers();
+  registerWindowHandlers();
 }
