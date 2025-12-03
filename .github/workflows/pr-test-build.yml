@@ -43,7 +43,7 @@ jobs:
               - '.github/workflows/pr-test-build.yml'
 
   build:
-    name: Build (${{ matrix.os }}
+    name: Build on ${{ matrix.os }}
     needs: changes
     if: ${{ needs.changes.outputs.core == 'true' }}
     runs-on: ${{ matrix.os }}
