@@ -29,8 +29,10 @@ export async function buildElectron() {
       files: [`${ELECTRON_OUT_DIRNAME}/**`, "dist/web/**"],
       win: {
         target: [
-          { target: "nsis", arch: ["x64", "arm64"] },
-          { target: "portable", arch: ["x64", "arm64"] },
+          { target: "nsis", arch: ["x64"] },
+          { target: "nsis", arch: ["arm64"] },
+          { target: "portable", arch: ["x64"] },
+          { target: "portable", arch: ["arm64"] },
         ],
         icon: `${ELECTRON_ICON_BASE_PATH}/logo.ico`,
       },
