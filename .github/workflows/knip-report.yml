@@ -41,10 +41,5 @@ jobs:
         env:
           HUSKY: 0
 
-      - name: Post the knip results
-        uses: codex-/knip-reporter@v2
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          command_script_name: knip
-          verbose: false
-          ignore_results: false
+      - name: Run Knip
+        run: pnpm knip
