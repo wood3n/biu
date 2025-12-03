@@ -72,7 +72,12 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Publish draft release
+      - name: Publish release (remove draft)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release edit "${{ github.ref_name }}" --draft=false --latest --repo "${{ github.repository }}"
+        run: gh release edit "${{ github.ref_name }}" --draft=false --repo "${{ github.repository }}"
+      - name: Mark as latest (stable only)
+        if: ${{ !contains(github.ref_name, '-') }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "${{ github.ref_name }}" --latest --repo "${{ github.repository }}"

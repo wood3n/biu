@@ -101,6 +101,7 @@ jobs:
           name: biu-${{ matrix.os }}-${{ matrix.arch }}
           path: |
             dist/artifacts/*.exe
+            dist/artifacts/*.yml
             dist/artifacts/*.dmg
             dist/artifacts/*.AppImage
           if-no-files-found: warn
