@@ -43,7 +43,7 @@ jobs:
               - '.github/workflows/pr-test-build.yml'
 
   build:
-    name: Build (${{ matrix.os }}-${{ matrix.arch }})
+    name: Build (${{ matrix.os }}
     needs: changes
     if: ${{ needs.changes.outputs.core == 'true' }}
     runs-on: ${{ matrix.os }}
@@ -76,14 +76,12 @@ jobs:
           HUSKY: 0
 
       - name: Build
-        env:
-          ARCH: ${{ matrix.arch }}
         run: pnpm build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: biu-${{ matrix.os }}-${{ matrix.arch }}
+          name: biu-${{ matrix.os }}
           path: |
             dist/artifacts/*.exe
             dist/artifacts/*.yml

@@ -10,7 +10,6 @@ export async function buildElectron() {
     config: {
       appId: "com.biu.wood3n",
       productName: "Biu",
-      artifactName: "${productName}-${version}-${os}-${arch}.${ext}",
       copyright: `Copyright © ${new Date().getFullYear()}`,
       nodeVersion: "current",
       buildVersion: pkg.version,
@@ -41,10 +40,10 @@ export async function buildElectron() {
         perMachine: false,
         allowElevation: true,
         allowToChangeInstallationDirectory: true,
-        artifactName: "${productName}-Setup-${version}-${arch}.${ext}",
+        artifactName: "${productName}-${version}-win-setup-${arch}.${ext}",
       },
       portable: {
-        artifactName: "${productName}-Portable-${version}-${arch}.${ext}",
+        artifactName: "${productName}-${version}-win-portable-${arch}.${ext}",
       },
       mac: {
         target: [
@@ -59,7 +58,7 @@ export async function buildElectron() {
         entitlements: "plugins/mac/entitlements.mac.plist",
         entitlementsInherit: "plugins/mac/entitlements.mac.plist",
         notarize: false,
-        artifactName: "${productName}-${version}-${arch}.${ext}",
+        artifactName: "${productName}-${version}-mac-${arch}.${ext}",
       },
       linux: {
         target: [
@@ -73,7 +72,7 @@ export async function buildElectron() {
         maintainer: "wood3n",
         vendor: "wood3n",
         executableName: "Biu",
-        artifactName: "${productName}-${version}-${arch}.${ext}",
+        artifactName: "${productName}-${version}-linux-${arch}.${ext}",
       },
       publish: {
         provider: "github",

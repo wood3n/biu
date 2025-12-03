@@ -18,22 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # Windows
-          - os: windows-latest
-            arch: x64
-          - os: windows-latest
-            arch: arm64
-          # macOS
-          - os: macos-latest
-            arch: x64
-          - os: macos-latest
-            arch: arm64
-          # Ubuntu
-          - os: ubuntu-latest
-            arch: x64
-          - os: ubuntu-latest
-            arch: arm64
+        os: [macos-latest, windows-latest, ubuntu-latest]
     permissions:
       contents: write
 
@@ -61,7 +46,6 @@ jobs:
       - name: Build & Publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ARCH: ${{ matrix.arch }}
         run: pnpm build
 
   publish-release:

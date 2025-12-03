@@ -36,8 +36,8 @@
 ## 下载和使用
 - 下载页面：[Github Release](https://github.com/wood3n/biu/releases/latest)
 - 在 Releases 中选择与你系统和架构匹配的安装包；常见文件名示例：
-  - Windows 安装包：`Biu-Setup-<version>.exe`（推荐，NSIS 向导）
-  - Windows 绿色版：`Biu-<version>-win-x64.exe`（portable，免安装）
+  - Windows 安装包：`Biu-<version>-win-setup.exe`（推荐，NSIS 向导）
+  - Windows 免安装版：`Biu-<version>-win-x64.exe`（portable，免安装）
   - macOS：`Biu-<version>-mac-x64.dmg` / `Biu-<version>-mac-arm64.dmg`（或对应的 `zip`）
   - Linux：`Biu-<version>-linux-*.AppImage` / `*.deb` / `*.rpm`（支持 `x64` / `arm64`）
 
