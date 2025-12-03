@@ -50,8 +50,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        arch: [x64, arm64]
+        include:
+          # Windows
+          - os: windows-latest
+            arch: x64
+          - os: windows-11-arm
+            arch: arm64
+          # macOS
+          - os: macos-15-intel
+            arch: x64
+          - os: macos-latest
+            arch: arm64
+          # Ubuntu
+          - os: ubuntu-latest
+            arch: x64
+          - os: ubuntu-24.04-arm
+            arch: arm64
 
     steps:
       - name: Checkout
@@ -77,6 +91,8 @@ jobs:
           HUSKY: 0
 
       - name: Build Electron (test mode)
+        env:
+          ARCH: ${{ matrix.arch }}
         run: pnpm build:test
 
       - name: Upload build artifacts
