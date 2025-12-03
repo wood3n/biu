@@ -32,10 +32,13 @@ body:
     attributes:
       label: 问题描述
       description: |
-        请描述该问题并附带问题截图，方便我们定位问题并排查：
-        1. ...
-        2. ...
-        3. ...
-      placeholder: 详细描述...
+        请描述该问题并附带问题截图，方便我们定位问题并排查。
+        可选择附上应用日志文件，以便快速定位问题。
+        默认日志位置：
+        - Windows: C:/Users/<用户名>/AppData/Roaming/Biu/logs/main.log 或 renderer.log
+        - macOS: ~/Library/Application Support/Biu/logs/main.log 或 renderer.log
+        - Linux: ~/.config/Biu/logs/main.log 或 renderer.log
+        您可以直接将日志文件拖拽到下方的输入框中上传。
+      placeholder: 详细问题描述...
     validations:
       required: true
