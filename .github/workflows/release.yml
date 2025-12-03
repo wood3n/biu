@@ -22,10 +22,10 @@ jobs:
           # Windows
           - os: windows-latest
             arch: x64
-          - os: windows-11-arm
+          - os: windows-latest
             arch: arm64
           # macOS
-          - os: macos-15-intel
+          - os: macos-latest
             arch: x64
           - os: macos-latest
             arch: arm64

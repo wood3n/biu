@@ -54,17 +54,17 @@ jobs:
           # Windows
           - os: windows-latest
             arch: x64
-          - os: windows-11-arm
+          - os: windows-latest
             arch: arm64
           # macOS
-          - os: macos-15-intel
+          - os: macos-latest
             arch: x64
           - os: macos-latest
             arch: arm64
           # Ubuntu
           - os: ubuntu-latest
             arch: x64
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-latest
             arch: arm64
 
     steps:
@@ -90,18 +90,8 @@ jobs:
         env:
           HUSKY: 0
 
-      # 安装最新版 FPM，支持 ARM 架构
-      - name: Install Latest FPM (System)
-        if: ${{ runner.os == 'Linux' && matrix.arch == 'arm64' }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ruby ruby-dev rubygems build-essential rpm
-          sudo gem install --no-document fpm
-          fpm --version
-
       - name: Build
         env:
-          USE_SYSTEM_FPM: ${{ runner.os == 'Linux' && matrix.arch == 'arm64' }}
           ARCH: ${{ matrix.arch }}
         run: pnpm build
 
