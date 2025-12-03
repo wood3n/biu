@@ -93,6 +93,7 @@ jobs:
       # 1. 手动安装最新版 FPM (ARM64)
       # 这会从 RubyGems 下载最新的 FPM，完美支持 ARM 架构
       - name: Install Latest FPM (System)
+        if: ${{ runner.os == 'Linux' && matrix.arch == 'arm64' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y ruby ruby-dev rubygems build-essential rpm
@@ -101,7 +102,7 @@ jobs:
 
       - name: Build
         env:
-          USE_SYSTEM_FPM: "true"
+          USE_SYSTEM_FPM: ${{ runner.os == 'Linux' && matrix.arch == 'arm64' }}
           ARCH: ${{ matrix.arch }}
         run: pnpm build
 
