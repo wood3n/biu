@@ -36,22 +36,20 @@
 ## 下载和使用
 - 下载页面：[Github Release](https://github.com/wood3n/biu/releases/latest)
 - 在 Releases 中选择与你系统和架构匹配的安装包；常见文件名示例：
-  - Windows 安装包：`Biu-<version>-win-setup.exe`（推荐，NSIS 向导）
-  - Windows 免安装版：`Biu-<version>-win-x64.exe`（portable，免安装）
+  - Windows 安装包：`Biu-<version>-win-setup.exe` / `Biu-<version>-win-setup-arm64.exe`
+  - Windows 免安装版：`Biu-<version>-win-portable-x64.exe` / `Biu-<version>-win-portable-arm64.exe`（portable，免安装）
   - macOS：`Biu-<version>-mac-x64.dmg` / `Biu-<version>-mac-arm64.dmg`（或对应的 `zip`）
   - Linux：`Biu-<version>-linux-*.AppImage` / `*.deb` / `*.rpm`（支持 `x64` / `arm64`）
+  - `*.yml`、`*.blockmap` 为自动更新辅助文件，手动下载时无需关注。
+
+- 系统要求（建议）
+  - Windows 10 / 11（`x64` / `arm64`）
+  - macOS 12+（`x64` / `arm64`）
+  - 主流 Linux 发行版（`x64` / `arm64`）
 
 - 自动更新说明
   - 应用会定期检查 GitHub Releases，下载安装更新（多数安装方式均支持）。
   - 在公司/校园网络或使用便携版时，自动更新可能受限；可前往 Releases 手动下载最新版本。
-
-- 系统要求（建议）
-  - Windows 10 / 11（`x64`）
-  - macOS 12+（`x64` / `arm64`）
-  - 主流 Linux 发行版（`x64` / `arm64`），`glibc ≥ 2.28` 推荐。
-
-- 资产说明
-  - `*.yml`、`*.blockmap` 为自动更新辅助文件，手动下载时无需关注。
 
 - 使用注意
   - 部分音频清晰度与解析可能需要登录或大会员权限。
