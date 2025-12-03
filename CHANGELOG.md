@@ -1,5 +1,28 @@
 # Changelog
 
+## v1.6.0-beta.6
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.5...v1.6.0-beta.6)
+
+### 📦 Build
+
+- 修改构建发包错误的问题 ([ee2b7e8](https://github.com/wood3n/biu/commit/ee2b7e8))
+- 修改electron针对不同平台的打包配置和release流程 ([8403da0](https://github.com/wood3n/biu/commit/8403da0))
+- 修改pr-test-build镜像配置 ([1f2f643](https://github.com/wood3n/biu/commit/1f2f643))
+- 修改ci镜像配置 ([95587c4](https://github.com/wood3n/biu/commit/95587c4))
+- 修改knip ci配置 ([736d8de](https://github.com/wood3n/biu/commit/736d8de))
+
+### 🤖 CI
+
+- 增加knip输出信息 ([24ca7e8](https://github.com/wood3n/biu/commit/24ca7e8))
+- Add ubuntu arm64 config ([d83fcc3](https://github.com/wood3n/biu/commit/d83fcc3))
+- Add ubuntu arm64 config ([5071c4a](https://github.com/wood3n/biu/commit/5071c4a))
+- Remove useless note ([b48e312](https://github.com/wood3n/biu/commit/b48e312))
+
+### ❤️ Contributors
+
+- Wood3n
+
 ## v1.6.0-beta.5
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.4...v1.6.0-beta.5)
