@@ -32,7 +32,7 @@
     "prepare": "husky install",
     "dev": "rsbuild dev",
     "build": "rsbuild build",
-    "knip": "knip --no-exit-code --max-show-issues 5",
+    "knip": "knip --no-exit-code --max-show-issues 5 --reporter github-actions",
     "release": "changelogen --release --push --hideAuthorEmail",
     "release:beta": "changelogen --release --push --hideAuthorEmail --prerelease beta",
     "release:alpha": "changelogen --release --push --hideAuthorEmail --prerelease alpha"
