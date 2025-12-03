@@ -8,7 +8,7 @@ export async function buildElectron() {
   const arch = (process.env.ARCH || "x64") as "arm64" | "x64";
 
   await electronBuild({
-    publish: process.env.GH_TOKEN && process.env.TEST_BUILD !== "true" ? "always" : "never",
+    publish: "onTag",
     config: {
       appId: "com.biu.wood3n",
       productName: "Biu",
@@ -49,7 +49,6 @@ export async function buildElectron() {
         artifactName: "${productName}-Portable-${version}-${arch}.${ext}",
       },
       mac: {
-        // 同时构建 x64 与 arm64 的 dmg/zip 产物
         target: [
           { target: "dmg", arch },
           { target: "zip", arch },
@@ -61,7 +60,6 @@ export async function buildElectron() {
         darkModeSupport: true,
         entitlements: "plugins/mac/entitlements.mac.plist",
         entitlementsInherit: "plugins/mac/entitlements.mac.plist",
-        // 使用环境变量进行公证配置；未设置时跳过
         notarize: false,
       },
       linux: {
