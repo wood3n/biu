@@ -5,8 +5,6 @@ import pkg from "../package.json";
 import { ELECTRON_OUT_DIRNAME, ELECTRON_ICON_BASE_PATH } from "../shared/path";
 
 export async function buildElectron() {
-  const arch = (process.env.ARCH || "x64") as "arm64" | "x64";
-
   await electronBuild({
     publish: "onTag",
     config: {
@@ -32,8 +30,8 @@ export async function buildElectron() {
       files: [`${ELECTRON_OUT_DIRNAME}/**`, "dist/web/**"],
       win: {
         target: [
-          { target: "nsis", arch },
-          { target: "portable", arch },
+          { target: "nsis", arch: ["x64", "arm64"] },
+          { target: "portable", arch: ["x64", "arm64"] },
         ],
         icon: `${ELECTRON_ICON_BASE_PATH}/logo.ico`,
       },
@@ -50,8 +48,8 @@ export async function buildElectron() {
       },
       mac: {
         target: [
-          { target: "dmg", arch },
-          { target: "zip", arch },
+          { target: "dmg", arch: ["x64", "arm64"] },
+          { target: "zip", arch: ["x64", "arm64"] },
         ],
         category: "public.app-category.music",
         icon: `${ELECTRON_ICON_BASE_PATH}/logo.icns`,
@@ -61,12 +59,13 @@ export async function buildElectron() {
         entitlements: "plugins/mac/entitlements.mac.plist",
         entitlementsInherit: "plugins/mac/entitlements.mac.plist",
         notarize: false,
+        artifactName: "${productName}-${version}-${arch}.${ext}",
       },
       linux: {
         target: [
-          { target: "AppImage", arch },
-          { target: "deb", arch },
-          { target: "rpm", arch },
+          { target: "AppImage", arch: ["x64", "arm64"] },
+          { target: "deb", arch: ["x64", "arm64"] },
+          { target: "rpm", arch: ["x64", "arm64"] },
         ],
         icon: `${ELECTRON_ICON_BASE_PATH}/logo.png`,
         category: "AudioVideo",
@@ -74,6 +73,7 @@ export async function buildElectron() {
         maintainer: "wood3n",
         vendor: "wood3n",
         executableName: "Biu",
+        artifactName: "${productName}-${version}-${arch}.${ext}",
       },
       publish: {
         provider: "github",
