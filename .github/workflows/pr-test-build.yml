@@ -50,8 +50,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        arch: [x64, arm64]
+        include:
+          # Windows
+          - os: windows-latest
+            arch: x64
+          - os: windows-11-arm
+            arch: arm64
+          # macOS
+          - os: macos-15-intel
+            arch: x64
+          - os: macos-latest
+            arch: arm64
+          # Ubuntu
+          - os: ubuntu-latest
+            arch: x64
+          - os: ubuntu-24.04-arm
+            arch: arm64
 
     steps:
       - name: Checkout
@@ -76,8 +90,20 @@ jobs:
         env:
           HUSKY: 0
 
-      - name: Build Electron (test mode)
-        run: pnpm build:test
+      # 安装最新版 FPM，支持 ARM 架构
+      - name: Install Latest FPM (System)
+        if: ${{ runner.os == 'Linux' && matrix.arch == 'arm64' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ruby ruby-dev rubygems build-essential rpm
+          sudo gem install --no-document fpm
+          fpm --version
+
+      - name: Build
+        env:
+          USE_SYSTEM_FPM: ${{ runner.os == 'Linux' && matrix.arch == 'arm64' }}
+          ARCH: ${{ matrix.arch }}
+        run: pnpm build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
