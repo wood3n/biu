@@ -127,6 +127,8 @@ interface ElectronAPI {
   onPlayerCommand: (cb: (cmd: "prev" | "next" | "toggle") => void) => Promise<void>;
   /** 获取当前应用版本 */
   getAppVersion: () => Promise<string>;
+  /** 是否支持自动更新 */
+  isSupportAutoUpdate: () => boolean;
   /** 检查更新 */
   checkAppUpdate: () => Promise<CheckAppUpdateResult>;
   /** 监听应用更新下载进度 */
