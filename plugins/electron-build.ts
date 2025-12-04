@@ -1,5 +1,7 @@
 import { logger } from "@rsbuild/core";
 import { build as electronBuild } from "electron-builder";
+import fs from "node:fs";
+import path from "node:path";
 
 import pkg from "../package.json";
 import { ELECTRON_OUT_DIRNAME, ELECTRON_ICON_BASE_PATH } from "../shared/path";
@@ -29,10 +31,8 @@ export async function buildElectron() {
       files: [`${ELECTRON_OUT_DIRNAME}/**`, "dist/web/**"],
       win: {
         target: [
-          { target: "nsis", arch: ["x64"] },
-          { target: "nsis", arch: ["arm64"] },
-          { target: "portable", arch: ["x64"] },
-          { target: "portable", arch: ["arm64"] },
+          { target: "nsis", arch: ["x64", "arm64"] },
+          { target: "portable", arch: ["x64", "arm64"] },
         ],
         icon: `${ELECTRON_ICON_BASE_PATH}/logo.ico`,
       },
@@ -42,6 +42,7 @@ export async function buildElectron() {
         perMachine: false,
         allowElevation: true,
         allowToChangeInstallationDirectory: true,
+        buildUniversalInstaller: false,
         artifactName: "${productName}-${version}-win-setup-${arch}.${ext}",
       },
       portable: {
@@ -81,6 +82,20 @@ export async function buildElectron() {
         owner: "wood3n",
         repo: "biu",
         releaseType: null,
+      },
+      artifactBuildCompleted: artifact => {
+        try {
+          const name = path.basename(artifact.file);
+          const isUniversalPortable = /-win-portable\.exe$/.test(name) && !/-win-portable-(x64|arm64)\.exe$/.test(name);
+          if (isUniversalPortable) {
+            fs.rmSync(artifact.file);
+            logger.info(`[electron] removed portable universal artifact: ${name}`);
+          }
+        } catch (err) {
+          logger.warn(
+            `[electron] failed to remove portable universal artifact: ${String((err && (err as any).message) || err)}`,
+          );
+        }
       },
     },
   })

@@ -20,6 +20,15 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
   const [error, setError] = useState<string>();
 
   const startDownload = async () => {
+    if (!window.electron.isSupportAutoUpdate()) {
+      const ok = await window.electron.openExternal("https://github.com/wood3n/biu/releases/latest");
+      if (!ok) {
+        setStatus("error");
+        setError("无法打开下载页面");
+      }
+      return;
+    }
+
     setStatus("downloading");
     try {
       await window.electron.downloadAppUpdate();

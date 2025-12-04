@@ -92,7 +92,6 @@ const api: ElectronAPI = {
       }
       playerToggleHandler = null;
     }
-
     playerPrevHandler = () => {
       try {
         cb("prev");
@@ -125,6 +124,16 @@ const api: ElectronAPI = {
     const handler = (_, payload: AppUpdateReleaseInfo) => cb(payload);
     ipcRenderer.on(channel.app.onUpdateAvailable, handler);
     return () => ipcRenderer.removeListener(channel.app.onUpdateAvailable, handler);
+  },
+  isSupportAutoUpdate: () => {
+    const platform = process.platform;
+    if (platform === "darwin") return true;
+    if (platform === "win32") {
+      const isPortable = Boolean(process.env.PORTABLE_EXECUTABLE_DIR || process.env.PORTABLE_EXECUTABLE_FILE);
+      return !isPortable;
+    }
+    const isAppImage = Boolean(process.env.APPIMAGE);
+    return isAppImage;
   },
   downloadAppUpdate: () => ipcRenderer.invoke(channel.app.downloadUpdate),
   onDownloadAppProgress: cb => {
