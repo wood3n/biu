@@ -198,6 +198,7 @@ app.whenReady().then(() => {
         app.quit();
       },
     });
+    registerGlobalShortcuts();
   }
 
   // 注册全局媒体快捷键
@@ -265,7 +266,6 @@ app.whenReady().then(() => {
     }
   };
 
-  registerGlobalShortcuts();
 });
 
 app.on("activate", () => mainWindow?.show());
