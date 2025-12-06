@@ -37,13 +37,21 @@ export function App() {
   useEffect(() => {
     if (window.electron && window.electron.onPlayerCommand) {
       window.electron.onPlayerCommand(cmd => {
-        const { prev, next, togglePlay } = usePlayQueue.getState();
+        const { prev, next, togglePlay, toggleMute, setVolume, volume } = usePlayQueue.getState();
         if (cmd === "prev") {
           prev();
         } else if (cmd === "next") {
           next();
         } else if (cmd === "toggle") {
           togglePlay();
+        } else if (cmd === "toggle-mute") {
+          toggleMute();
+        } else if (cmd === "volume-up") {
+          // 增加音量，步长为0.02，最大不超过1
+          setVolume(Math.min(volume + 0.02, 1));
+        } else if (cmd === "volume-down") {
+          // 减少音量，步长为0.02，最小不低于0
+          setVolume(Math.max(volume - 0.02, 0));
         }
       });
     }

@@ -32,6 +32,9 @@ export const channel = {
     prev: "player:prev",
     next: "player:next",
     toggle: "player:toggle",
+    volumeUp: "player:volume-up",
+    volumeDown: "player:volume-down",
+    toggleMute: "player:toggle-mute",
   },
   app: {
     getVersion: "app:get-version",

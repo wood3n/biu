@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, globalShortcut } from "electron";
 import isDev from "electron-is-dev";
 import log from "electron-log";
 import path from "node:path";
@@ -199,6 +199,73 @@ app.whenReady().then(() => {
       },
     });
   }
+
+  // 注册全局媒体快捷键
+  const registerGlobalShortcuts = () => {
+    // 注册播放/暂停快捷键
+    const playPauseShortcut = globalShortcut.register('Control+Space', () => {
+      if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.send(channel.player.toggle);
+      }
+    });
+
+    // 注册上一曲快捷键
+    const prevShortcut = globalShortcut.register('Control+Left', () => {
+      if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.send(channel.player.prev);
+      }
+    });
+
+    // 注册下一曲快捷键
+    const nextShortcut = globalShortcut.register('Control+Right', () => {
+      if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.send(channel.player.next);
+      }
+    });
+
+    // 注册音量增加快捷键
+    const volumeUpShortcut = globalShortcut.register('Control+Up', () => {
+      if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.send(channel.player.volumeUp);
+      }
+    });
+
+    // 注册音量减少快捷键
+    const volumeDownShortcut = globalShortcut.register('Control+Down', () => {
+      if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.send(channel.player.volumeDown);
+      }
+    });
+
+    // 注册静音快捷键
+    const toggleMuteShortcut = globalShortcut.register('Control+M', () => {
+      if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.send(channel.player.toggleMute);
+      }
+    });
+
+    // 检查快捷键是否注册成功
+    if (!playPauseShortcut) {
+      log.warn('[main] Failed to register MediaPlayPause shortcut');
+    }
+    if (!prevShortcut) {
+      log.warn('[main] Failed to register MediaPreviousTrack shortcut');
+    }
+    if (!nextShortcut) {
+      log.warn('[main] Failed to register MediaNextTrack shortcut');
+    }
+    if (!volumeUpShortcut) {
+      log.warn('[main] Failed to register volume up shortcut');
+    }
+    if (!volumeDownShortcut) {
+      log.warn('[main] Failed to register volume down shortcut');
+    }
+    if (!toggleMuteShortcut) {
+      log.warn('[main] Failed to register toggle mute shortcut');
+    }
+  };
+
+  registerGlobalShortcuts();
 });
 
 app.on("activate", () => mainWindow?.show());
@@ -215,6 +282,9 @@ app.on("will-quit", () => {
     // 修改说明：托盘销毁失败时记录日志，避免静默失败
     log.warn("[main] destroyTray failed:", err);
   }
+
+  // 注销所有全局快捷键
+  globalShortcut.unregisterAll();
 
   stopCheckForUpdates();
   autoUpdater.removeAllListeners();
