@@ -184,6 +184,8 @@ app.whenReady().then(() => {
 
   setupAutoUpdater();
 
+  registerGlobalShortcuts();
+  
   if (process.platform === "darwin" && mainWindow) {
     setupMacDock(mainWindow);
   }
@@ -199,7 +201,7 @@ app.whenReady().then(() => {
       },
     });
    }
-    registerGlobalShortcuts();
+    
   });
   // 注册全局媒体快捷键
   const registerGlobalShortcuts = () => {
