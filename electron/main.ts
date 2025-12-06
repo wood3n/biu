@@ -198,9 +198,9 @@ app.whenReady().then(() => {
         app.quit();
       },
     });
+   }
     registerGlobalShortcuts();
-  }
-
+  });
   // 注册全局媒体快捷键
   const registerGlobalShortcuts = () => {
     // 注册播放/暂停快捷键
@@ -266,7 +266,7 @@ app.whenReady().then(() => {
     }
   };
 
-});
+
 
 app.on("activate", () => mainWindow?.show());
 
@@ -293,6 +293,11 @@ app.on("will-quit", () => {
   if (isDev) {
     process.exit(0);
   }
+});
+
+app.on("activate", () => mainWindow?.show());
+app.on("before-quit", () => {
+  (app as any).quitting = true;
 });
 
 app.on("window-all-closed", () => {
