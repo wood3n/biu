@@ -56,6 +56,81 @@ function createTray({
 
   const menuTemplate: MenuItemConstructorOptions[] = [
     {
+      label: "上一曲  Ctrl+Left",
+      click: () => {
+        const win = getMainWindow?.();
+        if (!win) return;
+        try {
+          win.webContents.send(channel.player.prev);
+        } catch (err) {
+          log.error("[tray] send player prev command failed:", err);
+        }
+      },
+    },
+    {
+      label: "播放/暂停  Ctrl+Space",
+      click: () => {
+        const win = getMainWindow?.();
+        if (!win) return;
+        try {
+          win.webContents.send(channel.player.toggle);
+        } catch (err) {
+          log.error("[tray] send player toggle command failed:", err);
+        }
+      },
+    },
+    {
+      label: "下一曲  Ctrl+Right",
+      click: () => {
+        const win = getMainWindow?.();
+        if (!win) return;
+        try {
+          win.webContents.send(channel.player.next);
+        } catch (err) {
+          log.error("[tray] send player next command failed:", err);
+        }
+      },
+    },
+    {
+      label: "音量+  Ctrl+Up",
+      click: () => {
+        const win = getMainWindow?.();
+        if (!win) return;
+        try {
+          win.webContents.send(channel.player.volumeUp);
+        } catch (err) {
+          log.error("[tray] send player volume up command failed:", err);
+        }
+      },
+    },
+    {
+      label: "音量-  Ctrl+Down",
+      click: () => {
+        const win = getMainWindow?.();
+        if (!win) return;
+        try {
+          win.webContents.send(channel.player.volumeDown);
+        } catch (err) {
+          log.error("[tray] send player volume down command failed:", err);
+        }
+      },
+    },
+    {
+      label: "静音  Ctrl+M",
+      click: () => {
+        const win = getMainWindow?.();
+        if (!win) return;
+        try {
+          win.webContents.send(channel.player.toggleMute);
+        } catch (err) {
+          log.error("[tray] send player toggle mute command failed:", err);
+        }
+      },
+    },
+    {
+      type: "separator",
+    },
+    {
       label: "设置",
       click: () => {
         const win = getMainWindow?.();

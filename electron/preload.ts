@@ -5,6 +5,9 @@ import { channel } from "./ipc/channel";
 let playerPrevHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
 let playerNextHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
 let playerToggleHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
+let playerVolumeUpHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
+let playerVolumeDownHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
+let playerToggleMuteHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
 
 const api: ElectronAPI = {
   getSettings: () => ipcRenderer.invoke(channel.store.getSettings),
@@ -65,8 +68,8 @@ const api: ElectronAPI = {
       console.error("[preload] 上报播放状态失败:", error);
     }
   },
-  // 订阅主进程下发的播放器命令（上一首、下一首、播放/暂停）
-  onPlayerCommand: async (cb: (cmd: "prev" | "next" | "toggle") => void) => {
+  // 订阅主进程下发的播放器命令（上一首、下一首、播放/暂停、音量调节）
+  onPlayerCommand: async (cb: (cmd: "prev" | "next" | "toggle" | "volume-up" | "volume-down" | "toggle-mute") => void) => {
     // 先移除旧的监听，避免重复
     if (playerPrevHandler) {
       try {
@@ -92,6 +95,30 @@ const api: ElectronAPI = {
       }
       playerToggleHandler = null;
     }
+    if (playerVolumeUpHandler) {
+      try {
+        ipcRenderer.removeListener(channel.player.volumeUp, playerVolumeUpHandler);
+      } catch (error) {
+        console.error("[preload] 移除音量增加监听器失败:", error);
+      }
+      playerVolumeUpHandler = null;
+    }
+    if (playerVolumeDownHandler) {
+      try {
+        ipcRenderer.removeListener(channel.player.volumeDown, playerVolumeDownHandler);
+      } catch (error) {
+        console.error("[preload] 移除音量减少监听器失败:", error);
+      }
+      playerVolumeDownHandler = null;
+    }
+    if (playerToggleMuteHandler) {
+      try {
+        ipcRenderer.removeListener(channel.player.toggleMute, playerToggleMuteHandler);
+      } catch (error) {
+        console.error("[preload] 移除静音切换监听器失败:", error);
+      }
+      playerToggleMuteHandler = null;
+    }
     playerPrevHandler = () => {
       try {
         cb("prev");
@@ -113,10 +140,34 @@ const api: ElectronAPI = {
         console.error("[preload] player toggle 回调失败:", error);
       }
     };
+    playerVolumeUpHandler = () => {
+      try {
+        cb("volume-up");
+      } catch (error) {
+        console.error("[preload] player volume-up 回调失败:", error);
+      }
+    };
+    playerVolumeDownHandler = () => {
+      try {
+        cb("volume-down");
+      } catch (error) {
+        console.error("[preload] player volume-down 回调失败:", error);
+      }
+    };
+    playerToggleMuteHandler = () => {
+      try {
+        cb("toggle-mute");
+      } catch (error) {
+        console.error("[preload] player toggle-mute 回调失败:", error);
+      }
+    };
 
     ipcRenderer.on(channel.player.prev, playerPrevHandler);
     ipcRenderer.on(channel.player.next, playerNextHandler);
     ipcRenderer.on(channel.player.toggle, playerToggleHandler);
+    ipcRenderer.on(channel.player.volumeUp, playerVolumeUpHandler);
+    ipcRenderer.on(channel.player.volumeDown, playerVolumeDownHandler);
+    ipcRenderer.on(channel.player.toggleMute, playerToggleMuteHandler);
   },
   getAppVersion: () => ipcRenderer.invoke(channel.app.getVersion),
   checkAppUpdate: () => ipcRenderer.invoke(channel.app.checkUpdate),
