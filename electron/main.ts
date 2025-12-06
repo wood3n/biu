@@ -268,7 +268,6 @@ app.whenReady().then(() => {
 
 
 
-app.on("activate", () => mainWindow?.show());
 
 app.on("before-quit", () => {
   (app as any).quitting = true;
