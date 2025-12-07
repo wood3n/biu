@@ -9,3 +9,7 @@ export const getWindowIcon = () =>
   process.platform === "darwin"
     ? undefined
     : path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, process.platform === "win32" ? "logo.ico" : "logo.png");
+
+export const getMacLightIconPath = () => path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, "light-icon.png");
+
+export const getMacDarkIconPath = () => path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, "dark-icon.png");

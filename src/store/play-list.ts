@@ -358,7 +358,11 @@ export const usePlayList = create<State & Action>()(
               navigator.mediaSession.setActionHandler("play", () => get().togglePlay());
               navigator.mediaSession.setActionHandler("pause", () => get().togglePlay());
               navigator.mediaSession.setActionHandler("previoustrack", () => get().prev());
-              navigator.mediaSession.setActionHandler("nexttrack", () => get().next());
+              navigator.mediaSession.setActionHandler("nexttrack", () => {
+                if (get().list.length > 1) {
+                  get().next();
+                }
+              });
               navigator.mediaSession.setActionHandler("seekto", details => {
                 if (details.seekTime) get().seek(Math.round(details.seekTime * 100) / 100);
                 updatePositionState();
@@ -551,7 +555,7 @@ export const usePlayList = create<State & Action>()(
                   state.currentTime = 0;
                 });
                 audio.play();
-                return;
+                break;
               }
 
               set(state => {
@@ -567,7 +571,7 @@ export const usePlayList = create<State & Action>()(
                   state.currentTime = 0;
                 });
                 audio.play();
-                return;
+                break;
               }
 
               // 保持分集顺序，且当前为分集视频，且不是最后一集

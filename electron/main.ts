@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, nativeImage, nativeTheme } from "electron";
 import isDev from "electron-is-dev";
 import log from "electron-log";
 import path from "node:path";
@@ -13,7 +13,7 @@ import { installWebRequestInterceptors } from "./network/interceptor";
 import { store, storeKey } from "./store";
 import { createTray, destroyTray } from "./tray"; // 托盘功能
 import { autoUpdater, setupAutoUpdater, stopCheckForUpdates } from "./updater";
-import { getWindowIcon } from "./utils";
+import { getMacDarkIconPath, getMacLightIconPath, getWindowIcon } from "./utils";
 import { setupWindowsThumbar } from "./windows/thumbar";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -41,7 +41,7 @@ function createWindow() {
     // 无边框
     frame: false,
     transparent: false,
-    // titleBarStyle: "hidden",
+    titleBarStyle: "hidden",
     titleBarOverlay: false,
     trafficLightPosition: { x: 16, y: 16 },
     webPreferences: {
@@ -136,8 +136,19 @@ app.whenReady().then(() => {
 
   setupAutoUpdater();
 
-  if (process.platform === "darwin" && mainWindow) {
-    setupMacDock(mainWindow);
+  if (process.platform === "darwin") {
+    const updateDockIcon = () => {
+      const iconPath = nativeTheme.shouldUseDarkColors ? getMacDarkIconPath() : getMacLightIconPath();
+      const image = nativeImage.createFromPath(iconPath);
+      app.dock?.setIcon(image);
+    };
+
+    updateDockIcon();
+    nativeTheme.on("updated", updateDockIcon);
+
+    if (mainWindow) {
+      setupMacDock(mainWindow);
+    }
   }
 
   if (process.platform !== "darwin") {
