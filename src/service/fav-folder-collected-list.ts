@@ -37,6 +37,8 @@ export interface FavFolderCollectedListData {
   count: number;
   /** 收藏夹列表，无收藏夹时为 null */
   list: FavFolderCollectedItem[] | null;
+  /** 是否有更多数据 */
+  has_more: boolean;
 }
 
 /**
