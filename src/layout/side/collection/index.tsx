@@ -2,14 +2,17 @@ import { Button, Tooltip, useDisclosure } from "@heroui/react";
 import { RiAddLine, RiFolderLine, RiFolderOpenLine } from "@remixicon/react";
 
 import CreateFolderForm from "@/components/fav-folder/form";
+import MenuGroup from "@/components/menu/menu-group";
+import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
-
-import MenuGroup from "../menu-group";
 
 const Collection = () => {
   const user = useUser(state => state.user);
   const ownFolder = useUser(state => state.ownFolder);
   const collectedFolder = useUser(state => state.collectedFolder);
+  const hiddenMenuKeys = useSettings(state => state.hiddenMenuKeys);
+
+  const filteredCollectedFolder = collectedFolder.filter(item => !hiddenMenuKeys.includes(String(item.id)));
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -25,18 +28,21 @@ const Collection = () => {
               </Button>
             </Tooltip>
           }
-          items={ownFolder.map(item => ({
-            title: item.title,
-            href: `/collection/${item.id}?mid=${item?.mid}`,
-            icon: RiFolderLine,
-            activeIcon: RiFolderOpenLine,
-          }))}
+          items={ownFolder
+            .filter(item => !hiddenMenuKeys.includes(String(item.id)))
+            .map(item => ({
+              title: item.title,
+              href: `/collection/${item.id}?mid=${item?.mid}`,
+              icon: RiFolderLine,
+              activeIcon: RiFolderOpenLine,
+            }))}
         />
       )}
-      {Boolean(collectedFolder?.length) && (
+      {Boolean(filteredCollectedFolder?.length) && (
         <MenuGroup
           title="我收藏的"
-          items={collectedFolder.map(item => ({
+          itemClassName="pl-3"
+          items={filteredCollectedFolder.map(item => ({
             title: item.title,
             href: `/collection/${item.id}?type=${item.type}&mid=${item?.mid}`,
             cover: item.cover,

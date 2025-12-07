@@ -10,12 +10,11 @@ import {
   useDisclosure,
   addToast,
 } from "@heroui/react";
-import { RiDownloadLine, RiMore2Line, RiPlayListAddLine, RiStarLine, RiTimeLine } from "@remixicon/react";
+import { RiMore2Line, RiPlayListAddLine, RiStarLine, RiTimeLine } from "@remixicon/react";
 
 import FavFolderSelect from "@/components/fav-folder/select";
-import MVDownloadModal from "@/components/mv-download-modal";
 import { postHistoryToViewAdd } from "@/service/history-toview-add";
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList, type PlayDataType } from "@/store/play-list";
 import { useUser } from "@/store/user";
 
 export interface ImageCardMenu {
@@ -28,23 +27,43 @@ export interface ImageCardMenu {
 }
 
 export interface ActionProps {
-  bvid: string;
-  aid: string;
+  type: PlayDataType;
+  /** 标题 */
+  title: string;
+  /** 封面 */
+  cover: string;
+  /** 视频稿件bvid */
+  bvid?: string;
+  /** 视频稿件avid */
+  aid?: string;
+  /** 音频sid */
+  sid?: number;
+  /** UP名 */
+  ownerName?: string;
+  /** UP mid */
+  ownerMid?: number;
   menus?: ImageCardMenu[];
   collectMenuTitle?: string;
   onChangeFavSuccess?: () => void;
 }
 
-const Action = ({ bvid, aid, menus, collectMenuTitle, onChangeFavSuccess }: ActionProps) => {
+const Action = ({
+  type,
+  title,
+  cover,
+  ownerName,
+  ownerMid,
+  bvid,
+  aid,
+  sid,
+  menus,
+  collectMenuTitle,
+  onChangeFavSuccess,
+}: ActionProps) => {
   const user = useUser(s => s.user);
-  const addToNext = usePlayQueue(s => s.addToNext);
+  const addToNext = usePlayList(s => s.addToNext);
   const location = useLocation();
 
-  const {
-    isOpen: isOpenDownloadModal,
-    onOpen: onOpenDownloadModal,
-    onOpenChange: onOpenChangeDownloadModal,
-  } = useDisclosure();
   const {
     isOpen: isOpenFavSelectModal,
     onOpen: onOpenFavSelectModal,
@@ -67,8 +86,17 @@ const Action = ({ bvid, aid, menus, collectMenuTitle, onChangeFavSuccess }: Acti
       key: "nextPlay",
       icon: <RiPlayListAddLine size={16} />,
       title: "下一首播放",
+      hidden: !type,
       onPress: () => {
-        addToNext(bvid);
+        addToNext({
+          type,
+          title,
+          bvid,
+          sid,
+          cover,
+          ownerName,
+          ownerMid,
+        });
       },
     },
     {
@@ -85,12 +113,12 @@ const Action = ({ bvid, aid, menus, collectMenuTitle, onChangeFavSuccess }: Acti
       hidden: !user?.isLogin || location.pathname === "/later",
       onPress: addToLater,
     },
-    {
-      key: "download",
-      icon: <RiDownloadLine size={16} />,
-      title: "下载",
-      onPress: onOpenDownloadModal,
-    },
+    // {// 暂时隐藏，后续重构完再开放
+    //   key: "download",
+    //   icon: <RiDownloadLine size={16} />,
+    //   title: "下载",
+    //   onPress: onOpenDownloadModal,
+    // },
     ...(menus || []),
   ].filter(item => !item.hidden);
 
@@ -126,10 +154,9 @@ const Action = ({ bvid, aid, menus, collectMenuTitle, onChangeFavSuccess }: Acti
           </DropdownMenu>
         </Dropdown>
       </div>
-      <MVDownloadModal bvid={bvid} isOpen={isOpenDownloadModal} onOpenChange={onOpenChangeDownloadModal} />
       <FavFolderSelect
         title="收藏"
-        rid={aid}
+        rid={type === "mv" ? (aid as string) : String(sid)}
         isOpen={isOpenFavSelectModal}
         onOpenChange={onOpenChangeFavSelectModal}
         afterSubmit={onChangeFavSuccess}

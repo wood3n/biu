@@ -1,19 +1,23 @@
 import { RiPlayCircleFill } from "@remixicon/react";
 
+import { stripHtml } from "@/common/utils";
+
 import ImageCard from "../image-card";
 import Action, { type ActionProps } from "./action";
 
 interface Props extends ActionProps {
-  title: React.ReactNode;
-  cover: string;
+  isTitleIncludeHtmlTag?: boolean;
   coverHeight?: number;
   footer?: React.ReactNode;
   onPress?: () => void;
 }
 
 const MVCard = ({
+  type,
+  isTitleIncludeHtmlTag,
   bvid,
   aid,
+  sid,
   title,
   cover,
   coverHeight = 188,
@@ -33,11 +37,15 @@ const MVCard = ({
           <RiPlayCircleFill className="text-primary" size={48} />
         </div>
       }
-      title={title}
+      title={isTitleIncludeHtmlTag ? <p dangerouslySetInnerHTML={{ __html: title }} /> : title}
       titleExtra={
         <Action
+          type={type}
+          title={isTitleIncludeHtmlTag ? stripHtml(title) : title}
+          cover={cover}
           bvid={bvid}
           aid={String(aid)}
+          sid={sid}
           menus={menus}
           collectMenuTitle={collectMenuTitle}
           onChangeFavSuccess={onChangeFavSuccess}

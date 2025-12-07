@@ -8,7 +8,7 @@ import { formatDuration } from "@/common/utils";
 import GridList from "@/components/grid-list";
 import MVCard from "@/components/mv-card";
 import { getUserVideoArchivesList } from "@/service/user-video-archives-list";
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList } from "@/store/play-list";
 import { useUser } from "@/store/user";
 
 import Info from "./info";
@@ -18,8 +18,8 @@ const VideoSeries = () => {
   const collectedFolder = useUser(state => state.collectedFolder);
 
   const isCollected = collectedFolder?.some(item => item.id === Number(id));
-  const playMV = usePlayQueue(state => state.play);
-  const playList = usePlayQueue(state => state.playList);
+  const play = usePlayList(state => state.play);
+  const playList = usePlayList(state => state.playList);
 
   const { data, loading, refreshAsync } = useRequest(
     async () => {
@@ -38,6 +38,7 @@ const VideoSeries = () => {
     if (Array.isArray(data?.medias)) {
       playList(
         data.medias.map(item => ({
+          type: "mv",
           bvid: item.bvid,
           title: item.title,
           cover: item.cover,
@@ -69,10 +70,13 @@ const VideoSeries = () => {
         itemKey="bvid"
         renderItem={item => (
           <MVCard
+            type="mv"
             bvid={item.bvid}
             aid={String(item.id)}
             title={item.title}
             cover={item.cover}
+            ownerName={item.upper?.name}
+            ownerMid={item.upper?.mid}
             footer={
               !isCollected && (
                 <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
@@ -83,7 +87,16 @@ const VideoSeries = () => {
                 </div>
               )
             }
-            onPress={() => playMV(item.bvid)}
+            onPress={() =>
+              play({
+                type: "mv",
+                bvid: item.bvid,
+                title: item.title,
+                cover: item.cover,
+                ownerName: item.upper?.name,
+                ownerMid: item.upper?.mid,
+              })
+            }
           />
         )}
       />

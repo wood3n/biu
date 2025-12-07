@@ -9,7 +9,7 @@ import { formatDuration } from "@/common/utils";
 import GridList from "@/components/grid-list";
 import MVCard from "@/components/mv-card";
 import { getFavResourceList } from "@/service/fav-resource";
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList } from "@/store/play-list";
 import { useUser } from "@/store/user";
 
 import Info from "./info";
@@ -22,8 +22,8 @@ const Favorites: React.FC = () => {
 
   const isOwn = ownFolder?.some(item => item.id === Number(favFolderId));
   const isCollected = collectedFolder?.some(item => item.id === Number(favFolderId));
-  const playMV = usePlayQueue(state => state.play);
-  const playList = usePlayQueue(state => state.playList);
+  const play = usePlayList(state => state.play);
+  const playList = usePlayList(state => state.playList);
 
   const {
     data,
@@ -79,19 +79,31 @@ const Favorites: React.FC = () => {
       );
 
       const allMedias = allResSettled
-        .filter((res): res is PromiseFulfilledResult<any> => res.status === "fulfilled")
+        .filter(res => res.status === "fulfilled")
         .map(res => res.value)
         .filter(res => res.code === 0 && res?.data?.medias?.length)
         .flatMap(res =>
           res.data.medias
-            .filter(item => item.attr === 0) // 过滤失效稿件：0=正常，1/9=失效
-            .map(item => ({
-              bvid: item.bvid,
-              title: item.title,
-              cover: item.cover,
-              ownerMid: item.upper?.mid,
-              ownerName: item.upper?.name,
-            })),
+            .filter(item => item.attr === 0)
+            .map(item =>
+              item.type === 2
+                ? {
+                    type: "mv" as const,
+                    bvid: item.bvid,
+                    title: item.title,
+                    cover: item.cover,
+                    ownerMid: item.upper?.mid,
+                    ownerName: item.upper?.name,
+                  }
+                : {
+                    type: "audio" as const,
+                    sid: item.id,
+                    title: item.title,
+                    cover: item.cover,
+                    ownerMid: item.upper?.mid,
+                    ownerName: item.upper?.name,
+                  },
+            ),
         );
 
       if (allMedias.length) {
@@ -126,10 +138,14 @@ const Favorites: React.FC = () => {
         itemKey="id"
         renderItem={item => (
           <MVCard
+            type={item.type === 2 ? "mv" : "audio"}
             bvid={item.bvid}
             aid={String(item.id)}
+            sid={item.id}
             title={item.title}
             cover={item.cover}
+            ownerName={item.upper?.name}
+            ownerMid={item.upper?.mid}
             collectMenuTitle={isOwn ? "修改收藏夹" : "收藏"}
             footer={
               !isCollected && (
@@ -141,7 +157,27 @@ const Favorites: React.FC = () => {
                 </div>
               )
             }
-            onPress={() => playMV(item.bvid)}
+            onPress={() =>
+              play(
+                item.type === 2
+                  ? {
+                      type: "mv",
+                      bvid: item.bvid,
+                      title: item.title,
+                      cover: item.cover,
+                      ownerName: item.upper?.name,
+                      ownerMid: item.upper?.mid,
+                    }
+                  : {
+                      type: "audio",
+                      sid: item.id,
+                      title: item.title,
+                      cover: item.cover,
+                      ownerName: item.upper?.name,
+                      ownerMid: item.upper?.mid,
+                    },
+              )
+            }
             onChangeFavSuccess={refreshAsync}
           />
         )}

@@ -32,6 +32,7 @@
     "prepare": "husky install",
     "dev": "rsbuild dev",
     "build": "rsbuild build",
+    "test": "vitest",
     "knip": "knip --no-exit-code --max-show-issues 5 --reporter github-actions",
     "release": "changelogen --release --push --hideAuthorEmail",
     "release:beta": "changelogen --release --push --hideAuthorEmail --prerelease beta",
@@ -41,6 +42,7 @@
     "@heroui/react": "^2.8.3",
     "@hookform/resolvers": "^5.2.2",
     "@remixicon/react": "^4.6.0",
+    "@tanstack/react-virtual": "^3.13.12",
     "ahooks": "^3.9.5",
     "axios": "^1.11.0",
     "classnames": "^2.5.1",
@@ -90,6 +92,7 @@
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@types/spark-md5": "^3.0.5",
+    "@vitejs/plugin-react": "^5.1.1",
     "changelogen": "^0.6.2",
     "chokidar": "^4.0.3",
     "electron": "38.6.0",
@@ -118,7 +121,8 @@
     "stylelint-config-standard": "^39.0.0",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.42.0"
+    "typescript-eslint": "^8.42.0",
+    "vitest": "^4.0.15"
   },
   "lint-staged": {
     "*.{js,cjs,mjs,ts,tsx}": "eslint --fix --concurrency auto",

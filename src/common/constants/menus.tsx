@@ -15,9 +15,9 @@ import {
   RiHistoryFill,
 } from "@remixicon/react";
 
-import { type MenuItemProps } from "../menu-item";
+import { type MenuItemProps } from "@/components/menu/menu-item";
 
-export const menus: (MenuItemProps & { needLogin?: boolean })[] = [
+export const DefaultMenuList: (MenuItemProps & { needLogin?: boolean })[] = [
   {
     title: "热歌精选",
     href: "/",

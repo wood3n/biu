@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 
 import log from "electron-log/renderer";
 
@@ -13,6 +13,7 @@ import SideNav from "./side";
 
 const Layout = () => {
   const updateUser = useUser(state => state.updateUser);
+  const location = useLocation();
 
   useEffect(() => {
     updateUser();
@@ -21,6 +22,7 @@ const Layout = () => {
   return (
     <ErrorBoundary
       FallbackComponent={Fallback}
+      resetKeys={[location.pathname]}
       onError={(error, info) => {
         log.error("[ErrorBoundary]", error, info);
       }}

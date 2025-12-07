@@ -128,7 +128,7 @@ export interface Dimension {
  */
 export interface Page {
   cid: number; // 分P cid
-  page: number; // 分P序号
+  page: number; // 分P序号，从1开始
   from: string; // 视频来源 vupload:普通上传(B站) hunan:芒果TV qq:腾讯
   part: string; // 分P标题
   duration: number; // 分P持续时间 单位为秒

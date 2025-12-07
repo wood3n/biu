@@ -1,8 +1,9 @@
-import WindowAction from "@/components/window-action";
-
 import Navigation from "./navigation";
 import Search from "./search";
 import UserCard from "./user";
+import WindowAction from "./window-action";
+
+const platform = window.electron.getPlatform();
 
 const LayoutNavbar = () => {
   return (
@@ -13,7 +14,7 @@ const LayoutNavbar = () => {
       </div>
       <div className="window-no-drag flex items-center justify-center space-x-4 pl-20">
         <UserCard />
-        <WindowAction />
+        {["linux", "windows"].includes(platform) && <WindowAction />}
       </div>
     </div>
   );

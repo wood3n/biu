@@ -4,10 +4,10 @@ import GridList from "@/components/grid-list";
 import MVCard from "@/components/mv-card";
 import ScrollContainer from "@/components/scroll-container";
 import { getMusicHotRank } from "@/service/music-hot-rank";
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList } from "@/store/play-list";
 
 const MusicRank = () => {
-  const play = usePlayQueue(s => s.play);
+  const play = usePlayList(s => s.play);
 
   const { loading, data } = useRequest(async () => {
     const res = await getMusicHotRank({
@@ -29,13 +29,20 @@ const MusicRank = () => {
         itemKey="bvid"
         renderItem={item => (
           <MVCard
+            type="mv"
             bvid={item.bvid}
             aid={item.aid}
             title={item.music_title}
             cover={item.cover}
             coverHeight={240}
             footer={<div className="w-full truncate text-left text-sm text-zinc-400">{item.author}</div>}
-            onPress={() => play(item.bvid)}
+            onPress={() =>
+              play({
+                type: "mv",
+                bvid: item.bvid,
+                title: item.music_title,
+              })
+            }
           />
         )}
       />

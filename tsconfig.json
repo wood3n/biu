@@ -2,16 +2,13 @@
   "compilerOptions": {
     "target": "esnext",
     "jsx": "preserve",
-    "lib": [
-      "ESNext",
-      "dom"
-    ],
+    "lib": ["ESNext", "dom"],
     "baseUrl": ".",
     "module": "preserve",
     "moduleResolution": "bundler",
     "paths": {
       "@/*": ["./src/*"],
-      "@shared/*": ["./shared/*"],
+      "@shared/*": ["./shared/*"]
     },
     "resolveJsonModule": true,
     "noImplicitAny": false,
@@ -23,6 +20,6 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src", "shared", "plugins", "electron", "rsbuild.config.ts"],
+  "include": ["src", "shared", "plugins", "electron", "tests", "rsbuild.config.ts"],
   "exclude": ["node_modules", "dist", "public", ".electron"]
 }

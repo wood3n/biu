@@ -68,7 +68,7 @@ const Menu = ({ afterChangeInfo }: MenuProps) => {
 
           if (res.code === 0) {
             await updateUser();
-            navigate("/");
+            navigate("/empty");
           }
 
           return res.code === 0;

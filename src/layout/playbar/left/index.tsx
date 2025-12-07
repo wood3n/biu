@@ -1,38 +1,27 @@
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router";
 
-import { Chip, Image, Link } from "@heroui/react";
+import { Chip, Image } from "@heroui/react";
 
+import { openBiliVideoLink } from "@/common/utils/url";
 import AudioWaveform from "@/components/audio-waveform";
 import Ellipsis from "@/components/ellipsis";
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 
 import VideoPageList from "./video-page-list";
 
 const LeftControl = () => {
+  const navigate = useNavigate();
   const [showWaveform, setShowWaveform] = useState(false);
   const [waveformWidth, setWaveformWidth] = useState(0);
   const waveformContainerRef = useRef<HTMLDivElement>(null);
-  const currentCid = usePlayQueue(s => s.currentCid);
-  const getAudio = usePlayQueue(s => s.getAudio);
+  const list = usePlayList(s => s.list);
+  const playId = usePlayList(s => s.playId);
+  const getAudio = usePlayList(s => s.getAudio);
   const primaryColor = useSettings(s => s.primaryColor);
-  const mvData = usePlayQueue(s => {
-    return s.list.find(item => item.bvid === s.currentBvid);
-  });
 
-  const info = useMemo(() => {
-    const pageData = mvData?.pages?.find(item => item.cid === currentCid);
-    const hasPages = (mvData?.pages?.length ?? 0) > 1;
-
-    return {
-      hasPages,
-      title: hasPages ? pageData?.title : mvData?.title,
-      coverImageUrl: hasPages ? pageData?.cover : mvData?.cover,
-      isLossless: pageData?.isLossless,
-      ownerName: mvData?.ownerName,
-      ownerId: mvData?.ownerMid,
-    };
-  }, [currentCid, mvData]);
+  const playItem = useMemo(() => list.find(item => item.id === playId), [list, playId]);
 
   useEffect(() => {
     if (!showWaveform || !waveformContainerRef.current) return;
@@ -68,8 +57,9 @@ const LeftControl = () => {
         <>
           <div className="flex-none cursor-pointer" onClick={handleCoverClick}>
             <Image
+              removeWrapper
               radius="md"
-              src={info.coverImageUrl}
+              src={playItem?.pageCover || playItem?.cover}
               width={56}
               height={56}
               classNames={{
@@ -80,18 +70,26 @@ const LeftControl = () => {
           </div>
           <div className="flex min-w-0 flex-col space-y-1">
             <span className="flex items-center space-x-2">
-              <Ellipsis>{info.title}</Ellipsis>
-              {Boolean(info.isLossless) && <Chip size="sm">无损</Chip>}
+              <Ellipsis className="cursor-pointer hover:underline" onClick={() => openBiliVideoLink(playItem!)}>
+                {playItem?.pageTitle || playItem?.title}
+              </Ellipsis>
+              {Boolean(playItem?.isLossless) && <Chip size="sm">无损</Chip>}
             </span>
-            {Boolean(info.ownerName) && (
-              <Link href={`/user/${info.ownerId}`} className="text-foreground-500 text-sm hover:underline">
-                {info.ownerName}
-              </Link>
+            {Boolean(playItem?.ownerName) && (
+              <span
+                className="text-foreground-500 cursor-pointer text-sm hover:underline"
+                onClick={e => {
+                  e.stopPropagation();
+                  navigate(`/user/${playItem?.ownerMid}`);
+                }}
+              >
+                {playItem?.ownerName}
+              </span>
             )}
           </div>
         </>
       )}
-      {Boolean(info.hasPages) && <VideoPageList />}
+      {Boolean(playItem?.hasMultiPart) && <VideoPageList />}
     </div>
   );
 };

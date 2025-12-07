@@ -1,19 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import { Form, Input, Slider, Switch, Button, RadioGroup, Radio, Divider, Select, SelectItem } from "@heroui/react";
+import {
+  Form,
+  Input,
+  Slider,
+  Switch,
+  Button,
+  RadioGroup,
+  Radio,
+  Divider,
+  Select,
+  SelectItem,
+  Checkbox,
+  CheckboxGroup,
+} from "@heroui/react";
 import { RiArrowRightLongLine } from "@remixicon/react";
 import { useShallow } from "zustand/react/shallow";
 
+import { DefaultMenuList } from "@/common/constants/menus";
 import ColorPicker from "@/components/color-picker";
 import FontSelect from "@/components/font-select";
 import ScrollContainer from "@/components/scroll-container";
 import UpdateCheckButton from "@/components/update-check-button";
 import { useAppUpdateStore } from "@/store/app-update";
 import { useSettings } from "@/store/settings";
+import { useUser } from "@/store/user";
 import { defaultAppSettings } from "@shared/settings/app-settings";
 
+import ImportExport from "./export-import";
+
 const SettingsPage = () => {
+  const user = useUser(state => state.user);
   const [appVersion, setAppVersion] = useState<string>("");
   const {
     fontFamily,
@@ -25,6 +43,7 @@ const SettingsPage = () => {
     closeWindowOption,
     autoStart,
     audioQuality,
+    hiddenMenuKeys,
   } = useSettings(
     useShallow(s => ({
       fontFamily: s.fontFamily,
@@ -36,6 +55,7 @@ const SettingsPage = () => {
       closeWindowOption: s.closeWindowOption,
       autoStart: s.autoStart,
       audioQuality: s.audioQuality,
+      hiddenMenuKeys: s.hiddenMenuKeys,
     })),
   );
   const updateSettings = useSettings(s => s.update);
@@ -57,12 +77,14 @@ const SettingsPage = () => {
       closeWindowOption,
       autoStart,
       audioQuality,
+      hiddenMenuKeys,
     },
   });
 
   // 表单项变化时自动保存到 store（即改即存）
   useEffect(() => {
     const subscription = watch(values => {
+      // @ts-ignore hiddenMenuKeys类型错误，但是实际运行时没有问题
       updateSettings(values);
     });
     return () => subscription.unsubscribe();
@@ -71,6 +93,9 @@ const SettingsPage = () => {
   useEffect(() => {
     window.electron.getAppVersion().then(v => setAppVersion(v));
   }, []);
+
+  const ownFolder = useUser(state => state.ownFolder);
+  const collectedFolder = useUser(state => state.collectedFolder);
 
   return (
     <ScrollContainer className="h-full w-full">
@@ -183,6 +208,132 @@ const SettingsPage = () => {
             </div>
           </div>
           <Divider />
+          {user?.isLogin && (
+            <>
+              <h2>侧边菜单设置</h2>
+              <div className="w-full space-y-8">
+                <div className="flex w-full items-start justify-between">
+                  <div className="mr-6 space-y-1">
+                    <div className="text-medium font-medium">系统默认菜单</div>
+                  </div>
+                  <div className="max-w-[480px]">
+                    <Controller
+                      control={control}
+                      name="hiddenMenuKeys"
+                      render={({ field }) => {
+                        const groupKeys = DefaultMenuList.map(i => i.href);
+                        const selectedKeys = groupKeys.filter(k => !field.value.includes(k));
+                        return (
+                          <CheckboxGroup
+                            aria-label="系统默认菜单显示项"
+                            value={selectedKeys}
+                            onValueChange={keys => {
+                              const outsideHidden = field.value.filter(k => !groupKeys.includes(k));
+                              const hiddenInGroup = groupKeys.filter(k => !(keys as string[]).includes(k));
+                              const nextHidden = Array.from(new Set([...outsideHidden, ...hiddenInGroup]));
+                              field.onChange(nextHidden);
+                            }}
+                            color="primary"
+                            orientation="horizontal"
+                            classNames={{
+                              wrapper: "justify-end",
+                            }}
+                          >
+                            {DefaultMenuList.map(item => (
+                              <Checkbox key={item.href} value={item.href}>
+                                {item.title}
+                              </Checkbox>
+                            ))}
+                          </CheckboxGroup>
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex w-full items-start justify-between">
+                  <div className="mr-6 space-y-1">
+                    <div className="text-medium font-medium">个人创建菜单</div>
+                  </div>
+                  <div className="max-w-[480px]">
+                    <Controller
+                      control={control}
+                      name="hiddenMenuKeys"
+                      render={({ field }) => {
+                        const groupKeys = (ownFolder ?? []).map(i => String(i.id));
+                        const selectedKeys = groupKeys.filter(k => !field.value.includes(k));
+                        return (
+                          <CheckboxGroup
+                            aria-label="个人创建菜单显示项"
+                            value={selectedKeys}
+                            onValueChange={keys => {
+                              const outsideHidden = field.value.filter(k => !groupKeys.includes(k));
+                              const hiddenInGroup = groupKeys.filter(k => !(keys as string[]).includes(k));
+                              const nextHidden = Array.from(new Set([...outsideHidden, ...hiddenInGroup]));
+                              field.onChange(nextHidden);
+                            }}
+                            isDisabled={!groupKeys.length}
+                            color="primary"
+                            orientation="horizontal"
+                            classNames={{
+                              wrapper: "justify-end",
+                            }}
+                          >
+                            {groupKeys.map(key => (
+                              <Checkbox key={key} value={key}>
+                                {ownFolder?.find(i => String(i.id) === key)?.title}
+                              </Checkbox>
+                            ))}
+                          </CheckboxGroup>
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex w-full items-start justify-between">
+                  <div className="mr-6 space-y-1">
+                    <div className="text-medium font-medium">个人收藏菜单</div>
+                  </div>
+                  <div className="w-[360px]">
+                    <Controller
+                      control={control}
+                      name="hiddenMenuKeys"
+                      render={({ field }) => {
+                        const groupKeys = (collectedFolder ?? []).map(i => String(i.id));
+                        const selectedKeys = groupKeys.filter(k => !field.value.includes(k));
+                        return (
+                          <CheckboxGroup
+                            aria-label="个人收藏菜单显示项"
+                            value={selectedKeys}
+                            onValueChange={keys => {
+                              const outsideHidden = field.value.filter(k => !groupKeys.includes(k));
+                              const hiddenInGroup = groupKeys.filter(k => !(keys as string[]).includes(k));
+                              const nextHidden = Array.from(new Set([...outsideHidden, ...hiddenInGroup]));
+                              field.onChange(nextHidden);
+                            }}
+                            isDisabled={!groupKeys.length}
+                            color="primary"
+                            orientation="horizontal"
+                            classNames={{
+                              wrapper: "justify-end",
+                            }}
+                          >
+                            {groupKeys.map(key => (
+                              <Checkbox key={key} value={key}>
+                                {collectedFolder?.find(i => String(i.id) === key)?.title}
+                              </Checkbox>
+                            ))}
+                          </CheckboxGroup>
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <Divider />
+            </>
+          )}
           <h2>播放</h2>
           {/* 音质选择 */}
           <div className="flex w-full items-center justify-between">
@@ -295,6 +446,7 @@ const SettingsPage = () => {
             </div>
             <UpdateCheckButton />
           </div>
+          <ImportExport />
         </Form>
       </div>
     </ScrollContainer>

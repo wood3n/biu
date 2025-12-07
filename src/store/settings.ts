@@ -4,14 +4,21 @@ import { persist } from "zustand/middleware";
 import { defaultAppSettings } from "@shared/settings/app-settings";
 
 interface SettingsActions {
+  getSettings: () => AppSettings;
   update: (patch: Partial<AppSettings>) => void;
   reset: () => void;
 }
 
 export const useSettings = create<AppSettings & SettingsActions>()(
   persist(
-    set => ({
+    (set, get) => ({
       ...defaultAppSettings,
+      getSettings: () => {
+        return Object.keys(defaultAppSettings).reduce((acc, key) => {
+          acc[key] = get()[key];
+          return acc;
+        }, {} as AppSettings);
+      },
       update: (patch: Partial<AppSettings>) => {
         set(patch);
       },
@@ -48,8 +55,8 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           contentBackgroundColor: state.contentBackgroundColor,
           primaryColor: state.primaryColor,
           borderRadius: state.borderRadius,
-          appUpdate: state.appUpdate,
           audioQuality: state.audioQuality,
+          hiddenMenuKeys: state.hiddenMenuKeys,
         };
       },
     },

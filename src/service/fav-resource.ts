@@ -84,14 +84,16 @@ export interface FavCntInfo {
  */
 export interface FavMedia {
   id: number; // 内容id 视频稿件:视频稿件avid 音频:音频auid 视频合集:视频合集id
-  type: number; // 内容类型 2:视频稿件 12:音频 21:视频合集
+  /** 内容类型 2:视频稿件 12:音频 21:视频合集 */
+  type: number;
   title: string; // 标题
   cover: string; // 封面url
   intro: string; // 简介
   page: number; // 视频分P数
   duration: number; // 音频/视频时长
   upper: FavMediaUpper; // UP主信息
-  attr: number; // 失效 0:正常 9:up自己删除 1:其他原因删除
+  /** 失效 0:正常 9:up自己删除 1:其他原因删除 */
+  attr: number;
   cnt_info: FavMediaCntInfo; // 状态数
   link: string; // 跳转uri
   ctime: number; // 投稿时间 时间戳
