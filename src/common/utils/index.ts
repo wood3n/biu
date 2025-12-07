@@ -11,9 +11,13 @@ export function stripHtml(htmlString: string) {
       const doc = new DOMParser().parseFromString(htmlString, "text/html");
       return doc.body.textContent || "";
     } catch {
-      // 3. 兜底方案（万一在非浏览器环境或报错，回退到正则）
-      console.warn("DOMParser failed, using regex fallback");
-      return htmlString.replace(/<[^>]+>/g, "");
+      let sanitized = htmlString;
+      let prev;
+      do {
+        prev = sanitized;
+        sanitized = sanitized.replace(/<[^>]+>/g, "");
+      } while (sanitized !== prev);
+      return sanitized;
     }
   }
 
