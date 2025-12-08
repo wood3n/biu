@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Progress } from "@heroui/react";
+import { addToast, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Progress } from "@heroui/react";
 import { RiInformationLine } from "@remixicon/react";
 import { filesize } from "filesize";
 
@@ -30,10 +30,19 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
   };
 
   const handleOpenInstaller = async () => {
-    const ok = await window.electron.openInstallerDirectory();
-    if (!ok) {
-      setStatus("error");
-      setError("无法打开安装包文件夹");
+    try {
+      const ok = await window.electron.openInstallerDirectory();
+      if (!ok) {
+        addToast({
+          title: "无法打开安装包文件夹",
+          color: "danger",
+        });
+      }
+    } catch (e) {
+      addToast({
+        title: e instanceof Error ? e.message : String(e),
+        color: "danger",
+      });
     }
   };
 
@@ -82,11 +91,11 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
             <Progress radius="none" className="w-full" color="primary" value={downloadProgress?.percent} />
           )}
           <ModalFooter className="items-center justify-between">
-            <div>
+            <div className="min-w-0 flex-auto">
               {status === "downloading" && (
                 <div className="items-center">{filesize(downloadProgress?.bytesPerSecond || 0)}/s</div>
               )}
-              {status === "error" && <span className="text-danger truncate">下载出错：{error}</span>}
+              {status === "error" && <span className="text-danger block truncate">{error}</span>}
             </div>
             {status === "downloaded" ? (
               <div className="inline-flex items-center space-x-2">

@@ -1,7 +1,7 @@
 import { BrowserWindow } from "electron";
 import isDev from "electron-is-dev";
 import log from "electron-log";
-import electronUpdater from "electron-updater";
+import electronUpdater, { type UpdateDownloadedEvent } from "electron-updater";
 import path from "path";
 
 import { channel } from "../ipc/channel";
@@ -51,7 +51,7 @@ function setupAutoUpdater() {
     );
   });
 
-  autoUpdater.on("update-downloaded", (info: any) => {
+  autoUpdater.on("update-downloaded", (info: UpdateDownloadedEvent) => {
     downloadedFilePath = info.downloadedFile;
     BrowserWindow.getAllWindows().forEach(w =>
       w.webContents.send(channel.app.updateMessage, {
