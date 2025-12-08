@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 
 import { Chip, Image } from "@heroui/react";
 
+import { ReactComponent as AudioAnimationIcon } from "@/assets/icons/audio-animation.svg";
 import { openBiliVideoLink } from "@/common/utils/url";
 import AudioWaveform from "@/components/audio-waveform";
 import Ellipsis from "@/components/ellipsis";
@@ -55,7 +56,7 @@ const LeftControl = () => {
         </div>
       ) : (
         <>
-          <div className="flex-none cursor-pointer" onClick={handleCoverClick}>
+          <div className="group relative flex-none cursor-pointer" onClick={handleCoverClick}>
             <Image
               removeWrapper
               radius="md"
@@ -67,8 +68,11 @@ const LeftControl = () => {
               }}
               className="object-cover"
             />
+            <div className="text-primary rounded-medium absolute top-0 left-0 z-10 flex h-full w-full items-center justify-center bg-[rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100">
+              <AudioAnimationIcon style={{ width: 20, height: 20 }} />
+            </div>
           </div>
-          <div className="flex min-w-0 flex-col space-y-1">
+          <div className="flex min-w-0 flex-col items-start space-y-1">
             <span className="flex items-center space-x-2">
               <Ellipsis className="cursor-pointer hover:underline" onClick={() => openBiliVideoLink(playItem!)}>
                 {playItem?.pageTitle || playItem?.title}

@@ -9,7 +9,7 @@ import {
   RiSkipForwardFill,
 } from "@remixicon/react";
 import clx from "classnames";
-import { useShallow } from "zustand/shallow";
+import { useShallow } from "zustand/react/shallow";
 
 import { createBroadcastChannel } from "@/common/broadcast/mini-player-sync";
 import { getPlayModeList } from "@/common/constants/audio";

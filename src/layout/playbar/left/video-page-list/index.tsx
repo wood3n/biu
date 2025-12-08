@@ -39,7 +39,7 @@ const VideoPageListDrawer = () => {
   }, [isOpen]);
 
   return (
-    <Popover disableAnimation placement="top" offset={32} radius="md" isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Popover disableAnimation placement="top" offset={28} radius="md" isOpen={isOpen} onOpenChange={onOpenChange}>
       <PopoverTrigger>
         <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={onOpen}>
           <RiListRadio size={18} />

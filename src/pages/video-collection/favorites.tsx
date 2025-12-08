@@ -14,6 +14,48 @@ import { useUser } from "@/store/user";
 
 import Info from "./info";
 
+const getAllMedia = async ({ id: favFolderId, totalCount }: { id: string; totalCount: number }) => {
+  const FAVORITES_PAGE_SIZE = 20;
+  const allResSettled = await Promise.allSettled(
+    Array.from({ length: Math.ceil(totalCount / FAVORITES_PAGE_SIZE) }, (_, i) =>
+      getFavResourceList({
+        media_id: String(favFolderId),
+        ps: FAVORITES_PAGE_SIZE,
+        pn: i + 1,
+        platform: "web",
+      }),
+    ),
+  );
+
+  return allResSettled
+    .filter(res => res.status === "fulfilled")
+    .map(res => res.value)
+    .filter(res => res.code === 0 && res?.data?.medias?.length)
+    .flatMap(res =>
+      res.data.medias
+        .filter(item => item.attr === 0)
+        .map(item =>
+          item.type === 2
+            ? {
+                type: "mv" as const,
+                bvid: item.bvid,
+                title: item.title,
+                cover: item.cover,
+                ownerMid: item.upper?.mid,
+                ownerName: item.upper?.name,
+              }
+            : {
+                type: "audio" as const,
+                sid: item.id,
+                title: item.title,
+                cover: item.cover,
+                ownerMid: item.upper?.mid,
+                ownerName: item.upper?.name,
+              },
+        ),
+    );
+};
+
 /** 收藏夹详情 */
 const Favorites: React.FC = () => {
   const { id: favFolderId } = useParams();
@@ -24,6 +66,7 @@ const Favorites: React.FC = () => {
   const isCollected = collectedFolder?.some(item => item.id === Number(favFolderId));
   const play = usePlayList(state => state.play);
   const playList = usePlayList(state => state.playList);
+  const addToPlayList = usePlayList(state => state.addList);
 
   const {
     data,
@@ -66,53 +109,45 @@ const Favorites: React.FC = () => {
     }
 
     try {
-      const FAVORITES_PAGE_SIZE = 20;
-      const allResSettled = await Promise.allSettled(
-        Array.from({ length: Math.ceil(totalCount / FAVORITES_PAGE_SIZE) }, (_, i) =>
-          getFavResourceList({
-            media_id: String(favFolderId),
-            ps: FAVORITES_PAGE_SIZE,
-            pn: i + 1,
-            platform: "web",
-          }),
-        ),
-      );
-
-      const allMedias = allResSettled
-        .filter(res => res.status === "fulfilled")
-        .map(res => res.value)
-        .filter(res => res.code === 0 && res?.data?.medias?.length)
-        .flatMap(res =>
-          res.data.medias
-            .filter(item => item.attr === 0)
-            .map(item =>
-              item.type === 2
-                ? {
-                    type: "mv" as const,
-                    bvid: item.bvid,
-                    title: item.title,
-                    cover: item.cover,
-                    ownerMid: item.upper?.mid,
-                    ownerName: item.upper?.name,
-                  }
-                : {
-                    type: "audio" as const,
-                    sid: item.id,
-                    title: item.title,
-                    cover: item.cover,
-                    ownerMid: item.upper?.mid,
-                    ownerName: item.upper?.name,
-                  },
-            ),
-        );
+      const allMedias = await getAllMedia({
+        id: favFolderId,
+        totalCount,
+      });
 
       if (allMedias.length) {
         playList(allMedias);
       } else {
         addToast({ title: "无法获取收藏夹全部歌曲", color: "danger" });
       }
-    } catch (error) {
-      console.error("[Favorites] 获取收藏夹全部歌曲失败:", error);
+    } catch {
+      addToast({ title: "获取收藏夹全部歌曲失败", color: "danger" });
+    }
+  };
+
+  const addAllMedia = async () => {
+    if (!favFolderId) {
+      addToast({ title: "收藏夹 ID 无效", color: "danger" });
+      return;
+    }
+
+    const totalCount = data?.info?.media_count ?? 0;
+    if (!totalCount) {
+      addToast({ title: "收藏夹为空", color: "warning" });
+      return;
+    }
+
+    try {
+      const allMedias = await getAllMedia({
+        id: favFolderId,
+        totalCount,
+      });
+
+      if (allMedias.length) {
+        addToPlayList(allMedias);
+      } else {
+        addToast({ title: "无法获取收藏夹全部歌曲", color: "danger" });
+      }
+    } catch {
       addToast({ title: "获取收藏夹全部歌曲失败", color: "danger" });
     }
   };
@@ -131,6 +166,7 @@ const Favorites: React.FC = () => {
         mediaCount={data?.info?.media_count}
         afterChangeInfo={refreshAsync}
         onPlayAll={onPlayAll}
+        onAddToPlayList={addAllMedia}
       />
       <GridList
         data={data?.list ?? []}

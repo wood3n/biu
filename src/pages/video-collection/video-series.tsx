@@ -13,6 +13,7 @@ import { useUser } from "@/store/user";
 
 import Info from "./info";
 
+/** 视频合集 */
 const VideoSeries = () => {
   const { id } = useParams();
   const collectedFolder = useUser(state => state.collectedFolder);
@@ -20,6 +21,7 @@ const VideoSeries = () => {
   const isCollected = collectedFolder?.some(item => item.id === Number(id));
   const play = usePlayList(state => state.play);
   const playList = usePlayList(state => state.playList);
+  const addList = usePlayList(state => state.addList);
 
   const { data, loading, refreshAsync } = useRequest(
     async () => {
@@ -49,6 +51,21 @@ const VideoSeries = () => {
     }
   };
 
+  const addToPlayList = () => {
+    if (Array.isArray(data?.medias)) {
+      addList(
+        data.medias.map(item => ({
+          type: "mv",
+          bvid: item.bvid,
+          title: item.title,
+          cover: item.cover,
+          ownerMid: item.upper?.mid,
+          ownerName: item.upper?.name,
+        })),
+      );
+    }
+  };
+
   return (
     <>
       <Info
@@ -62,6 +79,7 @@ const VideoSeries = () => {
         mediaCount={data?.info?.media_count}
         afterChangeInfo={refreshAsync}
         onPlayAll={onPlayAll}
+        onAddToPlayList={addToPlayList}
       />
       <GridList
         enablePagination
