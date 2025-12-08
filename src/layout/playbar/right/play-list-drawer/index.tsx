@@ -1,18 +1,16 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo } from "react";
 
 import { Button, Drawer, DrawerBody, DrawerContent, DrawerHeader, Tooltip } from "@heroui/react";
 import { RiDeleteBinLine } from "@remixicon/react";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { uniqBy } from "es-toolkit/array";
 
 import Empty from "@/components/empty";
 import If from "@/components/if";
-import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
+import { VirtualList } from "@/components/virtual-list";
 import { usePlayList } from "@/store/play-list";
 
 import ListItem from "./list-item";
 import Settings from "./settings";
-import VirtualListItem from "./virtual-list-item";
 
 interface Props {
   isOpen: boolean;
@@ -33,24 +31,6 @@ const PlayListDrawer = ({ isOpen, onOpenChange }: Props) => {
   const filteredList = useMemo(() => {
     return pureList.filter(item => item.bvid !== playItem?.bvid);
   }, [pureList, playItem]);
-
-  const [container, setContainer] = useState<HTMLElement | null>(null);
-  const scrollerRef = useRef<ScrollRefObject>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setContainer(scrollerRef.current?.osInstance()?.elements().viewport as HTMLElement);
-    }
-  }, [isOpen]);
-
-  const virtualizer = useVirtualizer({
-    count: filteredList.length,
-    getScrollElement: () => container,
-    estimateSize: () => 64,
-    overscan: 8,
-  });
-  const virtualItems = virtualizer.getVirtualItems();
-  const totalSize = virtualizer.getTotalSize();
 
   return (
     <Drawer
@@ -86,26 +66,20 @@ const PlayListDrawer = ({ isOpen, onOpenChange }: Props) => {
           </div>
         )}
         <DrawerBody className="overflow-hidden px-0">
-          <ScrollContainer ref={scrollerRef} className="px-2">
-            <If condition={!pureList?.length}>
+          <VirtualList
+            className="px-2"
+            data={filteredList}
+            itemHeight={64}
+            overscan={8}
+            empty={
               <div className="flex flex-col items-center justify-center px-4">
                 <Empty className="min-h-[180px]" />
               </div>
-            </If>
-            <If condition={Boolean(filteredList?.length)}>
-              <div style={{ height: totalSize, position: "relative" }}>
-                {virtualItems.map(vi => {
-                  const item = filteredList[vi.index];
-
-                  return (
-                    <VirtualListItem key={item.id} virtualOffset={vi.start}>
-                      <ListItem data={item} onClose={() => onOpenChange(false)} onPress={() => playListItem(item.id)} />
-                    </VirtualListItem>
-                  );
-                })}
-              </div>
-            </If>
-          </ScrollContainer>
+            }
+            renderItem={item => (
+              <ListItem data={item} onClose={() => onOpenChange(false)} onPress={() => playListItem(item.id)} />
+            )}
+          />
         </DrawerBody>
       </DrawerContent>
     </Drawer>
