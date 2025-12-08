@@ -36,7 +36,7 @@ const MVCard = ({
       bodyClassName="group relative"
       imageMask={
         <>
-          {playCount > 0 && (
+          {playCount != null && playCount > 0 && (
             <>
               <div className="absolute right-0 bottom-0 left-0 z-20 h-10 bg-linear-to-t from-black/70 to-transparent"></div>
               <div className="absolute bottom-0 left-0 z-30 flex items-center gap-0.5 p-2 text-sm text-white">
