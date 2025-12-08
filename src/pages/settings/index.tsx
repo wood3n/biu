@@ -42,7 +42,6 @@ const SettingsPage = () => {
     autoStart,
     audioQuality,
     hiddenMenuKeys,
-    wheelAdjustVolume,
   } = useSettings(
     useShallow(s => ({
       fontFamily: s.fontFamily,
@@ -55,7 +54,6 @@ const SettingsPage = () => {
       autoStart: s.autoStart,
       audioQuality: s.audioQuality,
       hiddenMenuKeys: s.hiddenMenuKeys,
-      wheelAdjustVolume: s.wheelAdjustVolume,
     })),
   );
   const updateSettings = useSettings(s => s.update);
@@ -78,7 +76,6 @@ const SettingsPage = () => {
       autoStart,
       audioQuality,
       hiddenMenuKeys,
-      wheelAdjustVolume,
     },
   });
 
@@ -313,20 +310,6 @@ const SettingsPage = () => {
                   </div>
                 </div>
 
-                {/* 鼠标滚轮调整音量 */}
-                <div className="flex w-full items-center justify-between">
-                  <div className="mr-6 space-y-1">
-                    <div className="text-medium font-medium">鼠标滚轮调整音量</div>
-                    <div className="text-sm text-zinc-500">使用鼠标滚轮调整音量大小</div>
-                  </div>
-                  <div className="flex w-[360px] justify-end">
-                    <Controller
-                      control={control}
-                      name="wheelAdjustVolume"
-                      render={({ field }) => <Switch isSelected={field.value} onValueChange={field.onChange} />}
-                    />
-                  </div>
-                </div>
                 <Divider />
                 <h2>关于应用</h2>
                 <div className="flex w-full items-center justify-between">

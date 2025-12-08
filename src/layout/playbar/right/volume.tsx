@@ -4,7 +4,6 @@ import { Button, Tooltip, Slider } from "@heroui/react";
 import { RiVolumeDownLine, RiVolumeMuteLine, RiVolumeUpLine } from "@remixicon/react";
 
 import { usePlayList } from "@/store/play-list";
-import { useSettings } from "@/store/settings";
 
 import { PlayBarIconSize } from "../constants";
 
@@ -13,7 +12,6 @@ const Volume = () => {
   const isMuted = usePlayList(s => s.isMuted);
   const toggleMute = usePlayList(s => s.toggleMute);
   const setVolume = usePlayList(s => s.setVolume);
-  const wheelAdjustVolume = useSettings(s => s.wheelAdjustVolume);
 
   const previousVolume = useRef(volume);
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
@@ -45,11 +43,6 @@ const Volume = () => {
   };
 
   const onWheel = (event: React.WheelEvent<HTMLButtonElement>) => {
-    // 只有当设置开启时才执行滚轮调整音量
-    if (!wheelAdjustVolume) {
-      return;
-    }
-
     event.preventDefault(); // 阻止默认滚动行为
 
     // 如果当前是静音状态，先取消静音
