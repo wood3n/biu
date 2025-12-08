@@ -8,6 +8,7 @@ import { channel } from "../ipc/channel";
 
 const { autoUpdater } = electronUpdater;
 
+let downloadedFilePath: string | null = null;
 let checkForUpdatesInterval: NodeJS.Timeout | null = null;
 function setupAutoUpdater() {
   autoUpdater.logger = log;
@@ -50,7 +51,8 @@ function setupAutoUpdater() {
     );
   });
 
-  autoUpdater.on("update-downloaded", () => {
+  autoUpdater.on("update-downloaded", (info: any) => {
+    downloadedFilePath = info.downloadedFile;
     BrowserWindow.getAllWindows().forEach(w =>
       w.webContents.send(channel.app.updateMessage, {
         status: "downloaded",
@@ -74,4 +76,6 @@ const stopCheckForUpdates = () => {
   }
 };
 
-export { autoUpdater, setupAutoUpdater, stopCheckForUpdates };
+const getDownloadedFilePath = () => downloadedFilePath;
+
+export { autoUpdater, setupAutoUpdater, stopCheckForUpdates, getDownloadedFilePath };

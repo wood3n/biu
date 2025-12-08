@@ -1,7 +1,5 @@
 import { logger } from "@rsbuild/core";
 import { build as electronBuild } from "electron-builder";
-import fs from "node:fs";
-import path from "node:path";
 
 import pkg from "../package.json";
 import { ELECTRON_OUT_DIRNAME, ELECTRON_ICON_BASE_PATH } from "../shared/path";
@@ -82,20 +80,6 @@ export async function buildElectron() {
         owner: "wood3n",
         repo: "biu",
         releaseType: null,
-      },
-      artifactBuildCompleted: artifact => {
-        try {
-          const name = path.basename(artifact.file);
-          const isUniversalPortable = /-win-portable\.exe$/.test(name) && !/-win-portable-(x64|arm64)\.exe$/.test(name);
-          if (isUniversalPortable) {
-            fs.rmSync(artifact.file);
-            logger.info(`[electron] removed portable universal artifact: ${name}`);
-          }
-        } catch (err) {
-          logger.warn(
-            `[electron] failed to remove portable universal artifact: ${String((err && (err as any).message) || err)}`,
-          );
-        }
       },
     },
   })

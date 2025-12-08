@@ -20,21 +20,20 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
   const [error, setError] = useState<string>();
 
   const startDownload = async () => {
-    if (!window.electron.isSupportAutoUpdate()) {
-      const ok = await window.electron.openExternal("https://github.com/wood3n/biu/releases/latest");
-      if (!ok) {
-        setStatus("error");
-        setError("无法打开下载页面");
-      }
-      return;
-    }
-
     setStatus("downloading");
     try {
       await window.electron.downloadAppUpdate();
     } catch (e) {
       setStatus("error");
       setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  const handleOpenInstaller = async () => {
+    const ok = await window.electron.openInstallerDirectory();
+    if (!ok) {
+      setStatus("error");
+      setError("无法打开安装包文件夹");
     }
   };
 
@@ -95,9 +94,15 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
                   <RiInformationLine size={16} />
                   <span className="text-sm text-zinc-500 dark:text-zinc-400">安装包已下载完成</span>
                 </span>
-                <Button color="primary" onPress={window.electron.quitAndInstall}>
-                  退出并安装更新
-                </Button>
+                {window.electron.isSupportAutoUpdate() ? (
+                  <Button color="primary" onPress={window.electron.quitAndInstall}>
+                    退出并安装更新
+                  </Button>
+                ) : (
+                  <Button color="primary" onPress={handleOpenInstaller}>
+                    打开安装包文件夹
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="inline-flex items-center space-x-2">

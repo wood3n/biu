@@ -40,6 +40,7 @@ export const channel = {
     downloadUpdate: "app:download-update",
     updateMessage: "app:update-message",
     quitAndInstall: "app:quit-and-install",
+    openInstallerDirectory: "app:open-installer-directory",
   },
   cookie: {
     get: "cookie:get",
