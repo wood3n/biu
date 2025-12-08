@@ -16,6 +16,7 @@ interface AppSettings {
   autoStart: boolean;
   audioQuality: AudioQuality;
   hiddenMenuKeys: string[];
+  wheelAdjustVolume: boolean;
 }
 
 interface IFontInfo {
