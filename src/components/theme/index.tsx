@@ -47,14 +47,15 @@ const Theme = ({ children }: Props) => {
     bodyStyle.setProperty("--heroui-radius-medium", radius);
     bodyStyle.setProperty("--radius-medium", radius);
     bodyStyle.setProperty("--radius", radius);
-    bodyStyle.fontFamily = fontFamily || bodyStyle.fontFamily;
+    const validFontFamily = fontFamily === "system-default" ? "system-ui" : fontFamily;
+    bodyStyle.fontFamily = validFontFamily || bodyStyle.fontFamily;
   }, [fontFamily, backgroundColor, contentBackgroundColor, primaryColor, borderRadius]);
 
   return (
     <main
       className="bg-background text-foreground dark h-screen w-screen overflow-hidden"
       style={{
-        fontFamily,
+        fontFamily: fontFamily === "system-default" ? "system-ui" : fontFamily,
         ["--heroui-background" as any]: hexToHsl(contentBackgroundColor),
         ["--heroui-content1" as any]: hexToHsl(backgroundColor),
         ["--heroui-primary" as any]: hexToHsl(primaryColor),
