@@ -73,9 +73,10 @@ const MenuSettings: React.FC<MenuSettingsProps> = ({ control }) => {
                       field.onChange(nextHidden);
                     };
 
+                    const ownFolderMap = new Map((ownFolder ?? []).map(i => [String(i.id), i.title]));
                     const items = groupKeys.map(key => ({
                       value: key,
-                      label: ownFolder?.find(i => String(i.id) === key)?.title || key,
+                      label: ownFolderMap.get(key) || key,
                     }));
 
                     return (
