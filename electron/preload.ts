@@ -127,7 +127,7 @@ const api: ElectronAPI = {
   },
   isSupportAutoUpdate: () => {
     const platform = process.platform;
-    if (platform === "darwin") return true;
+    if (platform === "darwin") return false;
     if (platform === "win32") {
       const isPortable = Boolean(process.env.PORTABLE_EXECUTABLE_DIR || process.env.PORTABLE_EXECUTABLE_FILE);
       return !isPortable;
@@ -142,6 +142,7 @@ const api: ElectronAPI = {
     return () => ipcRenderer.removeListener(channel.app.updateMessage, handler);
   },
   quitAndInstall: () => ipcRenderer.invoke(channel.app.quitAndInstall),
+  openInstallerDirectory: () => ipcRenderer.invoke(channel.app.openInstallerDirectory),
   // 切换到 mini 播放器窗口
   switchToMiniPlayer: () => ipcRenderer.invoke(channel.window.switchToMini),
   // 切换到主窗口

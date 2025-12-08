@@ -28,12 +28,14 @@ export default function FontSelect({
     getFonts();
   }, []);
 
+  const selectedValue = value === "system-default" ? "system-ui" : value;
+
   return (
     <Select
       color={color}
       aria-label="选择字体"
       placeholder="选择字体"
-      selectedKeys={new Set([value])}
+      selectedKeys={new Set([selectedValue])}
       onChange={e => onChange?.(e.target.value)}
       items={fonts}
       className={className}
