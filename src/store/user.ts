@@ -9,21 +9,27 @@ interface UserState {
   user: UserInfo | null;
   ownFolder: FavFolderItem[];
   collectedFolder: FavFolderCollectedItem[];
+  collectedFolderPn: number;
+  collectedFolderHasMore: boolean;
+  collectedFolderTotal: number;
 }
 
 interface Action {
   updateUser: () => Promise<void>;
   updateOwnFolder: () => Promise<void>;
-  updateCollectedFolder: () => Promise<void>;
+  updateCollectedFolder: (append?: boolean) => Promise<void>;
+  loadMoreCollectedFolder: () => Promise<void>;
   clear: () => void;
 }
-
 export const useUser = create<UserState & Action>()(
   persist(
     (set, get) => ({
       user: null,
       ownFolder: [],
       collectedFolder: [],
+      collectedFolderPn: 1,
+      collectedFolderHasMore: false,
+      collectedFolderTotal: 0,
       updateUser: async () => {
         const res = await getUserInfo();
 
@@ -36,7 +42,7 @@ export const useUser = create<UserState & Action>()(
             }),
             getFavFolderCollectedList({
               up_mid: res.data?.mid ?? 0,
-              ps: 999,
+              ps: 50,
               pn: 1,
               platform: "web",
             }),
@@ -49,6 +55,11 @@ export const useUser = create<UserState & Action>()(
             ownFolder: getOwnFolderRes?.status === "fulfilled" ? (getOwnFolderRes.value?.data?.list ?? []) : [],
             collectedFolder:
               getOtherFolderRes?.status === "fulfilled" ? (getOtherFolderRes.value?.data?.list ?? []) : [],
+            collectedFolderPn: 1,
+            collectedFolderHasMore:
+              getOtherFolderRes?.status === "fulfilled" ? (getOtherFolderRes.value?.data?.has_more ?? false) : false,
+            collectedFolderTotal:
+              getOtherFolderRes?.status === "fulfilled" ? (getOtherFolderRes.value?.data?.count ?? 0) : 0,
           }));
         } else {
           set(() => ({ user: null }));
@@ -69,26 +80,43 @@ export const useUser = create<UserState & Action>()(
           set(() => ({ ownFolder: res.data?.list ?? [] }));
         }
       },
-      updateCollectedFolder: async () => {
+      updateCollectedFolder: async (append = false) => {
         const user = get().user;
 
         if (!user) {
           return;
         }
 
+        const currentPn = append ? get().collectedFolderPn + 1 : 1;
+
         const res = await getFavFolderCollectedList({
           up_mid: user.mid,
-          ps: 999,
-          pn: 1,
+          ps: 50,
+          pn: currentPn,
           platform: "web",
         });
 
         if (res.code === 0) {
-          set(() => ({ collectedFolder: res.data?.list ?? [] }));
+          set(state => ({
+            collectedFolder: append ? [...state.collectedFolder, ...(res.data?.list ?? [])] : (res.data?.list ?? []),
+            collectedFolderPn: currentPn,
+            collectedFolderHasMore: res.data?.has_more ?? false,
+            collectedFolderTotal: res.data?.count ?? 0,
+          }));
         }
       },
+      loadMoreCollectedFolder: async () => {
+        await get().updateCollectedFolder(true);
+      },
       clear: () => {
-        set(() => ({ user: null, ownFolder: [], collectedFolder: [] }));
+        set(() => ({
+          user: null,
+          ownFolder: [],
+          collectedFolder: [],
+          collectedFolderPn: 1,
+          collectedFolderHasMore: false,
+          collectedFolderTotal: 0,
+        }));
       },
     }),
     {

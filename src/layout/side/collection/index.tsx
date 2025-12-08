@@ -11,6 +11,9 @@ const Collection = () => {
   const ownFolder = useUser(state => state.ownFolder);
   const collectedFolder = useUser(state => state.collectedFolder);
   const hiddenMenuKeys = useSettings(state => state.hiddenMenuKeys);
+  const collectedFolderHasMore = useUser(state => state.collectedFolderHasMore);
+  const collectedFolderTotal = useUser(state => state.collectedFolderTotal);
+  const loadMoreCollectedFolder = useUser(state => state.loadMoreCollectedFolder);
 
   const filteredCollectedFolder = collectedFolder.filter(item => !hiddenMenuKeys.includes(String(item.id)));
 
@@ -39,17 +42,26 @@ const Collection = () => {
         />
       )}
       {Boolean(filteredCollectedFolder?.length) && (
-        <MenuGroup
-          title="我收藏的"
-          itemClassName="pl-3"
-          items={filteredCollectedFolder.map(item => ({
-            title: item.title,
-            href: `/collection/${item.id}?type=${item.type}&mid=${item?.mid}`,
-            cover: item.cover,
-            icon: RiFolderLine,
-            activeIcon: RiFolderOpenLine,
-          }))}
-        />
+        <>
+          <MenuGroup
+            title="我收藏的"
+            items={filteredCollectedFolder.map(item => ({
+              title: item.title,
+              href: `/collection/${item.id}?type=${item.type}&mid=${item?.mid}`,
+              cover: item.cover,
+              icon: RiFolderLine,
+              activeIcon: RiFolderOpenLine,
+            }))}
+          />
+          {collectedFolderHasMore && (
+            <div
+              className="cursor-pointer p-2 text-center text-sm text-zinc-500 transition-colors hover:text-zinc-700"
+              onClick={loadMoreCollectedFolder}
+            >
+              显示剩余{collectedFolderTotal - collectedFolder.length}个
+            </div>
+          )}
+        </>
       )}
       <CreateFolderForm isOpen={isOpen} onOpenChange={onOpenChange} />
     </>
