@@ -14,6 +14,7 @@ interface Props {
   /** 传递给 Tooltip 的配置（不包含 content/children） */
   tooltipProps?: Omit<TooltipProps, "content" | "children">;
   tooltipClassName?: string;
+  onClick?: () => void;
 }
 
 const lineClampMap = {
@@ -33,6 +34,7 @@ const Ellipsis = ({
   showTooltip = true,
   tooltipProps,
   tooltipClassName,
+  onClick,
 }: Props) => {
   const [isOverflowed, setIsOverflow] = useState(false);
   const textElementRef = useRef<HTMLDivElement>(null);
@@ -48,6 +50,7 @@ const Ellipsis = ({
       ref={textElementRef}
       className={clx(className, lineClampMap[lines as keyof typeof lineClampMap] || `line-clamp-${lines}`, "relative")}
       style={style}
+      onClick={onClick}
     >
       {children}
     </div>

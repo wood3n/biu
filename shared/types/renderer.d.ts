@@ -15,6 +15,7 @@ interface AppSettings {
   closeWindowOption: "hide" | "exit";
   autoStart: boolean;
   audioQuality: AudioQuality;
+  hiddenMenuKeys: string[];
 }
 
 interface IFontInfo {

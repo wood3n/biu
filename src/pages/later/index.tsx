@@ -11,11 +11,11 @@ import MVCard from "@/components/mv-card";
 import ScrollContainer from "@/components/scroll-container";
 import { postHistoryToViewDel } from "@/service/history-toview-del";
 import { getHistoryToViewList } from "@/service/history-toview-list";
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList } from "@/store/play-list";
 
 const Later = () => {
   const [initialLoading, setInitialLoading] = useState(true);
-  const play = usePlayQueue(s => s.play);
+  const play = usePlayList(s => s.play);
 
   const { isOpen: isOpenDelete, onOpen: onOpenDelete, onOpenChange: onOpenChangeDelete } = useDisclosure();
 
@@ -72,9 +72,14 @@ const Later = () => {
           renderItem={item => (
             <>
               <MVCard
+                type="mv"
                 bvid={item.bvid}
                 aid={String(item.aid)}
                 title={item.title}
+                cover={item.pic}
+                coverHeight={200}
+                ownerName={item.owner?.name}
+                ownerMid={item.owner?.mid}
                 menus={[
                   {
                     key: "delete",
@@ -83,8 +88,6 @@ const Later = () => {
                     onPress: onOpenDelete,
                   },
                 ]}
-                cover={item.pic}
-                coverHeight={200}
                 footer={
                   <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
                     <Link href={`/user/${item.owner?.mid}`} className="text-foreground-500 text-sm hover:underline">
@@ -93,7 +96,16 @@ const Later = () => {
                     <span>{formatDuration(item.duration as number)}</span>
                   </div>
                 }
-                onPress={() => play(item.bvid)}
+                onPress={() =>
+                  play({
+                    type: "mv",
+                    bvid: item.bvid,
+                    title: item.title,
+                    cover: item.pic,
+                    ownerName: item.owner?.name,
+                    ownerMid: item.owner?.mid,
+                  })
+                }
               />
               <ConfirmModal
                 isOpen={isOpenDelete}

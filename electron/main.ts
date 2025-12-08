@@ -1,20 +1,19 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, nativeImage, nativeTheme } from "electron";
 import isDev from "electron-is-dev";
 import log from "electron-log";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
-
 import { channel } from "./ipc/channel";
 import { registerIpcHandlers } from "./ipc/index";
 import { setupMacDock } from "./mac/dock";
+import { destroyMiniPlayer } from "./mini-player";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
-import { IconBase } from "./path";
 import { store, storeKey } from "./store";
 import { createTray, destroyTray } from "./tray"; // 托盘功能
 import { autoUpdater, setupAutoUpdater, stopCheckForUpdates } from "./updater";
+import { getMacDarkIconPath, getMacLightIconPath, getWindowIcon } from "./utils";
 import { setupWindowsThumbar } from "./windows/thumbar";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -22,16 +21,12 @@ const __dirname = path.dirname(__filename);
 
 log.initialize();
 
-let mainWindow: BrowserWindow | null;
-let miniWindow: BrowserWindow | null;
+let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
     title: "Biu",
-    icon:
-      process.platform === "darwin"
-        ? undefined
-        : path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, process.platform === "win32" ? "logo.ico" : "logo.png"),
+    icon: getWindowIcon(),
     show: true,
     hasShadow: true,
     width: 1200,
@@ -48,7 +43,7 @@ function createWindow() {
     transparent: false,
     titleBarStyle: "hidden",
     titleBarOverlay: false,
-    trafficLightPosition: { x: 16, y: 18 },
+    trafficLightPosition: { x: 16, y: 16 },
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       webSecurity: true,
@@ -75,13 +70,22 @@ function createWindow() {
   mainWindow.loadFile(indexPath);
   if (isDev) {
     mainWindow.webContents.openDevTools({
-      mode: "detach",
+      mode: "bottom",
     });
   }
 
   // 初始化 Windows 任务栏缩略按钮，并监听播放状态更新
   if (process.platform === "win32") {
     setupWindowsThumbar(mainWindow);
+
+    // 拦截 WM_INITMENU (0x0116) 消息，阻止系统菜单
+    mainWindow.hookWindowMessage(0x0116, () => {
+      mainWindow?.setEnabled(false);
+      setTimeout(() => {
+        mainWindow?.setEnabled(true);
+      }, 100);
+      return true;
+    });
   }
 
   mainWindow.on("maximize", () => {
@@ -119,79 +123,37 @@ function createWindow() {
   });
 }
 
-function createMiniWindow() {
-  miniWindow = new BrowserWindow({
-    title: "Biu Mini",
-    icon: path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, process.platform === "win32" ? "logo.ico" : "logo.icns"),
-    show: false,
-    hasShadow: true,
-    width: 320,
-    height: 100,
-    resizable: false,
-    // 窗口居中
-    center: true,
-    // 无边框
-    frame: false,
-    transparent: false,
-    titleBarStyle: "hidden",
-    titleBarOverlay: false,
-    alwaysOnTop: true,
-    skipTaskbar: false,
-    webPreferences: {
-      preload: path.join(__dirname, "preload.cjs"),
-      webSecurity: true,
-      contextIsolation: true,
-      nodeIntegration: false,
-      devTools: isDev,
-    },
-  });
-
-  miniWindow.webContents.setWindowOpenHandler(() => {
-    return { action: "deny" };
-  });
-
-  // 禁止 Ctrl+R / Cmd+R 刷新页面
-  miniWindow.webContents.on("before-input-event", (event, input) => {
-    if ((input.control || input.meta) && input.key.toLowerCase() === "r") {
-      event.preventDefault();
-    }
-  });
-
-  const indexPath = path.resolve(__dirname, "../dist/web/index.html");
-  miniWindow.loadFile(indexPath, { hash: "mini-player" });
-
-  miniWindow.on("close", event => {
-    if ((app as any).quitting) {
-      return;
-    }
-    event.preventDefault();
-    miniWindow?.hide();
-    mainWindow?.show();
-  });
-}
-
-app.commandLine.appendSwitch("disable-features", "WidgetLayering");
-
 app.whenReady().then(() => {
   createWindow();
-  createMiniWindow();
 
   injectAuthCookie();
 
   installWebRequestInterceptors();
 
-  registerIpcHandlers({ mainWindow, miniWindow });
+  registerIpcHandlers({
+    getMainWindow: () => mainWindow,
+  });
 
   setupAutoUpdater();
 
-  if (process.platform === "darwin" && mainWindow) {
-    setupMacDock(mainWindow);
+  if (process.platform === "darwin") {
+    const updateDockIcon = () => {
+      const iconPath = nativeTheme.shouldUseDarkColors ? getMacDarkIconPath() : getMacLightIconPath();
+      const image = nativeImage.createFromPath(iconPath);
+      app.dock?.setIcon(image);
+    };
+
+    updateDockIcon();
+    nativeTheme.on("updated", updateDockIcon);
+
+    if (mainWindow) {
+      setupMacDock(mainWindow);
+    }
   }
 
   if (process.platform !== "darwin") {
     createTray({
       getMainWindow: () => mainWindow,
-      getMiniWindow: () => miniWindow,
       // 退出：设置 app.quitting 标记，避免 close 事件拦截
       onExit: () => {
         (app as any).quitting = true;
@@ -215,6 +177,8 @@ app.on("will-quit", () => {
     // 修改说明：托盘销毁失败时记录日志，避免静默失败
     log.warn("[main] destroyTray failed:", err);
   }
+
+  destroyMiniPlayer();
 
   stopCheckForUpdates();
   autoUpdater.removeAllListeners();

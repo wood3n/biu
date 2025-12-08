@@ -22,7 +22,7 @@ export enum PlayMode {
   Single = 4,
 }
 
-export const getPlayModeList = (iconSize: number) => [
+export const getPlayModeList = (iconSize?: number) => [
   {
     value: PlayMode.Sequence,
     desc: "顺序播放",

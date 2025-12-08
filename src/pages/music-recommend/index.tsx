@@ -7,7 +7,7 @@ import ImageCard from "@/components/image-card";
 import MVCard from "@/components/mv-card";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import { getMusicComprehensiveWebRank, type Data as MusicItem } from "@/service/music-comprehensive-web-rank";
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList } from "@/store/play-list";
 
 const PAGE_SIZE = 20;
 
@@ -25,7 +25,7 @@ const MusicRecommend = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const playMV = usePlayQueue(state => state.play);
+  const play = usePlayList(state => state.play);
 
   const deDupConcat = useCallback((prev: MusicItem[], next: MusicItem[]) => {
     const seen = new Set(prev.map(i => i.id));
@@ -145,13 +145,20 @@ const MusicRecommend = () => {
           <div className={gridClass}>
             {list.map(item => (
               <MVCard
+                type="mv"
                 bvid={item.bvid}
                 aid={String(item.id)}
                 key={item.id}
                 cover={item.cover}
                 title={item.music_title}
                 footer={<div className="w-full truncate text-left text-sm text-zinc-400">{item.author}</div>}
-                onPress={() => playMV(item.bvid)}
+                onPress={() =>
+                  play({
+                    type: "mv",
+                    bvid: item.bvid,
+                    title: item.music_title,
+                  })
+                }
               />
             ))}
           </div>

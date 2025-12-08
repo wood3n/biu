@@ -3,6 +3,7 @@ import type { RouteObject } from "react-router";
 import Layout from "./layout";
 import ArtistRank from "./pages/artist-rank";
 import DownloadList from "./pages/download-list";
+import EmptyPage from "./pages/empty";
 import FollowList from "./pages/follow-list";
 import History from "./pages/history";
 import Later from "./pages/later";
@@ -63,6 +64,10 @@ const routes: RouteObject[] = [
       {
         path: "search",
         element: <Search />,
+      },
+      {
+        path: "empty",
+        element: <EmptyPage />,
       },
     ],
   },

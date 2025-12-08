@@ -8,4 +8,5 @@ export const defaultAppSettings: AppSettings = {
   contentBackgroundColor: "#1f1f1f",
   primaryColor: "#17c964",
   audioQuality: "auto",
+  hiddenMenuKeys: [],
 };

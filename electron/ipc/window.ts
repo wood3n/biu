@@ -1,28 +1,8 @@
 import { BrowserWindow, ipcMain } from "electron";
 
-import type { IpcHandlerProps } from "./types";
-
 import { channel } from "./channel";
 
-export function registerWindowHandlers({ mainWindow, miniWindow }: IpcHandlerProps) {
-  ipcMain.handle(channel.window.switchToMini, () => {
-    if (mainWindow) {
-      mainWindow.hide();
-    }
-    if (miniWindow) {
-      miniWindow.show();
-    }
-  });
-
-  ipcMain.handle(channel.window.switchToMain, () => {
-    if (miniWindow) {
-      miniWindow.hide();
-    }
-    if (mainWindow) {
-      mainWindow.show();
-    }
-  });
-
+export function registerWindowHandlers() {
   ipcMain.on(channel.window.minimize, event => {
     const win = BrowserWindow.fromWebContents(event.sender);
     win?.minimize();

@@ -54,7 +54,7 @@ export async function buildElectron() {
           { target: "zip", arch: ["x64", "arm64"] },
         ],
         category: "public.app-category.music",
-        icon: `${ELECTRON_ICON_BASE_PATH}/logo.icns`,
+        icon: `${ELECTRON_ICON_BASE_PATH}/icon.icns`,
         hardenedRuntime: true,
         gatekeeperAssess: false,
         darkModeSupport: true,

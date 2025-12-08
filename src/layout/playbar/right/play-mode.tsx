@@ -3,21 +3,15 @@ import React from "react";
 import { Button } from "@heroui/react";
 
 import { getPlayModeList } from "@/common/constants/audio";
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList } from "@/store/play-list";
 
 import { PlayBarIconSize } from "../constants";
 
 const PlayModeList = getPlayModeList(PlayBarIconSize.SideIconSize);
 
 const PlayModeSwitch = () => {
-  const playMode = usePlayQueue(s => s.playMode);
-  const setPlayMode = usePlayQueue(s => s.setPlayMode);
-
-  const togglePlayMode = () => {
-    const currentIndex = PlayModeList.findIndex(item => item.value === playMode);
-    const nextIndex = (currentIndex + 1) % PlayModeList.length;
-    setPlayMode(PlayModeList[nextIndex].value);
-  };
+  const playMode = usePlayList(s => s.playMode);
+  const togglePlayMode = usePlayList(s => s.togglePlayMode);
 
   return (
     <Button

@@ -15,10 +15,19 @@ export interface MenuItemProps {
   cover?: string;
   /** 激活状态图标 */
   activeIcon?: React.ComponentType<{ size?: number | string }>;
+  className?: string;
   onPress?: VoidFunction;
 }
 
-const MenuItem: React.FC<MenuItemProps> = ({ title, href, cover, icon: Icon, activeIcon: ActiveIcon, onPress }) => {
+const MenuItem: React.FC<MenuItemProps> = ({
+  title,
+  href,
+  cover,
+  icon: Icon,
+  activeIcon: ActiveIcon,
+  className,
+  onPress,
+}) => {
   const location = useLocation();
   const { id } = useParams();
 
@@ -36,15 +45,13 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, href, cover, icon: Icon, act
       startContent={
         cover ? (
           <Image
-            radius="sm"
+            radius="md"
+            removeWrapper
             src={cover}
             alt={title}
             height={32}
             width={32}
-            className="object-cover"
-            classNames={{
-              wrapper: "flex-none",
-            }}
+            className="rounded-medium object-cover"
           />
         ) : isActive ? (
           // @ts-expect-error 忽略类型错误，因为 ActiveIcon 可能是 undefined
@@ -54,7 +61,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, href, cover, icon: Icon, act
           <Icon size={18} />
         )
       }
-      className={clx("justify-start", {
+      className={clx("justify-start", className, {
         "text-primary": isActive,
       })}
     >
