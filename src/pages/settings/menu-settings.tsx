@@ -1,9 +1,8 @@
 import React from "react";
 import { type Control, Controller } from "react-hook-form";
 
-import { Checkbox, CheckboxGroup } from "@heroui/react";
-
 import { DefaultMenuList } from "@/common/constants/menus";
+import SelectAllCheckboxGroup from "@/components/select-all-checkbox-group";
 import { useUser } from "@/store/user";
 
 interface MenuSettingsProps {
@@ -28,28 +27,27 @@ const MenuSettings: React.FC<MenuSettingsProps> = ({ control }) => {
               render={({ field }) => {
                 const groupKeys = DefaultMenuList.map(i => i.href);
                 const selectedKeys = groupKeys.filter(k => !field.value.includes(k));
+
+                const handleSelectionChange = (newSelectedKeys: string[]) => {
+                  const outsideHidden = field.value.filter(k => !groupKeys.includes(k));
+                  const hiddenInGroup = groupKeys.filter(k => !newSelectedKeys.includes(k));
+                  const nextHidden = Array.from(new Set([...outsideHidden, ...hiddenInGroup]));
+                  field.onChange(nextHidden);
+                };
+
+                const items = DefaultMenuList.map(item => ({
+                  value: item.href,
+                  label: item.title,
+                }));
+
                 return (
-                  <CheckboxGroup
-                    aria-label="系统默认菜单显示项"
-                    value={selectedKeys}
-                    onValueChange={keys => {
-                      const outsideHidden = field.value.filter(k => !groupKeys.includes(k));
-                      const hiddenInGroup = groupKeys.filter(k => !(keys as string[]).includes(k));
-                      const nextHidden = Array.from(new Set([...outsideHidden, ...hiddenInGroup]));
-                      field.onChange(nextHidden);
-                    }}
-                    color="primary"
-                    orientation="horizontal"
-                    classNames={{
-                      wrapper: "gap-4",
-                    }}
-                  >
-                    {DefaultMenuList.map(item => (
-                      <Checkbox key={item.href} value={item.href}>
-                        {item.title}
-                      </Checkbox>
-                    ))}
-                  </CheckboxGroup>
+                  <SelectAllCheckboxGroup
+                    groupName="系统默认菜单"
+                    groupKeys={groupKeys}
+                    selectedKeys={selectedKeys}
+                    onSelectionChange={handleSelectionChange}
+                    items={items}
+                  />
                 );
               }}
             />
@@ -67,29 +65,29 @@ const MenuSettings: React.FC<MenuSettingsProps> = ({ control }) => {
                   render={({ field }) => {
                     const groupKeys = (ownFolder ?? []).map(i => String(i.id));
                     const selectedKeys = groupKeys.filter(k => !field.value.includes(k));
+
+                    const handleSelectionChange = (newSelectedKeys: string[]) => {
+                      const outsideHidden = field.value.filter(k => !groupKeys.includes(k));
+                      const hiddenInGroup = groupKeys.filter(k => !newSelectedKeys.includes(k));
+                      const nextHidden = Array.from(new Set([...outsideHidden, ...hiddenInGroup]));
+                      field.onChange(nextHidden);
+                    };
+
+                    const ownFolderMap = new Map((ownFolder ?? []).map(i => [String(i.id), i.title]));
+                    const items = groupKeys.map(key => ({
+                      value: key,
+                      label: ownFolderMap.get(key) || key,
+                    }));
+
                     return (
-                      <CheckboxGroup
-                        aria-label="个人创建菜单显示项"
-                        value={selectedKeys}
-                        onValueChange={keys => {
-                          const outsideHidden = field.value.filter(k => !groupKeys.includes(k));
-                          const hiddenInGroup = groupKeys.filter(k => !(keys as string[]).includes(k));
-                          const nextHidden = Array.from(new Set([...outsideHidden, ...hiddenInGroup]));
-                          field.onChange(nextHidden);
-                        }}
-                        isDisabled={!groupKeys.length}
-                        color="primary"
-                        orientation="horizontal"
-                        classNames={{
-                          wrapper: "gap-4",
-                        }}
-                      >
-                        {groupKeys.map(key => (
-                          <Checkbox key={key} value={key}>
-                            {ownFolder?.find(i => String(i.id) === key)?.title}
-                          </Checkbox>
-                        ))}
-                      </CheckboxGroup>
+                      <SelectAllCheckboxGroup
+                        groupName="个人创建菜单"
+                        groupKeys={groupKeys}
+                        selectedKeys={selectedKeys}
+                        onSelectionChange={handleSelectionChange}
+                        disabled={!groupKeys.length}
+                        items={items}
+                      />
                     );
                   }}
                 />
@@ -104,29 +102,29 @@ const MenuSettings: React.FC<MenuSettingsProps> = ({ control }) => {
                   render={({ field }) => {
                     const groupKeys = (collectedFolder ?? []).map(i => String(i.id));
                     const selectedKeys = groupKeys.filter(k => !field.value.includes(k));
+
+                    const handleSelectionChange = (newSelectedKeys: string[]) => {
+                      const outsideHidden = field.value.filter(k => !groupKeys.includes(k));
+                      const hiddenInGroup = groupKeys.filter(k => !newSelectedKeys.includes(k));
+                      const nextHidden = Array.from(new Set([...outsideHidden, ...hiddenInGroup]));
+                      field.onChange(nextHidden);
+                    };
+
+                    const collectedFolderMap = new Map((collectedFolder ?? []).map(i => [String(i.id), i.title]));
+                    const items = groupKeys.map(key => ({
+                      value: key,
+                      label: collectedFolderMap.get(key) || key,
+                    }));
+
                     return (
-                      <CheckboxGroup
-                        aria-label="个人收藏菜单显示项"
-                        value={selectedKeys}
-                        onValueChange={keys => {
-                          const outsideHidden = field.value.filter(k => !groupKeys.includes(k));
-                          const hiddenInGroup = groupKeys.filter(k => !(keys as string[]).includes(k));
-                          const nextHidden = Array.from(new Set([...outsideHidden, ...hiddenInGroup]));
-                          field.onChange(nextHidden);
-                        }}
-                        isDisabled={!groupKeys.length}
-                        color="primary"
-                        orientation="horizontal"
-                        classNames={{
-                          wrapper: "gap-4",
-                        }}
-                      >
-                        {groupKeys.map(key => (
-                          <Checkbox key={key} value={key}>
-                            {collectedFolder?.find(i => String(i.id) === key)?.title}
-                          </Checkbox>
-                        ))}
-                      </CheckboxGroup>
+                      <SelectAllCheckboxGroup
+                        groupName="个人收藏菜单"
+                        groupKeys={groupKeys}
+                        selectedKeys={selectedKeys}
+                        onSelectionChange={handleSelectionChange}
+                        disabled={!groupKeys.length}
+                        items={items}
+                      />
                     );
                   }}
                 />
