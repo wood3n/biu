@@ -52,6 +52,7 @@ const Collection = () => {
               icon: RiFolderLine,
               activeIcon: RiFolderOpenLine,
             }))}
+            itemClassName="pl-3"
           />
           {collectedFolderHasMore && (
             <div
