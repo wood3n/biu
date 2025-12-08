@@ -19,23 +19,10 @@ const SelectAllCheckboxGroup: React.FC<SelectAllCheckboxGroupProps> = ({
   disabled = false,
   items,
 }) => {
-  const [isSelectAll, setIsSelectAll] = useState(selectedKeys.length === groupKeys.length);
-
-  useEffect(() => {
-    setIsSelectAll(selectedKeys.length === groupKeys.length);
-  }, [selectedKeys, groupKeys.length]);
+  const isSelectAll = groupKeys.length > 0 && selectedKeys.length === groupKeys.length;
 
   const handleSelectAllChange = (checked: boolean) => {
-    let newSelectedKeys;
-    if (checked) {
-      // 全选：选择组中所有选项
-      newSelectedKeys = groupKeys;
-    } else {
-      // 取消全选：取消选择组中所有选项
-      newSelectedKeys = [];
-    }
-    onSelectionChange(newSelectedKeys);
-    setIsSelectAll(checked);
+    onSelectionChange(checked ? groupKeys : []);
   };
 
   const handleCheckboxGroupChange = (keys: string[]) => {
