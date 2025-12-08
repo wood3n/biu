@@ -21,6 +21,7 @@ import {
 
 import ConfirmModal from "@/components/confirm-modal";
 import { postPassportLoginExit } from "@/service/passport-login-exit";
+import { useSettings } from "@/store/settings";
 import { useToken } from "@/store/token";
 import { useUser } from "@/store/user";
 
@@ -31,6 +32,7 @@ const UserCard = () => {
   const clearUser = useUser(s => s.clear);
   const clearToken = useToken(s => s.clear);
   const navigate = useNavigate();
+  const updateSettings = useSettings(s => s.update);
 
   const { isOpen: isLoginModalOpen, onOpen: openLoginModal, onOpenChange: onLoginModalOpenChange } = useDisclosure();
 
@@ -56,6 +58,9 @@ const UserCard = () => {
     if (res?.code === 0) {
       clearToken();
       clearUser();
+      updateSettings({
+        hiddenMenuKeys: [],
+      });
       navigate("/");
       return true;
     } else {

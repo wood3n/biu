@@ -5,6 +5,7 @@ import { registerCookieIpcHandlers } from "./cookie";
 import { registerDialogHandlers } from "./dialog";
 import { registerDownloadHandlers } from "./download";
 import { registerFontHandlers } from "./font";
+import { registerMiniPlayerHandlers } from "./mini-player";
 import { registerRequestHandlers } from "./request";
 import { registerStoreHandlers } from "./store";
 import { registerWindowHandlers } from "./window";
@@ -17,5 +18,6 @@ export function registerIpcHandlers(props: IpcHandlerProps) {
   registerRequestHandlers();
   registerAppHandlers();
   registerCookieIpcHandlers();
-  registerWindowHandlers(props);
+  registerWindowHandlers();
+  registerMiniPlayerHandlers(props);
 }

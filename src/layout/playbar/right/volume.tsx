@@ -3,15 +3,15 @@ import React, { useRef } from "react";
 import { Button, Tooltip, Slider } from "@heroui/react";
 import { RiVolumeDownLine, RiVolumeMuteLine, RiVolumeUpLine } from "@remixicon/react";
 
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList } from "@/store/play-list";
 
 import { PlayBarIconSize } from "../constants";
 
 const Volume = () => {
-  const volume = usePlayQueue(s => s.volume);
-  const isMuted = usePlayQueue(s => s.isMuted);
-  const toggleMute = usePlayQueue(s => s.toggleMute);
-  const setVolume = usePlayQueue(s => s.setVolume);
+  const volume = usePlayList(s => s.volume);
+  const isMuted = usePlayList(s => s.isMuted);
+  const toggleMute = usePlayList(s => s.toggleMute);
+  const setVolume = usePlayList(s => s.setVolume);
 
   const previousVolume = useRef(volume);
 

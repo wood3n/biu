@@ -8,14 +8,14 @@ import { formatUrlProtocal } from "@/common/utils/url";
 import Empty from "@/components/empty";
 import GridList from "@/components/grid-list";
 import MVCard from "@/components/mv-card";
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList } from "@/store/play-list";
 
 export type SearchVideoProps = {
   items: SearchVideoItem[];
 };
 
 export default function SearchVideo({ items }: SearchVideoProps) {
-  const play = usePlayQueue(s => s.play);
+  const play = usePlayList(s => s.play);
 
   if (!items?.length) return <Empty className="min-h-[280px]" />;
 
@@ -26,10 +26,14 @@ export default function SearchVideo({ items }: SearchVideoProps) {
       className="px-4"
       renderItem={item => (
         <MVCard
+          isTitleIncludeHtmlTag
+          type="mv"
           bvid={item.bvid}
           aid={String(item.aid)}
-          title={<p dangerouslySetInnerHTML={{ __html: item.title }} />}
+          title={item.title}
           cover={formatUrlProtocal(item.pic)}
+          ownerName={item.author}
+          ownerMid={item.mid}
           footer={
             <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
               <Link href={`/user/${item.mid}`} className="text-foreground-500 text-sm hover:underline">
@@ -38,7 +42,16 @@ export default function SearchVideo({ items }: SearchVideoProps) {
               <span>{item.duration}</span>
             </div>
           }
-          onPress={() => play(item.bvid)}
+          onPress={() =>
+            play({
+              type: "mv",
+              bvid: item.bvid,
+              title: item.title,
+              cover: formatUrlProtocal(item.pic),
+              ownerName: item.author,
+              ownerMid: item.mid,
+            })
+          }
         />
       )}
     />

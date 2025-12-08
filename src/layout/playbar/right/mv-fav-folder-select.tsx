@@ -1,13 +1,15 @@
+import { useMemo } from "react";
+
 import { Button, useDisclosure } from "@heroui/react";
 import { RiStarLine } from "@remixicon/react";
 
 import FavFolderSelect from "@/components/fav-folder/select";
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList } from "@/store/play-list";
 
 const MvFavFolderSelect = () => {
-  const mvData = usePlayQueue(s => {
-    return s.list?.find(item => item.bvid === s.currentBvid);
-  });
+  const list = usePlayList(s => s.list);
+  const playId = usePlayList(s => s.playId);
+  const playItem = useMemo(() => list.find(item => item.id === playId), [list, playId]);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
@@ -15,7 +17,12 @@ const MvFavFolderSelect = () => {
       <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={onOpen}>
         <RiStarLine size={18} />
       </Button>
-      <FavFolderSelect title="收藏" rid={String(mvData?.aid)} isOpen={isOpen} onOpenChange={onOpenChange} />
+      <FavFolderSelect
+        title="收藏"
+        rid={playItem?.type === "mv" ? String(playItem?.aid) : String(playItem?.sid)}
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+      />
     </>
   );
 };

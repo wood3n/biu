@@ -168,33 +168,6 @@ async function doRequest<T = any>(payload: HttpInvokePayload): Promise<HttpRespo
 }
 
 /**
- * 设置登录 Cookie 到 Electron session
- */
-async function setLoginCookies(cookies: Array<{ name: string; value: string; expirationDate?: number }>) {
-  try {
-    await Promise.all(
-      cookies.map(cookie =>
-        session.defaultSession.cookies.set({
-          name: cookie.name,
-          value: cookie.value,
-          url: "https://bilibili.com/",
-          domain: ".bilibili.com",
-          path: "/",
-          secure: true,
-          sameSite: "no_restriction",
-          httpOnly: cookie.name === "SESSDATA",
-          expirationDate: cookie.expirationDate || Math.floor(Date.now() / 1000 + 30 * 24 * 3600),
-        }),
-      ),
-    );
-    await session.defaultSession.cookies.flushStore();
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
  * 注册 IPC 处理器，将 GET/POST 封装为可被渲染进程调用的方法
  */
 export function registerRequestHandlers() {
@@ -208,11 +181,4 @@ export function registerRequestHandlers() {
     const res = await doRequest({ ...payload, method: "POST" });
     return res.data;
   });
-
-  ipcMain.handle(
-    channel.cookie.setLoginCookies,
-    async (_event, cookies: Array<{ name: string; value: string; expirationDate?: number }>) => {
-      return await setLoginCookies(cookies);
-    },
-  );
 }

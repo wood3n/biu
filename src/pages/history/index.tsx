@@ -13,7 +13,7 @@ import {
   type HistoryBusinessType,
   type HistoryListItem,
 } from "@/service/web-interface-history-cursor";
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList } from "@/store/play-list";
 
 const HISTORY_PAGE_SIZE = 30;
 
@@ -25,7 +25,7 @@ const History = () => {
     null,
   );
   const [hasMore, setHasMore] = useState(true);
-  const playMV = usePlayQueue(s => s.play);
+  const play = usePlayList(s => s.play);
 
   const fetchHistory = async (isLoadMore = false) => {
     try {
@@ -97,7 +97,14 @@ const History = () => {
 
   const handlePlay = (item: HistoryListItem) => {
     if (item.history.bvid) {
-      playMV(item.history.bvid);
+      play({
+        type: "mv",
+        bvid: item.history.bvid,
+        title: item.title,
+        cover: item.cover,
+        ownerName: item.author_name,
+        ownerMid: item.author_mid,
+      });
     } else {
       addToast({
         title: "无法播放此类型内容",
@@ -121,10 +128,13 @@ const History = () => {
           itemKey={item => `${item.history.oid}-${item.view_at}`}
           renderItem={item => (
             <MVCard
+              type="mv" // 音频播放不会出现在历史记录中
               bvid={item.history.bvid || ""}
               aid={String(item.history.oid)}
               title={item.title}
               cover={item.cover}
+              ownerName={item.author_name}
+              ownerMid={item.author_mid}
               coverHeight={200}
               footer={
                 <div className="flex w-full flex-col space-y-1 text-sm">

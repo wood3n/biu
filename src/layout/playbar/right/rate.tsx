@@ -2,13 +2,13 @@ import React from "react";
 
 import { Button, Tooltip } from "@heroui/react";
 
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList } from "@/store/play-list";
 
 import { PlayRate } from "../constants";
 
 const Rate = () => {
-  const rate = usePlayQueue(s => s.rate);
-  const setRate = usePlayQueue(s => s.setRate);
+  const rate = usePlayList(s => s.rate);
+  const setRate = usePlayList(s => s.setRate);
 
   const tooltipId = "rate-tooltip";
 

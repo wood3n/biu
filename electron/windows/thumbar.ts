@@ -4,7 +4,7 @@ import path from "node:path";
 import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
 
 import { channel } from "../ipc/channel";
-import { IconBase } from "../path";
+import { IconBase } from "../utils";
 
 const iconPrev = nativeImage.createFromPath(path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, "prev.png"));
 const iconNext = nativeImage.createFromPath(path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, "next.png"));

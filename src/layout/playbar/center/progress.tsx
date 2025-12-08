@@ -4,16 +4,16 @@ import { Slider, type SliderProps } from "@heroui/react";
 import clx from "classnames";
 
 import { formatDuration } from "@/common/utils";
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList } from "@/store/play-list";
 
 const Progress = ({ isDisabled }: SliderProps) => {
   const [hovered, setHovered] = useState(false);
 
-  const duration = usePlayQueue(s => s.duration);
-  const currentTime = usePlayQueue(s => s.currentTime);
-  const seek = usePlayQueue(s => s.seek);
+  const duration = usePlayList(s => s.duration);
+  const currentTime = usePlayList(s => s.currentTime);
+  const seek = usePlayList(s => s.seek);
 
-  const showThumb = hovered && !isDisabled;
+  const showThumb = !isDisabled && hovered;
 
   return (
     <div className="flex w-3/4 items-center space-x-2">
@@ -38,7 +38,7 @@ const Progress = ({ isDisabled }: SliderProps) => {
         })}
         classNames={{
           track: "h-[4px]",
-          thumb: "after:bg-primary",
+          thumb: "w-4 h-4 bg-primary after:hidden",
         }}
       />
       <span className="flex justify-center text-sm whitespace-nowrap opacity-70">

@@ -105,3 +105,5 @@ dist
 electron-builder
 api.example.json
 .electron
+
+.trae

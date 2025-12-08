@@ -7,12 +7,12 @@ import { formatSecondsToDate } from "@/common/utils";
 import GridList from "@/components/grid-list";
 import MVCard from "@/components/mv-card";
 import { getSpaceWbiArcSearch } from "@/service/space-wbi-arc-search";
-import { usePlayQueue } from "@/store/play-queue";
+import { usePlayList } from "@/store/play-list";
 
 /** 个人投稿视频 */
 const VideoPost = () => {
   const { id } = useParams();
-  const play = usePlayQueue(s => s.play);
+  const play = usePlayList(s => s.play);
 
   const {
     data,
@@ -47,17 +47,29 @@ const VideoPost = () => {
         itemKey="bvid"
         renderItem={item => (
           <MVCard
+            type="mv"
             bvid={item.bvid}
             aid={String(item.aid)}
             title={item.title}
             cover={item.pic}
+            ownerName={item.author}
+            ownerMid={item.mid}
             footer={
               <div className="flex w-full justify-between text-sm text-zinc-500">
                 <span>{formatSecondsToDate(item.created)}</span>
                 <span>{item.length}</span>
               </div>
             }
-            onPress={() => play(item.bvid)}
+            onPress={() =>
+              play({
+                type: "mv",
+                bvid: item.bvid,
+                title: item.title,
+                cover: item.pic,
+                ownerName: item.author,
+                ownerMid: item.mid,
+              })
+            }
           />
         )}
       />

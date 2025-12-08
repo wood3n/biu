@@ -1,20 +1,13 @@
-import { useParams } from "react-router";
-
 import { Image, Link, Skeleton, User } from "@heroui/react";
-import { RiPlayFill, RiStarFill, RiStarLine } from "@remixicon/react";
+import { RiPlayFill } from "@remixicon/react";
 import { useRequest } from "ahooks";
 import clx from "classnames";
-import { useShallow } from "zustand/react/shallow";
 
 import FallbackImage from "@/assets/images/fallback.png";
 import { CollectionType } from "@/common/constants/collection";
 import { isPrivateFav } from "@/common/utils/fav";
 import AsyncButton from "@/components/async-button";
 import Ellipsis from "@/components/ellipsis";
-import { postFavFolderFav } from "@/service/fav-folder-fav";
-import { postFavFolderUnfav } from "@/service/fav-folder-unfav";
-import { postFavSeasonFav } from "@/service/fav-season-fav";
-import { postFavSeasonUnfav } from "@/service/fav-season-unfav";
 import { getWebInterfaceCard } from "@/service/user-account";
 import { useUser } from "@/store/user";
 
@@ -32,6 +25,7 @@ interface Props {
   mediaCount?: number;
   afterChangeInfo: VoidFunction;
   onPlayAll: VoidFunction;
+  onAddToPlayList: VoidFunction;
 }
 
 const Info = ({
@@ -46,18 +40,11 @@ const Info = ({
   mediaCount,
   afterChangeInfo,
   onPlayAll,
+  onAddToPlayList,
 }: Props) => {
-  const { user, collectedFolder, updateCollectedFolder } = useUser(
-    useShallow(state => ({
-      user: state.user,
-      collectedFolder: state.collectedFolder,
-      updateCollectedFolder: state.updateCollectedFolder,
-    })),
-  );
+  const user = useUser(s => s.user);
 
   const isOwn = upMid === user?.mid;
-  const { id } = useParams();
-  const isCollected = collectedFolder?.some(folder => folder.id === Number(id));
 
   const { data: upInfo } = useRequest(
     async () => {
@@ -72,54 +59,6 @@ const Info = ({
       refreshDeps: [upMid],
     },
   );
-
-  const toggleCollect = async () => {
-    if (type === CollectionType.Favorite) {
-      if (isCollected) {
-        // 取消收藏
-        const res = await postFavFolderUnfav({
-          media_id: Number(id),
-          platform: "web",
-        });
-
-        if (res.code === 0) {
-          await updateCollectedFolder();
-        }
-      } else {
-        // 收藏
-        const res = await postFavFolderFav({
-          media_id: Number(id),
-          platform: "web",
-        });
-
-        if (res.code === 0) {
-          await updateCollectedFolder();
-        }
-      }
-    } else {
-      if (isCollected) {
-        // 取消收藏
-        const res = await postFavSeasonUnfav({
-          season_id: Number(id),
-          platform: "web",
-        });
-
-        if (res.code === 0) {
-          await updateCollectedFolder();
-        }
-      } else {
-        // 收藏
-        const res = await postFavSeasonFav({
-          season_id: Number(id),
-          platform: "web",
-        });
-
-        if (res.code === 0) {
-          await updateCollectedFolder();
-        }
-      }
-    }
-  };
 
   if (loading) {
     return (
@@ -183,16 +122,13 @@ const Info = ({
               播放全部
             </AsyncButton>
           )}
-          {isOwn && attr !== 0 && <Menu afterChangeInfo={afterChangeInfo} />}
-          {!isOwn && (
-            <AsyncButton
-              color={isCollected ? "default" : "primary"}
-              startContent={isCollected ? <RiStarFill size={18} /> : <RiStarLine size={18} />}
-              onPress={toggleCollect}
-            >
-              {isCollected ? "取消收藏" : "收藏"}
-            </AsyncButton>
-          )}
+          <Menu
+            type={type}
+            isOwn={isOwn}
+            mediaCount={mediaCount}
+            afterChangeInfo={afterChangeInfo}
+            onAddToPlayList={onAddToPlayList}
+          />
         </div>
       </div>
     </div>

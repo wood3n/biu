@@ -8,7 +8,7 @@ import { getCookitFromBSite } from "./common/utils/cookie";
 import Theme from "./components/theme";
 import routes from "./routes";
 import { useAppUpdateStore } from "./store/app-update";
-import { usePlayQueue } from "./store/play-queue";
+import { usePlayList } from "./store/play-list";
 
 import "moment/locale/zh-cn";
 
@@ -37,7 +37,7 @@ export function App() {
   useEffect(() => {
     if (window.electron && window.electron.onPlayerCommand) {
       window.electron.onPlayerCommand(cmd => {
-        const { prev, next, togglePlay } = usePlayQueue.getState();
+        const { prev, next, togglePlay } = usePlayList.getState();
         if (cmd === "prev") {
           prev();
         } else if (cmd === "next") {

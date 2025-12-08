@@ -22,6 +22,7 @@ import AsyncButton from "../async-button";
 import ScrollContainer from "../scroll-container";
 
 export interface FavFolderSelectProps {
+  /** 视频aid，或者音频的id */
   rid: string;
   // 受控：显示/隐藏
   isOpen: boolean;

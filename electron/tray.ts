@@ -7,25 +7,23 @@ import path from "node:path";
 import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
 
 import { channel } from "./ipc/channel";
-import { IconBase } from "./path";
+import { destroyMiniPlayer } from "./mini-player";
+import { IconBase } from "./utils";
+
+interface Props {
+  getMainWindow: () => BrowserWindow | null;
+  onExit: () => void;
+}
 
 /**
- * Windows 系统托盘
+ * Windows、Linux 系统托盘
  * - 左键：显示/隐藏主窗口
  * - 右键：弹出上下文菜单（显示/隐藏、退出）
  * 通过传入 getMainWindow 和 onExit 回调与主进程解耦，便于复用与测试。
  */
 let tray: Tray | null = null;
 
-function createTray({
-  getMainWindow,
-  getMiniWindow,
-  onExit,
-}: {
-  getMainWindow?: () => BrowserWindow | null;
-  getMiniWindow?: () => BrowserWindow | null;
-  onExit?: () => void;
-} = {}) {
+function createTray({ getMainWindow, onExit }: Props) {
   // 若已存在旧实例，先销毁避免重复创建
   if (tray) {
     try {
@@ -88,11 +86,7 @@ function createTray({
 
   // 左键单击：显示主窗口；若迷你窗口已显示，则关闭它
   tray.on("click", () => {
-    const miniWin = getMiniWindow?.();
-    if (miniWin && miniWin.isVisible()) {
-      miniWin.hide();
-    }
-
+    destroyMiniPlayer();
     const win = getMainWindow?.();
     if (!win) return;
     if (win.isVisible()) {
