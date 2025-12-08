@@ -1,7 +1,7 @@
 export const defaultAppSettings: AppSettings = {
   autoStart: false,
   closeWindowOption: "hide",
-  fontFamily: "system-default",
+  fontFamily: "system-ui",
   borderRadius: 8,
   downloadPath: "",
   backgroundColor: "#18181b",
