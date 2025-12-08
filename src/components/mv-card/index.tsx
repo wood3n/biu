@@ -1,4 +1,7 @@
-import { RiPlayCircleFill } from "@remixicon/react";
+import { RiPlayCircleFill, RiYoutubeLine } from "@remixicon/react";
+
+import { formatNumber } from "@/common/utils";
+import { type FavMediaCntInfo } from "@/service/fav-resource";
 
 import { stripHtml } from "@/common/utils";
 
@@ -10,6 +13,8 @@ interface Props extends ActionProps {
   coverHeight?: number;
   footer?: React.ReactNode;
   onPress?: () => void;
+  cnt_info?: FavMediaCntInfo;
+  playCount?: number;
 }
 
 const MVCard = ({
@@ -26,6 +31,8 @@ const MVCard = ({
   onChangeFavSuccess,
   footer,
   onPress,
+  cnt_info,
+  playCount,
 }: Props) => {
   return (
     <ImageCard
@@ -33,9 +40,16 @@ const MVCard = ({
       imageHeight={coverHeight}
       bodyClassName="group relative"
       imageMask={
-        <div className="absolute right-0 bottom-0 z-30 p-4 opacity-0 transition-opacity group-hover:opacity-100">
-          <RiPlayCircleFill className="text-primary" size={48} />
-        </div>
+        <>
+          <div className="absolute right-0 bottom-0 left-0 z-20 h-10 bg-linear-to-t from-black/70 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 z-30 flex items-center gap-0.5 p-2 text-sm text-white">
+            <RiYoutubeLine size={18} className="transform" style={{ transform: "translateY(0.05em)" }} />
+            {formatNumber(playCount || cnt_info?.play)}
+          </div>
+          <div className="absolute right-0 bottom-0 z-30 p-4 opacity-0 transition-opacity group-hover:opacity-100">
+            <RiPlayCircleFill className="text-primary" size={48} />
+          </div>
+        </>
       }
       title={isTitleIncludeHtmlTag ? <p dangerouslySetInnerHTML={{ __html: title }} /> : title}
       titleExtra={

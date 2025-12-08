@@ -35,6 +35,7 @@ const MusicRank = () => {
             title={item.music_title}
             cover={item.cover}
             coverHeight={240}
+            playCount={item.total_vv}
             footer={<div className="w-full truncate text-left text-sm text-zinc-400">{item.author}</div>}
             onPress={() =>
               play({

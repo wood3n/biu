@@ -34,6 +34,7 @@ export default function SearchVideo({ items }: SearchVideoProps) {
           cover={formatUrlProtocal(item.pic)}
           ownerName={item.author}
           ownerMid={item.mid}
+          playCount={item.play}
           footer={
             <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
               <Link href={`/user/${item.mid}`} className="text-foreground-500 text-sm hover:underline">
