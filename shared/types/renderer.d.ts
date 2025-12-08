@@ -140,6 +140,8 @@ interface ElectronAPI {
   onDownloadAppProgress: (cb: (payload: DownloadAppMessage) => void) => VoidFunction;
   /** 安装更新 */
   quitAndInstall: () => Promise<void>;
+  /** 打开安装包所在目录 */
+  openInstallerDirectory: () => Promise<boolean>;
   /** 切换到 mini 播放器窗口 */
   switchToMiniPlayer: () => Promise<void>;
   /** 切换到主窗口 */

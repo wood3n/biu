@@ -32,6 +32,11 @@ export const useSettings = create<AppSettings & SettingsActions>()(
         getItem: async () => {
           const store = await window.electron.getSettings();
 
+          // 兼容之前的错误默认值
+          if (store.fontFamily === "system-default") {
+            store.fontFamily = "system-ui";
+          }
+
           return {
             state: store,
           };

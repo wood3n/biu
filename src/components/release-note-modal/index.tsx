@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Progress } from "@heroui/react";
+import { addToast, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Progress } from "@heroui/react";
 import { RiInformationLine } from "@remixicon/react";
 import { filesize } from "filesize";
 
@@ -20,21 +20,29 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
   const [error, setError] = useState<string>();
 
   const startDownload = async () => {
-    if (!window.electron.isSupportAutoUpdate()) {
-      const ok = await window.electron.openExternal("https://github.com/wood3n/biu/releases/latest");
-      if (!ok) {
-        setStatus("error");
-        setError("无法打开下载页面");
-      }
-      return;
-    }
-
     setStatus("downloading");
     try {
       await window.electron.downloadAppUpdate();
     } catch (e) {
       setStatus("error");
       setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  const handleOpenInstaller = async () => {
+    try {
+      const ok = await window.electron.openInstallerDirectory();
+      if (!ok) {
+        addToast({
+          title: "无法打开安装包文件夹",
+          color: "danger",
+        });
+      }
+    } catch (e) {
+      addToast({
+        title: e instanceof Error ? e.message : String(e),
+        color: "danger",
+      });
     }
   };
 
@@ -83,11 +91,11 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
             <Progress radius="none" className="w-full" color="primary" value={downloadProgress?.percent} />
           )}
           <ModalFooter className="items-center justify-between">
-            <div>
+            <div className="min-w-0 flex-auto">
               {status === "downloading" && (
                 <div className="items-center">{filesize(downloadProgress?.bytesPerSecond || 0)}/s</div>
               )}
-              {status === "error" && <span className="text-danger truncate">下载出错：{error}</span>}
+              {status === "error" && <span className="text-danger block truncate">{error}</span>}
             </div>
             {status === "downloaded" ? (
               <div className="inline-flex items-center space-x-2">
@@ -95,9 +103,15 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
                   <RiInformationLine size={16} />
                   <span className="text-sm text-zinc-500 dark:text-zinc-400">安装包已下载完成</span>
                 </span>
-                <Button color="primary" onPress={window.electron.quitAndInstall}>
-                  退出并安装更新
-                </Button>
+                {window.electron.isSupportAutoUpdate() ? (
+                  <Button color="primary" onPress={window.electron.quitAndInstall}>
+                    退出并安装更新
+                  </Button>
+                ) : (
+                  <Button color="primary" onPress={handleOpenInstaller}>
+                    打开安装包文件夹
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="inline-flex items-center space-x-2">
