@@ -151,6 +151,7 @@ const MusicRecommend = () => {
                 key={item.id}
                 cover={item.cover}
                 title={item.music_title}
+                playCount={item.related_archive.vv_count}
                 footer={<div className="w-full truncate text-left text-sm text-zinc-400">{item.author}</div>}
                 onPress={() =>
                   play({

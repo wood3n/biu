@@ -54,6 +54,7 @@ const VideoPost = () => {
             cover={item.pic}
             ownerName={item.author}
             ownerMid={item.mid}
+            playCount={item.play}
             footer={
               <div className="flex w-full justify-between text-sm text-zinc-500">
                 <span>{formatSecondsToDate(item.created)}</span>

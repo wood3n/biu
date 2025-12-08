@@ -92,6 +92,7 @@ const VideoSeries = () => {
             bvid={item.bvid}
             aid={String(item.id)}
             title={item.title}
+            playCount={item.cnt_info.play}
             cover={item.cover}
             ownerName={item.upper?.name}
             ownerMid={item.upper?.mid}

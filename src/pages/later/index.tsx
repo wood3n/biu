@@ -78,6 +78,7 @@ const Later = () => {
                 title={item.title}
                 cover={item.pic}
                 coverHeight={200}
+                playCount={item.stat.view}
                 ownerName={item.owner?.name}
                 ownerMid={item.owner?.mid}
                 menus={[

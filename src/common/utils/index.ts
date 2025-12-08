@@ -23,3 +23,4 @@ export function stripHtml(htmlString: string) {
 
   return htmlString;
 }
+export * from "./number";
