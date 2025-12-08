@@ -309,6 +309,7 @@ const SettingsPage = () => {
                     />
                   </div>
                 </div>
+
                 <Divider />
                 <h2>关于应用</h2>
                 <div className="flex w-full items-center justify-between">
