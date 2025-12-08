@@ -1,5 +1,65 @@
 # Changelog
 
+## v1.6.0-beta.6
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.5...v1.6.0-beta.6)
+
+### 🚀 新功能
+
+- 设置页面新增菜单设置功能 ([3da7d1e](https://github.com/wood3n/biu/commit/3da7d1e))
+
+### 🩹 修复问题
+
+- 回滚1.6.0-beta.6发版错误 ([55a8d5c](https://github.com/wood3n/biu/commit/55a8d5c))
+- 修复windows打包问题 ([853a3e9](https://github.com/wood3n/biu/commit/853a3e9))
+- Fix review problem ([ffae6e1](https://github.com/wood3n/biu/commit/ffae6e1))
+- **layout:** 修复收藏夹列表显示问题并添加加载更多功能 Closes #100 - 修复收藏夹列表无法显示完整的问题 - 添加分页状态管理 - 实现数据追加功能 - 根据has_more状态显示"显示剩余X个"文字提示 ([#100](https://github.com/wood3n/biu/issues/100))
+- 移除trace自动生成的文件 ([0fa5bd9](https://github.com/wood3n/biu/commit/0fa5bd9))
+- 补充merge丢失的样式 ([4163ff6](https://github.com/wood3n/biu/commit/4163ff6))
+
+### 💅 Refactors
+
+- 重构播放列表功能 ([690a10b](https://github.com/wood3n/biu/commit/690a10b))
+- Add virtual list component ([4903cc9](https://github.com/wood3n/biu/commit/4903cc9))
+
+### 📦 Build
+
+- 修改构建发包错误的问题 ([ee2b7e8](https://github.com/wood3n/biu/commit/ee2b7e8))
+- 修改electron针对不同平台的打包配置和release流程 ([8403da0](https://github.com/wood3n/biu/commit/8403da0))
+- 修改pr-test-build镜像配置 ([1f2f643](https://github.com/wood3n/biu/commit/1f2f643))
+- 修改ci镜像配置 ([95587c4](https://github.com/wood3n/biu/commit/95587c4))
+- 修改knip ci配置 ([736d8de](https://github.com/wood3n/biu/commit/736d8de))
+- 修改安装包名称 ([d9b8a0c](https://github.com/wood3n/biu/commit/d9b8a0c))
+- 修改windows打包配置 ([54aeb5d](https://github.com/wood3n/biu/commit/54aeb5d))
+
+### 🏡 Chore
+
+- **release:** V1.6.0-beta.6 ([45dd137](https://github.com/wood3n/biu/commit/45dd137))
+- **release:** V1.6.0-beta.6 ([b1ca69b](https://github.com/wood3n/biu/commit/b1ca69b))
+
+### 🎨 UI 调整
+
+- 优化macos图标显示 ([10e92d5](https://github.com/wood3n/biu/commit/10e92d5))
+- 优化播放列表显示，区分当前播放和其他列表歌曲 ([e6682cd](https://github.com/wood3n/biu/commit/e6682cd))
+
+### 🤖 CI
+
+- 增加knip输出信息 ([24ca7e8](https://github.com/wood3n/biu/commit/24ca7e8))
+- Add ubuntu arm64 config ([d83fcc3](https://github.com/wood3n/biu/commit/d83fcc3))
+- Add ubuntu arm64 config ([5071c4a](https://github.com/wood3n/biu/commit/5071c4a))
+- Remove useless note ([b48e312](https://github.com/wood3n/biu/commit/b48e312))
+- 修改打包镜像 ([942fcc4](https://github.com/wood3n/biu/commit/942fcc4))
+- 修改打包镜像配置和release提交latest问题修复 ([d8d5b2c](https://github.com/wood3n/biu/commit/d8d5b2c))
+- 修改打包镜像配置 ([1808df7](https://github.com/wood3n/biu/commit/1808df7))
+- Fix steps name ([a6ea9ce](https://github.com/wood3n/biu/commit/a6ea9ce))
+- Fix release edit problem ([25ed792](https://github.com/wood3n/biu/commit/25ed792))
+
+### ❤️ Contributors
+
+- Wood3n
+- Tang Wentao
+- Oxyg3n
+
 ## v1.6.0-beta.5
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.4...v1.6.0-beta.5)
