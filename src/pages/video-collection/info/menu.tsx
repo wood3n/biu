@@ -34,8 +34,9 @@ const Menu = ({ type, isOwn, mediaCount, attr, onAddToPlayList, afterChangeInfo 
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { updateUser, collectedFolder, updateCollectedFolder } = useUser(
+  const { user, updateUser, collectedFolder, updateCollectedFolder } = useUser(
     useShallow(state => ({
+      user: state.user,
       updateUser: state.updateUser,
       collectedFolder: state.collectedFolder,
       updateCollectedFolder: state.updateCollectedFolder,
@@ -109,7 +110,7 @@ const Menu = ({ type, isOwn, mediaCount, attr, onAddToPlayList, afterChangeInfo 
     },
     {
       key: "toggle-collect",
-      show: !isOwn,
+      show: user?.isLogin && !isOwn,
       startContent: isCollected ? <RiStarOffLine size={18} /> : <RiStarLine size={18} />,
       label: isCollected ? "取消收藏" : "收藏",
       className: isCollected ? "text-danger" : "text-primary",
