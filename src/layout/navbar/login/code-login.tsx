@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+
 import { Button, Input, addToast } from "@heroui/react";
 
-import { getPassportLoginWebSmsSend } from "@/service/passport-login-web-sms-send";
+import { useGeetest } from "@/hooks/use-geetest";
 import { getPassportLoginWebLoginSms } from "@/service/passport-login-web-login-sms";
+import { getPassportLoginWebSmsSend } from "@/service/passport-login-web-sms-send";
 
 export interface CodeLoginProps {
   onSuccess?: () => void;
@@ -17,12 +19,13 @@ interface CodeLoginForm {
 const PHONE_REGEX_CN = /^(?:\+?86)?1\d{10}$/; // 简易中国大陆手机号校验
 
 const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
+  const { verify, loading: geetestLoading } = useGeetest();
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
     getValues,
+    trigger,
   } = useForm<CodeLoginForm>({
     mode: "onChange",
     defaultValues: { phone: "", code: "" },
@@ -30,6 +33,7 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
 
   const [captchaKey, setCaptchaKey] = useState<string>("");
   const [countdown, setCountdown] = useState<number>(0);
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     let timer: number | null = null;
@@ -41,22 +45,32 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
     };
   }, [countdown]);
 
-  const onSendCode = async (phone: string) => {
+  const onSendCode = async () => {
+    const phone = getValues("phone");
+    const isPhoneValid = await trigger("phone");
+
+    if (!isPhoneValid || !phone) {
+      return;
+    }
+
+    setSending(true);
     try {
+      // 1. Geetest Verification
+      const gtResult = await verify();
+      if (!gtResult) return;
+
+      // 2. Send SMS
       const tel = Number(phone.replace(/\D/g, ""));
-      if (!PHONE_REGEX_CN.test(String(tel))) {
-        addToast({ title: "请输入正确的手机号", color: "warning" });
-        return;
-      }
       const res = await getPassportLoginWebSmsSend({
         cid: 86,
         tel,
         source: "main_web",
-        token: "",
-        challenge: "",
-        validate: "",
-        seccode: "",
+        token: gtResult.token,
+        challenge: gtResult.challenge,
+        validate: gtResult.validate,
+        seccode: gtResult.seccode,
       });
+
       if (res.code === 0) {
         setCaptchaKey(res.data?.captcha_key || "");
         addToast({ title: "验证码已发送", color: "success" });
@@ -66,6 +80,8 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
       }
     } catch (e: any) {
       addToast({ title: e?.message || "网络异常，稍后重试", color: "danger" });
+    } finally {
+      setSending(false);
     }
   };
 
@@ -73,10 +89,12 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
     try {
       const tel = Number(values.phone.replace(/\D/g, ""));
       const code = Number(values.code.replace(/\D/g, ""));
+
       if (!captchaKey) {
         addToast({ title: "请先获取验证码", color: "warning" });
         return;
       }
+
       const resp = await getPassportLoginWebLoginSms({
         cid: 86,
         tel,
@@ -85,6 +103,7 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
         captcha_key: captchaKey,
         keep: true,
       });
+
       if (resp.code === 0) {
         addToast({ title: "登录成功", color: "success" });
         onSuccess?.();
@@ -97,7 +116,7 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
   };
 
   return (
-    <form className="mt-2 space-y-4" onSubmit={handleSubmit(onSubmitCodeLogin)}>
+    <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit(onSubmitCodeLogin)}>
       <Controller
         control={control}
         name="phone"
@@ -112,19 +131,17 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
             type="tel"
             label="手机号"
             placeholder="请输入手机号"
-            value={field.value}
-            onValueChange={val => field.onChange(val)}
             variant="bordered"
             isClearable
             autoComplete="tel"
             startContent={<span className="text-small text-foreground-500 mr-1">+86</span>}
             isInvalid={!!errors.phone}
-            errorMessage={errors.phone?.message as string}
+            errorMessage={errors.phone?.message}
           />
         )}
       />
 
-      <div className="flex items-end gap-2">
+      <div className="flex items-start gap-2">
         <Controller
           control={control}
           name="code"
@@ -136,20 +153,19 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
               type="text"
               label="验证码"
               placeholder="请输入短信验证码"
-              value={field.value}
-              onValueChange={val => field.onChange(val)}
               variant="bordered"
               isInvalid={!!errors.code}
-              errorMessage={errors.code?.message as string}
+              errorMessage={errors.code?.message}
             />
           )}
         />
         <Button
           type="button"
           variant="flat"
-          className="min-w-[112px]"
-          isDisabled={countdown > 0}
-          onPress={() => onSendCode(getValues("phone") || "")}
+          className="h-14 min-w-28"
+          isDisabled={countdown > 0 || sending || geetestLoading}
+          isLoading={sending || geetestLoading}
+          onPress={onSendCode}
         >
           {countdown > 0 ? `${countdown}s` : "获取验证码"}
         </Button>

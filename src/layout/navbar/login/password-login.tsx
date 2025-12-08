@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
-import { Button, Form, Input, Tab, Tabs, Tooltip, addToast } from "@heroui/react";
-import { RiEyeLine, RiEyeOffLine, RiMailSendLine, RiMailSendLine } from "@remixicon/react";
+import { Button, Form, Input, Link, addToast } from "@heroui/react";
+import { RiEyeLine, RiEyeOffLine } from "@remixicon/react";
 import { JSEncrypt } from "jsencrypt";
 
+import { useGeetest } from "@/hooks/use-geetest";
 import { getPassportLoginWebKey } from "@/service/passport-login-web-key";
 import { postPassportLoginWebLoginPassword } from "@/service/passport-login-web-login-passport";
 
@@ -13,14 +14,13 @@ export interface PasswordLoginProps {
 }
 
 interface PasswordLoginForm {
-  phone: string;
+  username: string;
   password: string;
 }
 
-const PHONE_REGEX_CN = /^(?:\+?86)?1\d{10}$/; // 简易中国大陆手机号校验
-
 const PasswordLogin = ({ onSuccess }: PasswordLoginProps) => {
-  const [loginType, setLoginType] = useState<string>("password");
+  const { verify, loading: geetestLoading } = useGeetest();
+  const [isPwdVisible, setPwdVisible] = useState<boolean>(false);
 
   const {
     control,
@@ -29,29 +29,28 @@ const PasswordLogin = ({ onSuccess }: PasswordLoginProps) => {
     reset,
   } = useForm<PasswordLoginForm>({
     mode: "onChange",
-    defaultValues: { phone: "", password: "" },
+    defaultValues: { username: "", password: "" },
   });
-
-  const [isPwdVisible, setPwdVisible] = useState<boolean>(false);
 
   useEffect(() => {
     return () => {
-      reset({ phone: "", password: "" });
+      reset({ username: "", password: "" });
       setPwdVisible(false);
     };
   }, [reset]);
 
   const onSubmitPasswordLogin = async (values: PasswordLoginForm) => {
     try {
-      const tel = Number(values.phone.replace(/\D/g, ""));
-      const rawPwd = values.password;
+      const { username, password: rawPwd } = values;
 
+      // 1. Get Public Key
       const webKey = await getPassportLoginWebKey();
       if (webKey.code !== 0 || !webKey.data?.key || !webKey.data?.hash) {
         addToast({ title: webKey.message || "获取登录公钥失败", color: "danger" });
         return;
       }
 
+      // 2. Encrypt Password
       const encryptor = new JSEncrypt();
       encryptor.setPublicKey(webKey.data.key);
       const encrypted = encryptor.encrypt(webKey.data.hash + rawPwd);
@@ -60,13 +59,22 @@ const PasswordLogin = ({ onSuccess }: PasswordLoginProps) => {
         return;
       }
 
+      // 3. Geetest Verification
+      const gtResult = await verify();
+      if (!gtResult) return;
+
+      // 4. Login
       const resp = await postPassportLoginWebLoginPassword({
-        cid: 86,
-        tel,
+        username,
         password: encrypted,
+        keep: 0,
+        token: gtResult.token,
+        challenge: gtResult.challenge,
+        validate: gtResult.validate,
+        seccode: gtResult.seccode,
         source: "main_web",
-        keep: true,
       });
+
       if (resp.code === 0) {
         addToast({ title: "登录成功", color: "success" });
         onSuccess?.();
@@ -79,66 +87,73 @@ const PasswordLogin = ({ onSuccess }: PasswordLoginProps) => {
   };
 
   return (
-    <div className="flex flex-1 flex-col p-4">
-      <Tabs
-        fullWidth
-        aria-label="登录方式"
-        variant="solid"
-        selectedKey={loginType}
-        onSelectionChange={key => setLoginType(key as string)}
-        className="mb-4"
+    <Form className="flex w-full flex-col gap-4" onSubmit={handleSubmit(onSubmitPasswordLogin)}>
+      <Controller
+        control={control}
+        name="username"
+        rules={{ required: "请输入账号" }}
+        render={({ field }) => (
+          <Input
+            {...field}
+            label="账号"
+            placeholder="请输入手机号/邮箱"
+            variant="bordered"
+            autoComplete="username"
+            isInvalid={!!errors.username}
+            errorMessage={errors.username?.message}
+          />
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="password"
+        rules={{ required: "请输入密码" }}
+        render={({ field }) => (
+          <Input
+            {...field}
+            type={isPwdVisible ? "text" : "password"}
+            label="密码"
+            placeholder="请输入密码"
+            variant="bordered"
+            autoComplete="current-password"
+            isInvalid={!!errors.password}
+            errorMessage={errors.password?.message}
+            endContent={
+              <Button
+                size="sm"
+                variant="light"
+                className="min-w-0 px-2"
+                type="button"
+                onPress={() => setPwdVisible(v => !v)}
+              >
+                {isPwdVisible ? <RiEyeLine size={18} /> : <RiEyeOffLine size={18} />}
+              </Button>
+            }
+          />
+        )}
+      />
+
+      <Button
+        color="primary"
+        className="w-full"
+        type="submit"
+        isDisabled={isSubmitting || geetestLoading}
+        isLoading={isSubmitting || geetestLoading}
       >
-        <Tab key="password" title="手机号登录" />
-        <Tab key="code" title="验证码登录" />
-      </Tabs>
-      <Form className="gap-4" onSubmit={handleSubmit(onSubmitPasswordLogin)}>
-        <Input
-          name="phone"
-          type="tel"
-          label="手机号"
-          placeholder="请输入手机号"
-          variant="bordered"
-          autoComplete="tel"
-          startContent={<span className="text-small text-foreground-500 mr-1">+86</span>}
-          endContent={
-            loginType === "code" && (
-              <Tooltip content="发送验证码" closeDelay={0}>
-                <Button isIconOnly size="sm">
-                  <RiMailSendLine size={16} />
-                </Button>
-              </Tooltip>
-            )
-          }
-          isInvalid={!!errors.phone}
-          errorMessage={errors.phone?.message as string}
-        />
+        登录
+      </Button>
 
-        <Input
-          type={isPwdVisible ? "text" : "password"}
-          label="密码"
-          placeholder="请输入密码"
-          variant="bordered"
-          autoComplete="current-password"
-          isInvalid={!!errors.password}
-          errorMessage={errors.password?.message as string}
-          endContent={
-            <Button
-              size="sm"
-              variant="light"
-              className="min-w-0 px-2"
-              type="button"
-              onPress={() => setPwdVisible(v => !v)}
-            >
-              {isPwdVisible ? <RiEyeLine size={18} /> : <RiEyeOffLine size={18} />}
-            </Button>
-          }
-        />
-
-        <Button color="primary" className="w-full" type="submit" isDisabled={isSubmitting} isLoading={isSubmitting}>
-          登录
-        </Button>
-      </Form>
-    </div>
+      <div className="flex w-full items-center justify-center px-1">
+        <Link
+          onPress={() => window.electron.openExternal("https://passport.bilibili.com/pc/passport/findPassword")}
+          size="sm"
+          className="text-primary cursor-pointer hover:underline"
+        >
+          忘记密码?
+        </Link>
+      </div>
+    </Form>
   );
 };
 

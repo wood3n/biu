@@ -69,30 +69,31 @@ const QrcodeLogin = ({ onClose }: QrcodeLoginProps) => {
 
   return (
     <div className="flex flex-col items-center p-6">
-      <h2 className="mb-4">扫码登录</h2>
-      <div className="border-divider bg-content1 relative flex h-48 w-48 items-center justify-center overflow-hidden rounded-lg border">
+      <div className="mb-4 text-lg font-medium">扫码登录</div>
+      <div className="border-divider bg-content1 relative flex h-40 w-40 items-center justify-center overflow-hidden rounded-lg border">
         {genLoading || !qrcodeData?.url ? (
           <Skeleton className="rounded-lg">
-            <div className="bg-default-300 h-[176px] w-[176px] rounded-lg" />
+            <div className="bg-default-300 h-[144px] w-[144px] rounded-lg" />
           </Skeleton>
         ) : (
-          <QRCodeCanvas value={qrcodeData?.url} size={176} className="rounded-md" />
+          <QRCodeCanvas value={qrcodeData?.url} size={144} className="rounded-md" />
         )}
         <div
           className={clx(
-            "absolute top-0 right-0 h-full w-full flex-col items-center justify-center bg-gray-300/30 transition",
+            "absolute top-0 right-0 h-full w-full flex-col items-center justify-center bg-black/70 transition",
             {
               hidden: !isOvertime,
               flex: isOvertime,
             },
           )}
         >
-          <Button isLoading={genLoading} isIconOnly variant="flat" onPress={refreshCode}>
-            <RiRefreshLine className="text-primary" />
+          <Button isLoading={genLoading} isIconOnly color="primary" variant="solid" onPress={refreshCode}>
+            <RiRefreshLine />
           </Button>
-          {isOvertime && <p className="mt-2 text-center text-sm text-black">二维码已失效，请刷新</p>}
+          {isOvertime && <p className="mt-2 text-center text-sm font-bold text-white">二维码已失效，请刷新</p>}
         </div>
       </div>
+      <p className="text-default-500 mt-4 text-sm whitespace-nowrap">请使用bilibili手机客户端扫码登录</p>
     </div>
   );
 };

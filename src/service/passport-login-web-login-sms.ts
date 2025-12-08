@@ -32,5 +32,7 @@ export interface WebLoginSmsResponse {
  * @returns 登录结果
  */
 export function getPassportLoginWebLoginSms(params: WebLoginSmsRequestParams): Promise<WebLoginSmsResponse> {
-  return passportRequest.post("/x/passport-login/web/login/sms", params);
+  return passportRequest.post("/x/passport-login/web/login/sms", params, {
+    useFormData: true,
+  });
 }

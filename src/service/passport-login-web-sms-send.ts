@@ -30,5 +30,7 @@ export interface WebSmsSendResponse {
  * @returns 短信验证码发送结果
  */
 export function getPassportLoginWebSmsSend(params: WebSmsSendRequestParams): Promise<WebSmsSendResponse> {
-  return passportRequest.post("/x/passport-login/web/sms/send", params);
+  return passportRequest.post("/x/passport-login/web/sms/send", params, {
+    useFormData: true,
+  });
 }
