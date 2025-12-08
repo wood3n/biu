@@ -54,6 +54,62 @@ function createTray({ getMainWindow, onExit }: Props) {
 
   const menuTemplate: MenuItemConstructorOptions[] = [
     {
+      label: "播放/暂停",
+      click: () => {
+        const win = getMainWindow?.();
+        if (!win) return;
+        try {
+          win.webContents.send(channel.player.toggle);
+        } catch (err) {
+          log.error("[tray] toggle play failed:", err);
+        }
+      },
+    },
+    {
+      label: "上一曲",
+      click: () => {
+        const win = getMainWindow?.();
+        if (!win) return;
+        try {
+          win.webContents.send(channel.player.prev);
+        } catch (err) {
+          log.error("[tray] play previous failed:", err);
+        }
+      },
+    },
+    {
+      label: "下一曲",
+      click: () => {
+        const win = getMainWindow?.();
+        if (!win) return;
+        try {
+          win.webContents.send(channel.player.next);
+        } catch (err) {
+          log.error("[tray] play next failed:", err);
+        }
+      },
+    },
+    {
+      label: "显示/隐藏界面",
+      click: () => {
+        const win = getMainWindow?.();
+        if (!win) return;
+        try {
+          if (win.isVisible()) {
+            win.hide();
+          } else {
+            win.show();
+            win.focus();
+          }
+        } catch (err) {
+          log.error("[tray] toggle main window visibility failed:", err);
+        }
+      },
+    },
+    {
+      type: "separator",
+    },
+    {
       label: "设置",
       click: () => {
         const win = getMainWindow?.();
