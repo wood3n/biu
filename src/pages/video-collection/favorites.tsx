@@ -182,6 +182,7 @@ const Favorites: React.FC = () => {
             cover={item.cover}
             ownerName={item.upper?.name}
             ownerMid={item.upper?.mid}
+            playCount={item.cnt_info.play}
             collectMenuTitle={isOwn ? "修改收藏夹" : "收藏"}
             footer={
               !isCollected && (
