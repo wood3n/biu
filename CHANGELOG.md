@@ -1,5 +1,41 @@
 # Changelog
 
+## v1.6.0-beta.8
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.7...v1.6.0-beta.8)
+
+### 🚀 新功能
+
+- **组件MVCard:** 为MV卡片添加播放量显示功能 close#80 在多个页面组件中添加playCount属性，并实现播放量格式化显示 新增数字格式化工具函数，支持亿/万单位转换 ([#80](https://github.com/wood3n/biu/issues/80))
+- **音量控制:** 添加鼠标滚轮调整音量功能 ([dadf5df](https://github.com/wood3n/biu/commit/dadf5df))
+- 补充密码和短信登录功能 ([c2a2203](https://github.com/wood3n/biu/commit/c2a2203))
+- **托盘菜单:** 添加播放控制和窗口显示功能 ([f37a29b](https://github.com/wood3n/biu/commit/f37a29b))
+- **托盘菜单:** 添加播放控制和窗口显示功能 ([e9ee09e](https://github.com/wood3n/biu/commit/e9ee09e))
+- 分集视频支持搜索 ([025cd52](https://github.com/wood3n/biu/commit/025cd52))
+
+### 🩹 修复问题
+
+- **mv-card:** 仅在 playCount 存在时显示播放计数 ([1253827](https://github.com/wood3n/biu/commit/1253827))
+- **mv-card:** 修复播放次数为null时显示异常的问题 ([98f9e3e](https://github.com/wood3n/biu/commit/98f9e3e))
+- 修复mini播放器空状态显示问题 ([e5e3ae0](https://github.com/wood3n/biu/commit/e5e3ae0))
+- 修复mini播放器状态同步问题 ([142e45b](https://github.com/wood3n/biu/commit/142e45b))
+- 完善密码登录和短信登录功能 ([a3d96dd](https://github.com/wood3n/biu/commit/a3d96dd))
+- 鼠标滚轮调节音量功能增强 ([009946d](https://github.com/wood3n/biu/commit/009946d))
+- 修复搜索切换tab没有重置数据导致key重复的问题 ([d7303f3](https://github.com/wood3n/biu/commit/d7303f3))
+
+### 💅 Refactors
+
+- **视频卡片:** 统一播放次数属性为playCount ([6672fb7](https://github.com/wood3n/biu/commit/6672fb7))
+- 移除设置鼠标滚轮调整音量的功能，改为默认支持 ([3fd7107](https://github.com/wood3n/biu/commit/3fd7107))
+- **utils:** 使用 Intl.NumberFormat 替换数字格式化函数 ([658aaaf](https://github.com/wood3n/biu/commit/658aaaf))
+
+### ❤️ Contributors
+
+- Wood3n
+- Hope
+- Oxyg3n
+- Tang Wentao
+
 ## v1.6.0-beta.7
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.6...v1.6.0-beta.7)
