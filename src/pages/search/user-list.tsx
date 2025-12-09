@@ -19,6 +19,8 @@ export default function SearchUser({ items }: SearchUserProps) {
     return <Empty className="min-h-[280px]" />;
   }
 
+  console.log("items", items);
+
   return (
     <div className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-3 lg:grid-cols-4">
       {items.map(u => (
