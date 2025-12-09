@@ -20,6 +20,7 @@ const Later = () => {
   const displayMode = useSettings(state => state.displayMode);
 
   const { isOpen: isOpenDelete, onOpen: onOpenDelete, onOpenChange: onOpenChangeDelete } = useDisclosure();
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
 
   const {
     data,
@@ -58,6 +59,11 @@ const Later = () => {
     initData();
   }, []);
 
+  const handleOpenDeleteModal = (item: any) => {
+    setItemToDelete(item);
+    onOpenDelete();
+  };
+
   const renderMediaItem = (item: any) => (
     <div className="mb-4">
       <MediaItem
@@ -76,7 +82,7 @@ const Later = () => {
             key: "delete",
             title: "删除",
             icon: <RiDeleteBinLine size={16} />,
-            onPress: onOpenDelete,
+            onPress: () => handleOpenDeleteModal(item),
           },
         ]}
         footer={
@@ -99,30 +105,6 @@ const Later = () => {
             ownerMid: item.owner?.mid,
           })
         }
-      />
-      <ConfirmModal
-        isOpen={isOpenDelete}
-        onOpenChange={onOpenChangeDelete}
-        type="danger"
-        title="确认删除吗？"
-        confirmText="删除"
-        onConfirm={async () => {
-          const res = await postHistoryToViewDel({
-            aid: item?.aid,
-          });
-
-          if (res.code === 0) {
-            addToast({
-              title: "删除成功",
-              color: "success",
-            });
-            setTimeout(() => {
-              refreshAsync?.();
-            }, 500);
-          }
-
-          return res.code === 0;
-        }}
       />
     </div>
   );
@@ -152,6 +134,32 @@ const Later = () => {
           </div>
         )}
       </ScrollContainer>
+      <ConfirmModal
+        isOpen={isOpenDelete}
+        onOpenChange={onOpenChangeDelete}
+        type="danger"
+        title="确认删除吗？"
+        confirmText="删除"
+        onConfirm={async () => {
+          if (!itemToDelete) return false;
+
+          const res = await postHistoryToViewDel({
+            aid: itemToDelete?.aid,
+          });
+
+          if (res.code === 0) {
+            addToast({
+              title: "删除成功",
+              color: "success",
+            });
+            setTimeout(() => {
+              refreshAsync?.();
+            }, 500);
+          }
+
+          return res.code === 0;
+        }}
+      />
     </>
   );
 };
