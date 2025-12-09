@@ -6,9 +6,10 @@ import { useRequest } from "ahooks";
 import { CollectionType } from "@/common/constants/collection";
 import { formatDuration } from "@/common/utils";
 import GridList from "@/components/grid-list";
-import MVCard from "@/components/mv-card";
+import MediaItem from "@/components/media-item";
 import { getUserVideoArchivesList } from "@/service/user-video-archives-list";
 import { usePlayList } from "@/store/play-list";
+import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
 
 import Info from "./info";
@@ -19,6 +20,7 @@ const VideoSeries = () => {
   const collectedFolder = useUser(state => state.collectedFolder);
 
   const isCollected = collectedFolder?.some(item => item.id === Number(id));
+  const displayMode = useSettings(state => state.displayMode);
   const play = usePlayList(state => state.play);
   const playList = usePlayList(state => state.playList);
   const addList = usePlayList(state => state.addList);
@@ -66,6 +68,43 @@ const VideoSeries = () => {
     }
   };
 
+  const renderMediaItem = (item: any) => (
+    <MediaItem
+      key={item.bvid}
+      displayMode={displayMode}
+      type="mv"
+      bvid={item.bvid}
+      aid={String(item.id)}
+      title={item.title}
+      playCount={item.cnt_info.play}
+      cover={item.cover}
+      ownerName={item.upper?.name}
+      ownerMid={item.upper?.mid}
+      duration={item.duration as number}
+      footer={
+        displayMode === "card" &&
+        !isCollected && (
+          <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
+            <Link href={`/user/${item.upper?.mid}`} className="text-foreground-500 text-sm hover:underline">
+              {item.upper?.name}
+            </Link>
+            <span>{formatDuration(item.duration as number)}</span>
+          </div>
+        )
+      }
+      onPress={() =>
+        play({
+          type: "mv",
+          bvid: item.bvid,
+          title: item.title,
+          cover: item.cover,
+          ownerName: item.upper?.name,
+          ownerMid: item.upper?.mid,
+        })
+      }
+    />
+  );
+
   return (
     <>
       <Info
@@ -81,44 +120,17 @@ const VideoSeries = () => {
         onPlayAll={onPlayAll}
         onAddToPlayList={addToPlayList}
       />
-      <GridList
-        enablePagination
-        data={data?.medias ?? []}
-        loading={loading}
-        itemKey="bvid"
-        renderItem={item => (
-          <MVCard
-            type="mv"
-            bvid={item.bvid}
-            aid={String(item.id)}
-            title={item.title}
-            playCount={item.cnt_info.play}
-            cover={item.cover}
-            ownerName={item.upper?.name}
-            ownerMid={item.upper?.mid}
-            footer={
-              !isCollected && (
-                <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
-                  <Link href={`/user/${item.upper?.mid}`} className="text-foreground-500 text-sm hover:underline">
-                    {item.upper?.name}
-                  </Link>
-                  <span>{formatDuration(item.duration as number)}</span>
-                </div>
-              )
-            }
-            onPress={() =>
-              play({
-                type: "mv",
-                bvid: item.bvid,
-                title: item.title,
-                cover: item.cover,
-                ownerName: item.upper?.name,
-                ownerMid: item.upper?.mid,
-              })
-            }
-          />
-        )}
-      />
+      {displayMode === "card" ? (
+        <GridList
+          enablePagination
+          data={data?.medias ?? []}
+          loading={loading}
+          itemKey="bvid"
+          renderItem={renderMediaItem}
+        />
+      ) : (
+        <div className="space-y-2">{data?.medias?.map(renderMediaItem)}</div>
+      )}
     </>
   );
 };
