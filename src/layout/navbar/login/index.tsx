@@ -22,17 +22,17 @@ const Login = ({ isOpen, onOpenChange }: Props) => {
           <Divider className="h-42" orientation="vertical" />
           <div className="w-[320px]">
             <Tabs
-              aria-label="Login Options"
-              classNames={{ tabContent: "text-lg font-medium" }}
+              aria-label="登录方式"
+              classNames={{ tabContent: "text-lg font-medium mb-4" }}
               fullWidth
               size="lg"
               variant="underlined"
             >
-              <Tab key="password" title="密码登录">
-                <PasswordLogin onSuccess={onClose} />
-              </Tab>
               <Tab key="code" title="短信登录">
-                <CodeLogin onSuccess={onClose} />
+                <CodeLogin onClose={onClose} />
+              </Tab>
+              <Tab key="password" title="密码登录">
+                <PasswordLogin onClose={onClose} />
               </Tab>
             </Tabs>
           </div>

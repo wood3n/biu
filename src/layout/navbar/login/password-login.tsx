@@ -1,16 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import { Button, Form, Input, Link, addToast } from "@heroui/react";
-import { RiEyeLine, RiEyeOffLine } from "@remixicon/react";
+import { Button, Form, Input, Tooltip, addToast } from "@heroui/react";
+import { RiEyeLine, RiEyeOffLine, RiQuestionLine } from "@remixicon/react";
 import { JSEncrypt } from "jsencrypt";
+import moment from "moment";
 
-import { useGeetest } from "@/hooks/use-geetest";
+import { useGeetest } from "@/common/hooks/use-geetest";
 import { getPassportLoginWebKey } from "@/service/passport-login-web-key";
 import { postPassportLoginWebLoginPassword } from "@/service/passport-login-web-login-passport";
+import { useToken } from "@/store/token";
+import { useUser } from "@/store/user";
 
 export interface PasswordLoginProps {
-  onSuccess?: () => void;
+  onClose: () => void;
 }
 
 interface PasswordLoginForm {
@@ -18,9 +21,22 @@ interface PasswordLoginForm {
   password: string;
 }
 
-const PasswordLogin = ({ onSuccess }: PasswordLoginProps) => {
+const PasswordLogin = ({ onClose }: PasswordLoginProps) => {
   const { verify, loading: geetestLoading } = useGeetest();
   const [isPwdVisible, setPwdVisible] = useState<boolean>(false);
+  const usernameRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      usernameRef.current?.focus();
+    });
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const updateUser = useUser(state => state.updateUser);
+  const updateToken = useToken(state => state.updateToken);
 
   const {
     control,
@@ -77,7 +93,12 @@ const PasswordLogin = ({ onSuccess }: PasswordLoginProps) => {
 
       if (resp.code === 0) {
         addToast({ title: "登录成功", color: "success" });
-        onSuccess?.();
+        updateToken({
+          tokenData: { refresh_token: resp.data?.refresh_token },
+          nextCheckRefreshTime: moment().add(2, "days").unix(),
+        });
+        await updateUser();
+        onClose?.();
       } else {
         addToast({ title: resp.message || "登录失败", color: "danger" });
       }
@@ -95,8 +116,11 @@ const PasswordLogin = ({ onSuccess }: PasswordLoginProps) => {
         render={({ field }) => (
           <Input
             {...field}
-            label="账号"
-            placeholder="请输入手机号/邮箱"
+            ref={e => {
+              field.ref(e);
+              usernameRef.current = e;
+            }}
+            placeholder="请输入账号"
             variant="bordered"
             autoComplete="username"
             isInvalid={!!errors.username}
@@ -112,23 +136,50 @@ const PasswordLogin = ({ onSuccess }: PasswordLoginProps) => {
         render={({ field }) => (
           <Input
             {...field}
+            ref={e => {
+              field.ref(e);
+              passwordRef.current = e;
+            }}
             type={isPwdVisible ? "text" : "password"}
-            label="密码"
             placeholder="请输入密码"
             variant="bordered"
             autoComplete="current-password"
             isInvalid={!!errors.password}
             errorMessage={errors.password?.message}
             endContent={
-              <Button
-                size="sm"
-                variant="light"
-                className="min-w-0 px-2"
-                type="button"
-                onPress={() => setPwdVisible(v => !v)}
-              >
-                {isPwdVisible ? <RiEyeLine size={18} /> : <RiEyeOffLine size={18} />}
-              </Button>
+              <div className="flex items-center">
+                <Button
+                  size="sm"
+                  variant="light"
+                  className="min-w-0 px-2"
+                  type="button"
+                  onPress={() => {
+                    setPwdVisible(v => !v);
+                    setTimeout(() => {
+                      const input = passwordRef.current;
+                      if (input) {
+                        input.focus();
+                        const len = input.value.length;
+                        input.setSelectionRange(len, len);
+                      }
+                    });
+                  }}
+                >
+                  {isPwdVisible ? <RiEyeLine size={18} /> : <RiEyeOffLine size={18} />}
+                </Button>
+                <Tooltip content="找回密码">
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="light"
+                    onPress={() =>
+                      window.electron.openExternal("https://passport.bilibili.com/pc/passport/findPassword")
+                    }
+                  >
+                    <RiQuestionLine size={18} />
+                  </Button>
+                </Tooltip>
+              </div>
             }
           />
         )}
@@ -143,16 +194,6 @@ const PasswordLogin = ({ onSuccess }: PasswordLoginProps) => {
       >
         登录
       </Button>
-
-      <div className="flex w-full items-center justify-center px-1">
-        <Link
-          onPress={() => window.electron.openExternal("https://passport.bilibili.com/pc/passport/findPassword")}
-          size="sm"
-          className="text-primary cursor-pointer hover:underline"
-        >
-          忘记密码?
-        </Link>
-      </div>
     </Form>
   );
 };

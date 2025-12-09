@@ -20,9 +20,12 @@ export interface WebLoginSmsResponse {
   code: number; // 返回值，0表示成功
   message: string; // 错误信息
   data: {
+    hint: string; // 登录提示信息
     is_new: boolean; // 是否为新注册用户
     status: number; // 状态码
     url: string; // 跳转 url
+    refresh_token: string; // 刷新 token
+    timestamp: number; // 当前登录的时间戳
   };
 }
 

@@ -1,15 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import { Button, Input, addToast } from "@heroui/react";
+import { Button, Input, Select, SelectItem, addToast } from "@heroui/react";
+import { useRequest } from "ahooks";
+import moment from "moment";
 
-import { useGeetest } from "@/hooks/use-geetest";
+import { useGeetest } from "@/common/hooks/use-geetest";
+import { getGenericCountryList } from "@/service/generic-country-list";
+import { getPassportLoginDefaultCountry } from "@/service/passport-login-web-country";
 import { getPassportLoginWebLoginSms } from "@/service/passport-login-web-login-sms";
-import { getPassportLoginWebSmsSend } from "@/service/passport-login-web-sms-send";
-
-export interface CodeLoginProps {
-  onSuccess?: () => void;
-}
+import { passportLoginWebSmsSend } from "@/service/passport-login-web-sms-send";
+import { useToken } from "@/store/token";
+import { useUser } from "@/store/user";
 
 interface CodeLoginForm {
   phone: string;
@@ -18,8 +20,46 @@ interface CodeLoginForm {
 
 const PHONE_REGEX_CN = /^(?:\+?86)?1\d{10}$/; // 简易中国大陆手机号校验
 
-const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
+interface Props {
+  onClose: () => void;
+}
+
+const CodeLogin = ({ onClose }: Props) => {
+  const [countryId, setCountryId] = useState<string>("1");
+  const codeRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      phoneRef.current?.focus();
+    });
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const updateUser = useUser(state => state.updateUser);
+  const updateToken = useToken(state => state.updateToken);
+
+  useEffect(() => {
+    const getDefaultCountry = async () => {
+      const res = await getPassportLoginDefaultCountry();
+
+      if (res?.data?.default?.id) {
+        setCountryId(String(res.data.default.id));
+      }
+    };
+
+    getDefaultCountry();
+  }, []);
+
+  const { data: countryList } = useRequest(async () => {
+    const res = await getGenericCountryList();
+
+    return res?.data?.common || [];
+  });
+
   const { verify, loading: geetestLoading } = useGeetest();
+
   const {
     control,
     handleSubmit,
@@ -35,6 +75,7 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
   const [countdown, setCountdown] = useState<number>(0);
   const [sending, setSending] = useState(false);
 
+  // 倒计时逻辑保持不变
   useEffect(() => {
     let timer: number | null = null;
     if (countdown > 0) {
@@ -61,8 +102,9 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
 
       // 2. Send SMS
       const tel = Number(phone.replace(/\D/g, ""));
-      const res = await getPassportLoginWebSmsSend({
-        cid: 86,
+      const countryCode = countryList?.find(item => item.id === Number(countryId))?.country_id || "86";
+      const res = await passportLoginWebSmsSend({
+        cid: Number(countryCode),
         tel,
         source: "main_web",
         token: gtResult.token,
@@ -75,6 +117,9 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
         setCaptchaKey(res.data?.captcha_key || "");
         addToast({ title: "验证码已发送", color: "success" });
         setCountdown(60);
+        setTimeout(() => {
+          codeRef.current?.focus();
+        });
       } else {
         addToast({ title: res.message || "验证码发送失败", color: "danger" });
       }
@@ -95,8 +140,9 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
         return;
       }
 
+      const countryCode = countryList?.find(item => item.id === Number(countryId))?.country_id || "86";
       const resp = await getPassportLoginWebLoginSms({
-        cid: 86,
+        cid: Number(countryCode),
         tel,
         code,
         source: "main_web",
@@ -106,7 +152,12 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
 
       if (resp.code === 0) {
         addToast({ title: "登录成功", color: "success" });
-        onSuccess?.();
+        updateToken({
+          tokenData: { refresh_token: resp.data?.refresh_token },
+          nextCheckRefreshTime: moment().add(2, "days").unix(),
+        });
+        await updateUser();
+        onClose();
       } else {
         addToast({ title: resp.message || "登录失败", color: "danger" });
       }
@@ -122,21 +173,63 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
         name="phone"
         rules={{
           required: "请输入手机号",
-          pattern: { value: PHONE_REGEX_CN, message: "手机号格式不正确" },
+          validate: value => {
+            if (countryId === "1" && !PHONE_REGEX_CN.test(value)) {
+              return "手机号格式不正确";
+            }
+            return true;
+          },
         }}
         render={({ field }) => (
           <Input
             {...field}
+            ref={e => {
+              field.ref(e);
+              phoneRef.current = e;
+            }}
             name="phone"
             type="tel"
-            label="手机号"
             placeholder="请输入手机号"
             variant="bordered"
             isClearable
             autoComplete="tel"
-            startContent={<span className="text-small text-foreground-500 mr-1">+86</span>}
             isInvalid={!!errors.phone}
             errorMessage={errors.phone?.message}
+            classNames={{
+              inputWrapper: "pl-0",
+            }}
+            startContent={
+              <Select
+                variant="bordered"
+                disableAnimation
+                items={countryList || []}
+                className="w-[140px]"
+                popoverProps={{
+                  portalContainer: document.body,
+                  placement: "bottom-start",
+                  style: {
+                    width: "auto",
+                  },
+                }}
+                classNames={{
+                  popoverContent: "w-auto",
+                  listbox: "w-max",
+                  listboxWrapper: "w-auto",
+                  trigger: "border-none",
+                }}
+                selectedKeys={[countryId]}
+                onChange={e => {
+                  setCountryId(e.target.value);
+                }}
+                aria-label="选择国家/地区"
+              >
+                {country => (
+                  <SelectItem key={country.id} textValue={`+${country.country_id}`}>
+                    {country.cname}(+{country.country_id})
+                  </SelectItem>
+                )}
+              </Select>
+            }
           />
         )}
       />
@@ -145,14 +238,20 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
         <Controller
           control={control}
           name="code"
-          rules={{ required: "请输入验证码", minLength: { value: 4, message: "验证码至少4位" } }}
+          rules={{
+            required: "请输入验证码",
+            pattern: { value: /^\d{6}$/, message: "验证码必须为6位数字" },
+          }}
           render={({ field }) => (
             <Input
               {...field}
+              ref={e => {
+                field.ref(e);
+                codeRef.current = e;
+              }}
               className="flex-1"
               type="text"
-              label="验证码"
-              placeholder="请输入短信验证码"
+              placeholder="验证码"
               variant="bordered"
               isInvalid={!!errors.code}
               errorMessage={errors.code?.message}
@@ -162,7 +261,6 @@ const CodeLogin = ({ onSuccess }: CodeLoginProps) => {
         <Button
           type="button"
           variant="flat"
-          className="h-14 min-w-28"
           isDisabled={countdown > 0 || sending || geetestLoading}
           isLoading={sending || geetestLoading}
           onPress={onSendCode}
