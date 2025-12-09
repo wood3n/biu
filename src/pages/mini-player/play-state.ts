@@ -10,7 +10,7 @@ interface MediaData {
 interface State {
   isPlaying: boolean;
   isSingle: boolean;
-  mediaData?: MediaData;
+  mediaData?: MediaData | null;
   currentTime: number;
   duration: number;
   playMode?: PlayMode;

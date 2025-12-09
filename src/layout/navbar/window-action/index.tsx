@@ -46,10 +46,12 @@ const WindowAction = () => {
               from: "main",
               state: {
                 isSingle: list.length === 1,
-                mediaData: {
-                  title: playItem?.pageTitle || playItem?.pageTitle,
-                  cover: playItem?.pageCover || playItem?.cover,
-                },
+                mediaData: playItem
+                  ? {
+                      title: playItem.pageTitle || playItem.pageTitle,
+                      cover: playItem.pageCover || playItem.cover,
+                    }
+                  : null,
                 isPlaying: isPlaying,
                 currentTime: currentTime,
                 playMode: playMode,
