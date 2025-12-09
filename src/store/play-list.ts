@@ -247,6 +247,9 @@ export const usePlayList = create<State & Action>()(
         if (isUrlValid(currentPlayItem?.audioUrl)) {
           if (audio.src !== currentPlayItem.audioUrl) {
             audio.src = currentPlayItem.audioUrl;
+            if (get().currentTime) {
+              audio.currentTime = get().currentTime as number;
+            }
           }
           return;
         }
@@ -256,6 +259,9 @@ export const usePlayList = create<State & Action>()(
           if (mvPlayData?.audioUrl) {
             if (audio.src !== mvPlayData.audioUrl) {
               audio.src = mvPlayData.audioUrl;
+              if (get().currentTime) {
+                audio.currentTime = get().currentTime as number;
+              }
             }
             set(state => {
               const listItem = state.list.find(item => item.id === state.playId);
@@ -275,6 +281,9 @@ export const usePlayList = create<State & Action>()(
           if (musicPlayData?.audioUrl) {
             if (audio.src !== musicPlayData.audioUrl) {
               audio.src = musicPlayData.audioUrl;
+              if (get().currentTime) {
+                audio.currentTime = get().currentTime as number;
+              }
             }
             set(state => {
               const listItem = state.list.find(item => item.id === state.playId);
@@ -381,10 +390,6 @@ export const usePlayList = create<State & Action>()(
               const playItem = get().list.find(item => item.id === get().playId);
               if (playItem) {
                 await ensureAudioSrcValid();
-
-                if (get().currentTime) {
-                  audio.currentTime = get().currentTime as number;
-                }
 
                 updateMediaSession({
                   title: playItem.title,
