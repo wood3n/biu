@@ -111,7 +111,14 @@ const FavFolderSelect = ({ rid, isOpen, onOpenChange, title, afterSubmit }: FavF
   };
 
   return (
-    <Modal disableAnimation isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false} size="md">
+    <Modal
+      disableAnimation
+      scrollBehavior="inside"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      isDismissable={false}
+      size="md"
+    >
       <ModalContent>
         <ModalHeader className="text-base font-medium">{title}</ModalHeader>
         <ModalBody className="h-[800px] max-h-[800px] px-0">

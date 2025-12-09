@@ -60,19 +60,37 @@
       "labels": ["deps:eslint"]
     },
     {
-      "matchPackagePatterns": ["^electron$"],
-      "groupName": "electron runtime",
+      "matchPackagePatterns": ["^electron"],
+      "groupName": "electron ecosystem",
       "automerge": false,
       "stabilityDays": 7,
       "schedule": ["before 6am on monday"],
       "labels": ["deps:electron"]
     },
     {
-      "matchPackagePatterns": ["^react$", "^react-dom$"],
+      "matchPackagePatterns": ["^react", "^@types/react"],
       "groupName": "react ecosystem",
       "automerge": false,
       "stabilityDays": 3,
       "labels": ["deps:react"]
+    },
+    {
+      "matchPackagePatterns": [
+        "^prettier",
+        "^stylelint",
+        "^commitlint",
+        "^husky",
+        "^lint-staged",
+        "^vitest",
+        "^knip",
+        "^changelogen",
+        "^rimraf",
+        "^chokidar",
+        "^rollup"
+      ],
+      "groupName": "code quality and build tools",
+      "labels": ["deps:quality"],
+      "automerge": false
     },
     {
       "description": "Disable Node updates in package.json engines",
@@ -85,6 +103,47 @@
       "description": "Disable Node updates from .nvmrc",
       "matchManagers": ["nvm"],
       "enabled": false
+    },
+    {
+      "matchPackagePatterns": ["^@heroui/", "^@remixicon/", "^@tanstack/", "^overlayscrollbars", "^react-colorful"],
+      "groupName": "UI libraries",
+      "labels": ["deps:ui"],
+      "automerge": false
+    },
+    {
+      "matchPackagePatterns": [
+        "^tailwindcss",
+        "^@tailwindcss",
+        "^postcss",
+        "^prettier-plugin-tailwindcss",
+        "^tailwind-merge"
+      ],
+      "groupName": "tailwindcss ecosystem",
+      "labels": ["deps:tailwind"],
+      "automerge": false
+    },
+    {
+      "matchPackagePatterns": [
+        "^axios$",
+        "^zustand$",
+        "^immer$",
+        "^zod$",
+        "^moment",
+        "^classnames$",
+        "^cookie$",
+        "^es-toolkit$",
+        "^filesize$",
+        "^spark-md5$",
+        "^jsencrypt$",
+        "^font-list$",
+        "^ahooks$",
+        "^react-hook-form$",
+        "^@hookform/",
+        "^qrcode.react"
+      ],
+      "groupName": "utils and state management",
+      "labels": ["deps:utils"],
+      "automerge": false
     },
     {
       "description": "Disable updates for selected packages",
