@@ -61,13 +61,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release edit "${{ github.ref_name }}" --draft=false --repo "${{ github.repository }}"
-      - name: Mark as stable (stable only)
-        if: ${{ !contains(github.ref_name, '-') }}
+      - name: Mark as stable
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release edit "${{ github.ref_name }}" --prerelease=false --repo "${{ github.repository }}"
-      - name: Mark as latest (stable only)
-        if: ${{ !contains(github.ref_name, '-') }}
+      - name: Mark as latest
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release edit "${{ github.ref_name }}" --latest --repo "${{ github.repository }}"
