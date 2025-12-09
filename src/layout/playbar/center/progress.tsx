@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 import { Slider, type SliderProps } from "@heroui/react";
-import clx from "classnames";
 
 import { formatDuration } from "@/common/utils";
 import { usePlayList } from "@/store/play-list";
@@ -32,12 +31,9 @@ const Progress = ({ isDisabled }: SliderProps) => {
         color={showThumb ? "primary" : "foreground"}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className={clx("flex-1", {
-          "cursor-pointer": !isDisabled,
-          "cursor-not-allowed": isDisabled,
-        })}
+        className="flex-1"
         classNames={{
-          track: "h-[4px]",
+          track: "h-[4px] cursor-pointer",
           thumb: "w-4 h-4 bg-primary after:hidden",
         }}
       />
