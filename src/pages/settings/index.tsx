@@ -42,6 +42,7 @@ const SettingsPage = () => {
     autoStart,
     audioQuality,
     hiddenMenuKeys,
+    displayMode,
   } = useSettings(
     useShallow(s => ({
       fontFamily: s.fontFamily,
@@ -54,6 +55,7 @@ const SettingsPage = () => {
       autoStart: s.autoStart,
       audioQuality: s.audioQuality,
       hiddenMenuKeys: s.hiddenMenuKeys,
+      displayMode: s.displayMode,
     })),
   );
   const updateSettings = useSettings(s => s.update);
@@ -76,6 +78,7 @@ const SettingsPage = () => {
       autoStart,
       audioQuality,
       hiddenMenuKeys,
+      displayMode,
     },
   });
 
@@ -204,6 +207,24 @@ const SettingsPage = () => {
                       )}
                     />
                   </div>
+                </div>
+
+                {/* 显示模式 */}
+                <div className="flex w-full items-center justify-between">
+                  <div className="mr-6 space-y-1">
+                    <div className="text-medium font-medium">显示模式</div>
+                    <div className="text-sm text-zinc-500">选择媒体内容的显示样式</div>
+                  </div>
+                  <Controller
+                    control={control}
+                    name="displayMode"
+                    render={({ field }) => (
+                      <RadioGroup orientation="horizontal" value={field.value} onValueChange={field.onChange}>
+                        <Radio value="card">卡片</Radio>
+                        <Radio value="list">列表</Radio>
+                      </RadioGroup>
+                    )}
+                  />
                 </div>
                 <Divider />
                 <h2>播放</h2>

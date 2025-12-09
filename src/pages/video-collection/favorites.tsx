@@ -7,9 +7,10 @@ import { usePagination } from "ahooks";
 import { CollectionType } from "@/common/constants/collection";
 import { formatDuration } from "@/common/utils";
 import GridList from "@/components/grid-list";
-import MVCard from "@/components/mv-card";
+import MediaItem from "@/components/media-item";
 import { getFavResourceList } from "@/service/fav-resource";
 import { usePlayList } from "@/store/play-list";
+import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
 
 import Info from "./info";
@@ -61,6 +62,7 @@ const Favorites: React.FC = () => {
   const { id: favFolderId } = useParams();
   const ownFolder = useUser(state => state.ownFolder);
   const collectedFolder = useUser(state => state.collectedFolder);
+  const displayMode = useSettings(state => state.displayMode);
 
   const isOwn = ownFolder?.some(item => item.id === Number(favFolderId));
   const isCollected = collectedFolder?.some(item => item.id === Number(favFolderId));
@@ -152,6 +154,57 @@ const Favorites: React.FC = () => {
     }
   };
 
+  const renderMediaItem = (item: any) => (
+    <MediaItem
+      key={item.id}
+      displayMode={displayMode}
+      type={item.type === 2 ? "mv" : "audio"}
+      bvid={item.bvid}
+      aid={String(item.id)}
+      sid={item.id}
+      title={item.title}
+      cover={item.cover}
+      ownerName={item.upper?.name}
+      ownerMid={item.upper?.mid}
+      playCount={item.cnt_info.play}
+      duration={item.duration as number}
+      collectMenuTitle={isOwn ? "修改收藏夹" : "收藏"}
+      footer={
+        displayMode === "card" &&
+        !isCollected && (
+          <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
+            <Link href={`/user/${item.upper?.mid}`} className="text-foreground-500 text-sm hover:underline">
+              {item.upper?.name}
+            </Link>
+            <span>{formatDuration(item.duration as number)}</span>
+          </div>
+        )
+      }
+      onPress={() =>
+        play(
+          item.type === 2
+            ? {
+                type: "mv",
+                bvid: item.bvid,
+                title: item.title,
+                cover: item.cover,
+                ownerName: item.upper?.name,
+                ownerMid: item.upper?.mid,
+              }
+            : {
+                type: "audio",
+                sid: item.id,
+                title: item.title,
+                cover: item.cover,
+                ownerName: item.upper?.name,
+                ownerMid: item.upper?.mid,
+              },
+        )
+      }
+      onChangeFavSuccess={refreshAsync}
+    />
+  );
+
   return (
     <>
       <Info
@@ -168,57 +221,11 @@ const Favorites: React.FC = () => {
         onPlayAll={onPlayAll}
         onAddToPlayList={addAllMedia}
       />
-      <GridList
-        data={data?.list ?? []}
-        loading={loading}
-        itemKey="id"
-        renderItem={item => (
-          <MVCard
-            type={item.type === 2 ? "mv" : "audio"}
-            bvid={item.bvid}
-            aid={String(item.id)}
-            sid={item.id}
-            title={item.title}
-            cover={item.cover}
-            ownerName={item.upper?.name}
-            ownerMid={item.upper?.mid}
-            playCount={item.cnt_info.play}
-            collectMenuTitle={isOwn ? "修改收藏夹" : "收藏"}
-            footer={
-              !isCollected && (
-                <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
-                  <Link href={`/user/${item.upper?.mid}`} className="text-foreground-500 text-sm hover:underline">
-                    {item.upper?.name}
-                  </Link>
-                  <span>{formatDuration(item.duration as number)}</span>
-                </div>
-              )
-            }
-            onPress={() =>
-              play(
-                item.type === 2
-                  ? {
-                      type: "mv",
-                      bvid: item.bvid,
-                      title: item.title,
-                      cover: item.cover,
-                      ownerName: item.upper?.name,
-                      ownerMid: item.upper?.mid,
-                    }
-                  : {
-                      type: "audio",
-                      sid: item.id,
-                      title: item.title,
-                      cover: item.cover,
-                      ownerName: item.upper?.name,
-                      ownerMid: item.upper?.mid,
-                    },
-              )
-            }
-            onChangeFavSuccess={refreshAsync}
-          />
-        )}
-      />
+      {displayMode === "card" ? (
+        <GridList data={data?.list ?? []} loading={loading} itemKey="id" renderItem={renderMediaItem} />
+      ) : (
+        <div className="space-y-2">{(data?.list ?? []).map(renderMediaItem)}</div>
+      )}
       {pagination.totalPage > 1 && (
         <div className="flex w-full items-center justify-center py-6">
           <Pagination
