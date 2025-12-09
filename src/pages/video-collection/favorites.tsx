@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 
 import { addToast, Link, Pagination } from "@heroui/react";
@@ -14,6 +14,8 @@ import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
 
 import Info from "./info";
+
+const LIST_PAGE_SIZE = 20;
 
 const getAllMedia = async ({ id: favFolderId, totalCount }: { id: string; totalCount: number }) => {
   const FAVORITES_PAGE_SIZE = 20;
@@ -99,76 +101,83 @@ const Favorites: React.FC = () => {
     },
   );
 
-  // 列表模式下的全量数据
-  const [listModeData, setListModeData] = useState<any>({
-    info: null,
-    list: [],
-  });
+  // 列表模式：无限下拉分页
+  const [listModeData, setListModeData] = useState<{ info: any; list: any[] }>({ info: null, list: [] });
   const [listModeLoading, setListModeLoading] = useState(false);
+  const [listModePage, setListModePage] = useState(1);
+  const [listModeHasMore, setListModeHasMore] = useState(true);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  // 获取全量数据的函数
-  const fetchAllData = async () => {
-    if (!favFolderId) return;
+  const fetchListPage = useCallback(
+    async (page: number, { reset = false } = {}) => {
+      if (!favFolderId) return;
 
-    setListModeLoading(true);
-    try {
-      // 首先获取第一页数据，以获取总数量和基本信息
-      const firstPageRes = await getFavResourceList({
-        media_id: String(favFolderId),
-        ps: 20,
-        pn: 1,
-        platform: "web",
-      });
+      setListModeLoading(true);
+      try {
+        const res = await getFavResourceList({
+          media_id: String(favFolderId),
+          ps: LIST_PAGE_SIZE,
+          pn: page,
+          platform: "web",
+        });
 
-      if (firstPageRes.code === 0 && firstPageRes?.data?.info) {
-        const totalCount = firstPageRes.data.info.media_count;
-        const info = firstPageRes.data.info;
+        if (res.code === 0 && res.data) {
+          const medias = res.data.medias ?? [];
 
-        if (totalCount <= 20) {
-          // 如果数据量小于等于20，直接使用第一页数据
-          setListModeData({
-            info,
-            list: firstPageRes.data.medias ?? [],
+          setListModeData(prev => {
+            const baseInfo = res.data?.info ?? prev.info;
+            const baseList = reset || page === 1 ? [] : (prev.list ?? []);
+            const mergedList = [...baseList, ...medias];
+            const totalCount = res.data?.info?.media_count ?? baseInfo?.media_count ?? mergedList.length;
+            const nextHasMore =
+              typeof res.data?.has_more === "boolean" ? res.data.has_more : mergedList.length < totalCount;
+            setListModeHasMore(nextHasMore);
+            return { info: baseInfo, list: mergedList };
           });
+
+          setListModePage(page);
         } else {
-          // 否则获取所有页面数据
-          const pageSize = 20;
-          const totalPages = Math.ceil(totalCount / pageSize);
-
-          const allPages = await Promise.all(
-            Array.from({ length: totalPages }, (_, i) =>
-              getFavResourceList({
-                media_id: String(favFolderId),
-                ps: pageSize,
-                pn: i + 1,
-                platform: "web",
-              }),
-            ),
-          );
-
-          // 合并所有页面的medias
-          const allMedias = allPages.filter(res => res.code === 0).flatMap(res => res.data?.medias ?? []);
-
-          setListModeData({
-            info,
-            list: allMedias,
-          });
+          setListModeHasMore(false);
         }
+      } catch (error) {
+        console.error("获取列表数据失败:", error);
+        addToast({ title: "获取数据失败", color: "danger" });
+      } finally {
+        setListModeLoading(false);
       }
-    } catch (error) {
-      console.error("获取全量数据失败:", error);
-      addToast({ title: "获取数据失败", color: "danger" });
-    } finally {
-      setListModeLoading(false);
-    }
-  };
+    },
+    [favFolderId],
+  );
 
-  // 当displayMode切换到列表模式或favFolderId变化时，获取全量数据
+  // 切换到列表模式或收藏夹变化时重置并拉取第一页
   useEffect(() => {
     if (displayMode === "list" && favFolderId) {
-      fetchAllData();
+      setListModeData({ info: null, list: [] });
+      setListModePage(1);
+      setListModeHasMore(true);
+      fetchListPage(1, { reset: true });
     }
-  }, [displayMode, favFolderId]);
+  }, [displayMode, favFolderId, fetchListPage]);
+
+  // 监听列表底部元素实现下拉加载
+  useEffect(() => {
+    if (displayMode !== "list") return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        const first = entries[0];
+        if (first.isIntersecting && listModeHasMore && !listModeLoading) {
+          fetchListPage(listModePage + 1);
+        }
+      },
+      { root: null, rootMargin: "200px", threshold: 0 },
+    );
+
+    const target = loadMoreRef.current;
+    if (target) observer.observe(target);
+
+    return () => observer.disconnect();
+  }, [displayMode, fetchListPage, listModeHasMore, listModeLoading, listModePage]);
 
   // 根据当前模式获取显示数据
   const currentData = displayMode === "list" ? listModeData : data;
@@ -177,7 +186,8 @@ const Favorites: React.FC = () => {
   // 刷新当前模式的数据
   const handleRefresh = () => {
     if (displayMode === "list") {
-      fetchAllData();
+      setListModeHasMore(true);
+      fetchListPage(1, { reset: true });
     } else {
       refreshAsync?.();
     }
@@ -293,7 +303,14 @@ const Favorites: React.FC = () => {
           )}
         </>
       ) : (
-        <div className="space-y-2">{(listModeData?.list ?? []).map(renderMediaItem)}</div>
+        <div className="space-y-2">
+          {(listModeData?.list ?? []).map(renderMediaItem)}
+          <div ref={loadMoreRef} className="h-10" />
+          {listModeLoading && <div className="text-foreground-500 py-2 text-center text-sm">加载中...</div>}
+          {!listModeHasMore && !listModeLoading && (
+            <div className="text-foreground-500 py-2 text-center text-sm">没有更多了</div>
+          )}
+        </div>
       )}
     </>
   );

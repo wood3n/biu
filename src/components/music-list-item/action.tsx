@@ -103,7 +103,7 @@ const Action = ({
       key: "collect",
       icon: <RiStarLine size={16} />,
       title: collectMenuTitle || "收藏",
-      hidden: !user?.isLogin,
+      hidden: !user?.isLogin || (type === "mv" ? !aid : !sid),
       onPress: onOpenFavSelectModal,
     },
     {
