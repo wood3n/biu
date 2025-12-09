@@ -115,6 +115,57 @@ const History = () => {
     }
   };
 
+  // 提取MediaItem公共渲染函数，避免重复代码
+  const renderMediaItem = (item: HistoryListItem) => {
+    const commonProps = {
+      key: `${item.history.oid}-${item.view_at}`,
+      displayMode,
+      type: "mv" as const, // 音频播放不会出现在历史记录中
+      bvid: item.history.bvid || "",
+      aid: String(item.history.oid),
+      title: item.title,
+      cover: item.cover,
+      ownerName: item.author_name,
+      ownerMid: item.author_mid,
+      onPress: () => handlePlay(item),
+    };
+
+    // 卡片模式下添加额外属性
+    if (displayMode === "card") {
+      return (
+        <MediaItem
+          {...commonProps}
+          coverHeight={200}
+          footer={
+            <div className="flex w-full flex-col space-y-1 text-sm">
+              <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
+                {item.author_mid ? (
+                  <Link href={`/user/${item.author_mid}`} className="text-foreground-500 text-sm hover:underline">
+                    {item.author_name}
+                  </Link>
+                ) : (
+                  <span>{item.author_name}</span>
+                )}
+                {item.duration && <span>{formatDuration(item.duration)}</span>}
+              </div>
+              <div className="text-foreground-400 flex w-full items-center justify-between text-xs">
+                <span>{moment.unix(item.view_at).format("YYYY-MM-DD HH:mm")}</span>
+                {item.progress !== undefined && item.duration && (
+                  <span>
+                    观看进度: {formatDuration(item.progress)} / {formatDuration(item.duration)}
+                  </span>
+                )}
+              </div>
+            </div>
+          }
+        />
+      );
+    }
+
+    // 列表模式下直接返回
+    return <MediaItem {...commonProps} />;
+  };
+
   return (
     <>
       <ScrollContainer className="h-full w-full p-4">
@@ -129,60 +180,10 @@ const History = () => {
             loading={loading}
             data={list}
             itemKey={item => `${item.history.oid}-${item.view_at}`}
-            renderItem={item => (
-              <MediaItem
-                displayMode={displayMode}
-                type="mv" // 音频播放不会出现在历史记录中
-                bvid={item.history.bvid || ""}
-                aid={String(item.history.oid)}
-                title={item.title}
-                cover={item.cover}
-                ownerName={item.author_name}
-                ownerMid={item.author_mid}
-                coverHeight={200}
-                footer={
-                  <div className="flex w-full flex-col space-y-1 text-sm">
-                    <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
-                      {item.author_mid ? (
-                        <Link href={`/user/${item.author_mid}`} className="text-foreground-500 text-sm hover:underline">
-                          {item.author_name}
-                        </Link>
-                      ) : (
-                        <span>{item.author_name}</span>
-                      )}
-                      {item.duration && <span>{formatDuration(item.duration)}</span>}
-                    </div>
-                    <div className="text-foreground-400 flex w-full items-center justify-between text-xs">
-                      <span>{moment.unix(item.view_at).format("YYYY-MM-DD HH:mm")}</span>
-                      {item.progress !== undefined && item.duration && (
-                        <span>
-                          观看进度: {formatDuration(item.progress)} / {formatDuration(item.duration)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                }
-                onPress={() => handlePlay(item)}
-              />
-            )}
+            renderItem={renderMediaItem}
           />
         ) : (
-          <div className="space-y-2">
-            {list.map(item => (
-              <MediaItem
-                key={`${item.history.oid}-${item.view_at}`}
-                displayMode={displayMode}
-                type="mv" // 音频播放不会出现在历史记录中
-                bvid={item.history.bvid || ""}
-                aid={String(item.history.oid)}
-                title={item.title}
-                cover={item.cover}
-                ownerName={item.author_name}
-                ownerMid={item.author_mid}
-                onPress={() => handlePlay(item)}
-              />
-            ))}
-          </div>
+          <div className="space-y-2">{list.map(renderMediaItem)}</div>
         )}
         {hasMore && (
           <div className="flex w-full items-center justify-center py-6">

@@ -26,41 +26,29 @@ const MediaItem: React.FC<MediaItemProps> = ({
   isActive = false,
   ...rest
 }) => {
-  switch (displayMode) {
-    case "card":
-      return (
-        <MVCard
-          {...rest}
-          isTitleIncludeHtmlTag={isTitleIncludeHtmlTag}
-          coverHeight={coverHeight}
-          footer={footer}
-          onPress={onPress}
-          playCount={playCount}
-        />
-      );
-    case "list":
-      return (
-        <MusicListItem
-          {...rest}
-          isTitleIncludeHtmlTag={isTitleIncludeHtmlTag}
-          onPress={onPress}
-          playCount={playCount}
-          duration={duration}
-          isActive={isActive}
-        />
-      );
-    default:
-      return (
-        <MVCard
-          {...rest}
-          isTitleIncludeHtmlTag={isTitleIncludeHtmlTag}
-          coverHeight={coverHeight}
-          footer={footer}
-          onPress={onPress}
-          playCount={playCount}
-        />
-      );
+  if (displayMode === "list") {
+    return (
+      <MusicListItem
+        {...rest}
+        isTitleIncludeHtmlTag={isTitleIncludeHtmlTag}
+        onPress={onPress}
+        playCount={playCount}
+        duration={duration}
+        isActive={isActive}
+      />
+    );
   }
+
+  return (
+    <MVCard
+      {...rest}
+      isTitleIncludeHtmlTag={isTitleIncludeHtmlTag}
+      coverHeight={coverHeight}
+      footer={footer}
+      onPress={onPress}
+      playCount={playCount}
+    />
+  );
 };
 
 export default MediaItem;
