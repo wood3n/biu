@@ -45,6 +45,9 @@ export const channel = {
   cookie: {
     get: "cookie:get",
   },
+  user: {
+    switchAccount: "user:switch-account",
+  },
   window: {
     switchToMini: "window:switch-to-mini",
     switchToMain: "window:switch-to-main",

@@ -52,7 +52,7 @@ function createTray({ getMainWindow, onExit }: Props) {
   tray = new Tray(icon);
   tray.setToolTip("Biu");
 
-  const sendPlayerCommand = (channel: string, errorContext: string) => {
+  const sendWindowCommand = (channel: string, errorContext: string) => {
     return () => {
       const win = getMainWindow?.();
       // 增加 isDestroyed 检查以提高健壮性
@@ -61,6 +61,21 @@ function createTray({ getMainWindow, onExit }: Props) {
       }
       try {
         win.webContents.send(channel);
+      } catch (err) {
+        log.error(`[tray] ${errorContext} failed:`, err);
+      }
+    };
+  };
+
+  // 通用的窗口操作处理函数生成器
+  const createWindowActionHandler = (action: (win: BrowserWindow) => void, errorContext: string) => {
+    return () => {
+      const win = getMainWindow?.();
+      if (!win || win.isDestroyed()) return;
+      try {
+        win.show();
+        win.focus();
+        action(win);
       } catch (err) {
         log.error(`[tray] ${errorContext} failed:`, err);
       }
@@ -88,37 +103,33 @@ function createTray({ getMainWindow, onExit }: Props) {
   const menuTemplate: MenuItemConstructorOptions[] = [
     {
       label: "播放/暂停",
-      click: sendPlayerCommand(channel.player.toggle, "toggle play"),
+      click: sendWindowCommand(channel.player.toggle, "toggle play"),
     },
     {
       label: "上一曲",
-      click: sendPlayerCommand(channel.player.prev, "play previous"),
+      click: sendWindowCommand(channel.player.prev, "play previous"),
     },
     {
       label: "下一曲",
-      click: sendPlayerCommand(channel.player.next, "play next"),
+      click: sendWindowCommand(channel.player.next, "play next"),
     },
     {
       label: "显示/隐藏界面",
       click: toggleMainWindowVisibility,
     },
     {
+      label: "切换账号",
+      click: createWindowActionHandler(win => win.webContents.send(channel.user.switchAccount), "switch account"),
+    },
+    {
       type: "separator",
     },
     {
       label: "设置",
-      click: () => {
-        const win = getMainWindow?.();
-        if (!win || win.isDestroyed()) return;
-        try {
-          win.show();
-          win.focus();
-          win.webContents.send(channel.router.navigate, "/settings");
-        } catch (err) {
-          // 修改说明：托盘触发的导航失败时记录错误，便于定位
-          log.error("[tray] navigate to settings failed:", err);
-        }
-      },
+      click: createWindowActionHandler(
+        win => win.webContents.send(channel.router.navigate, "/settings"),
+        "navigate to settings",
+      ),
     },
     {
       label: "退出程序",

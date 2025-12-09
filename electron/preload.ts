@@ -183,6 +183,12 @@ const api: ElectronAPI = {
       ipcRenderer.removeListener(channel.window.leaveFullScreen, leaveFullScreenHandler);
     };
   },
+  // 监听账号切换命令
+  onSwitchAccount: cb => {
+    const handler = () => cb();
+    ipcRenderer.on(channel.user.switchAccount, handler);
+    return () => ipcRenderer.removeListener(channel.user.switchAccount, handler);
+  },
 };
 
 contextBridge.exposeInMainWorld("electron", api);

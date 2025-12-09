@@ -1,14 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useHref, useNavigate, useRoutes } from "react-router";
 
 import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import moment from "moment";
 
-import { getCookitFromBSite } from "./common/utils/cookie";
+import ConfirmModal from "./components/confirm-modal";
 import Theme from "./components/theme";
 import routes from "./routes";
 import { useAppUpdateStore } from "./store/app-update";
 import { usePlayList } from "./store/play-list";
+import { useToken } from "./store/token";
+import { useUser } from "./store/user";
 
 import "moment/locale/zh-cn";
 
@@ -22,9 +24,10 @@ export function App() {
   const navigate = useNavigate();
   const setUpdate = useAppUpdateStore(s => s.setUpdate);
 
-  useEffect(() => {
-    getCookitFromBSite();
-  }, []);
+  const { user } = useUser();
+
+  // 账号切换确认提示框状态
+  const [isSwitchAccountModalOpen, setIsSwitchAccountModalOpen] = useState(false);
 
   useEffect(() => {
     if (window.electron && window.electron.navigate) {
@@ -49,6 +52,45 @@ export function App() {
     }
   }, []);
 
+  // 订阅来自主进程的账号切换命令
+  useEffect(() => {
+    if (window.electron && window.electron.onSwitchAccount) {
+      const removeListener = window.electron.onSwitchAccount(() => {
+        // 如果用户未登录，直接显示提示
+        if (!user) {
+          import("@heroui/react").then(({ addToast }) => {
+            addToast({
+              title: "当前未登录",
+              color: "warning",
+            });
+          });
+          return;
+        }
+        // 如果已登录，显示确认提示框
+        setIsSwitchAccountModalOpen(true);
+      });
+      return removeListener;
+    }
+  }, [user]);
+
+  // 处理账号切换确认
+  const handleSwitchAccountConfirm = async () => {
+    try {
+      // 清除当前用户信息和token
+      const { clear: clearUser } = useUser.getState();
+      const { clear: clearToken } = useToken.getState();
+      clearUser();
+      clearToken();
+      // 显示主窗口
+      window.electron.switchToMainWindow();
+      // 触发全局账号切换事件，让 UserCard 组件显示登录模态框
+      window.dispatchEvent(new Event("switchAccount"));
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   useEffect(() => {
     const removeListener = window.electron.onUpdateAvailable(updateInfo => {
       setUpdate({
@@ -61,7 +103,7 @@ export function App() {
     return () => {
       removeListener();
     };
-  }, []);
+  }, [setUpdate]);
 
   return (
     <HeroUIProvider navigate={navigate} useHref={useHref} locale="zh-CN">
@@ -72,6 +114,16 @@ export function App() {
         toastProps={{ timeout: 3000, color: "primary" }}
       />
       <Theme>{routeElement}</Theme>
+
+      {/* 账号切换确认提示框 */}
+      <ConfirmModal
+        type="danger"
+        title="确认切换账号？"
+        description="当前账号将登出，是否继续？"
+        isOpen={isSwitchAccountModalOpen}
+        onOpenChange={setIsSwitchAccountModalOpen}
+        onConfirm={handleSwitchAccountConfirm}
+      />
     </HeroUIProvider>
   );
 }

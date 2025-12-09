@@ -160,6 +160,8 @@ interface ElectronAPI {
   isFullScreen: () => Promise<boolean>;
   /** 监听窗口全屏状态变化 */
   onWindowFullScreenChange: (cb: (isFullScreen: boolean) => void) => VoidFunction;
+  /** 监听账号切换命令 */
+  onSwitchAccount: (cb: () => void) => VoidFunction;
 }
 
 interface Window {
