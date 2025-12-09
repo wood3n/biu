@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 
 import { Button, Tooltip, Slider } from "@heroui/react";
 import { RiVolumeDownLine, RiVolumeMuteLine, RiVolumeUpLine } from "@remixicon/react";
@@ -15,8 +15,19 @@ const Volume = () => {
 
   const previousVolume = useRef(volume);
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
-  const [showTooltipOnScroll, setShowTooltipOnScroll] = useState(false);
   const tooltipTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const sliderRef = useRef<HTMLDivElement | null>(null);
+
+  const setSliderRef = useCallback((node: HTMLDivElement | null) => {
+    if (sliderRef.current) {
+      sliderRef.current.removeEventListener("wheel", onWheel);
+    }
+    sliderRef.current = node;
+    if (node) {
+      node.addEventListener("wheel", onWheel, { passive: false });
+    }
+  }, []);
 
   const onVolumeChange = (val: number) => {
     if (isMuted) {
@@ -36,37 +47,33 @@ const Volume = () => {
       setIsTooltipOpen(false);
     } else {
       setVolume(previousVolume.current);
-      // 取消静音时，设置标志允许滚动显示音量条
-      setShowTooltipOnScroll(true);
     }
     toggleMute();
   };
 
-  const onWheel = (event: React.WheelEvent<HTMLButtonElement>) => {
+  const onWheel = useCallback((event: WheelEvent) => {
     event.preventDefault(); // 阻止默认滚动行为
+
+    const state = usePlayList.getState();
+    const { volume, isMuted, toggleMute, setVolume } = state;
 
     // 如果当前是静音状态，先取消静音
     if (isMuted) {
       toggleMute();
-      // 取消静音时，设置标志允许滚动显示音量条
-      setShowTooltipOnScroll(true);
     }
 
-    // 如果设置了显示标志，显示音量条
-    if (showTooltipOnScroll) {
-      setIsTooltipOpen(true);
+    // 显示音量条
+    setIsTooltipOpen(true);
 
-      // 清除之前的定时器
-      if (tooltipTimerRef.current) {
-        clearTimeout(tooltipTimerRef.current);
-      }
-
-      // 设置3秒后自动隐藏音量条
-      tooltipTimerRef.current = setTimeout(() => {
-        setIsTooltipOpen(false);
-        setShowTooltipOnScroll(false);
-      }, 3000);
+    // 清除之前的定时器
+    if (tooltipTimerRef.current) {
+      clearTimeout(tooltipTimerRef.current);
     }
+
+    // 设置3秒后自动隐藏音量条
+    tooltipTimerRef.current = setTimeout(() => {
+      setIsTooltipOpen(false);
+    }, 3000);
 
     // 计算音量变化量，根据滚轮方向调整
     const delta = event.deltaY > 0 ? -0.05 : 0.05;
@@ -83,16 +90,24 @@ const Volume = () => {
       toggleMute();
       setIsTooltipOpen(false);
     }
-  };
+  }, []);
 
   // 清理定时器
   useEffect(() => {
+    const button = buttonRef.current;
+    if (button) {
+      button.addEventListener("wheel", onWheel, { passive: false });
+    }
+
     return () => {
       if (tooltipTimerRef.current) {
         clearTimeout(tooltipTimerRef.current);
       }
+      if (button) {
+        button.removeEventListener("wheel", onWheel);
+      }
     };
-  }, []);
+  }, [onWheel]);
 
   const tooltipId = "volume-tooltip";
 
@@ -106,7 +121,7 @@ const Volume = () => {
       isOpen={isTooltipOpen}
       onOpenChange={setIsTooltipOpen}
       content={
-        <div className="flex items-center justify-center p-3">
+        <div ref={setSliderRef} className="flex items-center justify-center p-3">
           <Slider
             disableAnimation
             aria-label="音量"
@@ -134,12 +149,12 @@ const Volume = () => {
       }
     >
       <Button
+        ref={buttonRef}
         isIconOnly
         size="sm"
         variant="light"
         className="hover:text-primary"
         onPress={onToggleMute}
-        onWheel={onWheel}
         aria-label={isMuted ? "取消静音" : "静音"}
         aria-describedby={tooltipId}
       >

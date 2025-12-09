@@ -1,6 +1,6 @@
 import { RiPlayCircleFill, RiYoutubeLine } from "@remixicon/react";
 
-import { formatter, stripHtml } from "@/common/utils";
+import { formatNumber, stripHtml } from "@/common/utils";
 
 import ImageCard from "../image-card";
 import Action, { type ActionProps } from "./action";
@@ -36,12 +36,12 @@ const MVCard = ({
       bodyClassName="group relative"
       imageMask={
         <>
-          {playCount != null && playCount > 0 && (
+          {(playCount ?? 0) > 0 && (
             <>
               <div className="absolute right-0 bottom-0 left-0 z-20 h-10 bg-linear-to-t from-black/70 to-transparent"></div>
               <div className="absolute bottom-0 left-0 z-30 flex items-center gap-0.5 p-2 text-sm text-white">
-                <RiYoutubeLine size={18} className="transform" style={{ transform: "translateY(0.05em)" }} />
-                {formatter.format(playCount)}
+                <RiYoutubeLine size={18} style={{ verticalAlign: "baseline" }} />
+                {formatNumber(playCount)}
               </div>
             </>
           )}

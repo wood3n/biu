@@ -20,11 +20,12 @@ import { useStyle } from "./use-style";
 const PlayModeList = getPlayModeList(16);
 
 const MiniPlayer = () => {
-  const { isSingle, isPlaying, mediaData, currentTime, duration, playMode } = usePlayState(
+  const { isSingle, isPlaying, title, cover, currentTime, duration, playMode } = usePlayState(
     useShallow(state => ({
       isSingle: state.isSingle,
       isPlaying: state.isPlaying,
-      mediaData: state.mediaData,
+      title: state.title,
+      cover: state.cover,
       currentTime: state.currentTime,
       duration: state.duration,
       playMode: state.playMode,
@@ -100,10 +101,10 @@ const MiniPlayer = () => {
   return (
     <div className="window-drag bg-content1 rounded-medium flex h-screen w-screen flex-col overflow-hidden select-none">
       <div className="flex h-full items-center space-x-3 px-3">
-        {Boolean(mediaData) && (
+        {Boolean(cover) && (
           <Image
             radius="md"
-            src={mediaData?.cover}
+            src={cover}
             width={64}
             height={64}
             classNames={{ wrapper: "flex-none" }}
@@ -112,8 +113,8 @@ const MiniPlayer = () => {
         )}
         <div className="flex min-w-0 flex-1 flex-col space-y-1">
           <div className="flex min-w-0 flex-col">
-            {mediaData ? (
-              <span className="truncate text-center text-sm font-medium">{mediaData?.title}</span>
+            {title ? (
+              <span className="truncate text-center text-sm font-medium">{title}</span>
             ) : (
               <span className="text-center text-sm text-zinc-500">暂无播放内容</span>
             )}
@@ -127,14 +128,14 @@ const MiniPlayer = () => {
               onChange={v => {
                 handleSeek(v as number);
               }}
-              isDisabled={!mediaData}
+              isDisabled={!title}
               size="sm"
               className="flex-1"
               classNames={{
-                trackWrapper: "cursor-pointer group",
-                track: "h-[4px]",
+                trackWrapper: "group",
+                track: "h-[4px] cursor-pointer",
                 thumb: clx("w-3 h-3 after:h-2 after:bg-primary opacity-0", {
-                  "group-hover:opacity-100": Boolean(mediaData),
+                  "group-hover:opacity-100": Boolean(title),
                 }),
               }}
             />
@@ -152,7 +153,7 @@ const MiniPlayer = () => {
             </Button>
             <div className="flex items-center space-x-1">
               <Button
-                isDisabled={!mediaData || isSingle}
+                isDisabled={!title || isSingle}
                 isIconOnly
                 size="sm"
                 variant="light"
@@ -162,7 +163,7 @@ const MiniPlayer = () => {
                 <RiSkipBackFill size={18} />
               </Button>
               <Button
-                isDisabled={!mediaData}
+                isDisabled={!title}
                 isIconOnly
                 size="sm"
                 variant="light"
@@ -174,7 +175,7 @@ const MiniPlayer = () => {
                 {isPlaying ? <RiPauseCircleFill size={28} /> : <RiPlayCircleFill size={28} />}
               </Button>
               <Button
-                isDisabled={!mediaData || isSingle}
+                isDisabled={!title || isSingle}
                 isIconOnly
                 size="sm"
                 variant="light"

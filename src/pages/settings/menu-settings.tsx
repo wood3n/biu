@@ -35,7 +35,7 @@ const MenuSettings: React.FC<MenuSettingsProps> = ({ control }) => {
                   field.onChange(nextHidden);
                 };
 
-                const items = DefaultMenuList.map(item => ({
+                const items = DefaultMenuList.filter(i => (user?.isLogin ? true : !i.needLogin)).map(item => ({
                   value: item.href,
                   label: item.title,
                 }));

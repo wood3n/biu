@@ -26,6 +26,7 @@ const Search = () => {
     pagination,
     error,
     runAsync: search,
+    mutate,
   } = usePagination(
     async ({ current = 1, pageSize = 24 }) => {
       if (searchType === SearchType.Video) {
@@ -73,7 +74,13 @@ const Search = () => {
             }}
             items={SearchTypeOptions}
             selectedKey={searchType}
-            onSelectionChange={v => setSearchType(v as SearchType)}
+            onSelectionChange={v => {
+              mutate({
+                total: 0,
+                list: [],
+              });
+              setSearchType(v as SearchType);
+            }}
           >
             {item => <Tab key={item.value} title={item.label} />}
           </Tabs>

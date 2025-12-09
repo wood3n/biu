@@ -1,7 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 
-import { Button, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@heroui/react";
-import { RiListRadio } from "@remixicon/react";
+import { Button, Input, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@heroui/react";
+import { RiListRadio, RiSearchLine } from "@remixicon/react";
 
 import Empty from "@/components/empty";
 import { VirtualList } from "@/components/virtual-list";
@@ -12,11 +12,21 @@ import ListItem from "./list-item";
 const VideoPageListDrawer = () => {
   const playId = usePlayList(s => s.playId);
   const list = usePlayList(s => s.list);
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   const pages = useMemo(() => {
     const currentItem = list.find(item => item.id === playId);
     return list.filter(item => item.bvid === currentItem?.bvid);
   }, [playId, list]);
+
+  const filteredPages = useMemo(() => {
+    if (!searchKeyword) return pages;
+    const lowerKeyword = searchKeyword.toLowerCase();
+    return pages.filter(item => {
+      const title = item.pageTitle || item.title || "";
+      return title.toLowerCase().includes(lowerKeyword);
+    });
+  }, [pages, searchKeyword]);
 
   const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
@@ -31,12 +41,26 @@ const VideoPageListDrawer = () => {
         className="bg-content2 w-auto min-w-[500px] overflow-hidden p-0"
         style={{ maxWidth: "min(500px, 90vw)" }}
       >
-        <div className="border-b-content2 flex flex-row items-center justify-between space-x-2 border-b px-4 py-3">
+        <div className="border-b-content2 flex w-full flex-row items-center justify-between space-x-2 border-b px-4 py-3">
           <h3>分集</h3>
+          <Input
+            classNames={{
+              base: "max-w-48 h-8",
+              mainWrapper: "h-full",
+              input: "text-small",
+              inputWrapper: "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
+            }}
+            placeholder="搜索分集"
+            size="sm"
+            startContent={<RiSearchLine size={14} />}
+            type="search"
+            value={searchKeyword}
+            onValueChange={setSearchKeyword}
+          />
         </div>
         <VirtualList
-          className="max-h-[60vh] w-full px-2"
-          data={pages}
+          className="h-[60vh] w-full px-2"
+          data={filteredPages}
           itemHeight={48}
           overscan={5}
           empty={

@@ -46,10 +46,8 @@ const WindowAction = () => {
               from: "main",
               state: {
                 isSingle: list.length === 1,
-                mediaData: {
-                  title: playItem?.pageTitle || playItem?.pageTitle,
-                  cover: playItem?.pageCover || playItem?.cover,
-                },
+                title: playItem?.pageTitle || playItem?.pageTitle,
+                cover: playItem?.pageCover || playItem?.cover,
                 isPlaying: isPlaying,
                 currentTime: currentTime,
                 playMode: playMode,
@@ -106,12 +104,11 @@ const WindowAction = () => {
           bc?.postMessage({
             from: "main",
             state: {
-              mediaData: {
-                title: playItem?.pageTitle || playItem?.pageTitle,
-                cover: playItem?.pageCover || playItem?.cover,
-              },
+              title: playItem?.pageTitle || playItem?.pageTitle,
+              cover: playItem?.pageCover || playItem?.cover,
               playId: state.playId,
               isPlaying: state.isPlaying,
+              isSingle: state.list.length === 1,
               currentTime: state.currentTime,
               playMode: state.playMode,
               duration: state.duration,
