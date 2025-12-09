@@ -8,7 +8,7 @@ import { CollectionType } from "@/common/constants/collection";
 import { formatDuration } from "@/common/utils";
 import GridList from "@/components/grid-list";
 import MediaItem from "@/components/media-item";
-import { getFavResourceList } from "@/service/fav-resource";
+import { getFavResourceList, type FavMedia } from "@/service/fav-resource";
 import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
@@ -184,14 +184,14 @@ const Favorites: React.FC = () => {
   const currentLoading = displayMode === "list" ? listModeLoading : loading;
 
   // 刷新当前模式的数据
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     if (displayMode === "list") {
       setListModeHasMore(true);
       fetchListPage(1, { reset: true });
     } else {
       refreshAsync?.();
     }
-  };
+  }, [displayMode, fetchListPage, refreshAsync]);
 
   const onPlayAll = async () => {
     if (!favFolderId) {
@@ -220,56 +220,85 @@ const Favorites: React.FC = () => {
       addToast({ title: "获取收藏夹全部歌曲失败", color: "danger" });
     }
   };
+  const addAllMedia = async () => {
+    if (!favFolderId) {
+      addToast({ title: "收藏夹 ID 无效", color: "danger" });
+      return;
+    }
 
-  const renderMediaItem = (item: any) => (
-    <MediaItem
-      key={item.id}
-      displayMode={displayMode}
-      type={item.type === 2 ? "mv" : "audio"}
-      bvid={item.bvid}
-      aid={String(item.id)}
-      sid={item.id}
-      title={item.title}
-      cover={item.cover}
-      ownerName={item.upper?.name}
-      ownerMid={item.upper?.mid}
-      playCount={item.cnt_info.play}
-      duration={item.duration as number}
-      collectMenuTitle={isOwn ? "修改收藏夹" : "收藏"}
-      footer={
-        displayMode === "card" &&
-        !isCollected && (
-          <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
-            <Link href={`/user/${item.upper?.mid}`} className="text-foreground-500 text-sm hover:underline">
-              {item.upper?.name}
-            </Link>
-            <span>{formatDuration(item.duration as number)}</span>
-          </div>
-        )
+    const totalCount = data?.info?.media_count ?? 0;
+    if (!totalCount) {
+      addToast({ title: "收藏夹为空", color: "warning" });
+      return;
+    }
+
+    try {
+      const allMedias = await getAllMedia({
+        id: favFolderId,
+        totalCount,
+      });
+
+      if (allMedias.length) {
+        addToPlayList(allMedias);
+      } else {
+        addToast({ title: "无法获取收藏夹全部歌曲", color: "danger" });
       }
-      onPress={() =>
-        play(
-          item.type === 2
-            ? {
-                type: "mv",
-                bvid: item.bvid,
-                title: item.title,
-                cover: item.cover,
-                ownerName: item.upper?.name,
-                ownerMid: item.upper?.mid,
-              }
-            : {
-                type: "audio",
-                sid: item.id,
-                title: item.title,
-                cover: item.cover,
-                ownerName: item.upper?.name,
-                ownerMid: item.upper?.mid,
-              },
-        )
-      }
-      onChangeFavSuccess={handleRefresh}
-    />
+    } catch {
+      addToast({ title: "获取收藏夹全部歌曲失败", color: "danger" });
+    }
+  };
+  const renderMediaItem = useCallback(
+    (item: FavMedia) => (
+      <MediaItem
+        key={item.id}
+        displayMode={displayMode}
+        type={item.type === 2 ? "mv" : "audio"}
+        bvid={item.bvid}
+        aid={String(item.id)}
+        sid={item.id}
+        title={item.title}
+        cover={item.cover}
+        ownerName={item.upper?.name}
+        ownerMid={item.upper?.mid}
+        playCount={item.cnt_info.play}
+        duration={item.duration as number}
+        collectMenuTitle={isOwn ? "修改收藏夹" : "收藏"}
+        footer={
+          displayMode === "card" &&
+          !isCollected && (
+            <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
+              <Link href={`/user/${item.upper?.mid}`} className="text-foreground-500 text-sm hover:underline">
+                {item.upper?.name}
+              </Link>
+              <span>{formatDuration(item.duration as number)}</span>
+            </div>
+          )
+        }
+        onPress={() =>
+          play(
+            item.type === 2
+              ? {
+                  type: "mv",
+                  bvid: item.bvid,
+                  title: item.title,
+                  cover: item.cover,
+                  ownerName: item.upper?.name,
+                  ownerMid: item.upper?.mid,
+                }
+              : {
+                  type: "audio",
+                  sid: item.id,
+                  title: item.title,
+                  cover: item.cover,
+                  ownerName: item.upper?.name,
+                  ownerMid: item.upper?.mid,
+                },
+          )
+        }
+        onChangeFavSuccess={handleRefresh}
+      />
+    ),
+    [displayMode, handleRefresh, isCollected, isOwn, play],
   );
 
   return (
@@ -286,7 +315,7 @@ const Favorites: React.FC = () => {
         mediaCount={currentData?.info?.media_count}
         afterChangeInfo={handleRefresh}
         onPlayAll={onPlayAll}
-        onAddToPlayList={() => addToPlayList([])}
+        onAddToPlayList={addAllMedia}
       />
       {displayMode === "card" ? (
         <>
