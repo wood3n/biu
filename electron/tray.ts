@@ -52,59 +52,55 @@ function createTray({ getMainWindow, onExit }: Props) {
   tray = new Tray(icon);
   tray.setToolTip("Biu");
 
+  const sendPlayerCommand = (channel: string, errorContext: string) => {
+    return () => {
+      const win = getMainWindow?.();
+      // 增加 isDestroyed 检查以提高健壮性
+      if (!win || win.isDestroyed()) {
+        return;
+      }
+      try {
+        win.webContents.send(channel);
+      } catch (err) {
+        log.error(`[tray] ${errorContext} failed:`, err);
+      }
+    };
+  };
+
+  /**
+   * 切换主窗口的显示/隐藏状态
+   */
+  const toggleMainWindowVisibility = () => {
+    const win = getMainWindow?.();
+    if (!win || win.isDestroyed()) return;
+    try {
+      if (win.isVisible()) {
+        win.hide();
+      } else {
+        win.show();
+        win.focus();
+      }
+    } catch (err) {
+      log.error("[tray] toggle main window visibility failed:", err);
+    }
+  };
+
   const menuTemplate: MenuItemConstructorOptions[] = [
     {
       label: "播放/暂停",
-      click: () => {
-        const win = getMainWindow?.();
-        if (!win) return;
-        try {
-          win.webContents.send(channel.player.toggle);
-        } catch (err) {
-          log.error("[tray] toggle play failed:", err);
-        }
-      },
+      click: sendPlayerCommand(channel.player.toggle, "toggle play"),
     },
     {
       label: "上一曲",
-      click: () => {
-        const win = getMainWindow?.();
-        if (!win) return;
-        try {
-          win.webContents.send(channel.player.prev);
-        } catch (err) {
-          log.error("[tray] play previous failed:", err);
-        }
-      },
+      click: sendPlayerCommand(channel.player.prev, "play previous"),
     },
     {
       label: "下一曲",
-      click: () => {
-        const win = getMainWindow?.();
-        if (!win) return;
-        try {
-          win.webContents.send(channel.player.next);
-        } catch (err) {
-          log.error("[tray] play next failed:", err);
-        }
-      },
+      click: sendPlayerCommand(channel.player.next, "play next"),
     },
     {
       label: "显示/隐藏界面",
-      click: () => {
-        const win = getMainWindow?.();
-        if (!win) return;
-        try {
-          if (win.isVisible()) {
-            win.hide();
-          } else {
-            win.show();
-            win.focus();
-          }
-        } catch (err) {
-          log.error("[tray] toggle main window visibility failed:", err);
-        }
-      },
+      click: toggleMainWindowVisibility,
     },
     {
       type: "separator",
@@ -113,7 +109,7 @@ function createTray({ getMainWindow, onExit }: Props) {
       label: "设置",
       click: () => {
         const win = getMainWindow?.();
-        if (!win) return;
+        if (!win || win.isDestroyed()) return;
         try {
           win.show();
           win.focus();
@@ -144,7 +140,7 @@ function createTray({ getMainWindow, onExit }: Props) {
   tray.on("click", () => {
     destroyMiniPlayer();
     const win = getMainWindow?.();
-    if (!win) return;
+    if (!win || win.isDestroyed()) return;
     if (win.isVisible()) {
       if (!win.isFocused()) {
         win.focus();

@@ -21,14 +21,10 @@
   },
   "tailwindCSS.includeLanguages": {
     "typescript": "javascript",
-    "typescriptreact": "javascript",
+    "typescriptreact": "javascript"
   },
-  "tailwindCSS.classAttributes": [
-    "class",
-    "className",
-    "ngClass",
-    "classNames",
-    ".*ClassName",
-    ".*Classes"
-  ]
+  "tailwindCSS.classAttributes": ["class", "className", "ngClass", "classNames", ".*ClassName", ".*Classes"],
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  }
 }
