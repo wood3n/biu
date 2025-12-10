@@ -109,17 +109,6 @@ interface ElectronAPI {
   navigate: (cb: (path: string) => void) => VoidFunction;
   /** 获取某个 cookie */
   getCookie: (key: string) => Promise<string | null>;
-  /** 使用主进程的 net.request 发起 GET 请求（只返回 data） */
-  httpGet: <T = any>(
-    url: string,
-    options?: { params?: Record<string, any>; headers?: Record<string, string>; timeout?: number },
-  ) => Promise<T>;
-  /** 使用主进程的 net.request 发起 POST 请求（只返回 data） */
-  httpPost: <T = any>(
-    url: string,
-    body?: unknown,
-    options?: { params?: Record<string, any>; headers?: Record<string, string>; timeout?: number },
-  ) => Promise<T>;
   /** 获取当前应用平台：macos | windows | linux */
   getPlatform: () => AppPlatForm;
   /** 上报当前播放状态到主进程（用于任务栏按钮切换） */
