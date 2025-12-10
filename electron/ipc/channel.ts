@@ -16,9 +16,13 @@ export const channel = {
     getSize: "file:get-size",
   },
   download: {
-    checkExists: "download:check-exists",
-    start: "start-download",
-    progress: "download:progress",
+    add: "download:add",
+    addList: "download:add-list",
+    pause: "download:pause",
+    resume: "download:resume",
+    cancel: "download:cancel",
+    retry: "download:retry",
+    sync: "download:sync",
   },
   router: {
     navigate: "router:navigate",

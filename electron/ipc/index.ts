@@ -13,7 +13,7 @@ export function registerIpcHandlers(props: IpcHandlerProps) {
   registerStoreHandlers();
   registerDialogHandlers();
   registerFontHandlers();
-  registerDownloadHandlers();
+  registerDownloadHandlers(props);
   registerAppHandlers();
   registerCookieIpcHandlers();
   registerWindowHandlers();

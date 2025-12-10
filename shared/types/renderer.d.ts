@@ -1,23 +1,3 @@
-/*
- * electron 暴露给 web 的 ipc 方法
- * http://www.electronjs.org/docs/latest/tutorial/context-isolation#usage-with-typescript
- */
-
-type AudioQuality = "auto" | "lossless" | "high" | "medium" | "low";
-
-interface AppSettings {
-  fontFamily: string;
-  backgroundColor: string;
-  contentBackgroundColor: string;
-  primaryColor: string;
-  borderRadius: number;
-  downloadPath?: string;
-  closeWindowOption: "hide" | "exit";
-  autoStart: boolean;
-  audioQuality: AudioQuality;
-  hiddenMenuKeys: string[];
-}
-
 interface IFontInfo {
   name: string;
   familyName: string;
@@ -28,64 +8,7 @@ interface IFontInfo {
   monospace: boolean;
 }
 
-type DownloadStatus = "waiting" | "downloading" | "merging" | "completed" | "failed";
-
-interface DownloadOptions {
-  /** 唯一标识（推荐传入 bvid），用于进度回调匹配 */
-  id: string;
-  /** 下载文件的标题 */
-  filename: string;
-  /** 下载文件的音频 url */
-  audioUrl: string;
-  /** 是否为无损音频 */
-  isLossless: boolean;
-  /** 下载文件的视频 url */
-  videoUrl?: string;
-}
-
-interface DownloadCallbackParams {
-  id: string;
-  totalBytes?: number;
-  downloadedBytes?: number;
-  progress?: number;
-  status: DownloadStatus;
-  error?: string;
-}
-
-interface StartDownloadResponse {
-  success: boolean;
-  error?: string;
-}
-
 type AppPlatForm = "macos" | "windows" | "linux";
-
-interface AppUpdateReleaseInfo {
-  /** 最新版本 */
-  latestVersion?: string;
-  /** html 字符串 */
-  releaseNotes?: string;
-}
-
-interface CheckAppUpdateResult extends AppUpdateReleaseInfo {
-  isUpdateAvailable?: boolean;
-  error?: string;
-}
-
-interface DownloadAppProgressInfo {
-  total: number;
-  delta: number;
-  transferred: number;
-  percent: number;
-  bytesPerSecond: number;
-}
-
-type DownloadAppUpdateStatus = "downloading" | "downloaded" | "error";
-
-interface DownloadAppMessage {
-  status: DownloadAppUpdateStatus;
-  processInfo?: DownloadAppProgressInfo;
-  error?: string;
-}
 
 interface ElectronAPI {
   getSettings: () => Promise<AppSettings>;
@@ -99,12 +22,6 @@ interface ElectronAPI {
   openExternal: (url: string) => Promise<boolean>;
   /** 获取本地安装的字体列表 */
   getFonts: () => Promise<IFontInfo[]>;
-  /** 检查目标下载文件是否已存在（在下载目录中） */
-  checkFileExists: (filename: string) => Promise<boolean>;
-  /** 开始下载文件 */
-  startDownload: (options: DownloadOptions) => Promise<StartDownloadResponse>;
-  /** 监听下载进度（包含 video/audio/merge 阶段），重复调用会替换旧监听 */
-  onDownloadProgress: (cb: (payload: DownloadCallbackParams) => void) => VoidFunction;
   /** 导航到指定路由 */
   navigate: (cb: (path: string) => void) => VoidFunction;
   /** 获取某个 cookie */
@@ -149,6 +66,18 @@ interface ElectronAPI {
   isFullScreen: () => Promise<boolean>;
   /** 监听窗口全屏状态变化 */
   onWindowFullScreenChange: (cb: (isFullScreen: boolean) => void) => VoidFunction;
+  /** 添加下载任务 */
+  addMediaDownloadTask: (media: MediaItem) => Promise<void>;
+  /** 添加下载任务列表 */
+  addMediaDownloadTasks: (media: MediaItem[]) => Promise<void>;
+  /** 暂停下载任务 */
+  pauseMediaDownloadTask: (id: string) => Promise<void>;
+  /** 恢复下载任务 */
+  resumeMediaDownloadTask: (id: string) => Promise<void>;
+  /** 取消下载任务 */
+  cancelMediaDownloadTask: (id: string) => Promise<void>;
+  /** 重试下载任务 */
+  retryMediaDownloadTask: (id: string) => Promise<void>;
 }
 
 interface Window {
