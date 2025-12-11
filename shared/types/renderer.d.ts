@@ -68,8 +68,10 @@ interface ElectronAPI {
   onWindowFullScreenChange: (cb: (isFullScreen: boolean) => void) => VoidFunction;
   /** 获取下载任务列表 */
   getMediaDownloadTaskList: () => Promise<MediaDownloadTask[]>;
+  /** 同步下载任务列表 */
+  syncMediaDownloadTaskList: (cb: (list: MediaDownloadTask[]) => void) => VoidFunction;
   /** 添加下载任务 */
-  addMediaDownloadTask: (media: MediaDownloadTask) => Promise<void>;
+  addMediaDownloadTask: (media: MediaDownloadInfo) => Promise<void>;
   /** 暂停下载任务 */
   pauseMediaDownloadTask: (id: string) => Promise<void>;
   /** 恢复下载任务 */
@@ -78,8 +80,6 @@ interface ElectronAPI {
   cancelMediaDownloadTask: (id: string) => Promise<void>;
   /** 重试下载任务 */
   retryMediaDownloadTask: (id: string) => Promise<void>;
-  /** 监听下载任务状态变化 */
-  onMediaDownloadTaskChange: (cb: (payload: MediaDownloadTaskChangeData) => void) => VoidFunction;
 }
 
 interface Window {

@@ -173,7 +173,7 @@ const api: ElectronAPI = {
   // 获取下载任务列表
   getMediaDownloadTaskList: () => ipcRenderer.invoke(channel.download.getList),
   // 添加文件下载任务
-  addMediaDownloadTask: (task: MediaDownloadTask) => ipcRenderer.invoke(channel.download.add, task),
+  addMediaDownloadTask: (media: MediaDownloadInfo) => ipcRenderer.invoke(channel.download.add, media),
   // 暂停文件下载任务
   pauseMediaDownloadTask: (id: string) => ipcRenderer.invoke(channel.download.pause, id),
   // 恢复文件下载任务
@@ -183,8 +183,8 @@ const api: ElectronAPI = {
   // 取消文件下载任务
   cancelMediaDownloadTask: (id: string) => ipcRenderer.invoke(channel.download.cancel, id),
   // 监听文件下载任务状态变化
-  onMediaDownloadTaskChange: cb => {
-    const handler = (_, payload: MediaDownloadTaskChangeData) => cb(payload);
+  syncMediaDownloadTaskList: cb => {
+    const handler = (_, payload: MediaDownloadTask[]) => cb(payload);
     ipcRenderer.on(channel.download.sync, handler);
     return () => ipcRenderer.removeListener(channel.download.sync, handler);
   },

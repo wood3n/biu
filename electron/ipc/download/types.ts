@@ -11,3 +11,18 @@ export interface MediaDownloadChunk {
   /** 分块是否下载完成 */
   done: boolean;
 }
+
+export interface DownloadCoreEventData {
+  /** 下载任务ID */
+  id: string;
+  /** 下载任务状态 */
+  status?: MediaDownloadStatus;
+  /** 下载进度 */
+  downloadProgress?: number;
+  /** 合并进度 */
+  mergeProgress?: number;
+  /** 转换进度 */
+  convertProgress?: number;
+  /** 错误信息 */
+  error?: string;
+}

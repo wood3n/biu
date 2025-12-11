@@ -8,7 +8,7 @@ import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import PQueue from "p-queue";
 
-import type { MediaDownloadChunk } from "./types";
+import type { DownloadCoreEventData, MediaDownloadChunk } from "./types";
 
 import { UserAgent } from "../../network/user-agent";
 import { store, storeKey } from "../../store";
@@ -54,49 +54,6 @@ export class DownloadCore extends EventEmitter {
     this.audioCodecs = task.audioCodecs;
     this.status = task.status;
   }
-
-  private getUrlFromRenderer = async () => {
-    return new Promise<MediaDownloadUrlData>((resolve, reject) => {
-      // A. 设置超时 (防止 React 卡死导致队列堵塞)
-      const timeout = setTimeout(() => {
-        cleanup();
-        reject(new Error("获取下载链接超时"));
-      }, 10000); // 30秒超时
-
-      // B. 定义一次性监听器，接收 React 的回信
-      // 使用 taskId 作为唯一标识，防止消息串台
-      const cbChannel = `reply-link-${this.id}`;
-
-      const listener = (_, response) => {
-        if (response.error) {
-          reject(new Error(response.error));
-        } else {
-          resolve(response.data as MediaDownloadUrlData); // 返回 { videoUrl, audioUrl }
-        }
-        cleanup();
-      };
-
-      // C. 清理函数
-      const cleanup = () => {
-        clearTimeout(timeout);
-        ipcMain.removeListener(cbChannel, listener);
-      };
-
-      // D. 注册监听
-      ipcMain.once(cbChannel, listener);
-
-      // E. 发送请求给 React
-      BrowserWindow.getAllWindows().forEach(w =>
-        w.webContents.send(channel.download.getDownloadData, { bvid: this.bvid, cid: this.cid, sid: this.sid }),
-      );
-    });
-  };
-
-  private ensureDir = (dir: string) => {
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-  };
 
   public async start(): Promise<void> {
     try {
@@ -151,16 +108,57 @@ export class DownloadCore extends EventEmitter {
     } catch (error: any) { }
   }
 
+  private getUrlFromRenderer = async () => {
+    return new Promise<MediaDownloadUrlData>((resolve, reject) => {
+      // A. 设置超时 (防止 React 卡死导致队列堵塞)
+      const timeout = setTimeout(() => {
+        cleanup();
+        reject(new Error("获取下载链接超时"));
+      }, 10000); // 30秒超时
+
+      // B. 定义一次性监听器，接收 React 的回信
+      // 使用 taskId 作为唯一标识，防止消息串台
+      const cbChannel = `reply-link-${this.id}`;
+
+      const listener = (_, response) => {
+        if (response.error) {
+          reject(new Error(response.error));
+        } else {
+          resolve(response.data as MediaDownloadUrlData); // 返回 { videoUrl, audioUrl }
+        }
+        cleanup();
+      };
+
+      // C. 清理函数
+      const cleanup = () => {
+        clearTimeout(timeout);
+        ipcMain.removeListener(cbChannel, listener);
+      };
+
+      // D. 注册监听
+      ipcMain.once(cbChannel, listener);
+
+      // E. 发送请求给 React
+      BrowserWindow.getAllWindows().forEach(w =>
+        w.webContents.send(channel.download.getDownloadData, { bvid: this.bvid, cid: this.cid, sid: this.sid }),
+      );
+    });
+  };
+
+  private ensureDir = (dir: string) => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  };
+
   public cancel(): void {
     this.abortController.abort();
-    this.updateStatus(DownloadStatus.CANCELLED);
-    // Cleanup temp files
-    this.cleanup();
+    this.deleteChunkFiles();
+    this.deleteTempFiles();
   }
 
   public pause(): void {
     this.abortController.abort();
-    this.updateStatus(DownloadStatus.PAUSED);
   }
 
   public async resume(): Promise<void> {
@@ -348,11 +346,9 @@ export class DownloadCore extends EventEmitter {
     });
   }
 
-  private updateStatus(status: DownloadStatus) {
-    this.task.status = status;
-    this.task.updatedTime = Date.now();
-    this.emit("status", this.task);
-  }
+  private updateEventData = (data: DownloadCoreEventData) => {
+    this.emit("download-event", data);
+  };
 
   private updateDownloadProgress = () => {
     const percent =

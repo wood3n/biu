@@ -7,8 +7,8 @@ export interface State {
 }
 
 export interface Action {
-  add: (media: MediaDownloadTask) => void;
-  addList: (mediaList: MediaDownloadTask[]) => void;
+  add: (media: MediaDownloadInfo) => void;
+  addList: (mediaList: MediaDownloadInfo[]) => void;
   pause: (id: string) => void;
   resume: (id: string) => void;
   retry: (id: string) => void;
