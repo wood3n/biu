@@ -1,4 +1,4 @@
-import { apiRequest } from "./request";
+import { biliRequest } from "./request";
 
 /**
  * 获取音频流URL（可获取付费音频）
@@ -9,7 +9,7 @@ export interface AudioStreamUrlRequestParams {
   /** APP 登录 Token（APP 方式必要） */
   access_key?: string;
   /** 音频 auid（必要） */
-  songid: number;
+  songid: number | string;
   /** 音质代码（必要：0=128K，1=192K，2=320K，3=FLAC） */
   quality: number;
   /** 必须为 2（必要） */
@@ -81,5 +81,5 @@ export interface AudioStreamUrlResponse {
  * @param params 请求参数
  */
 export const getAudioWebStreamUrl = (params: AudioStreamUrlRequestParams) => {
-  return apiRequest.get<AudioStreamUrlResponse>("/audio/music-service-c/url", { params });
+  return biliRequest.get<AudioStreamUrlResponse>("/audio/music-service-c/web/url", { params });
 };

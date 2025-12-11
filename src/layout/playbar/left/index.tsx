@@ -78,6 +78,7 @@ const LeftControl = () => {
                 {playItem?.pageTitle || playItem?.title}
               </Ellipsis>
               {Boolean(playItem?.isLossless) && <Chip size="sm">无损</Chip>}
+              {Boolean(playItem?.isDolby) && <Chip size="sm">杜比音频</Chip>}
             </span>
             {Boolean(playItem?.ownerName) && (
               <span

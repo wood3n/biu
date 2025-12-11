@@ -1,43 +1,80 @@
 import { create } from "zustand";
-import { immer } from "zustand/middleware/immer";
-import { persist } from "zustand/middleware/persist";
+
+import { getAudioUrl, getDashUrl } from "@/common/utils/audio";
 
 export interface State {
   list: MediaDownloadTask[];
 }
 
 export interface Action {
-  add: (media: MediaDownloadParams) => void;
-  addList: (mediaList: MediaDownloadParams[]) => void;
+  add: (media: MediaDownloadTask) => void;
+  addList: (mediaList: MediaDownloadTask[]) => void;
   pause: (id: string) => void;
   resume: (id: string) => void;
   retry: (id: string) => void;
   cancel: (id: string) => void;
+  restoreList: () => Promise<void>;
+  updateList: (list: MediaDownloadTask[]) => void;
 }
 
-export const useDownloadStore = create<State & Action>()(
-  persist(
-    immer((set, get) => ({
-      list: [],
+const getDownloadInfo = async (media: MediaDownloadTask) => {
+  if (media.sid) {
+    const musicData = await getAudioUrl(media.sid);
 
-      add: media => set(state => { }),
+    return {
+      audioUrl: musicData.audioUrl,
+      audioCodecs: musicData.audioCodecs,
+    };
+  }
 
-      addList: mediaList => set(state => { }),
+  const dashData = await getDashUrl(media.bvid as string, media.cid as string);
 
-      cancel: id =>
-        set(state => {
-          state.list = state.list.filter(item => item.id !== id);
-        }),
+  return {
+    audioUrl: dashData.audioUrl,
+    audioCodecs: dashData.audioCodecs,
+    audioBandwidth: dashData.audioBandwidth,
+    videoUrl: dashData.videoUrl,
+    videoBandwidth: dashData.videoResolution,
+  };
+};
 
-      pause: id => set(state => { }),
+export const useDownloadStore = create<State & Action>()(set => ({
+  list: [],
 
-      resume: id => set(state => { }),
+  add: media => {
+    window.electron.addMediaDownloadTask(media);
+  },
 
-      retry: id => set(state => { }),
-    })),
-    {
-      name: "download-list",
-      partialize: state => ({ list: state.list }),
-    },
-  ),
-);
+  addList: mediaList => {
+    mediaList.forEach(media => {
+      window.electron.addMediaDownloadTask(media);
+    });
+  },
+
+  cancel: id => {
+    window.electron.cancelMediaDownloadTask(id);
+  },
+
+  pause: id => {
+    window.electron.pauseMediaDownloadTask(id);
+  },
+
+  resume: id => {
+    window.electron.resumeMediaDownloadTask(id);
+  },
+
+  retry: id => {
+    window.electron.retryMediaDownloadTask(id);
+  },
+
+  restoreList: async () => {
+    const list = await window.electron.getMediaDownloadTaskList();
+    if (list) {
+      set({ list });
+    }
+  },
+
+  updateList: list => {
+    set({ list });
+  },
+}));

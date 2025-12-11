@@ -16,6 +16,8 @@ export const channel = {
     getSize: "file:get-size",
   },
   download: {
+    getList: "download:get-list",
+    getDownloadData: "download:get-download-data",
     add: "download:add",
     addList: "download:add-list",
     pause: "download:pause",

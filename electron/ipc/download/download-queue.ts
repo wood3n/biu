@@ -1,28 +1,20 @@
-import crypto from "crypto";
-import Store from "electron-store";
-import { EventEmitter } from "events";
+import type { BrowserWindow } from "electron";
+
 import PQueue from "p-queue";
 
+import type { DownloadTask, DownloadOptions, DownloadStatus } from "./types";
+
 import { DownloadCore } from "./download-core";
-import { DownloadTask, DownloadOptions, DownloadStatus } from "./types";
 
-interface StoreSchema {
-  downloads: Record<string, DownloadTask>;
-}
-
-export class DownloadQueue extends EventEmitter {
-  private store: Store<StoreSchema>;
+export class DownloadQueue {
   private queue: PQueue;
   private activeDownloads: Map<string, DownloadCore>;
+  private getMainWindow: () => BrowserWindow | null;
 
-  constructor() {
-    super();
-    this.store = new Store<StoreSchema>({
-      name: "download-manager",
-      defaults: { downloads: {} },
-    });
+  constructor(getMainWindow: () => BrowserWindow | null) {
     this.queue = new PQueue({ concurrency: 3 });
     this.activeDownloads = new Map();
+    this.getMainWindow = getMainWindow;
 
     this.restoreQueue();
   }
@@ -40,7 +32,6 @@ export class DownloadQueue extends EventEmitter {
   }
 
   public addTask(options: DownloadOptions): string {
-    const id = crypto.randomUUID();
     const task: DownloadTask = {
       id,
       options,
@@ -137,18 +128,5 @@ export class DownloadQueue extends EventEmitter {
 
       await core.start();
     });
-  }
-
-  private saveTask(task: DownloadTask) {
-    this.store.set(`downloads.${task.id}`, task);
-  }
-
-  public getTask(id: string): DownloadTask | undefined {
-    return this.store.get(`downloads.${id}`);
-  }
-
-  public getAllTasks(): DownloadTask[] {
-    const downloads = this.store.get("downloads");
-    return downloads ? Object.values(downloads) : [];
   }
 }

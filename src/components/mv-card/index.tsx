@@ -1,6 +1,7 @@
 import { RiPlayCircleFill, RiYoutubeLine } from "@remixicon/react";
 
-import { formatNumber, stripHtml } from "@/common/utils";
+import { formatNumber } from "@/common/utils/number";
+import { stripHtml } from "@/common/utils/str";
 
 import ImageCard from "../image-card";
 import Action, { type ActionProps } from "./action";

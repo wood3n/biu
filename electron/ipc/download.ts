@@ -1,17 +1,19 @@
 import { ipcMain } from "electron";
 
+import type { IpcHandlerProps } from "./types";
+
 import { channel } from "./channel";
 import { DownloadQueue } from "./download/download-queue";
 
-const downloadQueue = new DownloadQueue();
+export function registerDownloadHandlers({ getMainWindow }: IpcHandlerProps) {
+  const downloadQueue = new DownloadQueue(getMainWindow);
 
-export function registerDownloadHandlers() {
-  ipcMain.handle(channel.download.add, async (_, mediaItem: MediaDownloadParams) => {
-    return downloadQueue.addTask(mediaItem);
+  ipcMain.handle(channel.download.add, async (_, task: MediaDownloadTask) => {
+    return downloadQueue.addTask(task);
   });
 
-  ipcMain.handle(channel.download.addList, async (_, mediaList: MediaDownloadParams[]) => {
-    return downloadQueue.addTasks(mediaList);
+  ipcMain.handle(channel.download.addList, async (_, tasks: MediaDownloadTask[]) => {
+    return downloadQueue.addTasks(tasks);
   });
 
   ipcMain.handle(channel.download.pause, async (_, id: string) => {
@@ -28,13 +30,5 @@ export function registerDownloadHandlers() {
 
   ipcMain.handle(channel.download.retry, async (_, id: string) => {
     downloadQueue.retryTask(id);
-  });
-
-  ipcMain.handle(channel.download.sync, async () => {
-    const tasks = downloadQueue.getAllTasks();
-    return tasks.reduce((acc, task) => {
-      acc[task.id] = task;
-      return acc;
-    }, {} as any);
   });
 }
