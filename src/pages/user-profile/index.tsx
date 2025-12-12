@@ -126,7 +126,7 @@ const UserProfile = () => {
         refreshRelation={refreshRelation}
       />
       {user?.isLogin && (isSelf || relationWithMe !== UserRelation.Blocked) && (
-        <div className="p-4">
+        <div className="px-3 py-4">
           <Tabs radius="md" classNames={{ cursor: "rounded-medium" }} aria-label="个人资料栏目" variant="solid">
             {tabs.map(item => (
               <Tab key={item.key} title={item.label}>

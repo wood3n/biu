@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 
-import { addToast, Button, Input, Link, Pagination, Radio, RadioGroup } from "@heroui/react";
-import { RiSearch2Line } from "@remixicon/react";
+import { addToast, Link, Pagination } from "@heroui/react";
 import { usePagination } from "ahooks";
 
 import { CollectionType } from "@/common/constants/collection";
 import { formatDuration } from "@/common/utils";
 import GridList from "@/components/grid-list";
 import MediaItem from "@/components/media-item";
+import SearchFilter from "@/components/search-filter";
 import { getFavResourceList, type FavMedia, type FavResourceListRequestParams } from "@/service/fav-resource";
 import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
@@ -211,6 +211,18 @@ const Favorites: React.FC = () => {
     }
   }, [displayMode, fetchListPage, refreshAsync]);
 
+  // 当收藏夹ID变化时，重置搜索参数
+  useEffect(() => {
+    if (favFolderId) {
+      setSearchParams({
+        keyword: "",
+        tid: 0,
+        order: "mtime",
+        type: 0,
+      });
+    }
+  }, [favFolderId]);
+
   // 统一处理搜索参数变化和模式切换时的数据刷新
   useEffect(() => {
     if (displayMode === "list" && favFolderId) {
@@ -354,40 +366,20 @@ const Favorites: React.FC = () => {
       />
 
       {/* 搜索和过滤区域 */}
-      <div className="mb-6 flex flex-wrap items-center gap-4">
-        {/* 搜索框 */}
-        <div className="relative w-full max-w-md">
-          <Input
-            placeholder="搜索标题或简介..."
-            value={searchParams.keyword}
-            onChange={e => setSearchParams(prev => ({ ...prev, keyword: e.target.value }))}
-            startContent={<RiSearch2Line size={20} />}
-            endContent={
-              searchParams.keyword && (
-                <Button variant="flat" size="sm" onPress={() => setSearchParams(prev => ({ ...prev, keyword: "" }))}>
-                  清除
-                </Button>
-              )
-            }
-          />
-        </div>
-
-        {/* 排序方式 */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm">排序：</span>
-          <RadioGroup
-            orientation="horizontal"
-            value={searchParams.order}
-            onValueChange={value => {
-              setSearchParams(prev => ({ ...prev, order: value }));
-            }}
-          >
-            <Radio value="mtime">收藏时间</Radio>
-            <Radio value="view">播放量</Radio>
-            <Radio value="pubtime">投稿时间</Radio>
-          </RadioGroup>
-        </div>
-      </div>
+      <SearchFilter
+        keyword={searchParams.keyword}
+        order={searchParams.order}
+        placeholder="请输入关键词"
+        searchIcon="search2"
+        orderOptions={[
+          { value: "mtime", label: "收藏时间" },
+          { value: "view", label: "播放量" },
+          { value: "pubtime", label: "投稿时间" },
+        ]}
+        onKeywordChange={keyword => setSearchParams(prev => ({ ...prev, keyword }))}
+        onOrderChange={order => setSearchParams(prev => ({ ...prev, order }))}
+        containerClassName="mb-6 flex flex-wrap items-center gap-4"
+      />
 
       {displayMode === "card" ? (
         <>
