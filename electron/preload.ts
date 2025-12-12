@@ -7,9 +7,9 @@ let playerNextHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
 let playerToggleHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
 
 const api: ElectronAPI = {
-  getSettings: () => ipcRenderer.invoke(channel.store.getSettings),
-  setSettings: (value: Partial<AppSettings>) => ipcRenderer.invoke(channel.store.setSettings, value),
-  clearSettings: () => ipcRenderer.invoke(channel.store.clearSettings),
+  getStore: (name: StoreName) => ipcRenderer.invoke(channel.store.get, name),
+  setStore: (name: StoreName, value: any) => ipcRenderer.invoke(channel.store.set, name, value),
+  clearStore: (name: StoreName) => ipcRenderer.invoke(channel.store.clear, name),
   selectDirectory: () => ipcRenderer.invoke(channel.dialog.selectDirectory),
   openDirectory: (path?: string) => ipcRenderer.invoke(channel.dialog.openDirectory, path),
   openExternal: (url: string) => ipcRenderer.invoke(channel.dialog.openExternal, url),
@@ -174,6 +174,8 @@ const api: ElectronAPI = {
   getMediaDownloadTaskList: () => ipcRenderer.invoke(channel.download.getList),
   // 添加文件下载任务
   addMediaDownloadTask: (media: MediaDownloadInfo) => ipcRenderer.invoke(channel.download.add, media),
+  /** 添加下载任务列表 */
+  addMediaDownloadTaskList: (mediaList: MediaDownloadInfo[]) => ipcRenderer.invoke(channel.download.addList, mediaList),
   // 暂停文件下载任务
   pauseMediaDownloadTask: (id: string) => ipcRenderer.invoke(channel.download.pause, id),
   // 恢复文件下载任务
@@ -188,6 +190,8 @@ const api: ElectronAPI = {
     ipcRenderer.on(channel.download.sync, handler);
     return () => ipcRenderer.removeListener(channel.download.sync, handler);
   },
+  // 清除文件下载任务列表
+  clearMediaDownloadTaskList: () => ipcRenderer.invoke(channel.download.clear),
 };
 
 contextBridge.exposeInMainWorld("electron", api);

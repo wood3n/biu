@@ -10,7 +10,7 @@ import { setupMacDock } from "./mac/dock";
 import { destroyMiniPlayer } from "./mini-player";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
-import { store, storeKey } from "./store";
+import { appSettingsStore, storeKey } from "./store";
 import { createTray, destroyTray } from "./tray"; // 托盘功能
 import { autoUpdater, setupAutoUpdater, stopCheckForUpdates } from "./updater";
 import { getMacDarkIconPath, getMacLightIconPath, getWindowIcon } from "./utils";
@@ -106,7 +106,7 @@ function createWindow() {
 
   // 从store获取配置，判断是否关闭窗口时隐藏还是退出程序
   mainWindow.on("close", event => {
-    const closeWindowOption = store.get(storeKey.appSettings).closeWindowOption;
+    const closeWindowOption = appSettingsStore.get(storeKey.appSettings).closeWindowOption;
 
     if ((app as any).quitting) {
       return;

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app } from "electron";
 import log from "electron-log";
 import got from "got";
 import { EventEmitter } from "node:events";
@@ -8,12 +8,14 @@ import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import PQueue from "p-queue";
 
-import type { DownloadCoreEventData, MediaDownloadChunk } from "./types";
+import type { MediaDownloadChunk, MediaDownloadTaskBase } from "./types";
 
 import { UserAgent } from "../../network/user-agent";
-import { store, storeKey } from "../../store";
-import { channel } from "../channel";
+import { appSettingsStore, storeKey } from "../../store";
+import { getAudioWebStreamUrl } from "../api/audio-stream-url";
+import { getDashurl } from "../api/dash-url";
 import { convert } from "./ffmpeg-processor";
+import { getStreamAudioBandwidth, sortAudio } from "./utils";
 
 const ChunkSize = 10 * 1024 * 1024; // 10MB
 const TempRootDir = path.join(os.tmpdir(), "biu-temp-downloader");
@@ -24,125 +26,143 @@ export class DownloadCore extends EventEmitter {
   public bvid?: string;
   public cid?: string;
   public sid?: string;
-  public outputFileType?: MediaDownloadOutputFileType;
+  public outputFileType: MediaDownloadOutputFileType;
   public audioUrl?: string;
-  public videoUrl?: string;
   public audioCodecs?: string;
+  public audioBandwidth?: number;
   public audioTotalBytes: number = 0;
+  public videoUrl?: string;
+  public videoResolution?: string;
+  public videoFrameRate?: string;
   public videoTotalBytes: number = 0;
   public totalBytes?: number;
+  public downloadedBytes: number = 0;
   public status?: MediaDownloadStatus;
-
+  public chunks: MediaDownloadChunk[] = [];
   public fileName?: string;
-  private tempDir: string;
-  private audioTempPath: string;
-  private videoTempPath: string;
-  private abortController: AbortController;
+  public savePath: string;
+  public tempDir: string = "";
+  public audioTempPath: string = "";
+  public videoTempPath: string = "";
+
+  private abortSignal: AbortSignal;
   private chunkQueue: PQueue;
-  private chunks: MediaDownloadChunk[] = [];
-  private downloadedBytes: number = 0;
 
-  private savePath: string = store.get(storeKey.appSettings).downloadPath || app.getPath("downloads");
-
-  constructor(task: MediaDownloadTask) {
+  constructor(task: MediaDownloadTaskBase, signal: AbortSignal) {
     super();
     this.id = task.id;
     this.title = task.title;
     this.outputFileType = task.outputFileType;
-    this.audioUrl = task.audioUrl;
-    this.videoUrl = task.videoUrl;
-    this.audioCodecs = task.audioCodecs;
+    this.bvid = task.bvid;
+    this.cid = task.cid;
+    this.sid = task.sid;
     this.status = task.status;
+
+    this.abortSignal = signal;
+    this.fileName = `${this.title}-${this.id}${this.getAudioExt()}`;
+    if (this.outputFileType === "video") {
+      this.fileName = `${this.title}-${this.id}${this.getVideoExt()}`;
+    }
+    this.savePath = appSettingsStore.get(storeKey.appSettings).downloadPath || app.getPath("downloads");
+    this.tempDir = path.join(TempRootDir, this.id);
+    this.audioTempPath = path.join(this.tempDir, "audio.m4s");
+    if (this.outputFileType === "video") {
+      this.videoTempPath = path.join(this.tempDir, "video.m4s");
+    }
+    this.chunkQueue = new PQueue({ concurrency: 5 });
   }
 
   public async start(): Promise<void> {
     try {
       // 获取下载链接
-      const downloadUrlData = await this.getUrlFromRenderer();
-      this.audioUrl = downloadUrlData.audioUrl;
-      this.videoUrl = downloadUrlData.videoUrl;
-      this.audioCodecs = downloadUrlData.audioCodecs;
+      this.updateStatus("downloading");
+      await this.setDownloadUrl();
 
       // 获取文件大小
       const audioSize = await this.getAudioSize();
       this.audioTotalBytes = audioSize;
       this.totalBytes = audioSize;
-      this.chunks.push(...this.splitChunks({ type: "audio", totalSize: audioSize, chunkSize: ChunkSize }));
+      this.splitChunks({ type: "audio", totalSize: audioSize, chunkSize: ChunkSize });
       if (this.outputFileType === "video") {
         const videoSize = await this.getVideoSize();
         this.videoTotalBytes = videoSize;
         this.totalBytes += videoSize;
-        this.chunks.push(...this.splitChunks({ type: "video", totalSize: videoSize, chunkSize: ChunkSize }));
+        this.splitChunks({ type: "video", totalSize: videoSize, chunkSize: ChunkSize });
       }
 
-      this.tempDir = path.join(TempRootDir, this.id!);
       this.ensureDir(this.tempDir);
-      this.abortController = new AbortController();
 
       await this.downloadChunked();
-      this.audioTempPath = path.join(this.tempDir, "audio.m4s");
+
+      this.updateStatus("merging");
       await this.mergeChunks("audio", this.audioTempPath);
       if (this.outputFileType === "video") {
-        this.videoTempPath = path.join(this.tempDir, "video.m4s");
         await this.mergeChunks("video", this.videoTempPath);
       }
-
       this.deleteChunkFiles();
 
-      // 3. Conversion if needed
-      this.fileName = `${this.title}-${this.id}${this.getAudioExt()}`;
-      if (this.outputFileType === "video") {
-        this.fileName = `${this.title}-${this.id}${this.getVideoExt()}`;
-      }
-
+      this.updateStatus("converting");
       const outputPath = path.join(this.savePath, this.fileName!);
       await convert({
-        outputFileType: this.outputFileType!,
+        outputFileType: this.outputFileType,
         audioTempPath: this.audioTempPath,
         videoTempPath: this.videoTempPath,
         outputPath,
-        onProgress: progress => { },
+        onProgress: progress => {
+          if (progress.percent) {
+            this.updateConversionProgress(progress.percent);
+          }
+        },
       });
-
       this.deleteTempFiles();
-    } catch (error: any) { }
+
+      this.updateStatus("completed");
+    } catch (error: any) {
+      log.error(`[${this.id}] Download failed:`, error);
+      this.emitError(error);
+    }
   }
 
-  private getUrlFromRenderer = async () => {
-    return new Promise<MediaDownloadUrlData>((resolve, reject) => {
-      // A. 设置超时 (防止 React 卡死导致队列堵塞)
-      const timeout = setTimeout(() => {
-        cleanup();
-        reject(new Error("获取下载链接超时"));
-      }, 10000); // 30秒超时
+  private setDownloadUrl = async () => {
+    if (this.sid) {
+      const streamRes = await getAudioWebStreamUrl(this.sid);
 
-      // B. 定义一次性监听器，接收 React 的回信
-      // 使用 taskId 作为唯一标识，防止消息串台
-      const cbChannel = `reply-link-${this.id}`;
+      if (streamRes.data?.cdns?.[0]) {
+        const isFlac = streamRes?.data?.type === 3;
+        this.audioUrl = streamRes.data?.cdns?.[0];
+        this.audioCodecs = isFlac ? "flac" : "aac";
+        this.audioBandwidth = getStreamAudioBandwidth(streamRes?.data?.type);
+      } else {
+        this.emitError(new Error("Audio URL is empty"));
+        return;
+      }
+    } else if (this.bvid && this.cid) {
+      const dashData = await getDashurl({
+        bvid: this.bvid,
+        cid: this.cid,
+        fnval: 4048,
+      });
 
-      const listener = (_, response) => {
-        if (response.error) {
-          reject(new Error(response.error));
-        } else {
-          resolve(response.data as MediaDownloadUrlData); // 返回 { videoUrl, audioUrl }
-        }
-        cleanup();
-      };
-
-      // C. 清理函数
-      const cleanup = () => {
-        clearTimeout(timeout);
-        ipcMain.removeListener(cbChannel, listener);
-      };
-
-      // D. 注册监听
-      ipcMain.once(cbChannel, listener);
-
-      // E. 发送请求给 React
-      BrowserWindow.getAllWindows().forEach(w =>
-        w.webContents.send(channel.download.getDownloadData, { bvid: this.bvid, cid: this.cid, sid: this.sid }),
-      );
-    });
+      const audioList = sortAudio(dashData?.data?.dash?.audio ?? []);
+      const bestVideoInfo = dashData?.data?.dash?.video?.[0];
+      const videoUrl = bestVideoInfo?.baseUrl || bestVideoInfo?.backupUrl?.[0];
+      const flacAudio = dashData?.data?.dash?.flac?.audio;
+      const dolbyAudio = dashData?.data?.dash?.dolby?.audio?.[0];
+      this.audioUrl =
+        flacAudio?.baseUrl ||
+        flacAudio?.backupUrl?.[0] ||
+        dolbyAudio?.baseUrl ||
+        dolbyAudio?.backupUrl?.[0] ||
+        audioList[0]?.baseUrl ||
+        audioList[0]?.backupUrl?.[0];
+      this.audioCodecs = flacAudio?.codecs || dolbyAudio?.codecs || audioList[0]?.codecs;
+      this.audioBandwidth = audioList[0]?.bandwidth;
+      if (this.outputFileType === "video") {
+        this.videoUrl = videoUrl;
+        this.videoResolution = `${bestVideoInfo?.width}x${bestVideoInfo?.height}`;
+        this.videoFrameRate = bestVideoInfo?.frameRate || bestVideoInfo?.frame_rate;
+      }
+    }
   };
 
   private ensureDir = (dir: string) => {
@@ -152,18 +172,17 @@ export class DownloadCore extends EventEmitter {
   };
 
   public cancel(): void {
-    this.abortController.abort();
+    this.chunkQueue.clear();
+    this.chunks = [];
     this.deleteChunkFiles();
     this.deleteTempFiles();
   }
 
   public pause(): void {
-    this.abortController.abort();
+    this.updateStatus("paused");
   }
 
   public async resume(): Promise<void> {
-    // Reset abort controller
-    this.abortController = new AbortController();
     await this.start();
   }
 
@@ -174,9 +193,12 @@ export class DownloadCore extends EventEmitter {
   };
 
   private deleteTempFiles = () => {
-    fs.unlinkSync(this.audioTempPath);
-    if (this.outputFileType === "video") {
-      fs.unlinkSync(this.videoTempPath);
+    try {
+      if (this.tempDir && fs.existsSync(this.tempDir)) {
+        fs.rmSync(this.tempDir, { recursive: true, force: true });
+      }
+    } catch (error) {
+      log.error(`[${this.id}] Failed to clean up temp files:`, error);
     }
   };
 
@@ -186,6 +208,7 @@ export class DownloadCore extends EventEmitter {
         headers: this.getHeaders(),
         timeout: { request: 10000 },
         retry: { limit: 3 },
+        signal: this.abortSignal,
       });
       const len = response.headers["content-length"];
       return len ? parseInt(len, 10) : 0;
@@ -196,22 +219,19 @@ export class DownloadCore extends EventEmitter {
   };
 
   private getVideoSize = async () => {
-    try {
-      const response = await got.head(this.videoUrl as string, {
-        headers: this.getHeaders(),
-        timeout: { request: 10000 },
-        retry: { limit: 3 },
-      });
-      const len = response.headers["content-length"];
-      return len ? parseInt(len, 10) : 0;
-    } catch {
-      log.warn(`[${this.title}] Failed to get content length, defaulting to 0`);
-      return 0;
-    }
+    const response = await got.head(this.videoUrl as string, {
+      headers: this.getHeaders(),
+      timeout: { request: 10000 },
+      retry: { limit: 3 },
+      signal: this.abortSignal,
+    });
+    const len = response.headers["content-length"];
+    return len ? parseInt(len, 10) : 0;
   };
 
   private getHeaders = () => {
     return {
+      Origin: "https://www.bilibili.com",
       Referer: "https://www.bilibili.com",
       "User-Agent": UserAgent,
     };
@@ -222,12 +242,8 @@ export class DownloadCore extends EventEmitter {
    * @returns 对应的文件扩展名，如 '.m4a' 或 '.mp3'
    */
   private getAudioExt = () => {
-    // 检查编码字符串
-    if (this.audioCodecs?.startsWith("mp4a") || this.audioCodecs?.includes("aac")) {
-      return ".m4a"; // AAC 编码 -> m4a 后缀
-    }
-    if (this.audioCodecs?.startsWith("ec-3") || this.audioCodecs?.startsWith("ac-3")) {
-      return ".m4a"; // 杜比编码 -> 也可以封装进 m4a (或用 .eac3)
+    if (this.audioCodecs?.includes("flac")) {
+      return ".flac"; // Opus 编码 -> opus 后缀
     }
     if (this.audioCodecs?.includes("mp3")) {
       return ".mp3"; // 只有源文件本身就是 mp3 编码时，才用 .mp3
@@ -252,29 +268,22 @@ export class DownloadCore extends EventEmitter {
     totalSize: number;
     chunkSize: number;
   }) => {
-    const chunks: MediaDownloadChunk[] = [];
     const chunksCount = Math.ceil(totalSize / chunkSize);
 
     for (let i = 0; i < chunksCount; i++) {
       const start = i * chunkSize;
       const end = Math.min((i + 1) * chunkSize - 1, totalSize - 1);
-      chunks.push({
+      this.chunks.push({
         type,
-        index: i,
         start,
         end,
         name: `${type}.part${i + 1}`,
         done: false,
       });
     }
-
-    return chunks;
   };
 
   private async downloadChunked(): Promise<void> {
-    this.ensureDir(this.tempDir);
-    this.chunkQueue = new PQueue({ concurrency: 5 });
-
     for (let i = 0; i < this.chunks.length; i++) {
       const chunk = this.chunks[i];
       const chunkPath = path.join(this.tempDir, chunk.name);
@@ -315,27 +324,49 @@ export class DownloadCore extends EventEmitter {
         ...this.getHeaders(),
         Range: `bytes=${start}-${end}`,
       },
-      signal: this.abortController.signal,
+      signal: this.abortSignal,
       retry: { limit: 3 },
     });
 
     stream.on("data", chunk => {
       this.downloadedBytes += chunk.length;
+      this.updateDownloadProgress();
     });
 
-    const fileStream = fs.createWriteStream(destPath);
-    await pipeline(stream, fileStream);
+    await pipeline(stream, fs.createWriteStream(destPath), {
+      signal: this.abortSignal,
+    });
+
+    const chunkIndex = this.chunks.findIndex(c => c.type === type && c.start === start && c.end === end);
+    if (chunkIndex > -1) {
+      this.chunks[chunkIndex].done = true;
+    }
   }
 
   private async mergeChunks(type: MediaDownloadOutputFileType, destPath: string): Promise<void> {
     const chunks = this.chunks.filter(chunk => chunk.type === type);
-    const writeStream = fs.createWriteStream(destPath);
+    const writeStream = fs.createWriteStream(destPath, {
+      signal: this.abortSignal,
+    });
 
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i];
+    const totalSize = chunks.reduce((acc, chunk) => acc + (chunk.end - chunk.start + 1), 0);
+    let mergedBytes = 0;
+
+    for (const chunk of chunks) {
       const chunkPath = path.join(this.tempDir, chunk.name);
-      const data = await fs.promises.readFile(chunkPath);
-      writeStream.write(data);
+      await new Promise<void>((resolve, reject) => {
+        const readStream = fs.createReadStream(chunkPath);
+        readStream.on("error", err => {
+          writeStream.destroy(err);
+          reject(err);
+        });
+        readStream.on("data", bf => {
+          mergedBytes += bf.length;
+          this.updateMergeProgress((mergedBytes / totalSize) * 100);
+        });
+        readStream.pipe(writeStream, { end: false });
+        readStream.on("end", resolve);
+      });
     }
 
     writeStream.end();
@@ -346,21 +377,47 @@ export class DownloadCore extends EventEmitter {
     });
   }
 
-  private updateEventData = (data: DownloadCoreEventData) => {
-    this.emit("download-event", data);
+  private updateStatus = (status: MediaDownloadStatus) => {
+    this.status = status;
+    this.emit("statusChange", {
+      id: this.id,
+      status,
+      timestamp: Date.now(),
+    });
   };
 
   private updateDownloadProgress = () => {
     const percent =
       (this.totalBytes ?? 0) > 0 ? Number(((this.downloadedBytes / this.totalBytes!) * 100).toFixed(2)) : 0;
-    this.emit("progress", { percent });
+    this.emit("downloadProgress", {
+      id: this.id,
+      progress: percent,
+      timestamp: Date.now(),
+    });
   };
 
   private updateMergeProgress = (percent: number) => {
-    this.emit("progress", { percent });
+    this.emit("mergeProgress", {
+      id: this.id,
+      progress: percent,
+      timestamp: Date.now(),
+    });
   };
 
   private updateConversionProgress = (percent: number) => {
-    this.emit("progress", { percent });
+    this.emit("convertProgress", {
+      id: this.id,
+      progress: percent,
+      timestamp: Date.now(),
+    });
+  };
+
+  private emitError = (error: Error) => {
+    this.updateStatus("failed");
+    this.emit("error", {
+      id: this.id,
+      error: error.message,
+      timestamp: Date.now(),
+    });
   };
 }

@@ -30,24 +30,24 @@ export const useSettings = create<AppSettings & SettingsActions>()(
       name: "settings",
       storage: {
         getItem: async () => {
-          const store = await window.electron.getSettings();
+          const store = await window.electron.getStore<{ appSettings: AppSettings }>("app-settings");
 
           // 兼容之前的错误默认值
-          if (store.fontFamily === "system-default") {
-            store.fontFamily = "system-ui";
+          if (store?.appSettings?.fontFamily === "system-default") {
+            store.appSettings.fontFamily = "system-ui";
           }
 
           return {
-            state: store,
+            state: store?.appSettings,
           };
         },
 
         setItem: async (_, value) => {
-          await window.electron.setSettings(value.state);
+          await window.electron.setStore("app-settings", value.state);
         },
 
         removeItem: async () => {
-          await window.electron.clearSettings();
+          await window.electron.clearStore("app-settings");
         },
       },
       partialize: state => {

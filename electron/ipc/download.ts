@@ -8,6 +8,10 @@ import { DownloadQueue } from "./download/download-queue";
 export function registerDownloadHandlers({ getMainWindow }: IpcHandlerProps) {
   const downloadQueue = new DownloadQueue(getMainWindow);
 
+  ipcMain.handle(channel.download.getList, async () => {
+    return downloadQueue.getAllTasks();
+  });
+
   ipcMain.handle(channel.download.add, async (_, task: MediaDownloadTask) => {
     return downloadQueue.addTask(task);
   });
@@ -30,5 +34,9 @@ export function registerDownloadHandlers({ getMainWindow }: IpcHandlerProps) {
 
   ipcMain.handle(channel.download.retry, async (_, id: string) => {
     downloadQueue.retryTask(id);
+  });
+
+  ipcMain.handle(channel.download.clear, async () => {
+    downloadQueue.clearTasks();
   });
 }

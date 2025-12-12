@@ -12,10 +12,15 @@ import {
 } from "@heroui/react";
 import { RiMore2Line, RiPlayListAddLine, RiStarLine, RiTimeLine } from "@remixicon/react";
 
+import { ReactComponent as AudioDownloadIcon } from "@/assets/icons/audio-download.svg";
+import { ReactComponent as VideoDownloadIcon } from "@/assets/icons/video-download.svg";
 import FavFolderSelect from "@/components/fav-folder/select";
 import { postHistoryToViewAdd } from "@/service/history-toview-add";
 import { usePlayList, type PlayDataType } from "@/store/play-list";
 import { useUser } from "@/store/user";
+
+import AudioSelect from "./audio-select";
+import VideoSelect from "./video-select";
 
 export interface ImageCardMenu {
   key: string;
@@ -70,6 +75,18 @@ const Action = ({
     onOpenChange: onOpenChangeFavSelectModal,
   } = useDisclosure();
 
+  const {
+    isOpen: isOpenAudioSelectModal,
+    onOpen: onOpenAudioSelectModal,
+    onOpenChange: onOpenChangeAudioSelectModal,
+  } = useDisclosure();
+
+  const {
+    isOpen: isOpenVideoSelectModal,
+    onOpen: onOpenVideoSelectModal,
+    onOpenChange: onOpenChangeVideoSelectModal,
+  } = useDisclosure();
+
   const addToLater = async () => {
     await postHistoryToViewAdd({
       bvid,
@@ -113,12 +130,38 @@ const Action = ({
       hidden: !user?.isLogin || location.pathname === "/later",
       onPress: addToLater,
     },
-    // {// 暂时隐藏，后续重构完再开放
-    //   key: "download",
-    //   icon: <RiDownloadLine size={16} />,
-    //   title: "下载",
-    //   onPress: onOpenDownloadModal,
-    // },
+    {
+      key: "downloadAudio",
+      icon: <AudioDownloadIcon className="relative top-px left-px h-[15px] w-[15px]" />,
+      title: "下载音乐",
+      hidden: type !== "audio",
+      onPress: async () => {
+        await window.electron.addMediaDownloadTask({
+          outputFileType: "audio",
+          title,
+          sid: String(sid),
+        });
+
+        addToast({
+          title: "已添加到下载队列",
+          color: "success",
+        });
+      },
+    },
+    {
+      key: "downloadAudio",
+      icon: <AudioDownloadIcon className="relative top-px left-px h-[15px] w-[15px]" />,
+      title: "下载音频",
+      hidden: type === "audio",
+      onPress: onOpenAudioSelectModal,
+    },
+    {
+      key: "downloadVideo",
+      hidden: type === "audio",
+      icon: <VideoDownloadIcon className="relative top-px left-px h-[15px] w-[15px]" />,
+      title: "下载视频",
+      onPress: onOpenVideoSelectModal,
+    },
     ...(menus || []),
   ].filter(item => !item.hidden);
 
@@ -160,6 +203,18 @@ const Action = ({
         isOpen={isOpenFavSelectModal}
         onOpenChange={onOpenChangeFavSelectModal}
         afterSubmit={onChangeFavSuccess}
+      />
+      <AudioSelect
+        title={title}
+        bvid={bvid!}
+        isOpen={isOpenAudioSelectModal}
+        onOpenChange={onOpenChangeAudioSelectModal}
+      />
+      <VideoSelect
+        title={title}
+        bvid={bvid!}
+        isOpen={isOpenVideoSelectModal}
+        onOpenChange={onOpenChangeVideoSelectModal}
       />
     </>
   );

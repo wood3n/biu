@@ -2,7 +2,7 @@ import log from "electron-log/renderer";
 import moment from "moment";
 
 import { getAudioWebStreamUrl } from "@/service/audio-web-url";
-import { getPlayerPlayurl, type DashAudio, type DashVideo } from "@/service/player-playurl";
+import { getPlayerPlayurl, type DashAudio } from "@/service/player-playurl";
 import { useUser } from "@/store/user";
 
 import { audioQualitySort } from "../constants/audio";
@@ -20,16 +20,6 @@ export function sortAudio(audio: DashAudio[]) {
     if (indexA === -1) return 1;
     if (indexB === -1) return -1;
     return indexB - indexA;
-  });
-}
-
-export function sortVideo(video: DashVideo[]) {
-  return video.toSorted((a, b) => {
-    if (a.bandwidth !== b.bandwidth) {
-      return b.bandwidth - a.bandwidth;
-    }
-
-    return b.id - a.id;
   });
 }
 

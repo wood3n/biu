@@ -3,6 +3,9 @@ export const channel = {
     getSettings: "settings:get",
     setSettings: "settings:set",
     clearSettings: "settings:clear",
+    get: "store:get",
+    set: "store:set",
+    clear: "store:clear",
   },
   dialog: {
     selectDirectory: "dialog:select-directory",
@@ -25,6 +28,7 @@ export const channel = {
     cancel: "download:cancel",
     retry: "download:retry",
     sync: "download:sync",
+    clear: "download:clear",
   },
   router: {
     navigate: "router:navigate",

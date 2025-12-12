@@ -10,10 +10,15 @@ interface IFontInfo {
 
 type AppPlatForm = "macos" | "windows" | "linux";
 
+type StoreName = "app-settings" | "user-login-info" | "media-downloads";
+
 interface ElectronAPI {
-  getSettings: () => Promise<AppSettings>;
-  setSettings: (patch: Partial<AppSettings>) => Promise<void>;
-  clearSettings: () => Promise<void>;
+  /** 获取指定name的存储值 */
+  getStore: <T>(name: StoreName) => Promise<T | undefined>;
+  /** 设置指定name的存储值 */
+  setStore: <T>(name: StoreName, value: T) => Promise<void>;
+  /** 清除指定name的存储值 */
+  clearStore: (name: StoreName) => Promise<void>;
   /** 打开系统目录选择对话框，返回选中的目录路径 */
   selectDirectory: () => Promise<string | null>;
   /** 打开本地目录（默认打开下载目录） */
@@ -72,6 +77,8 @@ interface ElectronAPI {
   syncMediaDownloadTaskList: (cb: (list: MediaDownloadTask[]) => void) => VoidFunction;
   /** 添加下载任务 */
   addMediaDownloadTask: (media: MediaDownloadInfo) => Promise<void>;
+  /** 添加下载任务列表 */
+  addMediaDownloadTaskList: (mediaList: MediaDownloadInfo[]) => Promise<void>;
   /** 暂停下载任务 */
   pauseMediaDownloadTask: (id: string) => Promise<void>;
   /** 恢复下载任务 */
@@ -80,6 +87,8 @@ interface ElectronAPI {
   cancelMediaDownloadTask: (id: string) => Promise<void>;
   /** 重试下载任务 */
   retryMediaDownloadTask: (id: string) => Promise<void>;
+  /** 清除下载任务列表 */
+  clearMediaDownloadTaskList: () => Promise<void>;
 }
 
 interface Window {

@@ -1,12 +1,4 @@
-type MediaDownloadStatus =
-  | "resolving"
-  | "waiting"
-  | "downloading"
-  | "merging"
-  | "converting"
-  | "paused"
-  | "completed"
-  | "error";
+type MediaDownloadStatus = "waiting" | "downloading" | "merging" | "converting" | "paused" | "completed" | "failed";
 
 type MediaDownloadOutputFileType = "audio" | "video";
 
@@ -22,21 +14,24 @@ interface MediaDownloadInfo {
   /** 视频分集cid */
   cid?: string;
   /** 音频sid */
-  sid?: string;
+  sid?: string | number;
 }
 
-interface MediaDownloadTask extends MediaDownloadInfo {
+interface MediaDownloadTaskBase extends MediaDownloadInfo {
   id: string;
-  /** 音频url(一般2小时过期，需要重新获取) */
-  audioUrl?: string;
+  status: MediaDownloadStatus;
+  createdTime: number;
+}
+
+interface MediaDownloadTask extends MediaDownloadTaskBase {
   /** 音频编码格式 */
   audioCodecs?: string;
-  /** 视频url(一般2小时过期，需要重新获取) */
-  videoUrl?: string;
-  /** 创建时间 */
-  createdTime: number;
-  /** 状态 */
-  status: MediaDownloadStatus;
+  /** 音频带宽 */
+  audioBandwidth?: number;
+  /** 视频分辨率 */
+  videoResolution?: string;
+  /** 视频帧率 */
+  videoFrameRate?: string;
   /** 保存路径 */
   savePath?: string;
   /** 文件大小 bytes */
@@ -49,10 +44,4 @@ interface MediaDownloadTask extends MediaDownloadInfo {
   convertProgress?: number;
   /** 下载错误信息 */
   error?: string;
-}
-
-interface MediaDownloadUrlData {
-  audioUrl: string;
-  videoUrl: string;
-  audioCodecs: string;
 }
