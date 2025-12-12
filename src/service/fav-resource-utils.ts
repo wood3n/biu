@@ -24,14 +24,7 @@ export const filterAndSortFavMedias = (
     );
   }
 
-  // 2. 按分区tid过滤
-  if (params.tid && params.tid !== 0) {
-    // 注意：B站API返回的media对象中可能没有直接的tid字段
-    // 这里我们假设API已经按tid过滤，客户端只做二次验证
-    // 如果需要客户端过滤，可能需要额外的映射关系
-  }
-
-  // 3. 按指定字段排序
+  // 2. 按指定字段排序
   if (params.order) {
     filteredMedias.sort((a, b) => {
       switch (params.order) {
@@ -50,51 +43,5 @@ export const filterAndSortFavMedias = (
       }
     });
   }
-
   return filteredMedias;
-};
-
-/**
- * 获取全部收藏夹内容
- * @param mediaId 收藏夹ID
- * @param params 其他参数
- * @returns 全部收藏夹内容
- */
-export const getAllFavMedias = async (
-  mediaId: string,
-  params?: Omit<FavResourceListRequestParams, "media_id" | "ps" | "pn">,
-) => {
-  const { getFavResourceList } = await import("./fav-resource");
-
-  let allMedias: FavMedia[] = [];
-  let page = 1;
-  const pageSize = 20;
-  let hasMore = true;
-
-  try {
-    while (hasMore) {
-      const response = await getFavResourceList({
-        media_id: mediaId,
-        ps: pageSize,
-        pn: page,
-        ...params,
-      });
-
-      if (response.data && response.data.medias) {
-        allMedias = [...allMedias, ...response.data.medias];
-        hasMore = response.data.has_more;
-        page++;
-      } else {
-        hasMore = false;
-      }
-
-      // 防止请求过快，添加适当延迟
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-
-    return allMedias;
-  } catch (error) {
-    console.error("获取全部收藏夹内容失败:", error);
-    throw error;
-  }
 };

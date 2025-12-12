@@ -9,4 +9,5 @@ export const defaultAppSettings: AppSettings = {
   primaryColor: "#17c964",
   audioQuality: "auto",
   hiddenMenuKeys: [],
+  displayMode: "card",
 };
