@@ -1,14 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router";
 
-import { addToast, Link, Pagination } from "@heroui/react";
+import { addToast, Button, Input, Link, Pagination, Radio, RadioGroup } from "@heroui/react";
+import { RiSearch2Line } from "@remixicon/react";
 import { usePagination } from "ahooks";
 
 import { CollectionType } from "@/common/constants/collection";
 import { formatDuration } from "@/common/utils";
 import GridList from "@/components/grid-list";
 import MVCard from "@/components/mv-card";
-import { getFavResourceList } from "@/service/fav-resource";
+import { getFavResourceList, type FavResourceListRequestParams } from "@/service/fav-resource";
 import { usePlayList } from "@/store/play-list";
 import { useUser } from "@/store/user";
 
@@ -68,6 +69,16 @@ const Favorites: React.FC = () => {
   const playList = usePlayList(state => state.playList);
   const addToPlayList = usePlayList(state => state.addList);
 
+  // 搜索和过滤参数
+  const [searchParams, setSearchParams] = useState<
+    Omit<FavResourceListRequestParams, "media_id" | "ps" | "pn" | "platform">
+  >({
+    keyword: "",
+    tid: 0,
+    order: "mtime",
+    type: 0,
+  });
+
   const {
     data,
     pagination,
@@ -76,22 +87,37 @@ const Favorites: React.FC = () => {
     refreshAsync,
   } = usePagination(
     async ({ current, pageSize }) => {
-      const res = await getFavResourceList({
-        media_id: String(favFolderId ?? ""),
-        ps: pageSize,
-        pn: current,
-        platform: "web",
-      });
+      try {
+        const res = await getFavResourceList({
+          media_id: String(favFolderId ?? ""),
+          ps: pageSize,
+          pn: current,
+          platform: "web",
+          ...searchParams,
+        });
 
-      return {
-        info: res?.data?.info,
-        total: res?.data?.info?.media_count,
-        list: res?.data?.medias ?? [],
-      };
+        return {
+          info: res?.data?.info,
+          total: res?.data?.info?.media_count,
+          list: res?.data?.medias ?? [],
+          hasMore: res?.data?.has_more ?? false,
+        };
+      } catch (error) {
+        addToast({
+          title: error instanceof Error ? error.message : "获取收藏夹内容失败",
+          color: "danger",
+        });
+        return {
+          info: undefined,
+          total: 0,
+          list: [],
+          hasMore: false,
+        };
+      }
     },
     {
       ready: Boolean(favFolderId),
-      refreshDeps: [favFolderId],
+      refreshDeps: [favFolderId, searchParams],
       defaultPageSize: 20,
     },
   );
@@ -168,6 +194,43 @@ const Favorites: React.FC = () => {
         onPlayAll={onPlayAll}
         onAddToPlayList={addAllMedia}
       />
+
+      {/* 搜索和过滤区域 */}
+      <div className="mb-6 flex flex-wrap items-center gap-4">
+        {/* 搜索框 */}
+        <div className="relative w-full max-w-md">
+          <Input
+            placeholder="搜索标题或简介..."
+            value={searchParams.keyword}
+            onChange={e => setSearchParams(prev => ({ ...prev, keyword: e.target.value }))}
+            startContent={<RiSearch2Line size={20} />}
+            endContent={
+              searchParams.keyword && (
+                <Button variant="flat" size="sm" onPress={() => setSearchParams(prev => ({ ...prev, keyword: "" }))}>
+                  清除
+                </Button>
+              )
+            }
+          />
+        </div>
+
+        {/* 排序方式 */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">排序：</span>
+          <RadioGroup
+            orientation="horizontal"
+            value={searchParams.order}
+            onValueChange={value => {
+              setSearchParams(prev => ({ ...prev, order: value }));
+            }}
+          >
+            <Radio value="mtime">收藏时间</Radio>
+            <Radio value="view">播放量</Radio>
+            <Radio value="pubtime">投稿时间</Radio>
+          </RadioGroup>
+        </div>
+      </div>
+
       <GridList
         data={data?.list ?? []}
         loading={loading}
