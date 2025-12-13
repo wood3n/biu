@@ -1,9 +1,3 @@
-export interface MediaDownloadTaskBase extends MediaDownloadInfo {
-  id: string;
-  status: MediaDownloadStatus;
-  createdTime: number;
-}
-
 export interface FullMediaDownloadTask extends MediaDownloadTask {
   /** 音频url(一般2小时过期，需要重新获取) */
   audioUrl?: string;
@@ -17,8 +11,14 @@ export interface FullMediaDownloadTask extends MediaDownloadTask {
   videoFrameRate?: string;
   /** 文件名 */
   fileName?: string;
+  /** 音频临时文件路径 */
+  audioTempPath?: string;
+  /** 视频临时文件路径 */
+  videoTempPath?: string;
   /** 保存路径 */
   savePath?: string;
+  /** 已下载字节数 */
+  downloadedBytes?: number;
   /** 下载分块信息 */
   chunks?: MediaDownloadChunk[];
 }

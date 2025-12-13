@@ -1,5 +1,12 @@
-import { Button, Tooltip } from "@heroui/react";
-import { RiDeleteBinLine, RiPauseLine, RiPlayLine, RiRefreshLine } from "@remixicon/react";
+import { addToast, Button, Tooltip } from "@heroui/react";
+import {
+  RiDeleteBinLine,
+  RiFileMusicLine,
+  RiFileVideoLine,
+  RiPauseLine,
+  RiPlayLine,
+  RiRefreshLine,
+} from "@remixicon/react";
 
 interface Props {
   data: MediaDownloadTask;
@@ -7,6 +14,20 @@ interface Props {
 
 const DownloadActions = ({ data }: Props) => {
   const actions = [
+    {
+      key: "open",
+      label: "打开文件",
+      color: "primary" as const,
+      icon: data.outputFileType === "audio" ? <RiFileMusicLine size={18} /> : <RiFileVideoLine size={18} />,
+      show: true,
+      onPress: async () => {
+        try {
+          await window.electron.openDirectory(data.savePath);
+        } catch (err) {
+          addToast({ title: `无法打开文件, ${err instanceof Error ? err.message : String(err)}`, color: "danger" });
+        }
+      },
+    },
     {
       key: "pause",
       label: "暂停",

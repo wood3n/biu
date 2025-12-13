@@ -68,7 +68,7 @@ const LeftControl = () => {
               }}
               className="object-cover"
             />
-            <div className="text-primary rounded-medium absolute top-0 left-0 z-10 flex h-full w-full items-center justify-center bg-[rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100">
+            <div className="text-primary rounded-medium absolute top-0 left-0 z-10 flex h-full w-full items-center justify-center overflow-hidden bg-[rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100">
               <AudioAnimationIcon style={{ width: 20, height: 20 }} />
             </div>
           </div>

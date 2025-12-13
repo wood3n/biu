@@ -45,3 +45,8 @@ interface MediaDownloadTask extends MediaDownloadTaskBase {
   /** 下载错误信息 */
   error?: string;
 }
+
+interface MediaDownloadBroadcastPayload {
+  type: "full" | "update";
+  data: MediaDownloadTask[];
+}

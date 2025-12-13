@@ -1,7 +1,10 @@
 import { useMemo } from "react";
 
-import { Progress } from "@heroui/react";
+import { Progress, Spinner } from "@heroui/react";
 import { RiCheckboxCircleLine } from "@remixicon/react";
+import clx from "classnames";
+
+import Ellipsis from "@/components/ellipsis";
 
 import { StatusDesc } from "./status-desc";
 
@@ -23,6 +26,15 @@ const DownloadProgress = ({ data }: Props) => {
     );
   }
 
+  if (data.status === "converting") {
+    return (
+      <span className="text-success flex items-center space-x-1">
+        <Spinner size="sm" color="success" />
+        转换中
+      </span>
+    );
+  }
+
   const progressValue = useMemo(() => {
     if (data.status === "downloading") {
       return data.downloadProgress;
@@ -39,10 +51,27 @@ const DownloadProgress = ({ data }: Props) => {
 
   return (
     <div className="flex h-full flex-col justify-center space-y-1">
-      <Progress value={progressValue} maxValue={100} showValueLabel={false} size="sm" radius="md" className="w-full" />
+      <Progress
+        color={data.status === "failed" ? "danger" : "primary"}
+        value={progressValue}
+        maxValue={100}
+        showValueLabel={false}
+        size="sm"
+        radius="md"
+        className="w-full"
+      />
       <div className="flex justify-between">
-        <span className="text-xs">{StatusDesc[data.status]}</span>
-        <span className="text-xs">{progressValue}%</span>
+        <span
+          className={clx("flex items-center space-x-1 text-xs", {
+            "text-danger": data.status === "failed",
+          })}
+        >
+          <span>{StatusDesc[data.status]}</span>
+          {data.status === "failed" && Boolean(data?.error) && (
+            <Ellipsis className="text-danger max-w-[160px] text-xs">{data.error}</Ellipsis>
+          )}
+        </span>
+        <span className="text-xs">{progressValue || 0}%</span>
       </div>
     </div>
   );

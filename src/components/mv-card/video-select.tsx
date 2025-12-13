@@ -10,12 +10,13 @@ import ScrollContainer from "../scroll-container";
 
 interface Props {
   title: string;
+  cover: string;
   bvid: string;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
 }
 
-const VideoSelect = ({ title, bvid, isOpen, onOpenChange }: Props) => {
+const VideoSelect = ({ title, cover, bvid, isOpen, onOpenChange }: Props) => {
   const [selectedCids, setSelectedCids] = useState<string[]>([]);
 
   const { data, loading } = useRequest(
@@ -29,7 +30,8 @@ const VideoSelect = ({ title, bvid, isOpen, onOpenChange }: Props) => {
       } else if (res?.data?.[0]?.cid) {
         const cid = String(res.data[0].cid);
         await window.electron.addMediaDownloadTask({
-          outputFileType: "audio",
+          outputFileType: "video",
+          cover,
           title,
           bvid,
           cid,

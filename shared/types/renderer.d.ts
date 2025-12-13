@@ -74,7 +74,7 @@ interface ElectronAPI {
   /** 获取下载任务列表 */
   getMediaDownloadTaskList: () => Promise<MediaDownloadTask[]>;
   /** 同步下载任务列表 */
-  syncMediaDownloadTaskList: (cb: (list: MediaDownloadTask[]) => void) => VoidFunction;
+  syncMediaDownloadTaskList: (cb: (payload: MediaDownloadBroadcastPayload) => void) => VoidFunction;
   /** 添加下载任务 */
   addMediaDownloadTask: (media: MediaDownloadInfo) => Promise<void>;
   /** 添加下载任务列表 */

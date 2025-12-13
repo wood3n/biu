@@ -6,12 +6,12 @@ import { getCookieString } from "../../network/cookie";
 import { UserAgent } from "../../network/user-agent";
 import { userStore } from "../../store";
 
-export const getAudioWebStreamUrl = async (songid: string) => {
+export const getAudioWebStreamUrl = async (songid: string | number) => {
   const cookie = await getCookieString();
   const mid = userStore.get("mid") || "";
   const vipStatus = userStore.get("vipStatus") || 2;
 
-  const response = await got.get("https://www.bilibili.com/audio/music-service-c/web/url", {
+  const response = await got.get("https://api.bilibili.com/audio/music-service-c/url", {
     searchParams: {
       mid: mid,
       songid,

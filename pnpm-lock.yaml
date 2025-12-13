@@ -151,7 +151,7 @@ importers:
         specifier: ^0.6.1
         version: 0.6.1
       '@types/fluent-ffmpeg':
-        specifier: ^2.1.27
+        specifier: ^2.1.28
         version: 2.1.28
       '@types/moment-duration-format':
         specifier: ^2.2.6

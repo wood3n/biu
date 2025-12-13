@@ -139,6 +139,7 @@ const Action = ({
         await window.electron.addMediaDownloadTask({
           outputFileType: "audio",
           title,
+          cover,
           sid: String(sid),
         });
 
@@ -206,12 +207,14 @@ const Action = ({
       />
       <AudioSelect
         title={title}
+        cover={cover}
         bvid={bvid!}
         isOpen={isOpenAudioSelectModal}
         onOpenChange={onOpenChangeAudioSelectModal}
       />
       <VideoSelect
         title={title}
+        cover={cover}
         bvid={bvid!}
         isOpen={isOpenVideoSelectModal}
         onOpenChange={onOpenChangeVideoSelectModal}

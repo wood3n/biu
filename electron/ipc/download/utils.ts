@@ -1,3 +1,5 @@
+import fs from "node:fs";
+
 import type { DashAudio } from "../api/types";
 
 const audioQualitySort = [30257, 30216, 30259, 30260, 30232, 30280, 30250, 30251];
@@ -32,4 +34,14 @@ export const getStreamAudioBandwidth = (type: number) => {
     default:
       return 0;
   }
+};
+
+export const ensureDir = (dir: string) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+};
+
+export const removeDirOrFile = (fsPath: string) => {
+  fs.rmSync(fsPath, { recursive: true, force: true });
 };

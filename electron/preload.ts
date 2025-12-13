@@ -186,7 +186,7 @@ const api: ElectronAPI = {
   cancelMediaDownloadTask: (id: string) => ipcRenderer.invoke(channel.download.cancel, id),
   // 监听文件下载任务状态变化
   syncMediaDownloadTaskList: cb => {
-    const handler = (_, payload: MediaDownloadTask[]) => cb(payload);
+    const handler = (_, payload: MediaDownloadBroadcastPayload) => cb(payload);
     ipcRenderer.on(channel.download.sync, handler);
     return () => ipcRenderer.removeListener(channel.download.sync, handler);
   },

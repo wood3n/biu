@@ -1,4 +1,4 @@
-import { biliRequest } from "./request";
+import { apiRequest } from "./request";
 
 /**
  * 获取音频流URL（可获取付费音频）
@@ -81,5 +81,5 @@ export interface AudioStreamUrlResponse {
  * @param params 请求参数
  */
 export const getAudioWebStreamUrl = (params: AudioStreamUrlRequestParams) => {
-  return biliRequest.get<AudioStreamUrlResponse>("/audio/music-service-c/web/url", { params });
+  return apiRequest.get<AudioStreamUrlResponse>("/audio/music-service-c/url", { params });
 };

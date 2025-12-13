@@ -6,14 +6,14 @@ import {
   CardBody,
   Chip,
   Image,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableColumn,
   TableHeader,
+  Radio,
+  RadioGroup,
   TableRow,
-  Tabs,
   Tooltip,
 } from "@heroui/react";
 import { RiDeleteBinLine, RiFolderLine, RiMusicLine, RiVideoLine } from "@remixicon/react";
@@ -30,7 +30,7 @@ import DownloadProgress from "./progress";
 const DownloadList = () => {
   const downloadPath = useSettings(s => s.downloadPath);
   const [downloadList, setDownloadList] = useState<MediaDownloadTask[]>([]);
-  const [fileType, setFileType] = useState<string | number>("audio");
+  const [fileType, setFileType] = useState<string>("all");
 
   useEffect(() => {
     const initList = async () => {
@@ -42,18 +42,17 @@ const DownloadList = () => {
 
     initList();
 
-    const removeListener = window.electron.syncMediaDownloadTaskList((payload: any) => {
-      if (Array.isArray(payload)) {
-        setDownloadList(payload as MediaDownloadTask[]);
-      } else if (payload?.type === "full") {
-        setDownloadList(payload.data);
+    const removeListener = window.electron.syncMediaDownloadTaskList(payload => {
+      console.log("syncMediaDownloadTaskList", payload);
+      if (payload?.type === "full") {
+        setDownloadList(payload.data as MediaDownloadTask[]);
       } else if (payload?.type === "update") {
         setDownloadList(prev => {
-          const currentMap = new Map(prev.map(item => [item.id, item]));
-          (payload.data as MediaDownloadTask[]).forEach(item => {
-            currentMap.set(item.id, item);
+          const updateTasks = payload.data;
+          return prev.map(item => {
+            const updateTask = updateTasks.find(t => t.id === item.id);
+            return updateTask ? { ...item, ...updateTask } : item;
           });
-          return Array.from(currentMap.values());
         });
       }
     });
@@ -113,23 +112,25 @@ const DownloadList = () => {
               removeWrapper
               topContent={
                 <div className="flex justify-between">
-                  <Tabs
-                    radius="md"
+                  <RadioGroup
+                    orientation="horizontal"
+                    value={fileType}
+                    onValueChange={setFileType}
                     classNames={{
-                      cursor: "rounded-medium",
+                      wrapper: "gap-4",
                     }}
-                    aria-label="切换文件类型"
-                    selectedKey={fileType}
-                    onSelectionChange={setFileType}
                   >
-                    <Tab key="audio" title="音频" />
-                    <Tab key="video" title="视频" />
-                  </Tabs>
-                  <Tooltip content="清空记录" closeDelay={0}>
-                    <Button size="sm" isIconOnly onPress={clearDownloadList}>
-                      <RiDeleteBinLine size={18} />
-                    </Button>
-                  </Tooltip>
+                    <Radio value="all">全部</Radio>
+                    <Radio value="audio">音频</Radio>
+                    <Radio value="video">视频</Radio>
+                  </RadioGroup>
+                  {Boolean(downloadList.length) && (
+                    <Tooltip content="清空记录" closeDelay={0}>
+                      <Button size="sm" isIconOnly onPress={clearDownloadList}>
+                        <RiDeleteBinLine size={18} />
+                      </Button>
+                    </Tooltip>
+                  )}
                 </div>
               }
               classNames={{
@@ -137,15 +138,18 @@ const DownloadList = () => {
               }}
             >
               <TableHeader className="rounded-medium">
-                <TableColumn>文件</TableColumn>
-                <TableColumn width={200}>状态</TableColumn>
+                <TableColumn width={280}>文件</TableColumn>
+                <TableColumn>状态</TableColumn>
                 <TableColumn width={120}>大小</TableColumn>
                 <TableColumn width={140}>下载时间</TableColumn>
                 <TableColumn width={120} align="center">
                   操作
                 </TableColumn>
               </TableHeader>
-              <TableBody items={downloadList.filter(item => item.outputFileType === fileType)} emptyContent={<Empty />}>
+              <TableBody
+                items={downloadList.filter(item => fileType === "all" || item.outputFileType === fileType)}
+                emptyContent={<Empty />}
+              >
                 {item => {
                   const quality = getFileQuality(item);
 
@@ -154,6 +158,7 @@ const DownloadList = () => {
                       <TableCell className="max-w-[280px] truncate">
                         <div className="flex items-center space-x-2">
                           <Image
+                            radius="md"
                             src={item.cover}
                             fallbackSrc={
                               item.outputFileType === "audio" ? <RiMusicLine size={48} /> : <RiVideoLine size={48} />

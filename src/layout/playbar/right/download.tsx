@@ -1,4 +1,4 @@
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
+import { addToast, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
 import { RiDownload2Fill } from "@remixicon/react";
 
 import { ReactComponent as AudioDownloadIcon } from "@/assets/icons/audio-download.svg";
@@ -22,6 +22,11 @@ const Download = () => {
       cid: playItem?.cid,
       sid: playItem?.sid,
     });
+
+    addToast({
+      title: "已添加下载任务",
+      color: "success",
+    });
   };
 
   const downloadVideo = async () => {
@@ -31,6 +36,11 @@ const Download = () => {
       cover: playItem?.pageCover || playItem?.cover,
       bvid: playItem?.bvid,
       cid: playItem?.cid,
+    });
+
+    addToast({
+      title: "已添加下载任务",
+      color: "success",
     });
   };
 
