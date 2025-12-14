@@ -6,10 +6,11 @@ use std::path::PathBuf;
 use tauri::{
     AppHandle, Emitter, Manager, State, Window, WebviewWindowBuilder, WebviewUrl,
 };
-use tauri::http::{StatusCode, Response}; 
 use tokio::io::AsyncWriteExt;
 use futures_util::StreamExt;
 use tauri_plugin_shell::ShellExt; 
+
+// --- Types ---
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AppSettings {
@@ -48,6 +49,8 @@ pub struct HttpInvokePayload {
 // Global State for HTTP Client
 pub struct AppHttpClient(pub reqwest::Client);
 
+// --- Helper Functions ---
+
 fn get_settings_path(app: &AppHandle) -> PathBuf {
     app.path().app_config_dir().unwrap().join("app-settings.json")
 }
@@ -70,35 +73,48 @@ fn load_settings(app: &AppHandle) -> AppSettings {
     }
 }
 
+// --- App/Updater Commands ---
+
 #[tauri::command]
 fn get_app_version(app: AppHandle) -> String {
     app.package_info().version.to_string()
 }
+
 #[tauri::command]
 async fn check_app_update(_app: AppHandle) -> Result<serde_json::Value, String> {
+    // Placeholder: Implement using tauri-plugin-updater if needed
+    // For now, return "no update" to prevent errors
     Ok(serde_json::json!({
         "isUpdateAvailable": false,
         "latestVersion": "",
         "releaseNotes": ""
     }))
 }
+
 #[tauri::command]
 async fn download_app_update() -> Result<(), String> {
+    // Placeholder
     Err("Auto-update not configured".to_string())
 }
+
 #[tauri::command]
 async fn quit_and_install(app: AppHandle) {
     app.exit(0);
 }
+
 #[tauri::command]
 async fn open_installer_directory(app: AppHandle) -> Result<bool, String> {
     let path = app.path().download_dir().unwrap_or_default();
     open_directory(app, Some(path.to_string_lossy().to_string())).await
 }
+
+// --- Store Commands ---
+
 #[tauri::command]
 async fn get_settings(app: AppHandle) -> Result<AppSettings, String> {
     Ok(load_settings(&app))
 }
+
 #[tauri::command]
 async fn set_settings(app: AppHandle, payload: AppSettings) -> Result<bool, String> {
     let path = get_settings_path(&app);
@@ -109,9 +125,13 @@ async fn set_settings(app: AppHandle, payload: AppSettings) -> Result<bool, Stri
     serde_json::to_writer_pretty(file, &payload).map_err(|e| e.to_string())?;
     Ok(true)
 }
+
 fn get_store_path(app: &AppHandle, key: &str) -> PathBuf {
+    // Saves to: <app_config_dir>/<key>.json
+    // e.g. /Users/name/Library/Application Support/com.your.app/search-history.json
     app.path().app_config_dir().unwrap().join(format!("{}.json", key))
 }
+
 #[tauri::command]
 async fn get_store(app: AppHandle, key: String) -> Result<serde_json::Value, String> {
     let path = get_store_path(&app, &key);
@@ -121,9 +141,11 @@ async fn get_store(app: AppHandle, key: String) -> Result<serde_json::Value, Str
         let data: serde_json::Value = serde_json::from_reader(reader).map_err(|e| e.to_string())?;
         Ok(data)
     } else {
+        // Return null if file doesn't exist
         Ok(serde_json::Value::Null)
     }
 }
+
 #[tauri::command]
 async fn set_store(app: AppHandle, key: String, data: serde_json::Value) -> Result<(), String> {
     let path = get_store_path(&app, &key);
@@ -134,6 +156,7 @@ async fn set_store(app: AppHandle, key: String, data: serde_json::Value) -> Resu
     serde_json::to_writer_pretty(file, &data).map_err(|e| e.to_string())?;
     Ok(())
 }
+
 #[tauri::command]
 async fn clear_store(app: AppHandle, key: String) -> Result<(), String> {
     let path = get_store_path(&app, &key);
@@ -142,6 +165,7 @@ async fn clear_store(app: AppHandle, key: String) -> Result<(), String> {
     }
     Ok(())
 }
+
 #[tauri::command]
 async fn clear_settings(app: AppHandle) -> Result<bool, String> {
     let path = get_settings_path(&app);
@@ -150,6 +174,9 @@ async fn clear_settings(app: AppHandle) -> Result<bool, String> {
     }
     Ok(true)
 }
+
+// --- Dialog Commands ---
+
 #[tauri::command]
 async fn select_directory(app: AppHandle) -> Result<Option<String>, String> {
     use tauri_plugin_dialog::DialogExt;
@@ -159,6 +186,7 @@ async fn select_directory(app: AppHandle) -> Result<Option<String>, String> {
         None => Ok(None),
     }
 }
+
 #[tauri::command]
 async fn open_directory(app: AppHandle, path: Option<String>) -> Result<bool, String> {
     let target_dir = if let Some(d) = path {
@@ -166,17 +194,22 @@ async fn open_directory(app: AppHandle, path: Option<String>) -> Result<bool, St
     } else {
         load_settings(&app).download_path.unwrap_or_default()
     };
+    
     #[cfg(target_os = "windows")]
     let result = std::process::Command::new("explorer").arg(&target_dir).spawn();
     #[cfg(target_os = "macos")]
     let result = std::process::Command::new("open").arg(&target_dir).spawn();
     #[cfg(target_os = "linux")]
     let result = std::process::Command::new("xdg-open").arg(&target_dir).spawn();
+
     match result {
         Ok(_) => Ok(true),
         Err(_) => Ok(false),
     }
 }
+
+// --- Font Commands ---
+
 #[tauri::command]
 async fn get_fonts() -> Result<Vec<serde_json::Value>, String> {
     let source = SystemSource::new();
@@ -192,12 +225,16 @@ async fn get_fonts() -> Result<Vec<serde_json::Value>, String> {
         .collect::<Vec<_>>();
     Ok(font_infos)
 }
+
+// --- Download Commands ---
+
 #[tauri::command]
 async fn check_file_exists(app: AppHandle, filename: String) -> Result<bool, String> {
     let settings = load_settings(&app);
     let download_dir = PathBuf::from(settings.download_path.unwrap_or_default());
     Ok(download_dir.join(filename).exists())
 }
+
 #[tauri::command]
 async fn start_download(
     app: AppHandle,
@@ -207,13 +244,16 @@ async fn start_download(
     let settings = load_settings(&app);
     let download_dir = PathBuf::from(settings.download_path.unwrap_or_default());
     fs::create_dir_all(&download_dir).map_err(|e| e.to_string())?;
+    
     let output_path = download_dir.join(&params.filename);
     let temp_dir = app.path().temp_dir().unwrap().join("biu-downloads");
     fs::create_dir_all(&temp_dir).map_err(|e| e.to_string())?;
     let temp_audio_path = temp_dir.join(format!("{}.audio.tmp", params.id));
+
     let options_clone = params.id.clone();
     let app_handle = app.clone();
     let client_inner = client.0.clone();
+
     tauri::async_runtime::spawn(async move {
         let emit_progress = |status: &str, progress: Option<u64>, downloaded: Option<u64>, total: Option<u64>, error: Option<String>| {
             let _ = app_handle.emit("download:progress", DownloadProgress {
@@ -225,35 +265,44 @@ async fn start_download(
                 error,
             });
         };
+
         let mut start_byte = 0;
         if temp_audio_path.exists() {
              if let Ok(metadata) = fs::metadata(&temp_audio_path) {
                  start_byte = metadata.len();
              }
         }
+
         let mut headers = HeaderMap::new();
         headers.insert(REFERER, "https://www.bilibili.com".parse().unwrap());
         headers.insert(USER_AGENT, "Mozilla/5.0".parse().unwrap());
         if start_byte > 0 {
             headers.insert(RANGE, format!("bytes={}-", start_byte).parse().unwrap());
         }
+
         let res_result = client_inner.get(&params.audio_url).headers(headers).send().await;
+        
         match res_result {
             Ok(res) => {
                 if !res.status().is_success() {
                      emit_progress("failed", None, None, None, Some(format!("HTTP {}", res.status())));
                      return;
                 }
+
                 let total_size = res.content_length().map(|l| l + start_byte);
                 let mut stream = res.bytes_stream();
+                
                 let mut file = tokio::fs::OpenOptions::new()
                     .create(true)
                     .append(true)
                     .open(&temp_audio_path)
                     .await
                     .expect("Failed to open temp file");
+
                 let mut downloaded = start_byte;
+                
                 emit_progress("downloading", Some(0), Some(downloaded), total_size, None);
+
                 while let Some(item) = stream.next().await {
                     if let Ok(chunk) = item {
                          if let Err(_) = file.write_all(&chunk).await {
@@ -261,6 +310,7 @@ async fn start_download(
                              return;
                          }
                          downloaded += chunk.len() as u64;
+                         
                          let pct = if let Some(total) = total_size {
                              (downloaded as f64 / total as f64 * 100.0) as u64
                          } else {
@@ -269,7 +319,9 @@ async fn start_download(
                          emit_progress("downloading", Some(pct), Some(downloaded), total_size, None);
                     }
                 }
+                
                 emit_progress("merging", None, None, None, None);
+
                 if params.is_lossless {
                      if let Err(_e) = fs::rename(&temp_audio_path, &output_path) {
                          fs::copy(&temp_audio_path, &output_path).unwrap();
@@ -285,6 +337,7 @@ async fn start_download(
                         ])
                         .output()
                         .await;
+
                     match status {
                          Ok(output) if output.status.success() => {
                              let _ = fs::remove_file(&temp_audio_path);
@@ -295,6 +348,7 @@ async fn start_download(
                          }
                     }
                 }
+
                 emit_progress("completed", Some(100), None, None, None);
             },
             Err(e) => {
@@ -302,12 +356,18 @@ async fn start_download(
             }
         }
     });
+
     Ok(serde_json::json!({ "success": true }))
 }
+
+// --- HTTP/Cookie Commands ---
+
 #[tauri::command]
 async fn get_cookie(_client: State<'_, AppHttpClient>, _key: String) -> Result<Option<String>, String> {
+    // Return None so frontend falls back to document.cookie or empty
     Ok(None)
 }
+
 #[tauri::command]
 async fn http_get(
     client: State<'_, AppHttpClient>,
@@ -331,13 +391,19 @@ async fn http_get(
             req = req.query(&params);
         }
     }
+    
     let res = req.send().await.map_err(|e| e.to_string())?;
+    // We return the raw text or json based on content type? 
+    // The frontend axios adapter expects data. 
+    // Let's try to parse as JSON first, if fail return string?
+    // Most Bilibili APIs return JSON.
     let text_res = res.text().await.map_err(|e| e.to_string())?;
     match serde_json::from_str::<serde_json::Value>(&text_res) {
         Ok(json) => Ok(json),
         Err(_) => Ok(serde_json::Value::String(text_res))
     }
 }
+
 #[tauri::command]
 async fn http_post(
     client: State<'_, AppHttpClient>,
@@ -347,6 +413,7 @@ async fn http_post(
 ) -> Result<serde_json::Value, String> {
     let mut req = client.0.post(&url);
     let mut is_form = false;
+
     if let Some(payload) = options {
         if let Some(headers) = payload.headers {
             let mut hmap = HeaderMap::new();
@@ -366,13 +433,17 @@ async fn http_post(
             req = req.query(&params);
         }
     }
+
     if let Some(b) = body {
         if is_form {
+            // If it's a form post, we expect the body to be a flat Key-Value object
+            // reqwest's .form() handles serialization
             req = req.form(&b);
         } else {
             req = req.json(&b);
         }
     }
+    
     let res = req.send().await.map_err(|e| e.to_string())?;
     let text_res = res.text().await.map_err(|e| e.to_string())?;
     match serde_json::from_str::<serde_json::Value>(&text_res) {
@@ -380,16 +451,21 @@ async fn http_post(
         Err(_) => Ok(serde_json::Value::String(text_res))
     }
 }
+
+// --- Window & Player Commands ---
+
 #[tauri::command]
 async fn update_playback_state(app: AppHandle, is_playing: bool) -> Result<(), String> {
     app.emit("playback-state-update", is_playing).map_err(|e| e.to_string())?;
     Ok(())
 }
+
 #[tauri::command]
 async fn switch_to_mini(app: AppHandle, _window: Window) -> Result<(), String> {
     if let Some(main_win) = app.get_webview_window("main") {
         main_win.hide().unwrap();
     }
+    
     if app.get_webview_window("mini").is_none() {
         let _mini = WebviewWindowBuilder::new(
             &app,
@@ -410,6 +486,7 @@ async fn switch_to_mini(app: AppHandle, _window: Window) -> Result<(), String> {
     }
     Ok(())
 }
+
 #[tauri::command]
 async fn switch_to_main(app: AppHandle) -> Result<(), String> {
     if let Some(mini_win) = app.get_webview_window("mini") {
@@ -421,10 +498,12 @@ async fn switch_to_main(app: AppHandle) -> Result<(), String> {
     }
     Ok(())
 }
+
 #[tauri::command]
 fn minimize_window(window: Window) {
     let _ = window.minimize();
 }
+
 #[tauri::command]
 fn toggle_maximize_window(window: Window) {
     if window.is_maximized().unwrap_or(false) {
@@ -435,14 +514,17 @@ fn toggle_maximize_window(window: Window) {
         let _ = window.emit("window:maximize", ());
     }
 }
+
 #[tauri::command]
 fn close_window(window: Window) {
     let _ = window.close();
 }
+
 #[tauri::command]
 fn is_maximized(window: Window) -> bool {
     window.is_maximized().unwrap_or(false)
 }
+
 #[tauri::command]
 fn is_full_screen(window: Window) -> bool {
     window.is_fullscreen().unwrap_or(false)
@@ -464,56 +546,6 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_http::init())
         .manage(AppHttpClient(client))
-        .register_uri_scheme_protocol("stream", move |_app, request| {
-            let res = tauri::async_runtime::block_on(async move {
-                let uri = request.uri().to_string();
-                let path = uri.strip_prefix("stream://localhost/").unwrap_or("");
-                let target_url = urlencoding::decode(path).map(|s| s.into_owned()).unwrap_or_else(|_| path.to_string());
-
-                if target_url.is_empty() {
-                     return Response::builder().status(StatusCode::BAD_REQUEST).body(Vec::new()).unwrap();
-                }
-
-                let client = reqwest::Client::new();
-                let mut req_builder = client.get(&target_url)
-                    .header("Referer", "https://www.bilibili.com")
-                    .header("User-Agent", "Mozilla/5.0");
-
-                if let Some(range) = request.headers().get("Range") {
-                    req_builder = req_builder.header("Range", range);
-                }
-
-                match req_builder.send().await {
-                    Ok(resp) => {
-                        let status = resp.status();
-                        let headers = resp.headers().clone();
-                        let body = resp.bytes().await.unwrap_or_default().to_vec();
-
-                        let mut builder = Response::builder().status(status);
-
-                        if let Some(ct) = headers.get(reqwest::header::CONTENT_TYPE) {
-                            builder = builder.header("Content-Type", ct);
-                        }
-                        if let Some(cl) = headers.get(reqwest::header::CONTENT_LENGTH) {
-                            builder = builder.header("Content-Length", cl);
-                        }
-                        if let Some(cr) = headers.get(reqwest::header::CONTENT_RANGE) {
-                            builder = builder.header("Content-Range", cr);
-                        }
-                        if let Some(ar) = headers.get(reqwest::header::ACCEPT_RANGES) {
-                            builder = builder.header("Accept-Ranges", ar);
-                        }
-
-                        builder.body(body).unwrap()
-                    },
-                    Err(e) => {
-                        eprintln!("Stream error: {}", e);
-                        Response::builder().status(StatusCode::INTERNAL_SERVER_ERROR).body(Vec::new()).unwrap()
-                    }
-                }
-            });
-            res
-        })
         .invoke_handler(tauri::generate_handler![
             get_settings,
             set_settings,
