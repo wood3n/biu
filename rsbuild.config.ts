@@ -4,10 +4,12 @@ import { pluginSvgr } from "@rsbuild/plugin-svgr";
 
 import { pluginElectron } from "./plugins/rsbuild-plugin-electron";
 
+const isTauri = !!process.env.IS_TAURI;
+
 export default defineConfig({
   output: {
     distPath: {
-      root: "./dist/web",
+      root: isTauri ? "./dist/web-tauri" : "./dist/web",
     },
     // 生产环境相对路径，保证通过 file:// 加载时静态资源能正确引用
     assetPrefix: "./",
@@ -36,7 +38,7 @@ export default defineConfig({
         },
       },
     }),
-    pluginElectron(),
+    ...(!isTauri ? [pluginElectron()] : []),
   ],
   dev: {
     writeToDisk: true,
