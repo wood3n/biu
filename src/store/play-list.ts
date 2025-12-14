@@ -856,7 +856,26 @@ function resetAudioAndPlay(url: string) {
   audio.src = url;
   audio.currentTime = 0;
   audio.load();
-  audio.play();
+  audio.play().catch(error => {
+    // Specify the issue based on the error name
+    let message = "播放出错";
+
+    switch (error.name) {
+      case "NotAllowedError":
+        message = "播放失败：浏览器阻止了自动播放 (NotAllowedError)";
+        break;
+      case "NotSupportedError":
+        message = "播放失败：不支持的音频格式或无效的播放源 (NotSupportedError)";
+        break;
+      case "AbortError":
+        // Interrupted by a new load request, usually safe to ignore
+        return;
+      default:
+        message = `播放失败：${error.message || "未知错误"}`;
+    }
+
+    toastError(message);
+  });
 }
 
 // 切换歌曲时，更新当前播放的歌曲信息
