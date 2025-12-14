@@ -1,4 +1,3 @@
-import log from "electron-log/renderer";
 import moment from "moment";
 
 import { getAudioWebStreamUrl } from "@/service/audio-web-url";
@@ -92,7 +91,8 @@ export async function getDashUrl(bvid: string, cid: string | number, audioQualit
       videoResolution,
     };
   } catch (error) {
-    log.error("[Get video play url error]", error);
+    // Replaced electron-log with console.error
+    console.error("[Get video play url error]", error);
     return {
       isLossless: false,
     };
