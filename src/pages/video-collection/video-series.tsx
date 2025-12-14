@@ -1,6 +1,7 @@
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router";
 
-import { Link } from "@heroui/react";
+import { Link, Pagination } from "@heroui/react";
 import { useRequest } from "ahooks";
 
 import { CollectionType } from "@/common/constants/collection";
@@ -25,6 +26,9 @@ const VideoSeries = () => {
   const playList = usePlayList(state => state.playList);
   const addList = usePlayList(state => state.addList);
 
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+
   const { data, loading, refreshAsync } = useRequest(
     async () => {
       const res = await getUserVideoArchivesList({
@@ -37,6 +41,17 @@ const VideoSeries = () => {
       refreshDeps: [id],
     },
   );
+
+  useEffect(() => {
+    setPage(1);
+  }, [id, displayMode]);
+
+  const total = data?.medias?.length ?? 0;
+  const totalPage = useMemo(() => Math.ceil(total / pageSize), [total, pageSize]);
+  const pagedMedias = useMemo(() => {
+    const medias = data?.medias ?? [];
+    return medias.slice((page - 1) * pageSize, page * pageSize);
+  }, [data?.medias, page, pageSize]);
 
   const onPlayAll = () => {
     if (Array.isArray(data?.medias)) {
@@ -121,15 +136,14 @@ const VideoSeries = () => {
         onAddToPlayList={addToPlayList}
       />
       {displayMode === "card" ? (
-        <GridList
-          enablePagination
-          data={data?.medias ?? []}
-          loading={loading}
-          itemKey="bvid"
-          renderItem={renderMediaItem}
-        />
+        <GridList data={pagedMedias} loading={loading} itemKey="bvid" renderItem={renderMediaItem} />
       ) : (
-        <div className="space-y-2">{data?.medias?.map(renderMediaItem)}</div>
+        <div className="space-y-2">{pagedMedias.map(renderMediaItem)}</div>
+      )}
+      {totalPage > 1 && (
+        <div className="flex w-full items-center justify-center py-6">
+          <Pagination initialPage={1} page={page} total={totalPage} onChange={setPage} />
+        </div>
       )}
     </>
   );
