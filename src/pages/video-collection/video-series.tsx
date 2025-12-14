@@ -57,7 +57,7 @@ const VideoSeries = () => {
 
   useEffect(() => {
     setPage(1);
-  }, [id, displayMode]);
+  }, [id, displayMode, searchParams]);
 
   // 当合集ID变化时，重置搜索参数
   useEffect(() => {
