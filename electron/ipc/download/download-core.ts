@@ -172,6 +172,7 @@ export class DownloadCore extends EventEmitter {
         await this.mergeChunks("video", this.videoTempPath);
       }
       this.deleteChunkFiles();
+      this.chunks = [];
 
       this.status = "converting";
       this.emitUpdate();

@@ -250,6 +250,10 @@ export const usePlayList = create<State & Action>()(
           if (audio.src !== currentPlayItem.audioUrl) {
             audio.src = currentPlayItem.audioUrl;
           }
+          const currentTime = get().currentTime;
+          if (typeof currentTime === "number" && currentTime > 0) {
+            audio.currentTime = currentTime;
+          }
           return;
         }
 
@@ -258,6 +262,10 @@ export const usePlayList = create<State & Action>()(
           if (mvPlayData?.audioUrl) {
             if (audio.src !== mvPlayData.audioUrl) {
               audio.src = mvPlayData.audioUrl;
+              const currentTime = get().currentTime;
+              if (typeof currentTime === "number") {
+                audio.currentTime = currentTime;
+              }
             }
             set(state => {
               const listItem = state.list.find(item => item.id === state.playId);
@@ -278,6 +286,10 @@ export const usePlayList = create<State & Action>()(
           if (musicPlayData?.audioUrl) {
             if (audio.src !== musicPlayData.audioUrl) {
               audio.src = musicPlayData.audioUrl;
+              const currentTime = get().currentTime;
+              if (typeof currentTime === "number") {
+                audio.currentTime = currentTime;
+              }
             }
             set(state => {
               const listItem = state.list.find(item => item.id === state.playId);
