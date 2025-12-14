@@ -104,6 +104,23 @@ const SettingsPage = () => {
             <Tab key="system" title="系统设置">
               <Form className="space-y-6">
                 <h2>外观</h2>
+                {/* 显示模式 */}
+                <div className="flex w-full items-center justify-between">
+                  <div className="mr-6 space-y-1">
+                    <div className="text-medium font-medium">显示模式</div>
+                    <div className="text-sm text-zinc-500">选择媒体内容的显示样式</div>
+                  </div>
+                  <Controller
+                    control={control}
+                    name="displayMode"
+                    render={({ field }) => (
+                      <RadioGroup orientation="horizontal" value={field.value} onValueChange={field.onChange}>
+                        <Radio value="card">卡片</Radio>
+                        <Radio value="list">列表</Radio>
+                      </RadioGroup>
+                    )}
+                  />
+                </div>
                 {/* 字体选择 */}
                 <div className="flex w-full items-center justify-between">
                   <div className="mr-6 space-y-1">
@@ -207,24 +224,6 @@ const SettingsPage = () => {
                       )}
                     />
                   </div>
-                </div>
-
-                {/* 显示模式 */}
-                <div className="flex w-full items-center justify-between">
-                  <div className="mr-6 space-y-1">
-                    <div className="text-medium font-medium">显示模式</div>
-                    <div className="text-sm text-zinc-500">选择媒体内容的显示样式</div>
-                  </div>
-                  <Controller
-                    control={control}
-                    name="displayMode"
-                    render={({ field }) => (
-                      <RadioGroup orientation="horizontal" value={field.value} onValueChange={field.onChange}>
-                        <Radio value="card">卡片</Radio>
-                        <Radio value="list">列表</Radio>
-                      </RadioGroup>
-                    )}
-                  />
                 </div>
                 <Divider />
                 <h2>播放</h2>

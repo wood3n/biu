@@ -91,6 +91,12 @@ export class DownloadCore extends EventEmitter {
         return;
       }
 
+      // 设置文件名
+      this.fileName = `${this.title}-${this.id}${this.getAudioExt()}`;
+      if (this.outputFileType === "video") {
+        this.fileName = `${this.title}-${this.id}${this.getVideoExt()}`;
+      }
+
       // 获取文件大小
       const audioSize = await this.getContentLength(this.audioUrl!);
       if (audioSize === 0) {
@@ -239,10 +245,6 @@ export class DownloadCore extends EventEmitter {
         this.videoUrl = videoUrl;
         this.videoResolution = `${bestVideoInfo?.width}x${bestVideoInfo?.height}`;
         this.videoFrameRate = bestVideoInfo?.frameRate || bestVideoInfo?.frame_rate;
-      }
-      this.fileName = `${this.title}-${this.id}${this.getAudioExt()}`;
-      if (this.outputFileType === "video") {
-        this.fileName = `${this.title}-${this.id}${this.getVideoExt()}`;
       }
     }
   }

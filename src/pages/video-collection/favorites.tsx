@@ -328,7 +328,7 @@ const Favorites: React.FC = () => {
         ]}
         onKeywordChange={keyword => setSearchParams(prev => ({ ...prev, keyword }))}
         onOrderChange={order => setSearchParams(prev => ({ ...prev, order }))}
-        containerClassName="mb-6 flex flex-wrap items-center gap-4"
+        containerClassName="mb-4 flex flex-wrap items-center gap-4"
       />
 
       {displayMode === "card" ? (
@@ -346,9 +346,9 @@ const Favorites: React.FC = () => {
           )}
         </>
       ) : (
-        <div className="space-y-2">
+        <div>
           {(listModeData?.list ?? []).map(renderMediaItem)}
-          <div ref={loadMoreRef} className="h-10" />
+          <div ref={loadMoreRef} className="h-2" />
           {listModeLoading && <div className="text-foreground-500 py-2 text-center text-sm">加载中...</div>}
           {!listModeHasMore && !listModeLoading && (
             <div className="text-foreground-500 py-2 text-center text-sm">没有更多了</div>

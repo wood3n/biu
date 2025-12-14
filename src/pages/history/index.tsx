@@ -118,7 +118,6 @@ const History = () => {
   // 提取MediaItem公共渲染函数，避免重复代码
   const renderMediaItem = (item: HistoryListItem) => {
     const commonProps = {
-      key: `${item.history.oid}-${item.view_at}`,
       displayMode,
       type: "mv" as const, // 音频播放不会出现在历史记录中
       bvid: item.history.bvid || "",
@@ -135,6 +134,7 @@ const History = () => {
       return (
         <MediaItem
           {...commonProps}
+          key={`${item.history.oid}-${item.view_at}`}
           coverHeight={200}
           footer={
             <div className="flex w-full flex-col space-y-1 text-sm">

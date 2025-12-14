@@ -43,7 +43,9 @@ export const useSettings = create<AppSettings & SettingsActions>()(
         },
 
         setItem: async (_, value) => {
-          await window.electron.setStore("app-settings", value.state);
+          await window.electron.setStore("app-settings", {
+            appSettings: value.state,
+          });
         },
 
         removeItem: async () => {

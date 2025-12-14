@@ -17,7 +17,7 @@ interface Props {
   onOpenChange: (isOpen: boolean) => void;
 }
 
-const MediaDownloadSelect = ({ outputFileType, title, cover, bvid, isOpen, onOpenChange }: Props) => {
+const MvPageDownloadSelect = ({ outputFileType, title, cover, bvid, isOpen, onOpenChange }: Props) => {
   const [selectedCids, setSelectedCids] = useState<string[]>([]);
 
   const { data, loading } = useRequest(
@@ -78,7 +78,7 @@ const MediaDownloadSelect = ({ outputFileType, title, cover, bvid, isOpen, onOpe
         <ModalBody className="p-0">
           {loading ? (
             <div className="flex h-60 items-center justify-center">
-              <Spinner label="获取音频信息中..." />
+              <Spinner label="获取分集信息中..." />
             </div>
           ) : (
             <ScrollContainer>
@@ -138,4 +138,4 @@ const MediaDownloadSelect = ({ outputFileType, title, cover, bvid, isOpen, onOpe
   );
 };
 
-export default MediaDownloadSelect;
+export default MvPageDownloadSelect;
