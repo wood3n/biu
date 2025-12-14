@@ -19,7 +19,7 @@ const DownloadActions = ({ data }: Props) => {
       label: "打开文件",
       color: "primary" as const,
       icon: data.outputFileType === "audio" ? <RiFileMusicLine size={18} /> : <RiFileVideoLine size={18} />,
-      show: true,
+      show: data.status === "completed",
       onPress: async () => {
         try {
           await window.electron.openDirectory(data.savePath);
