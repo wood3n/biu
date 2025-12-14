@@ -456,13 +456,11 @@ export const usePlayList = create<State & Action>()(
         },
         togglePlay: async () => {
           if (audio.paused) {
-            try {
-              await ensureAudioSrcValid();
-              await audio.play();
-            } catch (error) {
-              handlePlayError(error);
-              set({ isPlaying: false });
-            }
+            set(state => {
+              state.isPlaying = true;
+            });
+            await ensureAudioSrcValid();
+            await audio.play();
           } else {
             audio.pause();
             set(state => {
@@ -480,12 +478,8 @@ export const usePlayList = create<State & Action>()(
           // 当前正在播放，如果暂停了则播放
           if (isSame(currentItem, { type, bvid, sid })) {
             if (audio.paused) {
-              try {
-                await ensureAudioSrcValid();
-                await audio.play();
-              } catch (error) {
-                handlePlayError(error);
-              }
+              await ensureAudioSrcValid();
+              await audio.play();
             }
             return;
           }
@@ -861,7 +855,7 @@ function resetAudioAndPlay(url: string) {
   audio.src = url;
   audio.currentTime = 0;
   audio.load();
-  audio.play().catch(handlePlayError);
+  audio.play();
 }
 
 // 切换歌曲时，更新当前播放的歌曲信息
