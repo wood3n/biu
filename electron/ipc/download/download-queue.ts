@@ -207,6 +207,7 @@ export class DownloadQueue {
   }
 
   public saveAllTasksToStore() {
+    this.controllers.forEach(controller => controller.abort());
     const tasksObject: Record<string, FullMediaDownloadTask> = {};
     this.tasks.forEach((core, id) => {
       tasksObject[`downloads.${id}`] = {

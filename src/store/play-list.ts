@@ -385,8 +385,9 @@ export const usePlayList = create<State & Action>()(
               if (playItem) {
                 await ensureAudioSrcValid();
 
-                if (get().currentTime) {
-                  audio.currentTime = get().currentTime as number;
+                const localCurrentTime = localStorage.getItem("play-current-time");
+                if (localCurrentTime) {
+                  audio.currentTime = Number(localCurrentTime);
                 }
 
                 updateMediaSession({
@@ -828,7 +829,6 @@ export const usePlayList = create<State & Action>()(
         volume: state.volume,
         playMode: state.playMode,
         rate: state.rate,
-        currentTime: state.currentTime,
         duration: state.duration,
         list: state.list,
         playId: state.playId,

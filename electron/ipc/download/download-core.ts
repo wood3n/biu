@@ -92,9 +92,10 @@ export class DownloadCore extends EventEmitter {
       }
 
       // 设置文件名
-      this.fileName = `${this.title}-${this.id}${this.getAudioExt()}`;
+      const sanitizedTitle = this.title.replace(/<[^>]+>/g, "").replace(/[\\/:*?"<>|]/g, "_");
+      this.fileName = `${sanitizedTitle}-${this.id}${this.getAudioExt()}`;
       if (this.outputFileType === "video") {
-        this.fileName = `${this.title}-${this.id}${this.getVideoExt()}`;
+        this.fileName = `${sanitizedTitle}-${this.id}${this.getVideoExt()}`;
       }
 
       // 获取文件大小
