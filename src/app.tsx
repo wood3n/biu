@@ -63,6 +63,21 @@ export function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (usePlayList.getState().currentTime) {
+        localStorage.setItem("play-current-time", String(usePlayList.getState().currentTime));
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // 清理函数
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
   return (
     <HeroUIProvider navigate={navigate} useHref={useHref} locale="zh-CN">
       <ToastProvider

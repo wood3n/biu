@@ -1,9 +1,10 @@
 import { RiPlayCircleFill, RiYoutubeLine } from "@remixicon/react";
 
-import { formatNumber, stripHtml } from "@/common/utils";
+import { formatNumber } from "@/common/utils/number";
+import { stripHtml } from "@/common/utils/str";
 
 import ImageCard from "../image-card";
-import Action, { type ActionProps } from "./action";
+import MVAction, { type ActionProps } from "../mv-action";
 
 interface Props extends ActionProps {
   isTitleIncludeHtmlTag?: boolean;
@@ -52,7 +53,7 @@ const MVCard = ({
       }
       title={isTitleIncludeHtmlTag ? <p dangerouslySetInnerHTML={{ __html: title }} /> : title}
       titleExtra={
-        <Action
+        <MVAction
           type={type}
           title={isTitleIncludeHtmlTag ? stripHtml(title) : title}
           cover={cover}
@@ -62,6 +63,8 @@ const MVCard = ({
           menus={menus}
           collectMenuTitle={collectMenuTitle}
           onChangeFavSuccess={onChangeFavSuccess}
+          className="ml-4"
+          buttonClassName="-top-[2px] -right-[12px] absolute h-7 w-7 min-w-7 "
         />
       }
       footer={footer}

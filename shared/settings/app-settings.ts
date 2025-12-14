@@ -10,4 +10,5 @@ export const defaultAppSettings: AppSettings = {
   audioQuality: "auto",
   hiddenMenuKeys: [],
   displayMode: "card",
+  ffmpegPath: "",
 };

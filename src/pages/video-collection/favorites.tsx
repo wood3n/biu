@@ -15,51 +15,7 @@ import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
 
 import Info from "./info";
-
-const LIST_PAGE_SIZE = 20;
-
-const getAllMedia = async ({ id: favFolderId, totalCount }: { id: string; totalCount: number }, searchParams: any) => {
-  const FAVORITES_PAGE_SIZE = 20;
-  const allResSettled = await Promise.allSettled(
-    Array.from({ length: Math.ceil(totalCount / FAVORITES_PAGE_SIZE) }, (_, i) =>
-      getFavResourceList({
-        media_id: String(favFolderId),
-        ps: FAVORITES_PAGE_SIZE,
-        pn: i + 1,
-        platform: "web",
-        ...searchParams,
-      }),
-    ),
-  );
-
-  return allResSettled
-    .filter(res => res.status === "fulfilled")
-    .map(res => res.value)
-    .filter(res => res.code === 0 && res?.data?.medias?.length)
-    .flatMap(res =>
-      res.data.medias
-        .filter(item => item.attr === 0)
-        .map(item =>
-          item.type === 2
-            ? {
-                type: "mv" as const,
-                bvid: item.bvid,
-                title: item.title,
-                cover: item.cover,
-                ownerMid: item.upper?.mid,
-                ownerName: item.upper?.name,
-              }
-            : {
-                type: "audio" as const,
-                sid: item.id,
-                title: item.title,
-                cover: item.cover,
-                ownerMid: item.upper?.mid,
-                ownerName: item.upper?.name,
-              },
-        ),
-    );
-};
+import { getAllFavMedia } from "./utils";
 
 /** 收藏夹详情 */
 const Favorites: React.FC = () => {
@@ -143,7 +99,7 @@ const Favorites: React.FC = () => {
       try {
         const res = await getFavResourceList({
           media_id: String(favFolderId),
-          ps: LIST_PAGE_SIZE,
+          ps: 20,
           pn: page,
           platform: "web",
           ...searchParams,
@@ -247,13 +203,10 @@ const Favorites: React.FC = () => {
     }
 
     try {
-      const allMedias = await getAllMedia(
-        {
-          id: favFolderId,
-          totalCount,
-        },
-        searchParams,
-      );
+      const allMedias = await getAllFavMedia({
+        id: favFolderId,
+        totalCount,
+      });
 
       if (allMedias.length) {
         playList(allMedias);
@@ -277,13 +230,10 @@ const Favorites: React.FC = () => {
     }
 
     try {
-      const allMedias = await getAllMedia(
-        {
-          id: favFolderId,
-          totalCount,
-        },
-        searchParams,
-      );
+      const allMedias = await getAllFavMedia({
+        id: favFolderId,
+        totalCount,
+      });
 
       if (allMedias.length) {
         addToPlayList(allMedias);
@@ -378,7 +328,7 @@ const Favorites: React.FC = () => {
         ]}
         onKeywordChange={keyword => setSearchParams(prev => ({ ...prev, keyword }))}
         onOrderChange={order => setSearchParams(prev => ({ ...prev, order }))}
-        containerClassName="mb-6 flex flex-wrap items-center gap-4"
+        containerClassName="mb-4 flex flex-wrap items-center gap-4"
       />
 
       {displayMode === "card" ? (
@@ -396,9 +346,9 @@ const Favorites: React.FC = () => {
           )}
         </>
       ) : (
-        <div className="space-y-2">
+        <div>
           {(listModeData?.list ?? []).map(renderMediaItem)}
-          <div ref={loadMoreRef} className="h-10" />
+          <div ref={loadMoreRef} className="h-2" />
           {listModeLoading && <div className="text-foreground-500 py-2 text-center text-sm">加载中...</div>}
           {!listModeHasMore && !listModeLoading && (
             <div className="text-foreground-500 py-2 text-center text-sm">没有更多了</div>

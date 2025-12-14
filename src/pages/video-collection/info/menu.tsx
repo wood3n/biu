@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 import { Dropdown, DropdownTrigger, Button, DropdownMenu, DropdownItem, useDisclosure } from "@heroui/react";
@@ -11,6 +12,8 @@ import {
 } from "@remixicon/react";
 import { useShallow } from "zustand/react/shallow";
 
+import { ReactComponent as AudioDownloadIcon } from "@/assets/icons/audio-download.svg";
+import { ReactComponent as VideoDownloadIcon } from "@/assets/icons/video-download.svg";
 import { CollectionType } from "@/common/constants/collection";
 import ConfirmModal from "@/components/confirm-modal";
 import EditFavForm from "@/components/fav-folder/form";
@@ -20,6 +23,8 @@ import { postFavFolderUnfav } from "@/service/fav-folder-unfav";
 import { postFavSeasonFav } from "@/service/fav-season-fav";
 import { postFavSeasonUnfav } from "@/service/fav-season-unfav";
 import { useUser } from "@/store/user";
+
+import DownloadSelectModal from "./download-select-modal";
 
 interface MenuProps {
   isOwn: boolean;
@@ -33,6 +38,7 @@ interface MenuProps {
 const Menu = ({ type, isOwn, mediaCount, attr, onAddToPlayList, afterChangeInfo }: MenuProps) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [outputFileType, setOutputFileType] = useState<MediaDownloadOutputFileType>("audio");
 
   const { user, updateUser, collectedFolder, updateCollectedFolder } = useUser(
     useShallow(state => ({
@@ -51,6 +57,11 @@ const Menu = ({ type, isOwn, mediaCount, attr, onAddToPlayList, afterChangeInfo 
   } = useDisclosure();
 
   const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditChange } = useDisclosure();
+  const {
+    isOpen: isDownloadSelectOpen,
+    onOpen: onDownloadSelectOpen,
+    onOpenChange: onDownloadSelectChange,
+  } = useDisclosure();
 
   const toggleCollect = async () => {
     if (type === CollectionType.Favorite) {
@@ -107,6 +118,26 @@ const Menu = ({ type, isOwn, mediaCount, attr, onAddToPlayList, afterChangeInfo 
       startContent: <RiPlayListAddLine size={18} />,
       label: "添加到播放列表",
       onPress: onAddToPlayList,
+    },
+    {
+      key: "download-audio",
+      show: Boolean(mediaCount),
+      startContent: <AudioDownloadIcon className="relative top-px left-px h-[17px] w-[17px]" />,
+      label: "下载全部音频",
+      onPress: () => {
+        setOutputFileType("audio");
+        onDownloadSelectOpen();
+      },
+    },
+    {
+      key: "download-video",
+      show: Boolean(mediaCount),
+      startContent: <VideoDownloadIcon className="relative top-px left-px h-[17px] w-[17px]" />,
+      label: "下载全部视频",
+      onPress: () => {
+        setOutputFileType("video");
+        onDownloadSelectOpen();
+      },
     },
     {
       key: "toggle-collect",
@@ -183,6 +214,13 @@ const Menu = ({ type, isOwn, mediaCount, attr, onAddToPlayList, afterChangeInfo 
         }}
       />
       <EditFavForm mid={Number(id)} isOpen={isEditOpen} onOpenChange={onEditChange} afterSubmit={afterChangeInfo} />
+      <DownloadSelectModal
+        outputFileType={outputFileType}
+        type={type}
+        mediaCount={mediaCount}
+        isOpen={isDownloadSelectOpen}
+        onOpenChange={onDownloadSelectChange}
+      />
     </>
   );
 };

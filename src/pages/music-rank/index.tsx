@@ -57,7 +57,7 @@ const MusicRank = () => {
           renderItem={renderMediaItem}
         />
       ) : (
-        <div className="space-y-2">{data?.map(renderMediaItem)}</div>
+        <div>{data?.map(renderMediaItem)}</div>
       )}
     </ScrollContainer>
   );

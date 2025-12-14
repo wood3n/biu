@@ -9,7 +9,7 @@ export interface AudioStreamUrlRequestParams {
   /** APP 登录 Token（APP 方式必要） */
   access_key?: string;
   /** 音频 auid（必要） */
-  songid: number;
+  songid: number | string;
   /** 音质代码（必要：0=128K，1=192K，2=320K，3=FLAC） */
   quality: number;
   /** 必须为 2（必要） */

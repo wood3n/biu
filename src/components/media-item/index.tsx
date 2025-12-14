@@ -1,8 +1,8 @@
 import React from "react";
 
 import MusicListItem from "../music-list-item";
+import { type ActionProps } from "../mv-action";
 import MVCard from "../mv-card";
-import { type ActionProps } from "../mv-card/action";
 
 interface MediaItemProps extends ActionProps {
   displayMode: "card" | "list";
@@ -23,7 +23,6 @@ const MediaItem: React.FC<MediaItemProps> = ({
   onPress,
   playCount,
   duration,
-  isActive = false,
   ...rest
 }) => {
   if (displayMode === "list") {
@@ -34,7 +33,6 @@ const MediaItem: React.FC<MediaItemProps> = ({
         onPress={onPress}
         playCount={playCount}
         duration={duration}
-        isActive={isActive}
       />
     );
   }

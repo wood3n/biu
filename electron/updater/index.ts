@@ -2,7 +2,7 @@ import { BrowserWindow } from "electron";
 import isDev from "electron-is-dev";
 import log from "electron-log";
 import electronUpdater, { type UpdateDownloadedEvent } from "electron-updater";
-import path from "path";
+import path from "node:path";
 
 import { channel } from "../ipc/channel";
 

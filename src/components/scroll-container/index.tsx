@@ -11,7 +11,7 @@ const ScrollContainer = ({
   options,
   children,
   ...props
-}: OverlayScrollbarsComponentProps & { ref?: React.RefObject<OverlayScrollbarsComponentRef<"div"> | null> }) => {
+}: OverlayScrollbarsComponentProps & { ref?: React.RefObject<ScrollRefObject | null> }) => {
   return (
     <OverlayScrollbarsComponent
       ref={ref}
