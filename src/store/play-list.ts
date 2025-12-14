@@ -876,7 +876,7 @@ usePlayList.subscribe(async (state, prevState) => {
             resetAudioAndPlay(mvPlayData?.audioUrl);
 
             updateMediaSession({
-              title: playItem.title,
+              title: playItem.pageTitle || playItem.title,
               artist: playItem.ownerName,
               cover: playItem.pageCover,
             });
@@ -902,7 +902,7 @@ usePlayList.subscribe(async (state, prevState) => {
               resetAudioAndPlay(mvPlayData?.audioUrl);
 
               updateMediaSession({
-                title: firstMV.title,
+                title: firstMV.pageTitle || firstMV.title,
                 artist: firstMV.ownerName,
                 cover: firstMV.pageCover,
               });

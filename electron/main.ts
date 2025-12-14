@@ -1,4 +1,4 @@
-import { app, BrowserWindow, nativeImage, nativeTheme } from "electron";
+import { app, BrowserWindow } from "electron";
 import isDev from "electron-is-dev";
 import log from "electron-log";
 import path from "node:path";
@@ -7,13 +7,12 @@ import { fileURLToPath } from "node:url";
 import { channel } from "./ipc/channel";
 import { saveDownloadQueue } from "./ipc/download";
 import { registerIpcHandlers } from "./ipc/index";
-import { setupMacDock } from "./mac/dock";
 import { destroyMiniPlayer } from "./mini-player";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
 import { appSettingsStore, storeKey } from "./store";
 import { autoUpdater, setupAutoUpdater, stopCheckForUpdates } from "./updater";
-import { getMacDarkIconPath, getMacLightIconPath, getWindowIcon } from "./utils";
+import { getWindowIcon } from "./utils";
 import { setupWindowsThumbar } from "./windows/thumbar";
 import { createTray, destroyTray } from "./windows/tray"; // 托盘功能
 
@@ -136,21 +135,6 @@ app.whenReady().then(() => {
   });
 
   setupAutoUpdater();
-
-  if (process.platform === "darwin") {
-    const updateDockIcon = () => {
-      const iconPath = nativeTheme.shouldUseDarkColors ? getMacDarkIconPath() : getMacLightIconPath();
-      const image = nativeImage.createFromPath(iconPath);
-      app.dock?.setIcon(image);
-    };
-
-    updateDockIcon();
-    nativeTheme.on("updated", updateDockIcon);
-
-    if (mainWindow) {
-      setupMacDock(mainWindow);
-    }
-  }
 
   if (process.platform !== "darwin") {
     createTray({
