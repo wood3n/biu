@@ -112,7 +112,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
       {orderOptions.length > 0 && (
         <div className="flex items-center gap-2">
           <Select
-            selectedKeys={order ? [order] : []}
+            selectedKeys={[order]}
             onSelectionChange={keys => {
               const selectedValue = Array.from(keys)[0];
               onOrderChange?.(selectedValue as string);
