@@ -8,6 +8,8 @@ import {
   RiRefreshLine,
 } from "@remixicon/react";
 
+import { tauriAdapter } from "@/utils/tauri-adapter";
+
 interface Props {
   data: MediaDownloadTask;
 }
@@ -22,7 +24,7 @@ const DownloadActions = ({ data }: Props) => {
       show: data.status === "completed",
       onPress: async () => {
         try {
-          await window.electron.openDirectory(data.savePath);
+          await tauriAdapter.openDirectory(data.savePath);
         } catch (err) {
           addToast({ title: `无法打开文件, ${err instanceof Error ? err.message : String(err)}`, color: "danger" });
         }
@@ -34,7 +36,7 @@ const DownloadActions = ({ data }: Props) => {
       icon: <RiPauseLine size={18} />,
       show: false, // TODO:先不展示
       onPress: async () => {
-        await window.electron.pauseMediaDownloadTask(data.id);
+        await tauriAdapter.pauseMediaDownloadTask(data.id);
       },
     },
     {
@@ -43,7 +45,7 @@ const DownloadActions = ({ data }: Props) => {
       icon: <RiPlayLine size={18} />,
       show: false,
       onPress: async () => {
-        await window.electron.resumeMediaDownloadTask(data.id);
+        await tauriAdapter.resumeMediaDownloadTask(data.id);
       },
     },
     {
@@ -52,7 +54,7 @@ const DownloadActions = ({ data }: Props) => {
       icon: <RiRefreshLine size={18} />,
       show: false,
       onPress: async () => {
-        await window.electron.retryMediaDownloadTask(data.id);
+        await tauriAdapter.retryMediaDownloadTask(data.id);
       },
     },
     {
@@ -62,7 +64,7 @@ const DownloadActions = ({ data }: Props) => {
       color: "danger" as const,
       show: true,
       onPress: async () => {
-        await window.electron.cancelMediaDownloadTask(data.id);
+        await tauriAdapter.cancelMediaDownloadTask(data.id);
       },
     },
   ];

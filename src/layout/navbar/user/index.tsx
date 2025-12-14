@@ -24,6 +24,7 @@ import { postPassportLoginExit } from "@/service/passport-login-exit";
 import { useSettings } from "@/store/settings";
 import { useToken } from "@/store/token";
 import { useUser } from "@/store/user";
+import { tauriAdapter } from "@/utils/tauri-adapter";
 
 import Login from "../login";
 
@@ -43,7 +44,7 @@ const UserCard = () => {
   } = useDisclosure();
 
   const logout = async () => {
-    const csrfToken = await window.electron.getCookie("bili_jct");
+    const csrfToken = await tauriAdapter.getCookie("bili_jct");
     if (!csrfToken) {
       addToast({
         title: "CSRF Token 不存在",
@@ -98,7 +99,7 @@ const UserCard = () => {
       label: "反馈",
       startContent: <RiFeedbackLine size={18} />,
       endContent: <RiExternalLinkLine size={18} />,
-      onPress: () => window.electron.openExternal("https://github.com/wood3n/biu/issues"),
+      onPress: () => tauriAdapter.openExternal("https://github.com/wood3n/biu/issues"),
     },
     {
       key: "logout",

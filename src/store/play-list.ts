@@ -11,6 +11,7 @@ import { getAudioUrl, getDashUrl, isUrlValid } from "@/common/utils/audio";
 import { formatUrlProtocal } from "@/common/utils/url";
 import { getAudioSongInfo } from "@/service/audio-song-info";
 import { getWebInterfaceView } from "@/service/web-interface-view";
+import { tauriAdapter } from "@/utils/tauri-adapter";
 
 export type PlayDataType = "mv" | "audio";
 
@@ -202,8 +203,8 @@ const updatePlaybackState = () => {
     navigator.mediaSession.playbackState = audio.paused ? "paused" : "playing";
   }
   try {
-    if (window.electron && window.electron.updatePlaybackState) {
-      window.electron.updatePlaybackState(!audio.paused);
+    if (tauriAdapter && tauriAdapter.updatePlaybackState) {
+      tauriAdapter.updatePlaybackState(!audio.paused);
     }
   } catch (err) {
     // 渲染端上报失败不影响本地状态；仅记录日志便于定位

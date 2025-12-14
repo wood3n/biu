@@ -1,5 +1,7 @@
 import type { PlayData } from "@/store/play-list";
 
+import { tauriAdapter } from "@/utils/tauri-adapter";
+
 export const getUrlParams = (url: string) => {
   const urlParams = new URLSearchParams(url.split("?")[1]);
   return Object.fromEntries(urlParams.entries());
@@ -18,5 +20,5 @@ export const getBiliVideoLink = (data: PlayData) => {
 };
 
 export const openBiliVideoLink = (data: PlayData) => {
-  window.electron.openExternal(getBiliVideoLink(data));
+  tauriAdapter.openExternal(getBiliVideoLink(data));
 };

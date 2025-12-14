@@ -23,6 +23,7 @@ import { formatMillisecond } from "@/common/utils";
 import Empty from "@/components/empty";
 import ScrollContainer from "@/components/scroll-container";
 import { useSettings } from "@/store/settings";
+import { tauriAdapter } from "@/utils/tauri-adapter";
 
 import DownloadActions from "./actions";
 import DownloadProgress from "./progress";
@@ -34,7 +35,7 @@ const DownloadList = () => {
 
   useEffect(() => {
     const initList = async () => {
-      const list = await window.electron.getMediaDownloadTaskList();
+      const list = await tauriAdapter.getMediaDownloadTaskList();
       if (list) {
         setDownloadList(list);
       }
@@ -42,7 +43,7 @@ const DownloadList = () => {
 
     initList();
 
-    const removeListener = window.electron.syncMediaDownloadTaskList(payload => {
+    const removeListener = tauriAdapter.syncMediaDownloadTaskList(payload => {
       if (payload?.type === "full") {
         setDownloadList(payload.data as MediaDownloadTask[]);
       } else if (payload?.type === "update") {
@@ -62,11 +63,11 @@ const DownloadList = () => {
   }, []);
 
   const clearDownloadList = async () => {
-    await window.electron.clearMediaDownloadTaskList();
+    await tauriAdapter.clearMediaDownloadTaskList();
   };
 
   const openDirectory = async () => {
-    await window.electron.openDirectory(downloadPath);
+    await tauriAdapter.openDirectory(downloadPath);
   };
 
   const getFileQuality = (item: MediaDownloadTask) => {

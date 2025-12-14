@@ -20,6 +20,7 @@ import FavFolderSelect from "@/components/fav-folder/select";
 import { postHistoryToViewAdd } from "@/service/history-toview-add";
 import { usePlayList, type PlayDataType } from "@/store/play-list";
 import { useUser } from "@/store/user";
+import { tauriAdapter } from "@/utils/tauri-adapter";
 
 import MediaDownloadSelect from "../mv-page-download-select";
 
@@ -136,7 +137,7 @@ const MVAction = ({
       title: "下载音乐",
       hidden: type !== "audio",
       onPress: async () => {
-        await window.electron.addMediaDownloadTask({
+        await tauriAdapter.addMediaDownloadTask({
           outputFileType: "audio",
           title,
           cover,

@@ -3,6 +3,7 @@ import moment from "moment";
 
 import { refreshCookie } from "@/common/utils/cookie";
 import { useToken } from "@/store/token";
+import { tauriAdapter } from "@/utils/tauri-adapter";
 
 import { encodeParamsWbi } from "./wbi-sign";
 
@@ -24,7 +25,7 @@ export const requestInterceptors = async (config: InternalAxiosRequestConfig) =>
   }
 
   if (config.useCSRF) {
-    const csrfToken = await window.electron.getCookie("bili_jct");
+    const csrfToken = await tauriAdapter.getCookie("bili_jct");
     if (csrfToken) {
       if (config.method === "post") {
         config.data ??= {};

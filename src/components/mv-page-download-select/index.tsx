@@ -4,6 +4,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Checkbox, Spi
 import { useRequest } from "ahooks";
 
 import { getPlayerPagelist } from "@/service/player-pagelist";
+import { tauriAdapter } from "@/utils/tauri-adapter";
 
 import AsyncButton from "../async-button";
 import ScrollContainer from "../scroll-container";
@@ -30,7 +31,7 @@ const MvPageDownloadSelect = ({ outputFileType, title, cover, bvid, isOpen, onOp
         setSelectedCids(res?.data?.map(item => String(item.cid)) || []);
       } else if (res?.data?.[0]?.cid) {
         const cid = String(res.data[0].cid);
-        await window.electron.addMediaDownloadTask({
+        await tauriAdapter.addMediaDownloadTask({
           outputFileType,
           cover,
           title,
@@ -53,7 +54,7 @@ const MvPageDownloadSelect = ({ outputFileType, title, cover, bvid, isOpen, onOp
   );
 
   const downloadSelected = async () => {
-    await window.electron.addMediaDownloadTaskList(
+    await tauriAdapter.addMediaDownloadTaskList(
       data!
         .filter(item => selectedCids.includes(String(item.cid)))
         .map(item => ({

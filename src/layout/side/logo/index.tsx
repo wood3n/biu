@@ -4,8 +4,9 @@ import { twMerge } from "tailwind-merge";
 import { ReactComponent as LogoIcon } from "@/assets/icons/logo.svg";
 import ReleaseNoteModal from "@/components/release-note-modal";
 import { useAppUpdateStore } from "@/store/app-update";
+import { tauriAdapter } from "@/utils/tauri-adapter";
 
-const isMac = window.electron?.getPlatform() === "macos";
+const isMac = tauriAdapter?.getPlatform() === "macos";
 
 const Logo = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();

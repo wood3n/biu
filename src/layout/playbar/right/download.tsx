@@ -5,6 +5,7 @@ import { ReactComponent as AudioDownloadIcon } from "@/assets/icons/audio-downlo
 import { ReactComponent as VideoDownloadIcon } from "@/assets/icons/video-download.svg";
 import AsyncButton from "@/components/async-button";
 import { usePlayList } from "@/store/play-list";
+import { tauriAdapter } from "@/utils/tauri-adapter";
 
 import { PlayBarIconSize } from "../constants";
 
@@ -14,7 +15,7 @@ const Download = () => {
   const playItem = list.find(item => item.id === playId);
 
   const downloadAudio = async () => {
-    await window.electron.addMediaDownloadTask({
+    await tauriAdapter.addMediaDownloadTask({
       outputFileType: "audio",
       title: playItem?.pageTitle || playItem?.title || `audio-${Date.now()}`,
       cover: playItem?.pageCover || playItem?.cover,
@@ -30,7 +31,7 @@ const Download = () => {
   };
 
   const downloadVideo = async () => {
-    await window.electron.addMediaDownloadTask({
+    await tauriAdapter.addMediaDownloadTask({
       outputFileType: "video",
       title: playItem?.pageTitle || playItem?.title || `video-${Date.now()}`,
       cover: playItem?.pageCover || playItem?.cover,

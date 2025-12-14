@@ -13,6 +13,7 @@ import { useShallow } from "zustand/react/shallow";
 
 import { createBroadcastChannel } from "@/common/broadcast/mini-player-sync";
 import { getPlayModeList } from "@/common/constants/audio";
+import { tauriAdapter } from "@/utils/tauri-adapter";
 
 import { usePlayState } from "./play-state";
 import { useStyle } from "./use-style";
@@ -75,7 +76,7 @@ const MiniPlayer = () => {
   }, []);
 
   const handleSwitchToMain = useCallback(() => {
-    window.electron.switchToMainWindow();
+    tauriAdapter.switchToMainWindow();
   }, []);
 
   const handleSeek = (v: number) => {

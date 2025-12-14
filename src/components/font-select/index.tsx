@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { Select, SelectItem } from "@heroui/react";
 
+import { tauriAdapter } from "@/utils/tauri-adapter";
 import { defaultAppSettings } from "@shared/settings/app-settings";
 
 export interface FontSelectProps {
@@ -20,7 +21,7 @@ export default function FontSelect({
   const [fonts, setFonts] = useState<Partial<IFontInfo>[]>([]);
 
   const getFonts = async () => {
-    const fonts = await window.electron.getFonts();
+    const fonts = await tauriAdapter.getFonts();
     setFonts([{ name: "系统默认", familyName: defaultAppSettings.fontFamily }, ...fonts]);
   };
 

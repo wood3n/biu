@@ -24,6 +24,7 @@ import ScrollContainer from "@/components/scroll-container";
 import UpdateCheckButton from "@/components/update-check-button";
 import { useAppUpdateStore } from "@/store/app-update";
 import { useSettings } from "@/store/settings";
+import { tauriAdapter } from "@/utils/tauri-adapter";
 import { defaultAppSettings } from "@shared/settings/app-settings";
 
 import ImportExport from "./export-import";
@@ -95,7 +96,7 @@ const SettingsPage = () => {
   }, [watch, updateSettings]);
 
   useEffect(() => {
-    window.electron.getAppVersion().then(v => setAppVersion(v));
+    tauriAdapter.getAppVersion().then(v => setAppVersion(v));
   }, []);
 
   return (
@@ -288,7 +289,7 @@ const SettingsPage = () => {
                           <Button
                             variant="flat"
                             onPress={async () => {
-                              const path = await window.electron.selectDirectory();
+                              const path = await tauriAdapter.selectDirectory();
                               if (path) setValue("downloadPath", path, { shouldDirty: true, shouldTouch: true });
                             }}
                           >
@@ -316,7 +317,7 @@ const SettingsPage = () => {
                           <Button
                             variant="flat"
                             onPress={async () => {
-                              const path = await window.electron.selectFile();
+                              const path = await tauriAdapter.selectFile();
                               if (path) setValue("ffmpegPath", path, { shouldDirty: true, shouldTouch: true });
                             }}
                           >

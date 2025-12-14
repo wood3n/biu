@@ -12,6 +12,7 @@ import { shallow } from "zustand/shallow";
 
 import { createBroadcastChannel } from "@/common/broadcast/mini-player-sync";
 import { usePlayList } from "@/store/play-list";
+import { tauriAdapter } from "@/utils/tauri-adapter";
 
 const WindowAction = () => {
   const [isMaximized, setIsMaximized] = useState(false);
@@ -19,10 +20,10 @@ const WindowAction = () => {
   const [shouldBroadcastMainState, setShouldBroadcastMainState] = useState(false);
 
   useEffect(() => {
-    window.electron.isMaximized().then(setIsMaximized);
-    window.electron.isFullScreen().then(setIsFullScreen);
-    const unlistenMaximize = window.electron.onWindowMaximizeChange(setIsMaximized);
-    const unlistenFullScreen = window.electron.onWindowFullScreenChange(setIsFullScreen);
+    tauriAdapter.isMaximized().then(setIsMaximized);
+    tauriAdapter.isFullScreen().then(setIsFullScreen);
+    const unlistenMaximize = tauriAdapter.onWindowMaximizeChange(setIsMaximized);
+    const unlistenFullScreen = tauriAdapter.onWindowFullScreenChange(setIsFullScreen);
 
     return () => {
       unlistenMaximize();
@@ -131,19 +132,19 @@ const WindowAction = () => {
   }, [shouldBroadcastMainState]);
 
   const handleMinimize = () => {
-    window.electron.minimizeWindow();
+    tauriAdapter.minimizeWindow();
   };
 
   const handleMaximize = () => {
-    window.electron.toggleMaximizeWindow();
+    tauriAdapter.toggleMaximizeWindow();
   };
 
   const handleClose = () => {
-    window.electron.closeWindow();
+    tauriAdapter.closeWindow();
   };
 
   const handleSwitchToMini = () => {
-    window.electron.switchToMiniPlayer();
+    tauriAdapter.switchToMiniPlayer();
     setShouldBroadcastMainState(true);
   };
 

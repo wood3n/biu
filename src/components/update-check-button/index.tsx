@@ -1,6 +1,7 @@
 import { addToast, useDisclosure } from "@heroui/react";
 
 import { useAppUpdateStore } from "@/store/app-update";
+import { tauriAdapter } from "@/utils/tauri-adapter";
 
 import AsyncButton from "../async-button";
 import ReleaseNoteModal from "../release-note-modal";
@@ -21,7 +22,7 @@ const UpdateCheckButton = () => {
       return;
     }
 
-    const res = await window.electron.checkAppUpdate();
+    const res = await tauriAdapter.checkAppUpdate();
 
     if (res?.error) {
       addToast({

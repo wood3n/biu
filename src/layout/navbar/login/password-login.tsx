@@ -11,6 +11,7 @@ import { getPassportLoginWebKey } from "@/service/passport-login-web-key";
 import { postPassportLoginWebLoginPassword } from "@/service/passport-login-web-login-passport";
 import { useToken } from "@/store/token";
 import { useUser } from "@/store/user";
+import { tauriAdapter } from "@/utils/tauri-adapter";
 
 export interface PasswordLoginProps {
   onClose: () => void;
@@ -172,9 +173,7 @@ const PasswordLogin = ({ onClose }: PasswordLoginProps) => {
                     isIconOnly
                     size="sm"
                     variant="light"
-                    onPress={() =>
-                      window.electron.openExternal("https://passport.bilibili.com/pc/passport/findPassword")
-                    }
+                    onPress={() => tauriAdapter.openExternal("https://passport.bilibili.com/pc/passport/findPassword")}
                   >
                     <RiQuestionLine size={18} />
                   </Button>
