@@ -121,7 +121,24 @@ export const useUser = create<UserState & Action>()(
     }),
     {
       name: "user",
-      partialize: state => ({ user: state.user }),
+      partialize: state => state.user,
+      storage: {
+        getItem: async () => {
+          const store = await window.electron.getStore<UserInfo>("user-login-info");
+
+          return {
+            state: store,
+          };
+        },
+
+        setItem: async (_, value) => {
+          await window.electron.setStore("user-login-info", value.state);
+        },
+
+        removeItem: async () => {
+          await window.electron.clearStore("user-login-info");
+        },
+      },
     },
   ),
 );

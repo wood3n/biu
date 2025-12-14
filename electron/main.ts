@@ -5,16 +5,17 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { channel } from "./ipc/channel";
+import { saveDownloadQueue } from "./ipc/download";
 import { registerIpcHandlers } from "./ipc/index";
 import { setupMacDock } from "./mac/dock";
 import { destroyMiniPlayer } from "./mini-player";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
-import { store, storeKey } from "./store";
-import { createTray, destroyTray } from "./tray"; // 托盘功能
+import { appSettingsStore, storeKey } from "./store";
 import { autoUpdater, setupAutoUpdater, stopCheckForUpdates } from "./updater";
 import { getMacDarkIconPath, getMacLightIconPath, getWindowIcon } from "./utils";
 import { setupWindowsThumbar } from "./windows/thumbar";
+import { createTray, destroyTray } from "./windows/tray"; // 托盘功能
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -106,7 +107,7 @@ function createWindow() {
 
   // 从store获取配置，判断是否关闭窗口时隐藏还是退出程序
   mainWindow.on("close", event => {
-    const closeWindowOption = store.get(storeKey.appSettings).closeWindowOption;
+    const closeWindowOption = appSettingsStore.get(storeKey.appSettings).closeWindowOption;
 
     if ((app as any).quitting) {
       return;
@@ -171,6 +172,12 @@ app.on("before-quit", () => {
 
 // 在 will-quit 阶段清理资源，确保进程干净退出
 app.on("will-quit", () => {
+  try {
+    saveDownloadQueue();
+  } catch (err) {
+    log.error("[main] saveDownloadQueue failed:", err);
+  }
+
   try {
     destroyTray();
   } catch (err) {

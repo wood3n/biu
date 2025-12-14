@@ -2,13 +2,12 @@ import log from "electron-log/renderer";
 import moment from "moment";
 
 import { getAudioWebStreamUrl } from "@/service/audio-web-url";
-import { getPlayerPlayurl, type DashAudio, type DashVideo } from "@/service/player-playurl";
+import { getPlayerPlayurl, type DashAudio } from "@/service/player-playurl";
 import { useUser } from "@/store/user";
 
+import { audioQualitySort } from "../constants/audio";
 import { VideoFnval } from "../constants/video";
 import { getUrlParams } from "./url";
-
-const audioQualitySort = [30257, 30216, 30259, 30260, 30232, 30280, 30250, 30251];
 
 export function sortAudio(audio: DashAudio[]) {
   return audio.toSorted((a, b) => {
@@ -21,16 +20,6 @@ export function sortAudio(audio: DashAudio[]) {
     if (indexA === -1) return 1;
     if (indexB === -1) return -1;
     return indexB - indexA;
-  });
-}
-
-export function sortVideo(video: DashVideo[]) {
-  return video.toSorted((a, b) => {
-    if (a.bandwidth !== b.bandwidth) {
-      return b.bandwidth - a.bandwidth;
-    }
-
-    return b.id - a.id;
   });
 }
 
@@ -53,37 +42,54 @@ function selectAudioByQuality(audioList: DashAudio[], quality: AudioQuality): Da
   }
 }
 
-export async function getMVUrl(bvid: string, cid: string | number, audioQuality: AudioQuality = "auto") {
+export async function getDashUrl(bvid: string, cid: string | number, audioQuality: AudioQuality = "auto") {
   try {
-    const getAudioInfoRes = await getPlayerPlayurl({
+    const getUrlInfoRes = await getPlayerPlayurl({
       bvid,
       cid,
       fnval: VideoFnval.AllDash,
     });
 
-    const videoTrackList = sortVideo(getAudioInfoRes?.data?.dash?.video || []);
-    const videoUrl = videoTrackList?.[0]?.baseUrl || videoTrackList?.[0]?.backupUrl?.[0] || "";
-
-    const flacAudio = getAudioInfoRes?.data?.dash?.flac?.audio;
-    const audioList = getAudioInfoRes?.data?.dash?.audio || [];
+    const bestVideoInfo = getUrlInfoRes?.data?.dash?.video?.[0];
+    const videoResolution = `${bestVideoInfo?.width}x${bestVideoInfo?.height}`;
+    const videoUrl = bestVideoInfo?.baseUrl || bestVideoInfo?.backupUrl?.[0];
+    const flacAudio = getUrlInfoRes?.data?.dash?.flac?.audio;
+    const dolbyAudio = getUrlInfoRes?.data?.dash?.dolby?.audio?.[0];
 
     if (audioQuality === "auto" || audioQuality === "lossless") {
       if (flacAudio) {
         return {
           isLossless: true,
+          audioCodecs: flacAudio.codecs.toLowerCase(),
           audioBandwidth: flacAudio.bandwidth,
-          audioUrl: flacAudio.baseUrl || flacAudio.backupUrl?.[0] || "",
+          audioUrl: flacAudio.baseUrl || flacAudio.backupUrl[0],
           videoUrl,
+          videoResolution,
+        };
+      }
+
+      if (dolbyAudio) {
+        return {
+          isLossless: false,
+          isDolby: true,
+          audioCodecs: dolbyAudio.codecs.toLowerCase(),
+          audioBandwidth: dolbyAudio.bandwidth,
+          audioUrl: dolbyAudio.baseUrl || dolbyAudio.backupUrl?.[0] || "",
+          videoUrl,
+          videoResolution: `${bestVideoInfo?.width}x${bestVideoInfo?.height}`,
         };
       }
     }
 
+    const audioList = getUrlInfoRes?.data?.dash?.audio || [];
     const selectedAudio = selectAudioByQuality(audioList, audioQuality);
     return {
       isLossless: false,
+      audioCodecs: selectedAudio?.codecs?.toLowerCase() || "",
       audioBandwidth: selectedAudio?.bandwidth,
       audioUrl: selectedAudio?.baseUrl || selectedAudio?.backupUrl?.[0] || "",
       videoUrl,
+      videoResolution,
     };
   } catch (error) {
     log.error("[Get video play url error]", error);
@@ -96,7 +102,7 @@ export async function getMVUrl(bvid: string, cid: string | number, audioQuality:
 /**
  * 登录情况下获取音乐播放链接
  */
-export const getAudioUrl = async (sid: number) => {
+export const getAudioUrl = async (sid: number | string) => {
   const res = await getAudioWebStreamUrl({
     songid: sid,
     quality: useUser.getState().user?.vipStatus ? 3 : 2,
@@ -105,9 +111,12 @@ export const getAudioUrl = async (sid: number) => {
     platform: "web",
   });
 
+  const isFlac = res?.data?.type === 3;
+
   return {
-    audioUrl: res?.data?.cdns?.[0] || "",
-    isLossless: res?.data?.type === 3,
+    audioUrl: res?.data?.cdns?.[0],
+    audioCodecs: isFlac ? "flac" : "",
+    isLossless: isFlac,
   };
 };
 

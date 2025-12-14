@@ -85,3 +85,8 @@ export async function injectAuthCookie() {
     failures.forEach(f => log.warn("[cookies] inject failed:", f.reason));
   }
 }
+
+export const getCookieString = async () => {
+  const cookies = await session.defaultSession.cookies.get({ url: "https://bilibili.com" });
+  return cookies.map(cookie => `${cookie.name}=${cookie.value}`).join("; ");
+};

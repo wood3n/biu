@@ -4,13 +4,13 @@ import { ipcMain, shell, dialog } from "electron";
 import log from "electron-log";
 import path from "node:path";
 
-import { store, storeKey } from "../store";
+import { appSettingsStore, storeKey } from "../store";
 import { channel } from "./channel";
 
 export function registerDialogHandlers() {
   ipcMain.handle(channel.dialog.openDirectory, async (_event: IpcMainInvokeEvent, dir?: string) => {
     const targetDir: string =
-      dir ?? store.get(storeKey.appSettings)?.downloadPath ?? path.resolve(process.cwd(), "downloads");
+      dir ?? appSettingsStore.get(storeKey.appSettings)?.downloadPath ?? path.resolve(process.cwd(), "downloads");
     const err = await shell.openPath(targetDir);
     return err === "";
   });

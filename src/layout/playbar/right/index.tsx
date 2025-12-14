@@ -5,6 +5,7 @@ import { usePlayList } from "@/store/play-list";
 import { useUser } from "@/store/user";
 
 import { PlayBarIconSize } from "../constants";
+import Download from "./download";
 import MvFavFolderSelect from "./mv-fav-folder-select";
 import PlayListDrawer from "./play-list-drawer";
 import PlayModeSwitch from "./play-mode";
@@ -21,7 +22,7 @@ const RightControl = () => {
       <div className="flex h-full items-center justify-end space-x-2">
         <PlayModeSwitch />
         {Boolean(user?.isLogin) && Boolean(playId) && <MvFavFolderSelect />}
-        {/* {Boolean(playId) && <Download />} */}
+        {Boolean(playId) && <Download />}
         <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={onQueueOpen}>
           <RiPlayListLine size={PlayBarIconSize.SideIconSize} />
         </Button>

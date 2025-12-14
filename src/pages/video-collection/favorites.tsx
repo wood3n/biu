@@ -13,48 +13,7 @@ import { usePlayList } from "@/store/play-list";
 import { useUser } from "@/store/user";
 
 import Info from "./info";
-
-const getAllMedia = async ({ id: favFolderId, totalCount }: { id: string; totalCount: number }) => {
-  const FAVORITES_PAGE_SIZE = 20;
-  const allResSettled = await Promise.allSettled(
-    Array.from({ length: Math.ceil(totalCount / FAVORITES_PAGE_SIZE) }, (_, i) =>
-      getFavResourceList({
-        media_id: String(favFolderId),
-        ps: FAVORITES_PAGE_SIZE,
-        pn: i + 1,
-        platform: "web",
-      }),
-    ),
-  );
-
-  return allResSettled
-    .filter(res => res.status === "fulfilled")
-    .map(res => res.value)
-    .filter(res => res.code === 0 && res?.data?.medias?.length)
-    .flatMap(res =>
-      res.data.medias
-        .filter(item => item.attr === 0)
-        .map(item =>
-          item.type === 2
-            ? {
-                type: "mv" as const,
-                bvid: item.bvid,
-                title: item.title,
-                cover: item.cover,
-                ownerMid: item.upper?.mid,
-                ownerName: item.upper?.name,
-              }
-            : {
-                type: "audio" as const,
-                sid: item.id,
-                title: item.title,
-                cover: item.cover,
-                ownerMid: item.upper?.mid,
-                ownerName: item.upper?.name,
-              },
-        ),
-    );
-};
+import { getAllFavMedia } from "./utils";
 
 /** 收藏夹详情 */
 const Favorites: React.FC = () => {
@@ -109,7 +68,7 @@ const Favorites: React.FC = () => {
     }
 
     try {
-      const allMedias = await getAllMedia({
+      const allMedias = await getAllFavMedia({
         id: favFolderId,
         totalCount,
       });
@@ -137,7 +96,7 @@ const Favorites: React.FC = () => {
     }
 
     try {
-      const allMedias = await getAllMedia({
+      const allMedias = await getAllFavMedia({
         id: favFolderId,
         totalCount,
       });

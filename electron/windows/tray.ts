@@ -6,9 +6,9 @@ import path from "node:path";
 
 import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
 
-import { channel } from "./ipc/channel";
-import { destroyMiniPlayer } from "./mini-player";
-import { IconBase } from "./utils";
+import { channel } from "../ipc/channel";
+import { destroyMiniPlayer } from "../mini-player";
+import { IconBase } from "../utils";
 
 interface Props {
   getMainWindow: () => BrowserWindow | null;

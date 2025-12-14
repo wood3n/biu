@@ -15,6 +15,7 @@ import eslintReact from "@eslint-react/eslint-plugin";
 
 export default defineConfig([
   globalIgnores(["dist", ".electron"]),
+  eslintPluginPrettierRecommended,
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
@@ -42,6 +43,7 @@ export default defineConfig([
       // FIXME:MVP版本暂时不处理
       "jsx-a11y/no-static-element-interactions": 0,
       "jsx-a11y/click-events-have-key-events": 0,
+      indent: 0,
     },
   },
   {
@@ -99,7 +101,6 @@ export default defineConfig([
       ],
     },
   },
-  eslintPluginPrettierRecommended,
   {
     files: ["**/*.{js,mjs,cjs}"],
     extends: [tseslint.configs.disableTypeChecked],
