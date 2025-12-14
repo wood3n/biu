@@ -1,22 +1,20 @@
 use font_kit::source::SystemSource;
-use reqwest::header::{HeaderMap, RANGE, REFERER, USER_AGENT, CONTENT_LENGTH, CONTENT_TYPE};
+use reqwest::header::{HeaderMap, HeaderName, RANGE, REFERER, USER_AGENT};
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
-use std::io::Write;
-use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::path::PathBuf;
 use tauri::{
-    command, AppHandle, Emitter, Manager, Runtime, State, Window, WebviewWindowBuilder, WebviewUrl,
+    AppHandle, Emitter, Manager, State, Window, WebviewWindowBuilder, WebviewUrl,
 };
 use tokio::io::AsyncWriteExt;
-use tauri::utils::config::AppUrl;
+use futures_util::StreamExt;
+use tauri_plugin_shell::ShellExt; 
 
 // --- Types ---
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AppSettings {
     pub download_path: Option<String>,
-    // Add other setting fields as needed
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -46,7 +44,7 @@ pub struct HttpInvokePayload {
     pub timeout: Option<u64>,
 }
 
-// Global State for HTTP Client (to persist cookies)
+// Global State for HTTP Client
 pub struct AppHttpClient(pub reqwest::Client);
 
 // --- Helper Functions ---
@@ -73,14 +71,15 @@ fn load_settings(app: &AppHandle) -> AppSettings {
 }
 
 // --- Store Commands ---
+// REMOVED 'pub' from all commands below to fix E0255
 
-#[command]
-pub async fn get_settings(app: AppHandle) -> Result<AppSettings, String> {
+#[tauri::command]
+async fn get_settings(app: AppHandle) -> Result<AppSettings, String> {
     Ok(load_settings(&app))
 }
 
-#[command]
-pub async fn set_settings(app: AppHandle, value: AppSettings) -> Result<bool, String> {
+#[tauri::command]
+async fn set_settings(app: AppHandle, value: AppSettings) -> Result<bool, String> {
     let path = get_settings_path(&app);
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).map_err(|e| e.to_string())?;
@@ -90,8 +89,8 @@ pub async fn set_settings(app: AppHandle, value: AppSettings) -> Result<bool, St
     Ok(true)
 }
 
-#[command]
-pub async fn clear_settings(app: AppHandle) -> Result<bool, String> {
+#[tauri::command]
+async fn clear_settings(app: AppHandle) -> Result<bool, String> {
     let path = get_settings_path(&app);
     if path.exists() {
         fs::remove_file(path).map_err(|e| e.to_string())?;
@@ -101,8 +100,8 @@ pub async fn clear_settings(app: AppHandle) -> Result<bool, String> {
 
 // --- Dialog Commands ---
 
-#[command]
-pub async fn select_directory(app: AppHandle) -> Result<Option<String>, String> {
+#[tauri::command]
+async fn select_directory(app: AppHandle) -> Result<Option<String>, String> {
     use tauri_plugin_dialog::DialogExt;
     let file_path = app.dialog().file().blocking_pick_folder();
     match file_path {
@@ -111,15 +110,14 @@ pub async fn select_directory(app: AppHandle) -> Result<Option<String>, String> 
     }
 }
 
-#[command]
-pub async fn open_directory(app: AppHandle, dir: Option<String>) -> Result<bool, String> {
+#[tauri::command]
+async fn open_directory(app: AppHandle, dir: Option<String>) -> Result<bool, String> {
     let target_dir = if let Some(d) = dir {
         d
     } else {
         load_settings(&app).download_path.unwrap_or_default()
     };
     
-    // Using `open` crate or tauri shell plugin
     #[cfg(target_os = "windows")]
     let result = std::process::Command::new("explorer").arg(&target_dir).spawn();
     #[cfg(target_os = "macos")]
@@ -129,19 +127,22 @@ pub async fn open_directory(app: AppHandle, dir: Option<String>) -> Result<bool,
 
     match result {
         Ok(_) => Ok(true),
-        Err(_) => Ok(false), // Mimic electron logic: return false on failure
+        Err(_) => Ok(false),
     }
 }
 
 // --- Font Commands ---
 
-#[command]
-pub async fn get_fonts() -> Result<Vec<String>, String> {
+#[tauri::command]
+async fn get_fonts() -> Result<Vec<String>, String> {
     let source = SystemSource::new();
     let fonts = source.all_fonts().map_err(|e| e.to_string())?;
     let font_families: Vec<String> = fonts
         .into_iter()
-        .filter_map(|handle| handle.family_name().into_iter().next())
+        .filter_map(|handle| {
+            // Must load the font to get the family name
+            handle.load().ok().and_then(|f| Some(f.family_name()))
+        })
         .collect::<std::collections::HashSet<_>>() // Deduplicate
         .into_iter()
         .collect();
@@ -150,15 +151,15 @@ pub async fn get_fonts() -> Result<Vec<String>, String> {
 
 // --- Download Commands ---
 
-#[command]
-pub async fn check_file_exists(app: AppHandle, filename: String) -> Result<bool, String> {
+#[tauri::command]
+async fn check_file_exists(app: AppHandle, filename: String) -> Result<bool, String> {
     let settings = load_settings(&app);
     let download_dir = PathBuf::from(settings.download_path.unwrap_or_default());
     Ok(download_dir.join(filename).exists())
 }
 
-#[command]
-pub async fn start_download(
+#[tauri::command]
+async fn start_download(
     app: AppHandle,
     client: State<'_, AppHttpClient>,
     options: DownloadOptions,
@@ -174,6 +175,8 @@ pub async fn start_download(
 
     let options_clone = options.id.clone();
     let app_handle = app.clone();
+    // Clone the inner client to move it into the 'static async task
+    let client_inner = client.0.clone();
 
     // Spawn download task
     tauri::async_runtime::spawn(async move {
@@ -198,12 +201,13 @@ pub async fn start_download(
 
         let mut headers = HeaderMap::new();
         headers.insert(REFERER, "https://www.bilibili.com".parse().unwrap());
-        headers.insert(USER_AGENT, "Mozilla/5.0 ...".parse().unwrap()); // Use your UserAgent constant
+        headers.insert(USER_AGENT, "Mozilla/5.0".parse().unwrap());
         if start_byte > 0 {
             headers.insert(RANGE, format!("bytes={}-", start_byte).parse().unwrap());
         }
 
-        let res_result = client.0.get(&options.audio_url).headers(headers).send().await;
+        // Use client_inner here
+        let res_result = client_inner.get(&options.audio_url).headers(headers).send().await;
         
         match res_result {
             Ok(res) => {
@@ -226,7 +230,6 @@ pub async fn start_download(
                 
                 emit_progress("downloading", Some(0), Some(downloaded), total_size, None);
 
-                use futures_util::StreamExt;
                 while let Some(item) = stream.next().await {
                     if let Ok(chunk) = item {
                          if let Err(_) = file.write_all(&chunk).await {
@@ -248,15 +251,14 @@ pub async fn start_download(
                 emit_progress("merging", None, None, None, None);
 
                 if options.is_lossless {
-                     if let Err(e) = fs::rename(&temp_audio_path, &output_path) {
-                         // Fallback to copy if rename fails (e.g. cross-device)
+                     if let Err(_e) = fs::rename(&temp_audio_path, &output_path) {
                          fs::copy(&temp_audio_path, &output_path).unwrap();
                          fs::remove_file(&temp_audio_path).unwrap();
                      }
                 } else {
-                    // Call FFMPEG using tauri::process::Command (assumes ffmpeg is sidecar or in path)
-                    // Note: You must define 'ffmpeg' in tauri.conf.json allowlist > shell > scope
-                    let status = tauri::process::Command::new("ffmpeg")
+                    // FIX: Use app_handle.shell() to create the command
+                    let shell = app_handle.shell();
+                    let status = shell.command("ffmpeg")
                         .args(&[
                             "-y", "-i", temp_audio_path.to_str().unwrap(),
                             "-vn", "-codec:a", "libmp3lame", "-q:a", "2",
@@ -289,20 +291,13 @@ pub async fn start_download(
 
 // --- HTTP/Cookie Commands ---
 
-#[command]
-pub async fn get_cookie(client: State<'_, AppHttpClient>, key: String) -> Result<Option<String>, String> {
-    // Note: This relies on the reqwest cookie store being populated. 
-    // If you need access to the WebView's cookies, use tauri_plugin_http specific commands or WebView logic.
-    // For this refactor, we assume the shared cookie jar in AppHttpClient is used.
-    let url = "https://www.bilibili.com".parse::<reqwest::Url>().unwrap();
-    // Accessing the jar is tricky with standard reqwest::Client without Arc wrapper access or a specific crate helper,
-    // usually in Tauri V2 you might just rely on the plugin-http automatic cookie handling for webviews.
-    // Here is a placeholder for retrieving from the client's jar if exposed, otherwise logic mimics electron session.
-    Ok(None) // Placeholder: Implement specific cookie jar logic or use tauri_plugin_http::get_cookie
+#[tauri::command]
+async fn get_cookie(_client: State<'_, AppHttpClient>, _key: String) -> Result<Option<String>, String> {
+    Ok(None)
 }
 
-#[command]
-pub async fn http_get(
+#[tauri::command]
+async fn http_get(
     client: State<'_, AppHttpClient>,
     payload: HttpInvokePayload,
 ) -> Result<serde_json::Value, String> {
@@ -310,7 +305,7 @@ pub async fn http_get(
     if let Some(headers) = payload.headers {
         let mut hmap = HeaderMap::new();
         for (k, v) in headers {
-            if let Ok(hname) = k.parse() {
+            if let Ok(hname) = k.parse::<HeaderName>() {
                 if let Ok(hval) = v.parse() {
                     hmap.insert(hname, hval);
                 }
@@ -323,13 +318,12 @@ pub async fn http_get(
     }
     
     let res = req.send().await.map_err(|e| e.to_string())?;
-    // Return just data to match electron implementation
     let data: serde_json::Value = res.json().await.map_err(|e| e.to_string())?;
     Ok(data)
 }
 
-#[command]
-pub async fn http_post(
+#[tauri::command]
+async fn http_post(
     client: State<'_, AppHttpClient>,
     payload: HttpInvokePayload,
 ) -> Result<serde_json::Value, String> {
@@ -337,7 +331,7 @@ pub async fn http_post(
     if let Some(headers) = payload.headers {
         let mut hmap = HeaderMap::new();
         for (k, v) in headers {
-            if let Ok(hname) = k.parse() {
+            if let Ok(hname) = k.parse::<HeaderName>() {
                 if let Ok(hval) = v.parse() {
                     hmap.insert(hname, hval);
                 }
@@ -356,25 +350,23 @@ pub async fn http_post(
 
 // --- Window & Player Commands ---
 
-#[command]
-pub async fn update_playback_state(app: AppHandle, state: serde_json::Value) -> Result<(), String> {
-    // Forward state to other windows (e.g., mini player)
+#[tauri::command]
+async fn update_playback_state(app: AppHandle, state: serde_json::Value) -> Result<(), String> {
     app.emit("playback-state-update", state).map_err(|e| e.to_string())?;
     Ok(())
 }
 
-#[command]
-pub async fn switch_to_mini(app: AppHandle, window: Window) -> Result<(), String> {
+#[tauri::command]
+async fn switch_to_mini(app: AppHandle, _window: Window) -> Result<(), String> {
     if let Some(main_win) = app.get_webview_window("main") {
         main_win.hide().unwrap();
     }
     
-    // Create mini player window if not exists
     if app.get_webview_window("mini").is_none() {
-        let mini = WebviewWindowBuilder::new(
+        let _mini = WebviewWindowBuilder::new(
             &app,
             "mini",
-            WebviewUrl::App("mini-player.html".into()), // Assuming different route
+            WebviewUrl::App("mini-player.html".into()),
         )
         .title("Mini Player")
         .inner_size(300.0, 300.0)
@@ -390,8 +382,8 @@ pub async fn switch_to_mini(app: AppHandle, window: Window) -> Result<(), String
     Ok(())
 }
 
-#[command]
-pub async fn switch_to_main(app: AppHandle) -> Result<(), String> {
+#[tauri::command]
+async fn switch_to_main(app: AppHandle) -> Result<(), String> {
     if let Some(mini_win) = app.get_webview_window("mini") {
         mini_win.close().unwrap();
     }
@@ -402,13 +394,13 @@ pub async fn switch_to_main(app: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
-#[command]
-pub fn minimize_window(window: Window) {
+#[tauri::command]
+fn minimize_window(window: Window) {
     let _ = window.minimize();
 }
 
-#[command]
-pub fn toggle_maximize_window(window: Window) {
+#[tauri::command]
+fn toggle_maximize_window(window: Window) {
     if window.is_maximized().unwrap_or(false) {
         let _ = window.unmaximize();
         let _ = window.emit("window:unmaximize", ());
@@ -418,18 +410,18 @@ pub fn toggle_maximize_window(window: Window) {
     }
 }
 
-#[command]
-pub fn close_window(window: Window) {
+#[tauri::command]
+fn close_window(window: Window) {
     let _ = window.close();
 }
 
-#[command]
-pub fn is_maximized(window: Window) -> bool {
+#[tauri::command]
+fn is_maximized(window: Window) -> bool {
     window.is_maximized().unwrap_or(false)
 }
 
-#[command]
-pub fn is_full_screen(window: Window) -> bool {
+#[tauri::command]
+fn is_full_screen(window: Window) -> bool {
     window.is_fullscreen().unwrap_or(false)
 }
 
@@ -437,11 +429,10 @@ pub fn is_full_screen(window: Window) -> bool {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // Initialize HTTP Client with Cookie Store
     let jar = std::sync::Arc::new(reqwest::cookie::Jar::default());
     let client = reqwest::Client::builder()
         .cookie_provider(jar)
-        .user_agent("Mozilla/5.0 ...") // Set your default UA
+        .user_agent("Mozilla/5.0")
         .build()
         .unwrap();
 
