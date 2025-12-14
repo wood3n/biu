@@ -28,6 +28,7 @@ import { defaultAppSettings } from "@shared/settings/app-settings";
 
 import ImportExport from "./export-import";
 import MenuSettings from "./menu-settings";
+import ShortcutSettingsPage from "./shortcut-settings";
 
 const SettingsPage = () => {
   const [appVersion, setAppVersion] = useState<string>("");
@@ -381,6 +382,9 @@ const SettingsPage = () => {
             </Tab>
             <Tab key="menu" title="菜单设置">
               <MenuSettings control={control} />
+            </Tab>
+            <Tab key="shortcut" title="快捷键">
+              <ShortcutSettingsPage />
             </Tab>
           </Tabs>
         </div>

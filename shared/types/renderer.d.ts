@@ -10,7 +10,7 @@ interface IFontInfo {
 
 type AppPlatForm = "macos" | "windows" | "linux";
 
-type StoreName = "app-settings" | "user-login-info" | "media-downloads";
+type StoreName = "app-settings" | "user-login-info" | "media-downloads" | "shortcut-settings";
 
 interface ElectronAPI {
   /** 获取指定name的存储值 */
