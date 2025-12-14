@@ -427,7 +427,7 @@ async fn switch_to_mini(app: AppHandle, _window: Window) -> Result<(), String> {
         let _mini = WebviewWindowBuilder::new(
             &app,
             "mini",
-            WebviewUrl::App("mini-player.html".into()),
+            WebviewUrl::App("index.html#/mini-player".into()),
         )
         .title("Mini Player")
         .inner_size(300.0, 300.0)
