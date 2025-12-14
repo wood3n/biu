@@ -1,10 +1,16 @@
 import axios, { type CreateAxiosDefaults } from "axios";
 
 import { requestInterceptors } from "./request-interceptors";
+import { tauriAxiosAdapter } from "./tauri-axios-adapter";
+
+// Detect if running in Tauri
+const isTauri = !!(window as any).__TAURI_INTERNALS__ || !!(window as any).__TAURI__;
 
 const axiosConfig: CreateAxiosDefaults = {
   timeout: 10000,
   withCredentials: true,
+  // Use Tauri adapter if in Tauri environment to bypass CORS/Referer restrictions
+  adapter: isTauri ? tauriAxiosAdapter : undefined,
 };
 
 export const axiosInstance = axios.create(axiosConfig);

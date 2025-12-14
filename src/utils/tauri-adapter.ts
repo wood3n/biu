@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-shell";
-// Helper to handle async listeners synchronously to match existing API signature
+
 const syncListen = (event: string, callback: (payload: any) => void) => {
   let unlisten: (() => void) | undefined;
   let cancelled = false;
@@ -38,25 +38,27 @@ export const tauriAdapter: any = {
   checkFileExists: (filename: string) => invoke("check_file_exists", { filename }),
   startDownload: (params: any) => invoke("start_download", { params }),
   onDownloadProgress: (cb: any) => {
-    // Maps to channel.download.progress ("download:progress")
     return syncListen("download:progress", payload => cb(payload));
   },
 
-  // Cookies
-  getCookie: (key: string) => invoke("get_cookie", { key }),
+  // Cookies - Try document first (for WebView access), then backend
+  getCookie: (key: string) => {
+    const match = document.cookie.match(new RegExp("(^| )" + key + "=([^;]+)"));
+    if (match) return Promise.resolve(match[2]);
+    return invoke("get_cookie", { key });
+  },
 
   // Router / Navigation
   navigate: (cb: any) => {
     return syncListen("router:navigate", path => cb(path));
   },
 
-  // HTTP (Relay requests through Rust to avoid CORS/Cookie issues)
+  // HTTP (Relay requests through Rust)
   httpGet: (url: string, options?: any) => invoke("http_get", { url, options }),
   httpPost: (url: string, body?: any, options?: any) => invoke("http_post", { url, body, options }),
 
   // Platform
   getPlatform: () => {
-    // Synchronous platform detection for frontend
     const userAgent = navigator.userAgent.toLowerCase();
     if (userAgent.includes("mac")) return "macos";
     if (userAgent.includes("win")) return "windows";
@@ -68,12 +70,10 @@ export const tauriAdapter: any = {
     invoke("update_playback_state", { isPlaying });
   },
   onPlayerCommand: (cb: (cmd: "prev" | "next" | "toggle") => void) => {
-    // Listen to all three events and map them to the callback
     const unlistenPrev = syncListen("player:prev", () => cb("prev"));
     const unlistenNext = syncListen("player:next", () => cb("next"));
     const unlistenToggle = syncListen("player:toggle", () => cb("toggle"));
 
-    // Return a composite cleanup function
     return () => {
       unlistenPrev();
       unlistenNext();
@@ -87,10 +87,7 @@ export const tauriAdapter: any = {
   onUpdateAvailable: (cb: any) => {
     return syncListen("app:on-update-available", cb);
   },
-  isSupportAutoUpdate: () => {
-    // Tauri auto-updater support logic (simplified)
-    return true;
-  },
+  isSupportAutoUpdate: () => true,
   downloadAppUpdate: () => invoke("download_app_update"),
   onDownloadAppProgress: (cb: any) => {
     return syncListen("app:update-message", cb);

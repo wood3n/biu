@@ -1,5 +1,5 @@
 use font_kit::source::SystemSource;
-use reqwest::header::{HeaderMap, HeaderName, RANGE, REFERER, USER_AGENT};
+use reqwest::header::{HeaderMap, HeaderName, CONTENT_TYPE, RANGE, REFERER, USER_AGENT};
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::path::PathBuf;
@@ -70,8 +70,42 @@ fn load_settings(app: &AppHandle) -> AppSettings {
     }
 }
 
+// --- App/Updater Commands ---
+
+#[tauri::command]
+fn get_app_version(app: AppHandle) -> String {
+    app.package_info().version.to_string()
+}
+
+#[tauri::command]
+async fn check_app_update(_app: AppHandle) -> Result<serde_json::Value, String> {
+    // Placeholder: Implement using tauri-plugin-updater if needed
+    // For now, return "no update" to prevent errors
+    Ok(serde_json::json!({
+        "isUpdateAvailable": false,
+        "latestVersion": "",
+        "releaseNotes": ""
+    }))
+}
+
+#[tauri::command]
+async fn download_app_update() -> Result<(), String> {
+    // Placeholder
+    Err("Auto-update not configured".to_string())
+}
+
+#[tauri::command]
+async fn quit_and_install(app: AppHandle) {
+    app.exit(0);
+}
+
+#[tauri::command]
+async fn open_installer_directory(app: AppHandle) -> Result<bool, String> {
+    let path = app.path().download_dir().unwrap_or_default();
+    open_directory(app, Some(path.to_string_lossy().to_string())).await
+}
+
 // --- Store Commands ---
-// REMOVED 'pub' from all commands below to fix E0255
 
 #[tauri::command]
 async fn get_settings(app: AppHandle) -> Result<AppSettings, String> {
@@ -79,13 +113,13 @@ async fn get_settings(app: AppHandle) -> Result<AppSettings, String> {
 }
 
 #[tauri::command]
-async fn set_settings(app: AppHandle, value: AppSettings) -> Result<bool, String> {
+async fn set_settings(app: AppHandle, payload: AppSettings) -> Result<bool, String> {
     let path = get_settings_path(&app);
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     }
     let file = File::create(path).map_err(|e| e.to_string())?;
-    serde_json::to_writer_pretty(file, &value).map_err(|e| e.to_string())?;
+    serde_json::to_writer_pretty(file, &payload).map_err(|e| e.to_string())?;
     Ok(true)
 }
 
@@ -111,8 +145,8 @@ async fn select_directory(app: AppHandle) -> Result<Option<String>, String> {
 }
 
 #[tauri::command]
-async fn open_directory(app: AppHandle, dir: Option<String>) -> Result<bool, String> {
-    let target_dir = if let Some(d) = dir {
+async fn open_directory(app: AppHandle, path: Option<String>) -> Result<bool, String> {
+    let target_dir = if let Some(d) = path {
         d
     } else {
         load_settings(&app).download_path.unwrap_or_default()
@@ -134,19 +168,19 @@ async fn open_directory(app: AppHandle, dir: Option<String>) -> Result<bool, Str
 // --- Font Commands ---
 
 #[tauri::command]
-async fn get_fonts() -> Result<Vec<String>, String> {
+async fn get_fonts() -> Result<Vec<serde_json::Value>, String> {
     let source = SystemSource::new();
     let fonts = source.all_fonts().map_err(|e| e.to_string())?;
-    let font_families: Vec<String> = fonts
+    let font_infos: Vec<serde_json::Value> = fonts
         .into_iter()
         .filter_map(|handle| {
-            // Must load the font to get the family name
-            handle.load().ok().and_then(|f| Some(f.family_name()))
+            handle.load().ok().map(|f| serde_json::json!({
+                "name": f.full_name(),
+                "familyName": f.family_name()
+            }))
         })
-        .collect::<std::collections::HashSet<_>>() // Deduplicate
-        .into_iter()
-        .collect();
-    Ok(font_families)
+        .collect::<Vec<_>>();
+    Ok(font_infos)
 }
 
 // --- Download Commands ---
@@ -162,23 +196,21 @@ async fn check_file_exists(app: AppHandle, filename: String) -> Result<bool, Str
 async fn start_download(
     app: AppHandle,
     client: State<'_, AppHttpClient>,
-    options: DownloadOptions,
+    params: DownloadOptions,
 ) -> Result<serde_json::Value, String> {
     let settings = load_settings(&app);
     let download_dir = PathBuf::from(settings.download_path.unwrap_or_default());
     fs::create_dir_all(&download_dir).map_err(|e| e.to_string())?;
     
-    let output_path = download_dir.join(&options.filename);
+    let output_path = download_dir.join(&params.filename);
     let temp_dir = app.path().temp_dir().unwrap().join("biu-downloads");
     fs::create_dir_all(&temp_dir).map_err(|e| e.to_string())?;
-    let temp_audio_path = temp_dir.join(format!("{}.audio.tmp", options.id));
+    let temp_audio_path = temp_dir.join(format!("{}.audio.tmp", params.id));
 
-    let options_clone = options.id.clone();
+    let options_clone = params.id.clone();
     let app_handle = app.clone();
-    // Clone the inner client to move it into the 'static async task
     let client_inner = client.0.clone();
 
-    // Spawn download task
     tauri::async_runtime::spawn(async move {
         let emit_progress = |status: &str, progress: Option<u64>, downloaded: Option<u64>, total: Option<u64>, error: Option<String>| {
             let _ = app_handle.emit("download:progress", DownloadProgress {
@@ -191,7 +223,6 @@ async fn start_download(
             });
         };
 
-        // Resume logic
         let mut start_byte = 0;
         if temp_audio_path.exists() {
              if let Ok(metadata) = fs::metadata(&temp_audio_path) {
@@ -206,8 +237,7 @@ async fn start_download(
             headers.insert(RANGE, format!("bytes={}-", start_byte).parse().unwrap());
         }
 
-        // Use client_inner here
-        let res_result = client_inner.get(&options.audio_url).headers(headers).send().await;
+        let res_result = client_inner.get(&params.audio_url).headers(headers).send().await;
         
         match res_result {
             Ok(res) => {
@@ -247,16 +277,14 @@ async fn start_download(
                     }
                 }
                 
-                // Merging/Conversion phase
                 emit_progress("merging", None, None, None, None);
 
-                if options.is_lossless {
+                if params.is_lossless {
                      if let Err(_e) = fs::rename(&temp_audio_path, &output_path) {
                          fs::copy(&temp_audio_path, &output_path).unwrap();
                          fs::remove_file(&temp_audio_path).unwrap();
                      }
                 } else {
-                    // FIX: Use app_handle.shell() to create the command
                     let shell = app_handle.shell();
                     let status = shell.command("ffmpeg")
                         .args(&[
@@ -293,66 +321,99 @@ async fn start_download(
 
 #[tauri::command]
 async fn get_cookie(_client: State<'_, AppHttpClient>, _key: String) -> Result<Option<String>, String> {
+    // Return None so frontend falls back to document.cookie or empty
     Ok(None)
 }
 
 #[tauri::command]
 async fn http_get(
     client: State<'_, AppHttpClient>,
-    payload: HttpInvokePayload,
+    url: String,
+    options: Option<HttpInvokePayload>,
 ) -> Result<serde_json::Value, String> {
-    let mut req = client.0.get(&payload.url);
-    if let Some(headers) = payload.headers {
-        let mut hmap = HeaderMap::new();
-        for (k, v) in headers {
-            if let Ok(hname) = k.parse::<HeaderName>() {
-                if let Ok(hval) = v.parse() {
-                    hmap.insert(hname, hval);
+    let mut req = client.0.get(&url);
+    if let Some(payload) = options {
+        if let Some(headers) = payload.headers {
+            let mut hmap = HeaderMap::new();
+            for (k, v) in headers {
+                if let Ok(hname) = k.parse::<HeaderName>() {
+                    if let Ok(hval) = v.parse() {
+                        hmap.insert(hname, hval);
+                    }
                 }
             }
+            req = req.headers(hmap);
         }
-        req = req.headers(hmap);
-    }
-    if let Some(params) = payload.params {
-        req = req.query(&params);
+        if let Some(params) = payload.params {
+            req = req.query(&params);
+        }
     }
     
     let res = req.send().await.map_err(|e| e.to_string())?;
-    let data: serde_json::Value = res.json().await.map_err(|e| e.to_string())?;
-    Ok(data)
+    // We return the raw text or json based on content type? 
+    // The frontend axios adapter expects data. 
+    // Let's try to parse as JSON first, if fail return string?
+    // Most Bilibili APIs return JSON.
+    let text_res = res.text().await.map_err(|e| e.to_string())?;
+    match serde_json::from_str::<serde_json::Value>(&text_res) {
+        Ok(json) => Ok(json),
+        Err(_) => Ok(serde_json::Value::String(text_res))
+    }
 }
 
 #[tauri::command]
 async fn http_post(
     client: State<'_, AppHttpClient>,
-    payload: HttpInvokePayload,
+    url: String,
+    body: Option<serde_json::Value>,
+    options: Option<HttpInvokePayload>,
 ) -> Result<serde_json::Value, String> {
-    let mut req = client.0.post(&payload.url);
-    if let Some(headers) = payload.headers {
-        let mut hmap = HeaderMap::new();
-        for (k, v) in headers {
-            if let Ok(hname) = k.parse::<HeaderName>() {
-                if let Ok(hval) = v.parse() {
-                    hmap.insert(hname, hval);
+    let mut req = client.0.post(&url);
+    let mut is_form = false;
+
+    if let Some(payload) = options {
+        if let Some(headers) = payload.headers {
+            let mut hmap = HeaderMap::new();
+            for (k, v) in headers {
+                if let Ok(hname) = k.parse::<HeaderName>() {
+                    if let Ok(hval) = v.parse::<tauri::http::HeaderValue>() {
+                        if hname == CONTENT_TYPE && hval.to_str().unwrap_or("").contains("application/x-www-form-urlencoded") {
+                            is_form = true;
+                        }
+                        hmap.insert(hname, hval);
+                    }
                 }
             }
+            req = req.headers(hmap);
         }
-        req = req.headers(hmap);
+        if let Some(params) = payload.params {
+            req = req.query(&params);
+        }
     }
-    if let Some(body) = payload.body {
-        req = req.json(&body);
+
+    if let Some(b) = body {
+        if is_form {
+            // If it's a form post, we expect the body to be a flat Key-Value object
+            // reqwest's .form() handles serialization
+            req = req.form(&b);
+        } else {
+            req = req.json(&b);
+        }
     }
     
     let res = req.send().await.map_err(|e| e.to_string())?;
-    let data: serde_json::Value = res.json().await.map_err(|e| e.to_string())?;
-    Ok(data)
+    let text_res = res.text().await.map_err(|e| e.to_string())?;
+    match serde_json::from_str::<serde_json::Value>(&text_res) {
+        Ok(json) => Ok(json),
+        Err(_) => Ok(serde_json::Value::String(text_res))
+    }
 }
 
 // --- Window & Player Commands ---
 
 #[tauri::command]
-async fn update_playback_state(app: AppHandle, state: serde_json::Value) -> Result<(), String> {
-    app.emit("playback-state-update", state).map_err(|e| e.to_string())?;
+async fn update_playback_state(app: AppHandle, is_playing: bool) -> Result<(), String> {
+    app.emit("playback-state-update", is_playing).map_err(|e| e.to_string())?;
     Ok(())
 }
 
@@ -372,6 +433,7 @@ async fn switch_to_mini(app: AppHandle, _window: Window) -> Result<(), String> {
         .inner_size(300.0, 300.0)
         .always_on_top(true)
         .decorations(false)
+        .transparent(true)
         .build()
         .map_err(|e| e.to_string())?;
     } else {
@@ -460,7 +522,12 @@ pub fn run() {
             toggle_maximize_window,
             close_window,
             is_maximized,
-            is_full_screen
+            is_full_screen,
+            get_app_version,
+            check_app_update,
+            download_app_update,
+            quit_and_install,
+            open_installer_directory
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
