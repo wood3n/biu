@@ -65,6 +65,7 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           audioQuality: state.audioQuality,
           hiddenMenuKeys: state.hiddenMenuKeys,
           displayMode: state.displayMode,
+          ffmpegPath: state.ffmpegPath,
         };
       },
     },

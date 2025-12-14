@@ -21,6 +21,8 @@ interface ElectronAPI {
   clearStore: (name: StoreName) => Promise<void>;
   /** 打开系统目录选择对话框，返回选中的目录路径 */
   selectDirectory: () => Promise<string | null>;
+  /** 打开系统文件选择对话框，返回选中的文件路径 */
+  selectFile: () => Promise<string | null>;
   /** 打开本地目录（默认打开下载目录） */
   openDirectory: (path?: string) => Promise<boolean>;
   /** 在外部浏览器打开链接 */

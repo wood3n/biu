@@ -12,4 +12,5 @@ interface AppSettings {
   audioQuality: AudioQuality;
   hiddenMenuKeys: string[];
   displayMode: "card" | "list";
+  ffmpegPath?: string;
 }

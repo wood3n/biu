@@ -11,6 +11,7 @@ const api: ElectronAPI = {
   setStore: (name: StoreName, value: any) => ipcRenderer.invoke(channel.store.set, name, value),
   clearStore: (name: StoreName) => ipcRenderer.invoke(channel.store.clear, name),
   selectDirectory: () => ipcRenderer.invoke(channel.dialog.selectDirectory),
+  selectFile: () => ipcRenderer.invoke(channel.dialog.selectFile),
   openDirectory: (path?: string) => ipcRenderer.invoke(channel.dialog.openDirectory, path),
   openExternal: (url: string) => ipcRenderer.invoke(channel.dialog.openExternal, url),
   getFonts: () => ipcRenderer.invoke(channel.font.getFonts),

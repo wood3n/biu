@@ -43,6 +43,7 @@ const SettingsPage = () => {
     audioQuality,
     hiddenMenuKeys,
     displayMode,
+    ffmpegPath,
   } = useSettings(
     useShallow(s => ({
       fontFamily: s.fontFamily,
@@ -56,6 +57,7 @@ const SettingsPage = () => {
       audioQuality: s.audioQuality,
       hiddenMenuKeys: s.hiddenMenuKeys,
       displayMode: s.displayMode,
+      ffmpegPath: s.ffmpegPath,
     })),
   );
   const updateSettings = useSettings(s => s.update);
@@ -79,6 +81,7 @@ const SettingsPage = () => {
       audioQuality,
       hiddenMenuKeys,
       displayMode,
+      ffmpegPath,
     },
   });
 
@@ -263,7 +266,7 @@ const SettingsPage = () => {
                   </div>
                 </div>
                 <Divider />
-                <h2>系统</h2>
+                <h2>下载</h2>
                 {/* 下载目录配置 */}
                 <div className="flex w-full items-center justify-between">
                   <div className="mr-6 space-y-1">
@@ -297,6 +300,35 @@ const SettingsPage = () => {
                   </div>
                 </div>
 
+                {/* FFmpeg 路径配置 */}
+                <div className="flex w-full items-center justify-between">
+                  <div className="mr-6 space-y-1">
+                    <div className="text-medium font-medium">FFmpeg 路径</div>
+                    <div className="text-sm text-zinc-500">手动指定 FFmpeg 可执行文件路径</div>
+                  </div>
+                  <div className="w-[360px]">
+                    <Controller
+                      control={control}
+                      name="ffmpegPath"
+                      render={({ field }) => (
+                        <div className="flex items-center space-x-1">
+                          <Input isDisabled placeholder="自动检测" value={field.value} onValueChange={field.onChange} />
+                          <Button
+                            variant="flat"
+                            onPress={async () => {
+                              const path = await window.electron.selectFile();
+                              if (path) setValue("ffmpegPath", path, { shouldDirty: true, shouldTouch: true });
+                            }}
+                          >
+                            选择
+                          </Button>
+                        </div>
+                      )}
+                    />
+                  </div>
+                </div>
+                <Divider />
+                <h2>系统</h2>
                 {/* 窗口关闭选项 */}
                 <div className="flex w-full items-center justify-between">
                   <div className="mr-6 space-y-1">

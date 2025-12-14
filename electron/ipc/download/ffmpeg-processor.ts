@@ -1,6 +1,8 @@
 import log from "electron-log";
 import ffmpeg from "fluent-ffmpeg";
 
+import { fixFfmpegPath } from "../../utils";
+
 interface ConvertOptions {
   outputFileType: MediaDownloadOutputFileType;
   audioTempPath: string;
@@ -16,6 +18,7 @@ export const convert = async ({
   outputFileType,
   onProgress,
 }: ConvertOptions): Promise<void> => {
+  fixFfmpegPath();
   return new Promise((resolve, reject) => {
     log.info(`Starting conversion: Audio=${audioTempPath}, Video=${videoTempPath ?? "N/A"} -> ${outputPath}`);
 

@@ -35,4 +35,13 @@ export function registerDialogHandlers() {
     const dir = result.filePaths?.[0] ?? null;
     return dir;
   });
+
+  ipcMain.handle(channel.dialog.selectFile, async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ["openFile"],
+      title: "选择文件",
+    });
+    if (result.canceled) return null;
+    return result.filePaths?.[0] ?? null;
+  });
 }
