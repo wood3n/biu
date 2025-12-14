@@ -15,6 +15,8 @@ use tauri_plugin_shell::ShellExt;
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AppSettings {
     pub download_path: Option<String>,
+    #[serde(flatten)]
+    pub extra: std::collections::HashMap<String, serde_json::Value>, 
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -67,6 +69,7 @@ fn load_settings(app: &AppHandle) -> AppSettings {
     // Defaults
     AppSettings {
         download_path: Some(app.path().download_dir().unwrap().to_string_lossy().to_string()),
+        extra: std::collections::HashMap::new(), 
     }
 }
 
@@ -121,6 +124,46 @@ async fn set_settings(app: AppHandle, payload: AppSettings) -> Result<bool, Stri
     let file = File::create(path).map_err(|e| e.to_string())?;
     serde_json::to_writer_pretty(file, &payload).map_err(|e| e.to_string())?;
     Ok(true)
+}
+
+fn get_store_path(app: &AppHandle, key: &str) -> PathBuf {
+    // Saves to: <app_config_dir>/<key>.json
+    // e.g. /Users/name/Library/Application Support/com.your.app/search-history.json
+    app.path().app_config_dir().unwrap().join(format!("{}.json", key))
+}
+
+#[tauri::command]
+async fn get_store(app: AppHandle, key: String) -> Result<serde_json::Value, String> {
+    let path = get_store_path(&app, &key);
+    if path.exists() {
+        let file = File::open(path).map_err(|e| e.to_string())?;
+        let reader = std::io::BufReader::new(file);
+        let data: serde_json::Value = serde_json::from_reader(reader).map_err(|e| e.to_string())?;
+        Ok(data)
+    } else {
+        // Return null if file doesn't exist
+        Ok(serde_json::Value::Null)
+    }
+}
+
+#[tauri::command]
+async fn set_store(app: AppHandle, key: String, data: serde_json::Value) -> Result<(), String> {
+    let path = get_store_path(&app, &key);
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
+    let file = File::create(path).map_err(|e| e.to_string())?;
+    serde_json::to_writer_pretty(file, &data).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+async fn clear_store(app: AppHandle, key: String) -> Result<(), String> {
+    let path = get_store_path(&app, &key);
+    if path.exists() {
+        fs::remove_file(path).map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }
 
 #[tauri::command]
@@ -507,6 +550,9 @@ pub fn run() {
             get_settings,
             set_settings,
             clear_settings,
+            get_store,
+            set_store,
+            clear_store,
             select_directory,
             open_directory,
             get_fonts,

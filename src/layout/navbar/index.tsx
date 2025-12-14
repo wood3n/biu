@@ -1,9 +1,11 @@
+import { tauriAdapter } from "@/utils/tauri-adapter";
+
 import Navigation from "./navigation";
 import Search from "./search";
 import UserCard from "./user";
 import WindowAction from "./window-action";
 
-const platform = window.electron.getPlatform();
+const platform = tauriAdapter.getPlatform();
 
 const LayoutNavbar = () => {
   return (

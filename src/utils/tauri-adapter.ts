@@ -25,6 +25,9 @@ export const tauriAdapter: any = {
   getSettings: () => invoke("get_settings"),
   setSettings: (value: any) => invoke("set_settings", { payload: value }),
   clearSettings: () => invoke("clear_settings"),
+  getStore: (key: string) => invoke("get_store", { key }),
+  setStore: (key: string, data: any) => invoke("set_store", { key, data }),
+  clearStore: (key: string) => invoke("clear_store", { key }),
 
   // Dialogs & Shell
   selectDirectory: () => invoke("select_directory"),
@@ -54,8 +57,10 @@ export const tauriAdapter: any = {
   },
 
   // HTTP (Relay requests through Rust)
-  httpGet: (url: string, options?: any) => invoke("http_get", { url, options }),
-  httpPost: (url: string, body?: any, options?: any) => invoke("http_post", { url, body, options }),
+  httpGet: (url: string, options?: any) => invoke("http_get", { url, options: { ...options, url } }),
+
+  httpPost: (url: string, body?: any, options?: any) =>
+    invoke("http_post", { url, body, options: { ...options, url } }),
 
   // Platform
   getPlatform: () => {

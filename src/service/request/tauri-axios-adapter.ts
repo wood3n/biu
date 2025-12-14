@@ -1,5 +1,7 @@
 import { type AxiosAdapter } from "axios";
 
+import { tauriAdapter } from "@/utils/tauri-adapter";
+
 export const tauriAxiosAdapter: AxiosAdapter = async config => {
   const { url, method, params, headers, data, baseURL } = config;
   const fullUrl = baseURL ? `${baseURL}${url}` : url;
@@ -29,12 +31,12 @@ export const tauriAxiosAdapter: AxiosAdapter = async config => {
   try {
     let responseData;
     if (method === "get") {
-      responseData = await window.electron.httpGet(fullUrl!, {
+      responseData = await tauriAdapter.httpGet(fullUrl!, {
         params,
         headers: requestHeaders,
       });
     } else if (method === "post") {
-      responseData = await window.electron.httpPost(fullUrl!, requestBody, {
+      responseData = await tauriAdapter.httpPost(fullUrl!, requestBody, {
         params,
         headers: requestHeaders,
       });
