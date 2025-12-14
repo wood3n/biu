@@ -7,17 +7,20 @@ import { usePagination } from "ahooks";
 import { formatDuration } from "@/common/utils";
 import ConfirmModal from "@/components/confirm-modal";
 import GridList from "@/components/grid-list";
-import MVCard from "@/components/mv-card";
+import MediaItem from "@/components/media-item";
 import ScrollContainer from "@/components/scroll-container";
 import { postHistoryToViewDel } from "@/service/history-toview-del";
 import { getHistoryToViewList } from "@/service/history-toview-list";
 import { usePlayList } from "@/store/play-list";
+import { useSettings } from "@/store/settings";
 
 const Later = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const play = usePlayList(s => s.play);
+  const displayMode = useSettings(state => state.displayMode);
 
   const { isOpen: isOpenDelete, onOpen: onOpenDelete, onOpenChange: onOpenChangeDelete } = useDisclosure();
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
 
   const {
     data,
@@ -56,6 +59,56 @@ const Later = () => {
     initData();
   }, []);
 
+  const handleOpenDeleteModal = (item: any) => {
+    setItemToDelete(item);
+    onOpenDelete();
+  };
+
+  const renderMediaItem = (item: any) => (
+    <div className="mb-4">
+      <MediaItem
+        displayMode={displayMode}
+        type="mv"
+        bvid={item.bvid}
+        aid={String(item.aid)}
+        title={item.title}
+        cover={item.pic}
+        coverHeight={200}
+        playCount={item.stat.view}
+        ownerName={item.owner?.name}
+        ownerMid={item.owner?.mid}
+        menus={[
+          {
+            key: "delete",
+            title: "删除",
+            icon: <RiDeleteBinLine size={16} />,
+            onPress: () => handleOpenDeleteModal(item),
+          },
+        ]}
+        footer={
+          displayMode === "card" && (
+            <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
+              <Link href={`/user/${item.owner?.mid}`} className="text-foreground-500 text-sm hover:underline">
+                {item.owner?.name}
+              </Link>
+              <span>{formatDuration(item.duration as number)}</span>
+            </div>
+          )
+        }
+        onPress={() =>
+          play({
+            type: "mv",
+            bvid: item.bvid,
+            title: item.title,
+            cover: item.pic,
+            ownerName: item.owner?.name,
+            ownerMid: item.owner?.mid,
+          })
+        }
+      />
+    </div>
+  );
+
   return (
     <>
       <ScrollContainer className="h-full w-full p-4">
@@ -65,76 +118,11 @@ const Later = () => {
             <RiRefreshLine size={18} />
           </Button>
         </div>
-        <GridList
-          loading={initialLoading}
-          data={data?.list}
-          itemKey="bvid"
-          renderItem={item => (
-            <>
-              <MVCard
-                type="mv"
-                bvid={item.bvid}
-                aid={String(item.aid)}
-                title={item.title}
-                cover={item.pic}
-                coverHeight={200}
-                playCount={item.stat.view}
-                ownerName={item.owner?.name}
-                ownerMid={item.owner?.mid}
-                menus={[
-                  {
-                    key: "delete",
-                    title: "删除",
-                    icon: <RiDeleteBinLine size={16} />,
-                    onPress: onOpenDelete,
-                  },
-                ]}
-                footer={
-                  <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
-                    <Link href={`/user/${item.owner?.mid}`} className="text-foreground-500 text-sm hover:underline">
-                      {item.owner?.name}
-                    </Link>
-                    <span>{formatDuration(item.duration as number)}</span>
-                  </div>
-                }
-                onPress={() =>
-                  play({
-                    type: "mv",
-                    bvid: item.bvid,
-                    title: item.title,
-                    cover: item.pic,
-                    ownerName: item.owner?.name,
-                    ownerMid: item.owner?.mid,
-                  })
-                }
-              />
-              <ConfirmModal
-                isOpen={isOpenDelete}
-                onOpenChange={onOpenChangeDelete}
-                type="danger"
-                title="确认删除吗？"
-                confirmText="删除"
-                onConfirm={async () => {
-                  const res = await postHistoryToViewDel({
-                    aid: item?.aid,
-                  });
-
-                  if (res.code === 0) {
-                    addToast({
-                      title: "删除成功",
-                      color: "success",
-                    });
-                    setTimeout(() => {
-                      refreshAsync?.();
-                    }, 500);
-                  }
-
-                  return res.code === 0;
-                }}
-              />
-            </>
-          )}
-        />
+        {displayMode === "card" ? (
+          <GridList loading={initialLoading} data={data?.list} itemKey="bvid" renderItem={renderMediaItem} />
+        ) : (
+          <div>{data?.list?.map((item: any) => renderMediaItem(item))}</div>
+        )}
         {!error && pagination?.totalPage > 1 && (
           <div className="flex w-full items-center justify-center py-6">
             <Pagination
@@ -146,6 +134,32 @@ const Later = () => {
           </div>
         )}
       </ScrollContainer>
+      <ConfirmModal
+        isOpen={isOpenDelete}
+        onOpenChange={onOpenChangeDelete}
+        type="danger"
+        title="确认删除吗？"
+        confirmText="删除"
+        onConfirm={async () => {
+          if (!itemToDelete) return false;
+
+          const res = await postHistoryToViewDel({
+            aid: itemToDelete?.aid,
+          });
+
+          if (res.code === 0) {
+            addToast({
+              title: "删除成功",
+              color: "success",
+            });
+            setTimeout(() => {
+              refreshAsync?.();
+            }, 500);
+          }
+
+          return res.code === 0;
+        }}
+      />
     </>
   );
 };
