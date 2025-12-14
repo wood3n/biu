@@ -12,6 +12,11 @@ import { formatUrlProtocal } from "@/common/utils/url";
 import { getAudioSongInfo } from "@/service/audio-song-info";
 import { getWebInterfaceView } from "@/service/web-interface-view";
 
+const getStreamUrl = (url: string) => {
+  if (!url) return "";
+  return `stream://localhost/${encodeURIComponent(url)}`;
+};
+
 export type PlayDataType = "mv" | "audio";
 
 export interface PlayData {
@@ -247,8 +252,10 @@ export const usePlayList = create<State & Action>()(
         const { playId, list } = get();
         const currentPlayItem = list.find(item => item.id === playId);
         if (isUrlValid(currentPlayItem?.audioUrl)) {
-          if (audio.src !== currentPlayItem.audioUrl) {
-            audio.src = currentPlayItem.audioUrl;
+          // [CHANGE] Use proxy URL
+          const streamUrl = getStreamUrl(currentPlayItem.audioUrl);
+          if (audio.src !== streamUrl) {
+            audio.src = streamUrl;
           }
           const currentTime = get().currentTime;
           if (typeof currentTime === "number" && currentTime > 0) {
@@ -260,8 +267,10 @@ export const usePlayList = create<State & Action>()(
         if (currentPlayItem?.type === "mv" && currentPlayItem?.bvid && currentPlayItem?.cid) {
           const mvPlayData = await getDashUrl(currentPlayItem.bvid, currentPlayItem.cid);
           if (mvPlayData?.audioUrl) {
-            if (audio.src !== mvPlayData.audioUrl) {
-              audio.src = mvPlayData.audioUrl;
+            // [CHANGE] Use proxy URL
+            const streamUrl = getStreamUrl(mvPlayData.audioUrl);
+            if (audio.src !== streamUrl) {
+              audio.src = streamUrl;
               const currentTime = get().currentTime;
               if (typeof currentTime === "number") {
                 audio.currentTime = currentTime;
@@ -284,8 +293,10 @@ export const usePlayList = create<State & Action>()(
         if (currentPlayItem?.type === "audio" && currentPlayItem?.sid) {
           const musicPlayData = await getAudioUrl(currentPlayItem.sid);
           if (musicPlayData?.audioUrl) {
-            if (audio.src !== musicPlayData.audioUrl) {
-              audio.src = musicPlayData.audioUrl;
+            // [CHANGE] Use proxy URL
+            const streamUrl = getStreamUrl(musicPlayData.audioUrl);
+            if (audio.src !== streamUrl) {
+              audio.src = streamUrl;
               const currentTime = get().currentTime;
               if (typeof currentTime === "number") {
                 audio.currentTime = currentTime;
@@ -852,7 +863,7 @@ export const usePlayList = create<State & Action>()(
 );
 
 function resetAudioAndPlay(url: string) {
-  audio.src = url;
+  audio.src = getStreamUrl(url);
   audio.currentTime = 0;
   audio.load();
   audio.play();
