@@ -1,14 +1,6 @@
 import { type AxiosAdapter } from "axios";
 
-const isTauri = !!(window as any).__TAURI_INTERNALS__ || !!(window as any).__TAURI__;
-
 export const tauriAxiosAdapter: AxiosAdapter = async config => {
-  if (!isTauri || !window.electron) {
-    // Should typically not happen if this adapter is only used in Tauri mode,
-    // but useful for fallback or development.
-    throw new Error("Tauri environment not detected");
-  }
-
   const { url, method, params, headers, data, baseURL } = config;
   const fullUrl = baseURL ? `${baseURL}${url}` : url;
 

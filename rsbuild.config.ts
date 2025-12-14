@@ -2,16 +2,12 @@ import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 import { pluginSvgr } from "@rsbuild/plugin-svgr";
 
-import { pluginElectron } from "./plugins/rsbuild-plugin-electron";
-
-const isTauri = !!process.env.IS_TAURI;
-
 export default defineConfig({
   output: {
     distPath: {
-      root: isTauri ? "./dist/web-tauri" : "./dist/web",
+      root: "./dist/web",
     },
-    // 生产环境相对路径，保证通过 file:// 加载时静态资源能正确引用
+    // Ensure relative paths for Tauri to load assets correctly via custom protocol
     assetPrefix: "./",
     cleanDistPath: true,
   },
@@ -26,7 +22,6 @@ export default defineConfig({
     pluginSvgr({
       svgrOptions: {
         exportType: "named",
-        // Enable SVGO to optimize inline SVGs
         svgo: true,
         svgoConfig: {
           plugins: [
@@ -38,13 +33,11 @@ export default defineConfig({
         },
       },
     }),
-    ...(!isTauri ? [pluginElectron()] : []),
   ],
   dev: {
     writeToDisk: true,
     lazyCompilation: false,
     cliShortcuts: false,
-    // 开发环境相对路径，保证通过 file:// 加载时静态资源能正确引用
     assetPrefix: "./",
   },
   server: {
