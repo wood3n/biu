@@ -62,6 +62,7 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           borderRadius: state.borderRadius,
           audioQuality: state.audioQuality,
           hiddenMenuKeys: state.hiddenMenuKeys,
+          displayMode: state.displayMode,
         };
       },
     },

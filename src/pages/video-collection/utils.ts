@@ -1,7 +1,10 @@
-import { getFavResourceList } from "@/service/fav-resource";
+import { getFavResourceList, type FavResourceListRequestParams } from "@/service/fav-resource";
 
 /** 获取收藏夹中的所有媒体 */
-export const getAllFavMedia = async ({ id: favFolderId, totalCount }: { id: string; totalCount: number }) => {
+export const getAllFavMedia = async (
+  { id: favFolderId, totalCount }: { id: string; totalCount: number },
+  searchParams?: Pick<FavResourceListRequestParams, "tid" | "keyword" | "order" | "type">,
+) => {
   const FAVORITES_PAGE_SIZE = 20;
   const allResSettled = await Promise.allSettled(
     Array.from({ length: Math.ceil(totalCount / FAVORITES_PAGE_SIZE) }, (_, i) =>
@@ -10,6 +13,7 @@ export const getAllFavMedia = async ({ id: favFolderId, totalCount }: { id: stri
         ps: FAVORITES_PAGE_SIZE,
         pn: i + 1,
         platform: "web",
+        ...searchParams,
       }),
     ),
   );

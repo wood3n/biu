@@ -1,17 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Alert, Button, Spinner, addToast } from "@heroui/react";
-import { twMerge } from "tailwind-merge";
 
 import ImageCard from "@/components/image-card";
-import MVCard from "@/components/mv-card";
+import MediaItem from "@/components/media-item";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import { getMusicComprehensiveWebRank, type Data as MusicItem } from "@/service/music-comprehensive-web-rank";
 import { usePlayList } from "@/store/play-list";
+import { useSettings } from "@/store/settings";
 
 const PAGE_SIZE = 20;
-
-const gridClass = twMerge("grid grid-cols-1 gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4");
 
 const MusicRecommend = () => {
   const scrollerRef = useRef<ScrollRefObject>(null);
@@ -26,6 +24,7 @@ const MusicRecommend = () => {
   const [error, setError] = useState<string | null>(null);
 
   const play = usePlayList(state => state.play);
+  const displayMode = useSettings(state => state.displayMode);
 
   const deDupConcat = useCallback((prev: MusicItem[], next: MusicItem[]) => {
     const seen = new Set(prev.map(i => i.id));
@@ -110,6 +109,30 @@ const MusicRecommend = () => {
     };
   }, [hasMore, loadingMore, initialLoading, error, loadMore]);
 
+  const renderMediaItem = (item: MusicItem) => (
+    <MediaItem
+      displayMode={displayMode}
+      type="mv"
+      bvid={item.bvid}
+      aid={String(item.id)}
+      key={item.id}
+      cover={item.cover}
+      title={item.music_title}
+      ownerName={item.author}
+      playCount={item.related_archive.vv_count}
+      footer={
+        displayMode === "card" && <div className="w-full truncate text-left text-sm text-zinc-400">{item.author}</div>
+      }
+      onPress={() =>
+        play({
+          type: "mv",
+          bvid: item.bvid,
+          title: item.music_title,
+        })
+      }
+    />
+  );
+
   const isEmpty = useMemo(() => !initialLoading && list.length === 0 && !error, [initialLoading, list, error]);
 
   return (
@@ -129,41 +152,40 @@ const MusicRecommend = () => {
         )}
 
         {/* 初始加载骨架屏 */}
-        {initialLoading && (
-          <div className={gridClass}>
-            {Array.from({ length: 10 }).map((_, idx) => (
-              <ImageCard.Skeleton key={idx} />
-            ))}
-          </div>
-        )}
+        {initialLoading &&
+          (displayMode === "card" ? (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4">
+              {Array.from({ length: 10 }).map((_, idx) => (
+                <ImageCard.Skeleton key={idx} />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {Array.from({ length: 10 }).map((_, idx) => (
+                <div key={idx} className="flex space-x-4">
+                  <div className="h-20 w-32 animate-pulse rounded bg-gray-200"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200"></div>
+                    <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
 
         {/* 空数据 */}
         {isEmpty && <div className="text-foreground-500 flex h-[40vh] items-center justify-center">暂无数据</div>}
 
         {/* 数据网格 */}
-        {!initialLoading && list.length > 0 && (
-          <div className={gridClass}>
-            {list.map(item => (
-              <MVCard
-                type="mv"
-                bvid={item.bvid}
-                aid={String(item.id)}
-                key={item.id}
-                cover={item.cover}
-                title={item.music_title}
-                playCount={item.related_archive.vv_count}
-                footer={<div className="w-full truncate text-left text-sm text-zinc-400">{item.author}</div>}
-                onPress={() =>
-                  play({
-                    type: "mv",
-                    bvid: item.bvid,
-                    title: item.music_title,
-                  })
-                }
-              />
-            ))}
-          </div>
-        )}
+        {!initialLoading &&
+          list.length > 0 &&
+          (displayMode === "card" ? (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4">
+              {list.map(renderMediaItem)}
+            </div>
+          ) : (
+            <div className="space-y-2">{list.map(renderMediaItem)}</div>
+          ))}
 
         {/* 加载更多/无更多 提示区 & 作为 sentinel */}
         <div ref={sentinelRef} className="flex w-full items-center justify-center py-6">
