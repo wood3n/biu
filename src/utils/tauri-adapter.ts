@@ -72,7 +72,7 @@ export const tauriAdapter: any = {
 
   // Player
   updatePlaybackState: (isPlaying: boolean) => {
-    invoke("update_playback_state", { isPlaying });
+    invoke("update_playback_state", { isPlaying }).catch(() => {});
   },
   onPlayerCommand: (cb: (cmd: "prev" | "next" | "toggle") => void) => {
     const unlistenPrev = syncListen("player:prev", () => cb("prev"));
