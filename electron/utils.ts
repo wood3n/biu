@@ -1,4 +1,5 @@
 import isDev from "electron-is-dev";
+import ffmpeg from "fluent-ffmpeg";
 import path from "node:path";
 
 import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
@@ -13,3 +14,15 @@ export const getWindowIcon = () =>
 export const getMacLightIconPath = () => path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, "light-icon.png");
 
 export const getMacDarkIconPath = () => path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, "dark-icon.png");
+
+export const checkFfmpeg = async (): Promise<boolean> => {
+  return new Promise(resolve => {
+    ffmpeg.getAvailableFormats(err => {
+      if (err) {
+        resolve(false);
+      } else {
+        resolve(true);
+      }
+    });
+  });
+};

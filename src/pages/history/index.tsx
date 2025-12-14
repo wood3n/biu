@@ -133,8 +133,8 @@ const History = () => {
     if (displayMode === "card") {
       return (
         <MediaItem
-          {...commonProps}
           key={`${item.history.oid}-${item.view_at}`}
+          {...commonProps}
           coverHeight={200}
           footer={
             <div className="flex w-full flex-col space-y-1 text-sm">
