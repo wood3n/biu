@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocation } from "react-router";
 
 import {
@@ -11,11 +12,16 @@ import {
   addToast,
 } from "@heroui/react";
 import { RiMore2Line, RiPlayListAddLine, RiStarLine, RiTimeLine } from "@remixicon/react";
+import clx from "classnames";
 
+import { ReactComponent as AudioDownloadIcon } from "@/assets/icons/audio-download.svg";
+import { ReactComponent as VideoDownloadIcon } from "@/assets/icons/video-download.svg";
 import FavFolderSelect from "@/components/fav-folder/select";
 import { postHistoryToViewAdd } from "@/service/history-toview-add";
 import { usePlayList, type PlayDataType } from "@/store/play-list";
 import { useUser } from "@/store/user";
+
+import MediaDownloadSelect from "../mv-page-download-select";
 
 export interface ImageCardMenu {
   key: string;
@@ -45,9 +51,11 @@ export interface ActionProps {
   menus?: ImageCardMenu[];
   collectMenuTitle?: string;
   onChangeFavSuccess?: () => void;
+  className?: string;
+  buttonClassName?: string;
 }
 
-const Action = ({
+const MVAction = ({
   type,
   title,
   cover,
@@ -59,15 +67,24 @@ const Action = ({
   menus,
   collectMenuTitle,
   onChangeFavSuccess,
+  className,
+  buttonClassName,
 }: ActionProps) => {
   const user = useUser(s => s.user);
   const addToNext = usePlayList(s => s.addToNext);
   const location = useLocation();
+  const [outputFileType, setOutputFileType] = useState<MediaDownloadOutputFileType>("audio");
 
   const {
     isOpen: isOpenFavSelectModal,
     onOpen: onOpenFavSelectModal,
     onOpenChange: onOpenChangeFavSelectModal,
+  } = useDisclosure();
+
+  const {
+    isOpen: isOpenMediaDownloadSelectModal,
+    onOpen: onOpenMediaDownloadSelectModal,
+    onOpenChange: onOpenChangeMediaDownloadSelectModal,
   } = useDisclosure();
 
   const addToLater = async () => {
@@ -113,18 +130,51 @@ const Action = ({
       hidden: !user?.isLogin || location.pathname === "/later",
       onPress: addToLater,
     },
-    // {// 暂时隐藏，后续重构完再开放
-    //   key: "download",
-    //   icon: <RiDownloadLine size={16} />,
-    //   title: "下载",
-    //   onPress: onOpenDownloadModal,
-    // },
+    {
+      key: "downloadAudio",
+      icon: <AudioDownloadIcon className="relative top-px left-px h-[15px] w-[15px]" />,
+      title: "下载音乐",
+      hidden: type !== "audio",
+      onPress: async () => {
+        await window.electron.addMediaDownloadTask({
+          outputFileType: "audio",
+          title,
+          cover,
+          sid: String(sid),
+        });
+
+        addToast({
+          title: "已添加到下载队列",
+          color: "success",
+        });
+      },
+    },
+    {
+      key: "downloadAudio",
+      icon: <AudioDownloadIcon className="relative top-px left-px h-[15px] w-[15px]" />,
+      title: "下载音频",
+      hidden: type === "audio",
+      onPress: () => {
+        setOutputFileType("audio");
+        onOpenMediaDownloadSelectModal();
+      },
+    },
+    {
+      key: "downloadVideo",
+      hidden: type === "audio",
+      icon: <VideoDownloadIcon className="relative top-px left-px h-[15px] w-[15px]" />,
+      title: "下载视频",
+      onPress: () => {
+        setOutputFileType("video");
+        onOpenMediaDownloadSelectModal();
+      },
+    },
     ...(menus || []),
   ].filter(item => !item.hidden);
 
   return (
     <>
-      <div className="relative ml-4 flex items-center justify-center">
+      <div className={clx("relative flex items-center justify-center", className)}>
         <Dropdown
           shouldBlockScroll={false}
           disableAnimation
@@ -140,7 +190,7 @@ const Action = ({
               radius="full"
               variant="light"
               isIconOnly
-              className="absolute -top-[2px] -right-[12px] h-7 w-7 min-w-7 text-zinc-300"
+              className={clx("text-zinc-300", buttonClassName)}
             >
               <RiMore2Line size={16} />
             </Button>
@@ -161,8 +211,16 @@ const Action = ({
         onOpenChange={onOpenChangeFavSelectModal}
         afterSubmit={onChangeFavSuccess}
       />
+      <MediaDownloadSelect
+        outputFileType={outputFileType}
+        title={title}
+        cover={cover}
+        bvid={bvid!}
+        isOpen={isOpenMediaDownloadSelectModal}
+        onOpenChange={onOpenChangeMediaDownloadSelectModal}
+      />
     </>
   );
 };
 
-export default Action;
+export default MVAction;

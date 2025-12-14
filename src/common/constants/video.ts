@@ -80,6 +80,7 @@ export enum VideoQuality {
   Q8K = 127,
 }
 
+/** 获取dash流视频请求参数 */
 export enum VideoFnval {
   /**
    * MP4 格式，仅 H.264 编码

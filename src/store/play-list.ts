@@ -7,7 +7,7 @@ import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
 import { getPlayModeList, PlayMode } from "@/common/constants/audio";
-import { getAudioUrl, getMVUrl, isUrlValid } from "@/common/utils/audio";
+import { getAudioUrl, getDashUrl, isUrlValid } from "@/common/utils/audio";
 import { formatUrlProtocal } from "@/common/utils/url";
 import { getAudioSongInfo } from "@/service/audio-song-info";
 import { getWebInterfaceView } from "@/service/web-interface-view";
@@ -52,6 +52,8 @@ export interface PlayData {
   videoUrl?: string;
   /** 是否为无损音频 */
   isLossless?: boolean;
+  /** 是否为杜比音频 */
+  isDolby?: boolean;
 }
 
 interface State {
@@ -248,14 +250,22 @@ export const usePlayList = create<State & Action>()(
           if (audio.src !== currentPlayItem.audioUrl) {
             audio.src = currentPlayItem.audioUrl;
           }
+          const currentTime = get().currentTime;
+          if (typeof currentTime === "number" && currentTime > 0) {
+            audio.currentTime = currentTime;
+          }
           return;
         }
 
         if (currentPlayItem?.type === "mv" && currentPlayItem?.bvid && currentPlayItem?.cid) {
-          const mvPlayData = await getMVUrl(currentPlayItem.bvid, currentPlayItem.cid);
+          const mvPlayData = await getDashUrl(currentPlayItem.bvid, currentPlayItem.cid);
           if (mvPlayData?.audioUrl) {
             if (audio.src !== mvPlayData.audioUrl) {
               audio.src = mvPlayData.audioUrl;
+              const currentTime = get().currentTime;
+              if (typeof currentTime === "number") {
+                audio.currentTime = currentTime;
+              }
             }
             set(state => {
               const listItem = state.list.find(item => item.id === state.playId);
@@ -263,6 +273,7 @@ export const usePlayList = create<State & Action>()(
                 listItem.audioUrl = mvPlayData.audioUrl;
                 listItem.videoUrl = mvPlayData.videoUrl;
                 listItem.isLossless = mvPlayData.isLossless;
+                listItem.isDolby = mvPlayData.isDolby;
               }
             });
           } else {
@@ -275,6 +286,10 @@ export const usePlayList = create<State & Action>()(
           if (musicPlayData?.audioUrl) {
             if (audio.src !== musicPlayData.audioUrl) {
               audio.src = musicPlayData.audioUrl;
+              const currentTime = get().currentTime;
+              if (typeof currentTime === "number") {
+                audio.currentTime = currentTime;
+              }
             }
             set(state => {
               const listItem = state.list.find(item => item.id === state.playId);
@@ -382,8 +397,9 @@ export const usePlayList = create<State & Action>()(
               if (playItem) {
                 await ensureAudioSrcValid();
 
-                if (get().currentTime) {
-                  audio.currentTime = get().currentTime as number;
+                const localCurrentTime = localStorage.getItem("play-current-time");
+                if (localCurrentTime) {
+                  audio.currentTime = Number(localCurrentTime);
                 }
 
                 updateMediaSession({
@@ -825,7 +841,6 @@ export const usePlayList = create<State & Action>()(
         volume: state.volume,
         playMode: state.playMode,
         rate: state.rate,
-        currentTime: state.currentTime,
         duration: state.duration,
         list: state.list,
         playId: state.playId,
@@ -856,7 +871,7 @@ usePlayList.subscribe(async (state, prevState) => {
 
       if (playItem?.type === "mv") {
         if (playItem?.bvid && playItem?.cid) {
-          const mvPlayData = await getMVUrl(playItem.bvid, playItem.cid);
+          const mvPlayData = await getDashUrl(playItem.bvid, playItem.cid);
           if (mvPlayData?.audioUrl) {
             resetAudioAndPlay(mvPlayData?.audioUrl);
 
@@ -872,6 +887,7 @@ usePlayList.subscribe(async (state, prevState) => {
                 listItem.audioUrl = mvPlayData?.audioUrl;
                 listItem.videoUrl = mvPlayData?.videoUrl;
                 listItem.isLossless = mvPlayData?.isLossless;
+                listItem.isDolby = mvPlayData?.isDolby;
               }
             });
           } else {
@@ -881,7 +897,7 @@ usePlayList.subscribe(async (state, prevState) => {
           const mvData = await getMVData(playItem.bvid);
           const [firstMV, ...restMV] = mvData;
           if (firstMV?.cid) {
-            const mvPlayData = await getMVUrl(playItem.bvid, firstMV.cid);
+            const mvPlayData = await getDashUrl(playItem.bvid, firstMV.cid);
             if (mvPlayData?.audioUrl) {
               resetAudioAndPlay(mvPlayData?.audioUrl);
 
@@ -902,6 +918,7 @@ usePlayList.subscribe(async (state, prevState) => {
                       audioUrl: mvPlayData?.audioUrl,
                       videoUrl: mvPlayData?.videoUrl,
                       isLossless: mvPlayData?.isLossless,
+                      isDolby: mvPlayData?.isDolby,
                     },
                   },
                   ...restMV,

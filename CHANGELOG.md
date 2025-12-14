@@ -1,5 +1,61 @@
 # Changelog
 
+## v1.6.0-beta.9
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.8...v1.6.0-beta.9)
+
+### 🚀 新功能
+
+- **媒体显示:** 添加卡片和列表两种显示模式 test:目前只在我创建的收藏夹中使用 添加 displayMode 设置选项，支持在卡片和列表两种显示模式间切换 创建 MediaItem 组件统一处理不同显示模式的渲染逻辑 更新收藏页面以支持新的显示模式 ([719a8b1](https://github.com/wood3n/biu/commit/719a8b1))
+- **media-item:** 替换MVCard为MediaItem组件并支持显示模式切换 ([7568001](https://github.com/wood3n/biu/commit/7568001))
+- **视频收藏:** 添加列表模式支持并优化数据获取逻辑 ([06310ba](https://github.com/wood3n/biu/commit/06310ba))
+- **列表模式:** 优化收藏夹列表加载逻辑，支持无限下拉分页 ([04a52de](https://github.com/wood3n/biu/commit/04a52de))
+- **视频收藏:** 添加全部媒体到播放列表功能并优化回调函数 ([699093e](https://github.com/wood3n/biu/commit/699093e))
+- **媒体显示:** 添加卡片和列表两种显示模式 test:目前只在我创建的收藏夹中使用 添加 displayMode 设置选项，支持在卡片和列表两种显示模式间切换 创建 MediaItem 组件统一处理不同显示模式的渲染逻辑 更新收藏页面以支持新的显示模式 ([8cf52f3](https://github.com/wood3n/biu/commit/8cf52f3))
+- **media-item:** 替换MVCard为MediaItem组件并支持显示模式切换 ([1a3d868](https://github.com/wood3n/biu/commit/1a3d868))
+- **视频收藏:** 添加列表模式支持并优化数据获取逻辑 ([540528d](https://github.com/wood3n/biu/commit/540528d))
+- **列表模式:** 优化收藏夹列表加载逻辑，支持无限下拉分页 ([bd18333](https://github.com/wood3n/biu/commit/bd18333))
+- **视频收藏:** 添加全部媒体到播放列表功能并优化回调函数 ([b664d52](https://github.com/wood3n/biu/commit/b664d52))
+- **用户资料:** 添加视频合集列表的列表视图模式 ([5b4da03](https://github.com/wood3n/biu/commit/5b4da03))
+- **收藏夹:** 实现收藏夹资源搜索、排序和分页功能 ([02a243f](https://github.com/wood3n/biu/commit/02a243f))
+- **用户资料:** 添加视频搜索和排序功能 ([8fc6a10](https://github.com/wood3n/biu/commit/8fc6a10))
+- 补充检测ffmpeg提示 ([ea4ff22](https://github.com/wood3n/biu/commit/ea4ff22))
+- **视频合集:** 添加搜索和排序功能 ([4f8d04e](https://github.com/wood3n/biu/commit/4f8d04e))
+- 补充ffmpeg系统路径设置项 ([720a8dc](https://github.com/wood3n/biu/commit/720a8dc))
+
+### 🩹 修复问题
+
+- 修复大量收藏夹选择时弹窗样式问题 ([cda9bc0](https://github.com/wood3n/biu/commit/cda9bc0))
+- 移除无用的ipc模块 ([e5f90b2](https://github.com/wood3n/biu/commit/e5f90b2))
+- 修复列表样式问题 ([5436ec7](https://github.com/wood3n/biu/commit/5436ec7))
+- 修复lint和review问题 ([3d4dea3](https://github.com/wood3n/biu/commit/3d4dea3))
+- **视频合集): 收藏合集从多页码切换单页码的场景数据加载异常 feat(视频合集:** 列表模式添加分页功能以提升性能 ([94f05f0](https://github.com/wood3n/biu/commit/94f05f0))
+- **video-series:** 修复切换合集时短暂显示上一个合集数据的问题 ([0748806](https://github.com/wood3n/biu/commit/0748806))
+- **video-series:** 修复搜索参数变化时未重置页码的问题 ([7bb39bb](https://github.com/wood3n/biu/commit/7bb39bb))
+- 修复播放进度恢复问题 ([e852ebc](https://github.com/wood3n/biu/commit/e852ebc))
+- 修复下载记录按钮显示状态 ([a726b27](https://github.com/wood3n/biu/commit/a726b27))
+
+### 💅 Refactors
+
+- **media-item:** 简化显示模式的条件判断逻辑 ([ff373cb](https://github.com/wood3n/biu/commit/ff373cb))
+- **media-item:** 简化显示模式的条件判断逻辑 ([6cbc71d](https://github.com/wood3n/biu/commit/6cbc71d))
+- Download ([b70b793](https://github.com/wood3n/biu/commit/b70b793))
+- Download ([3a42ef2](https://github.com/wood3n/biu/commit/3a42ef2))
+- Download ([269420b](https://github.com/wood3n/biu/commit/269420b))
+- Download ([f61cc99](https://github.com/wood3n/biu/commit/f61cc99))
+- Download ([b7d2052](https://github.com/wood3n/biu/commit/b7d2052))
+- Download ([3419cbb](https://github.com/wood3n/biu/commit/3419cbb))
+
+### 🏡 Chore
+
+- Update renovate config ([9f734c0](https://github.com/wood3n/biu/commit/9f734c0))
+
+### ❤️ Contributors
+
+- Wood3n
+- Tang Wentao
+- Oxyg3n
+
 ## v1.6.0-beta.8
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.7...v1.6.0-beta.8)

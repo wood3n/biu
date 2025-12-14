@@ -7,24 +7,14 @@ let playerNextHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
 let playerToggleHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
 
 const api: ElectronAPI = {
-  getSettings: () => ipcRenderer.invoke(channel.store.getSettings),
-  setSettings: (value: Partial<AppSettings>) => ipcRenderer.invoke(channel.store.setSettings, value),
-  clearSettings: () => ipcRenderer.invoke(channel.store.clearSettings),
+  getStore: (name: StoreName) => ipcRenderer.invoke(channel.store.get, name),
+  setStore: (name: StoreName, value: any) => ipcRenderer.invoke(channel.store.set, name, value),
+  clearStore: (name: StoreName) => ipcRenderer.invoke(channel.store.clear, name),
   selectDirectory: () => ipcRenderer.invoke(channel.dialog.selectDirectory),
+  selectFile: () => ipcRenderer.invoke(channel.dialog.selectFile),
   openDirectory: (path?: string) => ipcRenderer.invoke(channel.dialog.openDirectory, path),
   openExternal: (url: string) => ipcRenderer.invoke(channel.dialog.openExternal, url),
   getFonts: () => ipcRenderer.invoke(channel.font.getFonts),
-  checkFileExists: (filename: string) => ipcRenderer.invoke(channel.download.checkExists, filename),
-  startDownload: (params: DownloadOptions) => ipcRenderer.invoke(channel.download.start, params),
-  onDownloadProgress: cb => {
-    const downloadProgressHandler = (_, params: DownloadCallbackParams) => {
-      cb(params);
-    };
-
-    ipcRenderer.on(channel.download.progress, downloadProgressHandler);
-
-    return () => ipcRenderer.removeListener(channel.download.progress, downloadProgressHandler);
-  },
   getCookie: (key: string) => ipcRenderer.invoke(channel.cookie.get, key),
   // 监听来自主进程的导航事件，并将路径回调给渲染端
   navigate: cb => {
@@ -40,16 +30,6 @@ const api: ElectronAPI = {
 
     return () => ipcRenderer.removeListener(channel.router.navigate, navigateHandler);
   },
-  // 通过主进程 http 封装发起请求（只返回 data，风格与 axios 保持一致）
-  httpGet: <T = any>(
-    url: string,
-    options?: { params?: Record<string, any>; headers?: Record<string, string>; timeout?: number },
-  ) => ipcRenderer.invoke(channel.http.get, { url, ...options }) as Promise<T>,
-  httpPost: <T = any>(
-    url: string,
-    body?: unknown,
-    options?: { params?: Record<string, any>; headers?: Record<string, string>; timeout?: number },
-  ) => ipcRenderer.invoke(channel.http.post, { url, body, ...options }) as Promise<T>,
   // 返回当前应用运行的平台（macos/windows/linux）
   getPlatform: () => {
     const platform: AppPlatForm =
@@ -118,13 +98,17 @@ const api: ElectronAPI = {
     ipcRenderer.on(channel.player.next, playerNextHandler);
     ipcRenderer.on(channel.player.toggle, playerToggleHandler);
   },
+  // 获取应用版本
   getAppVersion: () => ipcRenderer.invoke(channel.app.getVersion),
+  // 检查应用更新
   checkAppUpdate: () => ipcRenderer.invoke(channel.app.checkUpdate),
+  // 监听应用更新事件
   onUpdateAvailable: cb => {
     const handler = (_, payload: AppUpdateReleaseInfo) => cb(payload);
     ipcRenderer.on(channel.app.onUpdateAvailable, handler);
     return () => ipcRenderer.removeListener(channel.app.onUpdateAvailable, handler);
   },
+  // 检查是否支持自动更新
   isSupportAutoUpdate: () => {
     const platform = process.platform;
     if (platform === "darwin") return false;
@@ -135,13 +119,17 @@ const api: ElectronAPI = {
     const isAppImage = Boolean(process.env.APPIMAGE);
     return isAppImage;
   },
+  // 下载应用更新
   downloadAppUpdate: () => ipcRenderer.invoke(channel.app.downloadUpdate),
+  // 监听应用更新进度事件
   onDownloadAppProgress: cb => {
     const handler = (_, payload: DownloadAppMessage) => cb(payload);
     ipcRenderer.on(channel.app.updateMessage, handler);
     return () => ipcRenderer.removeListener(channel.app.updateMessage, handler);
   },
+  // 退出并安装更新
   quitAndInstall: () => ipcRenderer.invoke(channel.app.quitAndInstall),
+  // 打开安装包下载目录
   openInstallerDirectory: () => ipcRenderer.invoke(channel.app.openInstallerDirectory),
   // 切换到 mini 播放器窗口
   switchToMiniPlayer: () => ipcRenderer.invoke(channel.window.switchToMini),
@@ -183,6 +171,28 @@ const api: ElectronAPI = {
       ipcRenderer.removeListener(channel.window.leaveFullScreen, leaveFullScreenHandler);
     };
   },
+  // 获取下载任务列表
+  getMediaDownloadTaskList: () => ipcRenderer.invoke(channel.download.getList),
+  // 添加文件下载任务
+  addMediaDownloadTask: (media: MediaDownloadInfo) => ipcRenderer.invoke(channel.download.add, media),
+  /** 添加下载任务列表 */
+  addMediaDownloadTaskList: (mediaList: MediaDownloadInfo[]) => ipcRenderer.invoke(channel.download.addList, mediaList),
+  // 暂停文件下载任务
+  pauseMediaDownloadTask: (id: string) => ipcRenderer.invoke(channel.download.pause, id),
+  // 恢复文件下载任务
+  resumeMediaDownloadTask: (id: string) => ipcRenderer.invoke(channel.download.resume, id),
+  // 重试文件下载任务
+  retryMediaDownloadTask: (id: string) => ipcRenderer.invoke(channel.download.retry, id),
+  // 取消文件下载任务
+  cancelMediaDownloadTask: (id: string) => ipcRenderer.invoke(channel.download.cancel, id),
+  // 监听文件下载任务状态变化
+  syncMediaDownloadTaskList: cb => {
+    const handler = (_, payload: MediaDownloadBroadcastPayload) => cb(payload);
+    ipcRenderer.on(channel.download.sync, handler);
+    return () => ipcRenderer.removeListener(channel.download.sync, handler);
+  },
+  // 清除文件下载任务列表
+  clearMediaDownloadTaskList: () => ipcRenderer.invoke(channel.download.clear),
 };
 
 contextBridge.exposeInMainWorld("electron", api);

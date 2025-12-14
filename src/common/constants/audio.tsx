@@ -44,3 +44,6 @@ export const getPlayModeList = (iconSize?: number) => [
     icon: <RiRepeatOneLine size={iconSize} />,
   },
 ];
+
+/** 从低到高音质排，最高为无损 */
+export const audioQualitySort = [30257, 30216, 30259, 30260, 30232, 30280, 30250, 30251];

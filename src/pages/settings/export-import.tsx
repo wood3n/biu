@@ -14,8 +14,8 @@ const ImportExport = () => {
 
   const handleExport = async () => {
     try {
-      const settings = await window.electron.getSettings();
-      const blob = new Blob([JSON.stringify(settings, null, 2)], { type: "application/json" });
+      const settingStore = (await window.electron.getStore("app-settings")) as { appSettings: AppSettings };
+      const blob = new Blob([JSON.stringify(settingStore.appSettings, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
