@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router";
 
-import { Link, Pagination } from "@heroui/react";
+import { Link, Pagination, Skeleton } from "@heroui/react";
 import { useRequest } from "ahooks";
 
 import { CollectionType } from "@/common/constants/collection";
@@ -30,6 +30,9 @@ const VideoSeries = () => {
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
+  // 用于避免切换合集时短暂渲染上一个合集的数据
+  const [loadedId, setLoadedId] = useState<string | undefined>(undefined);
+
   // 搜索和过滤参数
   const [searchParams, setSearchParams] = useState({
     keyword: "",
@@ -46,6 +49,9 @@ const VideoSeries = () => {
     {
       ready: Boolean(id),
       refreshDeps: [id],
+      onSuccess: () => {
+        setLoadedId(id);
+      },
     },
   );
 
@@ -96,6 +102,8 @@ const VideoSeries = () => {
   const pagedMedias = useMemo(() => {
     return filteredMedias.slice((page - 1) * pageSize, page * pageSize);
   }, [filteredMedias, page, pageSize]);
+
+  const showSkeleton = loading || (id && loadedId !== id);
 
   const onPlayAll = () => {
     if (filteredMedias.length > 0) {
@@ -200,7 +208,11 @@ const VideoSeries = () => {
       {displayMode === "card" ? (
         <GridList data={pagedMedias} loading={loading} itemKey="bvid" renderItem={renderMediaItem} />
       ) : (
-        <div className="space-y-2">{pagedMedias.map(renderMediaItem)}</div>
+        <div className="space-y-2">
+          {showSkeleton
+            ? Array.from({ length: 10 }, (_, i) => <Skeleton key={i} className="h-20 w-full rounded-lg" />)
+            : pagedMedias.map(renderMediaItem)}
+        </div>
       )}
       {totalPage > 1 && (
         <div className="flex w-full items-center justify-center py-6">
