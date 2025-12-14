@@ -57,7 +57,7 @@ const VideoSeries = () => {
 
   useEffect(() => {
     setPage(1);
-  }, [id, displayMode]);
+  }, [id, displayMode, searchParams]);
 
   // 当合集ID变化时，重置搜索参数
   useEffect(() => {
@@ -74,10 +74,11 @@ const VideoSeries = () => {
     const medias = data?.medias ?? [];
 
     // 根据搜索关键词过滤title
-    let result = medias.filter(item => {
-      if (!searchParams.keyword) return true;
-      return item.title.toLowerCase().includes(searchParams.keyword.toLowerCase());
-    });
+    let result = medias;
+    if (searchParams.keyword) {
+      const lowercaseKeyword = searchParams.keyword.toLowerCase();
+      result = medias.filter(item => item.title.toLowerCase().includes(lowercaseKeyword));
+    }
 
     // 根据排序条件排序
     switch (searchParams.order) {
