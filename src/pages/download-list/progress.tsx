@@ -29,8 +29,8 @@ const DownloadProgress = ({ data }: Props) => {
   if (data.status === "converting") {
     return (
       <span className="text-success flex items-center space-x-1">
-        <Spinner size="sm" color="success" />
-        转换中
+        <Spinner size="sm" color="success" className="h-4 w-4" />
+        <span>转换中</span>
       </span>
     );
   }

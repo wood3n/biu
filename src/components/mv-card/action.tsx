@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocation } from "react-router";
 
 import {
@@ -19,8 +20,7 @@ import { postHistoryToViewAdd } from "@/service/history-toview-add";
 import { usePlayList, type PlayDataType } from "@/store/play-list";
 import { useUser } from "@/store/user";
 
-import AudioSelect from "./audio-select";
-import VideoSelect from "./video-select";
+import MediaDownloadSelect from "./media-download-select";
 
 export interface ImageCardMenu {
   key: string;
@@ -68,6 +68,7 @@ const Action = ({
   const user = useUser(s => s.user);
   const addToNext = usePlayList(s => s.addToNext);
   const location = useLocation();
+  const [outputFileType, setOutputFileType] = useState<MediaDownloadOutputFileType>("audio");
 
   const {
     isOpen: isOpenFavSelectModal,
@@ -76,15 +77,9 @@ const Action = ({
   } = useDisclosure();
 
   const {
-    isOpen: isOpenAudioSelectModal,
-    onOpen: onOpenAudioSelectModal,
-    onOpenChange: onOpenChangeAudioSelectModal,
-  } = useDisclosure();
-
-  const {
-    isOpen: isOpenVideoSelectModal,
-    onOpen: onOpenVideoSelectModal,
-    onOpenChange: onOpenChangeVideoSelectModal,
+    isOpen: isOpenMediaDownloadSelectModal,
+    onOpen: onOpenMediaDownloadSelectModal,
+    onOpenChange: onOpenChangeMediaDownloadSelectModal,
   } = useDisclosure();
 
   const addToLater = async () => {
@@ -154,14 +149,20 @@ const Action = ({
       icon: <AudioDownloadIcon className="relative top-px left-px h-[15px] w-[15px]" />,
       title: "下载音频",
       hidden: type === "audio",
-      onPress: onOpenAudioSelectModal,
+      onPress: () => {
+        setOutputFileType("audio");
+        onOpenMediaDownloadSelectModal();
+      },
     },
     {
       key: "downloadVideo",
       hidden: type === "audio",
       icon: <VideoDownloadIcon className="relative top-px left-px h-[15px] w-[15px]" />,
       title: "下载视频",
-      onPress: onOpenVideoSelectModal,
+      onPress: () => {
+        setOutputFileType("video");
+        onOpenMediaDownloadSelectModal();
+      },
     },
     ...(menus || []),
   ].filter(item => !item.hidden);
@@ -205,19 +206,13 @@ const Action = ({
         onOpenChange={onOpenChangeFavSelectModal}
         afterSubmit={onChangeFavSuccess}
       />
-      <AudioSelect
+      <MediaDownloadSelect
+        outputFileType={outputFileType}
         title={title}
         cover={cover}
         bvid={bvid!}
-        isOpen={isOpenAudioSelectModal}
-        onOpenChange={onOpenChangeAudioSelectModal}
-      />
-      <VideoSelect
-        title={title}
-        cover={cover}
-        bvid={bvid!}
-        isOpen={isOpenVideoSelectModal}
-        onOpenChange={onOpenChangeVideoSelectModal}
+        isOpen={isOpenMediaDownloadSelectModal}
+        onOpenChange={onOpenChangeMediaDownloadSelectModal}
       />
     </>
   );

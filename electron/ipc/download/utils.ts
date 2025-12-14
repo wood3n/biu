@@ -2,6 +2,8 @@ import fs from "node:fs";
 
 import type { DashAudio } from "../api/types";
 
+import { getWebInterfaceView } from "../api/web-interface-view";
+
 const audioQualitySort = [30257, 30216, 30259, 30260, 30232, 30280, 30250, 30251];
 
 export function sortAudio(audio: DashAudio[]) {
@@ -44,4 +46,16 @@ export const ensureDir = (dir: string) => {
 
 export const removeDirOrFile = (fsPath: string) => {
   fs.rmSync(fsPath, { recursive: true, force: true });
+};
+
+export const getVideoPages = async (bvid: string) => {
+  const res = await getWebInterfaceView({ bvid });
+  return (
+    res?.data?.pages?.map(page => ({
+      bvid,
+      cid: page.cid,
+      title: page.part,
+      cover: page.first_frame,
+    })) || []
+  );
 };

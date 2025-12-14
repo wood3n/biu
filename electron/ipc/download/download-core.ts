@@ -27,7 +27,7 @@ export class DownloadCore extends EventEmitter {
   public cover?: string;
   public createdTime: number;
   public bvid?: string;
-  public cid?: string;
+  public cid?: string | number;
   public sid?: string | number;
   public outputFileType: MediaDownloadOutputFileType;
   public audioUrl?: string;
@@ -44,7 +44,7 @@ export class DownloadCore extends EventEmitter {
   public mergeProgress: number = 0;
   public convertProgress: number = 0;
   public status: MediaDownloadStatus;
-  public fileName: string;
+  public fileName?: string;
   public savePath: string = "";
   public tempDir: string = "";
   public audioTempPath: string = "";
@@ -68,10 +68,6 @@ export class DownloadCore extends EventEmitter {
     this.status = task.status;
     this.abortSignal = signal;
 
-    this.fileName = `${this.title}-${this.id}${this.getAudioExt()}`;
-    if (this.outputFileType === "video") {
-      this.fileName = `${this.title}-${this.id}${this.getVideoExt()}`;
-    }
     this.savePath = appSettingsStore.get(storeKey.appSettings).downloadPath || app.getPath("downloads");
     this.tempDir = path.join(TempRootDir, this.id);
     this.audioTempPath = path.join(this.tempDir, "audio.m4s");
@@ -238,11 +234,15 @@ export class DownloadCore extends EventEmitter {
         return;
       }
       this.audioCodecs = flacAudio?.codecs || dolbyAudio?.codecs || audioList[0]?.codecs;
-      this.audioBandwidth = audioList[0]?.bandwidth;
+      this.audioBandwidth = flacAudio?.bandwidth || dolbyAudio?.bandwidth || audioList[0]?.bandwidth;
       if (this.outputFileType === "video") {
         this.videoUrl = videoUrl;
         this.videoResolution = `${bestVideoInfo?.width}x${bestVideoInfo?.height}`;
         this.videoFrameRate = bestVideoInfo?.frameRate || bestVideoInfo?.frame_rate;
+      }
+      this.fileName = `${this.title}-${this.id}${this.getAudioExt()}`;
+      if (this.outputFileType === "video") {
+        this.fileName = `${this.title}-${this.id}${this.getVideoExt()}`;
       }
     }
   }
@@ -320,10 +320,10 @@ export class DownloadCore extends EventEmitter {
    * @returns 对应的文件扩展名，如 '.m4a' 或 '.mp3'
    */
   private getAudioExt() {
-    if (this.audioCodecs?.includes("flac")) {
+    if (this.audioCodecs?.toLowerCase().includes("flac")) {
       return ".flac"; // Opus 编码 -> opus 后缀
     }
-    if (this.audioCodecs?.includes("mp3")) {
+    if (this.audioCodecs?.toLowerCase().includes("mp3")) {
       return ".mp3"; // 只有源文件本身就是 mp3 编码时，才用 .mp3
     }
     return ".m4a"; // 默认兜底
@@ -331,7 +331,7 @@ export class DownloadCore extends EventEmitter {
 
   private getVideoExt() {
     // 无损音频输出视频格式
-    if (this.audioCodecs?.includes("flac")) {
+    if (this.audioCodecs?.toLowerCase().includes("flac")) {
       return ".mkv"; // H.264 编码 -> mp4 后缀
     }
     return ".mp4"; // 默认兜底
@@ -509,6 +509,8 @@ export class DownloadCore extends EventEmitter {
         bvid: this.bvid,
         cid: this.cid,
         sid: this.sid,
+        fileName: this.fileName,
+        savePath: this.savePath,
         totalBytes: this.totalBytes,
         downloadedBytes: this.downloadedBytes,
         downloadProgress: this.downloadProgress,

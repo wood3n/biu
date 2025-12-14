@@ -43,7 +43,6 @@ const DownloadList = () => {
     initList();
 
     const removeListener = window.electron.syncMediaDownloadTaskList(payload => {
-      console.log("syncMediaDownloadTaskList", payload);
       if (payload?.type === "full") {
         setDownloadList(payload.data as MediaDownloadTask[]);
       } else if (payload?.type === "update") {
@@ -72,7 +71,9 @@ const DownloadList = () => {
 
   const getFileQuality = (item: MediaDownloadTask) => {
     if (item.outputFileType === "video") {
-      return `${item.videoResolution}@${item.videoFrameRate}`;
+      return item.videoResolution
+        ? `${item.videoResolution}${item.videoFrameRate ? `@${item.videoFrameRate}` : ""}`
+        : "";
     }
 
     if (item.audioCodecs === "flac") {
@@ -171,7 +172,7 @@ const DownloadList = () => {
                             <span className="truncate">{item.title}</span>
                             {Boolean(quality) && (
                               <Chip size="sm" radius="sm" variant="flat">
-                                {getFileQuality(item)}
+                                {quality}
                               </Chip>
                             )}
                           </div>

@@ -12,7 +12,7 @@ interface MediaDownloadInfo {
   /** 视频bvid */
   bvid?: string;
   /** 视频分集cid */
-  cid?: string;
+  cid?: string | number;
   /** 音频sid */
   sid?: string | number;
 }

@@ -9,6 +9,7 @@ import type { FullMediaDownloadTask } from "./types";
 import { channel } from "../channel";
 import { mediaDownloadsStore } from "./../../store";
 import { DownloadCore } from "./download-core";
+import { getVideoPages } from "./utils";
 
 export class DownloadQueue {
   private queue: PQueue;
@@ -143,8 +144,30 @@ export class DownloadQueue {
   private queueTask(core: DownloadCore) {
     this.queue.add(
       async () => {
+        if (core.bvid && !core.cid) {
+          const pages = await getVideoPages(core.bvid);
+          if (pages.length > 0) {
+            if (pages.length === 1) {
+              core.cid = pages[0].cid;
+            } else {
+              this.cancelTask(core.id!);
+              pages.forEach(page =>
+                this.addTask({
+                  outputFileType: core.outputFileType,
+                  bvid: core.bvid,
+                  cid: page.cid,
+                  title: page.title,
+                  cover: page.cover,
+                }),
+              );
+            }
+          } else {
+            throw new Error("无法获取视频分集信息");
+          }
+        }
+
         core.on("update", (updateData: any) => {
-          this.pendingUpdates.set(core.id, updateData);
+          this.pendingUpdates.set(core.id!, updateData);
           this.flushUpdates();
         });
         await core.start();

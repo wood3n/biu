@@ -32,7 +32,7 @@ const DownloadActions = ({ data }: Props) => {
       key: "pause",
       label: "暂停",
       icon: <RiPauseLine size={18} />,
-      show: ["downloading", "merging", "converting"].includes(data.status),
+      show: false, // TODO:先不展示
       onPress: async () => {
         await window.electron.pauseMediaDownloadTask(data.id);
       },
@@ -41,7 +41,7 @@ const DownloadActions = ({ data }: Props) => {
       key: "resume",
       label: "继续",
       icon: <RiPlayLine size={18} />,
-      show: ["paused"].includes(data.status),
+      show: false,
       onPress: async () => {
         await window.electron.resumeMediaDownloadTask(data.id);
       },
@@ -50,7 +50,7 @@ const DownloadActions = ({ data }: Props) => {
       key: "retry",
       label: "重试",
       icon: <RiRefreshLine size={18} />,
-      show: ["failed"].includes(data.status),
+      show: false,
       onPress: async () => {
         await window.electron.retryMediaDownloadTask(data.id);
       },

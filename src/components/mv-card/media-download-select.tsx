@@ -9,6 +9,7 @@ import AsyncButton from "../async-button";
 import ScrollContainer from "../scroll-container";
 
 interface Props {
+  outputFileType: MediaDownloadOutputFileType;
   title: string;
   cover: string;
   bvid: string;
@@ -16,7 +17,7 @@ interface Props {
   onOpenChange: (isOpen: boolean) => void;
 }
 
-const AudioSelect = ({ title, cover, bvid, isOpen, onOpenChange }: Props) => {
+const MediaDownloadSelect = ({ outputFileType, title, cover, bvid, isOpen, onOpenChange }: Props) => {
   const [selectedCids, setSelectedCids] = useState<string[]>([]);
 
   const { data, loading } = useRequest(
@@ -30,7 +31,7 @@ const AudioSelect = ({ title, cover, bvid, isOpen, onOpenChange }: Props) => {
       } else if (res?.data?.[0]?.cid) {
         const cid = String(res.data[0].cid);
         await window.electron.addMediaDownloadTask({
-          outputFileType: "audio",
+          outputFileType,
           cover,
           title,
           bvid,
@@ -56,9 +57,10 @@ const AudioSelect = ({ title, cover, bvid, isOpen, onOpenChange }: Props) => {
       data!
         .filter(item => selectedCids.includes(String(item.cid)))
         .map(item => ({
-          outputFileType: "audio",
-          title,
+          outputFileType,
+          title: item.part || title,
           bvid,
+          cover: item.first_frame || cover,
           cid: String(item.cid),
         })),
     );
@@ -136,4 +138,4 @@ const AudioSelect = ({ title, cover, bvid, isOpen, onOpenChange }: Props) => {
   );
 };
 
-export default AudioSelect;
+export default MediaDownloadSelect;
