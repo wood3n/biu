@@ -77,6 +77,10 @@ export class DownloadCore extends EventEmitter {
   }
 
   public async start(): Promise<void> {
+    if (this.status === "completed") {
+      return;
+    }
+
     try {
       // 获取下载链接
       this.status = "downloading";

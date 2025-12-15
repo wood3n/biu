@@ -41,6 +41,16 @@ export class DownloadQueue {
     const downloads = mediaDownloadsStore.store;
     if (downloads && Object.keys(downloads).length > 0) {
       Object.values(downloads).forEach(task => {
+        // Filter out completed tasks
+        if (task.status === "completed") {
+          return;
+        }
+
+        // Prevent duplicate tasks
+        if (this.tasks.has(task.id)) {
+          return;
+        }
+
         if (["downloading", "merging", "converting"].includes(task.status)) {
           task.status = "paused";
         }
@@ -50,13 +60,23 @@ export class DownloadQueue {
         this.controllers.set(task.id, controller);
 
         const core = new DownloadCore(task, controller.signal);
-        this.queueTask(core);
         this.tasks.set(task.id, core);
       });
     }
   }
 
   public addTask(mediaInfo: MediaDownloadInfo): string {
+    // Deduplication check
+    for (const core of this.tasks.values()) {
+      if (
+        core.bvid === mediaInfo.bvid &&
+        core.cid === mediaInfo.cid &&
+        core.outputFileType === mediaInfo.outputFileType
+      ) {
+        return core.id;
+      }
+    }
+
     const id = randomUUID();
     const taskData: MediaDownloadTask = {
       id,
