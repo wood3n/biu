@@ -22,6 +22,50 @@ const DEFAULT_USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Appl
 // Store the dynamic port of our local proxy
 pub struct ProxyPort(Arc<Mutex<u16>>);
 
+// 1. Define the persistent state for tasks
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct MediaDownloadTaskState {
+    pub id: String,
+    // Base fields from request
+    pub output_file_type: String,
+    pub title: String,
+    pub cover: Option<String>,
+    pub bvid: Option<String>,
+    pub cid: Option<String>,
+    pub sid: Option<String>,
+    // Extended fields for status
+    pub audio_codecs: Option<String>,
+    pub audio_bandwidth: Option<u64>,
+    pub video_resolution: Option<String>,
+    pub video_frame_rate: Option<String>,
+    pub save_path: Option<String>,
+    pub total_bytes: Option<u64>,
+    pub download_progress: Option<u64>,
+    pub merge_progress: Option<u64>,
+    pub convert_progress: Option<u64>,
+    pub error: Option<String>,
+    pub status: String, // "pending", "downloading", "merging", "converting", "completed", "failed"
+}
+
+// 2. Define the Store Container
+pub struct TaskStore(Arc<Mutex<Vec<MediaDownloadTaskState>>>);
+
+impl TaskStore {
+    fn new() -> Self {
+        Self(Arc::new(Mutex::new(Vec::new())))
+    }
+    
+    // Helper to update a task safely
+    fn update_task<F>(&self, id: &str, f: F) 
+    where F: FnOnce(&mut MediaDownloadTaskState) {
+        let mut tasks = self.0.lock().unwrap();
+        if let Some(task) = tasks.iter_mut().find(|t| t.id == id) {
+            f(task);
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AppSettings {
     pub download_path: Option<String>,
@@ -359,31 +403,50 @@ async fn start_download(
     client: State<'_, AppHttpClient>,
     params: DownloadOptions,
 ) -> Result<serde_json::Value, String> {
-    // Call the shared helper
+    // Legacy simple download without state tracking
     spawn_download_task(app, client.0.clone(), params);
     Ok(serde_json::json!({ "success": true }))
+}
+
+// --- NEW: Command to get the list ---
+#[tauri::command]
+async fn get_media_download_task_list(state: State<'_, TaskStore>) -> Result<Vec<MediaDownloadTaskState>, String> {
+    let tasks = state.0.lock().unwrap();
+    Ok(tasks.clone())
+}
+
+// Input struct for creating a task (simpler than the State struct)
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MediaDownloadRequest {
+    pub output_file_type: String,
+    pub title: String,
+    pub cover: Option<String>,
+    pub bvid: Option<String>,
+    pub cid: Option<String>,
+    pub sid: Option<String>,
 }
 
 #[tauri::command]
 async fn add_media_download_task(
     app: AppHandle,
     client: State<'_, AppHttpClient>,
-    task: MediaDownloadTask
+    store: State<'_, TaskStore>, // State must be managed in run()
+    task: MediaDownloadRequest
 ) -> Result<serde_json::Value, String> {
     
     // Validate inputs
-    let bvid = task.bvid.ok_or("Missing bvid")?;
-    let cid = task.cid.ok_or("Missing cid")?;
+    let bvid = task.bvid.clone().ok_or("Missing bvid")?;
+    let cid = task.cid.clone().ok_or("Missing cid")?;
 
     // 1. Fetch the Bilibili Play URL
-    // fnval=16 requests DASH format (better audio separation)
     let api_url = format!(
         "https://api.bilibili.com/x/player/playurl?bvid={}&cid={}&qn=80&fnval=16", 
         bvid, cid
     );
 
     let res = client.0.get(&api_url)
-        .header(REFERER, "https://www.bilibili.com") // Required by Bilibili API
+        .header(REFERER, "https://www.bilibili.com")
         .send()
         .await
         .map_err(|e| format!("Network error: {}", e))?;
@@ -395,14 +458,10 @@ async fn add_media_download_task(
     }
 
     // 2. Extract Audio URL
-    // Priority: DASH audio stream -> DURL (fallback for older videos)
-    let audio_url = if let Some(data) = json.data {
-        if let Some(dash) = data.dash {
-            // Get the first audio track from DASH
-            dash.audio
-                .and_then(|audios| audios.first().map(|a| a.base_url.clone()))
-        } else if let Some(durls) = data.durl {
-            // Fallback to MP4/FLV url
+    let audio_url = if let Some(data) = &json.data {
+        if let Some(dash) = &data.dash {
+            dash.audio.as_ref().and_then(|audios| audios.first().map(|a| a.base_url.clone()))
+        } else if let Some(durls) = &data.durl {
             durls.first().map(|d| d.url.clone())
         } else {
             None
@@ -412,37 +471,52 @@ async fn add_media_download_task(
     }.ok_or("No audio stream found in API response")?;
 
     // 3. Determine Filename
-    // If user requested mp3, we rely on the ffmpeg conversion in logic.
     let ext = if task.output_file_type == "mp3" { "mp3" } else { "m4a" };
     
-    // Sanitize title for filename
     let safe_title: String = task.title.chars()
         .filter(|c| c.is_alphanumeric() || *c == ' ' || *c == '-' || *c == '_')
         .collect();
     let filename = format!("{}.{}", safe_title, ext);
+    let task_id = uuid::Uuid::new_v4().to_string();
 
-    // 4. Construct Options & Start
+    // 4. Initialize State Entry and push to Store
+    let new_task_state = MediaDownloadTaskState {
+        id: task_id.clone(),
+        output_file_type: task.output_file_type.clone(),
+        title: task.title.clone(),
+        cover: task.cover.clone(),
+        bvid: task.bvid.clone(),
+        cid: task.cid.clone(),
+        sid: task.sid.clone(),
+        audio_codecs: None,
+        audio_bandwidth: None,
+        video_resolution: None,
+        video_frame_rate: None,
+        save_path: Some(filename.clone()),
+        total_bytes: None,
+        download_progress: Some(0),
+        merge_progress: None,
+        convert_progress: None,
+        error: None,
+        status: "pending".to_string(),
+    };
+
+    {
+        let mut tasks = store.0.lock().unwrap();
+        tasks.push(new_task_state);
+    }
+
+    // 5. Construct Options & Start
     let options = DownloadOptions {
-        id: uuid::Uuid::new_v4().to_string(), // Requires `uuid` crate with "v4" feature
+        id: task_id,
         filename,
         audio_url,
-        is_lossless: task.output_file_type != "mp3", // If not mp3, treat as direct download
+        is_lossless: task.output_file_type != "mp3", 
     };
 
     spawn_download_task(app, client.0.clone(), options);
 
     Ok(serde_json::json!({ "success": true, "message": "Download started" }))
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct MediaDownloadTask {
-    pub output_file_type: String,
-    pub title: String,
-    pub cover: Option<String>,
-    pub bvid: Option<String>,
-    pub cid: Option<String>,
-    pub sid: Option<String>,
 }
 
 // Bilibili API Response Helper Structs
@@ -496,15 +570,38 @@ fn spawn_download_task(
     let app_handle = app.clone();
 
     tauri::async_runtime::spawn(async move {
-        let emit_progress = |status: &str, progress: Option<u64>, downloaded: Option<u64>, total: Option<u64>, error: Option<String>| {
+        // Closure to update both UI events and Backend State
+        let update_status = |status: &str, progress: Option<u64>, downloaded: Option<u64>, total: Option<u64>, error: Option<String>| {
+            // 1. Emit UI Event
             let _ = app_handle.emit("download:progress", DownloadProgress {
                 id: options_clone.clone(),
                 status: status.to_string(),
                 progress,
                 downloaded_bytes: downloaded,
                 total_bytes: total,
-                error,
+                error: error.clone(),
             });
+
+            // 2. Update Backend Store (if available)
+            // We use try_state here because in rare cases (like app shutdown) state might be gone, 
+            // though usually safe inside app logic.
+            if let Some(store) = app_handle.try_state::<TaskStore>() {
+                store.update_task(&options_clone, |t| {
+                    t.status = status.to_string();
+                    if let Some(p) = progress { t.download_progress = Some(p); }
+                    if let Some(tot) = total { t.total_bytes = Some(tot); }
+                    if let Some(err) = &error { t.error = Some(err.clone()); }
+                    
+                    // Logic to simulate phase progress
+                    if status == "merging" { t.merge_progress = Some(50); }
+                    if status == "converting" { t.convert_progress = Some(10); } 
+                    if status == "completed" {
+                        t.download_progress = Some(100);
+                        t.merge_progress = Some(100);
+                        t.convert_progress = Some(100);
+                    }
+                });
+            }
         };
 
         let mut start_byte = 0;
@@ -526,7 +623,7 @@ fn spawn_download_task(
         match res_result {
             Ok(res) => {
                 if !res.status().is_success() {
-                     emit_progress("failed", None, None, None, Some(format!("HTTP {}", res.status())));
+                     update_status("failed", None, None, None, Some(format!("HTTP {}", res.status())));
                      return;
                 }
 
@@ -542,12 +639,12 @@ fn spawn_download_task(
 
                 let mut downloaded = start_byte;
                 
-                emit_progress("downloading", Some(0), Some(downloaded), total_size, None);
+                update_status("downloading", Some(0), Some(downloaded), total_size, None);
 
                 while let Some(item) = stream.next().await {
                     if let Ok(chunk) = item {
                          if let Err(_) = file.write_all(&chunk).await {
-                             emit_progress("failed", None, None, None, Some("Write error".into()));
+                             update_status("failed", None, None, None, Some("Write error".into()));
                              return;
                          }
                          downloaded += chunk.len() as u64;
@@ -557,12 +654,11 @@ fn spawn_download_task(
                          } else {
                              0
                          };
-                         // Throttle events slightly if needed, or emit every chunk
-                         emit_progress("downloading", Some(pct), Some(downloaded), total_size, None);
+                         update_status("downloading", Some(pct), Some(downloaded), total_size, None);
                     }
                 }
                 
-                emit_progress("merging", None, None, None, None);
+                update_status("merging", None, None, None, None);
 
                 if is_lossless {
                      // If lossless/direct, just move the file
@@ -572,6 +668,8 @@ fn spawn_download_task(
                      }
                 } else {
                     // Convert to MP3
+                    update_status("converting", None, None, None, None);
+                    
                     let shell = app_handle.shell();
                     let status = shell.command("ffmpeg")
                         .args(&[
@@ -587,16 +685,16 @@ fn spawn_download_task(
                              let _ = fs::remove_file(&temp_audio_path);
                          },
                          _ => {
-                             emit_progress("failed", None, None, None, Some("FFmpeg failed".into()));
+                             update_status("failed", None, None, None, Some("FFmpeg failed".into()));
                              return;
                          }
                     }
                 }
 
-                emit_progress("completed", Some(100), None, None, None);
+                update_status("completed", Some(100), None, None, None);
             },
             Err(e) => {
-                emit_progress("failed", None, None, None, Some(e.to_string()));
+                update_status("failed", None, None, None, Some(e.to_string()));
             }
         }
     });
@@ -840,6 +938,9 @@ pub fn run() {
     let proxy_port = Arc::new(Mutex::new(0u16));
     let proxy_port_clone = proxy_port.clone();
 
+    // 1. Initialize Task Store
+    let task_store = TaskStore::new();
+
     // Start Proxy Server
     tauri::async_runtime::spawn(async move {
         run_proxy_server(proxy_port_clone).await;
@@ -851,6 +952,7 @@ pub fn run() {
         .plugin(tauri_plugin_http::init())
         .manage(AppHttpClient(client))
         .manage(ProxyPort(proxy_port))
+        .manage(task_store) // 2. IMPORTANT: Register the store here
         .invoke_handler(tauri::generate_handler![
             get_settings,
             set_settings,
@@ -864,6 +966,7 @@ pub fn run() {
             check_file_exists,
             start_download,
             add_media_download_task,
+            get_media_download_task_list, // 3. Register command
             get_cookie,
             http_request,
             http_get,
@@ -881,7 +984,7 @@ pub fn run() {
             download_app_update,
             quit_and_install,
             open_installer_directory,
-            get_proxy_port // Register the new command
+            get_proxy_port
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

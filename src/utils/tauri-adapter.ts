@@ -47,6 +47,8 @@ export const tauriAdapter: any = {
   addMediaDownloadTask: (task: any) => invoke("add_media_download_task", { task }),
   addMediaDownloadTaskList: (tasks: any[]) => invoke("add_media_download_task_list", { tasks }),
 
+  getMediaDownloadTaskList: () => invoke("get_media_download_task_list"),
+
   // Cookies - Try document first (for WebView access), then backend
   getCookie: (key: string) => {
     const match = document.cookie.match(new RegExp("(^| )" + key + "=([^;]+)"));
