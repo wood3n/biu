@@ -17,32 +17,22 @@ export const tauriAxiosAdapter: AxiosAdapter = async config => {
     });
   }
 
-  // Handle Data (FormData -> Object for JSON serialization, or keep object)
+  // Handle Data
   let requestBody = data;
   if (data instanceof FormData) {
     requestBody = {};
     data.forEach((value, key) => {
       requestBody[key] = value;
     });
-    // Explicitly set content type so Rust backend knows to treat as Form
     requestHeaders["Content-Type"] = "application/x-www-form-urlencoded";
   }
 
   try {
-    let responseData;
-    if (method === "get") {
-      responseData = await tauriAdapter.httpGet(fullUrl!, {
-        params,
-        headers: requestHeaders,
-      });
-    } else if (method === "post") {
-      responseData = await tauriAdapter.httpPost(fullUrl!, requestBody, {
-        params,
-        headers: requestHeaders,
-      });
-    } else {
-      throw new Error(`Method ${method} not supported by Tauri adapter`);
-    }
+    // USE THE GENERIC REQUEST FOR ALL METHODS
+    const responseData = await tauriAdapter.httpRequest(method || "GET", fullUrl!, requestBody, {
+      params,
+      headers: requestHeaders,
+    });
 
     return {
       data: responseData,
@@ -53,7 +43,6 @@ export const tauriAxiosAdapter: AxiosAdapter = async config => {
       request: {},
     };
   } catch (error: any) {
-    // If Rust returns an error string, try to reject properly
     return Promise.reject({
       message: typeof error === "string" ? error : "Network Error",
       config,

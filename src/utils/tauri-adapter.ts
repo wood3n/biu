@@ -57,6 +57,9 @@ export const tauriAdapter: any = {
   },
 
   // HTTP (Relay requests through Rust)
+  httpRequest: (method: string, url: string, body?: any, options?: any) =>
+    invoke("http_request", { method, url, body, options: { ...options, url } }),
+
   httpGet: (url: string, options?: any) => invoke("http_get", { url, options: { ...options, url } }),
 
   httpPost: (url: string, body?: any, options?: any) =>

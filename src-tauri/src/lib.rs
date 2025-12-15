@@ -1,4 +1,5 @@
 use font_kit::source::SystemSource;
+use reqwest::Method;
 use reqwest::header::{HeaderMap, HeaderName, CONTENT_TYPE, RANGE, REFERER, USER_AGENT};
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
@@ -9,6 +10,7 @@ use tauri::{
 use tokio::io::AsyncWriteExt;
 use futures_util::StreamExt;
 use tauri_plugin_shell::ShellExt; 
+use std::str::FromStr;
 
 // --- Types ---
 
@@ -361,6 +363,59 @@ async fn start_download(
 }
 
 // --- HTTP/Cookie Commands ---
+#[tauri::command]
+async fn http_request(
+    client: State<'_, AppHttpClient>,
+    method: String,
+    url: String,
+    body: Option<serde_json::Value>,
+    options: Option<HttpInvokePayload>,
+) -> Result<serde_json::Value, String> {
+    let req_method = Method::from_str(&method.to_uppercase()).map_err(|e| e.to_string())?;
+    let mut req = client.0.request(req_method, &url);
+    let mut is_form = false;
+
+    if let Some(payload) = options {
+        if let Some(headers) = payload.headers {
+            let mut hmap = HeaderMap::new();
+            for (k, v) in headers {
+                if let Ok(hname) = k.parse::<HeaderName>() {
+                    if let Ok(hval) = v.parse::<tauri::http::HeaderValue>() {
+                        if hname == CONTENT_TYPE && hval.to_str().unwrap_or("").contains("application/x-www-form-urlencoded") {
+                            is_form = true;
+                        }
+                        hmap.insert(hname, hval);
+                    }
+                }
+            }
+            req = req.headers(hmap);
+        }
+        if let Some(params) = payload.params {
+            req = req.query(&params);
+        }
+        // Handle timeout if present in payload
+        if let Some(timeout_ms) = payload.timeout {
+             req = req.timeout(std::time::Duration::from_millis(timeout_ms));
+        }
+    }
+
+    if let Some(b) = body {
+        if is_form {
+            req = req.form(&b);
+        } else {
+            req = req.json(&b);
+        }
+    }
+
+    let res = req.send().await.map_err(|e| e.to_string())?;
+    let text_res = res.text().await.map_err(|e| e.to_string())?;
+    
+    // Attempt to parse JSON, fallback to string
+    match serde_json::from_str::<serde_json::Value>(&text_res) {
+        Ok(json) => Ok(json),
+        Err(_) => Ok(serde_json::Value::String(text_res))
+    }
+}
 
 #[tauri::command]
 async fn get_cookie(_client: State<'_, AppHttpClient>, _key: String) -> Result<Option<String>, String> {
@@ -559,6 +614,7 @@ pub fn run() {
             check_file_exists,
             start_download,
             get_cookie,
+            http_request,
             http_get,
             http_post,
             update_playback_state,
