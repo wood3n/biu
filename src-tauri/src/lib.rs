@@ -1,18 +1,26 @@
 use font_kit::source::SystemSource;
 use reqwest::Method;
-use reqwest::header::{HeaderMap, HeaderName, CONTENT_TYPE, RANGE, REFERER, USER_AGENT};
+use reqwest::header::{HeaderMap, HeaderName, CONTENT_TYPE, RANGE, REFERER, USER_AGENT, LOCATION, COOKIE, CONTENT_LENGTH, CONTENT_RANGE, ACCEPT_RANGES};
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::path::PathBuf;
 use tauri::{
-    AppHandle, Emitter, Manager, State, Window, WebviewWindowBuilder, WebviewUrl,
+    AppHandle, Emitter, Manager, State, WebviewWindowBuilder, WebviewUrl, Window,
 };
-use tokio::io::AsyncWriteExt;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::net::TcpListener;
 use futures_util::StreamExt;
 use tauri_plugin_shell::ShellExt; 
 use std::str::FromStr;
+use std::sync::{Arc, Mutex};
+
+// --- Constants ---
+const DEFAULT_USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
 // --- Types ---
+
+// Store the dynamic port of our local proxy
+pub struct ProxyPort(Arc<Mutex<u16>>);
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AppSettings {
@@ -75,6 +83,120 @@ fn load_settings(app: &AppHandle) -> AppSettings {
     }
 }
 
+// --- Proxy Server Logic ---
+
+async fn run_proxy_server(port_state: Arc<Mutex<u16>>) {
+    // Bind to a random available port on localhost
+    let listener = TcpListener::bind("127.0.0.1:0").await.expect("Failed to bind proxy");
+    let port = listener.local_addr().unwrap().port();
+    
+    // Save the port so frontend can ask for it
+    {
+        let mut p = port_state.lock().unwrap();
+        *p = port;
+    }
+    println!("Local Audio Proxy running on port: {}", port);
+
+    let client = reqwest::Client::builder()
+        .user_agent(DEFAULT_USER_AGENT)
+        .build()
+        .unwrap();
+
+    loop {
+        if let Ok((mut socket, _)) = listener.accept().await {
+            let client_clone = client.clone();
+            tokio::spawn(async move {
+                let mut buf = [0; 2048];
+                // Read the HTTP request (just enough to get headers)
+                if let Ok(n) = socket.read(&mut buf).await {
+                    if n == 0 { return; }
+                    let request_str = String::from_utf8_lossy(&buf[..n]);
+                    
+                    // 1. Parse URL parameters manually to avoid dependencies
+                    // Expecting: GET /?url=...&referer=... HTTP/1.1
+                    let first_line = request_str.lines().next().unwrap_or("");
+                    if !first_line.contains("GET") { return; }
+
+                    // Extract query params
+                    let target_url = extract_query_param(&request_str, "url=");
+                    let referer_url = extract_query_param(&request_str, "referer=");
+
+                    if let Some(url) = target_url {
+                        let decoded_url = urlencoding::decode(&url).unwrap_or(std::borrow::Cow::Borrowed(&url));
+                        let decoded_referer = if let Some(r) = referer_url {
+                            urlencoding::decode(&r).unwrap_or(std::borrow::Cow::Borrowed("https://www.bilibili.com/")).into_owned()
+                        } else {
+                            "https://www.bilibili.com/".to_string()
+                        };
+
+                        // 2. Extract Range Header
+                        let range_header = request_str.lines()
+                            .find(|l| l.to_lowercase().starts_with("range:"))
+                            .map(|l| l.split(':').nth(1).unwrap_or("").trim());
+
+                        // 3. Prepare Request to Bilibili
+                        let mut req_builder = client_clone.get(decoded_url.as_ref())
+                            .header(REFERER, decoded_referer);
+                        
+                        if let Some(range) = range_header {
+                            req_builder = req_builder.header(RANGE, range);
+                        }
+
+                        // 4. Stream Response back to Socket
+                        match req_builder.send().await {
+                            Ok(res) => {
+                                let status_line = format!("HTTP/1.1 {} OK\r\n", res.status());
+                                let _ = socket.write_all(status_line.as_bytes()).await;
+
+                                // Forward Headers
+                                let mut headers_str = String::new();
+                                headers_str.push_str("Access-Control-Allow-Origin: *\r\n");
+                                headers_str.push_str("Connection: close\r\n"); // Keep it simple
+                                
+                                if let Some(ct) = res.headers().get(CONTENT_TYPE) {
+                                    headers_str.push_str(&format!("Content-Type: {}\r\n", ct.to_str().unwrap_or("application/octet-stream")));
+                                }
+                                if let Some(cl) = res.headers().get(CONTENT_LENGTH) {
+                                    headers_str.push_str(&format!("Content-Length: {}\r\n", cl.to_str().unwrap_or("0")));
+                                }
+                                if let Some(cr) = res.headers().get(CONTENT_RANGE) {
+                                    headers_str.push_str(&format!("Content-Range: {}\r\n", cr.to_str().unwrap_or("")));
+                                }
+                                headers_str.push_str("Accept-Ranges: bytes\r\n\r\n");
+                                
+                                let _ = socket.write_all(headers_str.as_bytes()).await;
+
+                                // Pipe Body
+                                let mut stream = res.bytes_stream();
+                                while let Some(chunk_result) = stream.next().await {
+                                    if let Ok(chunk) = chunk_result {
+                                        if let Err(_) = socket.write_all(&chunk).await {
+                                            break; // Client closed connection
+                                        }
+                                    }
+                                }
+                            }
+                            Err(_) => {
+                                let _ = socket.write_all(b"HTTP/1.1 500 Internal Server Error\r\n\r\n").await;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+}
+
+// Helper to extract param from "key=value" string in a request
+fn extract_query_param(request: &str, key: &str) -> Option<String> {
+    if let Some(start) = request.find(key) {
+        let rest = &request[start + key.len()..];
+        let end = rest.find(|c| c == '&' || c == ' ').unwrap_or(rest.len());
+        return Some(rest[..end].to_string());
+    }
+    None
+}
+
 // --- App/Updater Commands ---
 
 #[tauri::command]
@@ -84,8 +206,6 @@ fn get_app_version(app: AppHandle) -> String {
 
 #[tauri::command]
 async fn check_app_update(_app: AppHandle) -> Result<serde_json::Value, String> {
-    // Placeholder: Implement using tauri-plugin-updater if needed
-    // For now, return "no update" to prevent errors
     Ok(serde_json::json!({
         "isUpdateAvailable": false,
         "latestVersion": "",
@@ -95,7 +215,6 @@ async fn check_app_update(_app: AppHandle) -> Result<serde_json::Value, String> 
 
 #[tauri::command]
 async fn download_app_update() -> Result<(), String> {
-    // Placeholder
     Err("Auto-update not configured".to_string())
 }
 
@@ -129,8 +248,6 @@ async fn set_settings(app: AppHandle, payload: AppSettings) -> Result<bool, Stri
 }
 
 fn get_store_path(app: &AppHandle, key: &str) -> PathBuf {
-    // Saves to: <app_config_dir>/<key>.json
-    // e.g. /Users/name/Library/Application Support/com.your.app/search-history.json
     app.path().app_config_dir().unwrap().join(format!("{}.json", key))
 }
 
@@ -143,7 +260,6 @@ async fn get_store(app: AppHandle, key: String) -> Result<serde_json::Value, Str
         let data: serde_json::Value = serde_json::from_reader(reader).map_err(|e| e.to_string())?;
         Ok(data)
     } else {
-        // Return null if file doesn't exist
         Ok(serde_json::Value::Null)
     }
 }
@@ -277,7 +393,7 @@ async fn start_download(
 
         let mut headers = HeaderMap::new();
         headers.insert(REFERER, "https://www.bilibili.com".parse().unwrap());
-        headers.insert(USER_AGENT, "Mozilla/5.0".parse().unwrap());
+        headers.insert(USER_AGENT, DEFAULT_USER_AGENT.parse().unwrap());
         if start_byte > 0 {
             headers.insert(RANGE, format!("bytes={}-", start_byte).parse().unwrap());
         }
@@ -393,7 +509,6 @@ async fn http_request(
         if let Some(params) = payload.params {
             req = req.query(&params);
         }
-        // Handle timeout if present in payload
         if let Some(timeout_ms) = payload.timeout {
              req = req.timeout(std::time::Duration::from_millis(timeout_ms));
         }
@@ -410,7 +525,6 @@ async fn http_request(
     let res = req.send().await.map_err(|e| e.to_string())?;
     let text_res = res.text().await.map_err(|e| e.to_string())?;
     
-    // Attempt to parse JSON, fallback to string
     match serde_json::from_str::<serde_json::Value>(&text_res) {
         Ok(json) => Ok(json),
         Err(_) => Ok(serde_json::Value::String(text_res))
@@ -419,7 +533,6 @@ async fn http_request(
 
 #[tauri::command]
 async fn get_cookie(_client: State<'_, AppHttpClient>, _key: String) -> Result<Option<String>, String> {
-    // Return None so frontend falls back to document.cookie or empty
     Ok(None)
 }
 
@@ -448,10 +561,6 @@ async fn http_get(
     }
     
     let res = req.send().await.map_err(|e| e.to_string())?;
-    // We return the raw text or json based on content type? 
-    // The frontend axios adapter expects data. 
-    // Let's try to parse as JSON first, if fail return string?
-    // Most Bilibili APIs return JSON.
     let text_res = res.text().await.map_err(|e| e.to_string())?;
     match serde_json::from_str::<serde_json::Value>(&text_res) {
         Ok(json) => Ok(json),
@@ -491,8 +600,6 @@ async fn http_post(
 
     if let Some(b) = body {
         if is_form {
-            // If it's a form post, we expect the body to be a flat Key-Value object
-            // reqwest's .form() handles serialization
             req = req.form(&b);
         } else {
             req = req.json(&b);
@@ -505,6 +612,16 @@ async fn http_post(
         Ok(json) => Ok(json),
         Err(_) => Ok(serde_json::Value::String(text_res))
     }
+}
+
+// --- Proxy Command ---
+#[tauri::command]
+async fn get_proxy_port(state: State<'_, ProxyPort>) -> Result<u16, String> {
+    let port = *state.0.lock().unwrap();
+    if port == 0 {
+        return Err("Proxy not ready".into());
+    }
+    Ok(port)
 }
 
 // --- Window & Player Commands ---
@@ -592,15 +709,24 @@ pub fn run() {
     let jar = std::sync::Arc::new(reqwest::cookie::Jar::default());
     let client = reqwest::Client::builder()
         .cookie_provider(jar)
-        .user_agent("Mozilla/5.0")
+        .user_agent(DEFAULT_USER_AGENT)
         .build()
         .unwrap();
+    
+    let proxy_port = Arc::new(Mutex::new(0u16));
+    let proxy_port_clone = proxy_port.clone();
+
+    // Start Proxy Server
+    tauri::async_runtime::spawn(async move {
+        run_proxy_server(proxy_port_clone).await;
+    });
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_http::init())
         .manage(AppHttpClient(client))
+        .manage(ProxyPort(proxy_port))
         .invoke_handler(tauri::generate_handler![
             get_settings,
             set_settings,
@@ -629,7 +755,8 @@ pub fn run() {
             check_app_update,
             download_app_update,
             quit_and_install,
-            open_installer_directory
+            open_installer_directory,
+            get_proxy_port // Register the new command
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

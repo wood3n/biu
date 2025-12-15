@@ -1,4 +1,5 @@
 import { addToast } from "@heroui/react";
+import { invoke } from "@tauri-apps/api/core"; // Ensure you are importing invoke!
 import { shuffle } from "es-toolkit/array";
 import { remove } from "es-toolkit/array";
 import { uniqueId } from "es-toolkit/compat";
@@ -80,6 +81,8 @@ interface State {
   nextId?: string;
   /** 是否在随机播放模式下保持视频分集顺序 */
   shouldKeepPagesOrderInRandomPlayMode: boolean;
+  // Store the local proxy port
+  proxyPort: number;
 }
 
 interface PlayItem {
@@ -241,15 +244,28 @@ const isSame = (
   return false;
 };
 
+const getProxyUrl = (url: string, referer: string, port: number) => {
+  if (!url || !port) return url;
+  return `http://127.0.0.1:${port}/?url=${encodeURIComponent(url)}&referer=${encodeURIComponent(referer)}`;
+};
+
 export const usePlayList = create<State & Action>()(
   persist(
     immer((set, get) => {
       const ensureAudioSrcValid = async () => {
-        const { playId, list } = get();
+        const { playId, list, proxyPort } = get();
         const currentPlayItem = list.find(item => item.id === playId);
+
+        // Decide the referer based on item type
+        const referer = currentPlayItem?.bvid
+          ? `https://www.bilibili.com/video/${currentPlayItem.bvid}`
+          : "https://www.bilibili.com/";
+
         if (isUrlValid(currentPlayItem?.audioUrl)) {
-          if (audio.src !== currentPlayItem.audioUrl) {
-            audio.src = currentPlayItem.audioUrl;
+          const proxyUrl = getProxyUrl(currentPlayItem!.audioUrl!, referer, proxyPort);
+
+          if (audio.src !== proxyUrl) {
+            audio.src = proxyUrl;
           }
           const currentTime = get().currentTime;
           if (typeof currentTime === "number" && currentTime > 0) {
@@ -261,20 +277,19 @@ export const usePlayList = create<State & Action>()(
         if (currentPlayItem?.type === "mv" && currentPlayItem?.bvid && currentPlayItem?.cid) {
           const mvPlayData = await getDashUrl(currentPlayItem.bvid, currentPlayItem.cid);
           if (mvPlayData?.audioUrl) {
-            if (audio.src !== mvPlayData.audioUrl) {
-              audio.src = mvPlayData.audioUrl;
+            const pUrl = getProxyUrl(mvPlayData.audioUrl, referer, proxyPort);
+            if (audio.src !== pUrl) {
+              audio.src = pUrl;
               const currentTime = get().currentTime;
-              if (typeof currentTime === "number") {
-                audio.currentTime = currentTime;
-              }
+              if (typeof currentTime === "number") audio.currentTime = currentTime;
             }
             set(state => {
-              const listItem = state.list.find(item => item.id === state.playId);
-              if (listItem) {
-                listItem.audioUrl = mvPlayData.audioUrl;
-                listItem.videoUrl = mvPlayData.videoUrl;
-                listItem.isLossless = mvPlayData.isLossless;
-                listItem.isDolby = mvPlayData.isDolby;
+              const item = state.list.find(i => i.id === state.playId);
+              if (item) {
+                item.audioUrl = mvPlayData.audioUrl;
+                item.videoUrl = mvPlayData.videoUrl;
+                item.isLossless = mvPlayData.isLossless;
+                item.isDolby = mvPlayData.isDolby;
               }
             });
           } else {
@@ -285,19 +300,15 @@ export const usePlayList = create<State & Action>()(
         if (currentPlayItem?.type === "audio" && currentPlayItem?.sid) {
           const musicPlayData = await getAudioUrl(currentPlayItem.sid);
           if (musicPlayData?.audioUrl) {
-            if (audio.src !== musicPlayData.audioUrl) {
-              audio.src = musicPlayData.audioUrl;
+            const pUrl = getProxyUrl(musicPlayData.audioUrl, referer, proxyPort);
+            if (audio.src !== pUrl) {
+              audio.src = pUrl;
               const currentTime = get().currentTime;
-              if (typeof currentTime === "number") {
-                audio.currentTime = currentTime;
-              }
+              if (typeof currentTime === "number") audio.currentTime = currentTime;
             }
             set(state => {
-              const listItem = state.list.find(item => item.id === state.playId);
-              if (listItem) {
-                listItem.audioUrl = musicPlayData.audioUrl;
-                listItem.isLossless = musicPlayData.isLossless;
-              }
+              const item = state.list.find(i => i.id === state.playId);
+              if (item) item.audioUrl = musicPlayData.audioUrl;
             });
           } else {
             toastError("无法获取音频播放链接");
@@ -315,6 +326,8 @@ export const usePlayList = create<State & Action>()(
         duration: undefined,
         shouldKeepPagesOrderInRandomPlayMode: true,
         list: [],
+        proxyPort: 0, // Default 0
+
         init: async () => {
           if (audio) {
             audio.volume = get().volume;
@@ -392,23 +405,32 @@ export const usePlayList = create<State & Action>()(
                 get().seek(Math.round((audio.currentTime + offset) * 100) / 100);
               });
             }
+          }
 
-            if (get().playId) {
-              const playItem = get().list.find(item => item.id === get().playId);
-              if (playItem) {
-                await ensureAudioSrcValid();
+          // 2. GET THE PROXY PORT FROM RUST
+          try {
+            const port = await invoke<number>("get_proxy_port");
+            set({ proxyPort: port });
+            console.log("Got proxy port:", port);
+          } catch (e) {
+            console.error("Failed to get proxy port", e);
+          }
 
-                const localCurrentTime = localStorage.getItem("play-current-time");
-                if (localCurrentTime) {
-                  audio.currentTime = Number(localCurrentTime);
-                }
-
-                updateMediaSession({
-                  title: playItem.title,
-                  artist: playItem.ownerName,
-                  cover: playItem.pageCover,
-                });
+          // 3. Restore last played item
+          if (get().playId) {
+            const playItem = get().list.find(item => item.id === get().playId);
+            if (playItem) {
+              await ensureAudioSrcValid();
+              const localCurrentTime = localStorage.getItem("play-current-time");
+              if (localCurrentTime) {
+                audio.currentTime = Number(localCurrentTime);
               }
+
+              updateMediaSession({
+                title: playItem.title,
+                artist: playItem.ownerName,
+                cover: playItem.pageCover,
+              });
             }
           }
         },
@@ -852,8 +874,12 @@ export const usePlayList = create<State & Action>()(
   ),
 );
 
-function resetAudioAndPlay(url: string) {
-  audio.src = url;
+// Helper for resetting audio, using proxy logic
+function resetAudioAndPlay(url: string, referer: string) {
+  const { proxyPort } = usePlayList.getState();
+  const proxyUrl = getProxyUrl(url, referer, proxyPort);
+
+  audio.src = proxyUrl;
   audio.currentTime = 0;
   audio.load();
   audio.play().catch(error => {
@@ -884,8 +910,10 @@ usePlayList.subscribe(async (state, prevState) => {
     // 切换歌曲
     if (state.playId) {
       const playItem = state.list.find(item => item.id === state.playId);
+      const referer = playItem?.bvid ? `https://www.bilibili.com/video/${playItem.bvid}` : "https://www.bilibili.com/";
+
       if (isUrlValid(playItem?.audioUrl) && audio.paused && !state.isPlaying) {
-        resetAudioAndPlay(playItem.audioUrl);
+        resetAudioAndPlay(playItem.audioUrl!, referer);
         return;
       }
 
@@ -893,7 +921,7 @@ usePlayList.subscribe(async (state, prevState) => {
         if (playItem?.bvid && playItem?.cid) {
           const mvPlayData = await getDashUrl(playItem.bvid, playItem.cid);
           if (mvPlayData?.audioUrl) {
-            resetAudioAndPlay(mvPlayData?.audioUrl);
+            resetAudioAndPlay(mvPlayData?.audioUrl, referer);
 
             updateMediaSession({
               title: playItem.title,
@@ -919,7 +947,7 @@ usePlayList.subscribe(async (state, prevState) => {
           if (firstMV?.cid) {
             const mvPlayData = await getDashUrl(playItem.bvid, firstMV.cid);
             if (mvPlayData?.audioUrl) {
-              resetAudioAndPlay(mvPlayData?.audioUrl);
+              resetAudioAndPlay(mvPlayData?.audioUrl, referer);
 
               updateMediaSession({
                 title: firstMV.title,
@@ -957,7 +985,7 @@ usePlayList.subscribe(async (state, prevState) => {
       if (playItem?.type === "audio" && playItem?.sid) {
         const musicPlayData = await getAudioUrl(playItem.sid);
         if (musicPlayData?.audioUrl) {
-          resetAudioAndPlay(musicPlayData?.audioUrl);
+          resetAudioAndPlay(musicPlayData?.audioUrl, referer);
 
           updateMediaSession({
             title: playItem.title,
