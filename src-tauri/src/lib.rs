@@ -359,18 +359,141 @@ async fn start_download(
     client: State<'_, AppHttpClient>,
     params: DownloadOptions,
 ) -> Result<serde_json::Value, String> {
+    // Call the shared helper
+    spawn_download_task(app, client.0.clone(), params);
+    Ok(serde_json::json!({ "success": true }))
+}
+
+#[tauri::command]
+async fn add_media_download_task(
+    app: AppHandle,
+    client: State<'_, AppHttpClient>,
+    task: MediaDownloadTask
+) -> Result<serde_json::Value, String> {
+    
+    // Validate inputs
+    let bvid = task.bvid.ok_or("Missing bvid")?;
+    let cid = task.cid.ok_or("Missing cid")?;
+
+    // 1. Fetch the Bilibili Play URL
+    // fnval=16 requests DASH format (better audio separation)
+    let api_url = format!(
+        "https://api.bilibili.com/x/player/playurl?bvid={}&cid={}&qn=80&fnval=16", 
+        bvid, cid
+    );
+
+    let res = client.0.get(&api_url)
+        .header(REFERER, "https://www.bilibili.com") // Required by Bilibili API
+        .send()
+        .await
+        .map_err(|e| format!("Network error: {}", e))?;
+
+    let json: BiliPlayUrlResponse = res.json().await.map_err(|e| format!("JSON error: {}", e))?;
+
+    if json.code != 0 {
+        return Err(format!("Bilibili API Error Code: {}", json.code));
+    }
+
+    // 2. Extract Audio URL
+    // Priority: DASH audio stream -> DURL (fallback for older videos)
+    let audio_url = if let Some(data) = json.data {
+        if let Some(dash) = data.dash {
+            // Get the first audio track from DASH
+            dash.audio
+                .and_then(|audios| audios.first().map(|a| a.base_url.clone()))
+        } else if let Some(durls) = data.durl {
+            // Fallback to MP4/FLV url
+            durls.first().map(|d| d.url.clone())
+        } else {
+            None
+        }
+    } else {
+        None
+    }.ok_or("No audio stream found in API response")?;
+
+    // 3. Determine Filename
+    // If user requested mp3, we rely on the ffmpeg conversion in logic.
+    let ext = if task.output_file_type == "mp3" { "mp3" } else { "m4a" };
+    
+    // Sanitize title for filename
+    let safe_title: String = task.title.chars()
+        .filter(|c| c.is_alphanumeric() || *c == ' ' || *c == '-' || *c == '_')
+        .collect();
+    let filename = format!("{}.{}", safe_title, ext);
+
+    // 4. Construct Options & Start
+    let options = DownloadOptions {
+        id: uuid::Uuid::new_v4().to_string(), // Requires `uuid` crate with "v4" feature
+        filename,
+        audio_url,
+        is_lossless: task.output_file_type != "mp3", // If not mp3, treat as direct download
+    };
+
+    spawn_download_task(app, client.0.clone(), options);
+
+    Ok(serde_json::json!({ "success": true, "message": "Download started" }))
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MediaDownloadTask {
+    pub output_file_type: String,
+    pub title: String,
+    pub cover: Option<String>,
+    pub bvid: Option<String>,
+    pub cid: Option<String>,
+    pub sid: Option<String>,
+}
+
+// Bilibili API Response Helper Structs
+#[derive(Debug, Deserialize)]
+struct BiliPlayUrlResponse {
+    code: i32,
+    data: Option<BiliPlayUrlData>,
+}
+
+#[derive(Debug, Deserialize)]
+struct BiliPlayUrlData {
+    dash: Option<BiliDashData>,
+    durl: Option<Vec<BiliDurlData>>,
+}
+
+#[derive(Debug, Deserialize)]
+struct BiliDashData {
+    audio: Option<Vec<BiliDashMedia>>,
+}
+
+#[derive(Debug, Deserialize)]
+struct BiliDashMedia {
+    base_url: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct BiliDurlData {
+    url: String,
+}
+
+fn spawn_download_task(
+    app: AppHandle,
+    client: reqwest::Client,
+    params: DownloadOptions,
+) {
     let settings = load_settings(&app);
     let download_dir = PathBuf::from(settings.download_path.unwrap_or_default());
-    fs::create_dir_all(&download_dir).map_err(|e| e.to_string())?;
+    
+    // Ensure directories exist
+    if let Err(_) = fs::create_dir_all(&download_dir) { return; }
     
     let output_path = download_dir.join(&params.filename);
     let temp_dir = app.path().temp_dir().unwrap().join("biu-downloads");
-    fs::create_dir_all(&temp_dir).map_err(|e| e.to_string())?;
+    if let Err(_) = fs::create_dir_all(&temp_dir) { return; }
+    
     let temp_audio_path = temp_dir.join(format!("{}.audio.tmp", params.id));
 
     let options_clone = params.id.clone();
+    let is_lossless = params.is_lossless;
+    let audio_url = params.audio_url.clone();
     let app_handle = app.clone();
-    let client_inner = client.0.clone();
 
     tauri::async_runtime::spawn(async move {
         let emit_progress = |status: &str, progress: Option<u64>, downloaded: Option<u64>, total: Option<u64>, error: Option<String>| {
@@ -398,7 +521,7 @@ async fn start_download(
             headers.insert(RANGE, format!("bytes={}-", start_byte).parse().unwrap());
         }
 
-        let res_result = client_inner.get(&params.audio_url).headers(headers).send().await;
+        let res_result = client.get(&audio_url).headers(headers).send().await;
         
         match res_result {
             Ok(res) => {
@@ -434,18 +557,21 @@ async fn start_download(
                          } else {
                              0
                          };
+                         // Throttle events slightly if needed, or emit every chunk
                          emit_progress("downloading", Some(pct), Some(downloaded), total_size, None);
                     }
                 }
                 
                 emit_progress("merging", None, None, None, None);
 
-                if params.is_lossless {
+                if is_lossless {
+                     // If lossless/direct, just move the file
                      if let Err(_e) = fs::rename(&temp_audio_path, &output_path) {
-                         fs::copy(&temp_audio_path, &output_path).unwrap();
-                         fs::remove_file(&temp_audio_path).unwrap();
+                         let _ = fs::copy(&temp_audio_path, &output_path);
+                         let _ = fs::remove_file(&temp_audio_path);
                      }
                 } else {
+                    // Convert to MP3
                     let shell = app_handle.shell();
                     let status = shell.command("ffmpeg")
                         .args(&[
@@ -474,8 +600,6 @@ async fn start_download(
             }
         }
     });
-
-    Ok(serde_json::json!({ "success": true }))
 }
 
 // --- HTTP/Cookie Commands ---
@@ -739,6 +863,7 @@ pub fn run() {
             get_fonts,
             check_file_exists,
             start_download,
+            add_media_download_task,
             get_cookie,
             http_request,
             http_get,
