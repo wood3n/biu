@@ -45,6 +45,13 @@ export const tauriAdapter: any = {
   },
 
   addMediaDownloadTask: (task: any) => invoke("add_media_download_task", { task }),
+
+  clearMediaDownloadTaskList: () => invoke("clear_media_download_task_list"),
+
+  syncMediaDownloadTaskList: (cb: any) => {
+    return syncListen("download:list-sync", cb);
+  },
+
   addMediaDownloadTaskList: (tasks: any[]) => invoke("add_media_download_task_list", { tasks }),
 
   getMediaDownloadTaskList: () => invoke("get_media_download_task_list"),

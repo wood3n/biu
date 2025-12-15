@@ -1,18 +1,19 @@
 use font_kit::source::SystemSource;
+use futures_util::StreamExt;
+use reqwest::header::{
+    HeaderMap, HeaderName, ACCEPT_RANGES, CONTENT_LENGTH, CONTENT_RANGE, CONTENT_TYPE, COOKIE,
+    LOCATION, RANGE, REFERER, USER_AGENT,
+};
 use reqwest::Method;
-use reqwest::header::{HeaderMap, HeaderName, CONTENT_TYPE, RANGE, REFERER, USER_AGENT, LOCATION, COOKIE, CONTENT_LENGTH, CONTENT_RANGE, ACCEPT_RANGES};
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::path::PathBuf;
-use tauri::{
-    AppHandle, Emitter, Manager, State, WebviewWindowBuilder, WebviewUrl, Window,
-};
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net::TcpListener;
-use futures_util::StreamExt;
-use tauri_plugin_shell::ShellExt; 
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
+use tauri::{AppHandle, Emitter, Manager, State, WebviewUrl, WebviewWindowBuilder, Window};
+use tauri_plugin_shell::ShellExt;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::net::TcpListener;
 
 // --- Constants ---
 const DEFAULT_USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
@@ -55,10 +56,12 @@ impl TaskStore {
     fn new() -> Self {
         Self(Arc::new(Mutex::new(Vec::new())))
     }
-    
+
     // Helper to update a task safely
-    fn update_task<F>(&self, id: &str, f: F) 
-    where F: FnOnce(&mut MediaDownloadTaskState) {
+    fn update_task<F>(&self, id: &str, f: F)
+    where
+        F: FnOnce(&mut MediaDownloadTaskState),
+    {
         let mut tasks = self.0.lock().unwrap();
         if let Some(task) = tasks.iter_mut().find(|t| t.id == id) {
             f(task);
@@ -70,7 +73,7 @@ impl TaskStore {
 pub struct AppSettings {
     pub download_path: Option<String>,
     #[serde(flatten)]
-    pub extra: std::collections::HashMap<String, serde_json::Value>, 
+    pub extra: std::collections::HashMap<String, serde_json::Value>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -106,7 +109,10 @@ pub struct AppHttpClient(pub reqwest::Client);
 // --- Helper Functions ---
 
 fn get_settings_path(app: &AppHandle) -> PathBuf {
-    app.path().app_config_dir().unwrap().join("app-settings.json")
+    app.path()
+        .app_config_dir()
+        .unwrap()
+        .join("app-settings.json")
 }
 
 fn load_settings(app: &AppHandle) -> AppSettings {
@@ -122,8 +128,14 @@ fn load_settings(app: &AppHandle) -> AppSettings {
     }
     // Defaults
     AppSettings {
-        download_path: Some(app.path().download_dir().unwrap().to_string_lossy().to_string()),
-        extra: std::collections::HashMap::new(), 
+        download_path: Some(
+            app.path()
+                .download_dir()
+                .unwrap()
+                .to_string_lossy()
+                .to_string(),
+        ),
+        extra: std::collections::HashMap::new(),
     }
 }
 
@@ -131,9 +143,11 @@ fn load_settings(app: &AppHandle) -> AppSettings {
 
 async fn run_proxy_server(port_state: Arc<Mutex<u16>>) {
     // Bind to a random available port on localhost
-    let listener = TcpListener::bind("127.0.0.1:0").await.expect("Failed to bind proxy");
+    let listener = TcpListener::bind("127.0.0.1:0")
+        .await
+        .expect("Failed to bind proxy");
     let port = listener.local_addr().unwrap().port();
-    
+
     // Save the port so frontend can ask for it
     {
         let mut p = port_state.lock().unwrap();
@@ -153,35 +167,44 @@ async fn run_proxy_server(port_state: Arc<Mutex<u16>>) {
                 let mut buf = [0; 2048];
                 // Read the HTTP request (just enough to get headers)
                 if let Ok(n) = socket.read(&mut buf).await {
-                    if n == 0 { return; }
+                    if n == 0 {
+                        return;
+                    }
                     let request_str = String::from_utf8_lossy(&buf[..n]);
-                    
+
                     // 1. Parse URL parameters manually to avoid dependencies
                     // Expecting: GET /?url=...&referer=... HTTP/1.1
                     let first_line = request_str.lines().next().unwrap_or("");
-                    if !first_line.contains("GET") { return; }
+                    if !first_line.contains("GET") {
+                        return;
+                    }
 
                     // Extract query params
                     let target_url = extract_query_param(&request_str, "url=");
                     let referer_url = extract_query_param(&request_str, "referer=");
 
                     if let Some(url) = target_url {
-                        let decoded_url = urlencoding::decode(&url).unwrap_or(std::borrow::Cow::Borrowed(&url));
+                        let decoded_url =
+                            urlencoding::decode(&url).unwrap_or(std::borrow::Cow::Borrowed(&url));
                         let decoded_referer = if let Some(r) = referer_url {
-                            urlencoding::decode(&r).unwrap_or(std::borrow::Cow::Borrowed("https://www.bilibili.com/")).into_owned()
+                            urlencoding::decode(&r)
+                                .unwrap_or(std::borrow::Cow::Borrowed("https://www.bilibili.com/"))
+                                .into_owned()
                         } else {
                             "https://www.bilibili.com/".to_string()
                         };
 
                         // 2. Extract Range Header
-                        let range_header = request_str.lines()
+                        let range_header = request_str
+                            .lines()
                             .find(|l| l.to_lowercase().starts_with("range:"))
                             .map(|l| l.split(':').nth(1).unwrap_or("").trim());
 
                         // 3. Prepare Request to Bilibili
-                        let mut req_builder = client_clone.get(decoded_url.as_ref())
+                        let mut req_builder = client_clone
+                            .get(decoded_url.as_ref())
                             .header(REFERER, decoded_referer);
-                        
+
                         if let Some(range) = range_header {
                             req_builder = req_builder.header(RANGE, range);
                         }
@@ -196,18 +219,27 @@ async fn run_proxy_server(port_state: Arc<Mutex<u16>>) {
                                 let mut headers_str = String::new();
                                 headers_str.push_str("Access-Control-Allow-Origin: *\r\n");
                                 headers_str.push_str("Connection: close\r\n"); // Keep it simple
-                                
+
                                 if let Some(ct) = res.headers().get(CONTENT_TYPE) {
-                                    headers_str.push_str(&format!("Content-Type: {}\r\n", ct.to_str().unwrap_or("application/octet-stream")));
+                                    headers_str.push_str(&format!(
+                                        "Content-Type: {}\r\n",
+                                        ct.to_str().unwrap_or("application/octet-stream")
+                                    ));
                                 }
                                 if let Some(cl) = res.headers().get(CONTENT_LENGTH) {
-                                    headers_str.push_str(&format!("Content-Length: {}\r\n", cl.to_str().unwrap_or("0")));
+                                    headers_str.push_str(&format!(
+                                        "Content-Length: {}\r\n",
+                                        cl.to_str().unwrap_or("0")
+                                    ));
                                 }
                                 if let Some(cr) = res.headers().get(CONTENT_RANGE) {
-                                    headers_str.push_str(&format!("Content-Range: {}\r\n", cr.to_str().unwrap_or("")));
+                                    headers_str.push_str(&format!(
+                                        "Content-Range: {}\r\n",
+                                        cr.to_str().unwrap_or("")
+                                    ));
                                 }
                                 headers_str.push_str("Accept-Ranges: bytes\r\n\r\n");
-                                
+
                                 let _ = socket.write_all(headers_str.as_bytes()).await;
 
                                 // Pipe Body
@@ -221,7 +253,9 @@ async fn run_proxy_server(port_state: Arc<Mutex<u16>>) {
                                 }
                             }
                             Err(_) => {
-                                let _ = socket.write_all(b"HTTP/1.1 500 Internal Server Error\r\n\r\n").await;
+                                let _ = socket
+                                    .write_all(b"HTTP/1.1 500 Internal Server Error\r\n\r\n")
+                                    .await;
                             }
                         }
                     }
@@ -292,7 +326,10 @@ async fn set_settings(app: AppHandle, payload: AppSettings) -> Result<bool, Stri
 }
 
 fn get_store_path(app: &AppHandle, key: &str) -> PathBuf {
-    app.path().app_config_dir().unwrap().join(format!("{}.json", key))
+    app.path()
+        .app_config_dir()
+        .unwrap()
+        .join(format!("{}.json", key))
 }
 
 #[tauri::command]
@@ -356,13 +393,17 @@ async fn open_directory(app: AppHandle, path: Option<String>) -> Result<bool, St
     } else {
         load_settings(&app).download_path.unwrap_or_default()
     };
-    
+    println!("Path: {}", &target_dir);
     #[cfg(target_os = "windows")]
-    let result = std::process::Command::new("explorer").arg(&target_dir).spawn();
+    let result = std::process::Command::new("explorer")
+        .arg(&target_dir)
+        .spawn();
     #[cfg(target_os = "macos")]
     let result = std::process::Command::new("open").arg(&target_dir).spawn();
     #[cfg(target_os = "linux")]
-    let result = std::process::Command::new("xdg-open").arg(&target_dir).spawn();
+    let result = std::process::Command::new("xdg-open")
+        .arg(&target_dir)
+        .spawn();
 
     match result {
         Ok(_) => Ok(true),
@@ -379,10 +420,12 @@ async fn get_fonts() -> Result<Vec<serde_json::Value>, String> {
     let font_infos: Vec<serde_json::Value> = fonts
         .into_iter()
         .filter_map(|handle| {
-            handle.load().ok().map(|f| serde_json::json!({
-                "name": f.full_name(),
-                "familyName": f.family_name()
-            }))
+            handle.load().ok().map(|f| {
+                serde_json::json!({
+                    "name": f.full_name(),
+                    "familyName": f.family_name()
+                })
+            })
         })
         .collect::<Vec<_>>();
     Ok(font_infos)
@@ -410,7 +453,9 @@ async fn start_download(
 
 // --- NEW: Command to get the list ---
 #[tauri::command]
-async fn get_media_download_task_list(state: State<'_, TaskStore>) -> Result<Vec<MediaDownloadTaskState>, String> {
+async fn get_media_download_task_list(
+    state: State<'_, TaskStore>,
+) -> Result<Vec<MediaDownloadTaskState>, String> {
     let tasks = state.0.lock().unwrap();
     Ok(tasks.clone())
 }
@@ -432,20 +477,21 @@ async fn add_media_download_task(
     app: AppHandle,
     client: State<'_, AppHttpClient>,
     store: State<'_, TaskStore>, // State must be managed in run()
-    task: MediaDownloadRequest
+    task: MediaDownloadRequest,
 ) -> Result<serde_json::Value, String> {
-    
     // Validate inputs
     let bvid = task.bvid.clone().ok_or("Missing bvid")?;
     let cid = task.cid.clone().ok_or("Missing cid")?;
 
     // 1. Fetch the Bilibili Play URL
     let api_url = format!(
-        "https://api.bilibili.com/x/player/playurl?bvid={}&cid={}&qn=80&fnval=16", 
+        "https://api.bilibili.com/x/player/playurl?bvid={}&cid={}&qn=80&fnval=16",
         bvid, cid
     );
 
-    let res = client.0.get(&api_url)
+    let res = client
+        .0
+        .get(&api_url)
         .header(REFERER, "https://www.bilibili.com")
         .send()
         .await
@@ -460,7 +506,9 @@ async fn add_media_download_task(
     // 2. Extract Audio URL
     let audio_url = if let Some(data) = &json.data {
         if let Some(dash) = &data.dash {
-            dash.audio.as_ref().and_then(|audios| audios.first().map(|a| a.base_url.clone()))
+            dash.audio
+                .as_ref()
+                .and_then(|audios| audios.first().map(|a| a.base_url.clone()))
         } else if let Some(durls) = &data.durl {
             durls.first().map(|d| d.url.clone())
         } else {
@@ -468,12 +516,19 @@ async fn add_media_download_task(
         }
     } else {
         None
-    }.ok_or("No audio stream found in API response")?;
+    }
+    .ok_or("No audio stream found in API response")?;
 
     // 3. Determine Filename
-    let ext = if task.output_file_type == "mp3" { "mp3" } else { "m4a" };
-    
-    let safe_title: String = task.title.chars()
+    let ext = if task.output_file_type == "mp3" {
+        "mp3"
+    } else {
+        "m4a"
+    };
+
+    let safe_title: String = task
+        .title
+        .chars()
         .filter(|c| c.is_alphanumeric() || *c == ' ' || *c == '-' || *c == '_')
         .collect();
     let filename = format!("{}.{}", safe_title, ext);
@@ -503,7 +558,16 @@ async fn add_media_download_task(
 
     {
         let mut tasks = store.0.lock().unwrap();
-        tasks.push(new_task_state);
+        tasks.push(new_task_state.clone());
+
+        app.emit(
+            "download:list-sync",
+            serde_json::json!({
+                "type": "full",
+                "data": *tasks
+            }),
+        )
+        .map_err(|e| e.to_string())?;
     }
 
     // 5. Construct Options & Start
@@ -511,7 +575,7 @@ async fn add_media_download_task(
         id: task_id,
         filename,
         audio_url,
-        is_lossless: task.output_file_type != "mp3", 
+        is_lossless: task.output_file_type != "mp3",
     };
 
     spawn_download_task(app, client.0.clone(), options);
@@ -547,21 +611,21 @@ struct BiliDurlData {
     url: String,
 }
 
-fn spawn_download_task(
-    app: AppHandle,
-    client: reqwest::Client,
-    params: DownloadOptions,
-) {
+fn spawn_download_task(app: AppHandle, client: reqwest::Client, params: DownloadOptions) {
     let settings = load_settings(&app);
     let download_dir = PathBuf::from(settings.download_path.unwrap_or_default());
-    
+
     // Ensure directories exist
-    if let Err(_) = fs::create_dir_all(&download_dir) { return; }
-    
+    if let Err(_) = fs::create_dir_all(&download_dir) {
+        return;
+    }
+
     let output_path = download_dir.join(&params.filename);
     let temp_dir = app.path().temp_dir().unwrap().join("biu-downloads");
-    if let Err(_) = fs::create_dir_all(&temp_dir) { return; }
-    
+    if let Err(_) = fs::create_dir_all(&temp_dir) {
+        return;
+    }
+
     let temp_audio_path = temp_dir.join(format!("{}.audio.tmp", params.id));
 
     let options_clone = params.id.clone();
@@ -571,44 +635,75 @@ fn spawn_download_task(
 
     tauri::async_runtime::spawn(async move {
         // Closure to update both UI events and Backend State
-        let update_status = |status: &str, progress: Option<u64>, downloaded: Option<u64>, total: Option<u64>, error: Option<String>| {
-            // 1. Emit UI Event
-            let _ = app_handle.emit("download:progress", DownloadProgress {
-                id: options_clone.clone(),
-                status: status.to_string(),
-                progress,
-                downloaded_bytes: downloaded,
-                total_bytes: total,
-                error: error.clone(),
-            });
+        let update_status = |status: &str,
+                             progress: Option<u64>,
+                             downloaded: Option<u64>,
+                             total: Option<u64>,
+                             error: Option<String>| {
+            // 1. Emit legacy UI Event (Optional, keep if other components use it)
+            let _ = app_handle.emit(
+                "download:progress",
+                DownloadProgress {
+                    id: options_clone.clone(),
+                    status: status.to_string(),
+                    progress,
+                    downloaded_bytes: downloaded,
+                    total_bytes: total,
+                    error: error.clone(),
+                },
+            );
 
-            // 2. Update Backend Store (if available)
-            // We use try_state here because in rare cases (like app shutdown) state might be gone, 
-            // though usually safe inside app logic.
+            // 2. Update Backend Store AND Emit Sync Event
             if let Some(store) = app_handle.try_state::<TaskStore>() {
-                store.update_task(&options_clone, |t| {
+                // We manually lock here instead of using helper so we can get the updated task to emit
+                let mut tasks = store.0.lock().unwrap();
+                if let Some(t) = tasks.iter_mut().find(|t| t.id == options_clone) {
                     t.status = status.to_string();
-                    if let Some(p) = progress { t.download_progress = Some(p); }
-                    if let Some(tot) = total { t.total_bytes = Some(tot); }
-                    if let Some(err) = &error { t.error = Some(err.clone()); }
-                    
-                    // Logic to simulate phase progress
-                    if status == "merging" { t.merge_progress = Some(50); }
-                    if status == "converting" { t.convert_progress = Some(10); } 
+                    if let Some(p) = progress {
+                        t.download_progress = Some(p);
+                    }
+                    if let Some(tot) = total {
+                        t.total_bytes = Some(tot);
+                    }
+                    if let Some(err) = &error {
+                        t.error = Some(err.clone());
+                    }
+
+                    if status == "merging" {
+                        t.merge_progress = Some(50);
+                    }
+                    if status == "converting" {
+                        t.convert_progress = Some(10);
+                    }
                     if status == "completed" {
                         t.download_progress = Some(100);
                         t.merge_progress = Some(100);
                         t.convert_progress = Some(100);
                     }
-                });
+
+                    // Clone the updated task to send in the event
+                    let updated_task_data = t.clone();
+
+                    // Release lock before emitting (good practice, though emit is async usually)
+                    drop(tasks);
+
+                    // Emit UPDATE sync event
+                    let _ = app_handle.emit(
+                        "download:list-sync",
+                        serde_json::json!({
+                            "type": "update",
+                            "data": [updated_task_data] // Send array of updates
+                        }),
+                    );
+                }
             }
         };
 
         let mut start_byte = 0;
         if temp_audio_path.exists() {
-             if let Ok(metadata) = fs::metadata(&temp_audio_path) {
-                 start_byte = metadata.len();
-             }
+            if let Ok(metadata) = fs::metadata(&temp_audio_path) {
+                start_byte = metadata.len();
+            }
         }
 
         let mut headers = HeaderMap::new();
@@ -619,17 +714,23 @@ fn spawn_download_task(
         }
 
         let res_result = client.get(&audio_url).headers(headers).send().await;
-        
+
         match res_result {
             Ok(res) => {
                 if !res.status().is_success() {
-                     update_status("failed", None, None, None, Some(format!("HTTP {}", res.status())));
-                     return;
+                    update_status(
+                        "failed",
+                        None,
+                        None,
+                        None,
+                        Some(format!("HTTP {}", res.status())),
+                    );
+                    return;
                 }
 
                 let total_size = res.content_length().map(|l| l + start_byte);
                 let mut stream = res.bytes_stream();
-                
+
                 let mut file = tokio::fs::OpenOptions::new()
                     .create(true)
                     .append(true)
@@ -638,66 +739,94 @@ fn spawn_download_task(
                     .expect("Failed to open temp file");
 
                 let mut downloaded = start_byte;
-                
+
                 update_status("downloading", Some(0), Some(downloaded), total_size, None);
 
                 while let Some(item) = stream.next().await {
                     if let Ok(chunk) = item {
-                         if let Err(_) = file.write_all(&chunk).await {
-                             update_status("failed", None, None, None, Some("Write error".into()));
-                             return;
-                         }
-                         downloaded += chunk.len() as u64;
-                         
-                         let pct = if let Some(total) = total_size {
-                             (downloaded as f64 / total as f64 * 100.0) as u64
-                         } else {
-                             0
-                         };
-                         update_status("downloading", Some(pct), Some(downloaded), total_size, None);
+                        if let Err(_) = file.write_all(&chunk).await {
+                            update_status("failed", None, None, None, Some("Write error".into()));
+                            return;
+                        }
+                        downloaded += chunk.len() as u64;
+
+                        let pct = if let Some(total) = total_size {
+                            (downloaded as f64 / total as f64 * 100.0) as u64
+                        } else {
+                            0
+                        };
+                        update_status("downloading", Some(pct), Some(downloaded), total_size, None);
                     }
                 }
-                
+
                 update_status("merging", None, None, None, None);
 
                 if is_lossless {
-                     // If lossless/direct, just move the file
-                     if let Err(_e) = fs::rename(&temp_audio_path, &output_path) {
-                         let _ = fs::copy(&temp_audio_path, &output_path);
-                         let _ = fs::remove_file(&temp_audio_path);
-                     }
+                    // If lossless/direct, just move the file
+                    if let Err(_e) = fs::rename(&temp_audio_path, &output_path) {
+                        let _ = fs::copy(&temp_audio_path, &output_path);
+                        let _ = fs::remove_file(&temp_audio_path);
+                    }
                 } else {
                     // Convert to MP3
                     update_status("converting", None, None, None, None);
-                    
+
                     let shell = app_handle.shell();
-                    let status = shell.command("ffmpeg")
+                    let status = shell
+                        .command("ffmpeg")
                         .args(&[
-                            "-y", "-i", temp_audio_path.to_str().unwrap(),
-                            "-vn", "-codec:a", "libmp3lame", "-q:a", "2",
-                            output_path.to_str().unwrap()
+                            "-y",
+                            "-i",
+                            temp_audio_path.to_str().unwrap(),
+                            "-vn",
+                            "-codec:a",
+                            "libmp3lame",
+                            "-q:a",
+                            "2",
+                            output_path.to_str().unwrap(),
                         ])
                         .output()
                         .await;
 
                     match status {
-                         Ok(output) if output.status.success() => {
-                             let _ = fs::remove_file(&temp_audio_path);
-                         },
-                         _ => {
-                             update_status("failed", None, None, None, Some("FFmpeg failed".into()));
-                             return;
-                         }
+                        Ok(output) if output.status.success() => {
+                            let _ = fs::remove_file(&temp_audio_path);
+                        }
+                        _ => {
+                            update_status("failed", None, None, None, Some("FFmpeg failed".into()));
+                            return;
+                        }
                     }
                 }
 
                 update_status("completed", Some(100), None, None, None);
-            },
+            }
             Err(e) => {
                 update_status("failed", None, None, None, Some(e.to_string()));
             }
         }
     });
+}
+
+#[tauri::command]
+async fn clear_media_download_task_list(
+    app: AppHandle,
+    store: State<'_, TaskStore>,
+) -> Result<(), String> {
+    let mut tasks = store.0.lock().unwrap();
+    tasks.clear();
+
+    // Emit full sync event with empty list
+    app.emit(
+        "download:list-sync",
+        serde_json::json!({
+            "type": "full",
+            "data": Vec::<MediaDownloadTaskState>::new()
+        }),
+    )
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
 }
 
 // --- HTTP/Cookie Commands ---
@@ -719,7 +848,12 @@ async fn http_request(
             for (k, v) in headers {
                 if let Ok(hname) = k.parse::<HeaderName>() {
                     if let Ok(hval) = v.parse::<tauri::http::HeaderValue>() {
-                        if hname == CONTENT_TYPE && hval.to_str().unwrap_or("").contains("application/x-www-form-urlencoded") {
+                        if hname == CONTENT_TYPE
+                            && hval
+                                .to_str()
+                                .unwrap_or("")
+                                .contains("application/x-www-form-urlencoded")
+                        {
                             is_form = true;
                         }
                         hmap.insert(hname, hval);
@@ -732,7 +866,7 @@ async fn http_request(
             req = req.query(&params);
         }
         if let Some(timeout_ms) = payload.timeout {
-             req = req.timeout(std::time::Duration::from_millis(timeout_ms));
+            req = req.timeout(std::time::Duration::from_millis(timeout_ms));
         }
     }
 
@@ -746,15 +880,18 @@ async fn http_request(
 
     let res = req.send().await.map_err(|e| e.to_string())?;
     let text_res = res.text().await.map_err(|e| e.to_string())?;
-    
+
     match serde_json::from_str::<serde_json::Value>(&text_res) {
         Ok(json) => Ok(json),
-        Err(_) => Ok(serde_json::Value::String(text_res))
+        Err(_) => Ok(serde_json::Value::String(text_res)),
     }
 }
 
 #[tauri::command]
-async fn get_cookie(_client: State<'_, AppHttpClient>, _key: String) -> Result<Option<String>, String> {
+async fn get_cookie(
+    _client: State<'_, AppHttpClient>,
+    _key: String,
+) -> Result<Option<String>, String> {
     Ok(None)
 }
 
@@ -781,12 +918,12 @@ async fn http_get(
             req = req.query(&params);
         }
     }
-    
+
     let res = req.send().await.map_err(|e| e.to_string())?;
     let text_res = res.text().await.map_err(|e| e.to_string())?;
     match serde_json::from_str::<serde_json::Value>(&text_res) {
         Ok(json) => Ok(json),
-        Err(_) => Ok(serde_json::Value::String(text_res))
+        Err(_) => Ok(serde_json::Value::String(text_res)),
     }
 }
 
@@ -806,7 +943,12 @@ async fn http_post(
             for (k, v) in headers {
                 if let Ok(hname) = k.parse::<HeaderName>() {
                     if let Ok(hval) = v.parse::<tauri::http::HeaderValue>() {
-                        if hname == CONTENT_TYPE && hval.to_str().unwrap_or("").contains("application/x-www-form-urlencoded") {
+                        if hname == CONTENT_TYPE
+                            && hval
+                                .to_str()
+                                .unwrap_or("")
+                                .contains("application/x-www-form-urlencoded")
+                        {
                             is_form = true;
                         }
                         hmap.insert(hname, hval);
@@ -827,12 +969,12 @@ async fn http_post(
             req = req.json(&b);
         }
     }
-    
+
     let res = req.send().await.map_err(|e| e.to_string())?;
     let text_res = res.text().await.map_err(|e| e.to_string())?;
     match serde_json::from_str::<serde_json::Value>(&text_res) {
         Ok(json) => Ok(json),
-        Err(_) => Ok(serde_json::Value::String(text_res))
+        Err(_) => Ok(serde_json::Value::String(text_res)),
     }
 }
 
@@ -850,7 +992,8 @@ async fn get_proxy_port(state: State<'_, ProxyPort>) -> Result<u16, String> {
 
 #[tauri::command]
 async fn update_playback_state(app: AppHandle, is_playing: bool) -> Result<(), String> {
-    app.emit("playback-state-update", is_playing).map_err(|e| e.to_string())?;
+    app.emit("playback-state-update", is_playing)
+        .map_err(|e| e.to_string())?;
     Ok(())
 }
 
@@ -859,7 +1002,7 @@ async fn switch_to_mini(app: AppHandle, _window: Window) -> Result<(), String> {
     if let Some(main_win) = app.get_webview_window("main") {
         main_win.hide().unwrap();
     }
-    
+
     if app.get_webview_window("mini").is_none() {
         let _mini = WebviewWindowBuilder::new(
             &app,
@@ -934,7 +1077,7 @@ pub fn run() {
         .user_agent(DEFAULT_USER_AGENT)
         .build()
         .unwrap();
-    
+
     let proxy_port = Arc::new(Mutex::new(0u16));
     let proxy_port_clone = proxy_port.clone();
 
@@ -947,9 +1090,20 @@ pub fn run() {
     });
 
     tauri::Builder::default()
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .level(tauri_plugin_log::log::LevelFilter::Info)
+                .build(),
+        )
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .level(tauri_plugin_log::log::LevelFilter::Info)
+                .build(),
+        )
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_log::Builder::new().build())
         .manage(AppHttpClient(client))
         .manage(ProxyPort(proxy_port))
         .manage(task_store) // 2. IMPORTANT: Register the store here
@@ -966,7 +1120,8 @@ pub fn run() {
             check_file_exists,
             start_download,
             add_media_download_task,
-            get_media_download_task_list, // 3. Register command
+            get_media_download_task_list,
+            clear_media_download_task_list,
             get_cookie,
             http_request,
             http_get,
