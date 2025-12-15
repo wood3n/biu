@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "identifier": "com.biu.app",
   "build": {
-    "frontendDist": "../build",
+    "frontendDist": "../dist/web",
     "devUrl": "http://localhost:3000",
     "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build"
