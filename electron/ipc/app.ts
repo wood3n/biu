@@ -1,6 +1,6 @@
-import { app, ipcMain, shell } from "electron";
+import { app, ipcMain } from "electron";
 
-import { autoUpdater, getDownloadedFilePath } from "../updater";
+import { autoUpdater } from "../updater";
 import { channel } from "./channel";
 
 export function registerAppHandlers() {
@@ -37,14 +37,5 @@ export function registerAppHandlers() {
 
   ipcMain.handle(channel.app.quitAndInstall, async () => {
     return autoUpdater.quitAndInstall();
-  });
-
-  ipcMain.handle(channel.app.openInstallerDirectory, async () => {
-    const path = getDownloadedFilePath();
-    if (path) {
-      shell.showItemInFolder(path);
-      return true;
-    }
-    return false;
   });
 }

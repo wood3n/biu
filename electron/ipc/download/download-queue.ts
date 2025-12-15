@@ -170,6 +170,7 @@ export class DownloadQueue {
           this.pendingUpdates.set(core.id!, updateData);
           this.flushUpdates();
         });
+
         await core.start();
       },
       {
@@ -179,12 +180,12 @@ export class DownloadQueue {
   }
 
   public retryTask(id: string) {
-    this.resumeTask(id); // Retry is essentially resume/restart
+    this.resumeTask(id);
   }
 
   public getBroadcastTaskDataList(): MediaDownloadTask[] {
     return Array.from(this.tasks.values()).map(core => ({
-      id: core.id!,
+      id: core.id,
       outputFileType: core.outputFileType,
       title: core.title,
       bvid: core.bvid,
@@ -229,7 +230,7 @@ export class DownloadQueue {
         downloadProgress: core.downloadProgress,
         mergeProgress: core.mergeProgress,
         convertProgress: core.convertProgress,
-        status: core.status,
+        status: ["downloading", "merging", "converting"].includes(core.status) ? "paused" : core.status,
         fileName: core.fileName,
         savePath: core.savePath,
         audioTempPath: core.audioTempPath,

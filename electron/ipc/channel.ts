@@ -9,6 +9,7 @@ export const channel = {
   },
   dialog: {
     selectDirectory: "dialog:select-directory",
+    showFileInFolder: "dialog:show-file-in-folder",
     selectFile: "dialog:select-file",
     openDirectory: "dialog:open-directory",
     openExternal: "dialog:open-external",

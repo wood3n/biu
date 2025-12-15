@@ -15,6 +15,16 @@ export function registerDialogHandlers() {
     return err === "";
   });
 
+  ipcMain.handle(channel.dialog.showFileInFolder, (_event: IpcMainInvokeEvent, filePath: string) => {
+    try {
+      if (!filePath) return false;
+      shell.showItemInFolder(filePath);
+      return true;
+    } catch {
+      return false;
+    }
+  });
+
   ipcMain.handle(channel.dialog.openExternal, async (_event: IpcMainInvokeEvent, url: string) => {
     try {
       await shell.openExternal(url);

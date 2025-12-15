@@ -135,7 +135,9 @@ app.whenReady().then(() => {
     getMainWindow: () => mainWindow,
   });
 
-  setupAutoUpdater();
+  setupAutoUpdater({
+    getMainWindow: () => mainWindow,
+  });
 
   if (process.platform === "darwin") {
     const updateDockIcon = () => {
