@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 import { Progress, Spinner } from "@heroui/react";
 import { RiCheckboxCircleLine } from "@remixicon/react";
 import clx from "classnames";
@@ -13,10 +11,6 @@ interface Props {
 }
 
 const DownloadProgress = ({ data }: Props) => {
-  if (data.status === "waiting") {
-    return <span>等待中</span>;
-  }
-
   if (data.status === "completed") {
     return (
       <div className="text-success flex items-center space-x-1">
@@ -26,34 +20,29 @@ const DownloadProgress = ({ data }: Props) => {
     );
   }
 
-  if (data.status === "converting") {
+  if (data.status === "merging") {
     return (
-      <span className="text-success flex items-center space-x-1">
-        <Spinner size="sm" color="success" className="h-4 w-4" />
-        <span>转换中</span>
+      <span className="flex items-center space-x-1">
+        <Spinner size="sm" color="default" variant="spinner" className="h-4 w-4" />
+        <span>合并文件中</span>
       </span>
     );
   }
 
-  const progressValue = useMemo(() => {
-    if (data.status === "downloading") {
-      return data.downloadProgress;
-    }
-
-    if (data.status === "merging") {
-      return data.mergeProgress;
-    }
-
-    if (data.status === "converting") {
-      return data.convertProgress;
-    }
-  }, [data.status, data.downloadProgress, data.mergeProgress, data.convertProgress]);
+  if (data.status === "converting") {
+    return (
+      <span className="flex items-center space-x-1">
+        <Spinner size="sm" color="default" variant="spinner" className="h-4 w-4" />
+        <span className="text-foreground">转换文件格式</span>
+      </span>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col justify-center space-y-1">
       <Progress
-        color={data.status === "failed" ? "danger" : "primary"}
-        value={progressValue}
+        color={["failed", "downloadFailed"].includes(data.status) ? "danger" : "primary"}
+        value={data.downloadProgress}
         maxValue={100}
         showValueLabel={false}
         size="sm"
@@ -71,7 +60,7 @@ const DownloadProgress = ({ data }: Props) => {
             <Ellipsis className="text-danger max-w-[160px] text-xs">{data.error}</Ellipsis>
           )}
         </span>
-        <span className="text-xs">{progressValue || 0}%</span>
+        <span className="text-xs">{data.downloadProgress || 0}%</span>
       </div>
     </div>
   );

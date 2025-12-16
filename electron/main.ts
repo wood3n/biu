@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { channel } from "./ipc/channel";
-import { saveDownloadQueue } from "./ipc/download";
+import { quitAndSaveTasks } from "./ipc/download";
 import { registerIpcHandlers } from "./ipc/index";
 import { setupMacDock } from "./mac/dock";
 import { destroyMiniPlayer } from "./mini-player";
@@ -175,9 +175,9 @@ app.on("before-quit", () => {
 // 在 will-quit 阶段清理资源，确保进程干净退出
 app.on("will-quit", () => {
   try {
-    saveDownloadQueue();
+    quitAndSaveTasks();
   } catch (err) {
-    log.error("[main] saveDownloadQueue failed:", err);
+    log.error("[main] quitAndSaveTasks failed:", err);
   }
 
   try {

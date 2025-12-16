@@ -8,7 +8,6 @@ interface ConvertOptions {
   audioTempPath: string;
   videoTempPath?: string;
   outputPath: string;
-  onProgress?: (percent: number) => void;
 }
 
 export const convert = async ({
@@ -16,7 +15,6 @@ export const convert = async ({
   videoTempPath,
   outputPath,
   outputFileType,
-  onProgress,
 }: ConvertOptions): Promise<void> => {
   fixFfmpegPath();
   return new Promise((resolve, reject) => {
@@ -40,12 +38,6 @@ export const convert = async ({
       command.input(audioTempPath);
       command.outputOptions(["-c:a copy"]);
     }
-
-    command.on("progress", progress => {
-      if (onProgress && progress.percent) {
-        onProgress(Math.round(progress.percent * 100) / 100);
-      }
-    });
 
     command.on("error", err => {
       log.error("Cannot process video: " + err.message);

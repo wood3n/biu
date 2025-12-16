@@ -1,4 +1,13 @@
-type MediaDownloadStatus = "waiting" | "downloading" | "merging" | "converting" | "paused" | "completed" | "failed";
+type MediaDownloadStatus =
+  | "waiting"
+  | "downloading"
+  | "downloadPaused"
+  | "merging"
+  | "mergePaused" // 一般因为中途退出应用而暂停
+  | "converting"
+  | "convertPaused" // 一般因为中途退出应用而暂停
+  | "completed"
+  | "failed";
 
 type MediaDownloadOutputFileType = "audio" | "video";
 
@@ -17,13 +26,13 @@ interface MediaDownloadInfo {
   sid?: string | number;
 }
 
-interface MediaDownloadTaskBase extends MediaDownloadInfo {
+interface MediaDownloadTask extends MediaDownloadInfo {
+  /** 下载任务id */
   id: string;
+  /** 下载状态 */
   status: MediaDownloadStatus;
-  createdTime: number;
-}
-
-interface MediaDownloadTask extends MediaDownloadTaskBase {
+  /** 创建时间 */
+  createdTime?: number;
   /** 音频编码格式 */
   audioCodecs?: string;
   /** 音频带宽 */
@@ -38,10 +47,6 @@ interface MediaDownloadTask extends MediaDownloadTaskBase {
   totalBytes?: number;
   /** 下载进度百分比 */
   downloadProgress?: number;
-  /** 合并进度百分比 */
-  mergeProgress?: number;
-  /** ffmpeg 转换进度百分比 */
-  convertProgress?: number;
   /** 下载错误信息 */
   error?: string;
 }

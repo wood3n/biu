@@ -11,16 +11,22 @@ export interface FullMediaDownloadTask extends MediaDownloadTask {
   videoFrameRate?: string;
   /** 文件名 */
   fileName?: string;
+  /** 临时目录 */
+  tempDir?: string;
   /** 音频临时文件路径 */
   audioTempPath?: string;
   /** 视频临时文件路径 */
   videoTempPath?: string;
-  /** 保存路径 */
+  /** 保存目录 */
+  saveDir?: string;
+  /** 保存文件路径 */
   savePath?: string;
   /** 已下载字节数 */
   downloadedBytes?: number;
   /** 下载分块信息 */
   chunks?: MediaDownloadChunk[];
+  /** 取消下载信号 */
+  abortSignal?: AbortSignal;
 }
 
 export interface MediaDownloadChunk {

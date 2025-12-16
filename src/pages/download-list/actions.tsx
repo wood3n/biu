@@ -21,10 +21,15 @@ const DownloadActions = ({ data }: Props) => {
       icon: data.outputFileType === "audio" ? <RiFileMusicLine size={18} /> : <RiFileVideoLine size={18} />,
       show: data.status === "completed",
       onPress: async () => {
+        if (!data.savePath) {
+          addToast({ title: "文件路径不存在", color: "danger" });
+          return;
+        }
+
         try {
-          await window.electron.openDirectory(data.savePath);
+          await window.electron.showFileInFolder(data.savePath);
         } catch (err) {
-          addToast({ title: `无法打开文件, ${err instanceof Error ? err.message : String(err)}`, color: "danger" });
+          addToast({ title: `${err instanceof Error ? err.message : String(err)}`, color: "danger" });
         }
       },
     },
@@ -32,7 +37,7 @@ const DownloadActions = ({ data }: Props) => {
       key: "pause",
       label: "暂停",
       icon: <RiPauseLine size={18} />,
-      show: false, // TODO:先不展示
+      show: data.status === "downloading",
       onPress: async () => {
         await window.electron.pauseMediaDownloadTask(data.id);
       },
@@ -41,7 +46,7 @@ const DownloadActions = ({ data }: Props) => {
       key: "resume",
       label: "继续",
       icon: <RiPlayLine size={18} />,
-      show: false,
+      show: ["downloadPaused", "mergePaused", "convertPaused"].includes(data.status),
       onPress: async () => {
         await window.electron.resumeMediaDownloadTask(data.id);
       },
@@ -50,7 +55,7 @@ const DownloadActions = ({ data }: Props) => {
       key: "retry",
       label: "重试",
       icon: <RiRefreshLine size={18} />,
-      show: false,
+      show: data.status === "failed",
       onPress: async () => {
         await window.electron.retryMediaDownloadTask(data.id);
       },

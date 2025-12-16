@@ -65,7 +65,7 @@ const DownloadList = () => {
     await window.electron.clearMediaDownloadTaskList();
   };
 
-  const openDirectory = async () => {
+  const openDownloadDir = async () => {
     await window.electron.openDirectory(downloadPath);
   };
 
@@ -102,7 +102,7 @@ const DownloadList = () => {
         </h1>
         <div className="flex items-center space-x-1">
           <Tooltip content="打开目录" closeDelay={0}>
-            <Button variant="flat" onPress={openDirectory} startContent={<RiFolderLine size={18} />}>
+            <Button variant="flat" onPress={openDownloadDir} startContent={<RiFolderLine size={18} />}>
               {downloadPath}
             </Button>
           </Tooltip>
