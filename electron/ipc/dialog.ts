@@ -17,15 +17,11 @@ export function registerDialogHandlers() {
   });
 
   ipcMain.handle(channel.dialog.showFileInFolder, (_event: IpcMainInvokeEvent, filePath: string) => {
-    return new Promise<boolean>((resolve, reject) => {
-      try {
-        if (!filePath || !fs.existsSync(filePath)) return reject(new Error("文件路径不存在"));
-        shell.showItemInFolder(filePath);
-        resolve(true);
-      } catch (err) {
-        reject(err);
-      }
-    });
+    if (!filePath || !fs.existsSync(filePath)) {
+      throw new Error("文件路径不存在");
+    }
+    shell.showItemInFolder(filePath);
+    return true;
   });
 
   ipcMain.handle(channel.dialog.openExternal, async (_event: IpcMainInvokeEvent, url: string) => {
