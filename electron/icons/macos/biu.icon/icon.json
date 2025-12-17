@@ -1,0 +1,28 @@
+{
+  "fill": "automatic",
+  "groups": [
+    {
+      "layers": [
+        {
+          "image-name": "logo 2.png",
+          "name": "biu",
+          "position": {
+            "scale": 1.75,
+            "translation-in-points": [0, -25.40625]
+          }
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.5
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": ["macOS"]
+  }
+}

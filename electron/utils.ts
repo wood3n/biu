@@ -15,10 +15,6 @@ export const getWindowIcon = () =>
     ? undefined
     : path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, process.platform === "win32" ? "logo.ico" : "logo.png");
 
-export const getMacLightIconPath = () => path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, "light-icon.png");
-
-export const getMacDarkIconPath = () => path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, "dark-icon.png");
-
 export const fixFfmpegPath = () => {
   try {
     const settings = appSettingsStore.get("appSettings");
