@@ -47,6 +47,10 @@ interface MediaDownloadTask extends MediaDownloadInfo {
   totalBytes?: number;
   /** 下载进度百分比 */
   downloadProgress?: number;
+  /** 合并进度百分比 */
+  mergeProgress?: number;
+  /** 转换进度百分比 */
+  convertProgress?: number;
   /** 下载错误信息 */
   error?: string;
 }

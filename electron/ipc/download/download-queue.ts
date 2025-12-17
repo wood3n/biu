@@ -113,6 +113,7 @@ export class DownloadQueue {
       async () => {
         await this.getVideoPages(core);
 
+        core.removeAllListeners("update");
         core.on("update", (updateData: any) => {
           this.pendingUpdates.set(core.id!, updateData);
           this.flushUpdates();
@@ -145,7 +146,22 @@ export class DownloadQueue {
       const newController = new AbortController();
       core.abortSignal = newController.signal;
       this.controllerMap.set(id, newController);
-      core.resume();
+
+      this.queue.add(
+        async () => {
+          // 重新绑定监听器，防止丢失或重复
+          core.removeAllListeners("update");
+          core.on("update", (updateData: any) => {
+            this.pendingUpdates.set(core.id!, updateData);
+            this.flushUpdates();
+          });
+
+          await core.resume();
+        },
+        {
+          signal: core.abortSignal,
+        },
+      );
     }
   }
 
@@ -178,6 +194,8 @@ export class DownloadQueue {
       status: core.status,
       totalBytes: core.totalBytes,
       downloadProgress: core.downloadProgress,
+      mergeProgress: core.mergeProgress,
+      convertProgress: core.convertProgress,
       createdTime: core.createdTime,
       error: core.error,
     }));
@@ -193,6 +211,10 @@ export class DownloadQueue {
 
   public saveAllTasksToStore() {
     this.controllerMap.forEach(controller => controller.abort());
+    this.taskMap.forEach(core => {
+      core.removeAllListeners();
+      core.chunkQueue?.clear();
+    });
     const tasksObject: Record<string, FullMediaDownloadTask> = {};
     this.taskMap.forEach((core, id) => {
       tasksObject[`downloads.${id}`] = {
@@ -204,14 +226,19 @@ export class DownloadQueue {
         bvid: core.bvid,
         cid: core.cid,
         sid: core.sid,
+        audioUrl: core.audioUrl,
         audioCodecs: core.audioCodecs,
         audioBandwidth: core.audioBandwidth,
         videoUrl: core.videoUrl,
         videoResolution: core.videoResolution,
         videoFrameRate: core.videoFrameRate,
         totalBytes: core.totalBytes,
+        audioTotalBytes: core.audioTotalBytes,
+        videoTotalBytes: core.videoTotalBytes,
         downloadedBytes: core.downloadedBytes,
         downloadProgress: core.downloadProgress,
+        mergeProgress: core.mergeProgress,
+        convertProgress: core.convertProgress,
         status:
           core.status === "downloading"
             ? "downloadPaused"

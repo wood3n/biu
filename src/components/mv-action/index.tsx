@@ -37,7 +37,7 @@ export interface ActionProps {
   /** 标题 */
   title: string;
   /** 封面 */
-  cover: string;
+  cover?: string;
   /** 视频稿件bvid */
   bvid?: string;
   /** 视频稿件avid */

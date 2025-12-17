@@ -4,7 +4,6 @@ import { Button, Image } from "@heroui/react";
 import { RiPlayFill } from "@remixicon/react";
 import clx from "classnames";
 
-import { ReactComponent as AudioAnimationIcon } from "@/assets/icons/audio-animation.svg";
 import { formatDuration } from "@/common/utils";
 import { formatNumber } from "@/common/utils/number";
 import { usePlayList } from "@/store/play-list";
@@ -63,11 +62,7 @@ const MusicListItem = ({
               height="100%"
               className="m-0 object-cover"
             />
-            {isActive ? (
-              <div className="text-primary rounded-medium absolute top-0 left-0 z-10 flex h-full w-full items-center justify-center overflow-hidden bg-[rgba(0,0,0,0.5)]">
-                <AudioAnimationIcon style={{ width: 20, height: 20 }} />
-              </div>
-            ) : (
+            {!isActive && (
               <div className="absolute inset-0 z-20 flex items-center justify-center rounded-md bg-[rgba(0,0,0,0.35)] opacity-0 group-hover:opacity-100">
                 <RiPlayFill size={20} className="text-white transition-transform duration-200 group-hover:scale-110" />
               </div>

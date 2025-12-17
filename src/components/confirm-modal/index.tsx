@@ -4,8 +4,10 @@ import type { ReactNode } from "react";
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import { RiErrorWarningLine } from "@remixicon/react";
 
+type ConfirmModalType = "warning" | "danger";
+
 export interface ConfirmModalProps {
-  type: "warning" | "danger";
+  type?: ConfirmModalType;
   // 显示/隐藏控制（受控）
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -22,7 +24,7 @@ export interface ConfirmModalProps {
   cancelText?: string;
 }
 
-const colorMap: Record<ConfirmModalProps["type"], string> = {
+const colorMap: Record<ConfirmModalType, string> = {
   warning: "#F5A524",
   danger: "#dc1258",
 };

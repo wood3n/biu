@@ -23,6 +23,10 @@ export interface FullMediaDownloadTask extends MediaDownloadTask {
   savePath?: string;
   /** 已下载字节数 */
   downloadedBytes?: number;
+  /** 音频文件总大小 */
+  audioTotalBytes?: number;
+  /** 视频文件总大小 */
+  videoTotalBytes?: number;
   /** 下载分块信息 */
   chunks?: MediaDownloadChunk[];
   /** 取消下载信号 */
