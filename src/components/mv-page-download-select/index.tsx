@@ -11,7 +11,7 @@ import ScrollContainer from "../scroll-container";
 interface Props {
   outputFileType: MediaDownloadOutputFileType;
   title: string;
-  cover: string;
+  cover?: string;
   bvid: string;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;

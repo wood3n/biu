@@ -13,16 +13,16 @@ import { getVideoPages } from "./utils";
 
 export class DownloadQueue {
   private queue: PQueue;
-  private tasks: Map<string, DownloadCore>;
-  private controllers: Map<string, AbortController>;
+  private taskMap: Map<string, DownloadCore>;
+  private controllerMap: Map<string, AbortController>;
   private getMainWindow: () => BrowserWindow | null;
   private pendingUpdates: Map<string, MediaDownloadTask>;
   private flushUpdates: () => void;
 
   constructor(getMainWindow: () => BrowserWindow | null) {
     this.queue = new PQueue({ concurrency: 3 });
-    this.tasks = new Map();
-    this.controllers = new Map();
+    this.taskMap = new Map();
+    this.controllerMap = new Map();
     this.getMainWindow = getMainWindow;
     this.pendingUpdates = new Map();
 
@@ -37,28 +37,29 @@ export class DownloadQueue {
     this.restoreQueue();
   }
 
+  private broadcast({ type, data }: Partial<MediaDownloadBroadcastPayload>) {
+    const window = this.getMainWindow();
+    if (window) {
+      const payload = type === "full" ? { type: "full", data: this.getTaskList() } : { type: "update", data };
+      window.webContents.send(channel.download.sync, payload);
+    }
+  }
+
   private restoreQueue() {
     const downloads = mediaDownloadsStore.store;
     if (downloads && Object.keys(downloads).length > 0) {
       Object.values(downloads).forEach(task => {
-        if (["downloading", "merging", "converting"].includes(task.status)) {
-          task.status = "paused";
-        }
-
-        // Restore controller and core
-        const controller = new AbortController();
-        this.controllers.set(task.id, controller);
-
-        const core = new DownloadCore(task, controller.signal);
-        this.queueTask(core);
-        this.tasks.set(task.id, core);
+        const core = new DownloadCore(task);
+        this.taskMap.set(task.id, core);
       });
+      this.broadcast({ type: "full" });
     }
   }
 
-  public addTask(mediaInfo: MediaDownloadInfo): string {
+  public addTask(mediaInfo: MediaDownloadInfo) {
     const id = randomUUID();
-    const taskData: MediaDownloadTask = {
+    const controller = new AbortController();
+    const taskData: FullMediaDownloadTask = {
       id,
       outputFileType: mediaInfo.outputFileType,
       title: mediaInfo.title,
@@ -68,125 +69,129 @@ export class DownloadQueue {
       sid: mediaInfo.sid,
       createdTime: Date.now(),
       status: "waiting",
+      abortSignal: controller.signal,
     };
-    const controller = new AbortController();
-    const core = new DownloadCore(taskData, controller.signal);
-    this.tasks.set(id, core);
-    this.controllers.set(id, controller);
+
+    const core = new DownloadCore(taskData);
+    this.taskMap.set(id, core);
+    this.controllerMap.set(id, controller);
     this.queueTask(core);
     this.broadcast({ type: "full" });
-    return id;
   }
 
   public addTasks(mediaInfos: MediaDownloadInfo[]) {
     mediaInfos.forEach(mediaInfo => this.addTask(mediaInfo));
   }
 
-  public resumeTask(id: string) {
-    const core = this.tasks.get(id);
-    if (core && core.status !== "completed" && core.status !== "downloading") {
-      // Re-create controller if needed?
-      // DownloadCore takes signal in constructor. If we abort a controller, we can't reuse it.
-      // If the task was cancelled/aborted, the signal is aborted.
-      // We might need to recreate the DownloadCore instance or update its signal if possible.
-      // DownloadCore doesn't support updating signal.
-      // So we should recreate DownloadCore with new controller.
-
-      const taskData = core.toTask();
-      taskData.status = "waiting";
-
-      const newController = new AbortController();
-      this.controllers.set(id, newController);
-
-      const newCore = new DownloadCore(taskData, newController.signal);
-      this.tasks.set(id, newCore);
-      this.queueTask(newCore);
-      this.broadcast({ type: "full" });
-    }
-  }
-
-  public pauseTask(id: string) {
-    const controller = this.controllers.get(id);
-    if (controller) {
-      controller.abort();
-    }
-    const core = this.tasks.get(id);
-    if (core) {
-      core.pause();
-    }
-  }
-
-  public cancelTask(id: string) {
-    const controller = this.controllers.get(id);
-    if (controller) {
-      controller.abort();
-      this.controllers.delete(id);
-    }
-
-    const core = this.tasks.get(id);
-    if (core) {
-      core.cancel();
-      this.tasks.delete(id);
-    }
-
-    this.broadcast({ type: "full" });
-  }
-
-  private broadcast({ type, data }: Partial<MediaDownloadBroadcastPayload>) {
-    const window = this.getMainWindow();
-    if (window) {
-      const payload =
-        type === "full" ? { type: "full", data: this.getBroadcastTaskDataList() } : { type: "update", data };
-      window.webContents.send(channel.download.sync, payload);
+  // 缺少分集 id，需要获取视频分集信息
+  private async getVideoPages(core: DownloadCore) {
+    if (core.bvid && !core.cid) {
+      const pages = await getVideoPages(core.bvid);
+      if (pages.length > 0) {
+        if (pages.length === 1) {
+          core.cid = pages[0].cid;
+        } else {
+          this.cancelTask(core.id);
+          pages.forEach(page =>
+            this.addTask({
+              outputFileType: core.outputFileType,
+              bvid: core.bvid,
+              cid: page.cid,
+              title: page.title,
+              cover: page.cover,
+            }),
+          );
+        }
+      } else {
+        throw new Error("无法获取视频分集信息");
+      }
     }
   }
 
   private queueTask(core: DownloadCore) {
     this.queue.add(
       async () => {
-        if (core.bvid && !core.cid) {
-          const pages = await getVideoPages(core.bvid);
-          if (pages.length > 0) {
-            if (pages.length === 1) {
-              core.cid = pages[0].cid;
-            } else {
-              this.cancelTask(core.id!);
-              pages.forEach(page =>
-                this.addTask({
-                  outputFileType: core.outputFileType,
-                  bvid: core.bvid,
-                  cid: page.cid,
-                  title: page.title,
-                  cover: page.cover,
-                }),
-              );
-            }
-          } else {
-            throw new Error("无法获取视频分集信息");
-          }
-        }
+        await this.getVideoPages(core);
 
+        core.removeAllListeners("update");
         core.on("update", (updateData: any) => {
           this.pendingUpdates.set(core.id!, updateData);
           this.flushUpdates();
         });
+
         await core.start();
       },
       {
-        signal: this.controllers.get(core.id!)?.signal,
+        signal: core.abortSignal,
       },
     );
   }
 
-  public retryTask(id: string) {
-    this.resumeTask(id); // Retry is essentially resume/restart
+  public pauseTask(id: string) {
+    const controller = this.controllerMap.get(id);
+    if (controller) {
+      controller.abort();
+      this.controllerMap.delete(id);
+    }
+    const core = this.taskMap.get(id);
+    if (core) {
+      core.pause();
+    }
   }
 
-  public getBroadcastTaskDataList(): MediaDownloadTask[] {
-    return Array.from(this.tasks.values()).map(core => ({
-      id: core.id!,
+  // 恢复下载任务
+  public resumeTask(id: string) {
+    const core = this.taskMap.get(id);
+    if (core) {
+      const newController = new AbortController();
+      core.abortSignal = newController.signal;
+      this.controllerMap.set(id, newController);
+
+      this.queue.add(
+        async () => {
+          // 重新绑定监听器，防止丢失或重复
+          core.removeAllListeners("update");
+          core.on("update", (updateData: any) => {
+            this.pendingUpdates.set(core.id!, updateData);
+            this.flushUpdates();
+          });
+
+          await core.resume();
+        },
+        {
+          signal: core.abortSignal,
+        },
+      );
+    }
+  }
+
+  public retryTask(id: string) {
+    const controller = this.controllerMap.get(id);
+    if (controller) {
+      controller.abort();
+      this.controllerMap.delete(id);
+    }
+
+    const core = this.taskMap.get(id);
+    if (core) {
+      core.status = "waiting";
+      core.error = undefined;
+      core.downloadProgress = 0;
+      core.mergeProgress = 0;
+      core.convertProgress = 0;
+      const newController = new AbortController();
+      core.abortSignal = newController.signal;
+      this.controllerMap.set(id, newController);
+      this.queueTask(core);
+      this.broadcast({ type: "full" });
+    }
+  }
+
+  public getTaskList(): MediaDownloadTask[] {
+    return Array.from(this.taskMap.values()).map(core => ({
+      id: core.id,
       outputFileType: core.outputFileType,
-      title: core.title,
+      title: core.title!,
       bvid: core.bvid,
       cid: core.cid,
       sid: core.sid,
@@ -206,10 +211,22 @@ export class DownloadQueue {
     }));
   }
 
+  public quitAndSave() {
+    this.taskMap.forEach(core => core.removeAllListeners());
+    this.pendingUpdates.clear();
+    this.controllerMap.forEach(controller => controller.abort());
+    this.controllerMap.clear();
+    this.saveAllTasksToStore();
+  }
+
   public saveAllTasksToStore() {
-    this.controllers.forEach(controller => controller.abort());
+    this.controllerMap.forEach(controller => controller.abort());
+    this.taskMap.forEach(core => {
+      core.removeAllListeners();
+      core.chunkQueue?.clear();
+    });
     const tasksObject: Record<string, FullMediaDownloadTask> = {};
-    this.tasks.forEach((core, id) => {
+    this.taskMap.forEach((core, id) => {
       tasksObject[`downloads.${id}`] = {
         id: core.id,
         outputFileType: core.outputFileType,
@@ -219,18 +236,30 @@ export class DownloadQueue {
         bvid: core.bvid,
         cid: core.cid,
         sid: core.sid,
+        audioUrl: core.audioUrl,
         audioCodecs: core.audioCodecs,
         audioBandwidth: core.audioBandwidth,
         videoUrl: core.videoUrl,
         videoResolution: core.videoResolution,
         videoFrameRate: core.videoFrameRate,
         totalBytes: core.totalBytes,
+        audioTotalBytes: core.audioTotalBytes,
+        videoTotalBytes: core.videoTotalBytes,
         downloadedBytes: core.downloadedBytes,
         downloadProgress: core.downloadProgress,
         mergeProgress: core.mergeProgress,
         convertProgress: core.convertProgress,
-        status: core.status,
+        status:
+          core.status === "downloading"
+            ? "downloadPaused"
+            : core.status === "merging"
+              ? "mergePaused"
+              : core.status === "converting"
+                ? "convertPaused"
+                : core.status,
         fileName: core.fileName,
+        tempDir: core.tempDir,
+        saveDir: core.saveDir,
         savePath: core.savePath,
         audioTempPath: core.audioTempPath,
         videoTempPath: core.videoTempPath,
@@ -241,11 +270,30 @@ export class DownloadQueue {
     mediaDownloadsStore.store = tasksObject;
   }
 
+  public cancelTask(id: string) {
+    this.pendingUpdates.delete(id);
+
+    const controller = this.controllerMap.get(id);
+    if (controller) {
+      controller.abort();
+      this.controllerMap.delete(id);
+    }
+
+    const core = this.taskMap.get(id);
+    if (core) {
+      core.cancel();
+      this.taskMap.delete(id);
+    }
+
+    this.broadcast({ type: "full" });
+  }
+
   public clearTasks() {
-    this.controllers.forEach(controller => controller.abort());
-    this.controllers.clear();
-    this.tasks.forEach(core => core.cancel());
-    this.tasks.clear();
+    this.pendingUpdates.clear();
+    this.controllerMap.forEach(controller => controller.abort());
+    this.controllerMap.clear();
+    this.taskMap.forEach(core => core.cancel());
+    this.taskMap.clear();
     mediaDownloadsStore.clear();
     this.broadcast({ type: "full" });
   }

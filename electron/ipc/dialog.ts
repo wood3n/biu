@@ -2,6 +2,7 @@ import type { IpcMainInvokeEvent } from "electron";
 
 import { ipcMain, shell, dialog } from "electron";
 import log from "electron-log";
+import fs from "node:fs";
 import path from "node:path";
 
 import { appSettingsStore, storeKey } from "../store";
@@ -13,6 +14,14 @@ export function registerDialogHandlers() {
       dir ?? appSettingsStore.get(storeKey.appSettings)?.downloadPath ?? path.resolve(process.cwd(), "downloads");
     const err = await shell.openPath(targetDir);
     return err === "";
+  });
+
+  ipcMain.handle(channel.dialog.showFileInFolder, (_event: IpcMainInvokeEvent, filePath: string) => {
+    if (!filePath || !fs.existsSync(filePath)) {
+      throw new Error("文件路径不存在");
+    }
+    shell.showItemInFolder(filePath);
+    return true;
   });
 
   ipcMain.handle(channel.dialog.openExternal, async (_event: IpcMainInvokeEvent, url: string) => {

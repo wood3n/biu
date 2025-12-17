@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { URLSearchParams } from "node:url";
 
 import type { DashAudio } from "../api/types";
 
@@ -58,4 +59,15 @@ export const getVideoPages = async (bvid: string) => {
       cover: page.first_frame,
     })) || []
   );
+};
+
+/** URL是否有效 */
+export const isUrlValid = (url?: string): url is string => {
+  if (!url) return false;
+  const urlParams = new URLSearchParams(url);
+  const deadline = urlParams.get("deadline");
+  if (!deadline) return false;
+
+  const now = Math.floor(Date.now() / 1000);
+  return Number(deadline) > now;
 };

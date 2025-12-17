@@ -17,6 +17,7 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
   const releaseNotes = useAppUpdateStore(state => state.releaseNotes);
   const [status, setStatus] = useState<DownloadAppUpdateStatus>();
   const [downloadProgress, setDownloadProgress] = useState<DownloadAppProgressInfo>();
+  const [downloadInfo, setDownloadInfo] = useState<DownloadInfo>();
   const [error, setError] = useState<string>();
 
   const startDownload = async () => {
@@ -31,12 +32,15 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
 
   const handleOpenInstaller = async () => {
     try {
-      const ok = await window.electron.openInstallerDirectory();
-      if (!ok) {
-        addToast({
-          title: "无法打开安装包文件夹",
-          color: "danger",
-        });
+      if (downloadInfo?.filePath) {
+        const ok = await window.electron.showFileInFolder(downloadInfo.filePath);
+        if (!ok) {
+          addToast({
+            title: "无法打开安装包文件夹",
+            color: "danger",
+          });
+        }
+        return ok;
       }
     } catch (e) {
       addToast({
@@ -49,10 +53,16 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
   useEffect(() => {
     const removeListener = window.electron.onDownloadAppProgress(info => {
       setStatus(info.status);
-      if (info.status === "downloading") {
-        setDownloadProgress(info.processInfo);
-      } else if (info.status === "error") {
-        setError(info.error);
+      switch (info.status) {
+        case "downloading":
+          setDownloadProgress(info.processInfo);
+          break;
+        case "downloaded":
+          setDownloadInfo(info.downloadInfo);
+          break;
+        case "error":
+          setError(info.error);
+          break;
       }
     });
 
@@ -75,11 +85,7 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
         disableAnimation
       >
         <ModalContent>
-          <ModalHeader>
-            <div className="flex items-center">
-              <span>✨ 有新版本更新</span>
-            </div>
-          </ModalHeader>
+          <ModalHeader>✨ 有新版本更新</ModalHeader>
           <ModalBody className="px-0">
             {releaseNotes?.trim() ? (
               <Typography content={releaseNotes} />

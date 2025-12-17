@@ -92,7 +92,7 @@ export function paginateSearchAllResults<T = any>(
   const mod = data.result.find(m => m.result_type === module);
   if (!mod || !Array.isArray(mod.data)) return [] as T[];
   const start = (Math.max(1, page) - 1) * Math.max(1, pageSize);
-  return mod.data.slice(start, start + Math.max(1, pageSize));
+  return mod.data.slice(start, start + Math.max(1, pageSize)) as T[];
 }
 
 export type VideoSortKey = "pubdate" | "play" | "video_review" | "favorites" | "review";

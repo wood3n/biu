@@ -20,8 +20,14 @@ interface DownloadAppProgressInfo {
 
 type DownloadAppUpdateStatus = "downloading" | "downloaded" | "error";
 
+interface DownloadInfo {
+  /** 下载完成后的文件路径 */
+  filePath: string;
+}
+
 interface DownloadAppMessage {
   status: DownloadAppUpdateStatus;
   processInfo?: DownloadAppProgressInfo;
+  downloadInfo?: DownloadInfo;
   error?: string;
 }

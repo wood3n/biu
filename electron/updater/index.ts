@@ -8,9 +8,8 @@ import { channel } from "../ipc/channel";
 
 const { autoUpdater } = electronUpdater;
 
-let downloadedFilePath: string | null = null;
 let checkForUpdatesInterval: NodeJS.Timeout | null = null;
-function setupAutoUpdater() {
+function setupAutoUpdater({ getMainWindow }: { getMainWindow: () => BrowserWindow | null }) {
   autoUpdater.logger = log;
   log.transports.file.level = "info";
   autoUpdater.autoDownload = false;
@@ -25,39 +24,37 @@ function setupAutoUpdater() {
   }
 
   autoUpdater.on("update-available", info => {
-    BrowserWindow.getAllWindows().forEach(w =>
-      w.webContents.send(channel.app.onUpdateAvailable, {
-        latestVersion: info.version,
-        releaseNotes: info.releaseNotes,
-      }),
-    );
+    const mainWindow = getMainWindow();
+    mainWindow?.webContents.send(channel.app.onUpdateAvailable, {
+      latestVersion: info.version,
+      releaseNotes: info.releaseNotes,
+    });
   });
 
   autoUpdater.on("download-progress", progressObj => {
-    BrowserWindow.getAllWindows().forEach(w =>
-      w.webContents.send(channel.app.updateMessage, {
-        status: "downloading",
-        processInfo: progressObj,
-      }),
-    );
+    const mainWindow = getMainWindow();
+    mainWindow?.webContents.send(channel.app.updateMessage, {
+      status: "downloading",
+      processInfo: progressObj,
+    });
   });
 
   autoUpdater.on("error", error => {
-    BrowserWindow.getAllWindows().forEach(w =>
-      w.webContents.send(channel.app.updateMessage, {
-        status: "error",
-        error: error instanceof Error ? error.message : String(error),
-      }),
-    );
+    const mainWindow = getMainWindow();
+    mainWindow?.webContents.send(channel.app.updateMessage, {
+      status: "error",
+      error: error instanceof Error ? error.message : String(error),
+    });
   });
 
   autoUpdater.on("update-downloaded", (info: UpdateDownloadedEvent) => {
-    downloadedFilePath = info.downloadedFile;
-    BrowserWindow.getAllWindows().forEach(w =>
-      w.webContents.send(channel.app.updateMessage, {
-        status: "downloaded",
-      }),
-    );
+    const mainWindow = getMainWindow();
+    mainWindow?.webContents.send(channel.app.updateMessage, {
+      status: "downloaded",
+      downloadInfo: {
+        filePath: info.downloadedFile,
+      },
+    });
   });
 
   autoUpdater.checkForUpdates();
@@ -76,6 +73,4 @@ const stopCheckForUpdates = () => {
   }
 };
 
-const getDownloadedFilePath = () => downloadedFilePath;
-
-export { autoUpdater, setupAutoUpdater, stopCheckForUpdates, getDownloadedFilePath };
+export { autoUpdater, setupAutoUpdater, stopCheckForUpdates };

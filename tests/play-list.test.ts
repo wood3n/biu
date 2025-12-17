@@ -5,6 +5,11 @@ import { usePlayList } from "@/store/play-list";
 
 vi.mock("@/common/utils/audio", () => ({
   getAudioUrl: vi.fn(async () => ({ audioUrl: "https://audio.test/a.mp3", isLossless: false })),
+  getDashUrl: vi.fn(async () => ({
+    audioUrl: "https://video.test/a.mp3",
+    videoUrl: "https://video.test/v.mp4",
+    isLossless: false,
+  })),
   getMVUrl: vi.fn(async () => ({
     audioUrl: "https://video.test/a.mp3",
     videoUrl: "https://video.test/v.mp4",

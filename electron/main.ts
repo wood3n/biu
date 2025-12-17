@@ -1,19 +1,18 @@
-import { app, BrowserWindow, nativeImage, nativeTheme } from "electron";
+import { app, BrowserWindow } from "electron";
 import isDev from "electron-is-dev";
 import log from "electron-log";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { channel } from "./ipc/channel";
-import { saveDownloadQueue } from "./ipc/download";
+import { quitAndSaveTasks } from "./ipc/download";
 import { registerIpcHandlers } from "./ipc/index";
-import { setupMacDock } from "./mac/dock";
 import { destroyMiniPlayer } from "./mini-player";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
 import { appSettingsStore, storeKey } from "./store";
 import { autoUpdater, setupAutoUpdater, stopCheckForUpdates } from "./updater";
-import { getMacDarkIconPath, getMacLightIconPath, getWindowIcon } from "./utils";
+import { getWindowIcon } from "./utils";
 import { setupWindowsThumbar } from "./windows/thumbar";
 import { createTray, destroyTray } from "./windows/tray"; // 托盘功能
 
@@ -135,22 +134,9 @@ app.whenReady().then(() => {
     getMainWindow: () => mainWindow,
   });
 
-  setupAutoUpdater();
-
-  if (process.platform === "darwin") {
-    const updateDockIcon = () => {
-      const iconPath = nativeTheme.shouldUseDarkColors ? getMacDarkIconPath() : getMacLightIconPath();
-      const image = nativeImage.createFromPath(iconPath);
-      app.dock?.setIcon(image);
-    };
-
-    updateDockIcon();
-    nativeTheme.on("updated", updateDockIcon);
-
-    if (mainWindow) {
-      setupMacDock(mainWindow);
-    }
-  }
+  setupAutoUpdater({
+    getMainWindow: () => mainWindow,
+  });
 
   if (process.platform !== "darwin") {
     createTray({
@@ -173,9 +159,9 @@ app.on("before-quit", () => {
 // 在 will-quit 阶段清理资源，确保进程干净退出
 app.on("will-quit", () => {
   try {
-    saveDownloadQueue();
+    quitAndSaveTasks();
   } catch (err) {
-    log.error("[main] saveDownloadQueue failed:", err);
+    log.error("[main] quitAndSaveTasks failed:", err);
   }
 
   try {
