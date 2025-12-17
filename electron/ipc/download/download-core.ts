@@ -108,7 +108,7 @@ export class DownloadCore extends EventEmitter {
       await this.mergeChunks();
 
       // @ts-ignore 因为pause这里的status会被设置为暂停
-      if (this.status === "mergePaused" || (this.abortSignal as any)?.aborted) {
+      if (this.status === "mergePaused" || this.abortSignal?.aborted) {
         return;
       }
 
@@ -122,7 +122,7 @@ export class DownloadCore extends EventEmitter {
         this.status === "downloadPaused" ||
         this.status === "mergePaused" ||
         this.status === "convertPaused" ||
-        (this.abortSignal as any)?.aborted
+        this.abortSignal?.aborted
       ) {
         return;
       }
@@ -158,19 +158,16 @@ export class DownloadCore extends EventEmitter {
           break;
         case "mergePaused": {
           await this.mergeChunks();
-          if (this.status === "mergePaused" || (this.abortSignal as any)?.aborted) return;
-
+          if (this.status === "mergePaused" || this.abortSignal?.aborted) return;
           await this.convertTempFileByFFmpeg();
-          if (this.status === "convertPaused" || (this.abortSignal as any)?.aborted) return;
-
+          if (this.status === "convertPaused" || this.abortSignal?.aborted) return;
           this.status = "completed";
           this.emitUpdate();
           break;
         }
         case "convertPaused": {
           await this.convertTempFileByFFmpeg();
-          if (this.status === "convertPaused" || (this.abortSignal as any)?.aborted) return;
-
+          if (this.status === "convertPaused" || this.abortSignal?.aborted) return;
           this.status = "completed";
           this.emitUpdate();
           break;
@@ -378,9 +375,9 @@ export class DownloadCore extends EventEmitter {
       const end = Math.min((i + 1) * chunkSize - 1, totalSize - 1);
       this.chunks.push({
         type,
+        name: `${type}.part${i + 1}`,
         start,
         end,
-        name: `${type}.part${i + 1}`,
         done: false,
       });
     }
@@ -419,24 +416,9 @@ export class DownloadCore extends EventEmitter {
       this.emitUpdate();
     });
 
-    stream.on("error", err => {
-      // 忽略因暂停（abort）导致的错误
-      if (this.abortSignal?.aborted || this.status === "downloadPaused") {
-        return;
-      }
-
-      this.status = "failed";
-      this.error = err instanceof Error ? err.message : String(err);
-      this.emitUpdate();
+    await pipeline(stream, fs.createWriteStream(destPath, { flags: offset > 0 ? "a" : "w" }), {
+      signal: this.abortSignal,
     });
-
-    await pipeline(
-      stream,
-      fs.createWriteStream(destPath, { flags: offset > 0 ? "a" : "w", signal: this.abortSignal }),
-      {
-        signal: this.abortSignal,
-      },
-    );
   }
 
   private async downloadChunks(): Promise<void> {
@@ -484,7 +466,20 @@ export class DownloadCore extends EventEmitter {
       );
     }
 
-    await this.chunkQueue?.onIdle();
+    await new Promise<void>((resolve, reject) => {
+      const errorHandler = (error: Error) => {
+        this.chunkQueue?.clear();
+        this.chunkQueue?.off("error", errorHandler);
+        reject(error);
+      };
+
+      this.chunkQueue?.on("error", errorHandler);
+
+      this.chunkQueue?.onIdle().then(() => {
+        this.chunkQueue?.off("error", errorHandler);
+        resolve();
+      });
+    });
   }
 
   private async downloadChunk({
@@ -512,6 +507,16 @@ export class DownloadCore extends EventEmitter {
 
   private async mergeChunks() {
     this.status = "merging";
+    this.mergedBytes = 0;
+    if (this.audioTempPath && fs.existsSync(this.audioTempPath)) {
+      const audioMergedSize = fs.statSync(this.audioTempPath).size;
+      this.mergedBytes += audioMergedSize;
+    }
+    if (this.videoTempPath && fs.existsSync(this.videoTempPath)) {
+      const videoMergedSize = fs.statSync(this.videoTempPath).size;
+      this.mergedBytes += videoMergedSize;
+    }
+    this.mergeProgress = this.totalBytes ? Math.round((this.mergedBytes / this.totalBytes) * 100) : 0;
     this.emitUpdate();
     await this.mergeChunkByFileType("audio", this.audioTempPath!);
     await this.mergeChunkByFileType("video", this.videoTempPath!);
@@ -558,64 +563,27 @@ export class DownloadCore extends EventEmitter {
       return;
     }
 
-    if ((this.abortSignal as any)?.aborted) return;
-
-    const writeStream = fs.createWriteStream(destPath, {
-      flags: "a", // 追加模式
-    });
-
-    // 提前监听错误，防止未捕获异常导致崩溃
-    writeStream.on("error", err => {
-      this.status = "failed";
-      this.error = err.message;
-      this.emitUpdate();
-    });
+    if (this.abortSignal?.aborted) return;
 
     for (let i = startIndex; i < chunks.length; i++) {
-      if ((this.abortSignal as any)?.aborted) {
-        writeStream.destroy();
+      if (this.abortSignal?.aborted) {
         return;
       }
 
       const chunk = chunks[i];
       const chunkPath = path.join(this.tempDir, chunk.name);
-      await new Promise<void>((resolve, reject) => {
-        const readStream = fs.createReadStream(chunkPath);
 
-        // 监听 abort 信号，立即销毁流并停止
-        const abortHandler = () => {
-          readStream.destroy();
-          writeStream.destroy();
-          reject(new Error("Aborted"));
-        };
-        this.abortSignal?.addEventListener("abort", abortHandler);
+      const readStream = fs.createReadStream(chunkPath);
+      readStream.on("data", dataChunk => {
+        this.mergedBytes += dataChunk.length;
+        this.mergeProgress = this.totalBytes ? Math.round((this.mergedBytes / this.totalBytes) * 100) : 0;
+        this.emitUpdate();
+      });
 
-        readStream.on("data", chunk => {
-          this.mergedBytes += chunk.length;
-          this.mergeProgress = this.totalBytes ? Math.round((this.mergedBytes / this.totalBytes) * 100) : 0;
-          this.emitUpdate();
-        });
-        readStream.on("error", err => {
-          this.abortSignal?.removeEventListener("abort", abortHandler);
-          // 如果是暂停导致的错误，忽略之（由外层 catch 处理）
-          if ((this.abortSignal as any)?.aborted) {
-            return reject(new Error("Aborted"));
-          }
-          writeStream.destroy(err);
-          reject(err);
-        });
-        readStream.pipe(writeStream, { end: false });
-        readStream.on("end", () => {
-          this.abortSignal?.removeEventListener("abort", abortHandler);
-          resolve();
-        });
+      await pipeline(readStream, fs.createWriteStream(destPath, { flags: "a" }), {
+        signal: this.abortSignal,
       });
     }
-
-    return new Promise(resolve => {
-      writeStream.end();
-      writeStream.on("finish", resolve);
-    });
   }
 
   private emitUpdate() {

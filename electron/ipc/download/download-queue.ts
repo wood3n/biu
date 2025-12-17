@@ -166,9 +166,19 @@ export class DownloadQueue {
   }
 
   public retryTask(id: string) {
+    const controller = this.controllerMap.get(id);
+    if (controller) {
+      controller.abort();
+      this.controllerMap.delete(id);
+    }
+
     const core = this.taskMap.get(id);
     if (core) {
       core.status = "waiting";
+      core.error = undefined;
+      core.downloadProgress = 0;
+      core.mergeProgress = 0;
+      core.convertProgress = 0;
       const newController = new AbortController();
       core.abortSignal = newController.signal;
       this.controllerMap.set(id, newController);

@@ -38,6 +38,7 @@ const StageProgress = ({ data }: Props) => {
   return (
     <div className="flex h-full flex-col justify-center space-y-1">
       <Progress
+        aria-label={StatusDesc[data.status]}
         value={progressValue}
         maxValue={100}
         showValueLabel={false}

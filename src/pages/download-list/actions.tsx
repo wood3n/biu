@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+
 import { addToast, Tooltip, useDisclosure } from "@heroui/react";
 import {
   RiDeleteBinLine,
@@ -15,12 +17,60 @@ interface Props {
   data: MediaDownloadTask;
 }
 
+type ActionKey = "open" | "pause" | "resume" | "retry" | "delete";
+
 const DownloadActions = ({ data }: Props) => {
   const {
     isOpen: isConfirmCancelOpen,
     onOpen: onConfirmCancelOpen,
     onOpenChange: onConfirmCancelOpenChange,
   } = useDisclosure();
+
+  const [pendingAction, setPendingAction] = useState<ActionKey | null>(null);
+  const pendingTimeoutRef = useRef<number | null>(null);
+
+  const clearPendingTimeout = () => {
+    if (pendingTimeoutRef.current) {
+      window.clearTimeout(pendingTimeoutRef.current);
+      pendingTimeoutRef.current = null;
+    }
+  };
+
+  const lockAction = (key: ActionKey) => {
+    setPendingAction(key);
+    clearPendingTimeout();
+    pendingTimeoutRef.current = window.setTimeout(() => {
+      setPendingAction(null);
+      pendingTimeoutRef.current = null;
+    }, 2000);
+  };
+
+  useEffect(() => {
+    if (!pendingAction) {
+      clearPendingTimeout();
+      return;
+    }
+
+    if (pendingAction === "pause" && data.status !== "downloading") {
+      setPendingAction(null);
+      return;
+    }
+
+    if (pendingAction === "resume" && !["downloadPaused", "mergePaused", "convertPaused"].includes(data.status)) {
+      setPendingAction(null);
+      return;
+    }
+
+    if (pendingAction === "retry" && data.status !== "failed") {
+      setPendingAction(null);
+    }
+  }, [data.status, pendingAction]);
+
+  useEffect(() => {
+    return () => {
+      clearPendingTimeout();
+    };
+  }, []);
 
   const actions = [
     {
@@ -49,6 +99,8 @@ const DownloadActions = ({ data }: Props) => {
       className: "hover:text-warning",
       show: data.status === "downloading",
       onPress: async () => {
+        if (pendingAction) return;
+        lockAction("pause");
         await window.electron.pauseMediaDownloadTask(data.id);
       },
     },
@@ -60,6 +112,8 @@ const DownloadActions = ({ data }: Props) => {
       className: "hover:text-success",
       show: ["downloadPaused", "mergePaused", "convertPaused"].includes(data.status),
       onPress: async () => {
+        if (pendingAction) return;
+        lockAction("resume");
         await window.electron.resumeMediaDownloadTask(data.id);
       },
     },
@@ -69,6 +123,8 @@ const DownloadActions = ({ data }: Props) => {
       icon: <RiRefreshLine size={16} />,
       show: data.status === "failed",
       onPress: async () => {
+        if (pendingAction) return;
+        lockAction("retry");
         await window.electron.retryMediaDownloadTask(data.id);
       },
     },
@@ -80,6 +136,8 @@ const DownloadActions = ({ data }: Props) => {
       tooltipColor: "danger" as const,
       className: "hover:text-danger",
       onPress: async () => {
+        if (pendingAction) return;
+
         if (
           ["downloading", "downloadPaused", "merging", "mergePaused", "converting", "convertPaused"].includes(
             data.status,
@@ -89,6 +147,7 @@ const DownloadActions = ({ data }: Props) => {
           return;
         }
 
+        lockAction("delete");
         await window.electron.cancelMediaDownloadTask(data.id);
       },
     },
@@ -106,6 +165,8 @@ const DownloadActions = ({ data }: Props) => {
                 variant="light"
                 size="sm"
                 isIconOnly
+                isLoading={pendingAction === item.key}
+                isDisabled={Boolean(pendingAction) && pendingAction !== item.key}
                 onPress={item.onPress}
                 className={item.className}
               >
@@ -121,6 +182,8 @@ const DownloadActions = ({ data }: Props) => {
         description="当前任务未下载完成，确认删除后将无法恢复"
         confirmText="删除"
         onConfirm={async () => {
+          if (pendingAction) return false;
+          lockAction("delete");
           await window.electron.cancelMediaDownloadTask(data.id);
           return true;
         }}
