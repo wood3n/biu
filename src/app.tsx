@@ -5,10 +5,12 @@ import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import moment from "moment";
 
 import { getCookitFromBSite } from "./common/utils/cookie";
+import { mapKeyToElectron } from "./common/utils/shortcut";
 import Theme from "./components/theme";
 import routes from "./routes";
 import { useAppUpdateStore } from "./store/app-update";
 import { usePlayList } from "./store/play-list";
+import { useShortcutSettings } from "./store/shortcuts";
 
 import "moment/locale/zh-cn";
 
@@ -36,7 +38,7 @@ export function App() {
   // 订阅来自主进程的任务栏缩略按钮命令
   useEffect(() => {
     if (window.electron && window.electron.onPlayerCommand) {
-      window.electron.onPlayerCommand(cmd => {
+      const removeListener = window.electron.onPlayerCommand(cmd => {
         const { prev, next, togglePlay } = usePlayList.getState();
         if (cmd === "prev") {
           prev();
@@ -46,7 +48,87 @@ export function App() {
           togglePlay();
         }
       });
+      return removeListener;
     }
+  }, []);
+
+  // 订阅来自主进程的全局快捷键命令
+  useEffect(() => {
+    if (window.electron && window.electron.onShortcutCommand) {
+      return window.electron.onShortcutCommand(cmd => {
+        const { prev, next, togglePlay, setVolume, volume } = usePlayList.getState();
+
+        switch (cmd) {
+          case "togglePlay":
+            togglePlay();
+            break;
+          case "prev":
+            prev();
+            break;
+          case "next":
+            next();
+            break;
+          case "volumeUp":
+            setVolume(Math.min(1, volume + 0.05));
+            break;
+          case "volumeDown":
+            setVolume(Math.max(0, volume - 0.05));
+            break;
+          case "toggleMiniMode":
+            window.electron.toggleMiniPlayer();
+            break;
+          default:
+            break;
+        }
+      });
+    }
+  }, []);
+
+  // 监听应用内快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 忽略在输入框中的按键
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
+        return;
+      }
+
+      const shortcut = mapKeyToElectron(e);
+      if (!shortcut) return;
+
+      const { shortcuts } = useShortcutSettings.getState();
+      const matched = shortcuts.find(s => s.shortcut === shortcut);
+
+      if (matched) {
+        e.preventDefault();
+        const { prev, next, togglePlay, setVolume, volume } = usePlayList.getState();
+        switch (matched.id) {
+          case "togglePlay":
+            togglePlay();
+            break;
+          case "prev":
+            prev();
+            break;
+          case "next":
+            next();
+            break;
+          case "volumeUp":
+            setVolume(Math.min(1, volume + 0.05));
+            break;
+          case "volumeDown":
+            setVolume(Math.max(0, volume - 0.05));
+            break;
+          case "toggleMiniMode":
+            window.electron.toggleMiniPlayer();
+            break;
+          default:
+            break;
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   useEffect(() => {

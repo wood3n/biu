@@ -45,6 +45,10 @@ export const channel = {
     next: "player:next",
     toggle: "player:toggle",
   },
+  shortcut: {
+    triggered: "shortcut:triggered",
+    check: "shortcut:check",
+  },
   app: {
     getVersion: "app:get-version",
     checkUpdate: "app:check-update",
@@ -61,6 +65,7 @@ export const channel = {
   window: {
     switchToMini: "window:switch-to-mini",
     switchToMain: "window:switch-to-main",
+    toggleMini: "window:toggle-mini",
     minimize: "window:minimize",
     toggleMaximize: "window:toggle-maximize",
     close: "window:close",

@@ -1,3 +1,58 @@
+interface LevelInfo {
+  current_level: number;
+  current_min: number;
+  current_exp: number;
+  next_exp: number | string;
+}
+
+interface Official {
+  role: number;
+  title: string;
+  desc: string;
+  type: number;
+}
+
+interface OfficialVerify {
+  type: number;
+  desc: string;
+}
+
+interface Pendant {
+  pid: number;
+  name: string;
+  image: string;
+  expire: number;
+  image_enhance?: string;
+  image_enhance_frame?: string;
+}
+
+interface VipLabel {
+  path: string;
+  text: string;
+  label_theme: string;
+  text_color?: string;
+  bg_style?: number;
+  bg_color?: string;
+  border_color?: string;
+  use_img_label?: boolean;
+  img_label_uri_hans?: string;
+  img_label_uri_hant?: string;
+  img_label_uri_hans_static?: string;
+  img_label_uri_hant_static?: string;
+}
+
+interface Wallet {
+  mid: number;
+  bcoin_balance: number;
+  coupon_balance: number;
+  coupon_due_time: number;
+}
+
+interface WbiImg {
+  img_url: string;
+  sub_url: string;
+}
+
 interface UserInfo {
   isLogin: boolean; // 是否已登录 false:未登录 true:已登录
   email_verified: number; // 是否验证邮箱地址 0:未验证 1:已验证

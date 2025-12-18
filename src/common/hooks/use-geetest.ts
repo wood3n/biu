@@ -85,8 +85,8 @@ export const useGeetest = () => {
               resolve(null);
             });
 
-            if ((captchaObj as any).onClose) {
-              (captchaObj as any).onClose(() => {
+            if (captchaObj.onClose) {
+              captchaObj.onClose(() => {
                 resolve(null);
               });
             }

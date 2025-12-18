@@ -6,6 +6,7 @@ import { merge } from "es-toolkit/object";
 
 import { useSettings } from "@/store/settings";
 import { defaultAppSettings } from "@shared/settings/app-settings";
+import { StoreNameMap } from "@shared/store";
 
 const ImportExport = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -14,8 +15,10 @@ const ImportExport = () => {
 
   const handleExport = async () => {
     try {
-      const settingStore = (await window.electron.getStore("app-settings")) as { appSettings: AppSettings };
-      const blob = new Blob([JSON.stringify(settingStore.appSettings, null, 2)], { type: "application/json" });
+      const settingStore = await window.electron.getStore(StoreNameMap.AppSettings);
+      const blob = new Blob([JSON.stringify(settingStore?.appSettings ?? defaultAppSettings, null, 2)], {
+        type: "application/json",
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;

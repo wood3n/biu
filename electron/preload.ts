@@ -46,8 +46,24 @@ const api: ElectronAPI = {
       console.error("[preload] 上报播放状态失败:", error);
     }
   },
+  // 订阅主进程下发的快捷键命令
+  onShortcutCommand: cb => {
+    const handler = (_: Electron.IpcRendererEvent, cmd: ShortcutCommand) => {
+      try {
+        cb(cmd);
+      } catch (error) {
+        console.error("[preload] shortcut command callback failed:", error);
+      }
+    };
+
+    ipcRenderer.on(channel.shortcut.triggered, handler);
+
+    return () => ipcRenderer.removeListener(channel.shortcut.triggered, handler);
+  },
+  // 检查快捷键是否可用
+  checkShortcut: (accelerator: string) => ipcRenderer.invoke(channel.shortcut.check, accelerator),
   // 订阅主进程下发的播放器命令（上一首、下一首、播放/暂停）
-  onPlayerCommand: async (cb: (cmd: "prev" | "next" | "toggle") => void) => {
+  onPlayerCommand: (cb: (cmd: "prev" | "next" | "toggle") => void) => {
     // 先移除旧的监听，避免重复
     if (playerPrevHandler) {
       try {
@@ -98,6 +114,21 @@ const api: ElectronAPI = {
     ipcRenderer.on(channel.player.prev, playerPrevHandler);
     ipcRenderer.on(channel.player.next, playerNextHandler);
     ipcRenderer.on(channel.player.toggle, playerToggleHandler);
+
+    return () => {
+      if (playerPrevHandler) {
+        ipcRenderer.removeListener(channel.player.prev, playerPrevHandler);
+        playerPrevHandler = null;
+      }
+      if (playerNextHandler) {
+        ipcRenderer.removeListener(channel.player.next, playerNextHandler);
+        playerNextHandler = null;
+      }
+      if (playerToggleHandler) {
+        ipcRenderer.removeListener(channel.player.toggle, playerToggleHandler);
+        playerToggleHandler = null;
+      }
+    };
   },
   // 获取应用版本
   getAppVersion: () => ipcRenderer.invoke(channel.app.getVersion),
@@ -134,6 +165,8 @@ const api: ElectronAPI = {
   switchToMiniPlayer: () => ipcRenderer.invoke(channel.window.switchToMini),
   // 切换到主窗口
   switchToMainWindow: () => ipcRenderer.invoke(channel.window.switchToMain),
+  // 切换 mini/主窗口
+  toggleMiniPlayer: () => ipcRenderer.invoke(channel.window.toggleMini),
   // 最小化窗口
   minimizeWindow: () => ipcRenderer.send(channel.window.minimize),
   // 最大化/还原窗口

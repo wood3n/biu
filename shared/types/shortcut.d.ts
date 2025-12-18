@@ -1,16 +1,5 @@
-export { };
-
 declare global {
-  type ShortcutCommand =
-    | "togglePlay"
-    | "prev"
-    | "next"
-    | "volumeUp"
-    | "volumeDown"
-    | "toggleMiniMode"
-    | "toggleLike"
-    | "toggleLyrics"
-    | "translateLyrics";
+  type ShortcutCommand = "togglePlay" | "prev" | "next" | "volumeUp" | "volumeDown" | "toggleMiniMode" | "toggleLyrics";
 
   interface ShortcutItem {
     id: ShortcutCommand;
@@ -22,6 +11,7 @@ declare global {
   interface ShortcutSettings {
     shortcuts: ShortcutItem[];
     enableGlobalShortcuts: boolean;
-    useSystemMediaShortcuts: boolean;
   }
 }
+
+export {};

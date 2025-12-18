@@ -51,7 +51,7 @@ export function startElectronDev() {
     try {
       electronProcess.kill();
     } catch (e) {
-      logger.warn("Failed to kill electron process", e as any);
+      logger.warn("Failed to kill electron process", e);
     }
   };
 

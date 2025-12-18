@@ -10,7 +10,8 @@ import { registerIpcHandlers } from "./ipc/index";
 import { destroyMiniPlayer } from "./mini-player";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
-import { appSettingsStore, storeKey } from "./store";
+import { setupShortcutManager } from "./shortcut-manager";
+import { appSettingsStore } from "./store";
 import { autoUpdater, setupAutoUpdater, stopCheckForUpdates } from "./updater";
 import { getWindowIcon } from "./utils";
 import { setupWindowsThumbar } from "./windows/thumbar";
@@ -106,7 +107,7 @@ function createWindow() {
 
   // 从store获取配置，判断是否关闭窗口时隐藏还是退出程序
   mainWindow.on("close", event => {
-    const closeWindowOption = appSettingsStore.get(storeKey.appSettings).closeWindowOption;
+    const closeWindowOption = appSettingsStore.get("appSettings").closeWindowOption;
 
     if ((app as any).quitting) {
       return;
@@ -138,6 +139,8 @@ app.whenReady().then(() => {
     getMainWindow: () => mainWindow,
   });
 
+  const cleanupShortcuts = setupShortcutManager(() => mainWindow);
+
   if (process.platform !== "darwin") {
     createTray({
       getMainWindow: () => mainWindow,
@@ -148,6 +151,9 @@ app.whenReady().then(() => {
       },
     });
   }
+
+  // 保存清理函数到 app 对象上，方便在 will-quit 中调用
+  (app as any).cleanupShortcuts = cleanupShortcuts;
 });
 
 app.on("activate", () => mainWindow?.show());
@@ -169,6 +175,14 @@ app.on("will-quit", () => {
   } catch (err) {
     // 修改说明：托盘销毁失败时记录日志，避免静默失败
     log.warn("[main] destroyTray failed:", err);
+  }
+
+  try {
+    if (typeof (app as any).cleanupShortcuts === "function") {
+      (app as any).cleanupShortcuts();
+    }
+  } catch (err) {
+    log.warn("[main] cleanupShortcuts failed:", err);
   }
 
   destroyMiniPlayer();

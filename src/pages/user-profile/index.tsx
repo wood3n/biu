@@ -99,7 +99,7 @@ const UserProfile = () => {
     {
       label: "收藏夹",
       key: "collection",
-      hidden: !spacePrivacy?.fav_video,
+      hidden: !isSelf && !spacePrivacy?.fav_video,
       content: <Favorites />,
     },
     {
