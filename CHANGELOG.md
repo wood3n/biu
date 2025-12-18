@@ -1,5 +1,28 @@
 # Changelog
 
+## v1.6.0-beta.10
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.9...v1.6.0-beta.10)
+
+### 🚀 新功能
+
+- 下载功能支持断点续传 ([89c8b19](https://github.com/wood3n/biu/commit/89c8b19))
+- 优化代码 ([0c2436a](https://github.com/wood3n/biu/commit/0c2436a))
+
+### 🩹 修复问题
+
+- 移除无用的ipc方法 ([dc4f4f8](https://github.com/wood3n/biu/commit/dc4f4f8))
+- 修复下载记录初始化后重复下载的问题 ([dbe1e34](https://github.com/wood3n/biu/commit/dbe1e34))
+- 支持断点续传和合并 ([fd8468a](https://github.com/wood3n/biu/commit/fd8468a))
+- 修复review问题 ([224c87c](https://github.com/wood3n/biu/commit/224c87c))
+- Mac dock icon ([0c2c3c9](https://github.com/wood3n/biu/commit/0c2c3c9))
+- Action's macos version ([906db36](https://github.com/wood3n/biu/commit/906db36))
+
+### ❤️ Contributors
+
+- Oxyg3n
+- Wood3n
+
 ## v1.6.0-beta.9
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.8...v1.6.0-beta.9)
