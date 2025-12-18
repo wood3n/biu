@@ -5,7 +5,6 @@ import {
   Card,
   CardBody,
   Chip,
-  Image,
   Table,
   TableBody,
   TableCell,
@@ -16,11 +15,13 @@ import {
   TableRow,
   Tooltip,
 } from "@heroui/react";
-import { RiDeleteBinLine, RiFolderLine, RiInformationLine, RiMusicLine, RiVideoLine } from "@remixicon/react";
+import { RiDeleteBinLine, RiExternalLinkLine, RiFolderLine, RiInformationLine } from "@remixicon/react";
 import { filesize } from "filesize";
 
 import { formatMillisecond } from "@/common/utils";
+import { openBiliVideoLink } from "@/common/utils/url";
 import Empty from "@/components/empty";
+import Image from "@/components/image";
 import ScrollContainer from "@/components/scroll-container";
 import { useSettings } from "@/store/settings";
 
@@ -35,7 +36,7 @@ const DownloadList = () => {
   useEffect(() => {
     const initList = async () => {
       const list = await window.electron.getMediaDownloadTaskList();
-      if (list) {
+      if (list.length) {
         setDownloadList(list);
       }
     };
@@ -65,7 +66,7 @@ const DownloadList = () => {
     await window.electron.clearMediaDownloadTaskList();
   };
 
-  const openDirectory = async () => {
+  const openDownloadDir = async () => {
     await window.electron.openDirectory(downloadPath);
   };
 
@@ -102,7 +103,7 @@ const DownloadList = () => {
         </h1>
         <div className="flex items-center space-x-1">
           <Tooltip content="打开目录" closeDelay={0}>
-            <Button variant="flat" onPress={openDirectory} startContent={<RiFolderLine size={18} />}>
+            <Button variant="flat" onPress={openDownloadDir} startContent={<RiFolderLine size={18} />}>
               {downloadPath}
             </Button>
           </Tooltip>
@@ -144,10 +145,14 @@ const DownloadList = () => {
               }}
             >
               <TableHeader className="rounded-medium">
-                <TableColumn width={280}>文件</TableColumn>
+                <TableColumn width={350}>文件</TableColumn>
                 <TableColumn>状态</TableColumn>
-                <TableColumn width={120}>大小</TableColumn>
-                <TableColumn width={140}>下载时间</TableColumn>
+                <TableColumn width={120} align="center">
+                  大小
+                </TableColumn>
+                <TableColumn width={120} align="center">
+                  下载时间
+                </TableColumn>
                 <TableColumn width={120} align="center">
                   操作
                 </TableColumn>
@@ -163,18 +168,21 @@ const DownloadList = () => {
                     <TableRow key={item.id}>
                       <TableCell className="max-w-[280px] truncate">
                         <div className="flex items-center space-x-2">
-                          <Image
-                            radius="md"
-                            src={item.cover}
-                            fallbackSrc={
-                              item.outputFileType === "audio" ? <RiMusicLine size={48} /> : <RiVideoLine size={48} />
-                            }
-                            width={48}
-                            height={48}
-                            className="mr-2 object-cover"
-                          />
-                          <div className="flex min-w-0 flex-1 flex-col space-y-1 overflow-hidden">
-                            <span className="truncate">{item.title}</span>
+                          <Image radius="md" src={item.cover} width={48} height={48} className="mr-2 object-cover" />
+                          <div className="flex min-w-0 flex-1 flex-col items-start space-y-1 overflow-hidden">
+                            <div
+                              className="group flex max-w-full min-w-0 cursor-pointer items-center space-x-1 hover:underline"
+                              onClick={() =>
+                                openBiliVideoLink({
+                                  type: item.sid ? "audio" : "mv",
+                                  bvid: item.bvid,
+                                  sid: item.sid,
+                                })
+                              }
+                            >
+                              <span className="min-w-0 flex-auto truncate">{item.title}</span>
+                              <RiExternalLinkLine className="w-0 flex-none group-hover:w-[16px]" />
+                            </div>
                             {Boolean(quality) && (
                               <Chip size="sm" radius="sm" variant="flat">
                                 {quality}

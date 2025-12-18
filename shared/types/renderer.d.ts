@@ -21,6 +21,8 @@ interface ElectronAPI {
   clearStore: (name: StoreName) => Promise<void>;
   /** 打开系统目录选择对话框，返回选中的目录路径 */
   selectDirectory: () => Promise<string | null>;
+  /** 显示指定路径的文件 */
+  showFileInFolder: (filePath: string) => Promise<boolean>;
   /** 打开系统文件选择对话框，返回选中的文件路径 */
   selectFile: () => Promise<string | null>;
   /** 打开本地目录（默认打开下载目录） */
@@ -53,8 +55,6 @@ interface ElectronAPI {
   onDownloadAppProgress: (cb: (payload: DownloadAppMessage) => void) => VoidFunction;
   /** 安装更新 */
   quitAndInstall: () => Promise<void>;
-  /** 打开安装包所在目录 */
-  openInstallerDirectory: () => Promise<boolean>;
   /** 切换到 mini 播放器窗口 */
   switchToMiniPlayer: () => Promise<void>;
   /** 切换到主窗口 */

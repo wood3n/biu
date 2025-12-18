@@ -13,6 +13,7 @@ const api: ElectronAPI = {
   selectDirectory: () => ipcRenderer.invoke(channel.dialog.selectDirectory),
   selectFile: () => ipcRenderer.invoke(channel.dialog.selectFile),
   openDirectory: (path?: string) => ipcRenderer.invoke(channel.dialog.openDirectory, path),
+  showFileInFolder: (filePath: string) => ipcRenderer.invoke(channel.dialog.showFileInFolder, filePath),
   openExternal: (url: string) => ipcRenderer.invoke(channel.dialog.openExternal, url),
   getFonts: () => ipcRenderer.invoke(channel.font.getFonts),
   getCookie: (key: string) => ipcRenderer.invoke(channel.cookie.get, key),
@@ -129,8 +130,6 @@ const api: ElectronAPI = {
   },
   // 退出并安装更新
   quitAndInstall: () => ipcRenderer.invoke(channel.app.quitAndInstall),
-  // 打开安装包下载目录
-  openInstallerDirectory: () => ipcRenderer.invoke(channel.app.openInstallerDirectory),
   // 切换到 mini 播放器窗口
   switchToMiniPlayer: () => ipcRenderer.invoke(channel.window.switchToMini),
   // 切换到主窗口

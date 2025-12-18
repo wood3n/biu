@@ -11,7 +11,7 @@ export function registerDownloadHandlers({ getMainWindow }: IpcHandlerProps) {
   downloadQueue = new DownloadQueue(getMainWindow);
 
   ipcMain.handle(channel.download.getList, async () => {
-    return downloadQueue.getBroadcastTaskDataList();
+    return downloadQueue.getTaskList();
   });
 
   ipcMain.handle(channel.download.add, async (_, task: MediaDownloadTask) => {
@@ -43,6 +43,6 @@ export function registerDownloadHandlers({ getMainWindow }: IpcHandlerProps) {
   });
 }
 
-export function saveDownloadQueue() {
-  downloadQueue.saveAllTasksToStore();
+export function quitAndSaveTasks() {
+  downloadQueue.quitAndSave();
 }

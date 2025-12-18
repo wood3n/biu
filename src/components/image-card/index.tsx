@@ -7,7 +7,7 @@ import { formatUrlProtocal } from "@/common/utils/url";
 import Skeleton from "./skeleton";
 
 export interface ImageCardProps {
-  imageUrl: string;
+  imageUrl?: string;
   title: React.ReactNode;
   imageHeight?: number;
   imageMask?: React.ReactNode;
@@ -29,7 +29,7 @@ const ImageCard = ({
 }: ImageCardProps) => {
   return (
     <Card as="div" isHoverable radius="md" shadow="none" isPressable onPress={onPress} className="w-full">
-      <CardBody className={twMerge("rounded-medium flex-grow-0 overflow-hidden bg-none p-0", bodyClassName)}>
+      <CardBody className={twMerge("rounded-medium grow-0 overflow-hidden bg-none p-0", bodyClassName)}>
         <Image
           radius="md"
           removeWrapper
@@ -41,9 +41,9 @@ const ImageCard = ({
         />
         {imageMask}
       </CardBody>
-      <CardFooter className="flex flex-grow-1 flex-col items-start justify-between space-y-1">
+      <CardFooter className="flex grow flex-col items-start justify-between space-y-1">
         <div className="flex w-full items-stretch justify-between">
-          <div className="line-clamp-2 min-w-0 flex-grow text-start text-base wrap-anywhere break-all">{title}</div>
+          <div className="line-clamp-2 min-w-0 grow text-start text-base wrap-anywhere break-all">{title}</div>
           {titleExtra}
         </div>
         {footer}

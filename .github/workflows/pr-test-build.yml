@@ -50,7 +50,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [macos-26, windows-latest, ubuntu-latest]
 
     steps:
       - name: Checkout

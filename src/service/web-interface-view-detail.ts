@@ -1,5 +1,6 @@
+import type { WebInterfaceViewData } from "./web-interface-view";
+
 import { apiRequest } from "./request";
-import { WebInterfaceViewData } from "./web-interface-view";
 
 /**
  * 获取视频超详细信息(web端) - 请求参数

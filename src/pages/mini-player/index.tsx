@@ -100,18 +100,11 @@ const MiniPlayer = () => {
 
   return (
     <div className="window-drag bg-content1 rounded-medium flex h-screen w-screen flex-col overflow-hidden select-none">
-      <div className="flex h-full items-center space-x-3 px-3">
+      <div className="flex h-full items-center">
         {Boolean(cover) && (
-          <Image
-            radius="md"
-            src={cover}
-            width={64}
-            height={64}
-            classNames={{ wrapper: "flex-none" }}
-            className="object-cover"
-          />
+          <Image removeWrapper radius="none" src={cover} width={100} height="100%" className="object-cover" />
         )}
-        <div className="flex min-w-0 flex-1 flex-col space-y-1">
+        <div className="flex min-w-0 flex-1 flex-col space-y-1 px-2">
           <div className="flex min-w-0 flex-col">
             {title ? (
               <span className="truncate text-center text-sm font-medium">{title}</span>
