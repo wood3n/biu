@@ -17,22 +17,20 @@ export const pluginElectron = (): RsbuildPlugin => ({
       }
     });
 
-    if (process.env.BUILD_WEB !== "true") {
-      api.onBeforeBuild(async () => {
-        logger.info("Cleaning dist directory...");
-        try {
-          rimrafSync("dist");
-        } catch (err) {
-          logger.error(`Clean dist failed: ${String((err && (err as any).message) || err)}`);
-        }
+    api.onBeforeBuild(async () => {
+      logger.info("Cleaning dist directory...");
+      try {
+        rimrafSync("dist");
+      } catch (err) {
+        logger.error(`Clean dist failed: ${String((err && (err as any).message) || err)}`);
+      }
 
-        logger.info("[electron] Bundling Electron TypeScript...");
-        await buildElectronConfig();
-      });
+      logger.info("[electron] Bundling Electron TypeScript...");
+      await buildElectronConfig();
+    });
 
-      api.onAfterBuild(async () => {
-        await buildElectron();
-      });
-    }
+    api.onAfterBuild(async () => {
+      await buildElectron();
+    });
   },
 });

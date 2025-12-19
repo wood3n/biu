@@ -1,5 +1,7 @@
 import log from "electron-log";
 import ffmpeg from "fluent-ffmpeg";
+import fs from "node:fs";
+import path from "node:path";
 
 import { fixFfmpegPath } from "../../utils";
 
@@ -13,6 +15,21 @@ interface ConvertOptions {
   signal?: AbortSignal;
 }
 
+const getAvailableOutputPath = (outputPath: string) => {
+  if (!fs.existsSync(outputPath)) return outputPath;
+
+  const parsed = path.parse(outputPath);
+  const name = parsed.ext ? parsed.name : parsed.base;
+  const ext = parsed.ext;
+
+  for (let i = 1; i < 10000; i += 1) {
+    const next = path.join(parsed.dir, `${name} (${i})${ext}`);
+    if (!fs.existsSync(next)) return next;
+  }
+
+  throw new Error("Cannot find available output path");
+};
+
 export const convert = async ({
   audioTempPath,
   videoTempPath,
@@ -20,8 +37,9 @@ export const convert = async ({
   outputFileType,
   onProgress,
   signal,
-}: ConvertOptions): Promise<void> => {
+}: ConvertOptions): Promise<string> => {
   fixFfmpegPath();
+  const finalOutputPath = getAvailableOutputPath(outputPath);
   return new Promise((resolve, reject) => {
     const command = ffmpeg();
 
@@ -33,9 +51,6 @@ export const convert = async ({
       command.kill("SIGKILL");
       reject(new Error("Aborted"));
     });
-
-    // Set overwrite output option
-    command.outputOptions("-y");
 
     if (outputFileType === "video") {
       if (!videoTempPath) {
@@ -73,10 +88,10 @@ export const convert = async ({
     });
 
     command.on("end", () => {
-      resolve();
+      resolve(finalOutputPath);
     });
 
     // Save to output path
-    command.save(outputPath);
+    command.save(finalOutputPath);
   });
 };

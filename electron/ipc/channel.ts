@@ -45,6 +45,13 @@ export const channel = {
     next: "player:next",
     toggle: "player:toggle",
   },
+  shortcut: {
+    triggered: "shortcut:triggered",
+    register: "shortcut:register",
+    unregister: "shortcut:unregister",
+    registerAll: "shortcut:register-all",
+    unregisterAll: "shortcut:unregister-all",
+  },
   app: {
     getVersion: "app:get-version",
     checkUpdate: "app:check-update",
@@ -59,8 +66,7 @@ export const channel = {
     get: "cookie:get",
   },
   window: {
-    switchToMini: "window:switch-to-mini",
-    switchToMain: "window:switch-to-main",
+    toggleMini: "window:toggle-mini",
     minimize: "window:minimize",
     toggleMaximize: "window:toggle-maximize",
     close: "window:close",

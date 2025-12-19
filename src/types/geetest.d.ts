@@ -61,6 +61,7 @@ interface GeetestCaptcha {
   onReady(cb: () => void): GeetestCaptcha;
   onSuccess(cb: () => void): GeetestCaptcha;
   onError(cb: (error?: any) => void): GeetestCaptcha;
+  onClose(cb: () => void): GeetestCaptcha;
   verify(): void;
   getValidate(): GeetestValidate | null | false;
   reset?(): void;

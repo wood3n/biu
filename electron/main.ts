@@ -10,7 +10,8 @@ import { registerIpcHandlers } from "./ipc/index";
 import { destroyMiniPlayer } from "./mini-player";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
-import { appSettingsStore, storeKey } from "./store";
+import { registerAllShortcuts, unregisterAllShortcuts } from "./shortcut";
+import { appSettingsStore } from "./store";
 import { autoUpdater, setupAutoUpdater, stopCheckForUpdates } from "./updater";
 import { getWindowIcon } from "./utils";
 import { setupWindowsThumbar } from "./windows/thumbar";
@@ -106,7 +107,7 @@ function createWindow() {
 
   // 从store获取配置，判断是否关闭窗口时隐藏还是退出程序
   mainWindow.on("close", event => {
-    const closeWindowOption = appSettingsStore.get(storeKey.appSettings).closeWindowOption;
+    const closeWindowOption = appSettingsStore.get("appSettings").closeWindowOption;
 
     if ((app as any).quitting) {
       return;
@@ -137,6 +138,8 @@ app.whenReady().then(() => {
   setupAutoUpdater({
     getMainWindow: () => mainWindow,
   });
+
+  registerAllShortcuts(() => mainWindow);
 
   if (process.platform !== "darwin") {
     createTray({
@@ -175,6 +178,8 @@ app.on("will-quit", () => {
 
   stopCheckForUpdates();
   autoUpdater.removeAllListeners();
+
+  unregisterAllShortcuts();
 
   // 开发环境：Electron 退出时同时结束 Node.js 开发进程
   if (isDev) {

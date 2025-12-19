@@ -18,7 +18,7 @@
     "noEmit": true,
     "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": false
   },
   "include": ["src", "shared", "plugins", "electron", "tests", "rsbuild.config.ts"],
   "exclude": ["node_modules", "dist", "public", ".electron"]

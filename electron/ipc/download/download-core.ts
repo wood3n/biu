@@ -10,7 +10,7 @@ import PQueue from "p-queue";
 import type { FullMediaDownloadTask, MediaDownloadChunk } from "./types";
 
 import { UserAgent } from "../../network/user-agent";
-import { appSettingsStore, storeKey } from "../../store";
+import { appSettingsStore } from "../../store";
 import { getAudioWebStreamUrl } from "../api/audio-stream-url";
 import { getDashurl } from "../api/dash-url";
 import { convert } from "./ffmpeg-processor";
@@ -18,7 +18,6 @@ import { ensureDir, getStreamAudioBandwidth, isUrlValid, removeDirOrFile, sortAu
 
 const ChunkSize = 10 * 1024 * 1024; // 10MB
 const TempRootDir = path.join(os.tmpdir(), "biu-temp-downloader");
-const saveDir = appSettingsStore.get(storeKey.appSettings).downloadPath || app.getPath("downloads");
 
 export class DownloadCore extends EventEmitter {
   public id: string;
@@ -45,7 +44,7 @@ export class DownloadCore extends EventEmitter {
   public convertProgress: number = 0;
   public status: MediaDownloadStatus = "waiting";
   public fileName?: string;
-  public saveDir: string = saveDir;
+  public saveDir: string;
   public tempDir: string = TempRootDir;
   public savePath?: string;
   public audioTempPath?: string;
@@ -58,6 +57,7 @@ export class DownloadCore extends EventEmitter {
   constructor(task: FullMediaDownloadTask) {
     super();
     this.id = task.id;
+    this.saveDir = appSettingsStore.get("appSettings.downloadPath") || app.getPath("downloads");
     Object.assign(this, task);
   }
 
@@ -268,12 +268,12 @@ export class DownloadCore extends EventEmitter {
     this.status = "converting";
     this.emitUpdate();
     const sanitizedTitle = this.title?.replace(/<[^>]+>/g, "");
-    this.fileName = `${sanitizedTitle}-${this.id}${this.getAudioExt()}`;
+    this.fileName = `${sanitizedTitle}${this.getAudioExt()}`;
     if (this.outputFileType === "video") {
-      this.fileName = `${sanitizedTitle}-${this.id}${this.getVideoExt()}`;
+      this.fileName = `${sanitizedTitle}${this.getVideoExt()}`;
     }
     this.savePath = path.join(this.saveDir, this.fileName);
-    await convert({
+    const finalSavePath = await convert({
       outputFileType: this.outputFileType!,
       audioTempPath: this.audioTempPath,
       videoTempPath: this.videoTempPath,
@@ -284,6 +284,9 @@ export class DownloadCore extends EventEmitter {
       },
       signal: this.abortSignal,
     });
+    this.savePath = finalSavePath;
+    this.fileName = path.basename(finalSavePath);
+    this.emitUpdate();
     this.deleteTempFiles();
   }
 

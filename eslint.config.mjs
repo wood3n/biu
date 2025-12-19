@@ -15,7 +15,6 @@ import eslintReact from "@eslint-react/eslint-plugin";
 
 export default defineConfig([
   globalIgnores(["dist", ".electron"]),
-  eslintPluginPrettierRecommended,
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
@@ -112,4 +111,5 @@ export default defineConfig([
       "@typescript-eslint/explicit-function-return-type": "off",
     },
   },
+  eslintPluginPrettierRecommended,
 ]);

@@ -5,13 +5,13 @@ import log from "electron-log";
 import fs from "node:fs";
 import path from "node:path";
 
-import { appSettingsStore, storeKey } from "../store";
+import { appSettingsStore } from "../store";
 import { channel } from "./channel";
 
 export function registerDialogHandlers() {
   ipcMain.handle(channel.dialog.openDirectory, async (_event: IpcMainInvokeEvent, dir?: string) => {
     const targetDir: string =
-      dir ?? appSettingsStore.get(storeKey.appSettings)?.downloadPath ?? path.resolve(process.cwd(), "downloads");
+      dir ?? appSettingsStore.get("appSettings")?.downloadPath ?? path.resolve(process.cwd(), "downloads");
     const err = await shell.openPath(targetDir);
     return err === "";
   });

@@ -46,6 +46,7 @@ export default defineConfig({
     assetPrefix: "./",
   },
   server: {
+    port: 5173,
     printUrls: false,
     open: false,
     compress: false,

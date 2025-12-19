@@ -7,16 +7,16 @@ let playerNextHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
 let playerToggleHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
 
 const api: ElectronAPI = {
-  getStore: (name: StoreName) => ipcRenderer.invoke(channel.store.get, name),
-  setStore: (name: StoreName, value: any) => ipcRenderer.invoke(channel.store.set, name, value),
-  clearStore: (name: StoreName) => ipcRenderer.invoke(channel.store.clear, name),
+  getStore: name => ipcRenderer.invoke(channel.store.get, name),
+  setStore: (name, value: any) => ipcRenderer.invoke(channel.store.set, name, value),
+  clearStore: name => ipcRenderer.invoke(channel.store.clear, name),
   selectDirectory: () => ipcRenderer.invoke(channel.dialog.selectDirectory),
   selectFile: () => ipcRenderer.invoke(channel.dialog.selectFile),
-  openDirectory: (path?: string) => ipcRenderer.invoke(channel.dialog.openDirectory, path),
-  showFileInFolder: (filePath: string) => ipcRenderer.invoke(channel.dialog.showFileInFolder, filePath),
-  openExternal: (url: string) => ipcRenderer.invoke(channel.dialog.openExternal, url),
+  openDirectory: path => ipcRenderer.invoke(channel.dialog.openDirectory, path),
+  showFileInFolder: filePath => ipcRenderer.invoke(channel.dialog.showFileInFolder, filePath),
+  openExternal: url => ipcRenderer.invoke(channel.dialog.openExternal, url),
   getFonts: () => ipcRenderer.invoke(channel.font.getFonts),
-  getCookie: (key: string) => ipcRenderer.invoke(channel.cookie.get, key),
+  getCookie: key => ipcRenderer.invoke(channel.cookie.get, key),
   // 监听来自主进程的导航事件，并将路径回调给渲染端
   navigate: cb => {
     const navigateHandler = (_: Electron.IpcRendererEvent, path: string) => {
@@ -46,8 +46,30 @@ const api: ElectronAPI = {
       console.error("[preload] 上报播放状态失败:", error);
     }
   },
+  // 订阅主进程下发的快捷键命令
+  onShortcutCommand: cb => {
+    const handler = (_: Electron.IpcRendererEvent, cmd: ShortcutCommand) => {
+      try {
+        cb(cmd);
+      } catch (error) {
+        console.error("[preload] shortcut command callback failed:", error);
+      }
+    };
+
+    ipcRenderer.on(channel.shortcut.triggered, handler);
+
+    return () => ipcRenderer.removeListener(channel.shortcut.triggered, handler);
+  },
+  // 注册快捷键，返回是否注册成功
+  registerShortcut: ({ id, accelerator }) => ipcRenderer.invoke(channel.shortcut.register, { id, accelerator }),
+  // 注销指定快捷键
+  unregisterShortcut: id => ipcRenderer.invoke(channel.shortcut.unregister, id),
+  // 注册所有快捷键
+  registerAllShortcuts: () => ipcRenderer.invoke(channel.shortcut.registerAll),
+  // 注销所有快捷键
+  unregisterAllShortcuts: () => ipcRenderer.invoke(channel.shortcut.unregisterAll),
   // 订阅主进程下发的播放器命令（上一首、下一首、播放/暂停）
-  onPlayerCommand: async (cb: (cmd: "prev" | "next" | "toggle") => void) => {
+  onPlayerCommand: cb => {
     // 先移除旧的监听，避免重复
     if (playerPrevHandler) {
       try {
@@ -98,6 +120,21 @@ const api: ElectronAPI = {
     ipcRenderer.on(channel.player.prev, playerPrevHandler);
     ipcRenderer.on(channel.player.next, playerNextHandler);
     ipcRenderer.on(channel.player.toggle, playerToggleHandler);
+
+    return () => {
+      if (playerPrevHandler) {
+        ipcRenderer.removeListener(channel.player.prev, playerPrevHandler);
+        playerPrevHandler = null;
+      }
+      if (playerNextHandler) {
+        ipcRenderer.removeListener(channel.player.next, playerNextHandler);
+        playerNextHandler = null;
+      }
+      if (playerToggleHandler) {
+        ipcRenderer.removeListener(channel.player.toggle, playerToggleHandler);
+        playerToggleHandler = null;
+      }
+    };
   },
   // 获取应用版本
   getAppVersion: () => ipcRenderer.invoke(channel.app.getVersion),
@@ -130,10 +167,8 @@ const api: ElectronAPI = {
   },
   // 退出并安装更新
   quitAndInstall: () => ipcRenderer.invoke(channel.app.quitAndInstall),
-  // 切换到 mini 播放器窗口
-  switchToMiniPlayer: () => ipcRenderer.invoke(channel.window.switchToMini),
-  // 切换到主窗口
-  switchToMainWindow: () => ipcRenderer.invoke(channel.window.switchToMain),
+  // 切换 mini/主窗口
+  toggleMiniPlayer: () => ipcRenderer.invoke(channel.window.toggleMini),
   // 最小化窗口
   minimizeWindow: () => ipcRenderer.send(channel.window.minimize),
   // 最大化/还原窗口
@@ -173,17 +208,17 @@ const api: ElectronAPI = {
   // 获取下载任务列表
   getMediaDownloadTaskList: () => ipcRenderer.invoke(channel.download.getList),
   // 添加文件下载任务
-  addMediaDownloadTask: (media: MediaDownloadInfo) => ipcRenderer.invoke(channel.download.add, media),
+  addMediaDownloadTask: media => ipcRenderer.invoke(channel.download.add, media),
   /** 添加下载任务列表 */
-  addMediaDownloadTaskList: (mediaList: MediaDownloadInfo[]) => ipcRenderer.invoke(channel.download.addList, mediaList),
+  addMediaDownloadTaskList: mediaList => ipcRenderer.invoke(channel.download.addList, mediaList),
   // 暂停文件下载任务
-  pauseMediaDownloadTask: (id: string) => ipcRenderer.invoke(channel.download.pause, id),
+  pauseMediaDownloadTask: id => ipcRenderer.invoke(channel.download.pause, id),
   // 恢复文件下载任务
-  resumeMediaDownloadTask: (id: string) => ipcRenderer.invoke(channel.download.resume, id),
+  resumeMediaDownloadTask: id => ipcRenderer.invoke(channel.download.resume, id),
   // 重试文件下载任务
-  retryMediaDownloadTask: (id: string) => ipcRenderer.invoke(channel.download.retry, id),
+  retryMediaDownloadTask: id => ipcRenderer.invoke(channel.download.retry, id),
   // 取消文件下载任务
-  cancelMediaDownloadTask: (id: string) => ipcRenderer.invoke(channel.download.cancel, id),
+  cancelMediaDownloadTask: id => ipcRenderer.invoke(channel.download.cancel, id),
   // 监听文件下载任务状态变化
   syncMediaDownloadTaskList: cb => {
     const handler = (_, payload: MediaDownloadBroadcastPayload) => cb(payload);

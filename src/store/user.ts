@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 import { getFavFolderCollectedList, type FavFolderCollectedItem } from "@/service/fav-folder-collected-list";
 import { getFavFolderCreatedListAll, type FavFolderItem } from "@/service/fav-folder-created-list-all";
 import { getUserInfo, type UserInfo } from "@/service/user-info";
+import { StoreNameMap } from "@shared/store";
 
 interface UserState {
   user: UserInfo | null;
@@ -124,7 +125,7 @@ export const useUser = create<UserState & Action>()(
       partialize: state => state.user,
       storage: {
         getItem: async () => {
-          const store = await window.electron.getStore<UserInfo>("user-login-info");
+          const store = await window.electron.getStore(StoreNameMap.UserLoginInfo);
 
           return {
             state: store,
@@ -132,11 +133,13 @@ export const useUser = create<UserState & Action>()(
         },
 
         setItem: async (_, value) => {
-          await window.electron.setStore("user-login-info", value.state);
+          if (value.state) {
+            await window.electron.setStore(StoreNameMap.UserLoginInfo, value.state);
+          }
         },
 
         removeItem: async () => {
-          await window.electron.clearStore("user-login-info");
+          await window.electron.clearStore(StoreNameMap.UserLoginInfo);
         },
       },
     },

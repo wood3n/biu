@@ -8,15 +8,12 @@ import {
   RiPictureInPicture2Line,
   RiSubtractLine,
 } from "@remixicon/react";
-import { shallow } from "zustand/shallow";
 
-import { createBroadcastChannel } from "@/common/broadcast/mini-player-sync";
-import { usePlayList } from "@/store/play-list";
+import { toggleMiniMode } from "@/common/utils/mini-player";
 
 const WindowAction = () => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [shouldBroadcastMainState, setShouldBroadcastMainState] = useState(false);
 
   useEffect(() => {
     window.electron.isMaximized().then(setIsMaximized);
@@ -30,106 +27,6 @@ const WindowAction = () => {
     };
   }, []);
 
-  useEffect(() => {
-    let bc: BroadcastChannel | null = null;
-    if (shouldBroadcastMainState) {
-      bc = createBroadcastChannel();
-
-      bc.onmessage = ev => {
-        const { from, data } = ev.data || {};
-        if (from !== "mini" || !data) return;
-        switch (data.type) {
-          case "init": {
-            const { list, isPlaying, currentTime, playMode, duration, getPlayItem } = usePlayList.getState();
-            const playItem = getPlayItem();
-            bc?.postMessage({
-              from: "main",
-              state: {
-                isSingle: list.length === 1,
-                title: playItem?.pageTitle || playItem?.pageTitle,
-                cover: playItem?.pageCover || playItem?.cover,
-                isPlaying: isPlaying,
-                currentTime: currentTime,
-                playMode: playMode,
-                duration: duration,
-              },
-              ts: Date.now(),
-            });
-            break;
-          }
-          case "seek": {
-            usePlayList.getState().seek(data.state.currentTime);
-            break;
-          }
-          case "togglePlayMode": {
-            usePlayList.getState().togglePlayMode();
-            break;
-          }
-          case "next": {
-            usePlayList.getState().next();
-            break;
-          }
-          case "prev": {
-            usePlayList.getState().prev();
-            break;
-          }
-          case "togglePlay": {
-            usePlayList.getState().togglePlay();
-            break;
-          }
-        }
-      };
-
-      const unsubscribe = usePlayList.subscribe((state, prevState) => {
-        if (
-          !shallow(
-            {
-              playId: state.playId,
-              isPlaying: state.isPlaying,
-              playMode: state.playMode,
-              currentTime: state.currentTime,
-              duration: state.duration,
-            },
-            {
-              playId: prevState.playId,
-              isPlaying: prevState.isPlaying,
-              playMode: prevState.playMode,
-              currentTime: prevState.currentTime,
-              duration: prevState.duration,
-            },
-          )
-        ) {
-          const playItem = state.getPlayItem();
-
-          bc?.postMessage({
-            from: "main",
-            state: {
-              title: playItem?.pageTitle || playItem?.pageTitle,
-              cover: playItem?.pageCover || playItem?.cover,
-              playId: state.playId,
-              isPlaying: state.isPlaying,
-              isSingle: state.list.length === 1,
-              currentTime: state.currentTime,
-              playMode: state.playMode,
-              duration: state.duration,
-            },
-            ts: Date.now(),
-          });
-        }
-      });
-
-      return () => {
-        bc?.close();
-        unsubscribe();
-      };
-    } else {
-      if (bc) {
-        (bc as BroadcastChannel).close();
-        bc = null;
-      }
-    }
-  }, [shouldBroadcastMainState]);
-
   const handleMinimize = () => {
     window.electron.minimizeWindow();
   };
@@ -142,16 +39,11 @@ const WindowAction = () => {
     window.electron.closeWindow();
   };
 
-  const handleSwitchToMini = () => {
-    window.electron.switchToMiniPlayer();
-    setShouldBroadcastMainState(true);
-  };
-
   return (
     <div className="flex items-center justify-center">
       {!isFullScreen && (
         <>
-          <Button title="切换到迷你播放器" isIconOnly size="sm" variant="light" onPress={handleSwitchToMini}>
+          <Button title="切换到迷你播放器" isIconOnly size="sm" variant="light" onPress={toggleMiniMode}>
             <RiPictureInPicture2Line size={16} />
           </Button>
           <Button variant="light" size="sm" isIconOnly onPress={handleMinimize}>
