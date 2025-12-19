@@ -32,8 +32,14 @@ declare global {
     updatePlaybackState: (isPlaying: boolean) => void;
     /** 订阅主进程下发的快捷键命令 */
     onShortcutCommand: (cb: (cmd: ShortcutCommand) => void) => VoidFunction;
-    /** 检查快捷键是否可用（检测系统和其他应用冲突） */
-    checkShortcut: (accelerator: string) => Promise<boolean>;
+    /** 注册快捷键，返回是否注册成功 */
+    registerShortcut: ({ id, accelerator }: { id: ShortcutCommand; accelerator: string }) => Promise<boolean>;
+    /** 注销指定快捷键 */
+    unregisterShortcut: (id: ShortcutCommand) => Promise<void>;
+    /** 注册所有快捷键 */
+    registerAllShortcuts: () => Promise<void>;
+    /** 注销所有快捷键 */
+    unregisterAllShortcuts: () => Promise<void>;
     /** 订阅主进程下发的播放器命令（上一首、下一首、播放/暂停） */
     onPlayerCommand: (cb: (cmd: "prev" | "next" | "toggle") => void) => VoidFunction;
     /** 获取当前应用版本 */

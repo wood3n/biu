@@ -268,9 +268,9 @@ export class DownloadCore extends EventEmitter {
     this.status = "converting";
     this.emitUpdate();
     const sanitizedTitle = this.title?.replace(/<[^>]+>/g, "");
-    this.fileName = `${sanitizedTitle}-${this.id}${this.getAudioExt()}`;
+    this.fileName = `${sanitizedTitle}${this.getAudioExt()}`;
     if (this.outputFileType === "video") {
-      this.fileName = `${sanitizedTitle}-${this.id}${this.getVideoExt()}`;
+      this.fileName = `${sanitizedTitle}${this.getVideoExt()}`;
     }
     this.savePath = path.join(this.saveDir, this.fileName);
     await convert({

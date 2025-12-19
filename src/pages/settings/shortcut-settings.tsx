@@ -1,93 +1,137 @@
 import React from "react";
 
-import { Checkbox, Button, addToast } from "@heroui/react";
+import { Checkbox, addToast } from "@heroui/react";
 import { useShallow } from "zustand/react/shallow";
 
+import AsyncButton from "@/components/async-button";
 import ShortcutKeyInput from "@/components/shortcut-key-input";
 import { useShortcutSettings } from "@/store/shortcuts";
 
 const ShortcutSettingsPage = () => {
-  const { shortcuts, enableGlobalShortcuts, update, reset } = useShortcutSettings(
+  const { shortcuts, globalShortcuts, enableGlobalShortcuts, refresh, update, reset } = useShortcutSettings(
     useShallow(state => ({
       shortcuts: state.shortcuts,
+      globalShortcuts: state.globalShortcuts,
       enableGlobalShortcuts: state.enableGlobalShortcuts,
+      refresh: state.refresh,
       update: state.update,
       reset: state.reset,
     })),
   );
 
-  const handleShortcutChange = async (id: ShortcutCommand, key: "shortcut" | "globalShortcut", value: string) => {
+  const handleChangeShortcut = (id: ShortcutCommand, shortcut: string) => {
     const newShortcuts = shortcuts.map(s => {
       if (s.id === id) {
-        return { ...s, [key]: value };
+        const existing = shortcuts.find(g => g.id !== id && g.shortcut === shortcut);
+
+        return {
+          ...s,
+          shortcut,
+          isConflict: existing ? true : false,
+          error: existing ? `与${existing.name}冲突` : undefined,
+        };
       }
       return s;
     });
     update({ shortcuts: newShortcuts });
   };
 
-  const handleToggleGlobalShortcuts = async (enabled: boolean) => {
-    if (enabled) {
-      const checks = shortcuts.map(async item => {
-        if (!item.globalShortcut) return null;
-        const isAvailable = await window.electron.checkShortcut(item.globalShortcut);
-        return isAvailable ? null : item;
+  const handleChangeGlobalShortcut = async (id: ShortcutCommand, shortcut: string) => {
+    console.log("shortcut", shortcut);
+    if (shortcut) {
+      const existing = globalShortcuts.find(g => g.id !== id && g.shortcut === shortcut);
+      if (existing) {
+        addToast({
+          title: `与${existing.name}冲突`,
+          color: "danger",
+        });
+        return;
+      }
+
+      const registerSuccess = await window.electron.registerShortcut({
+        id,
+        accelerator: shortcut,
       });
 
-      const results = await Promise.all(checks);
-      const conflicts = results.filter((item): item is ShortcutItem => item !== null);
-
-      if (conflicts.length > 0) {
-        const conflictNames = conflicts.map(c => `${c.name} (${c.globalShortcut})`).join("、");
+      if (!registerSuccess) {
         addToast({
-          title: "以下快捷键被占用，可能无法生效",
-          description: conflictNames,
-          color: "warning",
-          timeout: 5000,
+          title: "与系统或其他应用快捷键冲突",
+          color: "danger",
         });
+        return;
       }
+    } else {
+      await window.electron.unregisterShortcut(id);
     }
-    update({ enableGlobalShortcuts: enabled });
+    const newShortcuts = globalShortcuts.map(s =>
+      s.id === id ? { ...s, shortcut, isConflict: false, error: undefined } : s,
+    );
+    update({ globalShortcuts: newShortcuts });
+  };
+
+  const handleToggleEnableGlobalShortcut = async (enabled: boolean) => {
+    update({
+      enableGlobalShortcuts: enabled,
+    });
+
+    if (enabled) {
+      await window.electron.registerAllShortcuts();
+    } else {
+      await window.electron.unregisterAllShortcuts();
+    }
+
+    await refresh();
+  };
+
+  const handleReset = async () => {
+    reset();
+    await window.electron.registerAllShortcuts();
+    await refresh();
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2>快捷键设置</h2>
-        <Button size="sm" variant="flat" onPress={reset}>
+        <AsyncButton size="sm" variant="flat" onPress={handleReset}>
           恢复默认
-        </Button>
+        </AsyncButton>
       </div>
 
       <div className="grid grid-cols-[1fr_200px_200px] gap-4 text-sm font-medium text-zinc-500">
         <div>功能说明</div>
-        <div>快捷键</div>
+        <div>应用内快捷键</div>
         <div>全局快捷键</div>
       </div>
 
       <div className="space-y-4">
         {shortcuts.map(item => {
+          const globalShortcut = globalShortcuts.find(g => g.id === item.id) as ShortcutItem;
+
           return (
-            <div key={item.id} className="grid grid-cols-[1fr_200px_200px] items-center gap-4">
+            <div key={item.id} className="grid grid-cols-[1fr_200px_200px] items-start gap-4">
               <div className="text-medium">{item.name}</div>
               <ShortcutKeyInput
                 value={item.shortcut}
-                onChange={v => handleShortcutChange(item.id, "shortcut", v)}
-                shortcutId={item.id}
-                shortcutType="shortcut"
+                onChange={v => handleChangeShortcut(item.id, v)}
+                isInvalid={item.isConflict}
+                errorMessage={item.error}
               />
-              <ShortcutKeyInput
-                value={item.globalShortcut}
-                onChange={v => handleShortcutChange(item.id, "globalShortcut", v)}
-                shortcutId={item.id}
-                shortcutType="globalShortcut"
-              />
+              {Boolean(globalShortcut) && (
+                <ShortcutKeyInput
+                  value={globalShortcut.shortcut}
+                  onChange={v => handleChangeGlobalShortcut(globalShortcut.id, v)}
+                  isDisabled={!enableGlobalShortcuts}
+                  isInvalid={globalShortcut.isConflict}
+                  errorMessage="与系统或其他应用快捷键冲突"
+                />
+              )}
             </div>
           );
         })}
       </div>
       <div className="text-end">
-        <Checkbox isSelected={enableGlobalShortcuts} onValueChange={handleToggleGlobalShortcuts}>
+        <Checkbox isSelected={enableGlobalShortcuts} onValueChange={handleToggleEnableGlobalShortcut}>
           启用全局快捷键
         </Checkbox>
       </div>

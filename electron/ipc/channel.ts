@@ -47,7 +47,10 @@ export const channel = {
   },
   shortcut: {
     triggered: "shortcut:triggered",
-    check: "shortcut:check",
+    register: "shortcut:register",
+    unregister: "shortcut:unregister",
+    registerAll: "shortcut:register-all",
+    unregisterAll: "shortcut:unregister-all",
   },
   app: {
     getVersion: "app:get-version",

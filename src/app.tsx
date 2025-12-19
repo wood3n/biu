@@ -5,7 +5,7 @@ import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import moment from "moment";
 
 import { getCookitFromBSite } from "./common/utils/cookie";
-import { mapKeyToElectron } from "./common/utils/shortcut";
+import { mapKeyToElectronAccelerator } from "./common/utils/shortcut";
 import Theme from "./components/theme";
 import routes from "./routes";
 import { useAppUpdateStore } from "./store/app-update";
@@ -93,7 +93,7 @@ export function App() {
         return;
       }
 
-      const shortcut = mapKeyToElectron(e);
+      const shortcut = mapKeyToElectronAccelerator(e);
       if (!shortcut) return;
 
       const { shortcuts } = useShortcutSettings.getState();

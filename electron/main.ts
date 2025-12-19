@@ -10,7 +10,7 @@ import { registerIpcHandlers } from "./ipc/index";
 import { destroyMiniPlayer } from "./mini-player";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
-import { setupShortcutManager } from "./shortcut-manager";
+import { registerAllShortcuts, unregisterAllShortcuts } from "./shortcut";
 import { appSettingsStore } from "./store";
 import { autoUpdater, setupAutoUpdater, stopCheckForUpdates } from "./updater";
 import { getWindowIcon } from "./utils";
@@ -139,7 +139,7 @@ app.whenReady().then(() => {
     getMainWindow: () => mainWindow,
   });
 
-  const cleanupShortcuts = setupShortcutManager(() => mainWindow);
+  registerAllShortcuts(() => mainWindow);
 
   if (process.platform !== "darwin") {
     createTray({
@@ -151,9 +151,6 @@ app.whenReady().then(() => {
       },
     });
   }
-
-  // 保存清理函数到 app 对象上，方便在 will-quit 中调用
-  (app as any).cleanupShortcuts = cleanupShortcuts;
 });
 
 app.on("activate", () => mainWindow?.show());
@@ -177,18 +174,12 @@ app.on("will-quit", () => {
     log.warn("[main] destroyTray failed:", err);
   }
 
-  try {
-    if (typeof (app as any).cleanupShortcuts === "function") {
-      (app as any).cleanupShortcuts();
-    }
-  } catch (err) {
-    log.warn("[main] cleanupShortcuts failed:", err);
-  }
-
   destroyMiniPlayer();
 
   stopCheckForUpdates();
   autoUpdater.removeAllListeners();
+
+  unregisterAllShortcuts();
 
   // 开发环境：Electron 退出时同时结束 Node.js 开发进程
   if (isDev) {

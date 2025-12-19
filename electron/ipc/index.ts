@@ -17,5 +17,5 @@ export function registerIpcHandlers(props: IpcHandlerProps) {
   registerAppHandlers();
   registerCookieIpcHandlers();
   registerWindowHandlers(props);
-  registerShortcutHandlers();
+  registerShortcutHandlers(props);
 }

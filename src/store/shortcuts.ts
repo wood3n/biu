@@ -5,20 +5,20 @@ import { defaultShortcutSettings } from "@shared/settings/shortcut-settings";
 import { StoreNameMap } from "@shared/store";
 
 interface ShortcutActions {
-  getSettings: () => ShortcutSettings;
+  refresh: () => Promise<void>;
   update: (patch: Partial<ShortcutSettings>) => void;
   reset: () => void;
 }
 
 export const useShortcutSettings = create<ShortcutSettings & ShortcutActions>()(
   persist(
-    (set, get) => ({
+    set => ({
       ...defaultShortcutSettings,
-      getSettings: () => {
-        return {
-          shortcuts: get().shortcuts,
-          enableGlobalShortcuts: get().enableGlobalShortcuts,
-        };
+      refresh: async () => {
+        const store = await window.electron.getStore(StoreNameMap.ShortcutSettings);
+        if (store) {
+          set(store);
+        }
       },
       update: (patch: Partial<ShortcutSettings>) => {
         set(patch);
@@ -50,6 +50,7 @@ export const useShortcutSettings = create<ShortcutSettings & ShortcutActions>()(
       },
       partialize: state => ({
         shortcuts: state.shortcuts,
+        globalShortcuts: state.globalShortcuts,
         enableGlobalShortcuts: state.enableGlobalShortcuts,
       }),
     },

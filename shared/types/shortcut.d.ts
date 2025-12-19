@@ -5,11 +5,13 @@ declare global {
     id: ShortcutCommand;
     name: string;
     shortcut: string;
-    globalShortcut: string;
+    isConflict?: boolean;
+    error?: string;
   }
 
   interface ShortcutSettings {
     shortcuts: ShortcutItem[];
+    globalShortcuts: ShortcutItem[];
     enableGlobalShortcuts: boolean;
   }
 }

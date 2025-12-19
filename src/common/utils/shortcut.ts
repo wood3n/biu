@@ -2,7 +2,7 @@ import React from "react";
 
 export const isModifier = (key: string) => ["Control", "Shift", "Alt", "Meta"].includes(key);
 
-export const mapKeyToElectron = (e: KeyboardEvent | React.KeyboardEvent): string | null => {
+export const mapKeyToElectronAccelerator = (e: KeyboardEvent | React.KeyboardEvent): string | null => {
   const { key, ctrlKey, shiftKey, altKey, metaKey } = e;
 
   // 如果只按下了修饰键，不视为有效组合
