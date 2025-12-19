@@ -1,5 +1,105 @@
 # Changelog
 
+## v1.6.0-beta.12
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.6...v1.6.0-beta.12)
+
+### 🚀 新功能
+
+- **组件MVCard:** 为MV卡片添加播放量显示功能 close#80 在多个页面组件中添加playCount属性，并实现播放量格式化显示 新增数字格式化工具函数，支持亿/万单位转换 ([#80](https://github.com/wood3n/biu/issues/80))
+- **组件:** 添加全选复选框组组件并应用于菜单设置 ([5455a05](https://github.com/wood3n/biu/commit/5455a05))
+- **音量控制:** 添加鼠标滚轮调整音量功能 ([dadf5df](https://github.com/wood3n/biu/commit/dadf5df))
+- 补充密码和短信登录功能 ([c2a2203](https://github.com/wood3n/biu/commit/c2a2203))
+- **托盘菜单:** 添加播放控制和窗口显示功能 ([f37a29b](https://github.com/wood3n/biu/commit/f37a29b))
+- **托盘菜单:** 添加播放控制和窗口显示功能 ([e9ee09e](https://github.com/wood3n/biu/commit/e9ee09e))
+- 分集视频支持搜索 ([025cd52](https://github.com/wood3n/biu/commit/025cd52))
+- **媒体显示:** 添加卡片和列表两种显示模式 test:目前只在我创建的收藏夹中使用 添加 displayMode 设置选项，支持在卡片和列表两种显示模式间切换 创建 MediaItem 组件统一处理不同显示模式的渲染逻辑 更新收藏页面以支持新的显示模式 ([719a8b1](https://github.com/wood3n/biu/commit/719a8b1))
+- **media-item:** 替换MVCard为MediaItem组件并支持显示模式切换 ([7568001](https://github.com/wood3n/biu/commit/7568001))
+- **视频收藏:** 添加列表模式支持并优化数据获取逻辑 ([06310ba](https://github.com/wood3n/biu/commit/06310ba))
+- **列表模式:** 优化收藏夹列表加载逻辑，支持无限下拉分页 ([04a52de](https://github.com/wood3n/biu/commit/04a52de))
+- **视频收藏:** 添加全部媒体到播放列表功能并优化回调函数 ([699093e](https://github.com/wood3n/biu/commit/699093e))
+- **媒体显示:** 添加卡片和列表两种显示模式 test:目前只在我创建的收藏夹中使用 添加 displayMode 设置选项，支持在卡片和列表两种显示模式间切换 创建 MediaItem 组件统一处理不同显示模式的渲染逻辑 更新收藏页面以支持新的显示模式 ([8cf52f3](https://github.com/wood3n/biu/commit/8cf52f3))
+- **media-item:** 替换MVCard为MediaItem组件并支持显示模式切换 ([1a3d868](https://github.com/wood3n/biu/commit/1a3d868))
+- **视频收藏:** 添加列表模式支持并优化数据获取逻辑 ([540528d](https://github.com/wood3n/biu/commit/540528d))
+- **列表模式:** 优化收藏夹列表加载逻辑，支持无限下拉分页 ([bd18333](https://github.com/wood3n/biu/commit/bd18333))
+- **视频收藏:** 添加全部媒体到播放列表功能并优化回调函数 ([b664d52](https://github.com/wood3n/biu/commit/b664d52))
+- **用户资料:** 添加视频合集列表的列表视图模式 ([5b4da03](https://github.com/wood3n/biu/commit/5b4da03))
+- **收藏夹:** 实现收藏夹资源搜索、排序和分页功能 ([02a243f](https://github.com/wood3n/biu/commit/02a243f))
+- **用户资料:** 添加视频搜索和排序功能 ([8fc6a10](https://github.com/wood3n/biu/commit/8fc6a10))
+- 补充检测ffmpeg提示 ([ea4ff22](https://github.com/wood3n/biu/commit/ea4ff22))
+- **视频合集:** 添加搜索和排序功能 ([4f8d04e](https://github.com/wood3n/biu/commit/4f8d04e))
+- 补充ffmpeg系统路径设置项 ([720a8dc](https://github.com/wood3n/biu/commit/720a8dc))
+- 新增系统快捷键功能 ([0f0e15c](https://github.com/wood3n/biu/commit/0f0e15c))
+- 下载功能支持断点续传 ([89c8b19](https://github.com/wood3n/biu/commit/89c8b19))
+- 优化代码 ([0c2436a](https://github.com/wood3n/biu/commit/0c2436a))
+
+### 🩹 修复问题
+
+- **我收藏的收藏夹:** 修复我收藏的收藏夹显示已失效的bug，将getFavFolderCollectedList的pn从999改为50，并实现我收藏的收藏夹列表加载更多数据的功能 ([1dad2f9](https://github.com/wood3n/biu/commit/1dad2f9))
+- **mv-card:** 仅在 playCount 存在时显示播放计数 ([1253827](https://github.com/wood3n/biu/commit/1253827))
+- Mac自动安装改为打开下载目录 ([09c0d32](https://github.com/wood3n/biu/commit/09c0d32))
+- Fix system default font value ([cff5770](https://github.com/wood3n/biu/commit/cff5770))
+- Fix review problem ([dc660c2](https://github.com/wood3n/biu/commit/dc660c2))
+- **mv-card:** 修复播放次数为null时显示异常的问题 ([98f9e3e](https://github.com/wood3n/biu/commit/98f9e3e))
+- 修复mini播放器空状态显示问题 ([e5e3ae0](https://github.com/wood3n/biu/commit/e5e3ae0))
+- 修复mini播放器状态同步问题 ([142e45b](https://github.com/wood3n/biu/commit/142e45b))
+- 完善密码登录和短信登录功能 ([a3d96dd](https://github.com/wood3n/biu/commit/a3d96dd))
+- 鼠标滚轮调节音量功能增强 ([009946d](https://github.com/wood3n/biu/commit/009946d))
+- 修复搜索切换tab没有重置数据导致key重复的问题 ([d7303f3](https://github.com/wood3n/biu/commit/d7303f3))
+- 修复大量收藏夹选择时弹窗样式问题 ([cda9bc0](https://github.com/wood3n/biu/commit/cda9bc0))
+- 移除无用的ipc模块 ([e5f90b2](https://github.com/wood3n/biu/commit/e5f90b2))
+- 修复列表样式问题 ([5436ec7](https://github.com/wood3n/biu/commit/5436ec7))
+- 修复lint和review问题 ([3d4dea3](https://github.com/wood3n/biu/commit/3d4dea3))
+- **视频合集): 收藏合集从多页码切换单页码的场景数据加载异常 feat(视频合集:** 列表模式添加分页功能以提升性能 ([94f05f0](https://github.com/wood3n/biu/commit/94f05f0))
+- **video-series:** 修复切换合集时短暂显示上一个合集数据的问题 ([0748806](https://github.com/wood3n/biu/commit/0748806))
+- **video-series:** 修复搜索参数变化时未重置页码的问题 ([7bb39bb](https://github.com/wood3n/biu/commit/7bb39bb))
+- 修复播放进度恢复问题 ([e852ebc](https://github.com/wood3n/biu/commit/e852ebc))
+- 修复下载记录按钮显示状态 ([a726b27](https://github.com/wood3n/biu/commit/a726b27))
+- Mac dock icon ([3c7617a](https://github.com/wood3n/biu/commit/3c7617a))
+- 移除无用的ipc方法 ([dc4f4f8](https://github.com/wood3n/biu/commit/dc4f4f8))
+- 修复下载记录初始化后重复下载的问题 ([dbe1e34](https://github.com/wood3n/biu/commit/dbe1e34))
+- 支持断点续传和合并 ([fd8468a](https://github.com/wood3n/biu/commit/fd8468a))
+- 修复review问题 ([224c87c](https://github.com/wood3n/biu/commit/224c87c))
+- Mac dock icon ([0c2c3c9](https://github.com/wood3n/biu/commit/0c2c3c9))
+- Action's macos version ([906db36](https://github.com/wood3n/biu/commit/906db36))
+- 修复快捷键设置和注册问题 ([a3e379c](https://github.com/wood3n/biu/commit/a3e379c))
+- 完善快捷键设置功能 ([0c177a8](https://github.com/wood3n/biu/commit/0c177a8))
+- 修改快捷键映射在不同系统的显示 ([e3ede64](https://github.com/wood3n/biu/commit/e3ede64))
+- 修改下载文件名命名规则，避免过长文件名和覆盖本地同名文件 ([efca4ca](https://github.com/wood3n/biu/commit/efca4ca))
+- 修改review问题 ([ae91fc9](https://github.com/wood3n/biu/commit/ae91fc9))
+
+### 💅 Refactors
+
+- **视频卡片:** 统一播放次数属性为playCount ([6672fb7](https://github.com/wood3n/biu/commit/6672fb7))
+- **组件:** 移除未使用的React导入并删除废弃文档 ([6126b0d](https://github.com/wood3n/biu/commit/6126b0d))
+- 移除设置鼠标滚轮调整音量的功能，改为默认支持 ([3fd7107](https://github.com/wood3n/biu/commit/3fd7107))
+- **utils:** 使用 Intl.NumberFormat 替换数字格式化函数 ([658aaaf](https://github.com/wood3n/biu/commit/658aaaf))
+- **media-item:** 简化显示模式的条件判断逻辑 ([ff373cb](https://github.com/wood3n/biu/commit/ff373cb))
+- **media-item:** 简化显示模式的条件判断逻辑 ([6cbc71d](https://github.com/wood3n/biu/commit/6cbc71d))
+- Download ([b70b793](https://github.com/wood3n/biu/commit/b70b793))
+- Download ([3a42ef2](https://github.com/wood3n/biu/commit/3a42ef2))
+- Download ([269420b](https://github.com/wood3n/biu/commit/269420b))
+- Download ([f61cc99](https://github.com/wood3n/biu/commit/f61cc99))
+- Download ([b7d2052](https://github.com/wood3n/biu/commit/b7d2052))
+- Download ([3419cbb](https://github.com/wood3n/biu/commit/3419cbb))
+- 优化切换mini播放器实现，以响应快捷键设置 ([4de3d23](https://github.com/wood3n/biu/commit/4de3d23))
+
+### 🏡 Chore
+
+- **release:** V1.6.0-beta.7 ([003bd3f](https://github.com/wood3n/biu/commit/003bd3f))
+- **release:** V1.6.0-beta.8 ([5ef99a4](https://github.com/wood3n/biu/commit/5ef99a4))
+- Update renovate config ([9f734c0](https://github.com/wood3n/biu/commit/9f734c0))
+- **release:** V1.6.0-beta.9 ([d29c3c3](https://github.com/wood3n/biu/commit/d29c3c3))
+- **release:** V1.6.0-beta.10 ([491b728](https://github.com/wood3n/biu/commit/491b728))
+- **release:** V1.6.0-beta.11 ([22620a2](https://github.com/wood3n/biu/commit/22620a2))
+
+### ❤️ Contributors
+
+- Wood3n
+- Oxyg3n
+- Tang Wentao
+- Hope
+
 ## v1.6.0-beta.11
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.10...v1.6.0-beta.11)
