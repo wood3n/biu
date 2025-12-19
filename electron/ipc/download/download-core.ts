@@ -273,7 +273,7 @@ export class DownloadCore extends EventEmitter {
       this.fileName = `${sanitizedTitle}${this.getVideoExt()}`;
     }
     this.savePath = path.join(this.saveDir, this.fileName);
-    await convert({
+    const finalSavePath = await convert({
       outputFileType: this.outputFileType!,
       audioTempPath: this.audioTempPath,
       videoTempPath: this.videoTempPath,
@@ -284,6 +284,9 @@ export class DownloadCore extends EventEmitter {
       },
       signal: this.abortSignal,
     });
+    this.savePath = finalSavePath;
+    this.fileName = path.basename(finalSavePath);
+    this.emitUpdate();
     this.deleteTempFiles();
   }
 
