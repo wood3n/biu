@@ -33,6 +33,7 @@ export function registerAllShortcuts(getMainWindow: () => BrowserWindow | null) 
         item.isConflict = !success;
       } catch (error) {
         log.error(`[Shortcut] Error registering ${key}:`, error);
+        item.isConflict = true;
       }
     }
   });

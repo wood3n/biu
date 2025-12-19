@@ -20,20 +20,22 @@ const ShortcutSettingsPage = () => {
   );
 
   const handleChangeShortcut = (id: ShortcutCommand, shortcut: string) => {
-    const newShortcuts = shortcuts.map(s => {
-      if (s.id === id) {
-        const existing = shortcuts.find(g => g.id !== id && g.shortcut === shortcut);
+    const updatedShortcuts = shortcuts.map(s => (s.id === id ? { ...s, shortcut } : s));
 
-        return {
-          ...s,
-          shortcut,
-          isConflict: existing ? true : false,
-          error: existing ? `与${existing.name}冲突` : undefined,
-        };
+    const finalShortcuts = updatedShortcuts.map(s => {
+      // 空快捷键不会冲突
+      if (!s.shortcut) {
+        return { ...s, isConflict: false, error: undefined };
       }
-      return s;
+      const existing = updatedShortcuts.find(other => other.id !== s.id && other.shortcut === s.shortcut);
+      return {
+        ...s,
+        isConflict: !!existing,
+        error: existing ? `与“${existing.name}”冲突` : undefined,
+      };
     });
-    update({ shortcuts: newShortcuts });
+
+    update({ shortcuts: finalShortcuts });
   };
 
   const handleChangeGlobalShortcut = async (id: ShortcutCommand, shortcut: string) => {
