@@ -5,7 +5,6 @@ export const isModifier = (key: string) => ["Control", "Shift", "Alt", "Meta"].i
 export const mapKeyToElectronAccelerator = (e: KeyboardEvent | React.KeyboardEvent): string | null => {
   const { key, ctrlKey, shiftKey, altKey, metaKey } = e;
 
-  // 如果只按下了修饰键，不视为有效组合
   if (isModifier(key)) return null;
 
   const modifiers: string[] = [];
@@ -21,4 +20,65 @@ export const mapKeyToElectronAccelerator = (e: KeyboardEvent | React.KeyboardEve
   if (key === "ArrowRight") k = "Right";
 
   return [...modifiers, k].join("+");
+};
+
+export type ShortcutDisplayPlatform = "macos" | "windows" | "linux";
+
+export const getShortcutDisplayPlatform = (): ShortcutDisplayPlatform => {
+  const w: any = globalThis as any;
+
+  try {
+    const p = w?.window?.electron?.getPlatform?.();
+    if (p === "macos" || p === "windows" || p === "linux") return p;
+  } catch (error) {
+    void error;
+  }
+
+  try {
+    const nav: any = w?.navigator;
+    const platform = String(nav?.platform || "");
+    if (/mac/i.test(platform)) return "macos";
+    if (/win/i.test(platform)) return "windows";
+  } catch (error) {
+    void error;
+  }
+
+  return "windows";
+};
+
+export const formatElectronAcceleratorForDisplay = (
+  accelerator: string,
+  platform: ShortcutDisplayPlatform = getShortcutDisplayPlatform(),
+): string => {
+  if (!accelerator) return "";
+
+  const parts = accelerator.split("+").filter(Boolean);
+  return parts
+    .map(p => {
+      switch (p) {
+        case "CommandOrControl":
+          return platform === "macos" ? "⌘" : "Ctrl";
+        case "Command":
+          return "⌘";
+        case "Control":
+          return "Ctrl";
+        case "Alt":
+          return platform === "macos" ? "⌥" : "Alt";
+        case "Shift":
+          return platform === "macos" ? "⇧" : "Shift";
+        case "Up":
+          return "↑";
+        case "Down":
+          return "↓";
+        case "Left":
+          return "←";
+        case "Right":
+          return "→";
+        case "Space":
+          return platform === "macos" ? "␣" : "Space";
+        default:
+          return p;
+      }
+    })
+    .join("+");
 };

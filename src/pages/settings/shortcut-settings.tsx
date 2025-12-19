@@ -37,7 +37,6 @@ const ShortcutSettingsPage = () => {
   };
 
   const handleChangeGlobalShortcut = async (id: ShortcutCommand, shortcut: string) => {
-    console.log("shortcut", shortcut);
     if (shortcut) {
       const existing = globalShortcuts.find(g => g.id !== id && g.shortcut === shortcut);
       if (existing) {

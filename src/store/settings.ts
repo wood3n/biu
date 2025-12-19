@@ -44,7 +44,6 @@ export const useSettings = create<AppSettings & SettingsActions>()(
         },
 
         setItem: async (_, value) => {
-          console.log(value);
           if (value.state) {
             await window.electron.setStore(StoreNameMap.AppSettings, {
               appSettings: value.state,

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Input } from "@heroui/react";
 import { RiCloseCircleFill } from "@remixicon/react";
 
-import { mapKeyToElectronAccelerator } from "@/common/utils/shortcut";
+import { formatElectronAcceleratorForDisplay, mapKeyToElectronAccelerator } from "@/common/utils/shortcut";
 
 interface ShortcutRecorderProps {
   value: string;
@@ -13,16 +13,10 @@ interface ShortcutRecorderProps {
   onChange: (value: string) => void;
 }
 
-const formatDisplay = (value: string) => {
-  if (!value) return "";
-  return value.replace("CommandOrControl", "Ctrl").replace("Command", "Cmd").replace("Control", "Ctrl");
-};
-
 export const ShortcutKeyInput = ({ value, onChange, isDisabled, isInvalid, errorMessage }: ShortcutRecorderProps) => {
   const [focused, setFocused] = useState(false);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    console.log("e", e);
     e.preventDefault();
 
     if (e.key === "Backspace" || e.key === "Delete") {
@@ -43,7 +37,7 @@ export const ShortcutKeyInput = ({ value, onChange, isDisabled, isInvalid, error
 
   return (
     <Input
-      value={formatDisplay(value)}
+      value={formatElectronAcceleratorForDisplay(value)}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
       onKeyDown={handleKeyDown}
