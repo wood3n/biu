@@ -66,8 +66,6 @@ export const channel = {
     get: "cookie:get",
   },
   window: {
-    switchToMini: "window:switch-to-mini",
-    switchToMain: "window:switch-to-main",
     toggleMini: "window:toggle-mini",
     minimize: "window:minimize",
     toggleMaximize: "window:toggle-maximize",

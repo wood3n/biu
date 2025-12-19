@@ -56,10 +56,6 @@ declare global {
     onDownloadAppProgress: (cb: (payload: DownloadAppMessage) => void) => VoidFunction;
     /** 安装更新 */
     quitAndInstall: () => Promise<void>;
-    /** 切换到 mini 播放器窗口 */
-    switchToMiniPlayer: () => Promise<void>;
-    /** 切换到主窗口 */
-    switchToMainWindow: () => Promise<void>;
     /** 切换 mini/主窗口 */
     toggleMiniPlayer: () => Promise<void>;
     /** 最小化窗口 */

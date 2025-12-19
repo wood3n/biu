@@ -167,10 +167,6 @@ const api: ElectronAPI = {
   },
   // 退出并安装更新
   quitAndInstall: () => ipcRenderer.invoke(channel.app.quitAndInstall),
-  // 切换到 mini 播放器窗口
-  switchToMiniPlayer: () => ipcRenderer.invoke(channel.window.switchToMini),
-  // 切换到主窗口
-  switchToMainWindow: () => ipcRenderer.invoke(channel.window.switchToMain),
   // 切换 mini/主窗口
   toggleMiniPlayer: () => ipcRenderer.invoke(channel.window.toggleMini),
   // 最小化窗口

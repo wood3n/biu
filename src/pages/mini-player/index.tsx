@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { Button, Image, Slider } from "@heroui/react";
 import {
@@ -11,8 +11,8 @@ import {
 import clx from "classnames";
 import { useShallow } from "zustand/react/shallow";
 
-import { createBroadcastChannel } from "@/common/broadcast/mini-player-sync";
 import { getPlayModeList } from "@/common/constants/audio";
+import { createBroadcastChannel, toggleMiniMode } from "@/common/utils/mini-player";
 
 import { usePlayState } from "./play-state";
 import { useStyle } from "./use-style";
@@ -72,10 +72,6 @@ const MiniPlayer = () => {
       if (!bcRef.current) return;
       bcRef.current.close();
     };
-  }, []);
-
-  const handleSwitchToMain = useCallback(() => {
-    window.electron.switchToMainWindow();
   }, []);
 
   const handleSeek = (v: number) => {
@@ -184,7 +180,7 @@ const MiniPlayer = () => {
               isIconOnly
               size="sm"
               variant="light"
-              onPress={handleSwitchToMain}
+              onPress={toggleMiniMode}
               className="hover:text-primary window-no-drag"
             >
               <RiExpandDiagonalLine size={16} />

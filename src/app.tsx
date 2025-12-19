@@ -5,6 +5,7 @@ import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import moment from "moment";
 
 import { getCookitFromBSite } from "./common/utils/cookie";
+import { toggleMiniMode } from "./common/utils/mini-player";
 import { mapKeyToElectronAccelerator } from "./common/utils/shortcut";
 import Theme from "./components/theme";
 import routes from "./routes";
@@ -75,7 +76,7 @@ export function App() {
             setVolume(Math.max(0, volume - 0.05));
             break;
           case "toggleMiniMode":
-            window.electron.toggleMiniPlayer();
+            toggleMiniMode();
             break;
           default:
             break;
@@ -119,7 +120,7 @@ export function App() {
             setVolume(Math.max(0, volume - 0.05));
             break;
           case "toggleMiniMode":
-            window.electron.toggleMiniPlayer();
+            toggleMiniMode();
             break;
           default:
             break;

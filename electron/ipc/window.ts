@@ -35,21 +35,6 @@ export function registerWindowHandlers({ getMainWindow }) {
     return win?.isFullScreen() ?? false;
   });
 
-  ipcMain.handle(channel.window.switchToMini, () => {
-    const mainWindow = getMainWindow?.();
-    if (mainWindow) {
-      mainWindow.hide();
-    }
-
-    createMiniPlayer();
-  });
-
-  ipcMain.handle(channel.window.switchToMain, () => {
-    destroyMiniPlayer();
-    const mainWindow = getMainWindow?.();
-    mainWindow?.show();
-  });
-
   ipcMain.handle(channel.window.toggleMini, () => {
     const mainWindow = getMainWindow?.();
     if (miniPlayer && !miniPlayer.isDestroyed()) {

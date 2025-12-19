@@ -16,7 +16,7 @@ const createMiniPlayer = () => {
     width: 320,
     height: 100,
     resizable: false,
-    roundedCorners: true,
+    roundedCorners: false,
     center: true,
     // 隐藏窗口标题栏和窗口按钮
     frame: false,
