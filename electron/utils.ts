@@ -38,3 +38,33 @@ export const fixFfmpegPath = () => {
     }
   }
 };
+
+const entities = {
+  amp: "&",
+  apos: "'",
+  gt: ">",
+  lt: "<",
+  quot: '"',
+  nbsp: " ",
+};
+
+/**
+ * 将包含 HTML 和特殊字符的字符串转换为合法的文件名
+ */
+export function sanitizeFilename(input?: string, replacement = "_") {
+  if (!input) return "";
+
+  const decoded = input.replace(/&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});/gi, (match, entity) => {
+    return entities[entity.toLowerCase()] || match;
+  });
+
+  const noHtml = decoded.replace(/<[^>]+>/g, "");
+
+  // 替换 Windows/Linux 文件名非法字符
+  // 非法集：\ / : * ? " < > | 以及控制字符
+  // eslint-disable-next-line no-control-regex
+  const illegalRe = /[\\/:*?"<>|\x00-\x1f\x80-\x9f]/g;
+  const sanitized = noHtml.replace(illegalRe, replacement);
+
+  return sanitized.replace(/\s+/g, " ").trim().replace(/\.$/, "").slice(0, 255); // 截断长度，防止文件名过长
+}
