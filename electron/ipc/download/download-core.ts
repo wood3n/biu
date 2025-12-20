@@ -95,7 +95,7 @@ export class DownloadCore extends EventEmitter {
       if (this.outputFileType === "video") {
         this.videoTempPath = path.join(this.tempDir, "video.m4s");
       }
-      ensureDir(this.tempDir);
+      await ensureDir(this.tempDir);
 
       // 下载分块
       await this.downloadChunks();
@@ -183,12 +183,12 @@ export class DownloadCore extends EventEmitter {
     }
   }
 
-  public cancel(): void {
+  public async cancel(): Promise<void> {
     this.removeAllListeners();
     this.chunkQueue?.clear();
     this.chunks = [];
-    this.deleteChunkFiles();
-    this.deleteTempFiles();
+    await this.deleteChunkFiles();
+    await this.deleteTempFiles();
   }
 
   private async setDownloadUrl() {
@@ -273,6 +273,7 @@ export class DownloadCore extends EventEmitter {
     if (this.outputFileType === "video") {
       this.fileName = `${sanitizedTitle}${this.getVideoExt()}`;
     }
+    await ensureDir(this.saveDir);
     this.savePath = path.join(this.saveDir, this.fileName);
     const finalSavePath = await convert({
       outputFileType: this.outputFileType!,
@@ -288,17 +289,15 @@ export class DownloadCore extends EventEmitter {
     this.savePath = finalSavePath;
     this.fileName = path.basename(finalSavePath);
     this.emitUpdate();
-    this.deleteTempFiles();
+    await this.deleteTempFiles();
   }
 
-  private deleteChunkFiles() {
-    this.chunks.forEach(chunk => {
-      removeDirOrFile(path.join(this.tempDir!, chunk.name));
-    });
+  private async deleteChunkFiles() {
+    await Promise.all(this.chunks.map(chunk => removeDirOrFile(path.join(this.tempDir!, chunk.name))));
   }
 
-  private deleteTempFiles() {
-    removeDirOrFile(this.tempDir!);
+  private async deleteTempFiles() {
+    await removeDirOrFile(this.tempDir!);
   }
 
   private async getContentLength(url: string) {
@@ -445,7 +444,7 @@ export class DownloadCore extends EventEmitter {
       // 校验chunk大小
       if (currentSize > expectedSize) {
         // 大小异常，删除重下
-        removeDirOrFile(chunkPath);
+        await removeDirOrFile(chunkPath);
         currentSize = 0;
       } else if (currentSize === expectedSize) {
         // 已完成
@@ -524,7 +523,7 @@ export class DownloadCore extends EventEmitter {
     this.emitUpdate();
     await this.mergeChunkByFileType("audio", this.audioTempPath!);
     await this.mergeChunkByFileType("video", this.videoTempPath!);
-    this.deleteChunkFiles();
+    await this.deleteChunkFiles();
     this.chunks = [];
   }
 
@@ -554,7 +553,7 @@ export class DownloadCore extends EventEmitter {
             fs.closeSync(fd);
           } catch {
             // 如果截断失败，可能需要重头合并，这里简单处理为从0开始（通过不设置startIndex）
-            removeDirOrFile(destPath);
+            await removeDirOrFile(destPath);
             startIndex = 0;
           }
           break;

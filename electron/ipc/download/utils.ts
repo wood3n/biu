@@ -39,14 +39,12 @@ export const getStreamAudioBandwidth = (type: number) => {
   }
 };
 
-export const ensureDir = (dir: string) => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
+export const ensureDir = async (dir: string) => {
+  await fs.promises.mkdir(dir, { recursive: true });
 };
 
-export const removeDirOrFile = (fsPath: string) => {
-  fs.rmSync(fsPath, { recursive: true, force: true });
+export const removeDirOrFile = async (fsPath: string) => {
+  await fs.promises.rm(fsPath, { recursive: true, force: true });
 };
 
 export const getVideoPages = async (bvid: string) => {

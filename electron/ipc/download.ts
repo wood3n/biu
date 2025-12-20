@@ -31,7 +31,7 @@ export function registerDownloadHandlers({ getMainWindow }: IpcHandlerProps) {
   });
 
   ipcMain.handle(channel.download.cancel, async (_, id: string) => {
-    downloadQueue.cancelTask(id);
+    await downloadQueue.cancelTask(id);
   });
 
   ipcMain.handle(channel.download.retry, async (_, id: string) => {
@@ -39,7 +39,7 @@ export function registerDownloadHandlers({ getMainWindow }: IpcHandlerProps) {
   });
 
   ipcMain.handle(channel.download.clear, async () => {
-    downloadQueue.clearTasks();
+    await downloadQueue.clearTasks();
   });
 }
 
