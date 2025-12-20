@@ -34,9 +34,9 @@
     "build": "rsbuild build",
     "test": "vitest",
     "knip": "knip --no-exit-code --max-show-issues 5 --reporter github-actions",
-    "release": "changelogen --release --push --hideAuthorEmail",
-    "release:beta": "changelogen --release --push --hideAuthorEmail --prerelease beta",
-    "release:alpha": "changelogen --release --push --hideAuthorEmail --prerelease alpha"
+    "release": "git fetch --tags && changelogen --release --push --hideAuthorEmail",
+    "release:beta": "git fetch --tags && changelogen --release --push --hideAuthorEmail --prerelease beta",
+    "release:alpha": "git fetch --tags && changelogen --release --push --hideAuthorEmail --prerelease alpha"
   },
   "dependencies": {
     "@heroui/react": "^2.8.3",

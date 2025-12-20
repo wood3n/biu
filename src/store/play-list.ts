@@ -1,4 +1,5 @@
 import { addToast } from "@heroui/react";
+import log from "electron-log/renderer";
 import { shuffle } from "es-toolkit/array";
 import { remove } from "es-toolkit/array";
 import { uniqueId } from "es-toolkit/compat";
@@ -277,6 +278,13 @@ export const usePlayList = create<State & Action>()(
               }
             });
           } else {
+            log.error("无法获取音频播放链接", {
+              type: "mv",
+              bvid: currentPlayItem.bvid,
+              cid: currentPlayItem.cid,
+              title: currentPlayItem.title,
+              mvPlayData,
+            });
             toastError("无法获取音频播放链接");
           }
         }
@@ -299,6 +307,12 @@ export const usePlayList = create<State & Action>()(
               }
             });
           } else {
+            log.error("无法获取音频播放链接", {
+              type: "audio",
+              sid: currentPlayItem.sid,
+              title: currentPlayItem.title,
+              musicPlayData,
+            });
             toastError("无法获取音频播放链接");
           }
         }
@@ -908,6 +922,13 @@ usePlayList.subscribe(async (state, prevState) => {
               }
             });
           } else {
+            log.error("无法获取音频播放链接", {
+              type: "mv",
+              bvid: playItem.bvid,
+              cid: playItem.cid,
+              title: playItem.title,
+              mvPlayData,
+            });
             toastError("无法获取音频播放链接");
           }
         } else if (playItem?.bvid) {
@@ -943,9 +964,22 @@ usePlayList.subscribe(async (state, prevState) => {
                 state.playId = firstMV.id;
               });
             } else {
+              log.error("无法获取音频播放链接", {
+                type: "mv",
+                bvid: playItem.bvid,
+                cid: firstMV.cid,
+                title: firstMV.title,
+                mvPlayData,
+              });
               toastError("无法获取音频播放链接");
             }
           } else {
+            log.error("无法获取音频播放链接", {
+              type: "mv",
+              bvid: playItem.bvid,
+              title: playItem.title,
+              mvData,
+            });
             toastError("无法获取音频播放链接");
           }
         }
@@ -969,6 +1003,12 @@ usePlayList.subscribe(async (state, prevState) => {
             }
           });
         } else {
+          log.error("无法获取音频播放链接", {
+            type: "audio",
+            sid: playItem.sid,
+            title: playItem.title,
+            musicPlayData,
+          });
           toastError("无法获取音频播放链接");
         }
       }
