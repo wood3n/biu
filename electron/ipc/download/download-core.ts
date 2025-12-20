@@ -7,6 +7,8 @@ import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import PQueue from "p-queue";
 
+import { sanitizeFilename } from "@/common/utils/file";
+
 import type { FullMediaDownloadTask, MediaDownloadChunk } from "./types";
 
 import { UserAgent } from "../../network/user-agent";
@@ -267,7 +269,7 @@ export class DownloadCore extends EventEmitter {
 
     this.status = "converting";
     this.emitUpdate();
-    const sanitizedTitle = this.title?.replace(/<[^>]+>/g, "");
+    const sanitizedTitle = sanitizeFilename(this.title);
     this.fileName = `${sanitizedTitle}${this.getAudioExt()}`;
     if (this.outputFileType === "video") {
       this.fileName = `${sanitizedTitle}${this.getVideoExt()}`;
