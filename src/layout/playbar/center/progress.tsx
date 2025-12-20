@@ -1,21 +1,21 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 
 import { Slider, type SliderProps } from "@heroui/react";
 
 import { formatDuration } from "@/common/utils";
 import { usePlayList } from "@/store/play-list";
+import { usePlayProgress } from "@/store/play-progress";
 
-const Progress = ({ isDisabled }: SliderProps) => {
+const ProgressSlider = memo(({ isDisabled }: SliderProps) => {
   const [hovered, setHovered] = useState(false);
-
+  const currentTime = usePlayProgress(s => s.currentTime);
   const duration = usePlayList(s => s.duration);
-  const currentTime = usePlayList(s => s.currentTime);
   const seek = usePlayList(s => s.seek);
 
   const showThumb = !isDisabled && hovered;
 
   return (
-    <div className="flex w-3/4 items-center space-x-2">
+    <>
       <div className="flex justify-center text-sm whitespace-nowrap opacity-70">
         {currentTime ? formatDuration(currentTime) : "-:--"}
       </div>
@@ -37,6 +37,17 @@ const Progress = ({ isDisabled }: SliderProps) => {
           thumb: "w-4 h-4 bg-primary after:hidden",
         }}
       />
+    </>
+  );
+});
+
+ProgressSlider.displayName = "ProgressSlider";
+
+const Progress = ({ isDisabled }: SliderProps) => {
+  const duration = usePlayList(s => s.duration);
+  return (
+    <div className="flex w-3/4 items-center space-x-2">
+      <ProgressSlider isDisabled={isDisabled} />
       <span className="flex justify-center text-sm whitespace-nowrap opacity-70">
         {duration ? formatDuration(duration) : "-:--"}
       </span>
