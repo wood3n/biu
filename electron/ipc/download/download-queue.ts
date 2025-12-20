@@ -91,7 +91,7 @@ export class DownloadQueue {
         if (pages.length === 1) {
           core.cid = pages[0].cid;
         } else {
-          this.cancelTask(core.id);
+          await this.cancelTask(core.id);
           pages.forEach(page =>
             this.addTask({
               outputFileType: core.outputFileType,
@@ -270,7 +270,7 @@ export class DownloadQueue {
     mediaDownloadsStore.store = tasksObject;
   }
 
-  public cancelTask(id: string) {
+  public async cancelTask(id: string) {
     this.pendingUpdates.delete(id);
 
     const controller = this.controllerMap.get(id);
@@ -281,18 +281,18 @@ export class DownloadQueue {
 
     const core = this.taskMap.get(id);
     if (core) {
-      core.cancel();
+      await core.cancel();
       this.taskMap.delete(id);
     }
 
     this.broadcast({ type: "full" });
   }
 
-  public clearTasks() {
+  public async clearTasks() {
     this.pendingUpdates.clear();
     this.controllerMap.forEach(controller => controller.abort());
     this.controllerMap.clear();
-    this.taskMap.forEach(core => core.cancel());
+    await Promise.all(Array.from(this.taskMap.values()).map(core => core.cancel()));
     this.taskMap.clear();
     mediaDownloadsStore.clear();
     this.broadcast({ type: "full" });
