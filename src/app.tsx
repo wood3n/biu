@@ -11,6 +11,7 @@ import Theme from "./components/theme";
 import routes from "./routes";
 import { useAppUpdateStore } from "./store/app-update";
 import { usePlayList } from "./store/play-list";
+import { usePlayProgress } from "./store/play-progress";
 import { useShortcutSettings } from "./store/shortcuts";
 
 import "moment/locale/zh-cn";
@@ -148,8 +149,8 @@ export function App() {
 
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (usePlayList.getState().currentTime) {
-        localStorage.setItem("play-current-time", String(usePlayList.getState().currentTime));
+      if (usePlayProgress.getState().currentTime) {
+        localStorage.setItem("play-current-time", String(usePlayProgress.getState().currentTime));
       }
     };
 

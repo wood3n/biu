@@ -12,6 +12,8 @@ import { formatUrlProtocal } from "@/common/utils/url";
 import { getAudioSongInfo } from "@/service/audio-song-info";
 import { getWebInterfaceView } from "@/service/web-interface-view";
 
+import { usePlayProgress } from "./play-progress";
+
 export type PlayDataType = "mv" | "audio";
 
 export interface PlayData {
@@ -67,8 +69,6 @@ interface State {
   playMode: PlayMode;
   // 播放速率（0.5x - 2.0x）
   rate: number;
-  // 当前时间（秒）
-  currentTime: number | undefined;
   // 总时长（秒）
   duration: number | undefined;
   /** 播放队列 */
@@ -250,7 +250,7 @@ export const usePlayList = create<State & Action>()(
           if (audio.src !== currentPlayItem.audioUrl) {
             audio.src = currentPlayItem.audioUrl;
           }
-          const currentTime = get().currentTime;
+          const currentTime = usePlayProgress.getState().currentTime;
           if (typeof currentTime === "number" && currentTime > 0) {
             audio.currentTime = currentTime;
           }
@@ -262,7 +262,7 @@ export const usePlayList = create<State & Action>()(
           if (mvPlayData?.audioUrl) {
             if (audio.src !== mvPlayData.audioUrl) {
               audio.src = mvPlayData.audioUrl;
-              const currentTime = get().currentTime;
+              const currentTime = usePlayProgress.getState().currentTime;
               if (typeof currentTime === "number") {
                 audio.currentTime = currentTime;
               }
@@ -286,7 +286,7 @@ export const usePlayList = create<State & Action>()(
           if (musicPlayData?.audioUrl) {
             if (audio.src !== musicPlayData.audioUrl) {
               audio.src = musicPlayData.audioUrl;
-              const currentTime = get().currentTime;
+              const currentTime = usePlayProgress.getState().currentTime;
               if (typeof currentTime === "number") {
                 audio.currentTime = currentTime;
               }
@@ -310,7 +310,6 @@ export const usePlayList = create<State & Action>()(
         volume: 0.5,
         playMode: PlayMode.Loop,
         rate: 1,
-        currentTime: undefined,
         duration: undefined,
         shouldKeepPagesOrderInRandomPlayMode: true,
         list: [],
@@ -331,7 +330,7 @@ export const usePlayList = create<State & Action>()(
 
             audio.ontimeupdate = () => {
               const currentTime = Math.round(audio.currentTime * 100) / 100;
-              set({ currentTime });
+              usePlayProgress.getState().setCurrentTime(currentTime);
             };
 
             audio.onseeked = () => {
@@ -450,9 +449,7 @@ export const usePlayList = create<State & Action>()(
           if (audio) {
             audio.currentTime = s;
           }
-          set(state => {
-            state.currentTime = s;
-          });
+          usePlayProgress.getState().setCurrentTime(s);
         },
         togglePlay: async () => {
           if (!get().list?.length) {
@@ -583,9 +580,7 @@ export const usePlayList = create<State & Action>()(
             case PlayMode.Single:
             case PlayMode.Loop: {
               if (list.length === 1) {
-                set(state => {
-                  state.currentTime = 0;
-                });
+                audio.currentTime = 0;
                 audio.play();
                 break;
               }
@@ -599,9 +594,7 @@ export const usePlayList = create<State & Action>()(
               const currentPlayItem = list[currentIndex];
 
               if (list.length === 1) {
-                set(state => {
-                  state.currentTime = 0;
-                });
+                audio.currentTime = 0;
                 audio.play();
                 break;
               }
@@ -843,12 +836,12 @@ export const usePlayList = create<State & Action>()(
           }
           set(state => {
             state.isPlaying = false;
-            state.currentTime = undefined;
             state.duration = undefined;
             state.list = [];
             state.playId = undefined;
             state.nextId = undefined;
           });
+          usePlayProgress.getState().setCurrentTime(0);
         },
         getPlayItem: () => {
           const { playId, list } = get();
