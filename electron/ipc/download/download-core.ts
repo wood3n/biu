@@ -273,6 +273,7 @@ export class DownloadCore extends EventEmitter {
     if (this.outputFileType === "video") {
       this.fileName = `${sanitizedTitle}${this.getVideoExt()}`;
     }
+    ensureDir(this.saveDir);
     this.savePath = path.join(this.saveDir, this.fileName);
     const finalSavePath = await convert({
       outputFileType: this.outputFileType!,
