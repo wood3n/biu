@@ -11,6 +11,7 @@ import type { FullMediaDownloadTask, MediaDownloadChunk } from "./types";
 
 import { UserAgent } from "../../network/user-agent";
 import { appSettingsStore } from "../../store";
+import { sanitizeFilename } from "../../utils";
 import { getAudioWebStreamUrl } from "../api/audio-stream-url";
 import { getDashurl } from "../api/dash-url";
 import { convert } from "./ffmpeg-processor";
@@ -267,7 +268,7 @@ export class DownloadCore extends EventEmitter {
 
     this.status = "converting";
     this.emitUpdate();
-    const sanitizedTitle = this.title?.replace(/<[^>]+>/g, "");
+    const sanitizedTitle = sanitizeFilename(this.title);
     this.fileName = `${sanitizedTitle}${this.getAudioExt()}`;
     if (this.outputFileType === "video") {
       this.fileName = `${sanitizedTitle}${this.getVideoExt()}`;
