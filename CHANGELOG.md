@@ -1,5 +1,48 @@
 # Changelog
 
+## v1.6.0
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.11...v1.6.0)
+
+### 🚀 新功能
+
+- 新增系统快捷键功能 ([0f0e15c](https://github.com/wood3n/biu/commit/0f0e15c))
+
+### 🩹 修复问题
+
+- Mac dock icon ([3c7617a](https://github.com/wood3n/biu/commit/3c7617a))
+- 修复快捷键设置和注册问题 ([a3e379c](https://github.com/wood3n/biu/commit/a3e379c))
+- 完善快捷键设置功能 ([0c177a8](https://github.com/wood3n/biu/commit/0c177a8))
+- 修改快捷键映射在不同系统的显示 ([e3ede64](https://github.com/wood3n/biu/commit/e3ede64))
+- 修改下载文件名命名规则，避免过长文件名和覆盖本地同名文件 ([efca4ca](https://github.com/wood3n/biu/commit/efca4ca))
+- 修改review问题 ([ae91fc9](https://github.com/wood3n/biu/commit/ae91fc9))
+- Progress bar optimization ([fb82a97](https://github.com/wood3n/biu/commit/fb82a97))
+- 修复文件名非法字符导致下载失败的问题 ([c8cc1ef](https://github.com/wood3n/biu/commit/c8cc1ef))
+- 修复模块导入路径 ([3d2b840](https://github.com/wood3n/biu/commit/3d2b840))
+- 修复review问题 ([6356548](https://github.com/wood3n/biu/commit/6356548))
+- 修复文件夹不存在导致下载失败的问题 ([2a32ac9](https://github.com/wood3n/biu/commit/2a32ac9))
+- 将移除和创建文件夹修改为异步实现 ([80668d8](https://github.com/wood3n/biu/commit/80668d8))
+- 修复review问题 ([5b43d34](https://github.com/wood3n/biu/commit/5b43d34))
+
+### 💅 Refactors
+
+- 优化切换mini播放器实现，以响应快捷键设置 ([4de3d23](https://github.com/wood3n/biu/commit/4de3d23))
+
+### 📖 Documentation
+
+- Perf readme ([347402e](https://github.com/wood3n/biu/commit/347402e))
+
+### 🏡 Chore
+
+- **release:** V1.6.0-beta.12 ([39c56a6](https://github.com/wood3n/biu/commit/39c56a6))
+- **release:** V1.6.0-beta.13 ([65f9ed2](https://github.com/wood3n/biu/commit/65f9ed2))
+
+### ❤️ Contributors
+
+- Wood3n
+- Jeremy
+- Oxyg3n
+
 ## v1.6.0-beta.13
 
 ### 🩹 修复问题
