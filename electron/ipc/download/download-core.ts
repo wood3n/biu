@@ -7,12 +7,11 @@ import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import PQueue from "p-queue";
 
-import { sanitizeFilename } from "@/common/utils/file";
-
 import type { FullMediaDownloadTask, MediaDownloadChunk } from "./types";
 
 import { UserAgent } from "../../network/user-agent";
 import { appSettingsStore } from "../../store";
+import { sanitizeFilename } from "../../utils";
 import { getAudioWebStreamUrl } from "../api/audio-stream-url";
 import { getDashurl } from "../api/dash-url";
 import { convert } from "./ffmpeg-processor";
