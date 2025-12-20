@@ -39,6 +39,15 @@ export const fixFfmpegPath = () => {
   }
 };
 
+const entities = {
+  amp: "&",
+  apos: "'",
+  gt: ">",
+  lt: "<",
+  quot: '"',
+  nbsp: " ",
+};
+
 /**
  * 将包含 HTML 和特殊字符的字符串转换为合法的文件名
  */
@@ -46,14 +55,6 @@ export function sanitizeFilename(input?: string, replacement = "_") {
   if (!input) return "";
 
   const decoded = input.replace(/&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});/gi, (match, entity) => {
-    const entities = {
-      amp: "&",
-      apos: "'",
-      gt: ">",
-      lt: "<",
-      quot: '"',
-      nbsp: " ",
-    };
     return entities[entity.toLowerCase()] || match;
   });
 
@@ -65,8 +66,5 @@ export function sanitizeFilename(input?: string, replacement = "_") {
   const illegalRe = /[\\/:*?"<>|\x00-\x1f\x80-\x9f]/g;
   const sanitized = noHtml.replace(illegalRe, replacement);
 
-  // - 替换连续的空格/下划线为一个
-  // - 去除首尾空白
-  // - 去除尾部点号（Windows 不允许以 . 结尾）
   return sanitized.replace(/\s+/g, " ").trim().replace(/\.$/, "").slice(0, 255); // 截断长度，防止文件名过长
 }
