@@ -38,6 +38,7 @@ export interface MiniPlayerMainSyncState {
   isBroadcasting: boolean;
 }
 
+let bc: BroadcastChannel | null = null;
 let unsubscribePlayList: VoidFunction | null = null;
 let unsubscribePlayProgress: VoidFunction | null = null;
 let isBroadcasting = false;
