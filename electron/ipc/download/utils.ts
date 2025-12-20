@@ -40,11 +40,7 @@ export const getStreamAudioBandwidth = (type: number) => {
 };
 
 export const ensureDir = async (dir: string) => {
-  try {
-    await fs.promises.access(dir);
-  } catch {
-    await fs.promises.mkdir(dir, { recursive: true });
-  }
+  await fs.promises.mkdir(dir, { recursive: true });
 };
 
 export const removeDirOrFile = async (fsPath: string) => {
