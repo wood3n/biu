@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.6.1
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.6.0...v1.6.1)
+
+### 🩹 修复问题
+
+- 补充播放报错时日志采集 ([bcacfdb](https://github.com/wood3n/biu/commit/bcacfdb))
+- 修复mini播放器进度同步问题 ([5873216](https://github.com/wood3n/biu/commit/5873216))
+- Fix release script ([5176616](https://github.com/wood3n/biu/commit/5176616))
+
+### ❤️ Contributors
+
+- Wood3n
+
 ## v1.6.0
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.6.0-beta.11...v1.6.0)
