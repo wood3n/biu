@@ -4,6 +4,7 @@ import { shallow } from "zustand/shallow";
 import type { PlayMode } from "@/common/constants/audio";
 
 import { usePlayList } from "@/store/play-list";
+import { usePlayProgress } from "@/store/play-progress";
 
 export type MiniPlayerCommandFromMini = "init" | "seek" | "togglePlayMode" | "next" | "prev" | "togglePlay";
 
@@ -39,6 +40,7 @@ export interface MiniPlayerMainSyncState {
 
 let bc: BroadcastChannel | null = null;
 let unsubscribePlayList: VoidFunction | null = null;
+let unsubscribePlayProgress: VoidFunction | null = null;
 let isBroadcasting = false;
 
 export function createBroadcastChannel() {
@@ -46,7 +48,8 @@ export function createBroadcastChannel() {
 }
 
 function getMainStateSnapshot(): MiniPlayerMainStateSnapshot {
-  const { list, isPlaying, currentTime, playMode, duration, playId, getPlayItem } = usePlayList.getState();
+  const { list, isPlaying, playMode, duration, playId, getPlayItem } = usePlayList.getState();
+  const currentTime = usePlayProgress.getState().currentTime;
   const playItem = getPlayItem();
 
   return {
@@ -136,18 +139,22 @@ export function startMiniPlayerMainSync() {
           playId: state.playId,
           isPlaying: state.isPlaying,
           playMode: state.playMode,
-          currentTime: state.currentTime,
           duration: state.duration,
         },
         {
           playId: prevState.playId,
           isPlaying: prevState.isPlaying,
           playMode: prevState.playMode,
-          currentTime: prevState.currentTime,
           duration: prevState.duration,
         },
       )
     ) {
+      postMainState(bc as BroadcastChannel);
+    }
+  });
+
+  unsubscribePlayProgress = usePlayProgress.subscribe((state, prevState) => {
+    if (state.currentTime !== prevState.currentTime) {
       postMainState(bc as BroadcastChannel);
     }
   });
@@ -161,6 +168,8 @@ export function stopMiniPlayerMainSync() {
 
   unsubscribePlayList?.();
   unsubscribePlayList = null;
+  unsubscribePlayProgress?.();
+  unsubscribePlayProgress = null;
   bc?.close();
   bc = null;
   isBroadcasting = false;

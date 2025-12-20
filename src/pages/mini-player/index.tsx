@@ -13,6 +13,7 @@ import { useShallow } from "zustand/react/shallow";
 
 import { getPlayModeList } from "@/common/constants/audio";
 import { createBroadcastChannel, toggleMiniMode } from "@/common/utils/mini-player";
+import { usePlayProgress } from "@/store/play-progress";
 
 import { usePlayState } from "./play-state";
 import { useStyle } from "./use-style";
@@ -20,19 +21,18 @@ import { useStyle } from "./use-style";
 const PlayModeList = getPlayModeList(16);
 
 const MiniPlayer = () => {
-  const { isSingle, isPlaying, title, cover, currentTime, duration, playMode } = usePlayState(
+  const { isSingle, isPlaying, title, cover, duration, playMode } = usePlayState(
     useShallow(state => ({
       isSingle: state.isSingle,
       isPlaying: state.isPlaying,
       title: state.title,
       cover: state.cover,
-      currentTime: state.currentTime,
       duration: state.duration,
       playMode: state.playMode,
     })),
   );
+  const currentTime = usePlayProgress(s => s.currentTime);
   const updatePlayState = usePlayState(state => state.update);
-
   const bcRef = useRef<BroadcastChannel>(null);
 
   const postMessage = (type: string, state?: any) => {
