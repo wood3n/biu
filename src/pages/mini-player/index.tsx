@@ -32,6 +32,7 @@ const MiniPlayer = () => {
     })),
   );
   const currentTime = usePlayProgress(s => s.currentTime);
+  const setCurrentTime = usePlayProgress(s => s.setCurrentTime);
   const updatePlayState = usePlayState(state => state.update);
   const bcRef = useRef<BroadcastChannel>(null);
 
@@ -63,6 +64,9 @@ const MiniPlayer = () => {
         if (from !== "main" || !state) return;
 
         updatePlayState(state);
+        if (typeof state.currentTime === "number") {
+          setCurrentTime(state.currentTime);
+        }
       } catch (err) {
         console.error("[mini] failed to handle message from main", err);
       }
