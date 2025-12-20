@@ -47,7 +47,7 @@ const LeftControl = () => {
   };
 
   return (
-    <div className="flex h-full w-full items-center justify-start space-x-4">
+    <div className="flex h-full w-full items-center justify-start space-x-2">
       {showWaveform ? (
         <div ref={waveformContainerRef} className="relative min-w-0 flex-1 cursor-pointer" onClick={handleCoverClick}>
           {waveformWidth > 0 && (
@@ -68,7 +68,7 @@ const LeftControl = () => {
               }}
               className="object-cover"
             />
-            <div className="text-primary rounded-medium absolute top-0 left-0 z-10 flex h-full w-full items-center justify-center overflow-hidden bg-[rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100">
+            <div className="text-primary absolute top-0 left-0 z-10 flex h-full w-full items-center justify-center overflow-hidden bg-[rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100">
               <RiPulseLine size={20} />
             </div>
           </div>
