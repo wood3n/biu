@@ -8,4 +8,23 @@ export function registerCookieIpcHandlers() {
 
     return cookies?.[0]?.value;
   });
+
+  ipcMain.handle(
+    channel.cookie.set,
+    async (_, { name, value, expirationDate }: { name: string; value: string; expirationDate?: number }) => {
+      await session.defaultSession.cookies.set({
+        url: "https://bilibili.com/",
+        domain: ".bilibili.com",
+        path: "/",
+        name,
+        value,
+        secure: true,
+        sameSite: "no_restriction",
+        httpOnly: false,
+        expirationDate,
+      });
+
+      await session.defaultSession.cookies.flushStore();
+    },
+  );
 }

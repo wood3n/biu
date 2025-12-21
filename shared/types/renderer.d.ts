@@ -26,6 +26,8 @@ declare global {
     navigate: (cb: (path: string) => void) => VoidFunction;
     /** 获取某个 cookie */
     getCookie: (key: string) => Promise<string | null>;
+    /** 设置 cookie */
+    setCookie: (name: string, value: string, expirationDate?: number) => Promise<void>;
     /** 获取当前应用平台：macos | windows | linux */
     getPlatform: () => AppPlatForm;
     /** 上报当前播放状态到主进程（用于任务栏按钮切换） */

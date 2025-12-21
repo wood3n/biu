@@ -64,6 +64,7 @@ export const channel = {
   },
   cookie: {
     get: "cookie:get",
+    set: "cookie:set",
   },
   window: {
     toggleMini: "window:toggle-mini",
