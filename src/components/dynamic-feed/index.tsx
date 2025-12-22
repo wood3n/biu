@@ -12,10 +12,11 @@ interface DynamicFeedDrawerProps {
   onOpenChange: (isOpen: boolean) => void;
 }
 
-const DynamicFeedDrawer: React.FC<DynamicFeedDrawerProps> = ({ isOpen, onOpenChange }) => {
+const DynamicFeedDrawer = ({ isOpen, onOpenChange }: DynamicFeedDrawerProps) => {
   const [items, setItems] = useState<WebDynamicItem[]>([]);
   const [offset, setOffset] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const isLoadingRef = useRef(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,41 +25,41 @@ const DynamicFeedDrawer: React.FC<DynamicFeedDrawerProps> = ({ isOpen, onOpenCha
   const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);
 
   // Fetch data function
-  const fetchData = useCallback(
-    async (currentOffset: string = "") => {
-      if (isLoading) return;
-      setIsLoading(true);
-      setError(null);
+  const fetchData = useCallback(async (currentOffset: string = "") => {
+    if (isLoadingRef.current) return;
+    isLoadingRef.current = true;
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const res = await getWebDynamicFeedAll({
-          type: "video",
-          offset: currentOffset,
-          platform: "web",
-        });
+    try {
+      const res = await getWebDynamicFeedAll({
+        type: "video",
+        offset: currentOffset,
+        platform: "web",
+      });
 
-        if (res.code === 0) {
-          setItems(prev => (currentOffset === "" ? res.data.items : [...prev, ...res.data.items]));
-          setOffset(res.data.offset);
-          setHasMore(res.data.has_more);
-        } else {
-          setError(res.message || "Failed to load dynamics");
-        }
-      } catch (err) {
-        setError("Network error, please try again.");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
+      if (res.code === 0) {
+        setItems(prev => (currentOffset === "" ? res.data.items : [...prev, ...res.data.items]));
+        setOffset(res.data.offset);
+        setHasMore(res.data.has_more);
+      } else {
+        setError(res.message || "Failed to load dynamics");
       }
-    },
-    [isLoading],
-  );
+    } catch (err) {
+      setError("Network error, please try again.");
+      console.error(err);
+    } finally {
+      isLoadingRef.current = false;
+      setIsLoading(false);
+    }
+  }, []);
 
   // Initial load when opened
   useEffect(() => {
     if (isOpen && items.length === 0) {
       fetchData("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   // Set scroll element for virtualizer once ref is ready
@@ -79,7 +80,7 @@ const DynamicFeedDrawer: React.FC<DynamicFeedDrawerProps> = ({ isOpen, onOpenCha
     const timer = setTimeout(initScrollElement, 100);
 
     return () => clearTimeout(timer);
-  }, [scrollRef.current, isOpen]);
+  }, [isOpen]);
 
   // Virtualizer
   const rowVirtualizer = useVirtualizer({
