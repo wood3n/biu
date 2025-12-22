@@ -55,12 +55,17 @@ interface GeetestValidate {
   geetest_seccode?: string;
 }
 
+interface GeetestValidateError {
+  error_code: number;
+  msg: string;
+}
+
 interface GeetestCaptcha {
   appendTo(target: string | Element): GeetestCaptcha;
   bindForm(target: string | Element): GeetestCaptcha;
   onReady(cb: () => void): GeetestCaptcha;
   onSuccess(cb: () => void): GeetestCaptcha;
-  onError(cb: (error?: any) => void): GeetestCaptcha;
+  onError(cb: (error?: GeetestValidateError) => void): GeetestCaptcha;
   onClose(cb: () => void): GeetestCaptcha;
   verify(): void;
   getValidate(): GeetestValidate | null | false;
