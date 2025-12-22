@@ -60,6 +60,9 @@ export class DownloadCore extends EventEmitter {
     this.id = task.id;
     this.saveDir = appSettingsStore.get("appSettings.downloadPath") || app.getPath("downloads");
     Object.assign(this, task);
+    if (!this.title.trim()) {
+      this.title = `biu下载-${this.id}`;
+    }
   }
 
   public async start(): Promise<void> {
