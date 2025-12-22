@@ -1,7 +1,7 @@
 import { Tooltip, Button, useDisclosure } from "@heroui/react";
 import { RiTeamLine } from "@remixicon/react";
 
-import DynamicFeedDrawer from "@/components/dynamic-feed/INDEX";
+import DynamicFeedDrawer from "@/components/dynamic-feed";
 
 const UserFeed = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
