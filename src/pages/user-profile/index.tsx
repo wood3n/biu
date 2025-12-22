@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams } from "react-router";
 
-import { addToast, Spinner, Tab, Tabs } from "@heroui/react";
+import { Spinner, Tab, Tabs } from "@heroui/react";
 import { useRequest } from "ahooks";
 
 import { UserRelation } from "@/common/constants/relation";
@@ -33,12 +33,6 @@ const UserProfile = () => {
 
       if (res.code === 0) {
         return res.data;
-      } else {
-        addToast({
-          title: "无法验证身份，请登录后操作",
-          color: "danger",
-        });
-        return undefined;
       }
     },
     {
