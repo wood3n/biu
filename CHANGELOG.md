@@ -1,5 +1,31 @@
 # Changelog
 
+## v1.7.0
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.6.1...v1.7.0)
+
+### 🚀 新功能
+
+- 新增查看视频动态功能 ([99730d8](https://github.com/wood3n/biu/commit/99730d8))
+- 全局接口接入极验风控校验 ([6e30b86](https://github.com/wood3n/biu/commit/6e30b86))
+
+### 🩹 修复问题
+
+- 获取播放链接被风控时接入极验 ([b9c7264](https://github.com/wood3n/biu/commit/b9c7264))
+- Import path ([cda71e8](https://github.com/wood3n/biu/commit/cda71e8))
+- 优化geetest代码 ([1f8c0fd](https://github.com/wood3n/biu/commit/1f8c0fd))
+- 优化查看动态review问题 ([0f56a3b](https://github.com/wood3n/biu/commit/0f56a3b))
+- 移除无用的提示 ([9ae8c88](https://github.com/wood3n/biu/commit/9ae8c88))
+- 完善用户空间动态功能 ([2599206](https://github.com/wood3n/biu/commit/2599206))
+
+### 🏡 Chore
+
+- Change renovate update privacy ([d43d17b](https://github.com/wood3n/biu/commit/d43d17b))
+
+### ❤️ Contributors
+
+- Wood3n
+
 ## v1.6.1
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.6.0...v1.6.1)
