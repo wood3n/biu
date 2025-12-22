@@ -2,7 +2,7 @@ import { apiRequest } from "./request";
 
 export interface GaiaVGateRegisterRequestParams {
   v_voucher: string;
-  csrf: string;
+  csrf?: string;
 }
 
 export interface GaiaVGateRegisterResponse {
@@ -22,20 +22,12 @@ export interface GaiaVGateRegisterResponse {
   };
 }
 
-export const postGaiaVGateRegister = (params: GaiaVGateRegisterRequestParams) => {
-  return apiRequest.post<GaiaVGateRegisterResponse>("/x/gaia-vgate/v1/register", params, {
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-  });
-};
-
 export interface GaiaVGateValidateRequestParams {
   challenge: string;
   token: string;
   validate: string;
   seccode: string;
-  csrf: string;
+  csrf?: string;
 }
 
 export interface GaiaVGateValidateResponse {
@@ -48,6 +40,20 @@ export interface GaiaVGateValidateResponse {
   };
 }
 
+/**
+ * 调用 register 接口获取极验参数的 token challenge
+ */
+export const postGaiaVGateRegister = (params: GaiaVGateRegisterRequestParams) => {
+  return apiRequest.post<GaiaVGateRegisterResponse>("/x/gaia-vgate/v1/register", params, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
+};
+
+/**
+ * 调用 validate 接口获取 grisk_id (gaia_vtoken)
+ */
 export const postGaiaVGateValidate = (params: GaiaVGateValidateRequestParams) => {
   return apiRequest.post<GaiaVGateValidateResponse>("/x/gaia-vgate/v1/validate", params, {
     headers: {

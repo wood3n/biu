@@ -25,7 +25,7 @@ declare global {
     /** 导航到指定路由 */
     navigate: (cb: (path: string) => void) => VoidFunction;
     /** 获取某个 cookie */
-    getCookie: (key: string) => Promise<string | null>;
+    getCookie: (key: string) => Promise<string | undefined>;
     /** 设置 cookie */
     setCookie: (name: string, value: string, expirationDate?: number) => Promise<void>;
     /** 获取当前应用平台：macos | windows | linux */

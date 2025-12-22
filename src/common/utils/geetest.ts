@@ -20,7 +20,22 @@ export const loadGeetestScript = () => {
   });
 };
 
-export const verifyGeetest = async (getCaptchaParams: () => Promise<any>): Promise<GeetestResult | null> => {
+interface GetCaptchaParamsResponse {
+  code: number;
+  message: string;
+  data: {
+    type: string;
+    token: string;
+    geetest: {
+      gt: string;
+      challenge: string;
+    };
+  };
+}
+
+export const verifyGeetest = async (
+  getCaptchaParams: () => Promise<GetCaptchaParamsResponse>,
+): Promise<GeetestResult | null> => {
   try {
     await loadGeetestScript();
 
@@ -49,7 +64,7 @@ export const verifyGeetest = async (getCaptchaParams: () => Promise<any>): Promi
           product: "bind",
           https: true,
         },
-        (captchaObj: any) => {
+        captchaObj => {
           captchaObj.onReady(() => {
             captchaObj.verify();
           });
@@ -67,8 +82,7 @@ export const verifyGeetest = async (getCaptchaParams: () => Promise<any>): Promi
               resolve(null);
             }
           });
-          captchaObj.onError((e: any) => {
-            console.error("Geetest Error:", e);
+          captchaObj.onError(() => {
             addToast({ title: "验证出错", color: "danger" });
             resolve(null);
           });
@@ -81,8 +95,8 @@ export const verifyGeetest = async (getCaptchaParams: () => Promise<any>): Promi
         },
       );
     });
-  } catch (e: any) {
-    addToast({ title: e.message || "验证过程异常", color: "danger" });
+  } catch (err) {
+    addToast({ title: err instanceof Error ? err.message : "验证过程异常", color: "danger" });
     return null;
   }
 };
