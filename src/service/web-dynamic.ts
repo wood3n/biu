@@ -344,7 +344,7 @@ export const getWebDynamicFeedAllUpdate = (params: WebDynamicFeedAllUpdateParams
  * 获取用户空间动态
  */
 export const getWebDynamicFeedSpace = (params: WebDynamicFeedSpaceParams) => {
-  return apiRequest.get<WebDynamicResponse<WebDynamicFeedData>>("/x/polymer/web-dynamic/desktop/v1/feed/space", {
+  return apiRequest.get<WebDynamicResponse<WebDynamicFeedData>>("/x/polymer/web-dynamic/v1/feed/space", {
     params,
   });
 };
