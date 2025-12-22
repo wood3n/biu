@@ -39,7 +39,8 @@
       "matchManagers": ["github-actions"],
       "groupName": "GitHub Actions",
       "labels": ["deps:actions"],
-      "automerge": false
+      "automerge": false,
+      "enabled": false
     },
     {
       "matchPackagePatterns": ["^@rsbuild/"],
@@ -72,7 +73,8 @@
       "groupName": "react ecosystem",
       "automerge": false,
       "stabilityDays": 3,
-      "labels": ["deps:react"]
+      "labels": ["deps:react"],
+      "enabled": false
     },
     {
       "matchPackagePatterns": [
