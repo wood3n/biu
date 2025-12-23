@@ -152,6 +152,7 @@ const FavoritesSelectModal = () => {
                         color="primary"
                         isSelected={checked}
                         onChange={() => toggle(item.id)}
+                        onClick={e => e.stopPropagation()}
                         aria-label={item.title}
                       />
                       <div className="flex min-w-0 flex-1 items-center justify-between">
