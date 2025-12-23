@@ -25,6 +25,10 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ presets, value, onChange, cla
   const [color, setColor] = React.useState(colord(value).toRgb());
   const colorHex = colord(color).toHex();
 
+  React.useEffect(() => {
+    setColor(colord(value).toRgb());
+  }, [value]);
+
   const handleEyeDropper = async () => {
     // Check if the native EyeDropper API is supported (Available in Electron 17+)
     if ("EyeDropper" in window) {
