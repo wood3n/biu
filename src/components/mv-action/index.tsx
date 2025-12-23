@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useLocation } from "react-router";
 
 import {
@@ -8,7 +7,6 @@ import {
   DropdownMenu,
   DropdownItem,
   type MenuItemProps,
-  useDisclosure,
   addToast,
 } from "@heroui/react";
 import { RiMore2Line, RiPlayListAddLine, RiStarLine, RiTimeLine } from "@remixicon/react";
@@ -16,12 +14,10 @@ import clx from "classnames";
 
 import { ReactComponent as AudioDownloadIcon } from "@/assets/icons/audio-download.svg";
 import { ReactComponent as VideoDownloadIcon } from "@/assets/icons/video-download.svg";
-import FavFolderSelect from "@/components/fav-folder/select";
 import { postHistoryToViewAdd } from "@/service/history-toview-add";
+import { useModalStore } from "@/store/modal";
 import { usePlayList, type PlayDataType } from "@/store/play-list";
 import { useUser } from "@/store/user";
-
-import MediaDownloadSelect from "../mv-page-download-select";
 
 export interface ImageCardMenu {
   key: string;
@@ -73,19 +69,9 @@ const MVAction = ({
   const user = useUser(s => s.user);
   const addToNext = usePlayList(s => s.addToNext);
   const location = useLocation();
-  const [outputFileType, setOutputFileType] = useState<MediaDownloadOutputFileType>("audio");
 
-  const {
-    isOpen: isOpenFavSelectModal,
-    onOpen: onOpenFavSelectModal,
-    onOpenChange: onOpenChangeFavSelectModal,
-  } = useDisclosure();
-
-  const {
-    isOpen: isOpenMediaDownloadSelectModal,
-    onOpen: onOpenMediaDownloadSelectModal,
-    onOpenChange: onOpenChangeMediaDownloadSelectModal,
-  } = useDisclosure();
+  const onOpenFavSelectModalStore = useModalStore(s => s.onOpenFavSelectModal);
+  const onOpenVideoPageDownloadModal = useModalStore(s => s.onOpenVideoPageDownloadModal);
 
   const addToLater = async () => {
     await postHistoryToViewAdd({
@@ -121,7 +107,13 @@ const MVAction = ({
       icon: <RiStarLine size={16} />,
       title: collectMenuTitle || "收藏",
       hidden: !user?.isLogin,
-      onPress: onOpenFavSelectModal,
+      onPress: () => {
+        onOpenFavSelectModalStore({
+          rid: type === "mv" ? (aid as string) : String(sid),
+          title: collectMenuTitle || "收藏",
+          afterSubmit: onChangeFavSuccess,
+        });
+      },
     },
     {
       key: "addToLater",
@@ -155,8 +147,12 @@ const MVAction = ({
       title: "下载音频",
       hidden: type === "audio",
       onPress: () => {
-        setOutputFileType("audio");
-        onOpenMediaDownloadSelectModal();
+        onOpenVideoPageDownloadModal({
+          outputFileType: "audio",
+          title,
+          cover,
+          bvid: bvid!,
+        });
       },
     },
     {
@@ -165,8 +161,12 @@ const MVAction = ({
       icon: <VideoDownloadIcon className="relative top-px left-px h-[15px] w-[15px]" />,
       title: "下载视频",
       onPress: () => {
-        setOutputFileType("video");
-        onOpenMediaDownloadSelectModal();
+        onOpenVideoPageDownloadModal({
+          outputFileType: "video",
+          title,
+          cover,
+          bvid: bvid!,
+        });
       },
     },
     ...(menus || []),
@@ -204,21 +204,6 @@ const MVAction = ({
           </DropdownMenu>
         </Dropdown>
       </div>
-      <FavFolderSelect
-        title="收藏"
-        rid={type === "mv" ? (aid as string) : String(sid)}
-        isOpen={isOpenFavSelectModal}
-        onOpenChange={onOpenChangeFavSelectModal}
-        afterSubmit={onChangeFavSuccess}
-      />
-      <MediaDownloadSelect
-        outputFileType={outputFileType}
-        title={title}
-        cover={cover}
-        bvid={bvid!}
-        isOpen={isOpenMediaDownloadSelectModal}
-        onOpenChange={onOpenChangeMediaDownloadSelectModal}
-      />
     </>
   );
 };

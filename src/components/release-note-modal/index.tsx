@@ -3,17 +3,20 @@ import { useEffect, useState } from "react";
 import { addToast, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Progress } from "@heroui/react";
 import { RiInformationLine } from "@remixicon/react";
 import { filesize } from "filesize";
+import { useShallow } from "zustand/react/shallow";
 
 import { useAppUpdateStore } from "@/store/app-update";
+import { useModalStore } from "@/store/modal";
 
 import Typography from "../typography";
 
-interface Props {
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
-}
-
-const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
+const ReleaseNoteModal = () => {
+  const { isReleaseNoteModalOpen, onReleaseNoteModalOpenChange } = useModalStore(
+    useShallow(state => ({
+      isReleaseNoteModalOpen: state.isReleaseNoteModalOpen,
+      onReleaseNoteModalOpenChange: state.onReleaseNoteModalOpenChange,
+    })),
+  );
   const releaseNotes = useAppUpdateStore(state => state.releaseNotes);
   const [status, setStatus] = useState<DownloadAppUpdateStatus>();
   const [downloadProgress, setDownloadProgress] = useState<DownloadAppProgressInfo>();
@@ -78,8 +81,8 @@ const ReleaseNoteModal = ({ isOpen, onOpenChange }: Props) => {
         shouldBlockScroll={false}
         scrollBehavior="inside"
         size="lg"
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
+        isOpen={isReleaseNoteModalOpen}
+        onOpenChange={onReleaseNoteModalOpenChange}
         isKeyboardDismissDisabled
         isDismissable={false}
         disableAnimation

@@ -138,7 +138,10 @@ const SearchInput: React.FC = () => {
                         setValue(item.value);
                         submitSearch(item.value);
                       }}
-                      className="cursor-pointer"
+                      className="min-w-0 cursor-pointer"
+                      classNames={{
+                        content: "truncate",
+                      }}
                     >
                       {item.value}
                     </Chip>

@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 
-import { addToast, Button, Link, Pagination, useDisclosure } from "@heroui/react";
+import { addToast, Button, Link, Pagination } from "@heroui/react";
 import { RiDeleteBinLine, RiRefreshLine } from "@remixicon/react";
 import { usePagination } from "ahooks";
 
 import { formatDuration } from "@/common/utils";
-import ConfirmModal from "@/components/confirm-modal";
 import GridList from "@/components/grid-list";
 import MediaItem from "@/components/media-item";
 import ScrollContainer from "@/components/scroll-container";
 import { postHistoryToViewDel } from "@/service/history-toview-del";
 import { getHistoryToViewList } from "@/service/history-toview-list";
+import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 
@@ -18,9 +18,6 @@ const Later = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const play = usePlayList(s => s.play);
   const displayMode = useSettings(state => state.displayMode);
-
-  const { isOpen: isOpenDelete, onOpen: onOpenDelete, onOpenChange: onOpenChangeDelete } = useDisclosure();
-  const [itemToDelete, setItemToDelete] = useState<any>(null);
 
   const {
     data,
@@ -59,9 +56,30 @@ const Later = () => {
     initData();
   }, []);
 
+  const onOpenConfirmModal = useModalStore(s => s.onOpenConfirmModal);
+
   const handleOpenDeleteModal = (item: any) => {
-    setItemToDelete(item);
-    onOpenDelete();
+    onOpenConfirmModal({
+      title: "确认删除吗？",
+      confirmText: "删除",
+      onConfirm: async () => {
+        const res = await postHistoryToViewDel({
+          aid: item.aid,
+        });
+
+        if (res.code === 0) {
+          addToast({
+            title: "删除成功",
+            color: "success",
+          });
+          setTimeout(() => {
+            refreshAsync();
+          }, 500);
+        }
+
+        return res.code === 0;
+      },
+    });
   };
 
   const renderMediaItem = (item: any) => (
@@ -134,32 +152,6 @@ const Later = () => {
           </div>
         )}
       </ScrollContainer>
-      <ConfirmModal
-        isOpen={isOpenDelete}
-        onOpenChange={onOpenChangeDelete}
-        type="danger"
-        title="确认删除吗？"
-        confirmText="删除"
-        onConfirm={async () => {
-          if (!itemToDelete) return false;
-
-          const res = await postHistoryToViewDel({
-            aid: itemToDelete?.aid,
-          });
-
-          if (res.code === 0) {
-            addToast({
-              title: "删除成功",
-              color: "success",
-            });
-            setTimeout(() => {
-              refreshAsync?.();
-            }, 500);
-          }
-
-          return res.code === 0;
-        }}
-      />
     </>
   );
 };

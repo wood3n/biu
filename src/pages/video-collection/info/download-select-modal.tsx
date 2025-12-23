@@ -132,7 +132,7 @@ const DownloadSelectModal = ({ type, outputFileType, mediaCount, isOpen, onOpenC
                     }
                   }}
                   className={clx(
-                    "rounded-medium hover:bg-content2 border-content2 flex w-full cursor-default items-center justify-between border-2 px-4 py-2 not-last:mb-2",
+                    "rounded-medium hover:bg-content2 border-content2 flex w-full cursor-default items-center justify-between border-1 px-4 py-2 not-last:mb-2",
                     {
                       "border-primary": isSelected,
                     },

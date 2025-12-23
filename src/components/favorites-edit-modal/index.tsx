@@ -38,7 +38,7 @@ interface Props {
   afterSubmit?: () => void;
 }
 
-const FolderForm = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) => {
+const FavoritesEditModal = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) => {
   const updateOwnFolder = useUser(state => state.updateOwnFolder);
   const [isFetching, setIsFetching] = useState(false);
 
@@ -223,4 +223,4 @@ const FolderForm = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) => {
   );
 };
 
-export default FolderForm;
+export default FavoritesEditModal;
