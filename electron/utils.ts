@@ -27,6 +27,17 @@ export const fixFfmpegPath = () => {
     log.error("Error reading ffmpeg path from settings:", err);
   }
 
+  if (process.platform === "darwin" || process.platform === "linux") {
+    const paths = ["/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/usr/bin/ffmpeg", "/snap/bin/ffmpeg"];
+    for (const p of paths) {
+      if (fs.existsSync(p)) {
+        log.info(`Found ffmpeg at ${p}`);
+        ffmpeg.setFfmpegPath(p);
+        return;
+      }
+    }
+  }
+
   const getFfmpegName = () => {
     switch (process.platform) {
       case "win32":
@@ -49,19 +60,15 @@ export const fixFfmpegPath = () => {
 
   if (fs.existsSync(localFfmpegPath)) {
     log.info(`Found local ffmpeg at ${localFfmpegPath}`);
-    ffmpeg.setFfmpegPath(localFfmpegPath);
-    return;
-  }
-
-  if (process.platform === "darwin" || process.platform === "linux") {
-    const paths = ["/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/usr/bin/ffmpeg", "/snap/bin/ffmpeg"];
-    for (const p of paths) {
-      if (fs.existsSync(p)) {
-        log.info(`Found ffmpeg at ${p}`);
-        ffmpeg.setFfmpegPath(p);
-        return;
+    if (process.platform !== "win32") {
+      try {
+        fs.chmodSync(localFfmpegPath, "755");
+      } catch (err) {
+        log.error(`Failed to chmod ffmpeg at ${localFfmpegPath}`, err);
       }
     }
+    ffmpeg.setFfmpegPath(localFfmpegPath);
+    return;
   }
 };
 
