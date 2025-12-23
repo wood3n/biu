@@ -27,6 +27,32 @@ export const fixFfmpegPath = () => {
     log.error("Error reading ffmpeg path from settings:", err);
   }
 
+  const getFfmpegName = () => {
+    switch (process.platform) {
+      case "win32":
+        return "ffmpeg.exe";
+      case "darwin":
+        return process.arch === "arm64" ? "ffmpeg-mac-arm64" : "ffmpeg-mac-x64";
+      case "linux":
+        return "ffmpeg-linux";
+      default:
+        return "ffmpeg";
+    }
+  };
+
+  const localFfmpegPath = path.join(
+    isDev ? process.cwd() : process.resourcesPath,
+    "electron",
+    "ffmpeg",
+    getFfmpegName(),
+  );
+
+  if (fs.existsSync(localFfmpegPath)) {
+    log.info(`Found local ffmpeg at ${localFfmpegPath}`);
+    ffmpeg.setFfmpegPath(localFfmpegPath);
+    return;
+  }
+
   if (process.platform === "darwin" || process.platform === "linux") {
     const paths = ["/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/usr/bin/ffmpeg", "/snap/bin/ffmpeg"];
     for (const p of paths) {
