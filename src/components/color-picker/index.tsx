@@ -1,5 +1,5 @@
 import React from "react";
-import { HexColorInput, RgbaColor, RgbaColorPicker } from "react-colorful";
+import { HexColorInput, HexColorPicker } from "react-colorful";
 
 import { EyeDropperIcon } from "@heroicons/react/24/outline";
 import { Button, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
@@ -22,11 +22,10 @@ export interface ColorPickerProps {
 }
 
 const ColorPicker: React.FC<ColorPickerProps> = ({ presets, value, onChange, className }) => {
-  const [color, setColor] = React.useState(colord(value).toRgb());
-  const colorHex = colord(color).toHex();
+  const [color, setColor] = React.useState(colord(value).toHex());
 
   React.useEffect(() => {
-    setColor(colord(value).toRgb());
+    setColor(colord(value).toHex());
   }, [value]);
 
   const handleEyeDropper = async () => {
@@ -60,9 +59,9 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ presets, value, onChange, cla
     }
   };
 
-  const onColorChange = (newColor: RgbaColor) => {
+  const onColorChange = (newColor: string) => {
     setColor(newColor);
-    onChange?.(colord(newColor).toHex());
+    onChange?.(newColor);
   };
   return (
     <Popover radius="md" placement="bottom-start" offset={8}>
@@ -70,7 +69,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ presets, value, onChange, cla
         <Button style={{ backgroundColor: value }} className={twMerge("border-2 border-[#ffffff]", className)} />
       </PopoverTrigger>
       <PopoverContent className="bg-content2 p-2">
-        <RgbaColorPicker color={color} onChange={onColorChange} />
+        <HexColorPicker color={color} onChange={onColorChange} />
         <div className="mt-2 flex items-center gap-2">
           <Tooltip content="Eye Dropper" placement="top">
             <Button isIconOnly size="sm" onClick={handleEyeDropper}>
@@ -80,8 +79,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ presets, value, onChange, cla
           <HexColorInput
             className="border-default-200 text-foreground w-full rounded-md border bg-transparent px-2 py-1 text-sm"
             prefixed
-            alpha
-            color={colorHex}
+            color={color}
             onChange={onChange}
           />
         </div>
