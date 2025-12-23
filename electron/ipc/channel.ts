@@ -78,4 +78,7 @@ export const channel = {
     leaveFullScreen: "window:leave-full-screen",
     isFullScreen: "window:is-full-screen",
   },
+  eyedropper: {
+    open: "eyedropper:open",
+  },
 };

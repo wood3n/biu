@@ -1,8 +1,14 @@
 import React from "react";
-import { HexColorPicker } from "react-colorful";
+import { HexColorInput, RgbaColor, RgbaColorPicker } from "react-colorful";
 
-import { Button, Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
+import { EyeDropperIcon } from "@heroicons/react/24/outline";
+import { Button, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
+import { colord, extend } from "colord";
+import namesPlugin from "colord/plugins/names";
+import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
+
+extend([namesPlugin]);
 
 export interface ColorPickerProps {
   /** 颜色选择器预设颜色 */
@@ -16,13 +22,42 @@ export interface ColorPickerProps {
 }
 
 const ColorPicker: React.FC<ColorPickerProps> = ({ presets, value, onChange, className }) => {
+  const [color, setColor] = React.useState(colord(value).toRgb());
+  const colorHex = colord(color).toHex();
+
+  const handleEyeDropper = async () => {
+    try {
+      const res = await window.electron.openEyeDropper();
+      if (res) onChange?.(res);
+    } catch (error) {
+      toast.error("Failed to open eye dropper: " + error);
+    }
+  };
+  const onColorChange = (newColor: RgbaColor) => {
+    setColor(newColor);
+    onChange?.(colord(newColor).toHex());
+  };
   return (
     <Popover radius="md" placement="bottom-start" offset={8}>
       <PopoverTrigger>
         <Button style={{ backgroundColor: value }} className={twMerge("border-2 border-[#ffffff]", className)} />
       </PopoverTrigger>
       <PopoverContent className="bg-content2 p-2">
-        <HexColorPicker color={value} onChange={onChange} />
+        <RgbaColorPicker color={color} onChange={onColorChange} />
+        <div className="mt-2 flex items-center gap-2">
+          <Tooltip content="Eye Dropper" placement="top">
+            <Button isIconOnly size="sm" onClick={handleEyeDropper}>
+              <EyeDropperIcon className="size-4" />
+            </Button>
+          </Tooltip>
+          <HexColorInput
+            className="border-default-200 text-foreground w-full rounded-md border bg-transparent px-2 py-1 text-sm"
+            prefixed
+            alpha
+            color={colorHex}
+            onChange={onChange}
+          />
+        </div>
         <div className="mt-2 flex w-full flex-wrap gap-2">
           {presets?.map(preset => (
             <button

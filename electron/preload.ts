@@ -228,6 +228,8 @@ const api: ElectronAPI = {
   },
   // 清除文件下载任务列表
   clearMediaDownloadTaskList: () => ipcRenderer.invoke(channel.download.clear),
+  // 打开取色器
+  openEyeDropper: () => ipcRenderer.invoke(channel.eyedropper.open),
 };
 
 contextBridge.exposeInMainWorld("electron", api);

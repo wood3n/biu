@@ -92,6 +92,7 @@ declare global {
     retryMediaDownloadTask: (id: string) => Promise<void>;
     /** 清除下载任务列表 */
     clearMediaDownloadTaskList: () => Promise<void>;
+    openEyeDropper: () => Promise<string>;
   }
 
   interface Window {
