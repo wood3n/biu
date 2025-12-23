@@ -2,9 +2,6 @@
   "name": "biu",
   "version": "1.7.0",
   "private": true,
-  "engines": {
-    "node": "22.17.1"
-  },
   "type": "module",
   "description": "music application based on bilibili api",
   "author": "wood3n",
@@ -39,6 +36,7 @@
     "release:alpha": "git fetch --tags --force && changelogen --release --push --hideAuthorEmail --prerelease alpha"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@heroui/react": "^2.8.3",
     "@hookform/resolvers": "^5.2.2",
     "@remixicon/react": "^4.6.0",
