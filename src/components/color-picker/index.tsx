@@ -26,13 +26,31 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ presets, value, onChange, cla
   const colorHex = colord(color).toHex();
 
   const handleEyeDropper = async () => {
-    try {
-      const res = await window.electron.openEyeDropper();
-      if (res) onChange?.(res);
-    } catch (error) {
-      toast.error("Failed to open eye dropper: " + error);
+    // Check if the native EyeDropper API is supported (Available in Electron 17+)
+    if ("EyeDropper" in window) {
+      try {
+        // @ts-ignore: EyeDropper might not be in your current TS definitions
+        const eyeDropper = new window.EyeDropper();
+        // @ts-ignore
+        const result = await eyeDropper.open();
+        if (result && result.sRGBHex) {
+          onChange?.(result.sRGBHex);
+        }
+      } catch (error) {
+        // User cancelled the selection (e.g. pressed Esc), no error toast needed
+        console.debug("EyeDropper selection cancelled", error);
+      }
+    } else {
+      // Fallback for older environments or if the API is disabled
+      try {
+        const res = await window.electron.openEyeDropper();
+        if (res) onChange?.(res);
+      } catch (error) {
+        toast.error("Failed to open eye dropper: " + error);
+      }
     }
   };
+
   const onColorChange = (newColor: RgbaColor) => {
     setColor(newColor);
     onChange?.(colord(newColor).toHex());
