@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.7.1-beta.0
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.7.0...v1.7.1-beta.0)
+
+### 🔥 功能优化
+
+- 补充内置精简版ffmpeg ([5ec29e8](https://github.com/wood3n/biu/commit/5ec29e8))
+
+### 🩹 修复问题
+
+- **deps:** Update tailwindcss ecosystem ([0829134](https://github.com/wood3n/biu/commit/0829134))
+- 修复review问题 ([33f4d2a](https://github.com/wood3n/biu/commit/33f4d2a))
+- 修改ffmpeg执行权限 ([04773cb](https://github.com/wood3n/biu/commit/04773cb))
+- Review problem ([f8d9805](https://github.com/wood3n/biu/commit/f8d9805))
+
+### 💅 Refactors
+
+- 优化收藏等modal状态管理 ([f2d6079](https://github.com/wood3n/biu/commit/f2d6079))
+
+### 📖 Documentation
+
+- 更新README ([702c511](https://github.com/wood3n/biu/commit/702c511))
+
+### ❤️ Contributors
+
+- Wood3n
+
 ## v1.7.0
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.6.1...v1.7.0)
