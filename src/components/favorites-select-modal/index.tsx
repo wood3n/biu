@@ -22,7 +22,11 @@ import AsyncButton from "../async-button";
 import ScrollContainer from "../scroll-container";
 
 const hasSameIds = (arr1: number[], arr2: number[]) => {
-  return arr1.length === arr2.length && arr1.every(item => arr2.includes(item));
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+  const set2 = new Set(arr2);
+  return arr1.every(item => set2.has(item));
 };
 
 /** 将视频添加到收藏夹或从收藏夹中移除 */
