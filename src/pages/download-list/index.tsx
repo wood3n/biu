@@ -146,7 +146,7 @@ const DownloadList = () => {
             >
               <TableHeader className="rounded-medium">
                 <TableColumn width={350}>文件</TableColumn>
-                <TableColumn>状态</TableColumn>
+                <TableColumn align="center">状态</TableColumn>
                 <TableColumn width={120} align="center">
                   大小
                 </TableColumn>

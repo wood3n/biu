@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { addToast, Tooltip, useDisclosure } from "@heroui/react";
+import { addToast, Tooltip } from "@heroui/react";
 import {
   RiDeleteBinLine,
   RiFileMusicLine,
@@ -11,7 +11,7 @@ import {
 } from "@remixicon/react";
 
 import AsyncButton from "@/components/async-button";
-import ConfirmModal from "@/components/confirm-modal";
+import { useModalStore } from "@/store/modal";
 
 interface Props {
   data: MediaDownloadTask;
@@ -20,11 +20,7 @@ interface Props {
 type ActionKey = "open" | "pause" | "resume" | "retry" | "delete";
 
 const DownloadActions = ({ data }: Props) => {
-  const {
-    isOpen: isConfirmCancelOpen,
-    onOpen: onConfirmCancelOpen,
-    onOpenChange: onConfirmCancelOpenChange,
-  } = useDisclosure();
+  const onOpenConfirmModal = useModalStore(s => s.onOpenConfirmModal);
 
   const [pendingAction, setPendingAction] = useState<ActionKey | null>(null);
   const pendingTimeoutRef = useRef<number | null>(null);
@@ -143,7 +139,17 @@ const DownloadActions = ({ data }: Props) => {
             data.status,
           )
         ) {
-          onConfirmCancelOpen();
+          onOpenConfirmModal({
+            title: "确认删除吗？",
+            description: "当前任务未下载完成，确认删除后将无法恢复",
+            confirmText: "删除",
+            onConfirm: async () => {
+              if (pendingAction) return false;
+              lockAction("delete");
+              await window.electron.cancelMediaDownloadTask(data.id);
+              return true;
+            },
+          });
           return;
         }
 
@@ -175,19 +181,6 @@ const DownloadActions = ({ data }: Props) => {
             </Tooltip>
           ))}
       </div>
-      <ConfirmModal
-        isOpen={isConfirmCancelOpen}
-        onOpenChange={onConfirmCancelOpenChange}
-        title="确认删除吗？"
-        description="当前任务未下载完成，确认删除后将无法恢复"
-        confirmText="删除"
-        onConfirm={async () => {
-          if (pendingAction) return false;
-          lockAction("delete");
-          await window.electron.cancelMediaDownloadTask(data.id);
-          return true;
-        }}
-      />
     </>
   );
 };

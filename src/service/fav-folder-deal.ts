@@ -8,9 +8,9 @@ import { apiRequest } from "./request";
 export interface FavFolderAddRequestParams {
   /** 视频id */
   rid: string;
-  /** 目标收藏夹id，逗号分隔 */
+  /** 添加目标收藏夹id，逗号分隔 */
   add_media_ids?: string;
-  /** 目标收藏夹id，逗号分隔 */
+  /** 从目标收藏夹id移除，逗号分隔 */
   del_media_ids?: string;
   /** 视频：2 */
   type: number;
@@ -36,7 +36,7 @@ export interface FavFolderAddResponse {
 }
 
 /**
- * 将视频添加到收藏夹
+ * 将视频添加到收藏夹，或从收藏夹中移除
  */
 export function postFavFolderDeal(data: FavFolderAddRequestParams): Promise<FavFolderAddResponse> {
   return apiRequest.post<FavFolderAddResponse>("/x/v3/fav/resource/deal", data, {

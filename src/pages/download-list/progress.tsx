@@ -16,7 +16,7 @@ const StageProgress = ({ data }: Props) => {
 
   if (data.status === "completed") {
     return (
-      <div className="text-success flex items-center space-x-1">
+      <div className="text-success flex items-center justify-center space-x-1">
         <RiCheckboxCircleLine size={16} />
         <span>下载完成</span>
       </div>
@@ -49,7 +49,7 @@ const StageProgress = ({ data }: Props) => {
           indicator: data.status === "failed" ? "bg-danger" : "bg-blue-500",
         }}
       />
-      <div className="flex justify-between space-x-2 text-xs">
+      <div className="flex justify-between space-x-2 text-start text-xs">
         {data.status === "failed" ? (
           <p title={data.error} className="text-danger line-clamp-2 break-all">
             {data.error}

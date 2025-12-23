@@ -33,6 +33,7 @@ export async function buildElectron() {
           { target: "portable", arch: ["x64", "arm64"] },
         ],
         icon: `${ELECTRON_ICON_BASE_PATH}/logo.ico`,
+        extraResources: [{ from: "electron/ffmpeg/ffmpeg.exe", to: "electron/ffmpeg/ffmpeg.exe" }],
       },
       nsis: {
         deleteAppDataOnUninstall: true,
@@ -60,6 +61,7 @@ export async function buildElectron() {
         entitlementsInherit: "plugins/mac/entitlements.mac.plist",
         notarize: false,
         artifactName: "${productName}-${version}-mac-${arch}.${ext}",
+        extraResources: [{ from: "electron/ffmpeg/ffmpeg-mac-${arch}", to: "electron/ffmpeg/ffmpeg-mac-${arch}" }],
       },
       linux: {
         target: [
@@ -74,6 +76,7 @@ export async function buildElectron() {
         vendor: "wood3n",
         executableName: "Biu",
         artifactName: "${productName}-${version}-linux-${arch}.${ext}",
+        extraResources: [{ from: "electron/ffmpeg/ffmpeg-linux", to: "electron/ffmpeg/ffmpeg-linux" }],
       },
       publish: {
         provider: "github",

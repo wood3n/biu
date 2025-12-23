@@ -2,7 +2,7 @@ import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, useDiscl
 import { RiDeleteBinLine, RiExternalLinkLine, RiMoreFill, RiStarLine } from "@remixicon/react";
 
 import { openBiliVideoLink } from "@/common/utils/url";
-import FavFolderSelect from "@/components/fav-folder/select";
+import { useModalStore } from "@/store/modal";
 import { usePlayList, type PlayData } from "@/store/play-list";
 
 interface Props {
@@ -13,7 +13,15 @@ const Menus = ({ data }: Props) => {
   const del = usePlayList(state => state.del);
   const { isOpen, onOpenChange } = useDisclosure();
 
-  const { onOpen: onFavOpen, isOpen: isFavOpen, onOpenChange: onFavOpenChange } = useDisclosure();
+  const onOpenFavSelectModal = useModalStore(state => state.onOpenFavSelectModal);
+
+  const openSelectFav = () => {
+    if (!data) return;
+    onOpenFavSelectModal({
+      rid: data.type === "mv" ? String(data.aid) : String(data.sid),
+      title: "收藏",
+    });
+  };
 
   return (
     <>
@@ -36,7 +44,7 @@ const Menus = ({ data }: Props) => {
           </Button>
         </DropdownTrigger>
         <DropdownMenu aria-label="播放列表操作菜单">
-          <DropdownItem key="favorite" startContent={<RiStarLine size={16} />} onPress={onFavOpen}>
+          <DropdownItem key="favorite" startContent={<RiStarLine size={16} />} onPress={openSelectFav}>
             收藏
           </DropdownItem>
           <DropdownItem
@@ -58,12 +66,6 @@ const Menus = ({ data }: Props) => {
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
-      <FavFolderSelect
-        title="收藏"
-        rid={data?.type === "mv" ? String(data?.aid) : String(data?.sid)}
-        isOpen={isFavOpen}
-        onOpenChange={onFavOpenChange}
-      />
     </>
   );
 };

@@ -37,6 +37,39 @@ export const fixFfmpegPath = () => {
       }
     }
   }
+
+  const getFfmpegName = () => {
+    switch (process.platform) {
+      case "win32":
+        return "ffmpeg.exe";
+      case "darwin":
+        return process.arch === "arm64" ? "ffmpeg-mac-arm64" : "ffmpeg-mac-x64";
+      case "linux":
+        return "ffmpeg-linux";
+      default:
+        return "ffmpeg";
+    }
+  };
+
+  const localFfmpegPath = path.join(
+    isDev ? process.cwd() : process.resourcesPath,
+    "electron",
+    "ffmpeg",
+    getFfmpegName(),
+  );
+
+  if (fs.existsSync(localFfmpegPath)) {
+    log.info(`Found local ffmpeg at ${localFfmpegPath}`);
+    if (process.platform !== "win32") {
+      try {
+        fs.chmodSync(localFfmpegPath, "755");
+      } catch (err) {
+        log.error(`Failed to chmod ffmpeg at ${localFfmpegPath}`, err);
+      }
+    }
+    ffmpeg.setFfmpegPath(localFfmpegPath);
+    return;
+  }
 };
 
 const entities = {

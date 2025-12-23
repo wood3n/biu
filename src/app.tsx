@@ -7,7 +7,11 @@ import moment from "moment";
 import { getCookitFromBSite } from "./common/utils/cookie";
 import { toggleMiniMode } from "./common/utils/mini-player";
 import { mapKeyToElectronAccelerator } from "./common/utils/shortcut";
+import ConfirmModal from "./components/confirm-modal";
+import FavoritesSelectModal from "./components/favorites-select-modal";
+import ReleaseNoteModal from "./components/release-note-modal";
 import Theme from "./components/theme";
+import VideoPagesDownloadSelectModal from "./components/video-pages-download-select-modal";
 import routes from "./routes";
 import { useAppUpdateStore } from "./store/app-update";
 import { usePlayList } from "./store/play-list";
@@ -150,7 +154,7 @@ export function App() {
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (usePlayProgress.getState().currentTime) {
-        localStorage.setItem("play-current-time", String(usePlayProgress.getState().currentTime));
+        usePlayProgress.getState().saveCurrentTime();
       }
     };
 
@@ -171,6 +175,10 @@ export function App() {
         toastProps={{ timeout: 3000, color: "primary" }}
       />
       <Theme>{routeElement}</Theme>
+      <FavoritesSelectModal />
+      <ConfirmModal />
+      <VideoPagesDownloadSelectModal />
+      <ReleaseNoteModal />
     </HeroUIProvider>
   );
 }

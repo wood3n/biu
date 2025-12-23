@@ -1,7 +1,7 @@
 import { Button, Tooltip, useDisclosure } from "@heroui/react";
 import { RiAddLine, RiFolderLine, RiFolderOpenLine } from "@remixicon/react";
 
-import CreateFolderForm from "@/components/fav-folder/form";
+import FavoritesEditModal from "@/components/favorites-edit-modal";
 import MenuGroup from "@/components/menu/menu-group";
 import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
@@ -64,7 +64,7 @@ const Collection = () => {
           )}
         </>
       )}
-      <CreateFolderForm isOpen={isOpen} onOpenChange={onOpenChange} />
+      <FavoritesEditModal isOpen={isOpen} onOpenChange={onOpenChange} />
     </>
   );
 };

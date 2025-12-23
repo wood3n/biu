@@ -5,6 +5,8 @@ import { Dropdown, DropdownTrigger, Button, DropdownMenu, DropdownItem, useDiscl
 import {
   RiDeleteBinLine,
   RiEditLine,
+  RiFileMusicLine,
+  RiFileVideoLine,
   RiMoreLine,
   RiPlayListAddLine,
   RiStarLine,
@@ -12,16 +14,14 @@ import {
 } from "@remixicon/react";
 import { useShallow } from "zustand/react/shallow";
 
-import { ReactComponent as AudioDownloadIcon } from "@/assets/icons/audio-download.svg";
-import { ReactComponent as VideoDownloadIcon } from "@/assets/icons/video-download.svg";
 import { CollectionType } from "@/common/constants/collection";
-import ConfirmModal from "@/components/confirm-modal";
-import EditFavForm from "@/components/fav-folder/form";
+import FavoritesEditModal from "@/components/favorites-edit-modal";
 import { postFavFolderDel } from "@/service/fav-folder-del";
 import { postFavFolderFav } from "@/service/fav-folder-fav";
 import { postFavFolderUnfav } from "@/service/fav-folder-unfav";
 import { postFavSeasonFav } from "@/service/fav-season-fav";
 import { postFavSeasonUnfav } from "@/service/fav-season-unfav";
+import { useModalStore } from "@/store/modal";
 import { useUser } from "@/store/user";
 
 import DownloadSelectModal from "./download-select-modal";
@@ -50,11 +50,7 @@ const Menu = ({ type, isOwn, mediaCount, attr, onAddToPlayList, afterChangeInfo 
   );
   const isCollected = collectedFolder?.some(folder => folder.id === Number(id));
 
-  const {
-    isOpen: isDeleteConfirmOpen,
-    onOpen: onDeleteConfirmOpen,
-    onOpenChange: onDeleteConfirmChange,
-  } = useDisclosure();
+  const onOpenConfirmModal = useModalStore(s => s.onOpenConfirmModal);
 
   const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditChange } = useDisclosure();
   const {
@@ -122,7 +118,7 @@ const Menu = ({ type, isOwn, mediaCount, attr, onAddToPlayList, afterChangeInfo 
     {
       key: "download-audio",
       show: Boolean(mediaCount),
-      startContent: <AudioDownloadIcon className="relative top-px left-px h-[17px] w-[17px]" />,
+      startContent: <RiFileMusicLine size={18} />,
       label: "下载全部音频",
       onPress: () => {
         setOutputFileType("audio");
@@ -132,7 +128,7 @@ const Menu = ({ type, isOwn, mediaCount, attr, onAddToPlayList, afterChangeInfo 
     {
       key: "download-video",
       show: Boolean(mediaCount),
-      startContent: <VideoDownloadIcon className="relative top-px left-px h-[17px] w-[17px]" />,
+      startContent: <RiFileVideoLine size={18} />,
       label: "下载全部视频",
       onPress: () => {
         setOutputFileType("video");
@@ -162,7 +158,24 @@ const Menu = ({ type, isOwn, mediaCount, attr, onAddToPlayList, afterChangeInfo 
       label: "删除",
       className: "text-danger",
       color: "danger" as const,
-      onPress: onDeleteConfirmOpen,
+      onPress: () => {
+        onOpenConfirmModal({
+          title: "确认删除当前收藏夹吗？",
+          type: "danger",
+          onConfirm: async () => {
+            const res = await postFavFolderDel({
+              media_ids: id as string,
+            });
+
+            if (res.code === 0) {
+              await updateUser();
+              navigate("/empty");
+            }
+
+            return res.code === 0;
+          },
+        });
+      },
     },
   ];
 
@@ -195,25 +208,12 @@ const Menu = ({ type, isOwn, mediaCount, attr, onAddToPlayList, afterChangeInfo 
           )}
         </DropdownMenu>
       </Dropdown>
-      <ConfirmModal
-        type="danger"
-        isOpen={isDeleteConfirmOpen}
-        onOpenChange={onDeleteConfirmChange}
-        title="确认删除当前收藏夹吗？"
-        onConfirm={async () => {
-          const res = await postFavFolderDel({
-            media_ids: id as string,
-          });
-
-          if (res.code === 0) {
-            await updateUser();
-            navigate("/empty");
-          }
-
-          return res.code === 0;
-        }}
+      <FavoritesEditModal
+        mid={Number(id)}
+        isOpen={isEditOpen}
+        onOpenChange={onEditChange}
+        afterSubmit={afterChangeInfo}
       />
-      <EditFavForm mid={Number(id)} isOpen={isEditOpen} onOpenChange={onEditChange} afterSubmit={afterChangeInfo} />
       <DownloadSelectModal
         outputFileType={outputFileType}
         type={type}

@@ -69,7 +69,7 @@ export interface FavFolderItem {
 }
 
 /**
- * 获取指定用户创建的所有收藏夹信息
+ * 获取指定用户创建的所有收藏夹信息,以及指定视频是否存在于收藏夹中
  * @param params 请求参数
  * @returns Promise<FavFolderCreatedListAllResponse>
  */

@@ -1,22 +1,36 @@
-import { Badge, Tooltip, useDisclosure } from "@heroui/react";
+import { useEffect, useState } from "react";
+
+import { Badge, Tooltip } from "@heroui/react";
 import { twMerge } from "tailwind-merge";
 
 import { ReactComponent as LogoIcon } from "@/assets/icons/logo.svg";
-import ReleaseNoteModal from "@/components/release-note-modal";
 import { useAppUpdateStore } from "@/store/app-update";
+import { useModalStore } from "@/store/modal";
 
 const isMac = window.electron?.getPlatform() === "macos";
 
 const Logo = () => {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const onOpenReleaseNoteModal = useModalStore(s => s.onOpenReleaseNoteModal);
   const isUpdateAvailable = useAppUpdateStore(s => s.isUpdateAvailable);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+
+  useEffect(() => {
+    if (!isMac) return;
+
+    window.electron?.isFullScreen().then(setIsFullScreen);
+    const unlisten = window.electron?.onWindowFullScreenChange(setIsFullScreen);
+
+    return () => {
+      unlisten?.();
+    };
+  }, []);
 
   return (
     <>
       <div
         className={twMerge(
           "window-drag text-primary flex flex-none items-center space-x-1 px-7 py-4",
-          isMac && "pt-12",
+          isMac && !isFullScreen && "pt-12",
         )}
       >
         <LogoIcon className="h-10 w-10" />
@@ -28,10 +42,13 @@ const Logo = () => {
             classNames={{
               badge: "window-no-drag cursor-pointer -right-1/5",
             }}
-            onClick={onOpen}
+            onClick={onOpenReleaseNoteModal}
           >
             <Tooltip title="新版本更新">
-              <div className="window-no-drag cursor-pointer text-2xl leading-none font-bold" onClick={onOpen}>
+              <div
+                className="window-no-drag cursor-pointer text-2xl leading-none font-bold"
+                onClick={onOpenReleaseNoteModal}
+              >
                 Biu
               </div>
             </Tooltip>
@@ -40,7 +57,6 @@ const Logo = () => {
           <span className="text-2xl leading-none font-bold">Biu</span>
         )}
       </div>
-      <ReleaseNoteModal isOpen={isOpen} onOpenChange={onOpenChange} />
     </>
   );
 };

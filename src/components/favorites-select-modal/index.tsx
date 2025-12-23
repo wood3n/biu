@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import {
   addToast,
@@ -12,74 +12,79 @@ import {
   Spinner,
 } from "@heroui/react";
 import { useRequest } from "ahooks";
-import { isEqual } from "es-toolkit/predicate";
 
 import { getFavFolderCreatedListAll } from "@/service/fav-folder-created-list-all";
 import { postFavFolderDeal } from "@/service/fav-folder-deal";
+import { useModalStore } from "@/store/modal";
 import { useUser } from "@/store/user";
 
 import AsyncButton from "../async-button";
 import ScrollContainer from "../scroll-container";
 
-export interface FavFolderSelectProps {
-  /** 视频aid，或者音频的id */
-  rid: string;
-  // 受控：显示/隐藏
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  title?: React.ReactNode;
-  afterSubmit?: (ids: number[]) => void;
-}
+const hasSameIds = (arr1: number[], arr2: number[]) => {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+  const set2 = new Set(arr2);
+  return arr1.every(item => set2.has(item));
+};
 
-const FavFolderSelect = ({ rid, isOpen, onOpenChange, title, afterSubmit }: FavFolderSelectProps) => {
+/** 将视频添加到收藏夹或从收藏夹中移除 */
+const FavoritesSelectModal = () => {
   const user = useUser(s => s.user);
+  const isFavSelectModalOpen = useModalStore(s => s.isFavSelectModalOpen);
+  const onFavSelectModalOpenChange = useModalStore(s => s.onFavSelectModalOpenChange);
+  const favSelectModalData = useModalStore(s => s.favSelectModalData);
+  const { rid, title, afterSubmit } = favSelectModalData || {};
+
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const prevSelectedRef = useRef<number[]>([]);
 
+  useEffect(() => {
+    if (!isFavSelectModalOpen) {
+      setSelectedIds([]);
+      prevSelectedRef.current = [];
+    }
+  }, [isFavSelectModalOpen]);
+
   const { data, loading } = useRequest(
     async () => {
+      if (!rid) return [];
       const res = await getFavFolderCreatedListAll({
         rid: Number(rid),
         type: 2,
         up_mid: user?.mid as number,
       });
 
-      const collectedFolders = res?.data?.list?.filter(item => item.fav_state === 1) || [];
-      if (collectedFolders?.length) {
-        prevSelectedRef.current = collectedFolders.map(item => item.id);
+      const selectedFavs = res?.data?.list?.filter(item => item.fav_state === 1) || [];
+      if (selectedFavs?.length) {
+        prevSelectedRef.current = selectedFavs.map(item => item.id);
         setSelectedIds(prevSelectedRef.current);
       } else {
+        prevSelectedRef.current = [];
         setSelectedIds([]);
       }
 
       return res?.data?.list;
     },
     {
-      ready: Boolean(isOpen && user?.mid),
-      refreshDeps: [isOpen, rid],
+      ready: Boolean(isFavSelectModalOpen && user?.mid && rid),
+      refreshDeps: [isFavSelectModalOpen, rid],
     },
   );
 
   const toggle = (id: number) => {
-    setSelectedIds(prev => {
-      const next = [...prev];
-      // 多选
-      if (next.includes(id)) {
-        return next.filter(item => item !== id);
-      } else {
-        next.push(id);
-        return next;
-      }
-    });
+    setSelectedIds(prev => (prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]));
   };
 
   const handleCancel = () => {
-    onOpenChange(false);
+    onFavSelectModalOpenChange(false);
   };
 
   const handleConfirm = async () => {
+    if (!rid) return;
     const prevSelectedFolderIds = data?.filter(item => item.fav_state === 1)?.map(item => item.id) || [];
     const delMediaIds = prevSelectedFolderIds.filter(id => !selectedIds.includes(id)).join(",");
     const addMediaIds = selectedIds.filter(id => !prevSelectedFolderIds.includes(id)).join(",");
@@ -97,7 +102,7 @@ const FavFolderSelect = ({ rid, isOpen, onOpenChange, title, afterSubmit }: FavF
       });
 
       if (res.code === 0) {
-        onOpenChange(false);
+        onFavSelectModalOpenChange(false);
         afterSubmit?.(selectedIds);
       } else {
         addToast({
@@ -114,8 +119,9 @@ const FavFolderSelect = ({ rid, isOpen, onOpenChange, title, afterSubmit }: FavF
     <Modal
       disableAnimation
       scrollBehavior="inside"
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
+      shouldBlockScroll={false}
+      isOpen={isFavSelectModalOpen}
+      onOpenChange={onFavSelectModalOpenChange}
       isDismissable={false}
       size="md"
     >
@@ -169,7 +175,7 @@ const FavFolderSelect = ({ rid, isOpen, onOpenChange, title, afterSubmit }: FavF
           <AsyncButton
             color="primary"
             onPress={handleConfirm}
-            isDisabled={isEqual(selectedIds, prevSelectedRef.current)}
+            isDisabled={hasSameIds(selectedIds, prevSelectedRef.current)}
           >
             确认
           </AsyncButton>
@@ -179,4 +185,4 @@ const FavFolderSelect = ({ rid, isOpen, onOpenChange, title, afterSubmit }: FavF
   );
 };
 
-export default FavFolderSelect;
+export default FavoritesSelectModal;

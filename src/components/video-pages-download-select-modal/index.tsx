@@ -2,26 +2,31 @@ import { useState } from "react";
 
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Checkbox, Spinner, addToast } from "@heroui/react";
 import { useRequest } from "ahooks";
+import { useShallow } from "zustand/react/shallow";
 
 import { getPlayerPagelist } from "@/service/player-pagelist";
+import { useModalStore } from "@/store/modal";
 
 import AsyncButton from "../async-button";
 import ScrollContainer from "../scroll-container";
 
-interface Props {
-  outputFileType: MediaDownloadOutputFileType;
-  title: string;
-  cover?: string;
-  bvid: string;
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
-}
+const VideoPagesDownloadSelectModal = () => {
+  const { isVideoPageDownloadModalOpen, onVideoPageDownloadModalOpenChange, videoPageDownloadModalData } =
+    useModalStore(
+      useShallow(state => ({
+        isVideoPageDownloadModalOpen: state.isVideoPageDownloadModalOpen,
+        onVideoPageDownloadModalOpenChange: state.onVideoPageDownloadModalOpenChange,
+        videoPageDownloadModalData: state.videoPageDownloadModalData,
+      })),
+    );
 
-const MvPageDownloadSelect = ({ outputFileType, title, cover, bvid, isOpen, onOpenChange }: Props) => {
+  const { outputFileType, title, cover, bvid } = videoPageDownloadModalData || {};
+
   const [selectedCids, setSelectedCids] = useState<string[]>([]);
 
   const { data, loading } = useRequest(
     async () => {
+      if (!bvid) return [];
       const res = await getPlayerPagelist({
         bvid,
       });
@@ -31,13 +36,13 @@ const MvPageDownloadSelect = ({ outputFileType, title, cover, bvid, isOpen, onOp
       } else if (res?.data?.[0]?.cid) {
         const cid = String(res.data[0].cid);
         await window.electron.addMediaDownloadTask({
-          outputFileType,
+          outputFileType: outputFileType!,
           cover,
-          title,
+          title: title!,
           bvid,
           cid,
         });
-        onOpenChange(false);
+        onVideoPageDownloadModalOpenChange(false);
         addToast({
           title: "已添加到下载队列",
           color: "success",
@@ -47,7 +52,7 @@ const MvPageDownloadSelect = ({ outputFileType, title, cover, bvid, isOpen, onOp
       return res?.data || [];
     },
     {
-      ready: isOpen,
+      ready: Boolean(isVideoPageDownloadModalOpen && bvid),
       refreshDeps: [bvid],
     },
   );
@@ -57,14 +62,14 @@ const MvPageDownloadSelect = ({ outputFileType, title, cover, bvid, isOpen, onOp
       data!
         .filter(item => selectedCids.includes(String(item.cid)))
         .map(item => ({
-          outputFileType,
-          title: item.part || title,
-          bvid,
+          outputFileType: outputFileType!,
+          title: item.part || title!,
+          bvid: bvid!,
           cover: item.first_frame || cover,
           cid: String(item.cid),
         })),
     );
-    onOpenChange(false);
+    onVideoPageDownloadModalOpenChange(false);
     addToast({
       title: "已添加到下载队列",
       color: "success",
@@ -72,7 +77,11 @@ const MvPageDownloadSelect = ({ outputFileType, title, cover, bvid, isOpen, onOp
   };
 
   return (
-    <Modal scrollBehavior="inside" isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Modal
+      scrollBehavior="inside"
+      isOpen={isVideoPageDownloadModalOpen}
+      onOpenChange={onVideoPageDownloadModalOpenChange}
+    >
       <ModalContent>
         {Boolean(data?.length) && <ModalHeader>选择分集</ModalHeader>}
         <ModalBody className="p-0">
@@ -138,4 +147,4 @@ const MvPageDownloadSelect = ({ outputFileType, title, cover, bvid, isOpen, onOp
   );
 };
 
-export default MvPageDownloadSelect;
+export default VideoPagesDownloadSelectModal;
