@@ -46,7 +46,12 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ presets, value, onChange, cla
         const res = await window.electron.openEyeDropper();
         if (res) onChange?.(res);
       } catch (error) {
-        toast.error("Failed to open eye dropper: " + error);
+        if (error instanceof Error && error.message.includes("cancelled")) {
+          // User cancelled the selection, no error toast needed
+          console.debug("EyeDropper selection cancelled", error);
+        } else {
+          toast.error(`Failed to open eye dropper: ${error}`);
+        }
       }
     }
   };
