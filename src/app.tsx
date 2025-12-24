@@ -9,6 +9,7 @@ import { toggleMiniMode } from "./common/utils/mini-player";
 import { mapKeyToElectronAccelerator } from "./common/utils/shortcut";
 import ConfirmModal from "./components/confirm-modal";
 import FavoritesSelectModal from "./components/favorites-select-modal";
+import PlayListDrawer from "./components/music-playlist-drawer";
 import ReleaseNoteModal from "./components/release-note-modal";
 import Theme from "./components/theme";
 import VideoPagesDownloadSelectModal from "./components/video-pages-download-select-modal";
@@ -179,6 +180,7 @@ export function App() {
       <ConfirmModal />
       <VideoPagesDownloadSelectModal />
       <ReleaseNoteModal />
+      <PlayListDrawer />
     </HeroUIProvider>
   );
 }

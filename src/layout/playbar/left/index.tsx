@@ -5,7 +5,6 @@ import { Chip, Image } from "@heroui/react";
 import { RiArrowUpSLine } from "@remixicon/react";
 
 import { openBiliVideoLink } from "@/common/utils/url";
-import Ellipsis from "@/components/ellipsis";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 
@@ -38,10 +37,14 @@ const LeftControl = () => {
         </div>
       </div>
       <div className="flex min-w-0 flex-col items-start space-y-1">
-        <span className="flex items-center space-x-2">
-          <Ellipsis className="cursor-pointer hover:underline" onClick={() => openBiliVideoLink(playItem!)}>
+        <span className="flex w-full items-center space-x-2">
+          <span
+            title={playItem?.pageTitle || playItem?.title}
+            className="min-w-0 flex-1 cursor-pointer truncate hover:underline"
+            onClick={() => openBiliVideoLink(playItem!)}
+          >
             {playItem?.pageTitle || playItem?.title}
-          </Ellipsis>
+          </span>
           {Boolean(playItem?.isLossless) && <Chip size="sm">无损</Chip>}
           {Boolean(playItem?.isDolby) && <Chip size="sm">杜比音频</Chip>}
         </span>

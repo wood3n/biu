@@ -5,8 +5,10 @@ import { RiStarLine } from "@remixicon/react";
 
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
+import { useUser } from "@/store/user";
 
 const MusicFavButton = () => {
+  const user = useUser(s => s.user);
   const list = usePlayList(s => s.list);
   const playId = usePlayList(s => s.playId);
   const playItem = useMemo(() => list.find(item => item.id === playId), [list, playId]);
@@ -19,6 +21,10 @@ const MusicFavButton = () => {
       title: "收藏",
     });
   };
+
+  if (!user?.isLogin) {
+    return null;
+  }
 
   return (
     <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={handleOpen}>

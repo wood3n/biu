@@ -1,16 +1,28 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 import { Button, Drawer, DrawerBody, DrawerContent, Image } from "@heroui/react";
-import { RiArrowDownSLine } from "@remixicon/react";
+import { RiArrowDownSLine, RiExternalLinkLine } from "@remixicon/react";
 import { useShallow } from "zustand/shallow";
 
+import { openBiliVideoLink } from "@/common/utils/url";
 import AudioWaveform from "@/components/audio-waveform";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 
+import MusicDownloadButton from "../music-download-button";
+import MusicFavButton from "../music-fav-button";
 import MusicPlayControl from "../music-play-control";
+import MusicPlayMode from "../music-play-mode";
+import MusicPlayProgress from "../music-play-progress";
+import MusicRate from "../music-rate";
+import MusicVolume from "../music-volume";
+import OpenPlaylistDrawerButton from "../open-playlist-drawer-button";
 import WindowAction from "../window-action";
+import PageList from "./page-list";
+
+const platform = window.electron.getPlatform();
 
 const FullScreenPlayer = () => {
   const isOpen = useModalStore(s => s.isFullScreenPlayerOpen);
@@ -24,6 +36,7 @@ const FullScreenPlayer = () => {
   );
   const primaryColor = useSettings(s => s.primaryColor);
   const playItem = list.find(item => item.id === playId);
+  const navigate = useNavigate();
 
   const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1000);
 
@@ -65,38 +78,76 @@ const FullScreenPlayer = () => {
               >
                 <RiArrowDownSLine size={24} />
               </Button>
-              <WindowAction />
+              {["linux", "windows"].includes(platform) && <WindowAction />}
             </div>
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-between">
               <div className="text-center text-white">
                 <h2 className="text-2xl font-bold">{playItem.pageTitle || playItem.title}</h2>
-                <p className="mt-2 text-white/60">{playItem.ownerName}</p>
+                <button
+                  type="button"
+                  className="mt-2 text-white/60 hover:underline"
+                  onClick={() => {
+                    onClose();
+                    navigate(`/user/${playItem.ownerMid}`);
+                  }}
+                >
+                  {playItem.ownerName}
+                </button>
               </div>
-              <div className="aspect-square w-[min(60vw,35vh)] max-w-[400px] shadow-lg md:mt-10">
-                <Image
-                  src={playItem.pageCover || playItem.cover}
-                  className="h-full w-full object-cover"
-                  removeWrapper
-                  radius="md"
-                />
+              <div className="flex min-h-0 w-full flex-1 items-center justify-center pr-6 pl-12">
+                {playItem.hasMultiPart && <div className="mr-4 w-[320px] max-w-[30vw] flex-none" />}
+                <div className="flex flex-1 items-center justify-center shadow-lg">
+                  <Image
+                    isBlurred
+                    src={playItem.pageCover || playItem.cover}
+                    className="aspect-square w-[min(60vw,35vh)] max-w-[400px] object-cover"
+                    radius="md"
+                  />
+                </div>
+                {playItem.hasMultiPart && (
+                  <div className="ml-4 h-[60vh] w-[320px] max-w-[30vw] flex-none">
+                    <PageList />
+                  </div>
+                )}
               </div>
-              {/* Waveform */}
-              <div className="mt-4 flex-none md:mt-8" style={{ width: waveformWidth, height: 100 }}>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="mb-2 flex-none" style={{ width: waveformWidth, height: 90 }}>
                 {getAudio() && (
                   <AudioWaveform
                     audioElement={getAudio()!}
                     width={waveformWidth}
-                    height={100}
+                    height={80}
                     barColor={primaryColor}
                     barCount={Math.floor(waveformWidth / 8)} // Approx spacing
                   />
                 )}
               </div>
-            </div>
-            <div className="grid h-[88px] w-full grid-cols-[minmax(0,1fr)_minmax(0,3fr)_minmax(0,1fr)] px-6">
-              <div>测试</div>
-              <MusicPlayControl />
-              <div>测试</div>
+              <MusicPlayProgress className="w-full px-8" />
+              <div className="grid h-16 w-full grid-cols-[minmax(0,1fr)_minmax(0,3fr)_minmax(0,1fr)] px-6">
+                <div className="flex h-full items-center space-x-2">
+                  <Button
+                    title="打开B站链接"
+                    isIconOnly
+                    size="sm"
+                    variant="light"
+                    onPress={() => {
+                      openBiliVideoLink(playItem);
+                    }}
+                  >
+                    <RiExternalLinkLine size={18} />
+                  </Button>
+                  <MusicFavButton />
+                </div>
+                <MusicPlayControl />
+                <div className="flex h-full items-center justify-end space-x-2">
+                  <MusicPlayMode />
+                  <MusicDownloadButton />
+                  <OpenPlaylistDrawerButton />
+                  <MusicVolume />
+                  <MusicRate />
+                </div>
+              </div>
             </div>
           </DrawerBody>
         )}

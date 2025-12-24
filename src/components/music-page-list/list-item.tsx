@@ -3,6 +3,7 @@ import React from "react";
 import { Button, Image } from "@heroui/react";
 import { RiPlayFill } from "@remixicon/react";
 import clx from "classnames";
+import { twMerge } from "tailwind-merge";
 
 import { formatDuration } from "@/common/utils";
 import { usePlayList, type PlayData } from "@/store/play-list";
@@ -13,10 +14,13 @@ import { getDisplayCover, getDisplayTitle } from "./utils";
 interface Props {
   data: PlayData;
   isActive: boolean;
-  onClose: VoidFunction;
+  onPressItem?: VoidFunction;
+  hideCover?: boolean;
+  className?: string;
+  titleClassName?: string;
 }
 
-const ListItem = ({ data, isActive, onClose }: Props) => {
+const ListItem = ({ data, isActive, onPressItem, hideCover, className, titleClassName }: Props) => {
   const playListItem = usePlayList(state => state.playListItem);
 
   return (
@@ -29,29 +33,40 @@ const ListItem = ({ data, isActive, onClose }: Props) => {
       color={isActive ? "primary" : "default"}
       onPress={() => {
         playListItem(data.id);
-        onClose();
+        onPressItem?.();
       }}
-      className="group flex h-auto min-h-auto w-full min-w-auto items-center justify-between space-y-2 rounded-md p-2"
+      className={twMerge(
+        "group flex h-auto min-h-auto w-full min-w-auto items-center justify-between space-y-2 rounded-md p-2",
+        className,
+      )}
     >
       <div className="m-0 flex min-w-0 flex-1 items-center">
-        <div className="relative h-12 w-12 flex-none">
-          <Image
-            removeWrapper
-            radius="md"
-            src={getDisplayCover(data)}
-            alt={getDisplayTitle(data)}
-            width="100%"
-            height="100%"
-            className="m-0 object-cover"
-          />
-          {!isActive && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-md bg-[rgba(0,0,0,0.35)] opacity-0 group-hover:opacity-100">
-              <RiPlayFill size={20} className="text-white transition-transform duration-200 group-hover:scale-110" />
-            </div>
-          )}
-        </div>
-        <div className="ml-2 flex min-w-0 flex-auto flex-col items-start space-y-1">
-          <span className={clx("w-full min-w-0 truncate text-base", { "text-primary": isActive })}>
+        {!hideCover && (
+          <div className="relative h-12 w-12 flex-none">
+            <Image
+              removeWrapper
+              radius="md"
+              src={getDisplayCover(data)}
+              alt={getDisplayTitle(data)}
+              width="100%"
+              height="100%"
+              className="m-0 object-cover"
+            />
+            {!isActive && (
+              <div className="absolute inset-0 z-20 flex items-center justify-center rounded-md bg-[rgba(0,0,0,0.35)] opacity-0 group-hover:opacity-100">
+                <RiPlayFill size={20} className="text-white transition-transform duration-200 group-hover:scale-110" />
+              </div>
+            )}
+          </div>
+        )}
+        <div className={clx("flex min-w-0 flex-auto flex-col items-start space-y-1", { "ml-2": !hideCover })}>
+          <span
+            className={twMerge(
+              "w-full min-w-0 truncate text-base",
+              isActive ? "text-primary" : "text-foreground",
+              titleClassName,
+            )}
+          >
             {getDisplayTitle(data)}
           </span>
         </div>

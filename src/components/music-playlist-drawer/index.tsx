@@ -34,14 +34,15 @@ const PlayListDrawer = () => {
     <Drawer
       radius="md"
       shadow="none"
-      backdrop="opaque"
+      backdrop="blur"
       size="sm"
       hideCloseButton
       disableAnimation
       isOpen={isOpen}
       onOpenChange={setOpen}
       classNames={{
-        base: "data-[placement=right]:mb-[88px]",
+        backdrop: "z-200",
+        wrapper: "z-200",
       }}
     >
       <DrawerContent>

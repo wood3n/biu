@@ -10,7 +10,7 @@ const Settings = () => {
   return (
     <Dropdown>
       <DropdownTrigger>
-        <Button isIconOnly size="sm" variant="light">
+        <Button isIconOnly size="sm" variant="light" className="window-no-drag">
           <RiSettings3Line size={16} />
         </Button>
       </DropdownTrigger>

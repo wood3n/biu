@@ -118,12 +118,17 @@ const FavoritesSelectModal = () => {
   return (
     <Modal
       disableAnimation
+      backdrop="blur"
       scrollBehavior="inside"
       shouldBlockScroll={false}
       isOpen={isFavSelectModalOpen}
       onOpenChange={onFavSelectModalOpenChange}
       isDismissable={false}
       size="md"
+      classNames={{
+        backdrop: "z-200",
+        wrapper: "z-200",
+      }}
     >
       <ModalContent>
         <ModalHeader className="text-base font-medium">{title}</ModalHeader>
