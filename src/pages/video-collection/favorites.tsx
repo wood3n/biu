@@ -135,7 +135,7 @@ const Favorites: React.FC = () => {
 
   // 监听列表底部元素实现下拉加载
   useEffect(() => {
-    if (displayMode !== "list") return;
+    if (displayMode !== "list" && displayMode !== "compact") return;
 
     const observer = new IntersectionObserver(
       entries => {

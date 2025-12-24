@@ -1,14 +1,10 @@
 import { addToast, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
-import { RiDownload2Fill } from "@remixicon/react";
+import { RiDownload2Fill, RiFileMusicLine, RiFileVideoLine } from "@remixicon/react";
 
-import { ReactComponent as AudioDownloadIcon } from "@/assets/icons/audio-download.svg";
-import { ReactComponent as VideoDownloadIcon } from "@/assets/icons/video-download.svg";
 import AsyncButton from "@/components/async-button";
 import { usePlayList } from "@/store/play-list";
 
-import { PlayBarIconSize } from "../constants";
-
-const Download = () => {
+const MusicDownloadButton = () => {
   const list = usePlayList(s => s.list);
   const playId = usePlayList(s => s.playId);
   const playItem = list.find(item => item.id === playId);
@@ -47,7 +43,7 @@ const Download = () => {
   if (playItem?.sid) {
     return (
       <AsyncButton isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={downloadAudio}>
-        <RiDownload2Fill size={PlayBarIconSize.SideIconSize} />
+        <RiDownload2Fill size={18} />
       </AsyncButton>
     );
   }
@@ -60,22 +56,14 @@ const Download = () => {
     >
       <DropdownTrigger>
         <Button isIconOnly size="sm" variant="light" className="hover:text-primary">
-          <RiDownload2Fill size={PlayBarIconSize.SideIconSize} />
+          <RiDownload2Fill size={18} />
         </Button>
       </DropdownTrigger>
       <DropdownMenu aria-label="选择下载视频或音频">
-        <DropdownItem
-          key="downloadAudio"
-          startContent={<AudioDownloadIcon className="relative top-px left-px h-[15px] w-[15px]" />}
-          onPress={downloadAudio}
-        >
+        <DropdownItem key="downloadAudio" startContent={<RiFileMusicLine size={16} />} onPress={downloadAudio}>
           下载音频
         </DropdownItem>
-        <DropdownItem
-          key="downloadVideo"
-          startContent={<VideoDownloadIcon className="relative top-px left-px h-[15px] w-[15px]" />}
-          onPress={downloadVideo}
-        >
+        <DropdownItem key="downloadVideo" startContent={<RiFileVideoLine size={16} />} onPress={downloadVideo}>
           下载视频
         </DropdownItem>
       </DropdownMenu>
@@ -83,4 +71,4 @@ const Download = () => {
   );
 };
 
-export default Download;
+export default MusicDownloadButton;

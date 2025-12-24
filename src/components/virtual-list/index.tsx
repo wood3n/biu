@@ -12,7 +12,7 @@ interface VirtualListProps<T> {
   overscan?: number;
   className?: string;
   empty?: React.ReactNode;
-  scrollerRef?: React.RefObject<ScrollRefObject>;
+  scrollerRef?: React.RefObject<ScrollRefObject | null>;
 }
 
 export function VirtualList<T>({

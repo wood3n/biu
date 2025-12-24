@@ -11,6 +11,6 @@ interface AppSettings {
   autoStart: boolean;
   audioQuality: AudioQuality;
   hiddenMenuKeys: string[];
-  displayMode: "card" | "list";
+  displayMode: "card" | "list" | "compact";
   ffmpegPath?: string;
 }

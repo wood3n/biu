@@ -2,8 +2,21 @@ import React from "react";
 import { Controller } from "react-hook-form";
 import type { Control, UseFormSetValue } from "react-hook-form";
 
-import { Button, Divider, Form, Input, Radio, RadioGroup, Select, SelectItem, Slider, Switch } from "@heroui/react";
-import { RiArrowRightLongLine } from "@remixicon/react";
+import {
+  Button,
+  Divider,
+  Form,
+  Input,
+  Radio,
+  RadioGroup,
+  Select,
+  SelectItem,
+  Slider,
+  Switch,
+  Tab,
+  Tabs,
+} from "@heroui/react";
+import { RiArrowRightLongLine, RiLayoutGridFill, RiLayoutRowLine, RiListCheck } from "@remixicon/react";
 
 import ColorPicker from "@/components/color-picker";
 import FontSelect from "@/components/font-select";
@@ -42,10 +55,35 @@ export const SystemSettingsTab = ({
           control={control}
           name="displayMode"
           render={({ field }) => (
-            <RadioGroup orientation="horizontal" value={field.value} onValueChange={field.onChange}>
-              <Radio value="card">卡片</Radio>
-              <Radio value="list">列表</Radio>
-            </RadioGroup>
+            <Tabs aria-label="显示模式" selectedKey={field.value} onSelectionChange={key => field.onChange(key)}>
+              <Tab
+                key="list"
+                title={
+                  <div className="flex items-center space-x-2">
+                    <RiListCheck size={18} />
+                    <span>列表</span>
+                  </div>
+                }
+              />
+              <Tab
+                key="card"
+                title={
+                  <div className="flex items-center space-x-2">
+                    <RiLayoutGridFill size={18} />
+                    <span>网格</span>
+                  </div>
+                }
+              />
+              <Tab
+                key="compact"
+                title={
+                  <div className="flex items-center space-x-2">
+                    <RiLayoutRowLine size={18} />
+                    <span>紧凑</span>
+                  </div>
+                }
+              />
+            </Tabs>
           )}
         />
       </div>

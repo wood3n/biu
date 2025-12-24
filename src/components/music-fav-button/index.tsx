@@ -6,7 +6,7 @@ import { RiStarLine } from "@remixicon/react";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 
-const MvFavFolderSelect = () => {
+const MusicFavButton = () => {
   const list = usePlayList(s => s.list);
   const playId = usePlayList(s => s.playId);
   const playItem = useMemo(() => list.find(item => item.id === playId), [list, playId]);
@@ -27,4 +27,4 @@ const MvFavFolderSelect = () => {
   );
 };
 
-export default MvFavFolderSelect;
+export default MusicFavButton;

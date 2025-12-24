@@ -2,11 +2,10 @@ import React, { useState } from "react";
 
 import { Button, Tooltip } from "@heroui/react";
 
+import { PlayRate } from "@/common/constants/audio";
 import { usePlayList } from "@/store/play-list";
 
-import { PlayRate } from "../constants";
-
-const Rate = () => {
+const MusicRate = () => {
   const rate = usePlayList(s => s.rate);
   const setRate = usePlayList(s => s.setRate);
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
@@ -77,4 +76,4 @@ const Rate = () => {
   );
 };
 
-export default Rate;
+export default MusicRate;

@@ -5,7 +5,7 @@ import { type ActionProps } from "../mv-action";
 import MVCard from "../mv-card";
 
 interface MediaItemProps extends ActionProps {
-  displayMode: "card" | "list";
+  displayMode: "card" | "list" | "compact";
   isTitleIncludeHtmlTag?: boolean;
   coverHeight?: number;
   footer?: React.ReactNode;
@@ -25,10 +25,11 @@ const MediaItem: React.FC<MediaItemProps> = ({
   duration,
   ...rest
 }) => {
-  if (displayMode === "list") {
+  if (displayMode === "list" || displayMode === "compact") {
     return (
       <MusicListItem
         {...rest}
+        compact={displayMode === "compact"}
         isTitleIncludeHtmlTag={isTitleIncludeHtmlTag}
         onPress={onPress}
         playCount={playCount}

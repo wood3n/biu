@@ -1,10 +1,10 @@
 import { useUser } from "@/store/user";
 
+import WindowAction from "../../components/window-action";
 import Navigation from "./navigation";
 import Search from "./search";
 import UserCard from "./user";
 import UserFeed from "./user-feed";
-import WindowAction from "./window-action";
 
 const platform = window.electron.getPlatform();
 

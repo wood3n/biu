@@ -40,7 +40,7 @@ const WindowAction = () => {
   };
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="window-no-drag flex items-center justify-center">
       {!isFullScreen && (
         <>
           <Button title="切换到迷你播放器" isIconOnly size="sm" variant="light" onPress={toggleMiniMode}>

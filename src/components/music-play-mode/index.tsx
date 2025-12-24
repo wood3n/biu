@@ -5,11 +5,9 @@ import { Button } from "@heroui/react";
 import { getPlayModeList } from "@/common/constants/audio";
 import { usePlayList } from "@/store/play-list";
 
-import { PlayBarIconSize } from "../constants";
+const PlayModeList = getPlayModeList(18);
 
-const PlayModeList = getPlayModeList(PlayBarIconSize.SideIconSize);
-
-const PlayModeSwitch = () => {
+const MusicPlayMode = () => {
   const playMode = usePlayList(s => s.playMode);
   const togglePlayMode = usePlayList(s => s.togglePlayMode);
 
@@ -18,7 +16,7 @@ const PlayModeSwitch = () => {
       isIconOnly
       variant="light"
       size="sm"
-      className="hover:text-primary min-w-fit text-[18px]"
+      className="hover:text-primary flex-none"
       aria-label="播放模式"
       onPress={togglePlayMode}
     >
@@ -27,4 +25,4 @@ const PlayModeSwitch = () => {
   );
 };
 
-export default PlayModeSwitch;
+export default MusicPlayMode;

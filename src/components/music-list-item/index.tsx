@@ -11,6 +11,7 @@ import { usePlayList } from "@/store/play-list";
 import MVAction, { type ActionProps } from "../mv-action";
 
 interface Props extends ActionProps {
+  compact?: boolean;
   isTitleIncludeHtmlTag?: boolean;
   onPress?: () => void;
   playCount?: number;
@@ -18,6 +19,7 @@ interface Props extends ActionProps {
 }
 
 const MusicListItem = ({
+  compact,
   type,
   isTitleIncludeHtmlTag,
   bvid,
@@ -48,11 +50,14 @@ const MusicListItem = ({
       variant={isActive ? "flat" : "light"}
       color={isActive ? "primary" : "default"}
       onDoubleClick={onPress}
-      className="group flex h-auto min-h-auto w-full min-w-auto items-center justify-between space-y-2 rounded-md p-2"
+      className={clx(
+        "group flex h-auto min-h-auto w-full min-w-auto items-center justify-between space-y-2 rounded-md",
+        compact ? "p-1" : "p-2",
+      )}
     >
       <div className="m-0 grid w-full grid-cols-[1fr_100px_140px] items-center gap-6">
         <div className="flex min-w-0 items-center overflow-hidden">
-          <div className="relative h-12 w-12 flex-none">
+          <div className={clx("relative flex-none", compact ? "h-8 w-8" : "h-12 w-12")}>
             <Image
               removeWrapper
               radius="md"

@@ -5,8 +5,6 @@ import { RiVolumeDownLine, RiVolumeMuteLine, RiVolumeUpLine } from "@remixicon/r
 
 import { usePlayList } from "@/store/play-list";
 
-import { PlayBarIconSize } from "../constants";
-
 const Volume = () => {
   const volume = usePlayList(s => s.volume);
   const isMuted = usePlayList(s => s.isMuted);
@@ -159,11 +157,11 @@ const Volume = () => {
         aria-describedby={tooltipId}
       >
         {isMuted ? (
-          <RiVolumeMuteLine size={PlayBarIconSize.SideIconSize} />
+          <RiVolumeMuteLine size={18} />
         ) : volume > 0.5 ? (
-          <RiVolumeUpLine size={PlayBarIconSize.SideIconSize} />
+          <RiVolumeUpLine size={18} />
         ) : (
-          <RiVolumeDownLine size={PlayBarIconSize.SideIconSize} />
+          <RiVolumeDownLine size={18} />
         )}
       </Button>
     </Tooltip>

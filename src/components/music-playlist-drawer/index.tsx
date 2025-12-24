@@ -7,17 +7,15 @@ import { uniqBy } from "es-toolkit/array";
 import Empty from "@/components/empty";
 import If from "@/components/if";
 import { VirtualList } from "@/components/virtual-list";
+import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 
 import ListItem from "./list-item";
 import Settings from "./settings";
 
-interface Props {
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
-}
-
-const PlayListDrawer = ({ isOpen, onOpenChange }: Props) => {
+const PlayListDrawer = () => {
+  const isOpen = useModalStore(s => s.isPlayListDrawerOpen);
+  const setOpen = useModalStore(s => s.setPlayListDrawerOpen);
   const list = usePlayList(s => s.list);
   const playId = usePlayList(s => s.playId);
   const clear = usePlayList(s => s.clear);
@@ -41,7 +39,7 @@ const PlayListDrawer = ({ isOpen, onOpenChange }: Props) => {
       hideCloseButton
       disableAnimation
       isOpen={isOpen}
-      onOpenChange={onOpenChange}
+      onOpenChange={setOpen}
       classNames={{
         base: "data-[placement=right]:mb-[88px]",
       }}
@@ -62,7 +60,7 @@ const PlayListDrawer = ({ isOpen, onOpenChange }: Props) => {
         </DrawerHeader>
         {Boolean(currentMedia) && (
           <div className="border-b-content2 border-b px-2 py-1">
-            <ListItem isPlaying data={currentMedia!} onClose={() => onOpenChange(false)} />
+            <ListItem isPlaying data={currentMedia!} onClose={() => setOpen(false)} />
           </div>
         )}
         <DrawerBody className="overflow-hidden px-0">
@@ -77,7 +75,7 @@ const PlayListDrawer = ({ isOpen, onOpenChange }: Props) => {
               </div>
             }
             renderItem={item => (
-              <ListItem data={item} onClose={() => onOpenChange(false)} onPress={() => playListItem(item.id)} />
+              <ListItem data={item} onClose={() => setOpen(false)} onPress={() => playListItem(item.id)} />
             )}
           />
         </DrawerBody>
