@@ -1,7 +1,8 @@
-import { addToast, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
+import { addToast, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
 import { RiDownload2Fill, RiFileMusicLine, RiFileVideoLine } from "@remixicon/react";
 
 import AsyncButton from "@/components/async-button";
+import IconButton from "@/components/icon-button";
 import { usePlayList } from "@/store/play-list";
 
 const MusicDownloadButton = () => {
@@ -55,9 +56,9 @@ const MusicDownloadButton = () => {
       }}
     >
       <DropdownTrigger>
-        <Button isIconOnly size="sm" variant="light" className="hover:text-primary">
+        <IconButton>
           <RiDownload2Fill size={18} />
-        </Button>
+        </IconButton>
       </DropdownTrigger>
       <DropdownMenu aria-label="选择下载视频或音频">
         <DropdownItem key="downloadAudio" startContent={<RiFileMusicLine size={16} />} onPress={downloadAudio}>

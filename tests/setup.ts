@@ -1,3 +1,5 @@
+import { vi } from "vitest";
+
 class FakeMediaSession {
   metadata: any;
   playbackState: string = "none";
@@ -54,5 +56,23 @@ if (typeof g.navigator === "undefined") {
 }
 g.MediaMetadata = FakeMediaMetadata;
 g.window = g;
+if (typeof g.window.addEventListener !== "function") {
+  g.window.addEventListener = () => {};
+}
+if (typeof g.window.removeEventListener !== "function") {
+  g.window.removeEventListener = () => {};
+}
 g.window.electron = undefined;
 g.Audio = FakeAudio as any;
+
+vi.mock("electron-log/renderer", () => {
+  const logger = {
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+    verbose: vi.fn(),
+    log: vi.fn(),
+  };
+  return { default: logger };
+});

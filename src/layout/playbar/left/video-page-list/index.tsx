@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 
-import { Button, Input, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@heroui/react";
+import { Input, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@heroui/react";
 import { RiListRadio, RiSearchLine } from "@remixicon/react";
 
+import IconButton from "@/components/icon-button";
 import MusicPageList from "@/components/music-page-list";
 
 const VideoPageListDrawer = () => {
@@ -12,9 +13,9 @@ const VideoPageListDrawer = () => {
   return (
     <Popover disableAnimation placement="top" offset={28} radius="md" isOpen={isOpen} onOpenChange={onOpenChange}>
       <PopoverTrigger>
-        <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={onOpen}>
+        <IconButton onPress={onOpen}>
           <RiListRadio size={18} />
-        </Button>
+        </IconButton>
       </PopoverTrigger>
       <PopoverContent
         className="bg-content2 w-auto min-w-[500px] overflow-hidden p-0"

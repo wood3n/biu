@@ -1,41 +1,64 @@
 import { useState } from "react";
 
 import { Input } from "@heroui/react";
-import { RiSearchLine } from "@remixicon/react";
+import { RiArrowRightSLine, RiSearchLine } from "@remixicon/react";
+import { twMerge } from "tailwind-merge";
 
+import IconButton from "@/components/icon-button";
 import MusicPageList from "@/components/music-page-list";
 
-const PageList = () => {
-  const [keyword, setKeyword] = useState("");
+interface Props {
+  className?: string;
+  style?: React.CSSProperties;
+  onClose?: () => void;
+}
+
+const FullScreenPageList = ({
+  ref,
+  className,
+  style,
+  onClose,
+}: Props & { ref?: React.RefObject<HTMLDivElement | null> }) => {
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-white/10 bg-black/20">
-      <div className="p-3 pb-2">
+    <div
+      ref={ref}
+      className={twMerge(
+        "flex flex-col overflow-hidden rounded-2xl bg-white/10 text-white ring-1 ring-white/12 backdrop-blur-md",
+        className,
+      )}
+      style={style}
+    >
+      <div className="flex w-full flex-none flex-row items-center justify-between space-x-1 border-b border-white/10 px-2 py-2">
         <Input
-          size="sm"
-          placeholder="搜索分集..."
-          value={keyword}
-          onValueChange={setKeyword}
-          startContent={<RiSearchLine size={16} className="text-white/50" />}
           classNames={{
-            inputWrapper: "bg-white/10 data-[hover=true]:bg-white/20 group-data-[focus=true]:bg-white/20",
-            input: "text-white placeholder:text-white/50",
+            mainWrapper: "h-full",
+            input: "text-sm",
+            inputWrapper: "bg-black/20 hover:bg-black/30 group-data-[focus=true]:bg-black/30",
           }}
-          isClearable
+          placeholder="搜索分集"
+          size="sm"
+          startContent={<RiSearchLine size={16} />}
+          type="search"
+          value={searchKeyword}
+          onValueChange={setSearchKeyword}
         />
+        <IconButton variant="flat" onPress={onClose} className="w-6 min-w-6">
+          <RiArrowRightSLine size={16} className="text-white/80" />
+        </IconButton>
       </div>
-      <div className="min-h-0 flex-1">
-        <MusicPageList
-          searchKeyword={keyword}
-          className="h-full w-full px-2"
-          hideCover
-          itemTitleClassName="text-sm text-white/80 group-data-[hover=true]:text-white"
-          itemClassName="min-h-[36px] h-[36px] p-1 rounded-sm"
-          itemHeight={40}
-        />
-      </div>
+      <MusicPageList
+        className="h-full w-full flex-1 p-1 pb-2"
+        hideCover
+        itemClassName="hover:bg-white/10 data-[active=true]:bg-primary/20 text-foreground/80 data-[active=true]:text-primary h-8 min-h-8 p-1 [&_span.tabular-nums]:hidden"
+        itemHeight={32}
+        itemTitleClassName="text-sm"
+        onPressItem={onClose}
+        searchKeyword={searchKeyword}
+      />
     </div>
   );
 };
 
-export default PageList;
+export default FullScreenPageList;

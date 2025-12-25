@@ -174,6 +174,11 @@ export function App() {
         toastOffset={90}
         maxVisibleToasts={3}
         toastProps={{ timeout: 3000, color: "primary" }}
+        regionProps={{
+          classNames: {
+            base: "z-[99999]",
+          },
+        }}
       />
       <Theme>{routeElement}</Theme>
       <FavoritesSelectModal />

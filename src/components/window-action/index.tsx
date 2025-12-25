@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-import { Button } from "@heroui/react";
 import {
   RiCloseLine,
   RiFullscreenExitLine,
@@ -10,6 +9,7 @@ import {
 } from "@remixicon/react";
 
 import { toggleMiniMode } from "@/common/utils/mini-player";
+import IconButton from "@/components/icon-button";
 
 const WindowAction = () => {
   const [isMaximized, setIsMaximized] = useState(false);
@@ -43,18 +43,18 @@ const WindowAction = () => {
     <div className="window-no-drag flex items-center justify-center">
       {!isFullScreen && (
         <>
-          <Button title="切换到迷你播放器" isIconOnly size="sm" variant="light" onPress={toggleMiniMode}>
+          <IconButton title="切换到迷你播放器" onPress={toggleMiniMode}>
             <RiPictureInPicture2Line size={16} />
-          </Button>
-          <Button variant="light" size="sm" isIconOnly onPress={handleMinimize}>
+          </IconButton>
+          <IconButton onPress={handleMinimize}>
             <RiSubtractLine size={18} />
-          </Button>
-          <Button variant="light" size="sm" isIconOnly onPress={handleMaximize}>
+          </IconButton>
+          <IconButton onPress={handleMaximize}>
             {isMaximized ? <RiFullscreenExitLine size={14} /> : <RiFullscreenLine size={14} />}
-          </Button>
-          <Button variant="light" size="sm" isIconOnly onPress={handleClose}>
+          </IconButton>
+          <IconButton onPress={handleClose}>
             <RiCloseLine size={18} />
-          </Button>
+          </IconButton>
         </>
       )}
     </div>

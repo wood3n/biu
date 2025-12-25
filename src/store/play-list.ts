@@ -196,7 +196,7 @@ const createAudio = (): HTMLAudioElement => {
   return audio;
 };
 
-const audio = createAudio();
+export const audio = createAudio();
 
 const updatePlaybackState = () => {
   if ("mediaSession" in navigator) {

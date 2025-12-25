@@ -10,9 +10,10 @@ import { usePlayProgress } from "@/store/play-progress";
 interface Props {
   isDisabled?: boolean;
   className?: string;
+  trackClassName?: string;
 }
 
-const MusicPlayProgress = memo(({ isDisabled, className }: Props) => {
+const MusicPlayProgress = memo(({ isDisabled, className, trackClassName }: Props) => {
   const [hovered, setHovered] = useState(false);
   const currentTime = usePlayProgress(s => s.currentTime);
   const duration = usePlayList(s => s.duration);
@@ -39,7 +40,7 @@ const MusicPlayProgress = memo(({ isDisabled, className }: Props) => {
         onMouseLeave={() => setHovered(false)}
         className="flex-1"
         classNames={{
-          track: "h-[4px] cursor-pointer",
+          track: twMerge("h-[4px] cursor-pointer", trackClassName),
           thumb: "w-4 h-4 bg-primary after:hidden",
         }}
       />

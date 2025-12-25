@@ -6,7 +6,6 @@ import moment from "moment";
 import { twMerge } from "tailwind-merge";
 
 import { formatNumber } from "@/common/utils/number";
-import AudioWaveform from "@/components/audio-waveform";
 import Image from "@/components/image";
 import { usePlayList } from "@/store/play-list";
 
@@ -31,7 +30,7 @@ const MusicPlaylistItemComponent = ({
   className,
   displayMode = "list",
 }: Props) => {
-  const { playId, isPlaying, play, addToNext, addList, getAudio } = usePlayList();
+  const { playId, isPlaying, play, addToNext, addList } = usePlayList();
   const isActive = playId === item.id;
   const isCurrentPlaying = isActive && isPlaying;
 
@@ -134,13 +133,7 @@ const MusicPlaylistItemComponent = ({
                 handlePlay();
               }}
             >
-              {isCurrentPlaying ? (
-                <div className="text-primary">
-                  <AudioWaveform audioElement={getAudio()} width={24} height={24} barCount={4} />
-                </div>
-              ) : (
-                <RiPlayFill className="text-white" size={20} />
-              )}
+              {!isCurrentPlaying && <RiPlayFill className="text-white" size={20} />}
             </div>
           </div>
         )}

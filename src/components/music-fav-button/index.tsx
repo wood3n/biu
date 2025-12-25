@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 
-import { Button } from "@heroui/react";
 import { RiStarLine } from "@remixicon/react";
 
+import IconButton from "@/components/icon-button";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 import { useUser } from "@/store/user";
@@ -27,9 +27,9 @@ const MusicFavButton = () => {
   }
 
   return (
-    <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={handleOpen}>
+    <IconButton onPress={handleOpen}>
       <RiStarLine size={18} />
-    </Button>
+    </IconButton>
   );
 };
 
