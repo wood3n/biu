@@ -8,7 +8,7 @@ import { openBiliVideoLink } from "@/common/utils/url";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 
-import VideoPageList from "./video-page-list";
+import PageListDrawer from "./page-list";
 
 const LeftControl = () => {
   const navigate = useNavigate();
@@ -60,7 +60,7 @@ const LeftControl = () => {
           </span>
         )}
       </div>
-      {Boolean(playItem?.hasMultiPart) && <VideoPageList />}
+      {Boolean(playItem?.hasMultiPart) && <PageListDrawer />}
     </div>
   );
 };

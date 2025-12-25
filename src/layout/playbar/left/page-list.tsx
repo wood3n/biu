@@ -6,7 +6,7 @@ import { RiListRadio, RiSearchLine } from "@remixicon/react";
 import IconButton from "@/components/icon-button";
 import MusicPageList from "@/components/music-page-list";
 
-const VideoPageListDrawer = () => {
+const PageListDrawer = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
@@ -49,4 +49,4 @@ const VideoPageListDrawer = () => {
   );
 };
 
-export default VideoPageListDrawer;
+export default PageListDrawer;

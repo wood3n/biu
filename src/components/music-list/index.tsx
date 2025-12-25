@@ -12,7 +12,7 @@ import type { MusicPlaylistProps } from "./types";
 import MusicPlaylistItemComponent from "./item";
 import { MusicPlaylistItemSkeleton } from "./skeleton";
 
-export const MusicPlaylist = ({
+export const Musiclist = ({
   items,
   isLoading = false,
   hasMore = false,
@@ -110,4 +110,4 @@ export const MusicPlaylist = ({
   );
 };
 
-export default MusicPlaylist;
+export default Musiclist;
