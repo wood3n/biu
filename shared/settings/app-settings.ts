@@ -11,7 +11,6 @@ export const defaultAppSettings: AppSettings = {
   hiddenMenuKeys: [],
   displayMode: "card",
   ffmpegPath: "",
-  enableWaveformOnClick: true,
   themeMode: "dark",
   pageTransition: "none",
   searchMusicOnly: true,
@@ -21,9 +20,11 @@ export const defaultAppSettings: AppSettings = {
 export const lightThemeColors = {
   backgroundColor: "#f5f5f5",
   contentBackgroundColor: "#ffffff",
+  foregroundColor: "#000000",
 };
 
 export const darkThemeColors = {
   backgroundColor: "#18181b",
   contentBackgroundColor: "#1f1f1f",
+  foregroundColor: "#ffffff",
 };

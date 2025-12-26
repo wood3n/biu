@@ -187,27 +187,6 @@ export const SystemSettingsTab = ({
         </div>
       </div>
 
-      {/* 点击封面显示音乐频谱 */}
-      <div className="flex w-full items-center justify-between">
-        <div className="mr-6 space-y-1">
-          <div className="text-medium font-medium">音乐频谱</div>
-          <div className="text-sm text-zinc-500">点击歌曲封面显示音乐频谱</div>
-        </div>
-        <Controller
-          control={control}
-          name="enableWaveformOnClick"
-          render={({ field }) => (
-            <Button
-              className="w-[80px]"
-              variant={field.value ? "solid" : "bordered"}
-              color={field.value ? "primary" : "default"}
-              onPress={() => field.onChange(!field.value)}
-            >
-              {field.value ? "已启用" : "未启用"}
-            </Button>
-          )}
-        />
-      </div>
       <Divider />
       <h2>下载</h2>
       {/* 下载目录配置 */}
@@ -216,9 +195,11 @@ export const SystemSettingsTab = ({
         name="downloadPath"
         render={({ field }) => (
           <div className="flex w-full items-center justify-between">
-            <div className="mr-6 space-y-1">
+            <div className="mr-6 min-w-0 flex-1 space-y-1">
               <div className="text-medium font-medium">下载目录</div>
-              <div className="text-sm text-zinc-500">{field.value || "选择音视频保存的位置"}</div>
+              <div className="truncate text-sm text-zinc-500" title={field.value || undefined}>
+                {field.value || "选择音视频保存的位置"}
+              </div>
             </div>
             <Button
               variant="flat"
@@ -239,9 +220,11 @@ export const SystemSettingsTab = ({
         name="ffmpegPath"
         render={({ field }) => (
           <div className="flex w-full items-center justify-between">
-            <div className="mr-6 space-y-1">
+            <div className="mr-6 min-w-0 flex-1 space-y-1">
               <div className="text-medium font-medium">FFmpeg 路径</div>
-              <div className="text-sm text-zinc-500">{field.value || "手动指定 FFmpeg 可执行文件路径"}</div>
+              <div className="truncate text-sm text-zinc-500" title={field.value || undefined}>
+                {field.value || "手动指定 FFmpeg 可执行文件路径"}
+              </div>
             </div>
             <Button
               variant="flat"

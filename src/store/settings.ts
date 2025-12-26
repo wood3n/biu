@@ -70,7 +70,6 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           displayMode: state.displayMode,
           ffmpegPath: state.ffmpegPath,
           themeMode: state.themeMode,
-          enableWaveformOnClick: state.enableWaveformOnClick,
           pageTransition: state.pageTransition,
           searchMusicOnly: state.searchMusicOnly,
           showSearchHistory: state.showSearchHistory,

@@ -15,7 +15,6 @@ interface AppSettings {
   hiddenMenuKeys: string[];
   displayMode: "card" | "list";
   ffmpegPath?: string;
-  enableWaveformOnClick: boolean;
   themeMode: ThemeMode;
   pageTransition: PageTransition;
   searchMusicOnly: boolean;

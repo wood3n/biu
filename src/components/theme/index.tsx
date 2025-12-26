@@ -4,7 +4,7 @@ import { useShallow } from "zustand/react/shallow";
 
 import { hexToHsl } from "@/common/utils/color";
 import { useSettings } from "@/store/settings";
-import { lightThemeColors } from "@shared/settings/app-settings";
+import { lightThemeColors, darkThemeColors } from "@shared/settings/app-settings";
 
 interface Props {
   children: React.ReactNode;
@@ -22,9 +22,10 @@ const Theme = ({ children }: Props) => {
     })),
   );
 
-  // 根据主题模式获取实际的背景色
+  // 根据主题模式获取实际的背景色和前景色
   const actualBg = themeMode === "light" ? lightThemeColors.backgroundColor : backgroundColor;
   const actualContentBg = themeMode === "light" ? lightThemeColors.contentBackgroundColor : contentBackgroundColor;
+  const foreground = themeMode === "light" ? lightThemeColors.foregroundColor : darkThemeColors.foregroundColor;
 
   // 将主题相关样式应用到 :root 和 body，确保挂载在 body 上的组件可读取到
   useEffect(() => {
@@ -36,9 +37,6 @@ const Theme = ({ children }: Props) => {
     const contentBg = hexToHsl(actualContentBg);
     const primary = hexToHsl(primaryColor);
     const radius = `${borderRadius}px`;
-
-    // 根据主题模式设置文本颜色：暗色全白，亮色全黑
-    const foreground = themeMode === "dark" ? "#ffffff" : "#000000";
 
     // 在 body 上添加/移除 dark 类，确保 Portal 渲染的组件也能应用样式
     if (themeMode === "dark") {
@@ -70,7 +68,7 @@ const Theme = ({ children }: Props) => {
     bodyStyle.setProperty("--heroui-foreground", foreground);
     const validFontFamily = fontFamily === "system-default" ? "system-ui" : fontFamily;
     bodyStyle.fontFamily = validFontFamily || bodyStyle.fontFamily;
-  }, [fontFamily, actualBg, actualContentBg, primaryColor, borderRadius, themeMode]);
+  }, [fontFamily, actualBg, actualContentBg, primaryColor, borderRadius, themeMode, foreground]);
 
   return (
     <main
