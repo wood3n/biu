@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.7.1-beta.1
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.7.1-beta.0...v1.7.1-beta.1)
+
+### 🩹 修复问题
+
+- 修复内置ffmpeg缺少运行库导致下载失败的问题 ([055f042](https://github.com/wood3n/biu/commit/055f042))
+
+### ❤️ Contributors
+
+- Oxyg3n
+
 ## v1.7.1-beta.0
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.7.0...v1.7.1-beta.0)
