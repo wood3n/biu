@@ -57,35 +57,32 @@ html, body, #root {
  */
 
 /* SelectItem 组件文本颜色 */
-body.dark [data-slot="base"] [data-slot="content"],
-body.dark [data-slot="base"] [data-slot="content"] > span {
+body.dark [data-slot="base"] :is([data-slot="content"], [data-slot="content"] > span) {
   color: var(--heroui-foreground);
 }
 
 /* Select 下拉菜单中的项目 */
-body.dark [role="listbox"] [role="option"],
-body.dark [role="listbox"] [role="option"] > span {
+body.dark [role="listbox"] :is([role="option"], [role="option"] > span) {
   color: var(--heroui-foreground);
 }
 
 /* 登录弹窗内文本颜色 */
-body.dark .login-modal.text-foreground p,
-body.dark .login-modal.text-foreground label,
-body.dark .login-modal.text-foreground input,
-body.dark .login-modal.text-foreground textarea,
-body.dark .login-modal.text-foreground span:not([class*="icon"]),
-body.dark .login-modal.text-foreground div:not(button, [role="button"], [class*="button"]) {
+body.dark .login-modal.text-foreground :is(
+  p,
+  label,
+  input,
+  textarea,
+  span:not([class*="icon"]),
+  div:not(button, [role="button"], [class*="button"])) {
   color: var(--heroui-foreground);
 }
 
 /* Input 错误消息 */
-body.dark .login-modal.text-foreground [data-slot="errorMessage"],
-body.dark .login-modal.text-foreground [data-slot="errorMessage"] > span {
+body.dark .login-modal.text-foreground :is([data-slot="errorMessage"], [data-slot="errorMessage"] > span) {
   color: var(--heroui-danger);
 }
 
 /* placeholder */
-body.dark .login-modal.text-foreground input::placeholder,
-body.dark .login-modal.text-foreground textarea::placeholder {
+body.dark .login-modal.text-foreground :is(input, textarea)::placeholder {
   color: var(--heroui-default-400);
 }
