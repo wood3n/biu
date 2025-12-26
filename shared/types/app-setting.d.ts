@@ -4,8 +4,6 @@ type PageTransition = "none" | "fade" | "slide" | "scale" | "slideUp";
 
 interface AppSettings {
   fontFamily: string;
-  backgroundColor: string;
-  contentBackgroundColor: string;
   primaryColor: string;
   borderRadius: number;
   downloadPath?: string;

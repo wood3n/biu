@@ -52,53 +52,40 @@ html, body, #root {
   padding: 0;
 }
 
-/* 修复暗色主题下 SelectItem 文本颜色 */
+/* 
+ * 修复暗色主题下 Portal 渲染组件的文本颜色
+ */
 
-/* 使用 :is() 合并选择器，移除通配符，提高选择器特异性 */
-:is(.dark, body.dark) [data-slot="base"] [data-slot="content"] {
-  color: var(--heroui-foreground) !important;
+/* SelectItem 组件文本颜色 */
+body.dark [data-slot="base"] [data-slot="content"],
+body.dark [data-slot="base"] [data-slot="content"] > span {
+  color: var(--heroui-foreground);
 }
 
-:is(.dark, body.dark) [data-slot="base"] [data-slot="content"] > span {
-  color: var(--heroui-foreground) !important;
+/* Select 下拉菜单中的项目 */
+body.dark [role="listbox"] [role="option"],
+body.dark [role="listbox"] [role="option"] > span {
+  color: var(--heroui-foreground);
 }
 
-/* 针对 Select 下拉菜单中的项目 */
-:is(.dark, body.dark) [role="listbox"] [role="option"] {
-  color: var(--heroui-foreground) !important;
+/* 登录弹窗内文本颜色 */
+body.dark .login-modal.text-foreground p,
+body.dark .login-modal.text-foreground label,
+body.dark .login-modal.text-foreground input,
+body.dark .login-modal.text-foreground textarea,
+body.dark .login-modal.text-foreground span:not([class*="icon"]),
+body.dark .login-modal.text-foreground div:not(button, [role="button"], [class*="button"]) {
+  color: var(--heroui-foreground);
 }
 
-:is(.dark, body.dark) [role="listbox"] [role="option"] > span {
-  color: var(--heroui-foreground) !important;
+/* Input 错误消息 */
+body.dark .login-modal.text-foreground [data-slot="errorMessage"],
+body.dark .login-modal.text-foreground [data-slot="errorMessage"] > span {
+  color: var(--heroui-danger);
 }
 
-/* 修复暗色主题下登录弹窗内文本颜色 */
-:is(.dark, body.dark) .login-modal p,
-:is(.dark, body.dark) .login-modal label,
-:is(.dark, body.dark) .login-modal input,
-:is(.dark, body.dark) .login-modal textarea {
-  color: var(--heroui-foreground) !important;
-}
-
-:is(.dark, body.dark) .login-modal span:not([class*="icon"]) {
-  color: var(--heroui-foreground) !important;
-}
-
-:is(.dark, body.dark) .login-modal div:not(button, [role="button"], [class*="button"]) {
-  color: var(--heroui-foreground) !important;
-}
-
-/* 修复暗色主题下 Input 错误消息 */
-:is(.dark, body.dark) .login-modal [data-slot="errorMessage"] {
-  color: var(--heroui-danger) !important;
-}
-
-:is(.dark, body.dark) .login-modal [data-slot="errorMessage"] > span {
-  color: var(--heroui-danger) !important;
-}
-
-/* 修复暗色主题下 placeholder */
-:is(.dark, body.dark) .login-modal input::placeholder,
-:is(.dark, body.dark) .login-modal textarea::placeholder {
-  color: var(--heroui-default-400) !important;
+/* placeholder */
+body.dark .login-modal.text-foreground input::placeholder,
+body.dark .login-modal.text-foreground textarea::placeholder {
+  color: var(--heroui-default-400);
 }

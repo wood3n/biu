@@ -61,8 +61,6 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           closeWindowOption: state.closeWindowOption,
           autoStart: state.autoStart,
           fontFamily: state.fontFamily,
-          backgroundColor: state.backgroundColor,
-          contentBackgroundColor: state.contentBackgroundColor,
           primaryColor: state.primaryColor,
           borderRadius: state.borderRadius,
           audioQuality: state.audioQuality,

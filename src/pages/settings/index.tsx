@@ -16,8 +16,6 @@ const useSystemSettingsForm = () => {
   const [appVersion, setAppVersion] = useState<string>("");
   const {
     fontFamily,
-    backgroundColor,
-    contentBackgroundColor,
     primaryColor,
     borderRadius,
     downloadPath,
@@ -34,8 +32,6 @@ const useSystemSettingsForm = () => {
   } = useSettings(
     useShallow(s => ({
       fontFamily: s.fontFamily,
-      backgroundColor: s.backgroundColor,
-      contentBackgroundColor: s.contentBackgroundColor,
       primaryColor: s.primaryColor,
       borderRadius: s.borderRadius,
       downloadPath: s.downloadPath,
@@ -62,8 +58,6 @@ const useSystemSettingsForm = () => {
   const { control, watch, setValue } = useForm<AppSettings>({
     defaultValues: {
       fontFamily,
-      backgroundColor,
-      contentBackgroundColor,
       primaryColor,
       borderRadius,
       downloadPath,

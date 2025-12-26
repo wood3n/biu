@@ -8,7 +8,7 @@ import { RiArrowRightLongLine } from "@remixicon/react";
 import ColorPicker from "@/components/color-picker";
 import FontSelect from "@/components/font-select";
 import UpdateCheckButton from "@/components/update-check-button";
-import { defaultAppSettings } from "@shared/settings/app-settings";
+import { defaultAppSettings, THEME_MODE_OPTIONS } from "@shared/settings/app-settings";
 
 import ImportExport from "./export-import";
 
@@ -47,12 +47,13 @@ export const SystemSettingsTab = ({
                 aria-label="主题模式"
                 selectedKeys={field.value ? new Set([field.value]) : new Set()}
                 onSelectionChange={keys => {
-                  const value = Array.from(keys)[0] as string;
+                  const value = Array.from(keys)[0] as ThemeMode;
                   field.onChange(value);
                 }}
               >
-                <SelectItem key="light">浅色</SelectItem>
-                <SelectItem key="dark">深色</SelectItem>
+                {THEME_MODE_OPTIONS.map(option => (
+                  <SelectItem key={option.key}>{option.label}</SelectItem>
+                ))}
               </Select>
             )}
           />
