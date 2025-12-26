@@ -61,6 +61,7 @@ export const channel = {
     quitAndInstall: "app:quit-and-install",
     openInstallerDirectory: "app:open-installer-directory",
     onBeforeQuit: "app:on-before-quit",
+    isDev: "app:is-dev",
   },
   cookie: {
     get: "cookie:get",
@@ -77,5 +78,6 @@ export const channel = {
     enterFullScreen: "window:enter-full-screen",
     leaveFullScreen: "window:leave-full-screen",
     isFullScreen: "window:is-full-screen",
+    toggleDevTools: "window:toggle-dev-tools",
   },
 };

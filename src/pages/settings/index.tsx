@@ -27,6 +27,10 @@ const useSystemSettingsForm = () => {
     hiddenMenuKeys,
     displayMode,
     ffmpegPath,
+    themeMode,
+    pageTransition,
+    searchMusicOnly,
+    showSearchHistory,
   } = useSettings(
     useShallow(s => ({
       fontFamily: s.fontFamily,
@@ -41,6 +45,10 @@ const useSystemSettingsForm = () => {
       hiddenMenuKeys: s.hiddenMenuKeys,
       displayMode: s.displayMode,
       ffmpegPath: s.ffmpegPath,
+      themeMode: s.themeMode,
+      pageTransition: s.pageTransition,
+      searchMusicOnly: s.searchMusicOnly,
+      showSearchHistory: s.showSearchHistory,
     })),
   );
   const updateSettings = useSettings(s => s.update);
@@ -65,6 +73,10 @@ const useSystemSettingsForm = () => {
       hiddenMenuKeys,
       displayMode,
       ffmpegPath,
+      themeMode,
+      pageTransition,
+      searchMusicOnly,
+      showSearchHistory,
     },
   });
 
@@ -99,7 +111,7 @@ const SettingsPage = () => {
         <div className="space-y-6">
           <h1>设置</h1>
           <Tabs aria-label="设置选项" classNames={{ panel: "px-1 py-0", cursor: "rounded-medium" }}>
-            <Tab key="system" title="系统设置">
+            <Tab key="system" title="常规设置">
               <SystemSettingsTab {...system} />
             </Tab>
             <Tab key="menu" title="菜单设置">

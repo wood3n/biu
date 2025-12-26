@@ -1,4 +1,5 @@
 import { app, ipcMain } from "electron";
+import isDev from "electron-is-dev";
 
 import { autoUpdater } from "../updater";
 import { channel } from "./channel";
@@ -37,5 +38,9 @@ export function registerAppHandlers() {
 
   ipcMain.handle(channel.app.quitAndInstall, async () => {
     return autoUpdater.quitAndInstall();
+  });
+
+  ipcMain.handle(channel.app.isDev, async () => {
+    return isDev;
   });
 }

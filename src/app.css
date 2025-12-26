@@ -51,3 +51,49 @@ html, body, #root {
 
   padding: 0;
 }
+
+/* 修复暗色主题下 SelectItem 文本颜色 */
+.dark [data-slot="base"] [data-slot="content"],
+.dark [data-slot="base"] [data-slot="content"] span,
+.dark [data-slot="base"] [data-slot="content"] * {
+  color: var(--heroui-foreground) !important;
+}
+
+/* 针对 Select 下拉菜单中的项目 */
+.dark [role="listbox"] [role="option"],
+.dark [role="listbox"] [role="option"] span,
+.dark [role="listbox"] [role="option"] * {
+  color: var(--heroui-foreground) !important;
+}
+
+/* 针对所有 SelectItem 内容（包括 Portal 渲染的） */
+body.dark [data-slot="base"] [data-slot="content"],
+body.dark [data-slot="base"] [data-slot="content"] span,
+body.dark [data-slot="base"] [data-slot="content"] *,
+body.dark [role="listbox"] [role="option"],
+body.dark [role="listbox"] [role="option"] span,
+body.dark [role="listbox"] [role="option"] * {
+  color: var(--heroui-foreground) !important;
+}
+
+/* 修复暗色主题下登录弹窗内文本颜色 */
+body.dark .login-modal p,
+body.dark .login-modal span:not([class*="icon"]),
+body.dark .login-modal div:not(button, [role="button"], [class*="button"]),
+body.dark .login-modal label,
+body.dark .login-modal input,
+body.dark .login-modal textarea {
+  color: var(--heroui-foreground) !important;
+}
+
+/* 修复暗色主题下 Input 错误消息 */
+body.dark .login-modal [data-slot="errorMessage"],
+body.dark .login-modal [data-slot="errorMessage"] * {
+  color: var(--heroui-danger) !important;
+}
+
+/* 修复暗色主题下 placeholder */
+body.dark .login-modal input::placeholder,
+body.dark .login-modal textarea::placeholder {
+  color: var(--heroui-default-400) !important;
+}

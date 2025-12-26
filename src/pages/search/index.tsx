@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 
-import { Spinner, Pagination, Tabs, Tab, Switch } from "@heroui/react";
+import { Spinner, Pagination, Tabs, Tab } from "@heroui/react";
 import { usePagination } from "ahooks";
+import { useShallow } from "zustand/react/shallow";
 
 import ScrollContainer from "@/components/scroll-container";
 import {
@@ -10,6 +11,7 @@ import {
   type SearchVideoItem,
 } from "@/service/web-interface-search-type";
 import { useSearchHistory } from "@/store/search-history";
+import { useSettings } from "@/store/settings";
 
 import { SearchType, SearchTypeOptions } from "./search-type";
 import UserList from "./user-list";
@@ -17,8 +19,8 @@ import VideoList from "./video-list";
 
 const Search = () => {
   const [searchType, setSearchType] = useState(SearchType.Video);
-  const [musicOnly, setMusicOnly] = useState(true); // 默认只搜索音乐
   const keyword = useSearchHistory(s => s.keyword);
+  const musicOnly = useSettings(useShallow(s => s.searchMusicOnly));
 
   const {
     loading,
@@ -84,11 +86,6 @@ const Search = () => {
           >
             {item => <Tab key={item.value} title={item.label} />}
           </Tabs>
-          {searchType === SearchType.Video && (
-            <Switch isSelected={musicOnly} onValueChange={setMusicOnly} size="sm">
-              仅音乐
-            </Switch>
-          )}
         </div>
       </div>
       <>

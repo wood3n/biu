@@ -1,4 +1,6 @@
 type AudioQuality = "auto" | "lossless" | "high" | "medium" | "low";
+type ThemeMode = "light" | "dark";
+type PageTransition = "none" | "fade" | "slide" | "scale" | "slideUp";
 
 interface AppSettings {
   fontFamily: string;
@@ -13,4 +15,9 @@ interface AppSettings {
   hiddenMenuKeys: string[];
   displayMode: "card" | "list";
   ffmpegPath?: string;
+  enableWaveformOnClick: boolean;
+  themeMode: ThemeMode;
+  pageTransition: PageTransition;
+  searchMusicOnly: boolean;
+  showSearchHistory: boolean;
 }

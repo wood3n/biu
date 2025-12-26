@@ -21,6 +21,7 @@ const LeftControl = () => {
   const playId = usePlayList(s => s.playId);
   const getAudio = usePlayList(s => s.getAudio);
   const primaryColor = useSettings(s => s.primaryColor);
+  const enableWaveformOnClick = useSettings(s => s.enableWaveformOnClick);
 
   const playItem = useMemo(() => list.find(item => item.id === playId), [list, playId]);
 
@@ -43,7 +44,9 @@ const LeftControl = () => {
   }, [showWaveform]);
 
   const handleCoverClick = () => {
-    setShowWaveform(!showWaveform);
+    if (enableWaveformOnClick) {
+      setShowWaveform(!showWaveform);
+    }
   };
 
   return (

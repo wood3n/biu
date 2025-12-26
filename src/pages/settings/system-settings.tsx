@@ -2,7 +2,7 @@ import React from "react";
 import { Controller } from "react-hook-form";
 import type { Control, UseFormSetValue } from "react-hook-form";
 
-import { Button, Divider, Form, Input, Radio, RadioGroup, Select, SelectItem, Slider, Switch } from "@heroui/react";
+import { Button, Divider, Form, Select, SelectItem } from "@heroui/react";
 import { RiArrowRightLongLine } from "@remixicon/react";
 
 import ColorPicker from "@/components/color-picker";
@@ -32,22 +32,57 @@ export const SystemSettingsTab = ({
   return (
     <Form className="space-y-6">
       <h2>外观</h2>
+      {/* 主题模式 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">主题模式</div>
+          <div className="text-sm text-zinc-500">选择浅色或深色主题</div>
+        </div>
+        <div className="w-[180px]">
+          <Controller
+            control={control}
+            name="themeMode"
+            render={({ field }) => (
+              <Select
+                aria-label="主题模式"
+                selectedKeys={field.value ? new Set([field.value]) : new Set()}
+                onSelectionChange={keys => {
+                  const value = Array.from(keys)[0] as string;
+                  field.onChange(value);
+                }}
+              >
+                <SelectItem key="light">浅色</SelectItem>
+                <SelectItem key="dark">深色</SelectItem>
+              </Select>
+            )}
+          />
+        </div>
+      </div>
       {/* 显示模式 */}
       <div className="flex w-full items-center justify-between">
         <div className="mr-6 space-y-1">
           <div className="text-medium font-medium">显示模式</div>
           <div className="text-sm text-zinc-500">选择媒体内容的显示样式</div>
         </div>
-        <Controller
-          control={control}
-          name="displayMode"
-          render={({ field }) => (
-            <RadioGroup orientation="horizontal" value={field.value} onValueChange={field.onChange}>
-              <Radio value="card">卡片</Radio>
-              <Radio value="list">列表</Radio>
-            </RadioGroup>
-          )}
-        />
+        <div className="w-[180px]">
+          <Controller
+            control={control}
+            name="displayMode"
+            render={({ field }) => (
+              <Select
+                aria-label="显示模式"
+                selectedKeys={field.value ? new Set([field.value]) : new Set()}
+                onSelectionChange={keys => {
+                  const value = Array.from(keys)[0] as string;
+                  field.onChange(value);
+                }}
+              >
+                <SelectItem key="card">卡片</SelectItem>
+                <SelectItem key="list">列表</SelectItem>
+              </Select>
+            )}
+          />
+        </div>
       </div>
       {/* 字体选择 */}
       <div className="flex w-full items-center justify-between">
@@ -55,7 +90,7 @@ export const SystemSettingsTab = ({
           <div className="text-medium font-medium">字体</div>
           <div className="text-sm text-zinc-500">选择界面显示的字体</div>
         </div>
-        <div className="w-[360px]">
+        <div className="w-[180px]">
           <Controller
             control={control}
             name="fontFamily"
@@ -64,21 +99,31 @@ export const SystemSettingsTab = ({
         </div>
       </div>
 
+      {/* 页面切换动画 */}
       <div className="flex w-full items-center justify-between">
         <div className="mr-6 space-y-1">
-          <div className="text-medium font-medium">内容区域颜色</div>
-          <div className="text-sm text-zinc-500">更改应用内容区域的颜色</div>
+          <div className="text-medium font-medium">页面切换动画</div>
+          <div className="text-sm text-zinc-500">选择页面切换时的过渡效果</div>
         </div>
-        <div className="flex w-[360px] justify-end">
+        <div className="w-[180px]">
           <Controller
             control={control}
-            name="contentBackgroundColor"
+            name="pageTransition"
             render={({ field }) => (
-              <ColorPicker
-                presets={[defaultAppSettings.contentBackgroundColor]}
-                value={field.value}
-                onChange={field.onChange}
-              />
+              <Select
+                aria-label="页面切换动画"
+                selectedKeys={field.value ? new Set([field.value]) : new Set()}
+                onSelectionChange={keys => {
+                  const value = Array.from(keys)[0] as PageTransition;
+                  field.onChange(value);
+                }}
+              >
+                <SelectItem key="none">无动画</SelectItem>
+                <SelectItem key="fade">淡入淡出</SelectItem>
+                <SelectItem key="slide">滑动</SelectItem>
+                <SelectItem key="scale">缩放</SelectItem>
+                <SelectItem key="slideUp">上浮</SelectItem>
+              </Select>
             )}
           />
         </div>
@@ -86,30 +131,10 @@ export const SystemSettingsTab = ({
 
       <div className="flex w-full items-center justify-between">
         <div className="mr-6 space-y-1">
-          <div className="text-medium font-medium">布局颜色</div>
-          <div className="text-sm text-zinc-500">更改应用布局背景颜色</div>
+          <div className="text-medium font-medium">主色调</div>
+          <div className="text-sm text-zinc-500">自定义应用的强调色</div>
         </div>
-        <div className="flex w-[360px] justify-end">
-          <Controller
-            control={control}
-            name="backgroundColor"
-            render={({ field }) => (
-              <ColorPicker
-                presets={[defaultAppSettings.backgroundColor]}
-                value={field.value}
-                onChange={field.onChange}
-              />
-            )}
-          />
-        </div>
-      </div>
-
-      <div className="flex w-full items-center justify-between">
-        <div className="mr-6 space-y-1">
-          <div className="text-medium font-medium">主题颜色</div>
-          <div className="text-sm text-zinc-500">更改应用的主色调</div>
-        </div>
-        <div className="flex w-[360px] justify-end">
+        <div className="flex w-[180px] justify-end">
           <Controller
             control={control}
             name="primaryColor"
@@ -124,35 +149,6 @@ export const SystemSettingsTab = ({
         </div>
       </div>
 
-      {/* 全局圆角设置 */}
-      <div className="flex w-full items-center justify-between">
-        <div className="mr-6 space-y-1">
-          <div className="text-medium font-medium">圆角</div>
-          <div className="text-sm text-zinc-500">调整界面控件的圆角大小</div>
-        </div>
-        <div className="w-[360px]">
-          <Controller
-            control={control}
-            name="borderRadius"
-            render={({ field }) => (
-              <Slider
-                showTooltip={false}
-                size="sm"
-                endContent={<span>{field.value}px</span>}
-                aria-label="全局圆角"
-                value={field.value}
-                onChange={v => field.onChange(Number(v))}
-                minValue={0}
-                maxValue={24}
-                step={1}
-                classNames={{
-                  thumb: "after:hidden",
-                }}
-              />
-            )}
-          />
-        </div>
-      </div>
       <Divider />
       <h2>播放</h2>
       {/* 音质选择 */}
@@ -167,14 +163,14 @@ export const SystemSettingsTab = ({
             {audioQuality === "low" && "60-80 kbps"}
           </div>
         </div>
-        <div className="w-[140px]">
+        <div className="w-[180px]">
           <Controller
             control={control}
             name="audioQuality"
             render={({ field }) => (
               <Select
                 aria-label="音质偏好"
-                selectedKeys={[field.value]}
+                selectedKeys={field.value ? new Set([field.value]) : new Set()}
                 onSelectionChange={keys => {
                   const value = Array.from(keys)[0] as AudioQuality;
                   field.onChange(value);
@@ -190,63 +186,120 @@ export const SystemSettingsTab = ({
           />
         </div>
       </div>
+
+      {/* 点击封面显示音乐频谱 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">音乐频谱</div>
+          <div className="text-sm text-zinc-500">点击歌曲封面显示音乐频谱</div>
+        </div>
+        <Controller
+          control={control}
+          name="enableWaveformOnClick"
+          render={({ field }) => (
+            <Button
+              className="w-[80px]"
+              variant={field.value ? "solid" : "bordered"}
+              color={field.value ? "primary" : "default"}
+              onPress={() => field.onChange(!field.value)}
+            >
+              {field.value ? "已启用" : "未启用"}
+            </Button>
+          )}
+        />
+      </div>
       <Divider />
       <h2>下载</h2>
       {/* 下载目录配置 */}
-      <div className="flex w-full items-center justify-between">
-        <div className="mr-6 space-y-1">
-          <div className="text-medium font-medium">下载目录</div>
-          <div className="text-sm text-zinc-500">选择音视频保存的位置</div>
-        </div>
-        <div className="w-[360px]">
-          <Controller
-            control={control}
-            name="downloadPath"
-            render={({ field }) => (
-              <div className="flex items-center space-x-1">
-                <Input isDisabled placeholder="选择文件夹" value={field.value} onValueChange={field.onChange} />
-                <Button
-                  variant="flat"
-                  onPress={async () => {
-                    const path = await window.electron.selectDirectory();
-                    if (path) setValue("downloadPath", path, { shouldDirty: true, shouldTouch: true });
-                  }}
-                >
-                  选择
-                </Button>
-              </div>
-            )}
-          />
-        </div>
-      </div>
+      <Controller
+        control={control}
+        name="downloadPath"
+        render={({ field }) => (
+          <div className="flex w-full items-center justify-between">
+            <div className="mr-6 space-y-1">
+              <div className="text-medium font-medium">下载目录</div>
+              <div className="text-sm text-zinc-500">{field.value || "选择音视频保存的位置"}</div>
+            </div>
+            <Button
+              variant="flat"
+              onPress={async () => {
+                const path = await window.electron.selectDirectory();
+                if (path) setValue("downloadPath", path, { shouldDirty: true, shouldTouch: true });
+              }}
+            >
+              更改
+            </Button>
+          </div>
+        )}
+      />
 
       {/* FFmpeg 路径配置 */}
+      <Controller
+        control={control}
+        name="ffmpegPath"
+        render={({ field }) => (
+          <div className="flex w-full items-center justify-between">
+            <div className="mr-6 space-y-1">
+              <div className="text-medium font-medium">FFmpeg 路径</div>
+              <div className="text-sm text-zinc-500">{field.value || "手动指定 FFmpeg 可执行文件路径"}</div>
+            </div>
+            <Button
+              variant="flat"
+              onPress={async () => {
+                const path = await window.electron.selectFile();
+                if (path) setValue("ffmpegPath", path, { shouldDirty: true, shouldTouch: true });
+              }}
+            >
+              更改
+            </Button>
+          </div>
+        )}
+      />
+      <Divider />
+      <h2>搜索</h2>
+      {/* 仅音乐过滤 */}
       <div className="flex w-full items-center justify-between">
         <div className="mr-6 space-y-1">
-          <div className="text-medium font-medium">FFmpeg 路径</div>
-          <div className="text-sm text-zinc-500">手动指定 FFmpeg 可执行文件路径</div>
+          <div className="text-medium font-medium">仅音乐</div>
+          <div className="text-sm text-zinc-500">搜索视频时仅显示音乐分区内容</div>
         </div>
-        <div className="w-[360px]">
-          <Controller
-            control={control}
-            name="ffmpegPath"
-            render={({ field }) => (
-              <div className="flex items-center space-x-1">
-                <Input isDisabled placeholder="自动检测" value={field.value} onValueChange={field.onChange} />
-                <Button
-                  variant="flat"
-                  onPress={async () => {
-                    const path = await window.electron.selectFile();
-                    if (path) setValue("ffmpegPath", path, { shouldDirty: true, shouldTouch: true });
-                  }}
-                >
-                  选择
-                </Button>
-              </div>
-            )}
-          />
-        </div>
+        <Controller
+          control={control}
+          name="searchMusicOnly"
+          render={({ field }) => (
+            <Button
+              className="w-[80px]"
+              variant={field.value ? "solid" : "bordered"}
+              color={field.value ? "primary" : "default"}
+              onPress={() => field.onChange(!field.value)}
+            >
+              {field.value ? "已启用" : "未启用"}
+            </Button>
+          )}
+        />
       </div>
+      {/* 显示搜索历史 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">显示搜索历史</div>
+          <div className="text-sm text-zinc-500">在搜索框中显示搜索历史记录</div>
+        </div>
+        <Controller
+          control={control}
+          name="showSearchHistory"
+          render={({ field }) => (
+            <Button
+              className="w-[80px]"
+              variant={field.value ? "solid" : "bordered"}
+              color={field.value ? "primary" : "default"}
+              onPress={() => field.onChange(!field.value)}
+            >
+              {field.value ? "已启用" : "未启用"}
+            </Button>
+          )}
+        />
+      </div>
+
       <Divider />
       <h2>系统</h2>
       {/* 窗口关闭选项 */}
@@ -255,16 +308,25 @@ export const SystemSettingsTab = ({
           <div className="text-medium font-medium">窗口关闭</div>
           <div className="text-sm text-zinc-500">选择窗口关闭时的行为</div>
         </div>
-        <Controller
-          control={control}
-          name="closeWindowOption"
-          render={({ field }) => (
-            <RadioGroup orientation="horizontal" value={field.value} onValueChange={field.onChange}>
-              <Radio value="hide">隐藏到托盘</Radio>
-              <Radio value="exit">直接退出</Radio>
-            </RadioGroup>
-          )}
-        />
+        <div className="w-[180px]">
+          <Controller
+            control={control}
+            name="closeWindowOption"
+            render={({ field }) => (
+              <Select
+                aria-label="窗口关闭"
+                selectedKeys={field.value ? new Set([field.value]) : new Set()}
+                onSelectionChange={keys => {
+                  const value = Array.from(keys)[0] as string;
+                  field.onChange(value);
+                }}
+              >
+                <SelectItem key="hide">隐藏到托盘</SelectItem>
+                <SelectItem key="exit">直接退出</SelectItem>
+              </Select>
+            )}
+          />
+        </div>
       </div>
 
       {/* 开机自启动开关 */}
@@ -273,13 +335,20 @@ export const SystemSettingsTab = ({
           <div className="text-medium font-medium">开机自启动</div>
           <div className="text-sm text-zinc-500">系统登录后自动启动应用</div>
         </div>
-        <div className="flex w-[360px] justify-end">
-          <Controller
-            control={control}
-            name="autoStart"
-            render={({ field }) => <Switch isSelected={field.value} onValueChange={field.onChange} />}
-          />
-        </div>
+        <Controller
+          control={control}
+          name="autoStart"
+          render={({ field }) => (
+            <Button
+              className="w-[80px]"
+              variant={field.value ? "solid" : "bordered"}
+              color={field.value ? "primary" : "default"}
+              onPress={() => field.onChange(!field.value)}
+            >
+              {field.value ? "已启用" : "未启用"}
+            </Button>
+          )}
+        />
       </div>
 
       <Divider />
@@ -294,7 +363,9 @@ export const SystemSettingsTab = ({
             </>
           )}
         </div>
-        <UpdateCheckButton />
+        <div className="flex w-[64px] justify-end">
+          <UpdateCheckButton />
+        </div>
       </div>
       <ImportExport />
     </Form>
