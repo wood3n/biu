@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 import {
@@ -11,6 +12,7 @@ import {
   type DropdownItemProps,
 } from "@heroui/react";
 import {
+  RiCodeLine,
   RiExternalLinkLine,
   RiFeedbackLine,
   RiLoginCircleLine,
@@ -34,10 +36,15 @@ const UserCard = () => {
   const clearToken = useToken(s => s.clear);
   const navigate = useNavigate();
   const updateSettings = useSettings(s => s.update);
+  const [isDev, setIsDev] = useState(false);
 
   const { isOpen: isLoginModalOpen, onOpen: openLoginModal, onOpenChange: onLoginModalOpenChange } = useDisclosure();
 
   const onOpenConfirmModal = useModalStore(s => s.onOpenConfirmModal);
+
+  useEffect(() => {
+    window.electron.isDev().then(setIsDev);
+  }, []);
 
   const logout = async () => {
     const csrfToken = await window.electron.getCookie("bili_jct");
@@ -92,6 +99,15 @@ const UserCard = () => {
       onPress: () => navigate("/settings"),
     },
     {
+      key: "devTools",
+      label: "开发者工具",
+      startContent: <RiCodeLine size={18} />,
+      hidden: !isDev,
+      onPress: () => {
+        window.electron.toggleDevTools();
+      },
+    },
+    {
       key: "feedback",
       label: "问题反馈",
       startContent: <RiFeedbackLine size={18} />,
@@ -102,13 +118,16 @@ const UserCard = () => {
       key: "logout",
       label: "退出登录",
       startContent: <RiLogoutCircleLine size={18} />,
-      color: "danger" as const,
-      className: "text-danger",
+      color: "primary" as const,
+      className: "text-primary",
+      classNames: {
+        base: "hover:bg-primary/10",
+      },
       hidden: !user?.isLogin,
       onPress: () => {
         onOpenConfirmModal({
           title: "确认退出登录？",
-          type: "danger",
+          type: "primary",
           onConfirm: async () => {
             await logout();
             return true;

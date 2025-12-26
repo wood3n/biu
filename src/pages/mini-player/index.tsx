@@ -98,12 +98,31 @@ const MiniPlayer = () => {
     postMessage("next");
   };
 
+  const coverImage = useMemo(() => {
+    if (!cover) return null;
+    return (
+      <Image
+        removeWrapper
+        radius="none"
+        src={cover}
+        width={100}
+        height="100%"
+        className="object-cover"
+        style={
+          {
+            transform: "translateZ(0)",
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+          } as React.CSSProperties
+        }
+      />
+    );
+  }, [cover]);
+
   return (
     <div className="window-drag bg-content1 rounded-medium flex h-screen w-screen flex-col overflow-hidden select-none">
       <div className="flex h-full items-center">
-        {Boolean(cover) && (
-          <Image removeWrapper radius="none" src={cover} width={100} height="100%" className="object-cover" />
-        )}
+        {coverImage}
         <div className="flex min-w-0 flex-1 flex-col space-y-1 px-2">
           <div className="flex min-w-0 flex-col">
             {title ? (

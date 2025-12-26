@@ -8,6 +8,7 @@ import classNames from "classnames";
 
 import { getSearchSuggestMain } from "@/service/main-suggest";
 import { useSearchHistory } from "@/store/search-history";
+import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
 
 const SearchInput: React.FC = () => {
@@ -19,6 +20,7 @@ const SearchInput: React.FC = () => {
   const addSearchHistory = useSearchHistory(s => s.add);
   const deleteSearchHistory = useSearchHistory(s => s.delete);
   const clearSearchHistory = useSearchHistory(s => s.clear);
+  const showSearchHistory = useSettings(s => s.showSearchHistory);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -109,6 +111,7 @@ const SearchInput: React.FC = () => {
           }
           emptyContent="暂无搜索建议"
           topContent={
+            showSearchHistory &&
             searchHistoryItems.length > 0 && (
               <>
                 <div className="mb-1 flex items-center justify-between px-1">

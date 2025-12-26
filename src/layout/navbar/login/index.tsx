@@ -16,14 +16,14 @@ const Login = ({ isOpen, onOpenChange }: Props) => {
 
   return (
     <Modal size="2xl" isOpen={isOpen} isDismissable={false} onOpenChange={onOpenChange}>
-      <ModalContent>
+      <ModalContent className="login-modal text-foreground">
         <ModalBody className="flex-row items-center justify-center gap-8 py-8">
           <QrcodeLogin onClose={onClose} />
           <Divider className="h-42" orientation="vertical" />
           <div className="w-[320px]">
             <Tabs
               aria-label="登录方式"
-              classNames={{ tabContent: "text-lg font-medium mb-4" }}
+              classNames={{ tabContent: "text-lg font-medium mb-4 text-foreground" }}
               fullWidth
               size="lg"
               variant="underlined"

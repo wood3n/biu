@@ -51,3 +51,38 @@ html, body, #root {
 
   padding: 0;
 }
+
+/* 
+ * 修复暗色主题下 Portal 渲染组件的文本颜色
+ */
+
+/* SelectItem 组件文本颜色 */
+body.dark [data-slot="base"] :is([data-slot="content"], [data-slot="content"] > span) {
+  color: var(--heroui-foreground);
+}
+
+/* Select 下拉菜单中的项目 */
+body.dark [role="listbox"] :is([role="option"], [role="option"] > span) {
+  color: var(--heroui-foreground);
+}
+
+/* 登录弹窗内文本颜色 */
+body.dark .login-modal.text-foreground :is(
+  p,
+  label,
+  input,
+  textarea,
+  span:not([class*="icon"]),
+  div:not(button, [role="button"], [class*="button"])) {
+  color: var(--heroui-foreground);
+}
+
+/* Input 错误消息 */
+body.dark .login-modal.text-foreground :is([data-slot="errorMessage"], [data-slot="errorMessage"] > span) {
+  color: var(--heroui-danger);
+}
+
+/* placeholder */
+body.dark .login-modal.text-foreground :is(input, textarea)::placeholder {
+  color: var(--heroui-default-400);
+}
