@@ -147,10 +147,15 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) =
       onOpenChange={onOpenChange}
       isDismissable={!isSubmitting}
       disableAnimation
+      classNames={{
+        base: "theme-aware-modal",
+      }}
     >
       <ModalContent>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader className="border-b-1 border-b-zinc-800 py-3">{mid ? "修改收藏夹" : "新建收藏夹"}</ModalHeader>
+          <ModalHeader className="border-b-1 border-b-zinc-200 py-3 dark:border-b-zinc-800">
+            <span>{mid ? "修改收藏夹" : "新建收藏夹"}</span>
+          </ModalHeader>
           <ModalBody className="gap-4 py-4">
             <Controller
               name="title"

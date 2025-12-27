@@ -88,7 +88,7 @@ const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }
                   <RiVerifiedBadgeFill color="#66AAF9" />
                 </Tooltip>
               )}
-              <h1>{spaceInfo?.name}</h1>
+              <h1 className="font-semibold text-white">{spaceInfo?.name}</h1>
             </div>
             {Boolean(spaceInfo?.vip?.status) && (
               <Image
@@ -98,7 +98,7 @@ const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }
               />
             )}
           </div>
-          <p className="line-clamp-2 text-sm">{spaceInfo?.sign}</p>
+          <p className="line-clamp-2 text-sm text-white/90">{spaceInfo?.sign}</p>
         </div>
       </div>
       <div className="flex flex-none items-center space-x-4">
@@ -116,10 +116,10 @@ const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }
           ? stats.map((item, idx) => (
               <Fragment key={idx}>
                 <div className="flex flex-col items-center justify-center">
-                  <span className="text-lg">{item.value}</span>
-                  <span className="text-sm whitespace-nowrap">{item.title}</span>
+                  <span className="text-lg font-semibold text-white">{item.value}</span>
+                  <span className="text-sm whitespace-nowrap text-white/80">{item.title}</span>
                 </div>
-                {idx !== stats.length - 1 && <Divider orientation="vertical" className="h-4" />}
+                {idx !== stats.length - 1 && <Divider orientation="vertical" className="h-4 bg-white/30" />}
               </Fragment>
             ))
           : null}

@@ -117,7 +117,16 @@ const DynamicFeedDrawer = ({ isOpen, onOpenChange }: DynamicFeedDrawerProps) => 
   }, [handleScroll]);
 
   return (
-    <Drawer disableAnimation isOpen={isOpen} onOpenChange={onOpenChange} size="lg" backdrop="blur">
+    <Drawer
+      disableAnimation
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      size="lg"
+      backdrop="blur"
+      classNames={{
+        base: "theme-aware-modal",
+      }}
+    >
       <DrawerContent>
         <DrawerHeader className="border-default-100 border-b">动态</DrawerHeader>
         <DrawerBody className="flex-1 overflow-hidden p-0">

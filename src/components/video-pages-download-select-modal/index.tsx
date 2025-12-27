@@ -81,6 +81,9 @@ const VideoPagesDownloadSelectModal = () => {
       scrollBehavior="inside"
       isOpen={isVideoPageDownloadModalOpen}
       onOpenChange={onVideoPageDownloadModalOpenChange}
+      classNames={{
+        base: "theme-aware-modal",
+      }}
     >
       <ModalContent>
         {Boolean(data?.length) && <ModalHeader>选择分集</ModalHeader>}

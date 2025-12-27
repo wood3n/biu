@@ -86,6 +86,9 @@ const ReleaseNoteModal = () => {
         isKeyboardDismissDisabled
         isDismissable={false}
         disableAnimation
+        classNames={{
+          base: "theme-aware-modal",
+        }}
       >
         <ModalContent>
           <ModalHeader>✨ 有新版本更新</ModalHeader>

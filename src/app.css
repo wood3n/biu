@@ -52,37 +52,55 @@ html, body, #root {
   padding: 0;
 }
 
-/* 
- * 修复暗色主题下 Portal 渲染组件的文本颜色
- */
+@layer overrides {
+  body.dark :is(
+    [data-slot="base"] :is([data-slot="content"], [data-slot="content"] > span),
+    [role="listbox"] :is([role="option"], [role="option"] > span)
+  ) {
+    color: var(--heroui-foreground);
+  }
 
-/* SelectItem 组件文本颜色 */
-body.dark [data-slot="base"] :is([data-slot="content"], [data-slot="content"] > span) {
-  color: var(--heroui-foreground);
-}
+  .theme-aware-modal {
+    color: var(--heroui-foreground);
+  }
 
-/* Select 下拉菜单中的项目 */
-body.dark [role="listbox"] :is([role="option"], [role="option"] > span) {
-  color: var(--heroui-foreground);
-}
+  .theme-aware-modal :is(
+    [data-slot="header"],
+    [data-slot="body"],
+    [data-slot="footer"],
+    span:not([class*="icon"], button *, [data-slot]),
+    div:not(button, [role="button"], [class*="button"], [data-slot]),
+    p, h1, h2, h3, h4, h5, h6, label, input, textarea
+  ) {
+    color: inherit;
+  }
 
-/* 登录弹窗内文本颜色 */
-body.dark .login-modal.text-foreground :is(
-  p,
-  label,
-  input,
-  textarea,
-  span:not([class*="icon"]),
-  div:not(button, [role="button"], [class*="button"])) {
-  color: var(--heroui-foreground);
-}
+  .theme-aware-modal :is([data-slot="errorMessage"], [data-slot="errorMessage"] > span) {
+    color: var(--heroui-danger);
+  }
 
-/* Input 错误消息 */
-body.dark .login-modal.text-foreground :is([data-slot="errorMessage"], [data-slot="errorMessage"] > span) {
-  color: var(--heroui-danger);
-}
+  .theme-aware-modal :is(input, textarea)::placeholder {
+    color: var(--heroui-default-400);
+  }
 
-/* placeholder */
-body.dark .login-modal.text-foreground :is(input, textarea)::placeholder {
-  color: var(--heroui-default-400);
+  .theme-aware-modal :is(.text-zinc-500, .dark\:text-zinc-400) {
+    color: var(--heroui-foreground-500);
+  }
+
+  .theme-aware-modal .prose {
+    color: var(--heroui-foreground);
+  }
+
+  .theme-aware-modal .prose :is(p, h1, h2, h3, h4, h5, h6, li, blockquote, code, pre, strong, em, span, div) {
+    color: inherit;
+  }
+
+  .theme-aware-modal .prose a {
+    color: hsl(var(--heroui-primary));
+  }
+
+  .theme-aware-modal .prose a:hover {
+    color: hsl(var(--heroui-primary));
+    opacity: 0.8;
+  }
 }

@@ -43,7 +43,7 @@ const PlayListDrawer = ({ isOpen, onOpenChange }: Props) => {
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       classNames={{
-        base: "data-[placement=right]:mb-[88px]",
+        base: "theme-aware-modal data-[placement=right]:mb-[88px]",
       }}
     >
       <DrawerContent>
@@ -53,7 +53,7 @@ const PlayListDrawer = ({ isOpen, onOpenChange }: Props) => {
             <Settings />
             <If condition={Boolean(pureList?.length)}>
               <Tooltip closeDelay={0} content="清空播放列表">
-                <Button isIconOnly size="sm" variant="light" onPress={clear} className="text-zinc-300">
+                <Button isIconOnly size="sm" variant="light" onPress={clear}>
                   <RiDeleteBinLine size={16} />
                 </Button>
               </Tooltip>
