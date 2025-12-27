@@ -99,6 +99,32 @@ export const SystemSettingsTab = ({
           />
         </div>
       </div>
+      {/* 全局圆角设置 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">界面样式</div>
+          <div className="text-sm text-zinc-500">选择界面控件的圆角样式</div>
+        </div>
+        <div className="w-[180px]">
+          <Controller
+            control={control}
+            name="borderRadius"
+            render={({ field }) => (
+              <Select
+                aria-label="界面样式"
+                selectedKeys={field.value === 10 ? new Set(["rounded"]) : new Set(["square"])}
+                onSelectionChange={keys => {
+                  const value = Array.from(keys)[0] as string;
+                  field.onChange(value === "rounded" ? 10 : 0);
+                }}
+              >
+                <SelectItem key="rounded">圆角</SelectItem>
+                <SelectItem key="square">直角</SelectItem>
+              </Select>
+            )}
+          />
+        </div>
+      </div>
 
       {/* 页面切换动画 */}
       <div className="flex w-full items-center justify-between">

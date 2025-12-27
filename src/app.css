@@ -52,6 +52,7 @@ html, body, #root {
   padding: 0;
 }
 
+/* 统一使用 theme-aware-modal 管理主题中无法覆盖的地方 */
 @layer overrides {
   body.dark :is(
     [data-slot="base"] :is([data-slot="content"], [data-slot="content"] > span),

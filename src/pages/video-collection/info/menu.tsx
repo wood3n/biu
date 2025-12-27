@@ -7,7 +7,7 @@ import {
   RiEditLine,
   RiFileMusicLine,
   RiFileVideoLine,
-  RiMoreLine,
+  RiMoreFill,
   RiPlayListAddLine,
   RiStarLine,
   RiStarOffLine,
@@ -191,7 +191,7 @@ const Menu = ({ type, isOwn, mediaCount, attr, onAddToPlayList, afterChangeInfo 
       >
         <DropdownTrigger>
           <Button isIconOnly>
-            <RiMoreLine />
+            <RiMoreFill size={20} />
           </Button>
         </DropdownTrigger>
         <DropdownMenu aria-label="收藏夹操作" items={menus.filter(item => item.show)}>

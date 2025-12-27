@@ -40,7 +40,7 @@ const Menus = ({ data }: Props) => {
             size="sm"
             className={`flex-none transition-opacity duration-200 ${isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"} group-hover:pointer-events-auto group-hover:opacity-100`}
           >
-            <RiMoreFill size={16} />
+            <RiMoreFill size={20} />
           </Button>
         </DropdownTrigger>
         <DropdownMenu aria-label="播放列表操作菜单">
