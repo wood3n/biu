@@ -1,5 +1,24 @@
 # Changelog
 
+## v1.7.1
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.7.1-beta.1...v1.7.1)
+
+### 🩹 修复问题
+
+- Update by gemini & remove wave setting ([2ba5735](https://github.com/wood3n/biu/commit/2ba5735))
+- Update theme code ([0d98de3](https://github.com/wood3n/biu/commit/0d98de3))
+- Update theme code ([8590dda](https://github.com/wood3n/biu/commit/8590dda))
+
+### 🎨 UI 调整
+
+- Normalize the settings page ([da2aea4](https://github.com/wood3n/biu/commit/da2aea4))
+
+### ❤️ Contributors
+
+- Xfly
+- Fly ([@flystar233](https://github.com/flystar233))
+
 ## v1.7.1-beta.1
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.7.1-beta.0...v1.7.1-beta.1)
