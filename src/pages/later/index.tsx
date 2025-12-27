@@ -130,7 +130,7 @@ const Later = () => {
   return (
     <>
       <ScrollContainer className="h-full w-full p-4">
-        <div className="mb-4 flex items-center space-x-1">
+        <div className="mb-4 flex items-center justify-between">
           <h1>稍后再看</h1>
           <Button isIconOnly variant="light" size="sm" onPress={refreshAsync}>
             <RiRefreshLine size={18} />

@@ -35,24 +35,23 @@ const Logo = () => {
       >
         <LogoIcon className="h-10 w-10" />
         {isUpdateAvailable ? (
-          <Badge
-            color="danger"
-            content="new"
-            size="sm"
-            classNames={{
-              badge: "window-no-drag cursor-pointer -right-1/5",
-            }}
-            onClick={onOpenReleaseNoteModal}
-          >
-            <Tooltip title="新版本更新">
+          <Tooltip content="新版本更新" closeDelay={0}>
+            <Badge
+              color="danger"
+              content="new"
+              size="sm"
+              classNames={{
+                badge: "window-no-drag cursor-pointer -right-1/5",
+              }}
+            >
               <div
                 className="window-no-drag cursor-pointer text-2xl leading-none font-bold"
                 onClick={onOpenReleaseNoteModal}
               >
                 Biu
               </div>
-            </Tooltip>
-          </Badge>
+            </Badge>
+          </Tooltip>
         ) : (
           <span className="text-2xl leading-none font-bold">Biu</span>
         )}

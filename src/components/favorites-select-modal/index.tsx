@@ -124,6 +124,9 @@ const FavoritesSelectModal = () => {
       onOpenChange={onFavSelectModalOpenChange}
       isDismissable={false}
       size="md"
+      classNames={{
+        base: "theme-aware-modal",
+      }}
     >
       <ModalContent>
         <ModalHeader className="text-base font-medium">{title}</ModalHeader>

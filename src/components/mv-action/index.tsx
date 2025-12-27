@@ -9,7 +9,7 @@ import {
   type MenuItemProps,
   addToast,
 } from "@heroui/react";
-import { RiMore2Line, RiPlayListAddLine, RiStarLine, RiTimeLine } from "@remixicon/react";
+import { RiMore2Fill, RiPlayListAddLine, RiStarLine, RiTimeLine } from "@remixicon/react";
 import clx from "classnames";
 
 import { ReactComponent as AudioDownloadIcon } from "@/assets/icons/audio-download.svg";
@@ -192,7 +192,7 @@ const MVAction = ({
               isIconOnly
               className={clx("text-zinc-300", buttonClassName)}
             >
-              <RiMore2Line size={16} />
+              <RiMore2Fill size={20} />
             </Button>
           </DropdownTrigger>
           <DropdownMenu shouldFocusWrap selectionMode="none" items={menuItems}>

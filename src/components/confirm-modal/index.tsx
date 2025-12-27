@@ -68,11 +68,14 @@ const ConfirmModal = () => {
       isOpen={isConfirmModalOpen}
       onOpenChange={onConfirmModalOpenChange}
       isDismissable={false}
+      classNames={{
+        base: "theme-aware-modal",
+      }}
     >
       <ModalContent>
         {() => (
           <>
-            <ModalHeader className="flex items-center gap-1 [&>span]:text-[var(--heroui-foreground)]">
+            <ModalHeader className="flex items-center gap-1">
               <RiErrorWarningLine color={getIconColor()} />
               <span>{title}</span>
             </ModalHeader>

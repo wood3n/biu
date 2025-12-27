@@ -19,7 +19,7 @@ import { useSettings } from "@/store/settings";
 const HISTORY_PAGE_SIZE = 30;
 
 const History = () => {
-  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [list, setList] = useState<HistoryListItem[]>([]);
   const [cursor, setCursor] = useState<{ max: number; business: HistoryBusinessType | ""; view_at: number } | null>(
@@ -29,20 +29,20 @@ const History = () => {
   const play = usePlayList(s => s.play);
   const displayMode = useSettings(state => state.displayMode);
 
-  const fetchHistory = async (isLoadMore = false) => {
+  const fetchHistory = async (isLoadMore = false, resetCursor = false) => {
     try {
       if (isLoadMore) {
         setLoadingMore(true);
-      } else {
-        setLoading(true);
       }
+      // 首次加载时 initialLoading 已经在 useEffect 中设置为 true，刷新时不设置
 
+      const currentCursor = resetCursor ? null : cursor;
       const res = await getWebInterfaceHistoryCursor({
         type: "archive",
         ps: HISTORY_PAGE_SIZE,
-        max: cursor ? cursor.max : 0,
-        business: cursor?.business || undefined,
-        view_at: cursor ? cursor.view_at : 0,
+        max: currentCursor ? currentCursor.max : 0,
+        business: currentCursor?.business || undefined,
+        view_at: currentCursor ? currentCursor.view_at : 0,
       });
 
       if (res.code !== 0) {
@@ -76,7 +76,7 @@ const History = () => {
       if (isLoadMore) {
         setLoadingMore(false);
       } else {
-        setLoading(false);
+        setInitialLoading(false);
       }
     }
   };
@@ -86,14 +86,17 @@ const History = () => {
   };
 
   const handleRefresh = () => {
-    setList([]);
     setCursor(null);
     setHasMore(true);
-    fetchHistory(false);
+    fetchHistory(false, true);
   };
 
   useEffect(() => {
-    fetchHistory(false);
+    const initData = async () => {
+      setInitialLoading(true);
+      await fetchHistory(false);
+    };
+    initData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -177,7 +180,7 @@ const History = () => {
         </div>
         {displayMode === "card" ? (
           <GridList
-            loading={loading}
+            loading={initialLoading}
             data={list}
             itemKey={item => `${item.history.oid}-${item.view_at}`}
             renderItem={renderMediaItem}

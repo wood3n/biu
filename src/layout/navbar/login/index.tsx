@@ -15,8 +15,16 @@ const Login = ({ isOpen, onOpenChange }: Props) => {
   const onClose = () => onOpenChange(false);
 
   return (
-    <Modal size="2xl" isOpen={isOpen} isDismissable={false} onOpenChange={onOpenChange}>
-      <ModalContent className="login-modal text-foreground">
+    <Modal
+      size="2xl"
+      isOpen={isOpen}
+      isDismissable={false}
+      onOpenChange={onOpenChange}
+      classNames={{
+        base: "theme-aware-modal",
+      }}
+    >
+      <ModalContent className="text-foreground">
         <ModalBody className="flex-row items-center justify-center gap-8 py-8">
           <QrcodeLogin onClose={onClose} />
           <Divider className="h-42" orientation="vertical" />

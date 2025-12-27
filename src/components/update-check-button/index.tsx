@@ -33,7 +33,11 @@ const UpdateCheckButton = () => {
     }
   };
 
-  return <AsyncButton onPress={checkUpdate}>{isUpdateAvailable ? "查看更新内容" : "检查更新"}</AsyncButton>;
+  return (
+    <AsyncButton className="text-xs" onPress={checkUpdate}>
+      {isUpdateAvailable ? "查看更新内容" : "检查更新"}
+    </AsyncButton>
+  );
 };
 
 export default UpdateCheckButton;

@@ -17,7 +17,7 @@ const MoreMenu: React.FC<MoreMenuProps> = ({ onAddToNext, onDownloadAudio, onDow
     <Dropdown>
       <DropdownTrigger>
         <Button variant="light" isIconOnly size="sm" radius="md" className="text-default-500">
-          <RiMore2Fill size={16} />
+          <RiMore2Fill size={20} />
         </Button>
       </DropdownTrigger>
       <DropdownMenu aria-label="More Actions">
