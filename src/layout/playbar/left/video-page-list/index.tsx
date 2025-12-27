@@ -31,51 +31,61 @@ const VideoPageListDrawer = () => {
   const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
   return (
-    <Popover disableAnimation placement="top" offset={28} radius="md" isOpen={isOpen} onOpenChange={onOpenChange}>
-      <PopoverTrigger>
-        <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={onOpen}>
-          <RiListRadio size={18} />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="bg-content2 w-auto min-w-[500px] overflow-hidden p-0"
-        style={{ maxWidth: "min(500px, 90vw)" }}
+    <>
+      {isOpen && <div className="fixed inset-0 z-[100] bg-black/50" onClick={onClose} />}
+      <Popover
+        placement="top"
+        offset={28}
+        radius="md"
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        classNames={{ content: "z-[101]" }}
       >
-        <div className="border-b-content2 flex w-full flex-row items-center justify-between space-x-2 border-b px-4 py-3">
-          <h3>分集</h3>
-          <Input
-            classNames={{
-              base: "max-w-48 h-8",
-              mainWrapper: "h-full",
-              input: "text-small",
-              inputWrapper: "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
+        <PopoverTrigger>
+          <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={onOpen}>
+            <RiListRadio size={18} />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="bg-content2 w-auto min-w-[500px] overflow-hidden p-0"
+          style={{ maxWidth: "min(500px, 90vw)" }}
+        >
+          <div className="border-b-content2 flex w-full flex-row items-center justify-between space-x-2 border-b px-4 py-3">
+            <h3>分集</h3>
+            <Input
+              classNames={{
+                base: "max-w-48 h-8",
+                mainWrapper: "h-full",
+                input: "text-small",
+                inputWrapper: "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
+              }}
+              placeholder="搜索分集"
+              size="sm"
+              startContent={<RiSearchLine size={14} />}
+              type="search"
+              value={searchKeyword}
+              onValueChange={setSearchKeyword}
+            />
+          </div>
+          <VirtualList
+            className="h-[60vh] w-full px-2"
+            data={filteredPages}
+            itemHeight={48}
+            overscan={5}
+            empty={
+              <div className="flex flex-col items-center justify-center px-4">
+                <Empty className="min-h-[180px]" />
+                <div className="text-foreground-500 py-3 text-sm">暂无匹配结果</div>
+              </div>
+            }
+            renderItem={item => {
+              const isActive = item.id === playId;
+              return <ListItem key={item.id} data={item} isActive={isActive} onClose={onClose} />;
             }}
-            placeholder="搜索分集"
-            size="sm"
-            startContent={<RiSearchLine size={14} />}
-            type="search"
-            value={searchKeyword}
-            onValueChange={setSearchKeyword}
           />
-        </div>
-        <VirtualList
-          className="h-[60vh] w-full px-2"
-          data={filteredPages}
-          itemHeight={48}
-          overscan={5}
-          empty={
-            <div className="flex flex-col items-center justify-center px-4">
-              <Empty className="min-h-[180px]" />
-              <div className="text-foreground-500 py-3 text-sm">暂无匹配结果</div>
-            </div>
-          }
-          renderItem={item => {
-            const isActive = item.id === playId;
-            return <ListItem key={item.id} data={item} isActive={isActive} onClose={onClose} />;
-          }}
-        />
-      </PopoverContent>
-    </Popover>
+        </PopoverContent>
+      </Popover>
+    </>
   );
 };
 

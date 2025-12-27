@@ -102,8 +102,8 @@ export const SystemSettingsTab = ({
       {/* 全局圆角设置 */}
       <div className="flex w-full items-center justify-between">
         <div className="mr-6 space-y-1">
-          <div className="text-medium font-medium">界面样式</div>
-          <div className="text-sm text-zinc-500">选择界面控件的圆角样式</div>
+          <div className="text-medium font-medium">控件样式</div>
+          <div className="text-sm text-zinc-500">选择界面控件样式</div>
         </div>
         <div className="w-[180px]">
           <Controller
@@ -111,7 +111,7 @@ export const SystemSettingsTab = ({
             name="borderRadius"
             render={({ field }) => (
               <Select
-                aria-label="界面样式"
+                aria-label="控件样式"
                 selectedKeys={field.value === 10 ? new Set(["rounded"]) : new Set(["square"])}
                 onSelectionChange={keys => {
                   const value = Array.from(keys)[0] as string;

@@ -39,14 +39,13 @@ const PlayListDrawer = ({ isOpen, onOpenChange }: Props) => {
       backdrop="opaque"
       size="sm"
       hideCloseButton
-      disableAnimation
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       classNames={{
-        base: "theme-aware-modal data-[placement=right]:mb-[88px]",
+        base: "theme-aware-modal data-[placement=right]:mb-[88px] data-[placement=right]:mr-3 data-[placement=right]:mt-3",
       }}
     >
-      <DrawerContent>
+      <DrawerContent className="rounded-xl">
         <DrawerHeader className="border-b-content2 flex flex-row items-center justify-between space-x-2 border-b px-4 py-3">
           <h3>播放列表</h3>
           <div className="inline-flex items-center">
