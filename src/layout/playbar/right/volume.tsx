@@ -115,11 +115,14 @@ const Volume = () => {
     <Tooltip
       id={tooltipId}
       placement="top"
-      delay={300}
+      delay={200}
       showArrow={false}
       shouldCloseOnBlur={false}
       isOpen={isTooltipOpen}
       onOpenChange={setIsTooltipOpen}
+      classNames={{
+        content: "py-3 px-2 w-[60px] min-w-[60px] h-[270px]",
+      }}
       content={
         <div ref={setSliderRef} className="flex items-center justify-center p-3">
           <Slider
@@ -136,7 +139,7 @@ const Volume = () => {
             // @ts-expect-error volume is number
             onChange={onVolumeChange}
             classNames={{
-              trackWrapper: "h-40 w-[32px]",
+              trackWrapper: "h-[225px]",
               thumb: "after:hidden",
             }}
             endContent={

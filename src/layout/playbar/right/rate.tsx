@@ -18,31 +18,19 @@ const Rate = () => {
     setIsTooltipOpen(!isTooltipOpen);
   };
 
-  // 处理鼠标进入事件，打开tooltip
-  const handleMouseEnter = () => {
-    setIsTooltipOpen(true);
-  };
-
-  // 处理鼠标离开事件，关闭tooltip
-  const handleMouseLeave = () => {
-    setIsTooltipOpen(false);
-  };
-
   return (
     <Tooltip
       isOpen={isTooltipOpen}
       placement="top"
       delay={200}
       showArrow={false}
+      shouldCloseOnBlur={false}
+      onOpenChange={setIsTooltipOpen}
       classNames={{
         content: "py-3 px-2 w-[60px] min-w-[60px]",
       }}
       content={
-        <div
-          className="flex flex-col items-center gap-1"
-          onMouseEnter={() => setIsTooltipOpen(true)}
-          onMouseLeave={() => setIsTooltipOpen(false)}
-        >
+        <div className="flex flex-col items-center gap-1">
           {PlayRate.map(v => (
             <Button
               key={v}
@@ -68,8 +56,6 @@ const Rate = () => {
         aria-label="播放速率"
         aria-describedby={tooltipId}
         onPress={handleClick}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
       >
         {rate}x
       </Button>
