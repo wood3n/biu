@@ -39,10 +39,10 @@
     "release:alpha": "git fetch --tags --force && changelogen --release --push --hideAuthorEmail --prerelease alpha"
   },
   "dependencies": {
-    "@heroui/react": "^2.8.3",
+    "@heroui/react": "^2.8.7",
     "@hookform/resolvers": "^5.2.2",
-    "@remixicon/react": "^4.6.0",
-    "@tanstack/react-virtual": "^3.13.12",
+    "@remixicon/react": "^4.7.0",
+    "@tanstack/react-virtual": "^3.13.13",
     "ahooks": "^3.9.5",
     "axios": "^1.11.0",
     "classnames": "^2.5.1",
@@ -61,7 +61,7 @@
     "jsencrypt": "^3.5.4",
     "moment": "^2.30.1",
     "moment-duration-format": "^2.3.2",
-    "overlayscrollbars": "^2.12.0",
+    "overlayscrollbars": "^2.13.0",
     "overlayscrollbars-react": "^0.5.6",
     "p-queue": "^9.0.1",
     "qrcode.react": "^4.2.0",
