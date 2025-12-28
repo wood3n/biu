@@ -114,11 +114,12 @@ const MusicRecommend = () => {
       displayMode={displayMode}
       type="mv"
       bvid={item.bvid}
-      aid={String(item.id)}
+      aid={item.aid || item.related_archive.aid}
       key={item.id}
       cover={item.cover}
       title={item.music_title}
       ownerName={item.author}
+      ownerMid={item.related_archive.uid}
       playCount={item.related_archive.vv_count}
       footer={
         displayMode === "card" && <div className="w-full truncate text-left text-sm text-zinc-400">{item.author}</div>
@@ -128,6 +129,9 @@ const MusicRecommend = () => {
           type: "mv",
           bvid: item.bvid,
           title: item.music_title,
+          cover: item.cover,
+          ownerName: item.author,
+          ownerMid: item.related_archive.uid,
         })
       }
     />
