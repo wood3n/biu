@@ -22,24 +22,29 @@ const Collection = () => {
   return (
     <>
       {Boolean(user?.isLogin) && (
-        <MenuGroup
-          title="我创建的"
-          titleExtra={
-            <Tooltip closeDelay={0} content="新建收藏夹">
-              <Button isIconOnly variant="light" size="sm" className="h-auto w-auto min-w-auto p-1" onPress={onOpen}>
-                <RiAddLine size={16} />
-              </Button>
-            </Tooltip>
-          }
-          items={ownFolder
-            .filter(item => !hiddenMenuKeys.includes(String(item.id)))
-            .map(item => ({
-              title: item.title,
-              href: `/collection/${item.id}?mid=${item?.mid}`,
-              icon: RiFolderLine,
-              activeIcon: RiFolderOpenLine,
-            }))}
-        />
+        <>
+          <div className="border-default-200/30 dark:border-default-700/10 my-2 border-t" />
+          <MenuGroup
+            title="我创建的"
+            collapsible
+            defaultExpanded={true}
+            titleExtra={
+              <Tooltip closeDelay={0} content="新建收藏夹">
+                <Button isIconOnly variant="light" size="sm" className="h-auto w-auto min-w-auto p-1" onPress={onOpen}>
+                  <RiAddLine size={16} />
+                </Button>
+              </Tooltip>
+            }
+            items={ownFolder
+              .filter(item => !hiddenMenuKeys.includes(String(item.id)))
+              .map(item => ({
+                title: item.title,
+                href: `/collection/${item.id}?mid=${item?.mid}`,
+                icon: RiFolderLine,
+                activeIcon: RiFolderOpenLine,
+              }))}
+          />
+        </>
       )}
       {Boolean(filteredCollectedFolder?.length) && (
         <>

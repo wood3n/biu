@@ -96,7 +96,7 @@ const DynamicItem: React.FC<DynamicItemProps> = ({ item, onClose }) => {
       <CardBody className="text-small text-default-700 px-0 py-1 whitespace-pre-wrap">
         {Boolean(textContent) && <p className="mb-2 leading-relaxed">{textContent}</p>}
         <div
-          className="group border-default-200 dark:border-default-100 bg-default-50 hover:bg-default-100 relative mt-2 cursor-pointer overflow-hidden rounded-xl border"
+          className="group border-default-200 dark:border-default-100 bg-default-50 hover:bg-default-100 dark:hover:bg-default-200 relative mt-2 cursor-pointer overflow-hidden rounded-xl border"
           onClick={async () => {
             await play({
               bvid: archive?.bvid || "",

@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 
 import { Button, Input, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@heroui/react";
-import { RiListRadio, RiSearchLine } from "@remixicon/react";
+import { RiListUnordered, RiSearchLine } from "@remixicon/react";
 
 import Empty from "@/components/empty";
 import { VirtualList } from "@/components/virtual-list";
@@ -43,7 +43,7 @@ const VideoPageListDrawer = () => {
       >
         <PopoverTrigger>
           <Button isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={onOpen}>
-            <RiListRadio size={18} />
+            <RiListUnordered size={18} />
           </Button>
         </PopoverTrigger>
         <PopoverContent

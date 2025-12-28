@@ -127,7 +127,7 @@ const DynamicFeedDrawer = ({ isOpen, onOpenChange }: DynamicFeedDrawerProps) => 
         base: "theme-aware-modal",
       }}
     >
-      <DrawerContent>
+      <DrawerContent className="bg-content2 border-default-200 dark:border-default-300 border">
         <DrawerHeader className="border-default-100 border-b">动态</DrawerHeader>
         <DrawerBody className="flex-1 overflow-hidden p-0">
           <ScrollContainer
