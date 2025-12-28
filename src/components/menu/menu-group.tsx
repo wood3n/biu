@@ -20,7 +20,7 @@ const MenuGroup = ({ title, titleExtra, itemClassName, items, collapsible = fals
 
   return (
     <>
-      <div className="flex items-center justify-between p-2 text-zinc-500">
+      <div className="text-foreground-500 flex items-center justify-between p-2">
         {collapsible ? (
           <Button
             onPress={() => setIsExpanded(!isExpanded)}
@@ -29,14 +29,14 @@ const MenuGroup = ({ title, titleExtra, itemClassName, items, collapsible = fals
             color="default"
             className={clx("h-auto min-w-0 flex-1 justify-start px-2 py-1.5", {
               "text-primary": isExpanded,
-              "text-zinc-500": !isExpanded,
+              "text-foreground-500": !isExpanded,
             })}
             startContent={isExpanded ? <RiArrowDownSLine size={16} /> : <RiArrowRightSLine size={16} />}
           >
             <span className="truncate">{title}</span>
           </Button>
         ) : (
-          <div className="flex items-center gap-1 text-sm text-zinc-500">
+          <div className="text-foreground-500 flex items-center gap-1 text-sm">
             <span>{title}</span>
           </div>
         )}

@@ -50,6 +50,8 @@ const Collection = () => {
         <>
           <MenuGroup
             title="我收藏的"
+            collapsible
+            defaultExpanded={true}
             items={filteredCollectedFolder.map(item => ({
               title: item.title,
               href: `/collection/${item.id}?type=${item.type}&mid=${item?.mid}`,
@@ -57,11 +59,10 @@ const Collection = () => {
               icon: RiFolderLine,
               activeIcon: RiFolderOpenLine,
             }))}
-            itemClassName="pl-3"
           />
           {collectedFolderHasMore && (
             <div
-              className="cursor-pointer p-2 text-center text-sm text-zinc-500 transition-colors hover:text-zinc-700"
+              className="cursor-pointer p-2 text-center text-sm text-zinc-500 transition-colors hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300"
               onClick={loadMoreCollectedFolder}
             >
               显示剩余{collectedFolderTotal - collectedFolder.length}个
