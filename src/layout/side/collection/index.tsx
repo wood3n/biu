@@ -15,6 +15,7 @@ const Collection = () => {
   const collectedFolderTotal = useUser(state => state.collectedFolderTotal);
   const loadMoreCollectedFolder = useUser(state => state.loadMoreCollectedFolder);
 
+  const filteredOwnFolder = ownFolder.filter(item => !hiddenMenuKeys.includes(String(item.id)));
   const filteredCollectedFolder = collectedFolder.filter(item => !hiddenMenuKeys.includes(String(item.id)));
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -24,26 +25,32 @@ const Collection = () => {
       {Boolean(user?.isLogin) && (
         <>
           <div className="border-default-200/30 dark:border-default-700/10 my-2 border-t" />
-          <MenuGroup
-            title="我创建的"
-            collapsible
-            defaultExpanded={true}
-            titleExtra={
-              <Tooltip closeDelay={0} content="新建收藏夹">
-                <Button isIconOnly variant="light" size="sm" className="h-auto w-auto min-w-auto p-1" onPress={onOpen}>
-                  <RiAddLine size={16} />
-                </Button>
-              </Tooltip>
-            }
-            items={ownFolder
-              .filter(item => !hiddenMenuKeys.includes(String(item.id)))
-              .map(item => ({
+          {Boolean(filteredOwnFolder.length > 0) && (
+            <MenuGroup
+              title="我创建的"
+              collapsible
+              defaultExpanded={true}
+              titleExtra={
+                <Tooltip closeDelay={0} content="新建收藏夹">
+                  <Button
+                    isIconOnly
+                    variant="light"
+                    size="sm"
+                    className="h-auto w-auto min-w-auto p-1"
+                    onPress={onOpen}
+                  >
+                    <RiAddLine size={16} />
+                  </Button>
+                </Tooltip>
+              }
+              items={filteredOwnFolder.map(item => ({
                 title: item.title,
                 href: `/collection/${item.id}?mid=${item?.mid}`,
                 icon: RiFolderLine,
                 activeIcon: RiFolderOpenLine,
               }))}
-          />
+            />
+          )}
         </>
       )}
       {Boolean(filteredCollectedFolder?.length) && (
