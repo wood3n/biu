@@ -12,6 +12,10 @@ import { defaultAppSettings, THEME_MODE_OPTIONS } from "@shared/settings/app-set
 
 import ImportExport from "./export-import";
 
+// 圆角半径常量
+const ROUNDED_BORDER_RADIUS = 10;
+const SQUARE_BORDER_RADIUS = 0;
+
 type SystemSettingsTabProps = {
   appVersion: string;
   audioQuality: AudioQuality;
@@ -112,10 +116,10 @@ export const SystemSettingsTab = ({
             render={({ field }) => (
               <Select
                 aria-label="控件样式"
-                selectedKeys={field.value === 10 ? new Set(["rounded"]) : new Set(["square"])}
+                selectedKeys={field.value !== SQUARE_BORDER_RADIUS ? new Set(["rounded"]) : new Set(["square"])}
                 onSelectionChange={keys => {
                   const value = Array.from(keys)[0] as string;
-                  field.onChange(value === "rounded" ? 10 : 0);
+                  field.onChange(value === "rounded" ? ROUNDED_BORDER_RADIUS : SQUARE_BORDER_RADIUS);
                 }}
               >
                 <SelectItem key="rounded">圆角</SelectItem>
