@@ -1,4 +1,5 @@
 import { app } from "electron";
+import log from "electron-log";
 import got from "got";
 import { EventEmitter } from "node:events";
 import fs from "node:fs";
@@ -130,6 +131,7 @@ export class DownloadCore extends EventEmitter {
       ) {
         return;
       }
+      this.logError("download error", error);
       this.status = "failed";
       this.error = error instanceof Error ? error.message : String(error);
       this.emitUpdate();
@@ -180,6 +182,7 @@ export class DownloadCore extends EventEmitter {
           break;
       }
     } catch (error) {
+      this.logError("resume error", error);
       this.status = "failed";
       this.error = error instanceof Error ? error.message : String(error);
       this.emitUpdate();
@@ -590,6 +593,32 @@ export class DownloadCore extends EventEmitter {
         signal: this.abortSignal,
       });
     }
+  }
+
+  private logError(title: string, error: unknown) {
+    log.error(title, error);
+    log.error("[download core]", {
+      id: this.id,
+      status: this.status,
+      bvid: this.bvid,
+      cid: this.cid,
+      sid: this.sid,
+      title: this.title,
+      outputFileType: this.outputFileType,
+      audioUrl: this.audioUrl,
+      audioCodecs: this.audioCodecs,
+      audioBandwidth: this.audioBandwidth,
+      videoUrl: this.videoUrl,
+      videoResolution: this.videoResolution,
+      videoFrameRate: this.videoFrameRate,
+      totalBytes: this.totalBytes,
+      downloadedBytes: this.downloadedBytes,
+      downloadProgress: this.downloadProgress,
+      mergeProgress: this.mergeProgress,
+      convertProgress: this.convertProgress,
+      tempDir: this.tempDir,
+      savePath: this.savePath,
+    });
   }
 
   private emitUpdate() {

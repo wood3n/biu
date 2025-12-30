@@ -82,7 +82,7 @@ interface State {
   shouldKeepPagesOrderInRandomPlayMode: boolean;
 }
 
-interface PlayItem {
+export interface PlayItem {
   type: PlayDataType;
   title: string;
   bvid?: string;
@@ -225,7 +225,7 @@ const updatePositionState = () => {
   }
 };
 
-const isSame = (
+export const isSame = (
   item1?: { type: "mv" | "audio"; sid?: number; bvid?: string },
   item2?: { type: "mv" | "audio"; sid?: number; bvid?: string },
 ) => {

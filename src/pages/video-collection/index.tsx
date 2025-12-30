@@ -2,10 +2,9 @@ import React, { useMemo } from "react";
 import { useSearchParams } from "react-router";
 
 import { CollectionType } from "@/common/constants/collection";
-import ScrollContainer from "@/components/scroll-container";
 
 import Favorites from "./favorites";
-import VideoCollectionInfo from "./video-series";
+import VideoSeries from "./series";
 
 const Folder = () => {
   const [searchParams] = useSearchParams();
@@ -16,12 +15,10 @@ const Folder = () => {
   );
 
   return (
-    <ScrollContainer className="h-full w-full">
-      <div className="w-full p-4">
-        {collectionType === CollectionType.Favorite && <Favorites />}
-        {collectionType === CollectionType.VideoSeries && <VideoCollectionInfo />}
-      </div>
-    </ScrollContainer>
+    <>
+      {collectionType === CollectionType.Favorite && <Favorites />}
+      {collectionType === CollectionType.VideoSeries && <VideoSeries />}
+    </>
   );
 };
 

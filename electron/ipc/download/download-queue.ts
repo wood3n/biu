@@ -91,7 +91,6 @@ export class DownloadQueue {
         if (pages.length === 1) {
           core.cid = pages[0].cid;
         } else {
-          await this.cancelTask(core.id);
           pages.forEach(page =>
             this.addTask({
               outputFileType: core.outputFileType,
@@ -101,6 +100,7 @@ export class DownloadQueue {
               cover: page.cover,
             }),
           );
+          this.cancelTask(core.id);
         }
       } else {
         throw new Error("无法获取视频分集信息");
@@ -114,7 +114,7 @@ export class DownloadQueue {
         await this.getVideoPages(core);
 
         core.removeAllListeners("update");
-        core.on("update", (updateData: any) => {
+        core.on("update", updateData => {
           this.pendingUpdates.set(core.id!, updateData);
           this.flushUpdates();
         });

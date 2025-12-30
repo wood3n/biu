@@ -64,14 +64,14 @@ const FullScreenPlayer = () => {
 
   const waveformWidth = Math.min(windowWidth * 0.82, 900);
 
-  if (!playItem) return null;
-
-  const coverSrc = playItem.pageCover || playItem.cover;
+  const coverSrc = playItem?.pageCover || playItem?.cover;
   const { effectsProfile, bgLayerA, bgLayerB, activeBgLayer, cssVars } = useGlassmorphism(
     coverSrc,
     primaryColor,
     isOpen,
   );
+
+  if (!playItem) return null;
 
   return (
     <Drawer

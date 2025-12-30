@@ -15,6 +15,8 @@ import { useRequest } from "ahooks";
 
 import { getFavFolderCreatedListAll } from "@/service/fav-folder-created-list-all";
 import { postFavFolderDeal } from "@/service/fav-folder-deal";
+import { getAudioCreatedFavList } from "@/service/medialist-gateway-base-created";
+import { postCollResourceDeal } from "@/service/medialist-gateway-coll-resource-deal";
 import { useModalStore } from "@/store/modal";
 import { useUser } from "@/store/user";
 
@@ -35,7 +37,7 @@ const FavoritesSelectModal = () => {
   const isFavSelectModalOpen = useModalStore(s => s.isFavSelectModalOpen);
   const onFavSelectModalOpenChange = useModalStore(s => s.onFavSelectModalOpenChange);
   const favSelectModalData = useModalStore(s => s.favSelectModalData);
-  const { rid, title, afterSubmit } = favSelectModalData || {};
+  const { rid, type = "mv", title, favId, afterSubmit } = favSelectModalData || {};
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -52,13 +54,27 @@ const FavoritesSelectModal = () => {
   const { data, loading } = useRequest(
     async () => {
       if (!rid) return [];
-      const res = await getFavFolderCreatedListAll({
-        rid: Number(rid),
-        type: 2,
-        up_mid: user?.mid as number,
-      });
 
-      const selectedFavs = res?.data?.list?.filter(item => item.fav_state === 1) || [];
+      let list: any[] = [];
+      if (type === "audio") {
+        const res = await getAudioCreatedFavList({
+          rid: Number(rid),
+          type: 12,
+          up_mid: user?.mid as number,
+          pn: 1,
+          ps: 100,
+        });
+        list = res?.data?.list || [];
+      } else {
+        const res = await getFavFolderCreatedListAll({
+          rid: Number(rid),
+          type: 2,
+          up_mid: user?.mid as number,
+        });
+        list = res?.data?.list || [];
+      }
+
+      const selectedFavs = list.filter(item => item.fav_state === 1) || [];
       if (selectedFavs?.length) {
         prevSelectedRef.current = selectedFavs.map(item => item.id);
         setSelectedIds(prevSelectedRef.current);
@@ -67,7 +83,7 @@ const FavoritesSelectModal = () => {
         setSelectedIds([]);
       }
 
-      return res?.data?.list;
+      return list;
     },
     {
       ready: Boolean(isFavSelectModalOpen && user?.mid && rid),
@@ -91,19 +107,35 @@ const FavoritesSelectModal = () => {
 
     try {
       setSubmitting(true);
-      const res = await postFavFolderDeal({
-        rid,
-        add_media_ids: addMediaIds,
-        del_media_ids: delMediaIds,
-        type: 2,
-        platform: "web",
-        ga: 1,
-        gaia_source: "web_normal",
-      });
+
+      let res: any;
+      if (type === "audio") {
+        res = await postCollResourceDeal({
+          rid,
+          type: 12,
+          add_media_ids: addMediaIds,
+          del_media_ids: delMediaIds,
+        });
+      } else {
+        res = await postFavFolderDeal({
+          rid,
+          add_media_ids: addMediaIds,
+          del_media_ids: delMediaIds,
+          type: 2,
+          platform: "web",
+          ga: 1,
+          gaia_source: "web_normal",
+        });
+      }
 
       if (res.code === 0) {
         onFavSelectModalOpenChange(false);
-        afterSubmit?.(selectedIds);
+        const isFavorite = selectedIds.includes(Number(favId));
+        addToast({
+          title: "已修改收藏夹",
+          color: "success",
+        });
+        afterSubmit?.(isFavorite);
       } else {
         addToast({
           title: res.message,
@@ -118,7 +150,8 @@ const FavoritesSelectModal = () => {
   return (
     <Modal
       disableAnimation
-      backdrop="blur"
+      hideCloseButton
+      backdrop="opaque"
       scrollBehavior="inside"
       shouldBlockScroll={false}
       isOpen={isFavSelectModalOpen}

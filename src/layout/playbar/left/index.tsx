@@ -5,13 +5,16 @@ import { Chip, Image } from "@heroui/react";
 import { RiArrowUpSLine } from "@remixicon/react";
 
 import { openBiliVideoLink } from "@/common/utils/url";
+import MusicFavButton from "@/components/music-fav-button";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
+import { useUser } from "@/store/user";
 
 import PageListDrawer from "./page-list";
 
 const LeftControl = () => {
   const navigate = useNavigate();
+  const user = useUser(s => s.user);
   const open = useModalStore(s => s.openFullScreenPlayer);
   const list = usePlayList(s => s.list);
   const playId = usePlayList(s => s.playId);
@@ -45,8 +48,16 @@ const LeftControl = () => {
           >
             {playItem?.pageTitle || playItem?.title}
           </span>
-          {Boolean(playItem?.isLossless) && <Chip size="sm">无损</Chip>}
-          {Boolean(playItem?.isDolby) && <Chip size="sm">杜比音频</Chip>}
+          {Boolean(playItem?.isLossless) && (
+            <Chip size="sm" className="text-tiny">
+              无损
+            </Chip>
+          )}
+          {Boolean(playItem?.isDolby) && (
+            <Chip size="sm" className="text-tiny">
+              杜比音频
+            </Chip>
+          )}
         </span>
         {Boolean(playItem?.ownerName) && (
           <span
@@ -60,7 +71,10 @@ const LeftControl = () => {
           </span>
         )}
       </div>
-      {Boolean(playItem?.hasMultiPart) && <PageListDrawer />}
+      <div className="flex items-center">
+        {Boolean(playItem?.hasMultiPart) && <PageListDrawer />}
+        {Boolean(user?.isLogin) && Boolean(playId) && <MusicFavButton />}
+      </div>
     </div>
   );
 };

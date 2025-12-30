@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router";
 
-import { Button, Image } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { RiPlayFill } from "@remixicon/react";
 import clx from "classnames";
 
+import Image from "@/components/image";
 import { type PlayData } from "@/store/play-list";
 
 import Menus from "./menu";
@@ -31,15 +32,7 @@ const ListItem = ({ data, isPlaying, onPress, onClose }: Props) => {
     >
       <div className="m-0 flex min-w-0 flex-1 items-center">
         <div className="relative h-12 w-12 flex-none">
-          <Image
-            removeWrapper
-            radius="md"
-            src={data.cover}
-            alt={data.title}
-            width="100%"
-            height="100%"
-            className="object-cover"
-          />
+          <Image removeWrapper radius="md" src={data.cover} alt={data.title} width={48} height={48} />
           {!isPlaying && (
             <div className="absolute inset-0 z-20 flex items-center justify-center rounded-md bg-[rgba(0,0,0,0.35)] opacity-0 group-hover:opacity-100">
               <RiPlayFill size={20} className="text-white transition-transform duration-200 group-hover:scale-110" />

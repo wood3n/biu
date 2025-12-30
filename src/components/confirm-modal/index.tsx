@@ -55,6 +55,7 @@ const ConfirmModal = () => {
     <Modal
       disableAnimation
       radius="md"
+      hideCloseButton
       isOpen={isConfirmModalOpen}
       onOpenChange={onConfirmModalOpenChange}
       isDismissable={false}
@@ -63,7 +64,7 @@ const ConfirmModal = () => {
         {() => (
           <>
             <ModalHeader className="flex items-center gap-1">
-              <RiErrorWarningLine color={colorMap[type]} />
+              <RiErrorWarningLine color={colorMap[type]} className="flex-none" />
               <span>{title}</span>
             </ModalHeader>
             {description ? (

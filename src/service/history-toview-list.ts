@@ -7,6 +7,16 @@ export interface HistoryToViewListParams {
   ps?: number;
   /** 0: 全部；2：未看完 */
   viewed?: number;
+  /** 开始时间时间戳，默认为 0（当前时间） */
+  add_time_start?: number;
+  /** 结束时间时间戳，默认为 0（当前时间） */
+  add_time_end?: number;
+  /** 视频最大时长（秒），默认为 0（不筛选） */
+  arc_max_duration?: number;
+  /** 视频最小时长（秒），默认为 0（不筛选） */
+  arc_min_duration?: number;
+  /** 搜索关键词，默认空字符串（不筛选） */
+  key?: string;
 }
 
 /** 稍后再看视频条目（字段与 web 接口一致，尽量精确建模） */

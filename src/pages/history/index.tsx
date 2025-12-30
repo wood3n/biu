@@ -1,49 +1,55 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { addToast, Button, Link } from "@heroui/react";
-import { RiRefreshLine } from "@remixicon/react";
-import moment from "moment";
+import { addToast, Button, Spinner } from "@heroui/react";
+import { RiDeleteBinLine } from "@remixicon/react";
 
-import { formatDuration } from "@/common/utils";
-import GridList from "@/components/grid-list";
-import MediaItem from "@/components/media-item";
-import ScrollContainer from "@/components/scroll-container";
+import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
+import { postHistoryClear } from "@/service/history-clear";
+import { postHistoryDelete } from "@/service/history-delete";
 import {
-  getWebInterfaceHistoryCursor,
-  type HistoryBusinessType,
+  searchWebInterfaceHistory,
   type HistoryListItem,
-} from "@/service/web-interface-history-cursor";
+  type WebInterfaceHistorySearchParams,
+} from "@/service/web-interface-history-search";
+import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 
-const HISTORY_PAGE_SIZE = 30;
+import GridList from "./grid-list";
+import HistoryList from "./list";
+import HistorySearch from "./search";
 
 const History = () => {
+  const scrollerRef = useRef<ScrollRefObject>(null);
+
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [list, setList] = useState<HistoryListItem[]>([]);
-  const [cursor, setCursor] = useState<{ max: number; business: HistoryBusinessType | ""; view_at: number } | null>(
-    null,
-  );
+  const pageRef = useRef(1);
+  const keywordRef = useRef("");
+  const dateRangeRef = useRef<{ start?: number; end?: number } | null>(null);
   const [hasMore, setHasMore] = useState(true);
-  const play = usePlayList(s => s.play);
   const displayMode = useSettings(state => state.displayMode);
 
-  const fetchHistory = async (isLoadMore = false) => {
+  // 加载历史记录（只负责请求和数据合并，loading 状态由调用方管理）
+  const fetchHistory = useCallback(async () => {
     try {
-      if (isLoadMore) {
-        setLoadingMore(true);
-      } else {
-        setLoading(true);
+      const params: WebInterfaceHistorySearchParams = {
+        pn: pageRef.current,
+        keyword: keywordRef.current,
+        business: "archive",
+      };
+
+      if (dateRangeRef.current) {
+        if (dateRangeRef.current.start) {
+          params.add_time_start = Math.floor(dateRangeRef.current.start / 1000);
+        }
+        if (dateRangeRef.current.end) {
+          params.add_time_end = Math.floor(dateRangeRef.current.end / 1000);
+        }
       }
 
-      const res = await getWebInterfaceHistoryCursor({
-        type: "archive",
-        ps: HISTORY_PAGE_SIZE,
-        max: cursor ? cursor.max : 0,
-        business: cursor?.business || undefined,
-        view_at: cursor ? cursor.view_at : 0,
-      });
+      const res = await searchWebInterfaceHistory(params);
 
       if (res.code !== 0) {
         if (res.code === -101) {
@@ -53,153 +59,234 @@ const History = () => {
       }
 
       const newList = res.data?.list || [];
-      if (isLoadMore) {
-        setList(prev => [...prev, ...newList]);
-      } else {
+      // 统一走追加逻辑；首次加载 / 刷新前会清空 list
+      if (pageRef.current === 1) {
         setList(newList);
+      } else {
+        setList(prev => [...prev, ...newList]);
       }
 
-      if (newList.length > 0 && res.data.cursor) {
-        setCursor({
-          max: res.data.cursor.max,
-          business: res.data.cursor.business || "",
-          view_at: res.data.cursor.view_at,
-        });
-      }
-      setHasMore(!!(newList.length > 0 && res.data.cursor));
+      setHasMore(res.data.has_more);
     } catch (error: any) {
       addToast({
         title: error?.message || "获取历史记录失败",
         color: "danger",
       });
-    } finally {
-      if (isLoadMore) {
-        setLoadingMore(false);
-      } else {
-        setLoading(false);
+      // 如果是第一页请求失败，清空列表
+      if (pageRef.current === 1) {
+        setList([]);
       }
     }
-  };
-
-  const handleLoadMore = () => {
-    fetchHistory(true);
-  };
-
-  const handleRefresh = () => {
-    setList([]);
-    setCursor(null);
-    setHasMore(true);
-    fetchHistory(false);
-  };
-
-  useEffect(() => {
-    fetchHistory(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handlePlay = (item: HistoryListItem) => {
-    if (item.history.bvid) {
-      play({
-        type: "mv",
-        bvid: item.history.bvid,
-        title: item.title,
-        cover: item.cover,
-        ownerName: item.author_name,
-        ownerMid: item.author_mid,
-      });
-    } else {
-      addToast({
-        title: "无法播放此类型内容",
-        color: "warning",
-      });
+  const refreshList = useCallback(async () => {
+    pageRef.current = 1;
+    setLoading(true);
+    try {
+      await fetchHistory();
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [fetchHistory]);
 
-  // 提取MediaItem公共渲染函数，避免重复代码
-  const renderMediaItem = (item: HistoryListItem) => {
-    const commonProps = {
-      displayMode,
-      type: "mv" as const, // 音频播放不会出现在历史记录中
-      bvid: item.history.bvid || "",
-      aid: String(item.history.oid),
-      title: item.title,
-      cover: item.cover,
-      ownerName: item.author_name,
-      ownerMid: item.author_mid,
-      onPress: () => handlePlay(item),
+  const handleLoadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    try {
+      pageRef.current += 1;
+      await fetchHistory();
+    } catch {
+      pageRef.current -= 1;
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, hasMore, fetchHistory]);
+
+  const handleSearch = useCallback(
+    async (keyword: string) => {
+      keywordRef.current = keyword;
+      pageRef.current = 1;
+      setLoading(true);
+      try {
+        await fetchHistory();
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchHistory],
+  );
+
+  const handleDateRangeChange = useCallback(
+    async (range: { start?: number; end?: number } | null) => {
+      dateRangeRef.current = range;
+      pageRef.current = 1;
+      setLoading(true);
+      try {
+        await fetchHistory();
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchHistory],
+  );
+
+  useEffect(() => {
+    // 首次进入页面加载一次
+    let cancelled = false;
+
+    const load = async () => {
+      setLoading(true);
+      try {
+        await fetchHistory();
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
     };
 
-    // 卡片模式下添加额外属性
-    if (displayMode === "card") {
-      return (
-        <MediaItem
-          key={`${item.history.oid}-${item.view_at}`}
-          {...commonProps}
-          coverHeight={200}
-          footer={
-            <div className="flex w-full flex-col space-y-1 text-sm">
-              <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
-                {item.author_mid ? (
-                  <Link href={`/user/${item.author_mid}`} className="text-foreground-500 text-sm hover:underline">
-                    {item.author_name}
-                  </Link>
-                ) : (
-                  <span>{item.author_name}</span>
-                )}
-                {item.duration && <span>{formatDuration(item.duration)}</span>}
-              </div>
-              <div className="text-foreground-400 flex w-full items-center justify-between text-xs">
-                <span>{moment.unix(item.view_at).format("YYYY-MM-DD HH:mm")}</span>
-                {item.progress !== undefined && item.duration && (
-                  <span>
-                    观看进度: {formatDuration(item.progress)} / {formatDuration(item.duration)}
-                  </span>
-                )}
-              </div>
-            </div>
-          }
-        />
-      );
-    }
+    load();
 
-    // 列表模式下直接返回
-    return <MediaItem {...commonProps} />;
-  };
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchHistory]);
+
+  const handleMenuAction = useCallback(async (key: string, item: HistoryListItem) => {
+    switch (key) {
+      case "play-next":
+        usePlayList.getState().addToNext({
+          type: "mv",
+          title: item.title,
+          cover: item.cover,
+          bvid: item.history.bvid,
+          ownerName: item.author_name,
+          ownerMid: item.author_mid,
+        });
+        break;
+      case "add-to-playlist":
+        usePlayList.getState().addList([
+          {
+            type: "mv",
+            title: item.title,
+            cover: item.cover,
+            bvid: item.history.bvid,
+            ownerName: item.author_name,
+            ownerMid: item.author_mid,
+          },
+        ]);
+        break;
+      case "favorite":
+        useModalStore.getState().onOpenFavSelectModal({
+          rid: item.history.oid,
+          type: "mv",
+          title: item.title,
+        });
+        break;
+      case "download-audio":
+        await window.electron.addMediaDownloadTask({
+          outputFileType: "audio",
+          title: item.title,
+          cover: item.cover,
+          bvid: item.history.bvid,
+          cid: item.history.cid,
+        });
+        addToast({
+          title: "已添加下载任务",
+          color: "success",
+        });
+        break;
+      case "download-video":
+        await window.electron.addMediaDownloadTask({
+          outputFileType: "video",
+          title: item.title,
+          cover: item.cover,
+          bvid: item.history.bvid,
+          cid: item.history.cid,
+        });
+        addToast({
+          title: "已添加下载任务",
+          color: "success",
+        });
+        break;
+      case "delete":
+        useModalStore.getState().onOpenConfirmModal({
+          title: `删除记录${item.title}`,
+          confirmText: "删除",
+          onConfirm: async () => {
+            const res = await postHistoryDelete({
+              kid: `${item.history.business}_${item.kid}`,
+            });
+
+            if (res.code === 0) {
+              setList(prev => prev.filter(record => record.kid !== item.kid));
+              addToast({
+                title: "已删除记录",
+                color: "success",
+              });
+            }
+            return res.code === 0;
+          },
+        });
+        break;
+    }
+  }, []);
+
+  const handleClear = useCallback(() => {
+    useModalStore.getState().onOpenConfirmModal({
+      title: "确认删除所有历史记录？",
+      confirmText: "删除",
+      onConfirm: async () => {
+        const res = await postHistoryClear();
+        if (res.code === 0) {
+          refreshList();
+        }
+        return res.code === 0;
+      },
+    });
+  }, [refreshList]);
+
+  const isEmpty = !loading && list.length === 0;
 
   return (
-    <>
-      <ScrollContainer className="h-full w-full p-4">
-        <div className="mb-4 flex items-center justify-between">
+    <ScrollContainer ref={scrollerRef} className="h-full w-full px-4">
+      <div className="mb-2">
+        <div className="flex items-center justify-between">
           <h1>历史记录</h1>
-          <Button isIconOnly variant="light" size="sm" onPress={handleRefresh}>
-            <RiRefreshLine size={18} />
+          <Button startContent={<RiDeleteBinLine size={18} />} onPress={handleClear}>
+            清空
           </Button>
         </div>
-        {displayMode === "card" ? (
-          <GridList
-            loading={loading}
-            data={list}
-            itemKey={item => `${item.history.oid}-${item.view_at}`}
-            renderItem={renderMediaItem}
-          />
-        ) : (
-          <div className="space-y-2">{list.map(renderMediaItem)}</div>
-        )}
-        {hasMore && (
-          <div className="flex w-full items-center justify-center py-6">
-            <Button
-              variant="flat"
-              color="primary"
-              isLoading={loadingMore}
-              onPress={handleLoadMore}
-              disabled={loadingMore}
-            >
-              {loadingMore ? "加载中..." : "加载更多"}
-            </Button>
-          </div>
-        )}
-      </ScrollContainer>
-    </>
+        <HistorySearch onSearch={handleSearch} onDateRangeChange={handleDateRangeChange} />
+      </div>
+
+      {loading && list.length === 0 ? (
+        <div className="flex h-[40vh] items-center justify-center">
+          <Spinner />
+        </div>
+      ) : isEmpty ? (
+        <div className="flex h-[40vh] items-center justify-center text-gray-500">暂无历史记录</div>
+      ) : displayMode === "card" ? (
+        <GridList
+          items={list}
+          hasMore={hasMore}
+          loading={loadingMore}
+          onLoadMore={handleLoadMore}
+          getScrollElement={() => scrollerRef.current?.osInstance()?.elements().viewport || null}
+          onMenuAction={handleMenuAction}
+        />
+      ) : (
+        <HistoryList
+          items={list}
+          hasMore={hasMore}
+          loading={loadingMore}
+          onLoadMore={handleLoadMore}
+          getScrollElement={() => scrollerRef.current?.osInstance()?.elements().viewport || null}
+          onMenuAction={handleMenuAction}
+        />
+      )}
+    </ScrollContainer>
   );
 };
 

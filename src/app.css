@@ -46,8 +46,8 @@ html, body, #root {
 .os-scrollbar {
   --os-size: 10px;
   --os-handle-border-radius: 2px;
-  --os-handle-bg: #595959aa;
-  --os-handle-bg-hover: #888;
+  --os-handle-bg: hsl(var(--heroui-content3) / 100%);
+  --os-handle-bg-hover: #666;
 
   padding: 0;
 }

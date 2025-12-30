@@ -42,7 +42,7 @@ const PageListDrawer = () => {
           searchKeyword={searchKeyword}
           onPressItem={onClose}
           className="h-[60vh] w-full px-2"
-          itemHeight={48}
+          itemHeight={64}
         />
       </PopoverContent>
     </Popover>

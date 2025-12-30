@@ -16,7 +16,7 @@ import {
   Tab,
   Tabs,
 } from "@heroui/react";
-import { RiArrowRightLongLine, RiLayoutGridFill, RiLayoutRowLine, RiListCheck } from "@remixicon/react";
+import { RiArrowRightLongLine, RiFileListLine, RiLayoutGridFill, RiListView } from "@remixicon/react";
 
 import ColorPicker from "@/components/color-picker";
 import FontSelect from "@/components/font-select";
@@ -60,7 +60,7 @@ export const SystemSettingsTab = ({
                 key="list"
                 title={
                   <div className="flex items-center space-x-2">
-                    <RiListCheck size={18} />
+                    <RiListView size={18} />
                     <span>列表</span>
                   </div>
                 }
@@ -78,7 +78,7 @@ export const SystemSettingsTab = ({
                 key="compact"
                 title={
                   <div className="flex items-center space-x-2">
-                    <RiLayoutRowLine size={18} />
+                    <RiFileListLine size={18} />
                     <span>紧凑</span>
                   </div>
                 }

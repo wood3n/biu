@@ -32,11 +32,11 @@ export interface FavFolderCreatedListResponse {
 
 interface FavFolderCreatedListData {
   count: number;
-  list: List[];
+  list: FavFolderCreatedList[];
   has_more: boolean;
 }
 
-interface List {
+export interface FavFolderCreatedList {
   id: number;
   fid: number;
   mid: number;

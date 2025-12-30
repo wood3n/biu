@@ -41,7 +41,7 @@ const PlayListDrawer = () => {
       isOpen={isOpen}
       onOpenChange={setOpen}
       classNames={{
-        backdrop: "z-200",
+        backdrop: "z-200 window-no-drag",
         wrapper: "z-200",
       }}
     >
@@ -66,10 +66,9 @@ const PlayListDrawer = () => {
         )}
         <DrawerBody className="overflow-hidden px-0">
           <VirtualList
-            className="px-2"
+            className="h-full w-full px-2"
             data={filteredList}
             itemHeight={64}
-            overscan={8}
             empty={
               <div className="flex flex-col items-center justify-center px-4">
                 <Empty className="min-h-[180px]" />

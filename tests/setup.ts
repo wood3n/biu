@@ -1,5 +1,7 @@
 import { vi } from "vitest";
 
+import "@testing-library/jest-dom";
+
 class FakeMediaSession {
   metadata: any;
   playbackState: string = "none";

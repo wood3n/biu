@@ -19,7 +19,7 @@ export interface HistoryToViewDelResponse {
 }
 
 /**
- * 删除稍后再看视频
+ * 删除稍后再看中已观看的视频
  */
 export async function postHistoryToViewDel(data: HistoryToViewDelParams): Promise<HistoryToViewDelResponse> {
   return apiRequest.post<HistoryToViewDelResponse>("/x/v2/history/toview/del", data, {

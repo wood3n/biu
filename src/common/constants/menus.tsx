@@ -1,8 +1,4 @@
 import {
-  RiMvLine,
-  RiMvFill,
-  RiGroupLine,
-  RiGroupFill,
   RiDiscLine,
   RiDiscFill,
   RiUserFollowLine,
@@ -19,20 +15,8 @@ import { type MenuItemProps } from "@/components/menu/menu-item";
 
 export const DefaultMenuList: (MenuItemProps & { needLogin?: boolean })[] = [
   {
-    title: "热歌精选",
-    href: "/",
-    icon: RiMvLine,
-    activeIcon: RiMvFill,
-  },
-  {
-    title: "音乐大咖",
-    href: "/artist-rank",
-    icon: RiGroupLine,
-    activeIcon: RiGroupFill,
-  },
-  {
     title: "推荐音乐",
-    href: "/music-recommend",
+    href: "/",
     icon: RiDiscLine,
     activeIcon: RiDiscFill,
   },

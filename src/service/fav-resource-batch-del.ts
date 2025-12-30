@@ -13,7 +13,7 @@ export interface FavResourceBatchDelRequestParams {
    */
   resources: string;
   /** 目标收藏夹 id */
-  media_id: number;
+  media_id: string | number;
   /** 平台标识，可为 web */
   platform?: string;
 }

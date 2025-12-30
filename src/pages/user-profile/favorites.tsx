@@ -1,75 +1,100 @@
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
-import { Pagination } from "@heroui/react";
-import { usePagination } from "ahooks";
+import { addToast } from "@heroui/react";
 
 import { CollectionType } from "@/common/constants/collection";
-import { formatSecondsToDate } from "@/common/utils";
-import GridList from "@/components/grid-list";
-import ImageCard from "@/components/image-card";
-import { getFavFolderCreatedList } from "@/service/fav-folder-created-list";
+import VirtualGridPageList from "@/components/virtual-grid-page-list";
+import { getFavFolderCreatedList, type FavFolderCreatedList } from "@/service/fav-folder-created-list";
+
+import GridCard from "./grid-card";
+
+interface Props {
+  getScrollElement: () => HTMLElement | null;
+}
 
 /** 收藏夹 */
-const Favorites = () => {
+const Favorites = ({ getScrollElement }: Props) => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const {
-    data,
-    pagination,
-    loading,
-    runAsync: getPageData,
-  } = usePagination(
-    async ({ current, pageSize }) => {
-      const res = await getFavFolderCreatedList({
-        up_mid: Number(id ?? ""),
-        ps: pageSize,
-        pn: current,
-      });
+  const [list, setList] = useState<FavFolderCreatedList[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-      return {
-        total: res?.data?.count ?? 0,
-        list: res?.data?.list ?? [],
-      };
+  const fetchPage = useCallback(
+    async (pn: number) => {
+      if (!id) return { items: [], total: 0 };
+      const res = await getFavFolderCreatedList({
+        up_mid: Number(id),
+        ps: 20,
+        pn,
+      });
+      const items = res?.data?.list ?? [];
+      const total = res?.data?.count ?? 0;
+      return { items, total };
     },
-    {
-      ready: Boolean(id),
-      refreshDeps: [id],
-      defaultPageSize: 20,
-    },
+    [id],
   );
 
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    try {
+      setLoadingMore(true);
+      const nextPage = page + 1;
+      const { items, total } = await fetchPage(nextPage);
+      setList(prev => {
+        const newList = [...prev, ...items];
+        setHasMore(newList.length < total);
+        return newList;
+      });
+      setPage(nextPage);
+    } catch {
+      addToast({ title: "加载更多失败", color: "danger" });
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [page, loadingMore, hasMore, fetchPage]);
+
+  const retryInitial = useCallback(async () => {
+    if (!id) return;
+    try {
+      setInitialLoading(true);
+      setPage(1);
+      const { items, total } = await fetchPage(1);
+      setList(items);
+      setHasMore(items.length < total);
+    } catch {
+      addToast({ title: "加载失败", color: "danger" });
+    } finally {
+      setInitialLoading(false);
+    }
+  }, [fetchPage, id]);
+
+  useEffect(() => {
+    retryInitial();
+  }, [retryInitial]);
+
   return (
-    <>
-      <GridList
-        data={data?.list ?? []}
-        loading={loading}
-        itemKey="id"
-        renderItem={item => (
-          <ImageCard
-            title={item.title}
-            imageUrl={item.cover}
-            footer={
-              <div className="flex w-full justify-between text-sm text-zinc-500">
-                <span>{formatSecondsToDate(item.ctime)}</span>
-                <span>{item.media_count}个视频</span>
-              </div>
-            }
-            onPress={() => navigate(`/collection/${item.id}?type=${CollectionType.Favorite}`)}
-          />
-        )}
-      />
-      {pagination.totalPage > 1 && (
-        <div className="flex w-full items-center justify-center py-4">
-          <Pagination
-            initialPage={1}
-            total={pagination.totalPage}
-            page={pagination.current}
-            onChange={next => getPageData({ current: next, pageSize: 20 })}
-          />
-        </div>
+    <VirtualGridPageList
+      items={list}
+      loading={initialLoading || loadingMore}
+      hasMore={hasMore}
+      onLoadMore={loadMore}
+      getScrollElement={getScrollElement}
+      itemKey="id"
+      renderItem={item => (
+        <GridCard
+          title={item.title}
+          cover={item.cover}
+          createTime={item.ctime}
+          mediaCount={item.media_count}
+          onPress={() => navigate(`/collection/${item.id}?type=${CollectionType.Favorite}`)}
+        />
       )}
-    </>
+    />
   );
 };
 
