@@ -42,8 +42,8 @@ const QrcodeLogin = ({ onClose }: QrcodeLoginProps) => {
         if (pollData?.code === 0) {
           try {
             await updateUser();
-          } catch (error) {
-            console.error("[qrcode-login] 更新用户信息失败:", error);
+          } catch {
+            addToast({ title: "更新用户信息失败", color: "danger" });
           }
 
           const { refresh_token } = pollData;

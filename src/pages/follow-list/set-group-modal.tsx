@@ -66,8 +66,7 @@ const SetGroupModal = ({ isOpen, onOpenChange, onClose, user, tags, onSuccess }:
           color: "danger",
         });
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       addToast({
         title: "设置分组失败",
         color: "danger",

@@ -1,3 +1,4 @@
+import log from "electron-log";
 import got from "got";
 import { createHash } from "node:crypto";
 
@@ -35,7 +36,7 @@ const getWbiKeys = async (cookie: string) => {
       sub_key: sub_url?.slice(sub_url.lastIndexOf("/") + 1, sub_url.lastIndexOf(".")),
     };
   } catch (error) {
-    console.error("Failed to get Wbi keys:", error);
+    log.error("Failed to get Wbi keys:", error);
     return { img_key: "", sub_key: "" };
   }
 };

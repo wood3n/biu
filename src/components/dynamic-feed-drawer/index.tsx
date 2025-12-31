@@ -45,9 +45,8 @@ const DynamicFeedDrawer = ({ isOpen, onOpenChange }: DynamicFeedDrawerProps) => 
       } else {
         setError(res.message || "Failed to load dynamics");
       }
-    } catch (err) {
-      setError("Network error, please try again.");
-      console.error(err);
+    } catch {
+      setError("无法获取动态数据");
     } finally {
       isLoadingRef.current = false;
       setIsLoading(false);

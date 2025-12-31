@@ -60,16 +60,12 @@ const MiniPlayer = () => {
     postMessage("init");
 
     bcRef.current.onmessage = ev => {
-      try {
-        const { from, state } = ev.data || {};
-        if (from !== "main" || !state) return;
+      const { from, state } = ev.data || {};
+      if (from !== "main" || !state) return;
 
-        updatePlayState(state);
-        if (typeof state.currentTime === "number") {
-          setCurrentTime(state.currentTime);
-        }
-      } catch (err) {
-        console.error("[mini] failed to handle message from main", err);
+      updatePlayState(state);
+      if (typeof state.currentTime === "number") {
+        setCurrentTime(state.currentTime);
       }
     };
 

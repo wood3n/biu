@@ -202,13 +202,9 @@ const updatePlaybackState = () => {
   if ("mediaSession" in navigator) {
     navigator.mediaSession.playbackState = audio.paused ? "paused" : "playing";
   }
-  try {
-    if (window.electron && window.electron.updatePlaybackState) {
-      window.electron.updatePlaybackState(!audio.paused);
-    }
-  } catch (err) {
-    // 渲染端上报失败不影响本地状态；仅记录日志便于定位
-    console.warn("[renderer] updatePlaybackState IPC failed:", err);
+
+  if (window.electron && window.electron.updatePlaybackState) {
+    window.electron.updatePlaybackState(!audio.paused);
   }
 };
 
