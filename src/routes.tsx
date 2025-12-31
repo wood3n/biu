@@ -7,6 +7,8 @@ import EmptyPage from "./pages/empty";
 import FollowList from "./pages/follow-list";
 import History from "./pages/history";
 import Later from "./pages/later";
+import LyricsOverlay from "./pages/lyrics-overlay";
+import LyricsOverlaySettings from "./pages/lyrics-overlay-settings";
 import MiniPlayer from "./pages/mini-player";
 import MusicRank from "./pages/music-rank";
 import MusicRecommend from "./pages/music-recommend";
@@ -74,6 +76,14 @@ const routes: RouteObject[] = [
   {
     path: "mini-player",
     element: <MiniPlayer />,
+  },
+  {
+    path: "lyrics-overlay",
+    element: <LyricsOverlay />,
+  },
+  {
+    path: "lyrics-overlay-settings",
+    element: <LyricsOverlaySettings />,
   },
   {
     path: "*",

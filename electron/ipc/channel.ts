@@ -68,6 +68,15 @@ export const channel = {
   },
   window: {
     toggleMini: "window:toggle-mini",
+    openLyricsOverlay: "window:open-lyrics-overlay",
+    closeLyricsOverlay: "window:close-lyrics-overlay",
+    isLyricsOverlayOpen: "window:is-lyrics-overlay-open",
+    getLyricsOverlayBounds: "window:get-lyrics-overlay-bounds",
+    setLyricsOverlayBounds: "window:set-lyrics-overlay-bounds",
+    openLyricsOverlaySettings: "window:open-lyrics-overlay-settings",
+    closeLyricsOverlaySettings: "window:close-lyrics-overlay-settings",
+    isLyricsOverlaySettingsOpen: "window:is-lyrics-overlay-settings-open",
+    lyricsOverlaySettingsShow: "window:lyrics-overlay-settings-show",
     minimize: "window:minimize",
     toggleMaximize: "window:toggle-maximize",
     close: "window:close",
@@ -77,5 +86,11 @@ export const channel = {
     enterFullScreen: "window:enter-full-screen",
     leaveFullScreen: "window:leave-full-screen",
     isFullScreen: "window:is-full-screen",
+  },
+  lyrics: {
+    search: "lyrics:search",
+    searchNetease: "lyrics:search-netease",
+    resolveTitle: "lyrics:resolve-title",
+    resolveTitleArk: "lyrics:resolve-title-ark",
   },
 };

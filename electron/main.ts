@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { channel } from "./ipc/channel";
 import { quitAndSaveTasks } from "./ipc/download";
 import { registerIpcHandlers } from "./ipc/index";
+import { destroyLyricsOverlay } from "./lyrics-overlay";
 import { destroyMiniPlayer } from "./mini-player";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
@@ -175,6 +176,7 @@ app.on("will-quit", () => {
   }
 
   destroyMiniPlayer();
+  destroyLyricsOverlay();
 
   stopCheckForUpdates();
   autoUpdater.removeAllListeners();

@@ -1,5 +1,6 @@
 import { useUser } from "@/store/user";
 
+import { LyricsOverlayBridge } from "./lyrics-overlay-bridge";
 import Navigation from "./navigation";
 import Search from "./search";
 import UserCard from "./user";
@@ -13,6 +14,7 @@ const LayoutNavbar = () => {
 
   return (
     <div className="window-drag flex h-full items-center justify-between px-4">
+      <LyricsOverlayBridge />
       <div className="window-no-drag flex items-center justify-start space-x-2 pr-20">
         <Navigation />
         <Search />

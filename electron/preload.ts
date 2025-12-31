@@ -168,6 +168,29 @@ const api: ElectronAPI = {
   },
   // 退出并安装更新
   quitAndInstall: () => ipcRenderer.invoke(channel.app.quitAndInstall),
+  // 打开桌面歌词窗口
+  openLyricsOverlay: () => ipcRenderer.invoke(channel.window.openLyricsOverlay),
+  // 关闭桌面歌词窗口
+  closeLyricsOverlay: () => ipcRenderer.invoke(channel.window.closeLyricsOverlay),
+  // 桌面歌词窗口是否已打开
+  isLyricsOverlayOpen: () => ipcRenderer.invoke(channel.window.isLyricsOverlayOpen),
+  // 打开桌面歌词设置窗口
+  openLyricsOverlaySettings: () => ipcRenderer.invoke(channel.window.openLyricsOverlaySettings),
+  // 关闭桌面歌词设置窗口
+  closeLyricsOverlaySettings: () => ipcRenderer.invoke(channel.window.closeLyricsOverlaySettings),
+  // 桌面歌词设置窗口是否已打开
+  isLyricsOverlaySettingsOpen: () => ipcRenderer.invoke(channel.window.isLyricsOverlaySettingsOpen),
+  // 监听桌面歌词设置窗口每次显示
+  onLyricsOverlaySettingsShow: cb => {
+    const handler = () => cb();
+    ipcRenderer.on(channel.window.lyricsOverlaySettingsShow, handler);
+    return () => ipcRenderer.removeListener(channel.window.lyricsOverlaySettingsShow, handler);
+  },
+  // 获取桌面歌词窗口 bounds（x/y/width/height）
+  getLyricsOverlayBounds: () => ipcRenderer.invoke(channel.window.getLyricsOverlayBounds),
+  // 设置桌面歌词窗口 bounds（可只传 width/height）
+  setLyricsOverlayBounds: (bounds: { width?: number; height?: number; x?: number; y?: number }) =>
+    ipcRenderer.invoke(channel.window.setLyricsOverlayBounds, bounds),
   // 切换 mini/主窗口
   toggleMiniPlayer: () => ipcRenderer.invoke(channel.window.toggleMini),
   // 最小化窗口
@@ -228,6 +251,22 @@ const api: ElectronAPI = {
   },
   // 清除文件下载任务列表
   clearMediaDownloadTaskList: () => ipcRenderer.invoke(channel.download.clear),
+  // 从外部歌词服务查询歌词（返回原始响应文本）
+  searchLyrics: (params: { urlTemplate: string; title?: string; artist?: string }) =>
+    ipcRenderer.invoke(channel.lyrics.search, params),
+  // 从网易云音乐查询歌词（返回 LRC 文本）
+  searchLyricsNetease: (params: {
+    title?: string;
+    artist?: string;
+    searchUrlTemplate?: string;
+    lyricUrlTemplate?: string;
+  }) => ipcRenderer.invoke(channel.lyrics.searchNetease, params),
+  // 通过外部服务解析“真实歌名”（返回文本），并按 cacheKey 做本地缓存
+  resolveSongTitle: (params: { cacheKey: string; urlTemplate: string; title?: string; artist?: string }) =>
+    ipcRenderer.invoke(channel.lyrics.resolveTitle, params),
+  // 通过火山 Ark(Doubao) 解析“真实歌名”（返回文本），并按 cacheKey 做本地缓存
+  resolveSongTitleArk: (params: { cacheKey: string; title?: string; artist?: string }) =>
+    ipcRenderer.invoke(channel.lyrics.resolveTitleArk, params),
 };
 
 contextBridge.exposeInMainWorld("electron", api);

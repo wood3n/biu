@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router";
 
 import { useShallow } from "zustand/react/shallow";
 
@@ -10,6 +11,9 @@ interface Props {
 }
 
 const Theme = ({ children }: Props) => {
+  const location = useLocation();
+  const isLyricsOverlay = location.pathname === "/lyrics-overlay" || location.hash === "#lyrics-overlay";
+
   const { fontFamily, backgroundColor, contentBackgroundColor, primaryColor, borderRadius } = useSettings(
     useShallow(s => ({
       fontFamily: s.fontFamily,
@@ -49,11 +53,19 @@ const Theme = ({ children }: Props) => {
     bodyStyle.setProperty("--radius", radius);
     const validFontFamily = fontFamily === "system-default" ? "system-ui" : fontFamily;
     bodyStyle.fontFamily = validFontFamily || bodyStyle.fontFamily;
-  }, [fontFamily, backgroundColor, contentBackgroundColor, primaryColor, borderRadius]);
+
+    if (isLyricsOverlay) {
+      bodyStyle.backgroundColor = "transparent";
+      rootStyle.backgroundColor = "transparent";
+    } else {
+      bodyStyle.backgroundColor = "";
+      rootStyle.backgroundColor = "";
+    }
+  }, [fontFamily, backgroundColor, contentBackgroundColor, primaryColor, borderRadius, isLyricsOverlay]);
 
   return (
     <main
-      className="bg-background text-foreground dark h-screen w-screen overflow-hidden"
+      className={`${isLyricsOverlay ? "bg-transparent" : "bg-background"} text-foreground dark h-screen w-screen overflow-hidden`}
       style={{
         fontFamily: fontFamily === "system-default" ? "system-ui" : fontFamily,
         ["--heroui-background" as any]: hexToHsl(contentBackgroundColor),

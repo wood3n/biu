@@ -2,7 +2,6 @@ declare global {
   type AppPlatForm = "macos" | "windows" | "linux";
 
   type StoreName = keyof StoreDataMap;
-
   interface ElectronAPI {
     /** 获取指定name的存储值 */
     getStore: <N extends StoreName>(name: N) => Promise<StoreDataMap[N] | undefined>;
@@ -60,6 +59,29 @@ declare global {
     quitAndInstall: () => Promise<void>;
     /** 切换 mini/主窗口 */
     toggleMiniPlayer: () => Promise<void>;
+    /** 打开桌面歌词窗口 */
+    openLyricsOverlay: () => Promise<void>;
+    /** 关闭桌面歌词窗口 */
+    closeLyricsOverlay: () => Promise<void>;
+    /** 桌面歌词窗口是否已打开 */
+    isLyricsOverlayOpen: () => Promise<boolean>;
+    /** 打开桌面歌词设置窗口 */
+    openLyricsOverlaySettings: () => Promise<void>;
+    /** 关闭桌面歌词设置窗口 */
+    closeLyricsOverlaySettings: () => Promise<void>;
+    /** 桌面歌词设置窗口是否已打开 */
+    isLyricsOverlaySettingsOpen: () => Promise<boolean>;
+    /** 监听桌面歌词设置窗口每次显示 */
+    onLyricsOverlaySettingsShow: (cb: () => void) => VoidFunction;
+    /** 获取桌面歌词窗口 bounds（x/y/width/height） */
+    getLyricsOverlayBounds: () => Promise<{ x: number; y: number; width: number; height: number } | null>;
+    /** 设置桌面歌词窗口 bounds（可只传 width/height） */
+    setLyricsOverlayBounds: (bounds: {
+      width?: number;
+      height?: number;
+      x?: number;
+      y?: number;
+    }) => Promise<{ x: number; y: number; width: number; height: number } | null>;
     /** 最小化窗口 */
     minimizeWindow: () => void;
     /** 最大化/还原窗口 */
@@ -92,6 +114,33 @@ declare global {
     retryMediaDownloadTask: (id: string) => Promise<void>;
     /** 清除下载任务列表 */
     clearMediaDownloadTaskList: () => Promise<void>;
+    /** 从外部歌词服务查询歌词（返回原始响应文本） */
+    searchLyrics: (params: { urlTemplate: string; title?: string; artist?: string }) => Promise<string | null>;
+    /** 从网易云音乐查询歌词（返回 LRC 文本） */
+    searchLyricsNetease: (params: {
+      title?: string;
+      artist?: string;
+      searchUrlTemplate?: string;
+      lyricUrlTemplate?: string;
+    }) => Promise<string | null>;
+    /**
+     * 通过外部服务解析“真实歌名”（返回文本），并按 cacheKey 做本地缓存
+     * - urlTemplate 支持 {title}/{artist}/{query}
+     */
+    resolveSongTitle: (params: {
+      cacheKey: string;
+      urlTemplate: string;
+      title?: string;
+      artist?: string;
+    }) => Promise<string | null>;
+    /**
+     * 通过火山 Ark(Doubao) 解析“真实歌名”（返回文本），并按 cacheKey 做本地缓存
+     */
+    resolveSongTitleArk: (params: {
+      cacheKey: string;
+      title?: string;
+      artist?: string;
+    }) => Promise<{ title: string; artist?: string } | null>;
   }
 
   interface Window {

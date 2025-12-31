@@ -3,4 +3,5 @@ export enum StoreNameMap {
   UserLoginInfo = "user-login-info",
   MediaDownloads = "media-downloads",
   ShortcutSettings = "shortcut-settings",
+  LyricsCache = "lyrics-cache",
 }
