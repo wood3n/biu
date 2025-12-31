@@ -206,6 +206,7 @@ if (!gotTheLock) {
       if (mainWindow.isMinimized()) {
         mainWindow.restore(); // 如果窗口最小化了，先恢复
       }
+      mainWindow.show(); // 确保窗口可见
       mainWindow.focus(); // 聚焦窗口
     }
   });

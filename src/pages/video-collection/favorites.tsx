@@ -300,36 +300,41 @@ const Favorites: React.FC = () => {
 
   return (
     <>
-      <Info
-        loading={currentLoading}
-        type={CollectionType.Favorite}
-        cover={currentData?.info?.cover}
-        attr={currentData?.info?.attr}
-        title={currentData?.info?.title}
-        desc={currentData?.info?.intro}
-        upMid={currentData?.info?.upper?.mid}
-        upName={currentData?.info?.upper?.name}
-        mediaCount={currentData?.info?.media_count}
-        afterChangeInfo={handleRefresh}
-        onPlayAll={onPlayAll}
-        onAddToPlayList={addAllMedia}
-      />
+      {/* 使用相对定位将搜索框放在封面右侧并与底部对齐 */}
+      <div className="relative mb-4">
+        <Info
+          loading={currentLoading}
+          type={CollectionType.Favorite}
+          cover={currentData?.info?.cover}
+          attr={currentData?.info?.attr}
+          title={currentData?.info?.title}
+          desc={currentData?.info?.intro}
+          upMid={currentData?.info?.upper?.mid}
+          upName={currentData?.info?.upper?.name}
+          mediaCount={currentData?.info?.media_count}
+          afterChangeInfo={handleRefresh}
+          onPlayAll={onPlayAll}
+          onAddToPlayList={addAllMedia}
+        />
 
-      {/* 搜索和过滤区域 */}
-      <SearchFilter
-        keyword={searchParams.keyword}
-        order={searchParams.order}
-        placeholder="请输入关键词"
-        searchIcon="search2"
-        orderOptions={[
-          { value: "mtime", label: "收藏时间" },
-          { value: "view", label: "播放量" },
-          { value: "pubtime", label: "投稿时间" },
-        ]}
-        onKeywordChange={keyword => setSearchParams(prev => ({ ...prev, keyword }))}
-        onOrderChange={order => setSearchParams(prev => ({ ...prev, order }))}
-        containerClassName="mb-4 flex flex-wrap items-center gap-4"
-      />
+        {/* 搜索和过滤区域 - 与封面底部对齐 */}
+        <div className="absolute right-4 bottom-6">
+          <SearchFilter
+            keyword={searchParams.keyword}
+            order={searchParams.order}
+            placeholder="请输入关键词"
+            searchIcon="search2"
+            orderOptions={[
+              { value: "mtime", label: "收藏时间" },
+              { value: "view", label: "播放量" },
+              { value: "pubtime", label: "投稿时间" },
+            ]}
+            onKeywordChange={keyword => setSearchParams(prev => ({ ...prev, keyword }))}
+            onOrderChange={order => setSearchParams(prev => ({ ...prev, order }))}
+            containerClassName="flex flex-wrap items-center gap-4 justify-between"
+          />
+        </div>
+      </div>
 
       {displayMode === "card" ? (
         <>

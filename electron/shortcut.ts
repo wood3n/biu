@@ -1,10 +1,13 @@
-import { globalShortcut, BrowserWindow } from "electron";
+import { app, globalShortcut, BrowserWindow } from "electron";
 import log from "electron-log";
 
 import { channel } from "./ipc/channel";
 import { shortcutKeyStore } from "./store";
 
 export function registerAllShortcuts(getMainWindow: () => BrowserWindow | null) {
+  if (!app.isReady()) {
+    return;
+  }
   // Unregister all first to be safe
   globalShortcut.unregisterAll();
 
@@ -42,7 +45,9 @@ export function registerAllShortcuts(getMainWindow: () => BrowserWindow | null) 
 }
 
 export function unregisterAllShortcuts() {
-  globalShortcut.unregisterAll();
+  if (app.isReady()) {
+    globalShortcut.unregisterAll();
+  }
   const shortcuts = shortcutKeyStore.get("globalShortcuts");
   if (shortcuts) {
     shortcutKeyStore.set(

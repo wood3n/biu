@@ -147,6 +147,7 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) =
       onOpenChange={onOpenChange}
       isDismissable={!isSubmitting}
       disableAnimation
+      backdrop="blur"
     >
       <ModalContent>
         <form onSubmit={handleSubmit(onSubmit)}>

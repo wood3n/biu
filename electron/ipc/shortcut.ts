@@ -1,4 +1,4 @@
-import { globalShortcut, ipcMain } from "electron";
+import { app, globalShortcut, ipcMain } from "electron";
 
 import type { IpcHandlerProps } from "./types";
 
@@ -9,6 +9,9 @@ import { channel } from "./channel";
 export function registerShortcutHandlers({ getMainWindow }: IpcHandlerProps) {
   ipcMain.handle(channel.shortcut.register, (_, { accelerator, id }) => {
     try {
+      if (!app.isReady()) {
+        return false;
+      }
       const globalShortcuts = shortcutKeyStore.get("globalShortcuts");
       const oldShortcut = globalShortcuts.find(s => s.id === id)?.shortcut;
 
@@ -32,6 +35,9 @@ export function registerShortcutHandlers({ getMainWindow }: IpcHandlerProps) {
 
   // 注销指定快捷键
   ipcMain.handle(channel.shortcut.unregister, (_, id) => {
+    if (!app.isReady()) {
+      return;
+    }
     const globalShortcuts = shortcutKeyStore.get("globalShortcuts");
     const shortcut = globalShortcuts.find(s => s.id === id)?.shortcut;
     if (shortcut) {

@@ -2,10 +2,11 @@ import React, { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 
 import { Chip, Input, Listbox, ListboxItem } from "@heroui/react";
-import { RiSearchLine } from "@remixicon/react";
+import { RiCloseLine, RiSearchLine } from "@remixicon/react";
 import { useRequest, useClickAway } from "ahooks";
 import classNames from "classnames";
 
+import IconButton from "@/components/icon-button";
 import { getSearchSuggestMain } from "@/service/main-suggest";
 import { useSearchHistory } from "@/store/search-history";
 import { useSettings } from "@/store/settings";
@@ -72,20 +73,15 @@ const SearchInput: React.FC = () => {
         onFocus={() => setOpen(true)}
         placeholder="搜索"
         endContent={
-          <div
-            onClick={handleSearchClick}
-            className="bg-content2 hover:bg-content3 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md transition-colors"
-            role="button"
-            tabIndex={0}
-            onKeyDown={e => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleSearchClick();
-              }
-            }}
-            aria-label="搜索"
-          >
-            <RiSearchLine size={16} />
+          <div className="flex items-center gap-1">
+            {value && (
+              <IconButton onClick={() => setValue("")} ariaLabel="清除搜索">
+                <RiCloseLine size={16} />
+              </IconButton>
+            )}
+            <IconButton onClick={handleSearchClick} ariaLabel="搜索">
+              <RiSearchLine size={16} />
+            </IconButton>
           </div>
         }
         className="window-no-drag w-full"

@@ -1,7 +1,9 @@
 import React from "react";
 
 import { Input, Select, SelectItem } from "@heroui/react";
-import { RiSearch2Line, RiSearchLine } from "@remixicon/react";
+import { RiCloseLine, RiSearch2Line, RiSearchLine } from "@remixicon/react";
+
+import IconButton from "@/components/icon-button";
 
 interface SearchFilterProps {
   /** 搜索关键词 */
@@ -81,26 +83,9 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
           endContent={
             showClearButton &&
             keyword && (
-              <button
-                onClick={handleClearKeyword}
-                className="bg-content2 hover:bg-content3 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md transition-colors"
-                type="button"
-                aria-label="清除搜索"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
+              <IconButton ariaLabel="清除搜索" onClick={handleClearKeyword}>
+                <RiCloseLine size={16} />
+              </IconButton>
             )
           }
           className={`${inputClassName} max-w-full`}

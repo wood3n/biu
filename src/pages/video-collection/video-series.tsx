@@ -175,36 +175,41 @@ const VideoSeries = () => {
 
   return (
     <>
-      <Info
-        loading={loading}
-        type={CollectionType.VideoSeries}
-        title={data?.info?.title}
-        desc={data?.info?.intro}
-        cover={data?.info?.cover}
-        upMid={data?.info?.upper?.mid}
-        upName={data?.info?.upper?.name}
-        mediaCount={data?.info?.media_count}
-        afterChangeInfo={refreshAsync}
-        onPlayAll={onPlayAll}
-        onAddToPlayList={addToPlayList}
-      />
+      {/* 使用相对定位将搜索框放在封面右侧并与底部对齐 */}
+      <div className="relative mb-4">
+        <Info
+          loading={loading}
+          type={CollectionType.VideoSeries}
+          title={data?.info?.title}
+          desc={data?.info?.intro}
+          cover={data?.info?.cover}
+          upMid={data?.info?.upper?.mid}
+          upName={data?.info?.upper?.name}
+          mediaCount={data?.info?.media_count}
+          afterChangeInfo={refreshAsync}
+          onPlayAll={onPlayAll}
+          onAddToPlayList={addToPlayList}
+        />
 
-      {/* 搜索和过滤区域 */}
-      <SearchFilter
-        keyword={searchParams.keyword}
-        order={searchParams.order}
-        placeholder="请输入关键词"
-        searchIcon="search2"
-        orderOptions={[
-          { value: "", label: "默认排序" },
-          { value: "play", label: "播放量" },
-          { value: "collect", label: "收藏数" },
-          { value: "time", label: "发布时间" },
-        ]}
-        onKeywordChange={keyword => setSearchParams(prev => ({ ...prev, keyword }))}
-        onOrderChange={order => setSearchParams(prev => ({ ...prev, order }))}
-        containerClassName="mb-6 flex flex-wrap items-center gap-4"
-      />
+        {/* 搜索和过滤区域 */}
+        <div className="absolute right-4 bottom-6">
+          <SearchFilter
+            keyword={searchParams.keyword}
+            order={searchParams.order}
+            placeholder="请输入关键词"
+            searchIcon="search2"
+            orderOptions={[
+              { value: "", label: "默认排序" },
+              { value: "play", label: "播放量" },
+              { value: "collect", label: "收藏数" },
+              { value: "time", label: "发布时间" },
+            ]}
+            onKeywordChange={keyword => setSearchParams(prev => ({ ...prev, keyword }))}
+            onOrderChange={order => setSearchParams(prev => ({ ...prev, order }))}
+            containerClassName="flex flex-wrap items-center gap-4 justify-between"
+          />
+        </div>
+      </div>
 
       {displayMode === "card" ? (
         <GridList data={pagedMedias} loading={loading} itemKey="bvid" renderItem={renderMediaItem} />
