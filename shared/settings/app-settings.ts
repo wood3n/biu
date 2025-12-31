@@ -12,6 +12,13 @@ export const defaultAppSettings: AppSettings = {
   themeMode: "system",
   pageTransition: "none",
   showSearchHistory: true,
+  proxySettings: {
+    type: "none",
+    host: "",
+    port: undefined,
+    username: "",
+    password: "",
+  },
 };
 
 export const lightThemeColors = {

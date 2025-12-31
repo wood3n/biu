@@ -2,6 +2,16 @@ type AudioQuality = "auto" | "lossless" | "high" | "medium" | "low";
 type ThemeMode = "system" | "light" | "dark";
 type PageTransition = "none" | "fade" | "slide" | "scale" | "slideUp";
 
+type ProxyType = "none" | "http" | "socks4" | "socks5";
+
+interface ProxySettings {
+  type: ProxyType;
+  host?: string;
+  port?: number;
+  username?: string;
+  password?: string;
+}
+
 interface AppSettings {
   fontFamily: string;
   primaryColor: string;
@@ -16,4 +26,5 @@ interface AppSettings {
   themeMode: ThemeMode;
   pageTransition: PageTransition;
   showSearchHistory: boolean;
+  proxySettings: ProxySettings;
 }

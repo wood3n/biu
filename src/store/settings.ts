@@ -70,6 +70,7 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           themeMode: state.themeMode,
           pageTransition: state.pageTransition,
           showSearchHistory: state.showSearchHistory,
+          proxySettings: state.proxySettings,
         };
       },
     },

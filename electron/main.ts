@@ -4,6 +4,7 @@ import log from "electron-log";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { applyProxySettings } from "./ipc/app";
 import { channel } from "./ipc/channel";
 import { quitAndSaveTasks } from "./ipc/download";
 import { registerIpcHandlers } from "./ipc/index";
@@ -125,6 +126,15 @@ if (!gotTheLock) {
   app.quit();
 } else {
   app.whenReady().then(() => {
+    try {
+      const settings = appSettingsStore.get("appSettings");
+      applyProxySettings(settings?.proxySettings).catch(error => {
+        log.error("[main] Failed to apply proxy settings on startup:", error);
+      });
+    } catch (error) {
+      log.error("[main] Failed to read proxy settings from store:", error);
+    }
+
     createWindow();
     injectAuthCookie();
 

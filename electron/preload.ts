@@ -18,6 +18,7 @@ const api: ElectronAPI = {
   getFonts: () => ipcRenderer.invoke(channel.font.getFonts),
   getCookie: key => ipcRenderer.invoke(channel.cookie.get, key),
   setCookie: (name, value, expirationDate) => ipcRenderer.invoke(channel.cookie.set, { name, value, expirationDate }),
+  setProxySettings: proxySettings => ipcRenderer.invoke(channel.app.setProxySettings, proxySettings),
   // 监听来自主进程的导航事件，并将路径回调给渲染端
   navigate: cb => {
     const navigateHandler = (_: Electron.IpcRendererEvent, path: string) => {

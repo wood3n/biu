@@ -62,6 +62,7 @@ export const channel = {
     openInstallerDirectory: "app:open-installer-directory",
     onBeforeQuit: "app:on-before-quit",
     isDev: "app:is-dev",
+    setProxySettings: "app:set-proxy-settings",
   },
   cookie: {
     get: "cookie:get",
