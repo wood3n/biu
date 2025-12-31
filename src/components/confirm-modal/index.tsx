@@ -6,9 +6,9 @@ import { useShallow } from "zustand/shallow";
 
 import { useModalStore } from "@/store/modal";
 
-type ConfirmModalType = "warning" | "danger";
+type ConfirmModalType = "warning" | "danger" | "primary";
 
-const colorMap: Record<ConfirmModalType, string> = {
+const colorMap: Record<Exclude<ConfirmModalType, "primary">, string> = {
   warning: "#F5A524",
   danger: "#dc1258",
 };
@@ -76,7 +76,7 @@ const ConfirmModal = () => {
               <Button variant="light" onPress={handleClose} isDisabled={loading}>
                 {cancelText}
               </Button>
-              <Button color={type} onPress={handleConfirm} isLoading={loading}>
+              <Button color={type === "primary" ? "primary" : type} onPress={handleConfirm} isLoading={loading}>
                 {confirmText}
               </Button>
             </ModalFooter>

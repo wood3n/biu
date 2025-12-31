@@ -61,6 +61,9 @@ const DateRangePicker = ({ onDateRangeChange }: Props) => {
         variant="light"
         selectedKey={selectedKey}
         onSelectionChange={key => handlePresetChange(key as string)}
+        classNames={{
+          cursor: "rounded-medium",
+        }}
       >
         <Tab key="all" title="全部时间" />
         <Tab key="today" title="今天" />

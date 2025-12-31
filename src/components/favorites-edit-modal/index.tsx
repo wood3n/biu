@@ -150,7 +150,7 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
     >
       <ModalContent>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader className="border-b-1 border-b-zinc-800 py-3">{mid ? "修改收藏夹" : "新建收藏夹"}</ModalHeader>
+          <ModalHeader className="py-3">{mid ? "修改收藏夹" : "新建收藏夹"}</ModalHeader>
           <ModalBody className="gap-4 py-4">
             <Controller
               name="title"

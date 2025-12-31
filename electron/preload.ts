@@ -139,6 +139,7 @@ const api: ElectronAPI = {
   },
   // 获取应用版本
   getAppVersion: () => ipcRenderer.invoke(channel.app.getVersion),
+  isDev: () => ipcRenderer.invoke(channel.app.isDev),
   // 检查应用更新
   checkAppUpdate: () => ipcRenderer.invoke(channel.app.checkUpdate),
   // 监听应用更新事件
@@ -228,6 +229,8 @@ const api: ElectronAPI = {
   },
   // 清除文件下载任务列表
   clearMediaDownloadTaskList: () => ipcRenderer.invoke(channel.download.clear),
+  // 切换开发者工具
+  toggleDevTools: () => ipcRenderer.send(channel.window.toggleDevTools),
 };
 
 contextBridge.exposeInMainWorld("electron", api);

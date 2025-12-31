@@ -23,7 +23,7 @@ const Login = ({ isOpen, onOpenChange }: Props) => {
           <div className="w-[320px]">
             <Tabs
               aria-label="登录方式"
-              classNames={{ tabContent: "text-lg font-medium mb-4" }}
+              classNames={{ cursor: "rounded-medium", tabContent: "text-lg font-medium mb-4" }}
               fullWidth
               size="lg"
               variant="underlined"

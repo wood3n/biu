@@ -16,8 +16,6 @@ const useSystemSettingsForm = () => {
   const [appVersion, setAppVersion] = useState<string>("");
   const {
     fontFamily,
-    backgroundColor,
-    contentBackgroundColor,
     primaryColor,
     borderRadius,
     downloadPath,
@@ -27,11 +25,12 @@ const useSystemSettingsForm = () => {
     hiddenMenuKeys,
     displayMode,
     ffmpegPath,
+    themeMode,
+    pageTransition,
+    showSearchHistory,
   } = useSettings(
     useShallow(s => ({
       fontFamily: s.fontFamily,
-      backgroundColor: s.backgroundColor,
-      contentBackgroundColor: s.contentBackgroundColor,
       primaryColor: s.primaryColor,
       borderRadius: s.borderRadius,
       downloadPath: s.downloadPath,
@@ -41,6 +40,9 @@ const useSystemSettingsForm = () => {
       hiddenMenuKeys: s.hiddenMenuKeys,
       displayMode: s.displayMode,
       ffmpegPath: s.ffmpegPath,
+      themeMode: s.themeMode,
+      pageTransition: s.pageTransition,
+      showSearchHistory: s.showSearchHistory,
     })),
   );
   const updateSettings = useSettings(s => s.update);
@@ -54,8 +56,6 @@ const useSystemSettingsForm = () => {
   const { control, watch, setValue } = useForm<AppSettings>({
     defaultValues: {
       fontFamily,
-      backgroundColor,
-      contentBackgroundColor,
       primaryColor,
       borderRadius,
       downloadPath,
@@ -65,6 +65,9 @@ const useSystemSettingsForm = () => {
       hiddenMenuKeys,
       displayMode,
       ffmpegPath,
+      themeMode,
+      pageTransition,
+      showSearchHistory,
     },
   });
 
@@ -99,7 +102,7 @@ const SettingsPage = () => {
         <div className="space-y-6">
           <h1>设置</h1>
           <Tabs aria-label="设置选项" classNames={{ panel: "px-1 py-0", cursor: "rounded-medium" }}>
-            <Tab key="system" title="系统设置">
+            <Tab key="system" title="常规设置">
               <SystemSettingsTab {...system} />
             </Tab>
             <Tab key="menu" title="菜单设置">

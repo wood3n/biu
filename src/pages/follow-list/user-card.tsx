@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router";
 
 import { Avatar, Button, Card, CardBody, addToast } from "@heroui/react";
-import { RiGroupLine, RiUserUnfollowLine } from "@remixicon/react";
+import { RiFlashlightFill, RiGroupLine, RiUserUnfollowLine } from "@remixicon/react";
 
 import type { RelationListItem } from "@/service/relation-followings";
 import type { RelationTagUser } from "@/service/relation-tag";
@@ -67,14 +67,26 @@ const UserCard = ({ u, refresh, onSetGroup }: Props) => {
       className="group relative h-full w-full overflow-hidden"
     >
       <CardBody className="flex items-center space-y-2 overflow-hidden p-4">
-        <Avatar className="text-large h-32 w-32 flex-none" src={`${u.face}@160w_160h_1c_1s.webp`} name={u.uname} />
+        <div className="relative h-32 w-32 flex-none">
+          <Avatar className="text-large h-32 w-32" src={`${u.face}@160w_160h_1c_1s.webp`} name={u.uname} />
+          {u.official_verify?.type === 0 && (
+            <div className="bg-warning ring-background absolute right-1 bottom-1 flex h-6 w-6 items-center justify-center rounded-full text-white ring-2">
+              <RiFlashlightFill size={14} />
+            </div>
+          )}
+          {u.official_verify?.type === 1 && (
+            <div className="bg-primary ring-background absolute right-1 bottom-1 flex h-6 w-6 items-center justify-center rounded-full text-white ring-2">
+              <RiFlashlightFill size={14} />
+            </div>
+          )}
+        </div>
         <div className="flex w-full flex-col items-center space-y-1">
           <span className="text-lg">{u.uname}</span>
           <span className="text-foreground-500 line-clamp-2 w-full text-center text-sm">{u.sign}</span>
         </div>
       </CardBody>
 
-      <div className="absolute bottom-4 left-1/2 flex w-max -translate-x-1/2 translate-y-20 items-center justify-center rounded-full border border-white/10 bg-black/30 px-1 py-1 shadow-lg backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-in-out group-hover:translate-y-0">
+      <div className="bg-background/70 absolute bottom-4 left-1/2 flex w-max -translate-x-1/2 translate-y-20 items-center justify-center rounded-full border border-white/10 px-1 py-1 shadow-lg backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-in-out group-hover:translate-y-0">
         <Button
           size="sm"
           variant="light"
@@ -82,7 +94,6 @@ const UserCard = ({ u, refresh, onSetGroup }: Props) => {
           onPress={handleSetGroup}
           aria-label="设置分组"
           title="设置分组"
-          className="text-white"
           startContent={<RiGroupLine size={18} />}
         >
           设置分组

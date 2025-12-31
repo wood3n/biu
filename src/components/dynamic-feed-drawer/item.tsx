@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router";
 
 import { Card, CardHeader, CardBody, addToast, User } from "@heroui/react";
+import { RiPlayFill } from "@remixicon/react";
 import moment from "moment";
 
 import Image from "@/components/image";
@@ -94,7 +95,7 @@ const DynamicItem: React.FC<DynamicItemProps> = ({ item, onClose }) => {
         />
       </CardHeader>
 
-      <CardBody className="text-small text-default-700 px-0 py-1 whitespace-pre-wrap">
+      <CardBody className="group text-small text-default-700 px-0 py-1 whitespace-pre-wrap">
         {Boolean(textContent) && <p className="mb-2 leading-relaxed">{textContent}</p>}
         <div
           className="group border-default-200 dark:border-default-100 bg-default-50 hover:bg-default-100 relative mt-2 cursor-pointer overflow-hidden rounded-xl border"
@@ -124,7 +125,10 @@ const DynamicItem: React.FC<DynamicItemProps> = ({ item, onClose }) => {
                   img: "w-full h-full",
                 }}
               />
-              <div className="absolute right-1 bottom-1 rounded bg-black/70 px-1 text-xs text-white">
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-[rgba(0,0,0,0.4)] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                <RiPlayFill size={32} className="text-white" />
+              </div>
+              <div className="absolute right-1 bottom-1 z-20 rounded bg-black/70 px-1 text-xs text-white">
                 {archive?.duration_text || ""}
               </div>
             </div>

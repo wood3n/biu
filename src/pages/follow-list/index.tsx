@@ -203,7 +203,14 @@ const FollowList = () => {
         <h1 className="mb-2">我的关注</h1>
         <div className="flex justify-between">
           <div className="flex items-center">
-            <Tabs aria-label="关注分组" selectedKey={activeTab} onSelectionChange={key => setActiveTab(key as string)}>
+            <Tabs
+              aria-label="关注分组"
+              classNames={{
+                cursor: "rounded-medium",
+              }}
+              selectedKey={activeTab}
+              onSelectionChange={key => setActiveTab(key as string)}
+            >
               <Tab key="all" title={`全部关注${allCount ? `(${allCount})` : ""}`} />
               {tags.map(tag => (
                 <Tab key={String(tag.tagid)} title={`${tag.name}${tag.count ? `(${tag.count})` : ""}`} />

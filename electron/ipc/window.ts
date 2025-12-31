@@ -45,4 +45,9 @@ export function registerWindowHandlers({ getMainWindow }) {
       createMiniPlayer();
     }
   });
+
+  ipcMain.on(channel.window.toggleDevTools, event => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    win?.webContents.toggleDevTools();
+  });
 }

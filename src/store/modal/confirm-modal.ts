@@ -8,7 +8,7 @@ export interface ConfirmModalData {
   onConfirm: () => Promise<boolean>;
   confirmText?: string;
   cancelText?: string;
-  type?: "warning" | "danger";
+  type?: "warning" | "danger" | "primary";
 }
 
 export interface ConfirmModalState {

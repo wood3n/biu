@@ -46,6 +46,8 @@ declare global {
     onPlayerCommand: (cb: (cmd: "prev" | "next" | "toggle") => void) => VoidFunction;
     /** 获取当前应用版本 */
     getAppVersion: () => Promise<string>;
+    /** 判断是否为开发模式 */
+    isDev: () => Promise<boolean>;
     /** 是否支持自动更新 */
     isSupportAutoUpdate: () => boolean;
     /** 检查更新 */
@@ -74,6 +76,8 @@ declare global {
     isFullScreen: () => Promise<boolean>;
     /** 监听窗口全屏状态变化 */
     onWindowFullScreenChange: (cb: (isFullScreen: boolean) => void) => VoidFunction;
+    /** 切换开发者工具 */
+    toggleDevTools: () => void;
     /** 获取下载任务列表 */
     getMediaDownloadTaskList: () => Promise<MediaDownloadTask[]>;
     /** 同步下载任务列表 */

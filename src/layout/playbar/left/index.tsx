@@ -36,7 +36,7 @@ const LeftControl = () => {
           }}
           params="672w_378h_1c.avif"
         />
-        <div className="text-primary absolute top-0 left-0 z-10 flex h-full w-full items-center justify-center overflow-hidden bg-[rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100">
+        <div className="text-primary absolute top-0 left-0 z-10 flex h-full w-full items-center justify-center overflow-hidden rounded-md bg-[rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100">
           <RiArrowUpSLine size={32} />
         </div>
       </div>

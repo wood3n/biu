@@ -1,6 +1,7 @@
 import { useUser } from "@/store/user";
 
 import WindowAction from "../../components/window-action";
+import Dev from "./dev";
 import Navigation from "./navigation";
 import Search from "./search";
 import UserCard from "./user";
@@ -18,6 +19,7 @@ const LayoutNavbar = () => {
         <Search />
       </div>
       <div className="window-no-drag flex items-center justify-center space-x-4 pl-20">
+        <Dev />
         {Boolean(user?.isLogin) && <UserFeed />}
         <UserCard />
         {["linux", "windows"].includes(platform) && <WindowAction />}

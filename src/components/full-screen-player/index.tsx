@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { Chip, Drawer, DrawerBody, DrawerContent, Image } from "@heroui/react";
@@ -6,6 +6,7 @@ import { RiArrowDownSLine, RiArrowLeftSLine, RiExternalLinkLine } from "@remixic
 import { useClickAway } from "ahooks";
 import { useShallow } from "zustand/shallow";
 
+import { hexToHsl } from "@/common/utils/color";
 import { openBiliVideoLink } from "@/common/utils/url";
 import AudioWaveform from "@/components/audio-waveform";
 import { useModalStore } from "@/store/modal";
@@ -71,6 +72,15 @@ const FullScreenPlayer = () => {
     isOpen,
   );
 
+  const themeVars = useMemo(
+    () => ({
+      ...cssVars,
+      ["--heroui-primary" as any]: hexToHsl(primaryColor),
+      ["--primary" as any]: hexToHsl(primaryColor),
+    }),
+    [cssVars, primaryColor],
+  );
+
   if (!playItem) return null;
 
   return (
@@ -87,7 +97,7 @@ const FullScreenPlayer = () => {
         backdrop: "bg-black/80",
       }}
     >
-      <DrawerContent className="relative flex h-full flex-col overflow-hidden" style={cssVars}>
+      <DrawerContent className="dark text-foreground relative flex h-full flex-col overflow-hidden" style={themeVars}>
         {onClose => (
           <DrawerBody className="relative gap-0 overflow-hidden p-0">
             <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">

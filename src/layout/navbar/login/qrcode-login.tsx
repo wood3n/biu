@@ -93,7 +93,9 @@ const QrcodeLogin = ({ onClose }: QrcodeLoginProps) => {
           {isOvertime && <p className="mt-2 text-center text-sm font-bold text-white">二维码已失效，请刷新</p>}
         </div>
       </div>
-      <p className="text-default-500 mt-4 text-sm whitespace-nowrap">请使用bilibili手机客户端扫码登录</p>
+      <p className="text-default-500 dark:text-default-400 mt-4 text-sm whitespace-nowrap">
+        请使用bilibili手机客户端扫码登录
+      </p>
     </div>
   );
 };
