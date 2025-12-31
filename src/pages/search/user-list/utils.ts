@@ -1,4 +1,8 @@
-import type { WebSearchTypeUserParams } from "@/service/web-interface-search-type";
+import type { SearchUserItem, WebSearchTypeUserParams } from "@/service/web-interface-search-type";
+
+export interface SearchUserItemWithRelation extends SearchUserItem {
+  is_followed: boolean;
+}
 
 export type UserSortKey = "default" | "fans_desc" | "fans_asc" | "level_desc" | "level_asc";
 

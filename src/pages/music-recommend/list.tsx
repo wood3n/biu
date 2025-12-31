@@ -5,7 +5,7 @@ import type { Data as MusicItem } from "@/service/music-comprehensive-web-rank";
 import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
 import VirtualPageList from "@/components/virtual-page-list";
-import { usePlayList, isSame } from "@/store/play-list";
+import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 
 import { getContextMenus } from "./menu";
@@ -27,29 +27,23 @@ const MusicRecommendList: React.FC<MusicRecommendListProps> = ({
   getScrollElement,
   onMenuAction,
 }) => {
-  const playId = usePlayList(state => state.playId);
-  const list = usePlayList(state => state.list);
-  const playItem = list.find(item => item.id === playId);
-  const play = usePlayList(state => state.play);
   const displayMode = useSettings(state => state.displayMode);
   const isCompact = displayMode === "compact";
 
-  const handlePress = useCallback(
-    (item: MusicItem) => {
-      play({
-        type: "mv",
-        bvid: item.bvid,
-        title: item.music_title,
-        cover: item.cover,
-        ownerName: item.author,
-      });
-    },
-    [play],
-  );
+  const handlePress = useCallback((item: MusicItem) => {
+    usePlayList.getState().play({
+      type: "mv",
+      bvid: item.related_archive.bvid,
+      title: item.related_archive.title,
+      cover: item.related_archive.cover,
+      ownerName: item.related_archive.username,
+      ownerMid: item.related_archive.uid,
+    });
+  }, []);
 
   return (
     <div className="w-full">
-      <MusicListHeader hidePubTime isCompact={isCompact} />
+      <MusicListHeader hidePubTime />
       <VirtualPageList
         items={items}
         hasMore={hasMore}
@@ -58,29 +52,21 @@ const MusicRecommendList: React.FC<MusicRecommendListProps> = ({
         getScrollElement={getScrollElement}
         rowHeight={isCompact ? 36 : 64}
         renderItem={(item, index) => {
-          const isPlaying = isSame(playItem, {
-            type: "mv",
-            bvid: item.bvid,
-          });
-
           return (
             <MusicListItem
               hidePubTime
-              isCompact={isCompact}
               key={item.id}
               index={index + 1}
-              title={item.music_title}
+              title={item.related_archive.title}
               type="mv"
-              bvid={item.bvid}
-              cover={item.cover}
-              upName={item.author}
+              bvid={item.related_archive.bvid}
+              cover={item.related_archive.cover}
+              upName={item.related_archive.username}
+              upMid={item.related_archive.uid}
               playCount={item.related_archive.vv_count}
               duration={item.related_archive.duration}
               onPress={() => handlePress(item)}
-              menus={getContextMenus({
-                isPlaying,
-                type: "mv",
-              })}
+              menus={getContextMenus()}
               onMenuAction={key => onMenuAction(key, item)}
             />
           );

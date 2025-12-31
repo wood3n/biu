@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 
-import { Button, Image, Slider } from "@heroui/react";
+import { Button, Slider } from "@heroui/react";
 import {
   RiExpandDiagonalLine,
   RiPauseCircleFill,
@@ -13,6 +13,7 @@ import { useShallow } from "zustand/react/shallow";
 
 import { getPlayModeList } from "@/common/constants/audio";
 import { createBroadcastChannel, toggleMiniMode } from "@/common/utils/mini-player";
+import Image from "@/components/image";
 import { usePlayProgress } from "@/store/play-progress";
 
 import { usePlayState } from "./play-state";
@@ -102,7 +103,7 @@ const MiniPlayer = () => {
     <div className="window-drag bg-content1 rounded-medium flex h-screen w-screen flex-col overflow-hidden select-none">
       <div className="flex h-full items-center">
         {Boolean(cover) && (
-          <Image removeWrapper radius="none" src={cover} width={100} height="100%" className="object-cover" />
+          <Image removeWrapper radius="none" src={cover} width={100} height="100%" params="672w_378h_1c.avif" />
         )}
         <div className="flex min-w-0 flex-1 flex-col space-y-1 px-2">
           <div className="flex min-w-0 flex-col">

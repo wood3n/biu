@@ -1,10 +1,11 @@
 import React, { useMemo } from "react";
 import { useNavigate } from "react-router";
 
-import { Chip, Image } from "@heroui/react";
+import { Chip } from "@heroui/react";
 import { RiArrowUpSLine } from "@remixicon/react";
 
 import { openBiliVideoLink } from "@/common/utils/url";
+import Image from "@/components/image";
 import MusicFavButton from "@/components/music-fav-button";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
@@ -33,7 +34,7 @@ const LeftControl = () => {
           classNames={{
             wrapper: "flex-none",
           }}
-          className="object-cover"
+          params="672w_378h_1c.avif"
         />
         <div className="text-primary absolute top-0 left-0 z-10 flex h-full w-full items-center justify-center overflow-hidden bg-[rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100">
           <RiArrowUpSLine size={32} />

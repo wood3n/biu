@@ -40,7 +40,7 @@ export default function SearchHeader({ order, onOrderChange, musicOnly, onMusicO
       </Tabs>
 
       <Switch isSelected={musicOnly} onValueChange={onMusicOnlyChange} size="sm">
-        仅音乐
+        仅音乐分区
       </Switch>
     </div>
   );

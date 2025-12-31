@@ -84,7 +84,7 @@ export interface FavCntInfo {
  */
 export interface FavMedia {
   id: number; // 内容id 视频稿件:视频稿件avid 音频:音频auid 视频合集:视频合集id
-  /** 内容类型 2:视频稿件 12:音频 21:视频合集 */
+  /** 内容类型 2:视频稿件 12:音频 21:视频合集 24:电影 */
   type: number;
   title: string; // 标题
   cover: string; // 封面url

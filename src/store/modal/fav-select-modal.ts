@@ -4,7 +4,8 @@ import type { StateCreator } from "zustand";
 
 export interface FavSelectModalData {
   rid: string | number;
-  type?: "mv" | "audio";
+  /** 2:视频稿件 12:音频 21:视频合集 24:电影/纪录片等 */
+  type?: number;
   favId?: string | number;
   title?: ReactNode;
   /** 选择收藏夹后的回调函数, isFavorite 为 true 时表示收藏, 为 false 时表示取消收藏 */

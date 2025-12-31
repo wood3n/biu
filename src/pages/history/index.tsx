@@ -177,13 +177,6 @@ const History = () => {
           },
         ]);
         break;
-      case "favorite":
-        useModalStore.getState().onOpenFavSelectModal({
-          rid: item.history.oid,
-          type: "mv",
-          title: item.title,
-        });
-        break;
       case "download-audio":
         await window.electron.addMediaDownloadTask({
           outputFileType: "audio",

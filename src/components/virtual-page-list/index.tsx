@@ -1,13 +1,13 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import { type ReactNode, useRef, useLayoutEffect, useCallback, useEffect, useState } from "react";
 
 import { Spinner } from "@heroui/react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useVirtualizer, observeElementRect, type Virtualizer } from "@tanstack/react-virtual";
 
-import Empty from "@/components/empty";
+import Empty from "../empty";
 
-export interface VirtualPageListProps<T> {
+export interface VirtualListProps<T> {
   items: T[];
-  renderItem: (item: T, index: number) => React.ReactNode;
+  renderItem: (item: T, index: number) => ReactNode;
   getScrollElement: () => HTMLElement | null;
   rowHeight: number;
   className?: string;
@@ -16,156 +16,171 @@ export interface VirtualPageListProps<T> {
   loading: boolean;
 }
 
-const VirtualPageList = <T,>({
+export default function VirtualList<T>({
   items,
   renderItem,
   getScrollElement,
   rowHeight,
   className,
   onLoadMore,
-  hasMore,
+  hasMore = false,
   loading,
-}: VirtualPageListProps<T>) => {
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const loadMoreRef = useRef(onLoadMore);
-  const getRootRef = useRef(getScrollElement);
-  const hasMoreRef = useRef(hasMore);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const isInitialMountRef = useRef(true);
-  const lastTriggerTimeRef = useRef(0);
-  const DEBOUNCE_DELAY = 300; // 防抖延迟 300ms
+}: VirtualListProps<T>) {
+  const scrollElRef = useRef<HTMLElement | null>(null);
+  const loadLockRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [offsetTop, setOffsetTop] = useState(0);
+  const checkFillRef = useRef<((instance?: Virtualizer<HTMLElement, Element>) => void) | null>(null);
+  const updateOffsetTopRef = useRef<(() => void) | null>(null);
+
+  const updateOffsetTop = useCallback(() => {
+    const el = containerRef.current;
+    const scrollEl = getScrollElement();
+    if (el && scrollEl) {
+      const rect = el.getBoundingClientRect();
+      const scrollRect = scrollEl.getBoundingClientRect();
+      const offset = rect.top - scrollRect.top + scrollEl.scrollTop;
+      setOffsetTop(prev => (Math.abs(prev - offset) > 1 ? offset : prev));
+    }
+  }, [getScrollElement]);
+
+  /** 保持 updateOffsetTopRef 最新 */
+  useEffect(() => {
+    updateOffsetTopRef.current = updateOffsetTop;
+  }, [updateOffsetTop]);
+
+  /** 计算 offsetTop - 初始化和依赖变化时 */
+  useLayoutEffect(() => {
+    updateOffsetTop();
+  }, [updateOffsetTop]);
+
+  /** 只绑定一次 scroll element */
+  useLayoutEffect(() => {
+    scrollElRef.current = getScrollElement();
+  }, [getScrollElement]);
 
   const rowVirtualizer = useVirtualizer({
-    count: items.length,
+    count: hasMore ? items.length + 1 : items.length,
     getScrollElement,
-    estimateSize: () => rowHeight,
-    overscan: 5,
+    estimateSize: useCallback(() => rowHeight, [rowHeight]),
+    overscan: 4,
+    scrollMargin: offsetTop,
+    observeElementRect: (instance, cb) => {
+      // 使用 tanstack-virtual 内置的 observeElementRect，避免手动管理 ResizeObserver
+      return observeElementRect(instance, rect => {
+        cb(rect);
+        // 当容器尺寸变化时，重新检测是否填满
+        // 使用 ref 调用 checkFill，确保获取到最新的闭包状态
+        checkFillRef.current?.(instance);
+        // 同时重新计算 offsetTop，防止布局变化导致偏移量改变
+        updateOffsetTopRef.current?.();
+      });
+    },
   });
 
-  // 统一更新所有 ref，减少 useEffect 数量
-  useEffect(() => {
-    loadMoreRef.current = onLoadMore;
-    getRootRef.current = getScrollElement;
-    hasMoreRef.current = hasMore;
-  }, [onLoadMore, getScrollElement, hasMore]);
+  const virtualItems = rowVirtualizer.getVirtualItems();
 
-  // 处理加载更多的回调，添加防抖
-  const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
-    const now = Date.now();
-    entries.forEach(entry => {
-      if (
-        entry.isIntersecting &&
-        !isInitialMountRef.current &&
-        hasMoreRef.current &&
-        now - lastTriggerTimeRef.current > DEBOUNCE_DELAY
-      ) {
-        lastTriggerTimeRef.current = now;
-        loadMoreRef.current?.();
+  const checkFill = useCallback(
+    (instanceParam?: Virtualizer<HTMLElement, Element>) => {
+      if (!onLoadMore || !hasMore || loading) return;
+      if (loadLockRef.current) return;
+
+      const el = scrollElRef.current;
+      if (!el) return;
+
+      const instance = instanceParam || rowVirtualizer;
+      if (!instance) return;
+
+      // 获取滚动容器的高度
+      const scrollClientHeight = el.clientHeight;
+      // 获取列表总高度（包括已渲染项 + overscan）
+      const totalSize = instance.getTotalSize();
+
+      // 如果列表内容总高度 + 顶部偏移量 <= 滚动容器高度，说明还没填满，继续加载
+      // 这里稍微放宽一点判断条件，比如加上一个 rowHeight 的余量
+      if (totalSize + offsetTop <= scrollClientHeight + rowHeight) {
+        loadLockRef.current = true;
+        onLoadMore();
       }
-    });
-  }, []);
+    },
+    [onLoadMore, hasMore, loading, rowVirtualizer, offsetTop, rowHeight],
+  );
 
-  // 使用 useLayoutEffect 确保 DOM 更新后再设置 observer
-  useLayoutEffect(() => {
-    const scrollElement = getRootRef.current();
-    if (!scrollElement || !bottomRef.current) {
-      return;
-    }
-
-    // 清理旧的 observer
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
-    // 创建新的 observer
-    observerRef.current = new IntersectionObserver(handleIntersection, {
-      root: scrollElement,
-      rootMargin: "0px 0px 200px 0px",
-      threshold: 0,
-    });
-
-    observerRef.current.observe(bottomRef.current);
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-        observerRef.current = null;
-      }
-    };
-  }, [handleIntersection]); // 只在 handleIntersection 变化时重建
-
-  // 标记初始挂载完成 - 使用 requestAnimationFrame 更可靠
+  // 保持 checkFillRef 最新
   useEffect(() => {
-    const rafId = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        isInitialMountRef.current = false;
-      });
-    });
+    checkFillRef.current = checkFill;
+  }, [checkFill]);
 
-    return () => {
-      cancelAnimationFrame(rafId);
-    };
-  }, []);
+  /** ① 初始化 / items 变化：容器未填满检测 */
+  useEffect(() => {
+    const el = scrollElRef.current;
+    if (!el) return;
 
-  if (!items.length && !loading) {
-    return <Empty className="min-h-20" />;
+    // 初始检查
+    checkFill();
+  }, [checkFill]);
+
+  /** ② 滚动过程中：接近底部 */
+  useEffect(() => {
+    if (!onLoadMore || !hasMore || loading) return;
+    if (loadLockRef.current) return;
+    if (virtualItems.length === 0) return;
+
+    const last = virtualItems[virtualItems.length - 1];
+    if (last.index >= items.length) {
+      loadLockRef.current = true;
+      onLoadMore();
+    }
+  }, [virtualItems, items.length, hasMore, loading, onLoadMore]);
+
+  /** loading 结束释放锁，并再次检测是否需要加载 */
+  useEffect(() => {
+    if (!loading) {
+      loadLockRef.current = false;
+      // loading 结束后，可能数据还是不够填满屏幕，再次检测
+      checkFill();
+    }
+  }, [loading, checkFill]);
+
+  if (items.length === 0 && !hasMore && !loading) {
+    return <Empty />;
   }
-
-  const totalSize = rowVirtualizer.getTotalSize();
 
   return (
     <div
+      ref={containerRef}
       className={className}
       style={{
-        height: totalSize,
-        width: "100%",
         position: "relative",
+        height: rowVirtualizer.getTotalSize(),
       }}
     >
-      {rowVirtualizer.getVirtualItems().map(virtualRow => {
-        const item = items[virtualRow.index] as T;
+      {virtualItems.map(v => {
+        const index = v.index;
+        const isLoader = index >= items.length;
+
         return (
           <div
-            key={virtualRow.key}
-            data-index={virtualRow.index}
+            key={v.key}
             style={{
               position: "absolute",
               top: 0,
               left: 0,
               width: "100%",
-              height: virtualRow.size,
-              transform: `translate3d(0, ${virtualRow.start}px, 0)`,
+              height: rowHeight,
+              transform: `translateY(${v.start - rowVirtualizer.options.scrollMargin}px)`,
             }}
           >
-            {renderItem(item, virtualRow.index)}
+            {isLoader ? (
+              hasMore ? (
+                <div className="flex h-full items-center justify-center">{loading ? <Spinner /> : null}</div>
+              ) : null
+            ) : (
+              renderItem(items[index], index)
+            )}
           </div>
         );
       })}
-      {hasMore && loading && (
-        <div
-          className="flex w-full justify-center py-4"
-          style={{
-            position: "absolute",
-            top: totalSize,
-            left: 0,
-            width: "100%",
-          }}
-        >
-          <Spinner size="sm" />
-        </div>
-      )}
-      <div
-        ref={bottomRef}
-        style={{
-          position: "absolute",
-          top: totalSize,
-          left: 0,
-          width: "100%",
-          height: 1,
-        }}
-      />
     </div>
   );
-};
-
-export default VirtualPageList;
+}

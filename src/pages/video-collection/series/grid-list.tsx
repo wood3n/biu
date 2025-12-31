@@ -1,13 +1,13 @@
 import React, { useCallback } from "react";
 
-import { Skeleton } from "@heroui/react";
+import { Spinner } from "@heroui/react";
 
 import type { Media } from "@/service/user-video-archives-list";
 
 import Empty from "@/components/empty";
 import MusicCard from "@/components/music-card";
 import VirtualGridPageList from "@/components/virtual-grid-page-list";
-import { usePlayList, isSame } from "@/store/play-list";
+import { usePlayList } from "@/store/play-list";
 
 import { getContextMenus } from "./menu";
 
@@ -20,17 +20,8 @@ export interface SeriesGridListProps {
 }
 
 const SeriesGridList = ({ data, loading, className, getScrollElement, onMenuAction }: SeriesGridListProps) => {
-  const playId = usePlayList(state => state.playId);
-  const list = usePlayList(state => state.list);
-  const playItem = list.find(item => item.id === playId);
-
   const renderGridItem = useCallback(
     (item: Media) => {
-      const isPlaying = isSame(playItem, {
-        type: "mv",
-        bvid: item.bvid,
-      });
-
       return (
         <MusicCard
           key={item.bvid}
@@ -41,9 +32,7 @@ const SeriesGridList = ({ data, loading, className, getScrollElement, onMenuActi
           ownerName={item.upper?.name}
           ownerMid={item.upper?.mid}
           time={item.pubtime}
-          menus={getContextMenus({
-            isPlaying,
-          })}
+          menus={getContextMenus()}
           onMenuAction={key => {
             onMenuAction(key, item);
           }}
@@ -60,15 +49,13 @@ const SeriesGridList = ({ data, loading, className, getScrollElement, onMenuActi
         />
       );
     },
-    [onMenuAction, playItem],
+    [onMenuAction],
   );
 
   if (loading && data.length === 0) {
     return (
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-        {Array.from({ length: 12 }, (_, i) => (
-          <Skeleton key={i} className="aspect-square rounded-lg" />
-        ))}
+      <div className="flex h-[280px] items-center justify-center">
+        <Spinner label="加载中" />
       </div>
     );
   }

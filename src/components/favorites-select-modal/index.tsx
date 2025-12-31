@@ -37,7 +37,7 @@ const FavoritesSelectModal = () => {
   const isFavSelectModalOpen = useModalStore(s => s.isFavSelectModalOpen);
   const onFavSelectModalOpenChange = useModalStore(s => s.onFavSelectModalOpenChange);
   const favSelectModalData = useModalStore(s => s.favSelectModalData);
-  const { rid, type = "mv", title, favId, afterSubmit } = favSelectModalData || {};
+  const { rid, type = 2, title, favId, afterSubmit } = favSelectModalData || {};
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -56,7 +56,7 @@ const FavoritesSelectModal = () => {
       if (!rid) return [];
 
       let list: any[] = [];
-      if (type === "audio") {
+      if (type === 12) {
         const res = await getAudioCreatedFavList({
           rid: Number(rid),
           type: 12,
@@ -68,7 +68,7 @@ const FavoritesSelectModal = () => {
       } else {
         const res = await getFavFolderCreatedListAll({
           rid: Number(rid),
-          type: 2,
+          type,
           up_mid: user?.mid as number,
         });
         list = res?.data?.list || [];
@@ -109,7 +109,7 @@ const FavoritesSelectModal = () => {
       setSubmitting(true);
 
       let res: any;
-      if (type === "audio") {
+      if (type === 12) {
         res = await postCollResourceDeal({
           rid,
           type: 12,
@@ -121,7 +121,7 @@ const FavoritesSelectModal = () => {
           rid,
           add_media_ids: addMediaIds,
           del_media_ids: delMediaIds,
-          type: 2,
+          type,
           platform: "web",
           ga: 1,
           gaia_source: "web_normal",

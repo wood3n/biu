@@ -5,6 +5,7 @@ import { Avatar, Divider, Image, Tooltip } from "@heroui/react";
 import { RiAddLine, RiCheckLine, RiVerifiedBadgeFill } from "@remixicon/react";
 
 import { UserRelation } from "@/common/constants/relation";
+import { formatNumber } from "@/common/utils/number";
 import AsyncButton from "@/components/async-button";
 import { postRelationModify, UserRelationAction } from "@/service/relation-modify";
 import { type RelationStatData } from "@/service/relation-stat";
@@ -33,7 +34,7 @@ const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }
     },
     {
       title: "粉丝数",
-      value: relationStats?.follower,
+      value: formatNumber(relationStats?.follower),
     },
     {
       title: "等  级",

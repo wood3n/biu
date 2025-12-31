@@ -6,7 +6,8 @@ import { formatSecondsToDate } from "@/common/utils";
 import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
 import VirtualPageList from "@/components/virtual-page-list";
-import { usePlayList, isSame } from "@/store/play-list";
+import { usePlayList } from "@/store/play-list";
+import { useSettings } from "@/store/settings";
 
 import { getContextMenus } from "./menu";
 
@@ -20,25 +21,19 @@ interface PostListProps {
 }
 
 const PostList: React.FC<PostListProps> = ({ items, hasMore, loading, onLoadMore, getScrollElement, onMenuAction }) => {
-  const playId = usePlayList(state => state.playId);
-  const list = usePlayList(state => state.list);
-  const playItem = list.find(item => item.id === playId);
-  const play = usePlayList(state => state.play);
+  const displayMode = useSettings(state => state.displayMode);
+  const isCompact = displayMode === "compact";
 
-  const handlePress = useCallback(
-    (item: SpaceArcVListItem) => {
-      play({
-        type: "mv",
-        bvid: item.bvid,
-        sid: item.aid,
-        title: item.title,
-        cover: item.pic,
-        ownerName: item.author,
-        ownerMid: item.mid,
-      });
-    },
-    [play],
-  );
+  const handlePress = useCallback((item: SpaceArcVListItem) => {
+    usePlayList.getState().play({
+      type: "mv",
+      bvid: item.bvid,
+      title: item.title,
+      cover: item.pic,
+      ownerName: item.author,
+      ownerMid: item.mid,
+    });
+  }, []);
 
   return (
     <div className="w-full">
@@ -49,14 +44,8 @@ const PostList: React.FC<PostListProps> = ({ items, hasMore, loading, onLoadMore
         loading={loading}
         onLoadMore={onLoadMore}
         getScrollElement={getScrollElement}
-        rowHeight={64}
+        rowHeight={isCompact ? 36 : 64}
         renderItem={(item, index) => {
-          const isPlaying = isSame(playItem, {
-            type: "mv",
-            bvid: item.bvid,
-            sid: item.aid,
-          });
-
           return (
             <MusicListItem
               key={item.bvid}
@@ -72,10 +61,7 @@ const PostList: React.FC<PostListProps> = ({ items, hasMore, loading, onLoadMore
               duration={item.length}
               pubTime={formatSecondsToDate(item.created)}
               onPress={() => handlePress(item)}
-              menus={getContextMenus({
-                isPlaying,
-                type: "mv",
-              })}
+              menus={getContextMenus()}
               onMenuAction={key => onMenuAction(key, item)}
             />
           );

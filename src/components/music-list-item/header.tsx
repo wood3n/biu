@@ -1,14 +1,19 @@
 import clx from "classnames";
 
+import { useSettings } from "@/store/settings";
+
 import { getMusicListItemGrid } from "./styles";
 
 interface Props {
-  isCompact?: boolean;
   className?: string;
   hidePubTime?: boolean;
+  timeTitle?: string;
 }
 
-const MusicListHeader = ({ isCompact, className, hidePubTime }: Props) => {
+const MusicListHeader = ({ className, hidePubTime, timeTitle }: Props) => {
+  const displayMode = useSettings(state => state.displayMode);
+  const isCompact = displayMode === "compact";
+
   const gridCols = getMusicListItemGrid(isCompact, hidePubTime);
 
   return (
@@ -24,7 +29,7 @@ const MusicListHeader = ({ isCompact, className, hidePubTime }: Props) => {
       <div className="text-left">标题</div>
       {isCompact && <div className="text-left">UP</div>}
       <div className="text-right">播放量</div>
-      {!hidePubTime && <div className="text-right">投稿时间</div>}
+      {!hidePubTime && <div className="text-right">{timeTitle || "投稿时间"}</div>}
       <div className="text-right">时长</div>
       <div className="w-8" />
     </div>

@@ -1,13 +1,15 @@
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router";
 
-import { Button, Image } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { RiPlayFill } from "@remixicon/react";
 import clx from "classnames";
 
 import { formatDuration } from "@/common/utils";
 import { formatNumber } from "@/common/utils/number";
+import Image from "@/components/image";
 import { isSame, usePlayList } from "@/store/play-list";
+import { useSettings } from "@/store/settings";
 
 import type { ContextMenuItem } from "../context-menu";
 
@@ -16,7 +18,6 @@ import OperationMenu from "./operation";
 import { getMusicListItemGrid } from "./styles";
 
 interface Props {
-  isCompact?: boolean;
   title: ReactNode;
   type: "audio" | "mv";
   bvid?: string;
@@ -35,7 +36,6 @@ interface Props {
 }
 
 const MusicListItem = ({
-  isCompact,
   title,
   type,
   bvid,
@@ -57,6 +57,8 @@ const MusicListItem = ({
   const list = usePlayList(state => state.list);
   const playItem = list.find(item => item.id === playId);
   const isPlay = isSame(playItem, { type, bvid, sid });
+  const displayMode = useSettings(state => state.displayMode);
+  const isCompact = displayMode === "compact";
 
   const gridCols = getMusicListItemGrid(isCompact, hidePubTime);
 
@@ -86,8 +88,16 @@ const MusicListItem = ({
           ) : (
             <div className="flex min-w-0 items-center overflow-hidden">
               <div className="relative h-12 w-12 flex-none">
-                <Image removeWrapper radius="md" src={cover} width="100%" height="100%" className="m-0 object-cover" />
-                {!isPlay && (
+                <Image
+                  removeWrapper
+                  radius="md"
+                  src={cover}
+                  width="100%"
+                  height="100%"
+                  className="m-0"
+                  params="672w_378h_1c.avif"
+                />
+                {!isPlay && typeof onPress === "function" && (
                   <div className="absolute inset-0 z-20 flex items-center justify-center rounded-md bg-[rgba(0,0,0,0.35)] opacity-0 group-hover:opacity-100">
                     <RiPlayFill
                       size={20}
@@ -134,7 +144,7 @@ const MusicListItem = ({
 
           {/* 4. 播放量 */}
           <div className="text-foreground-500 flex justify-end text-xs">
-            {playCount !== undefined && playCount > 0 && <span>{formatNumber(playCount)}</span>}
+            {playCount !== undefined && playCount > 0 ? formatNumber(playCount) : "-"}
           </div>
 
           {/* 5. 投稿时间 */}
@@ -148,8 +158,8 @@ const MusicListItem = ({
           </div>
 
           {/* 7. 操作 */}
-          <div className="flex justify-end">
-            <OperationMenu items={menus} onAction={onMenuAction} />
+          <div className="flex h-full items-center justify-end">
+            {Boolean(menus.length) && <OperationMenu items={menus} onAction={onMenuAction} />}
           </div>
         </div>
       </Button>

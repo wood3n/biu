@@ -41,7 +41,6 @@ const FavoriteGridList: React.FC<FavoriteGridListProps> = ({
           time={item.fav_time}
           menus={getContextMenus({
             isCreatedBySelf,
-            isPlaying: false,
             type: item.type === 2 ? "mv" : "audio",
           })}
           onMenuAction={key => {

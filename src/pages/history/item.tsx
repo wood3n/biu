@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router";
 
-import { Button, Image } from "@heroui/react";
+import { Button } from "@heroui/react";
 import clx from "classnames";
 
 import { formatDuration } from "@/common/utils";
 import ContextMenu, { type ContextMenuItem } from "@/components/context-menu";
+import Image from "@/components/image";
 import OperationMenu from "@/components/music-list-item/operation";
 import { isSame, usePlayList } from "@/store/play-list";
 
@@ -78,7 +79,15 @@ const HistoryListItem = ({
           <div className="flex min-w-0 items-center overflow-hidden">
             {!isCompact && (
               <div className="relative h-12 w-12 flex-none">
-                <Image removeWrapper radius="md" src={cover} width="100%" height="100%" className="m-0 object-cover" />
+                <Image
+                  removeWrapper
+                  radius="md"
+                  src={cover}
+                  width="100%"
+                  height="100%"
+                  className="m-0"
+                  params="760w_428h_1c.avif"
+                />
               </div>
             )}
             <div className={clx("flex min-w-0 flex-col items-start justify-center space-y-1", { "ml-2": !isCompact })}>
@@ -134,7 +143,7 @@ const HistoryListItem = ({
           <div className="text-foreground-500 text-right text-xs">{viewAt}</div>
 
           {/* 6. Actions */}
-          <div className="flex justify-end">
+          <div className="flex h-full items-center justify-end">
             <OperationMenu items={menus} onAction={onMenuAction} />
           </div>
         </div>

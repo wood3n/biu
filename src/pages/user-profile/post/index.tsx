@@ -1,11 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 
-import { addToast } from "@heroui/react";
+import { addToast, Spinner } from "@heroui/react";
 
-import MusicCardSkeleton from "@/components/music-card/skeleton";
-import MusicListHeader from "@/components/music-list-item/header";
-import MusicListSkeleton from "@/components/music-list-item/skeleton";
 import SearchWithSort from "@/components/search-with-sort";
 import { getSpaceWbiArcSearch, type SpaceArcVListItem } from "@/service/space-wbi-arc-search";
 import { useModalStore } from "@/store/modal";
@@ -147,7 +144,7 @@ const VideoPost: React.FC<VideoPostProps> = ({ getScrollElement }) => {
       case "favorite":
         useModalStore.getState().onOpenFavSelectModal({
           rid: item.aid,
-          type: "mv",
+          type: 2,
           title: item.title,
         });
         break;
@@ -157,7 +154,7 @@ const VideoPost: React.FC<VideoPostProps> = ({ getScrollElement }) => {
   return (
     <div className="h-full w-full">
       <div className="mb-4 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-        <div className="text-default-500 text-sm">共 {total} 个视频</div>
+        <div className="text-default-500 pl-2 text-sm">共 {total} 个视频</div>
         <SearchWithSort
           onKeywordSearch={setKeyword}
           order={order}
@@ -170,20 +167,9 @@ const VideoPost: React.FC<VideoPostProps> = ({ getScrollElement }) => {
         />
       </div>
       {initialLoading ? (
-        displayMode === "card" ? (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <MusicCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : (
-          <div className="w-full space-y-2">
-            <MusicListHeader />
-            {Array.from({ length: 20 }).map((_, i) => (
-              <MusicListSkeleton key={i} />
-            ))}
-          </div>
-        )
+        <div className="flex h-[280px] items-center justify-center">
+          <Spinner label="加载中" />
+        </div>
       ) : displayMode === "card" ? (
         <PostGridList
           items={items}

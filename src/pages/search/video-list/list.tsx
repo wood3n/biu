@@ -6,7 +6,7 @@ import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
 import VirtualPageList from "@/components/virtual-page-list";
 import { type SearchVideoItem } from "@/service/web-interface-search-type";
-import { isSame, usePlayList } from "@/store/play-list";
+import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 
 import { getContextMenus } from "./menu";
@@ -21,30 +21,23 @@ interface ListProps {
 }
 
 const List: React.FC<ListProps> = ({ items, getScrollElement, onMenuAction, loading, hasMore, onLoadMore }) => {
-  const playId = usePlayList(state => state.playId);
-  const list = usePlayList(state => state.list);
-  const playItem = list.find(item => item.id === playId);
-  const play = usePlayList(state => state.play);
   const displayMode = useSettings(state => state.displayMode);
   const isCompact = displayMode === "compact";
 
-  const handlePress = useCallback(
-    (item: SearchVideoItem) => {
-      play({
-        type: "mv",
-        bvid: item.bvid,
-        title: item.title,
-        cover: formatUrlProtocal(item.pic),
-        ownerName: item.author,
-        ownerMid: item.mid,
-      });
-    },
-    [play],
-  );
+  const handlePress = useCallback((item: SearchVideoItem) => {
+    usePlayList.getState().play({
+      type: "mv",
+      bvid: item.bvid,
+      title: item.title,
+      cover: formatUrlProtocal(item.pic),
+      ownerName: item.author,
+      ownerMid: item.mid,
+    });
+  }, []);
 
   return (
     <div className="w-full">
-      <MusicListHeader isCompact={isCompact} />
+      <MusicListHeader />
       <VirtualPageList
         items={items}
         hasMore={hasMore}
@@ -53,14 +46,8 @@ const List: React.FC<ListProps> = ({ items, getScrollElement, onMenuAction, load
         getScrollElement={getScrollElement}
         rowHeight={isCompact ? 36 : 64}
         renderItem={(item, index) => {
-          const isPlaying = isSame(playItem, {
-            type: "mv",
-            bvid: item.bvid,
-          });
-
           return (
             <MusicListItem
-              isCompact={isCompact}
               key={item.aid}
               index={index + 1}
               title={<span dangerouslySetInnerHTML={{ __html: item.title }} />}
@@ -73,9 +60,7 @@ const List: React.FC<ListProps> = ({ items, getScrollElement, onMenuAction, load
               duration={item.duration}
               pubTime={formatSecondsToDate(item.pubdate)}
               onPress={() => handlePress(item)}
-              menus={getContextMenus({
-                isPlaying,
-              })}
+              menus={getContextMenus()}
               onMenuAction={key => onMenuAction(key, item)}
             />
           );

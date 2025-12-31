@@ -139,13 +139,6 @@ const Later = () => {
           },
         });
         break;
-      case "favorite":
-        useModalStore.getState().onOpenFavSelectModal({
-          rid: item.aid,
-          type: "mv",
-          title: item.title,
-        });
-        break;
       case "play-next":
         usePlayList.getState().addToNext({
           type: "mv",

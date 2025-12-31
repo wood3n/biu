@@ -164,7 +164,7 @@ const VideoSeries = () => {
       case "favorite":
         useModalStore.getState().onOpenFavSelectModal({
           rid: item.id,
-          type: "mv",
+          type: 2,
           title: item.title,
         });
         break;
@@ -174,7 +174,6 @@ const VideoSeries = () => {
           title: item.title,
           cover: item.cover,
           bvid: item.bvid,
-          sid: item.id,
         });
         addToast({
           title: "已添加下载任务",
@@ -187,7 +186,6 @@ const VideoSeries = () => {
           title: item.title,
           cover: item.cover,
           bvid: item.bvid,
-          sid: item.id,
         });
         addToast({
           title: "已添加下载任务",

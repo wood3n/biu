@@ -4,7 +4,7 @@ import { stripHtml } from "@/common/utils/str";
 import MusicCard from "@/components/music-card";
 import VirtualGridPageList from "@/components/virtual-grid-page-list";
 import { type SearchVideoItem } from "@/service/web-interface-search-type";
-import { isSame, usePlayList } from "@/store/play-list";
+import { usePlayList } from "@/store/play-list";
 
 import { getContextMenus } from "./menu";
 
@@ -18,17 +18,8 @@ interface GridListProps {
 }
 
 const GridList: React.FC<GridListProps> = ({ items, getScrollElement, onMenuAction, loading, hasMore, onLoadMore }) => {
-  const playList = usePlayList(state => state.list);
-  const playId = usePlayList(state => state.playId);
-  const playItem = playList.find(item => item.id === playId);
-
   const renderGridItem = useCallback(
     (item: SearchVideoItem) => {
-      const isPlaying = isSame(playItem, {
-        type: "mv",
-        bvid: item.bvid,
-      });
-
       return (
         <MusicCard
           key={item.aid}
@@ -39,9 +30,7 @@ const GridList: React.FC<GridListProps> = ({ items, getScrollElement, onMenuActi
           ownerName={item.author}
           ownerMid={item.mid}
           time={item.pubdate}
-          menus={getContextMenus({
-            isPlaying,
-          })}
+          menus={getContextMenus()}
           onMenuAction={key => {
             onMenuAction(key, item);
           }}
@@ -58,7 +47,7 @@ const GridList: React.FC<GridListProps> = ({ items, getScrollElement, onMenuActi
         />
       );
     },
-    [onMenuAction, playItem],
+    [onMenuAction],
   );
 
   return (

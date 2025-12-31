@@ -1,37 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import {
-  addToast,
-  Button,
-  Input,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  Spinner,
-  Tab,
-  Tabs,
-  Tooltip,
-  useDisclosure,
-} from "@heroui/react";
-import { RiAddLine, RiDeleteBinLine, RiEditLine } from "@remixicon/react";
+import { addToast, Button, Input, Spinner, Tab, Tabs, Tooltip, useDisclosure } from "@heroui/react";
+import { RiAddLine, RiDeleteBinLine, RiEditLine, RiSearchLine } from "@remixicon/react";
 
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import VirtualGridPageList from "@/components/virtual-grid-page-list";
 import { getRelationFollowings, type RelationListItem } from "@/service/relation-followings";
 import {
-  createRelationTag,
   deleteRelationTag,
   getRelationTag,
   getRelationTags,
+  searchFollowings,
   type RelationTag,
   type RelationTagUser,
-  updateRelationTag,
 } from "@/service/relation-tag";
 import { useModalStore } from "@/store/modal";
 import { useUser } from "@/store/user";
 
+import GroupModal from "./group-modal";
+import SetGroupModal from "./set-group-modal";
 import UserCard from "./user-card";
 
 const PAGE_SIZE = 20;
@@ -48,13 +35,30 @@ const FollowList = () => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [inputValue, setInputValue] = useState("");
 
-  // Modal State
+  const onSearchChange = (val: string) => {
+    setInputValue(val);
+  };
+
+  const onSearchSubmit = () => {
+    setSearchKeyword(inputValue);
+  };
+
+  const onClear = () => {
+    setInputValue("");
+    setSearchKeyword("");
+  };
+
+  // Modal State for Create/Rename
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [modalMode, setModalMode] = useState<"create" | "rename">("create");
   const [currentTag, setCurrentTag] = useState<RelationTag | null>(null);
-  const [tagNameInput, setTagNameInput] = useState("");
-  const [actionLoading, setActionLoading] = useState(false);
+
+  // Modal State for Set Group
+  const setGroupModalDisclosure = useDisclosure();
+  const [currentOperatingUser, setCurrentOperatingUser] = useState<RelationListItem | RelationTagUser | null>(null);
 
   // Derived state for current active tag
   const activeTagId = Number(activeTab);
@@ -81,7 +85,10 @@ const FollowList = () => {
     let total = 0;
 
     if (activeTab === "all") {
-      const res = await getRelationFollowings({ vmid: user.mid, pn, ps: PAGE_SIZE });
+      const res = searchKeyword
+        ? await searchFollowings({ vmid: user.mid, pn, ps: PAGE_SIZE, name: searchKeyword })
+        : await getRelationFollowings({ vmid: user.mid, pn, ps: PAGE_SIZE });
+
       if (res.code === 0) {
         setAllCount(res.data.total);
         if (res?.data?.list?.length) {
@@ -125,7 +132,7 @@ const FollowList = () => {
       init();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.mid, activeTab]);
+  }, [user?.mid, activeTab, searchKeyword]);
 
   const reload = async () => {
     setList([]);
@@ -146,7 +153,6 @@ const FollowList = () => {
   // Open Create Modal
   const handleOpenCreate = () => {
     setModalMode("create");
-    setTagNameInput("");
     setCurrentTag(null);
     onOpen();
   };
@@ -154,7 +160,6 @@ const FollowList = () => {
   // Open Rename Modal
   const handleOpenRename = (tag: RelationTag) => {
     setModalMode("rename");
-    setTagNameInput(tag.name);
     setCurrentTag(tag);
     onOpen();
   };
@@ -187,40 +192,9 @@ const FollowList = () => {
     });
   };
 
-  const handleSaveTag = async () => {
-    if (!tagNameInput.trim()) {
-      addToast({ title: "请输入分组名称", color: "danger" });
-      return;
-    }
-
-    try {
-      setActionLoading(true);
-      if (modalMode === "create") {
-        const res = await createRelationTag({ tag: tagNameInput.trim() });
-        if (res.code === 0) {
-          addToast({ title: "创建分组成功", color: "success" });
-          setTagNameInput("");
-          onClose();
-          fetchTags();
-        } else {
-          addToast({ title: res.message || "创建分组失败", color: "danger" });
-        }
-      } else if (modalMode === "rename" && currentTag) {
-        const res = await updateRelationTag({ tagid: currentTag.tagid, name: tagNameInput.trim() });
-        if (res.code === 0) {
-          addToast({ title: "修改分组名称成功", color: "success" });
-          setTagNameInput("");
-          onClose();
-          fetchTags();
-        } else {
-          addToast({ title: res.message || "修改分组名称失败", color: "danger" });
-        }
-      }
-    } catch {
-      addToast({ title: modalMode === "create" ? "创建分组失败" : "修改分组名称失败", color: "danger" });
-    } finally {
-      setActionLoading(false);
-    }
+  const handleOpenSetGroup = (u: RelationListItem | RelationTagUser) => {
+    setCurrentOperatingUser(u);
+    setGroupModalDisclosure.onOpen();
   };
 
   return (
@@ -261,6 +235,28 @@ const FollowList = () => {
               </>
             )}
           </div>
+          {activeTab === "all" && (
+            <div className="flex items-center">
+              <Input
+                classNames={{
+                  base: "w-64",
+                  inputWrapper: "h-10",
+                }}
+                placeholder="搜索关注"
+                size="sm"
+                startContent={<RiSearchLine size={16} />}
+                value={inputValue}
+                onValueChange={onSearchChange}
+                isClearable
+                onClear={onClear}
+                onKeyDown={e => {
+                  if (e.key === "Enter") {
+                    onSearchSubmit();
+                  }
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -272,7 +268,7 @@ const FollowList = () => {
         <VirtualGridPageList
           items={list}
           itemKey="mid"
-          renderItem={item => <UserCard u={item} refresh={reload} tags={tags} />}
+          renderItem={item => <UserCard u={item} refresh={reload} onSetGroup={handleOpenSetGroup} />}
           getScrollElement={() => scrollRef.current?.osInstance()?.elements().viewport || null}
           onLoadMore={loadMore}
           rowHeight={240}
@@ -280,33 +276,23 @@ const FollowList = () => {
           loading={loading}
         />
       )}
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-        <ModalContent>
-          {onClose => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                {modalMode === "create" ? "创建分组" : "修改分组名称"}
-              </ModalHeader>
-              <ModalBody>
-                <Input
-                  placeholder="请输入分组名称"
-                  value={tagNameInput}
-                  onValueChange={setTagNameInput}
-                  variant="bordered"
-                />
-              </ModalBody>
-              <ModalFooter>
-                <Button variant="light" onPress={onClose}>
-                  取消
-                </Button>
-                <Button color="primary" onPress={handleSaveTag} isLoading={actionLoading}>
-                  {modalMode === "create" ? "创建" : "保存"}
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <GroupModal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        onClose={onClose}
+        mode={modalMode}
+        tag={currentTag}
+        onSuccess={fetchTags}
+      />
+
+      <SetGroupModal
+        isOpen={setGroupModalDisclosure.isOpen}
+        onOpenChange={setGroupModalDisclosure.onOpenChange}
+        onClose={setGroupModalDisclosure.onClose}
+        user={currentOperatingUser}
+        tags={tags}
+        onSuccess={reload}
+      />
     </ScrollContainer>
   );
 };

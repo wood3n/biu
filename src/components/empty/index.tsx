@@ -10,7 +10,7 @@ interface Props {
 
 const Empty = ({ title, className }: Props) => {
   return (
-    <div className={twMerge("flex flex-col items-center justify-center space-y-2 text-zinc-600", className)}>
+    <div className={twMerge("flex flex-col items-center justify-center space-y-2 py-20 text-zinc-600", className)}>
       <RiCloseCircleLine size={32} />
       <span>{title ?? "暂无内容"}</span>
     </div>

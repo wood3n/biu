@@ -150,7 +150,6 @@ const Favorites: React.FC = () => {
     try {
       const allMedias = await getAllFavMedia({
         id: favFolderId,
-        totalCount,
       });
 
       if (allMedias.length) {
@@ -177,7 +176,6 @@ const Favorites: React.FC = () => {
     try {
       const allMedias = await getAllFavMedia({
         id: favFolderId,
-        totalCount,
       });
 
       if (allMedias.length) {
@@ -234,7 +232,7 @@ const Favorites: React.FC = () => {
         case "favorite":
           useModalStore.getState().onOpenFavSelectModal({
             rid: item.id,
-            type: item.type === 2 ? "mv" : "audio",
+            type: item.type,
             favId: favFolderId,
             title: item.title,
             afterSubmit: isFavorite => {

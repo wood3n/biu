@@ -37,10 +37,7 @@ const PostGridList: React.FC<PostGridListProps> = ({
           ownerName={item.author}
           ownerMid={item.mid}
           time={item.created}
-          menus={getContextMenus({
-            isPlaying: false,
-            type: "mv",
-          })}
+          menus={getContextMenus()}
           onMenuAction={key => {
             onMenuAction(key, item);
           }}

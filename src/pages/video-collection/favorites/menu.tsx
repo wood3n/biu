@@ -8,12 +8,15 @@ import {
 } from "@remixicon/react";
 
 interface Props {
-  type: "audio" | "mv";
+  /** 2:视频稿件 12:音频 21:视频合集 24:电影 */
+  type: number;
   isCreatedBySelf: boolean;
-  isPlaying: boolean;
 }
 
-export const getContextMenus = ({ type, isCreatedBySelf, isPlaying }: Props) => {
+export const getContextMenus = ({ type, isCreatedBySelf }: Props) => {
+  const isAudio = type === 12;
+  const canNotPlay = ![2, 12].includes(type);
+
   return [
     {
       icon: <RiStarLine size={18} />,
@@ -30,24 +33,25 @@ export const getContextMenus = ({ type, isCreatedBySelf, isPlaying }: Props) => 
       icon: <RiPlayCircleLine size={18} />,
       key: "play-next",
       label: "下一首播放",
-      hidden: isPlaying,
+      hidden: canNotPlay,
     },
     {
       icon: <RiPlayListAddLine size={18} />,
       key: "add-to-playlist",
       label: "添加到播放列表",
-      hidden: isPlaying,
+      hidden: canNotPlay,
     },
     {
       icon: <RiFileMusicLine size={18} />,
       key: "download-audio",
       label: "下载音频",
+      hidden: canNotPlay,
     },
     {
       icon: <RiFileVideoLine size={18} />,
       key: "download-video",
       label: "下载视频",
-      hidden: type === "audio",
+      hidden: canNotPlay || isAudio,
     },
   ];
 };

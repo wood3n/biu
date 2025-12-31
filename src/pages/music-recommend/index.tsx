@@ -70,7 +70,7 @@ const MusicRecommend = () => {
       case "favorite":
         useModalStore.getState().onOpenFavSelectModal({
           rid: Number(item.aid) || Number(item.id),
-          type: "mv",
+          type: 2,
           title: item.music_title,
         });
         break;

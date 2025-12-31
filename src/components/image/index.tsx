@@ -8,15 +8,15 @@ import { formatUrlProtocal } from "@/common/utils/url";
 
 interface Props extends ImageProps {
   fileType?: "audio" | "video";
-  resolution?: number;
+  params?: string;
 }
 
-const Image = ({ fileType = "audio", width, height, src, className, ...rest }: Props) => {
+const Image = ({ fileType = "audio", params, width, height, src, className, ...rest }: Props) => {
   const [isError, setIsError] = useState(false);
   const formatSrc = formatUrlProtocal(src);
   const finalSrc =
-    typeof height === "number" && formatSrc && formatSrc.includes("/bfs/") && !formatSrc.includes("@")
-      ? `${formatSrc}@${height * 2}h`
+    params && formatSrc && formatSrc.includes("/bfs/") && !formatSrc.includes("@")
+      ? `${formatSrc}@${params}`
       : formatSrc;
 
   if (isError) {

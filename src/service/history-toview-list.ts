@@ -24,6 +24,7 @@ export interface ToViewVideoItem {
   aid: number; // 稿件avid
   videos: number; // 分P总数
   tid: number; // 分区tid
+  is_pgc: boolean; // 是否为电影，纪录片等
   tname: string; // 子分区名称
   copyright: number; // 1原创 2转载
   pic: string; // 封面

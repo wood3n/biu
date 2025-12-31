@@ -6,7 +6,8 @@ import { formatSecondsToDate } from "@/common/utils/time";
 import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
 import VirtualPageList from "@/components/virtual-page-list";
-import { usePlayList, isSame } from "@/store/play-list";
+import { usePlayList } from "@/store/play-list";
+import { useSettings } from "@/store/settings";
 
 import { getContextMenus } from "./menu";
 
@@ -29,42 +30,33 @@ const FavoriteList: React.FC<FavoriteListProps> = ({
   isCreatedBySelf,
   onMenuAction,
 }) => {
-  const playId = usePlayList(state => state.playId);
-  const list = usePlayList(state => state.list);
-  const playItem = list.find(item => item.id === playId);
-  const play = usePlayList(state => state.play);
+  const displayMode = useSettings(state => state.displayMode);
+  const isCompact = displayMode === "compact";
 
-  const handlePress = useCallback(
-    (item: FavMedia) => {
-      play({
-        type: item.type === 2 ? "mv" : "audio",
-        bvid: item.type === 2 ? item.bvid : undefined,
-        sid: item.type === 2 ? undefined : item.id,
-        title: item.title,
-        cover: item.cover,
-        ownerName: item.upper?.name,
-        ownerMid: item.upper?.mid,
-      });
-    },
-    [play],
-  );
+  const handlePress = useCallback((item: FavMedia) => {
+    usePlayList.getState().play({
+      type: item.type === 2 ? "mv" : "audio",
+      bvid: item.type === 2 ? item.bvid : undefined,
+      sid: item.type === 2 ? undefined : item.id,
+      title: item.title,
+      cover: item.cover,
+      ownerName: item.upper?.name,
+      ownerMid: item.upper?.mid,
+    });
+  }, []);
 
   return (
     <div className="w-full">
-      <MusicListHeader />
+      <MusicListHeader timeTitle="收藏时间" />
       <VirtualPageList
         items={items}
         hasMore={hasMore}
         loading={loading}
         onLoadMore={onLoadMore}
         getScrollElement={getScrollElement}
-        rowHeight={64}
+        rowHeight={isCompact ? 36 : 64}
         renderItem={(item, index) => {
-          const isPlaying = isSame(playItem, {
-            type: item.type === 2 ? "mv" : "audio",
-            bvid: item.type === 2 ? item.bvid : undefined,
-            sid: item.type === 2 ? undefined : item.id,
-          });
+          const canPlay = [2, 12].includes(item.type);
 
           return (
             <MusicListItem
@@ -80,11 +72,14 @@ const FavoriteList: React.FC<FavoriteListProps> = ({
               playCount={item.cnt_info.play}
               duration={item.duration}
               pubTime={formatSecondsToDate(item.fav_time)}
-              onPress={() => handlePress(item)}
+              onPress={() => {
+                if (canPlay) {
+                  handlePress(item);
+                }
+              }}
               menus={getContextMenus({
                 isCreatedBySelf,
-                isPlaying,
-                type: item.type === 2 ? "mv" : "audio",
+                type: item.type,
               })}
               onMenuAction={key => onMenuAction(key, item)}
             />

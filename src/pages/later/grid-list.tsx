@@ -3,7 +3,7 @@ import React, { useCallback } from "react";
 import MusicCard from "@/components/music-card";
 import VirtualGridPageList from "@/components/virtual-grid-page-list";
 import { type ToViewVideoItem } from "@/service/history-toview-list";
-import { isSame, usePlayList } from "@/store/play-list";
+import { usePlayList } from "@/store/play-list";
 
 import { getContextMenus } from "./menu";
 
@@ -17,17 +17,8 @@ interface GridListProps {
 }
 
 const GridList: React.FC<GridListProps> = ({ items, hasMore, loading, onLoadMore, getScrollElement, onMenuAction }) => {
-  const playList = usePlayList(state => state.list);
-  const playId = usePlayList(state => state.playId);
-  const playItem = playList.find(item => item.id === playId);
-
   const renderGridItem = useCallback(
     (item: ToViewVideoItem) => {
-      const isPlaying = isSame(playItem, {
-        type: "mv",
-        bvid: item.bvid,
-      });
-
       return (
         <MusicCard
           key={item.aid}
@@ -39,25 +30,29 @@ const GridList: React.FC<GridListProps> = ({ items, hasMore, loading, onLoadMore
           ownerMid={item.owner?.mid}
           time={item.pubdate}
           menus={getContextMenus({
-            isPlaying,
+            is_pgc: item.is_pgc,
           })}
           onMenuAction={key => {
             onMenuAction(key, item);
           }}
-          onPress={() => {
-            usePlayList.getState().play({
-              type: "mv",
-              bvid: item.bvid,
-              title: item.title,
-              cover: item.pic,
-              ownerName: item.owner?.name,
-              ownerMid: item.owner?.mid,
-            });
-          }}
+          onPress={
+            item.is_pgc
+              ? undefined
+              : () => {
+                  usePlayList.getState().play({
+                    type: "mv",
+                    bvid: item.bvid,
+                    title: item.title,
+                    cover: item.pic,
+                    ownerName: item.owner?.name,
+                    ownerMid: item.owner?.mid,
+                  });
+                }
+          }
         />
       );
     },
-    [onMenuAction, playItem],
+    [onMenuAction],
   );
 
   return (

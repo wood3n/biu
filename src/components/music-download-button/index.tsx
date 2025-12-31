@@ -17,7 +17,7 @@ const MusicDownloadButton = () => {
       cover: playItem?.pageCover || playItem?.cover,
       bvid: playItem?.bvid,
       cid: playItem?.cid,
-      sid: playItem?.sid,
+      sid: playItem?.type === "audio" ? playItem?.sid : undefined,
     });
 
     addToast({

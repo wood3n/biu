@@ -34,15 +34,25 @@ const VirtualGridPageList = <T,>({
 }: VirtualGridPageListProps<T>) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const initialWidthRef = useRef(0);
   const size = useSize(wrapperRef);
-  const loadMoreRef = useRef(onLoadMore);
   const getRootRef = useRef(getScrollElement);
+  const loadMoreRef = useRef(onLoadMore);
   const hasMoreRef = useRef(hasMore);
+  const loadingRef = useRef(loading);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const isInitialMountRef = useRef(true);
   const lastTriggerTimeRef = useRef(0);
+  const pendingLoadMoreRef = useRef(false);
+  const lastIsIntersectingRef = useRef(false);
   const DEBOUNCE_DELAY = 300; // 防抖延迟 300ms
-  const width = size?.width || 0;
+  const width = size?.width || initialWidthRef.current || 0;
+
+  useLayoutEffect(() => {
+    if (initialWidthRef.current) return;
+    const nextWidth = wrapperRef.current?.getBoundingClientRect().width ?? 0;
+    if (nextWidth) initialWidthRef.current = nextWidth;
+  }, []);
 
   const columns = useMemo(() => {
     if (!width) return 2;
@@ -73,12 +83,14 @@ const VirtualGridPageList = <T,>({
     loadMoreRef.current = onLoadMore;
     getRootRef.current = getScrollElement;
     hasMoreRef.current = hasMore;
-  }, [onLoadMore, getScrollElement, hasMore]);
+    loadingRef.current = loading;
+  }, [onLoadMore, getScrollElement, hasMore, loading]);
 
   // 处理加载更多的回调，添加防抖
   const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
     const now = Date.now();
     entries.forEach(entry => {
+      lastIsIntersectingRef.current = entry.isIntersecting;
       if (
         entry.isIntersecting &&
         !isInitialMountRef.current &&
@@ -86,6 +98,10 @@ const VirtualGridPageList = <T,>({
         now - lastTriggerTimeRef.current > DEBOUNCE_DELAY
       ) {
         lastTriggerTimeRef.current = now;
+        if (loadingRef.current) {
+          pendingLoadMoreRef.current = true;
+          return;
+        }
         loadMoreRef.current?.();
       }
     });
@@ -118,7 +134,7 @@ const VirtualGridPageList = <T,>({
         observerRef.current = null;
       }
     };
-  }, [handleIntersection]); // 只在 handleIntersection 变化时重建
+  }, [handleIntersection, width, rows.length]);
 
   // 标记初始挂载完成 - 使用 requestAnimationFrame 更可靠
   useEffect(() => {
@@ -133,6 +149,13 @@ const VirtualGridPageList = <T,>({
     };
   }, []);
 
+  useEffect(() => {
+    if (!loading && pendingLoadMoreRef.current && hasMore && lastIsIntersectingRef.current) {
+      pendingLoadMoreRef.current = false;
+      loadMoreRef.current?.();
+    }
+  }, [loading, hasMore]);
+
   if (!items.length && !loading) {
     return <Empty className="min-h-20" />;
   }
@@ -140,7 +163,7 @@ const VirtualGridPageList = <T,>({
   const totalSize = rowVirtualizer.getTotalSize();
 
   return (
-    <div ref={wrapperRef} className={twMerge("h-full w-full", className)}>
+    <div ref={wrapperRef} className={twMerge("w-full", className)}>
       <div
         style={{
           height: totalSize,
@@ -179,28 +202,11 @@ const VirtualGridPageList = <T,>({
         })}
       </div>
       {hasMore && loading && (
-        <div
-          className="flex w-full justify-center py-4"
-          style={{
-            position: "absolute",
-            top: totalSize,
-            left: 0,
-            width: "100%",
-          }}
-        >
+        <div className="flex w-full justify-center py-4">
           <Spinner size="sm" />
         </div>
       )}
-      <div
-        ref={bottomRef}
-        style={{
-          position: "absolute",
-          top: totalSize,
-          left: 0,
-          width: "100%",
-          height: 1,
-        }}
-      />
+      <div ref={bottomRef} className="h-px w-full" />
     </div>
   );
 };

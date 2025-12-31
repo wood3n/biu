@@ -3,7 +3,7 @@ import React, { useCallback } from "react";
 import MusicCard from "@/components/music-card";
 import VirtualGridPageList from "@/components/virtual-grid-page-list";
 import { type Data as MusicItem } from "@/service/music-comprehensive-web-rank";
-import { usePlayList, isSame } from "@/store/play-list";
+import { usePlayList } from "@/store/play-list";
 
 import { getContextMenus } from "./menu";
 
@@ -24,45 +24,35 @@ const MusicRecommendGridList: React.FC<MusicRecommendGridListProps> = ({
   getScrollElement,
   onMenuAction,
 }) => {
-  const playId = usePlayList(state => state.playId);
-  const playList = usePlayList(state => state.list);
-  const playItem = playList.find(item => item.id === playId);
-
   const renderGridItem = useCallback(
     (item: MusicItem) => {
-      const isPlaying = isSame(playItem, {
-        type: "mv",
-        bvid: item.bvid,
-      });
-
       return (
         <MusicCard
           key={item.id}
-          title={item.music_title}
-          cover={item.cover}
+          title={item.related_archive.title}
+          cover={item.related_archive.cover}
           playCount={item.related_archive.vv_count}
           duration={item.related_archive.duration}
-          ownerName={item.author}
-          menus={getContextMenus({
-            isPlaying,
-            type: "mv",
-          })}
+          ownerName={item.related_archive.username}
+          ownerMid={item.related_archive.uid}
+          menus={getContextMenus()}
           onMenuAction={key => {
             onMenuAction(key, item);
           }}
           onPress={() => {
             usePlayList.getState().play({
               type: "mv",
-              bvid: item.bvid,
-              title: item.music_title,
-              cover: item.cover,
-              ownerName: item.author,
+              bvid: item.related_archive.bvid,
+              title: item.related_archive.title,
+              cover: item.related_archive.cover,
+              ownerName: item.related_archive.username,
+              ownerMid: item.related_archive.uid,
             });
           }}
         />
       );
     },
-    [onMenuAction, playItem],
+    [onMenuAction],
   );
 
   return (

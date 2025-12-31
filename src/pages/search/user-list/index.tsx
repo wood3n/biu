@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
 
-import { Card, CardBody, Avatar, Spinner, addToast } from "@heroui/react";
+import { Spinner, addToast } from "@heroui/react";
 
-import { formatUrlProtocal } from "@/common/utils/url";
 import VirtualGridPageList from "@/components/virtual-grid-page-list";
+import { getRelationRelations } from "@/service/relation-relations";
 import { getWebInterfaceWbiSearchType, type SearchUserItem } from "@/service/web-interface-search-type";
 
 import SearchHeader from "./search-header";
-import { getSortParams, type UserSortKey } from "./utils";
+import UserCard from "./user-card";
+import { getSortParams, type SearchUserItemWithRelation, type UserSortKey } from "./utils";
 
 interface UserListProps {
   keyword: string;
@@ -16,9 +16,7 @@ interface UserListProps {
 }
 
 export default function UserList({ keyword, getScrollElement }: UserListProps) {
-  const navigate = useNavigate();
-
-  const [list, setList] = useState<SearchUserItem[]>([]);
+  const [list, setList] = useState<SearchUserItemWithRelation[]>([]);
   const [sortKey, setSortKey] = useState<UserSortKey>("default");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -36,8 +34,29 @@ export default function UserList({ keyword, getScrollElement }: UserListProps) {
         order,
         order_sort,
       });
-      const items = res?.data?.result ?? [];
+      let items: SearchUserItemWithRelation[] = [];
+      const rawItems = res?.data?.result ?? [];
       const total = res?.data?.numResults ?? 0;
+
+      if (rawItems.length > 0) {
+        try {
+          const fids = rawItems.map(item => item.mid).join(",");
+          const relationRes = await getRelationRelations({ fids });
+          if (relationRes.code === 0 && relationRes.data) {
+            items = rawItems.map(item => {
+              const rel = relationRes.data[item.mid];
+              // attribute: 0:未关注 1:悄悄关注 2:已关注 6:已互粉 128:已拉黑
+              const is_followed = rel ? rel.attribute === 2 || rel.attribute === 6 : false;
+              return { ...item, is_followed };
+            });
+          } else {
+            items = rawItems.map(item => ({ ...item, is_followed: false }));
+          }
+        } catch {
+          items = rawItems.map(item => ({ ...item, is_followed: false }));
+        }
+      }
+
       return { items, total };
     },
     [keyword, sortKey],
@@ -91,17 +110,7 @@ export default function UserList({ keyword, getScrollElement }: UserListProps) {
     );
   }
 
-  const renderItem = (u: SearchUserItem) => (
-    <Card key={u.mid} isHoverable isPressable className="h-full" onPress={() => navigate(`/user/${u.mid}`)}>
-      <CardBody className="flex items-center space-y-2">
-        <Avatar className="text-large h-32 w-32 flex-none" src={formatUrlProtocal(u.upic as string)} />
-        <div className="flex w-full grow flex-col items-center space-y-1">
-          <span className="text-lg">{u.uname}</span>
-          <span className="text-foreground-500 line-clamp-2 w-full text-center text-sm">{u.usign}</span>
-        </div>
-      </CardBody>
-    </Card>
-  );
+  const renderItem = (u: SearchUserItemWithRelation) => <UserCard key={u.mid} u={u} />;
 
   return (
     <>

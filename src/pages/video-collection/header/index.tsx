@@ -5,7 +5,6 @@ import { Button, Link, Skeleton, useDisclosure, User } from "@heroui/react";
 import { useRequest } from "ahooks";
 import clx from "classnames";
 
-import FallbackImage from "@/assets/images/fallback.png";
 import { CollectionType } from "@/common/constants/collection";
 import { isPrivateFav } from "@/common/utils/fav";
 import FavoritesEditModal from "@/components/favorites-edit-modal";
@@ -67,11 +66,11 @@ const Header = memo(
           <Image
             isBlurred
             radius="md"
-            src={cover || FallbackImage}
-            fallbackSrc={FallbackImage}
+            src={cover}
             alt={title}
             width={200}
             height={168}
+            params="672w_378h_1c.avif"
             className={clx({
               "border-content3 border": !cover,
             })}

@@ -75,7 +75,7 @@ const DynamicList: React.FC<DynamicListProps> = ({ mid, getScrollElement }) => {
   }
 
   if (initialized && items.length === 0) {
-    return <Empty className="mt-20" title="暂无动态" />;
+    return <Empty title="暂无动态" />;
   }
 
   return (

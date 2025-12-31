@@ -1,9 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router";
 
-import { Image, Card, CardHeader, CardBody, addToast, User } from "@heroui/react";
+import { Card, CardHeader, CardBody, addToast, User } from "@heroui/react";
 import moment from "moment";
 
+import Image from "@/components/image";
 import { usePlayList } from "@/store/play-list";
 
 import type { WebDynamicItem } from "../../service/web-dynamic";
@@ -112,6 +113,7 @@ const DynamicItem: React.FC<DynamicItemProps> = ({ item, onClose }) => {
           <div className="flex flex-row">
             <div className="relative h-32 w-48 shrink-0">
               <Image
+                params="472w_264h_1c_!web-dynamic.webp"
                 removeWrapper
                 radius="none"
                 src={archive?.cover || ""}

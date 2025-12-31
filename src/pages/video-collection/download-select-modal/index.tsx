@@ -1,20 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  Image,
-  Checkbox,
-  addToast,
-} from "@heroui/react";
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Checkbox, addToast } from "@heroui/react";
 import clx from "classnames";
 
 import { CollectionType } from "@/common/constants/collection";
+import Image from "@/components/image";
 import ScrollContainer from "@/components/scroll-container";
 import { getUserVideoArchivesList } from "@/service/user-video-archives-list";
 
@@ -46,7 +37,6 @@ const DownloadSelectModal = ({ type, outputFileType, mediaCount, isOpen, onOpenC
     if (type === CollectionType.Favorite) {
       const res = await getAllFavMedia({
         id: id!,
-        totalCount: mediaCount as number,
       });
 
       if (res?.length) {
@@ -139,7 +129,13 @@ const DownloadSelectModal = ({ type, outputFileType, mediaCount, isOpen, onOpenC
                   )}
                 >
                   <div className="flex min-w-0 flex-1 items-center">
-                    <Image radius="md" src={item.cover} alt={item.title} className="h-12 w-12 flex-none object-cover" />
+                    <Image
+                      radius="md"
+                      src={item.cover}
+                      alt={item.title}
+                      className="h-12 w-12 flex-none"
+                      params="672w_378h_1c.avif"
+                    />
                     <span className="ml-2 min-w-0 flex-1 truncate">{item.title}</span>
                   </div>
                   <Checkbox disableAnimation isSelected={isSelected} className="ml-2" />

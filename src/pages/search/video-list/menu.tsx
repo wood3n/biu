@@ -1,22 +1,16 @@
 import { RiFileMusicLine, RiFileVideoLine, RiPlayCircleLine, RiPlayListAddLine, RiStarLine } from "@remixicon/react";
 
-interface Props {
-  isPlaying: boolean;
-}
-
-export const getContextMenus = ({ isPlaying }: Props) => {
+export const getContextMenus = () => {
   return [
     {
       icon: <RiPlayCircleLine size={18} />,
       key: "play-next",
       label: "下一首播放",
-      hidden: isPlaying,
     },
     {
       icon: <RiPlayListAddLine size={18} />,
       key: "add-to-playlist",
       label: "添加到播放列表",
-      hidden: isPlaying,
     },
     {
       icon: <RiStarLine size={18} />,

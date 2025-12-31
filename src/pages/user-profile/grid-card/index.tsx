@@ -1,9 +1,8 @@
 import React, { memo } from "react";
 
-import { Image } from "@heroui/react";
-
 import { formatSecondsToDate } from "@/common/utils/time";
 import ContextMenu, { type ContextMenuItem } from "@/components/context-menu";
+import Image from "@/components/image";
 
 export interface GridCardProps {
   title: string;
@@ -26,9 +25,10 @@ const GridCard = memo(({ title, cover, createTime, mediaCount, onPress, menus = 
           <div className="relative z-10 aspect-video w-full overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900">
             <Image
               radius="none"
-              src={`${cover}?@320h`}
+              src={cover}
+              params="672w_378h_1c.avif"
               alt={title}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="h-full w-full transition-transform duration-300 group-hover:scale-105"
               width="100%"
               height="100%"
               removeWrapper

@@ -4,7 +4,7 @@ import moment from "moment";
 
 import VirtualPageList from "@/components/virtual-page-list";
 import { type HistoryListItem as HistoryListItemType } from "@/service/web-interface-history-search";
-import { usePlayList, isSame } from "@/store/play-list";
+import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 
 import HistoryListHeader from "./header";
@@ -28,28 +28,21 @@ const HistoryList: React.FC<HistoryListProps> = ({
   getScrollElement,
   onMenuAction,
 }) => {
-  const playId = usePlayList(state => state.playId);
-  const list = usePlayList(state => state.list);
-  const playItem = list.find(item => item.id === playId);
-  const play = usePlayList(state => state.play);
   const displayMode = useSettings(state => state.displayMode);
   const isCompact = displayMode === "compact";
 
-  const handlePress = useCallback(
-    (item: HistoryListItemType) => {
-      if (item.history.bvid) {
-        play({
-          type: "mv",
-          bvid: item.history.bvid,
-          title: item.title,
-          cover: item.cover,
-          ownerName: item.author_name,
-          ownerMid: item.author_mid,
-        });
-      }
-    },
-    [play],
-  );
+  const handlePress = useCallback((item: HistoryListItemType) => {
+    if (item.history.bvid) {
+      usePlayList.getState().play({
+        type: "mv",
+        bvid: item.history.bvid,
+        title: item.title,
+        cover: item.cover,
+        ownerName: item.author_name,
+        ownerMid: item.author_mid,
+      });
+    }
+  }, []);
 
   return (
     <div className="w-full">
@@ -62,11 +55,6 @@ const HistoryList: React.FC<HistoryListProps> = ({
         getScrollElement={getScrollElement}
         rowHeight={isCompact ? 36 : 64}
         renderItem={(item, index) => {
-          const isPlaying = isSame(playItem, {
-            type: "mv",
-            bvid: item.history.bvid,
-          });
-
           return (
             <HistoryListItem
               key={`${item.history.oid}-${item.view_at}`}
@@ -80,9 +68,9 @@ const HistoryList: React.FC<HistoryListProps> = ({
               progress={item.progress}
               duration={item.duration}
               viewAt={moment.unix(item.view_at).format("YYYY-MM-DD HH:mm")}
-              onPress={() => handlePress(item)}
+              onPress={item.history.business === "pgc" ? undefined : () => handlePress(item)}
               menus={getContextMenus({
-                isPlaying,
+                business: item.history.business,
               })}
               onMenuAction={key => onMenuAction(key, item)}
               isCompact={isCompact}

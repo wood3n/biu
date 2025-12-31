@@ -6,7 +6,7 @@ import { formatSecondsToDate } from "@/common/utils";
 import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
 import VirtualPageList from "@/components/virtual-page-list";
-import { usePlayList, isSame } from "@/store/play-list";
+import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 
 import { getContextMenus } from "./menu";
@@ -28,30 +28,23 @@ const LaterList: React.FC<LaterListProps> = ({
   getScrollElement,
   onMenuAction,
 }) => {
-  const playId = usePlayList(state => state.playId);
-  const list = usePlayList(state => state.list);
-  const playItem = list.find(item => item.id === playId);
-  const play = usePlayList(state => state.play);
   const displayMode = useSettings(state => state.displayMode);
   const isCompact = displayMode === "compact";
 
-  const handlePress = useCallback(
-    (item: ToViewVideoItem) => {
-      play({
-        type: "mv",
-        bvid: item.bvid,
-        title: item.title,
-        cover: item.pic,
-        ownerName: item.owner?.name,
-        ownerMid: item.owner?.mid,
-      });
-    },
-    [play],
-  );
+  const handlePress = useCallback((item: ToViewVideoItem) => {
+    usePlayList.getState().play({
+      type: "mv",
+      bvid: item.bvid,
+      title: item.title,
+      cover: item.pic,
+      ownerName: item.owner?.name,
+      ownerMid: item.owner?.mid,
+    });
+  }, []);
 
   return (
     <div className="w-full">
-      <MusicListHeader isCompact={isCompact} />
+      <MusicListHeader />
       <VirtualPageList
         items={items}
         hasMore={hasMore}
@@ -60,14 +53,8 @@ const LaterList: React.FC<LaterListProps> = ({
         getScrollElement={getScrollElement}
         rowHeight={isCompact ? 36 : 64}
         renderItem={(item, index) => {
-          const isPlaying = isSame(playItem, {
-            type: "mv",
-            bvid: item.bvid,
-          });
-
           return (
             <MusicListItem
-              isCompact={isCompact}
               key={item.aid}
               index={index + 1}
               title={item.title}
@@ -79,9 +66,9 @@ const LaterList: React.FC<LaterListProps> = ({
               playCount={item.stat?.view}
               duration={item.duration}
               pubTime={formatSecondsToDate(item.pubdate)}
-              onPress={() => handlePress(item)}
+              onPress={item.is_pgc ? undefined : () => handlePress(item)}
               menus={getContextMenus({
-                isPlaying,
+                is_pgc: item.is_pgc,
               })}
               onMenuAction={key => onMenuAction(key, item)}
             />

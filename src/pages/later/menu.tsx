@@ -4,41 +4,35 @@ import {
   RiFileVideoLine,
   RiPlayCircleLine,
   RiPlayListAddLine,
-  RiStarLine,
 } from "@remixicon/react";
 
-interface Props {
-  isPlaying: boolean;
-}
+export const getContextMenus = ({ is_pgc }: { is_pgc: boolean }) => {
+  const cannotPlay = is_pgc;
 
-export const getContextMenus = ({ isPlaying }: Props) => {
   return [
     {
       icon: <RiPlayCircleLine size={18} />,
       key: "play-next",
       label: "下一首播放",
-      hidden: isPlaying,
+      hidden: cannotPlay,
     },
     {
       icon: <RiPlayListAddLine size={18} />,
       key: "add-to-playlist",
       label: "添加到播放列表",
-      hidden: isPlaying,
-    },
-    {
-      icon: <RiStarLine size={18} />,
-      key: "favorite",
-      label: "收藏",
+      hidden: cannotPlay,
     },
     {
       icon: <RiFileMusicLine size={18} />,
       key: "download-audio",
       label: "下载音频",
+      hidden: cannotPlay,
     },
     {
       icon: <RiFileVideoLine size={18} />,
       key: "download-video",
       label: "下载视频",
+      hidden: cannotPlay,
     },
     {
       icon: <RiDeleteBinLine size={18} />,

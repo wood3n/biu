@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Button, Card, CardBody, CardFooter, CardHeader, Image, Tooltip } from "@heroui/react";
+import { Button, Card, CardBody, CardFooter, CardHeader, Tooltip } from "@heroui/react";
 import { RiDownloadLine, RiExternalLinkLine, RiPlayCircleFill, RiThumbUpFill, RiThumbUpLine } from "@remixicon/react";
 import moment from "moment";
 
@@ -8,6 +8,7 @@ import type { WebDynamicItem } from "@/service/web-dynamic";
 
 import { formatNumber } from "@/common/utils/number";
 import { openBiliVideoLink } from "@/common/utils/url";
+import Image from "@/components/image";
 import { postDynamicFeedThumb } from "@/service/web-dynamic-feed-thumb";
 import { usePlayList } from "@/store/play-list";
 
@@ -77,8 +78,9 @@ const DynamicItem = ({ item }: DynamicItemProps) => {
                 removeWrapper
                 src={archive.cover}
                 alt={archive.title}
-                className="h-full w-full object-cover"
+                className="h-full w-full"
                 radius="none"
+                params="472w_264h_1c_!web-dynamic.webp"
               />
               <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
                 <RiPlayCircleFill size={32} className="text-white/90" />

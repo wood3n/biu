@@ -1,11 +1,12 @@
 import React from "react";
 
-import { Button, Image } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { RiPlayFill } from "@remixicon/react";
 import clx from "classnames";
 import { twMerge } from "tailwind-merge";
 
 import { formatDuration } from "@/common/utils";
+import Image from "@/components/image";
 import { usePlayList, type PlayData } from "@/store/play-list";
 
 import Menus from "./menu";
@@ -50,7 +51,8 @@ const ListItem = ({ data, isActive, onPressItem, hideCover, className, titleClas
               alt={getDisplayTitle(data)}
               width="100%"
               height="100%"
-              className="m-0 object-cover"
+              className="m-0"
+              params="672w_378h_1c.avif"
             />
             {!isActive && (
               <div className="absolute inset-0 z-20 flex items-center justify-center rounded-md bg-[rgba(0,0,0,0.35)] opacity-0 group-hover:opacity-100">

@@ -19,7 +19,7 @@ const ScrollContainer = ({
 }) => {
   // 统一的滚动重置逻辑
   useEffect(() => {
-    if (!ref?.current) return;
+    if (!ref?.current || !resetOnChange) return;
     const viewport = ref.current.osInstance()?.elements().viewport as HTMLElement | null;
     if (viewport) {
       viewport.scrollTop = 0;

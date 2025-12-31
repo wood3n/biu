@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
-import { addToast } from "@heroui/react";
+import { addToast, Spinner } from "@heroui/react";
 
 import { CollectionType } from "@/common/constants/collection";
 import VirtualGridPageList from "@/components/virtual-grid-page-list";
@@ -77,10 +77,18 @@ const Favorites = ({ getScrollElement }: Props) => {
     retryInitial();
   }, [retryInitial]);
 
+  if (initialLoading) {
+    return (
+      <div className="flex h-[280px] items-center justify-center">
+        <Spinner label="加载中" />
+      </div>
+    );
+  }
+
   return (
     <VirtualGridPageList
       items={list}
-      loading={initialLoading || loadingMore}
+      loading={loadingMore}
       hasMore={hasMore}
       onLoadMore={loadMore}
       getScrollElement={getScrollElement}
