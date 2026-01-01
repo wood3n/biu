@@ -72,11 +72,13 @@ const FavoriteList: React.FC<FavoriteListProps> = ({
               playCount={item.cnt_info.play}
               duration={item.duration}
               pubTime={formatSecondsToDate(item.fav_time)}
-              onPress={() => {
-                if (canPlay) {
-                  handlePress(item);
-                }
-              }}
+              onPress={
+                canPlay
+                  ? () => {
+                      handlePress(item);
+                    }
+                  : undefined
+              }
               menus={getContextMenus({
                 isCreatedBySelf,
                 type: item.type,

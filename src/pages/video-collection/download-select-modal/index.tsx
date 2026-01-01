@@ -160,7 +160,9 @@ const DownloadSelectModal = ({ type, outputFileType, mediaCount, isOpen, onOpenC
           >
             全选
           </Checkbox>
-          <Button onPress={handleDownload}>下载</Button>
+          <Button color="primary" onPress={handleDownload}>
+            下载
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

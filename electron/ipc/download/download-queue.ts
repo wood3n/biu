@@ -149,6 +149,8 @@ export class DownloadQueue {
 
       this.queue.add(
         async () => {
+          await this.getVideoPages(core);
+
           // 重新绑定监听器，防止丢失或重复
           core.removeAllListeners("update");
           core.on("update", (updateData: any) => {

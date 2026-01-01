@@ -29,6 +29,8 @@ const FavoriteGridList: React.FC<FavoriteGridListProps> = ({
 }) => {
   const renderGridItem = useCallback(
     (item: FavMedia) => {
+      const canPlay = [2, 12].includes(item.type);
+
       return (
         <MusicCard
           key={item.id}
@@ -41,22 +43,26 @@ const FavoriteGridList: React.FC<FavoriteGridListProps> = ({
           time={item.fav_time}
           menus={getContextMenus({
             isCreatedBySelf,
-            type: item.type === 2 ? "mv" : "audio",
+            type: item.type,
           })}
           onMenuAction={key => {
             onMenuAction(key, item);
           }}
-          onPress={() => {
-            usePlayList.getState().play({
-              type: item.type === 2 ? "mv" : "audio",
-              sid: item.id,
-              bvid: item.bvid,
-              title: item.title,
-              cover: item.cover,
-              ownerName: item.upper?.name,
-              ownerMid: item.upper?.mid,
-            });
-          }}
+          onPress={
+            canPlay
+              ? () => {
+                  usePlayList.getState().play({
+                    type: item.type === 2 ? "mv" : "audio",
+                    sid: item.id,
+                    bvid: item.bvid,
+                    title: item.title,
+                    cover: item.cover,
+                    ownerName: item.upper?.name,
+                    ownerMid: item.upper?.mid,
+                  });
+                }
+              : undefined
+          }
         />
       );
     },
