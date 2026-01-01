@@ -70,12 +70,7 @@ const GroupModal = ({ isOpen, onOpenChange, onClose, mode, tag, onSuccess }: Pro
           <>
             <ModalHeader className="flex flex-col gap-1">{mode === "create" ? "创建分组" : "修改分组名称"}</ModalHeader>
             <ModalBody>
-              <Input
-                placeholder="请输入分组名称"
-                value={tagNameInput}
-                onValueChange={setTagNameInput}
-                variant="bordered"
-              />
+              <Input placeholder="请输入分组名称" value={tagNameInput} onValueChange={setTagNameInput} />
             </ModalBody>
             <ModalFooter>
               <Button variant="light" onPress={onClose}>

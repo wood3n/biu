@@ -198,7 +198,13 @@ const Favorites: React.FC = () => {
       });
 
       if (res.code === 0) {
-        await refreshInfo();
+        await new Promise(resolve =>
+          setTimeout(() => {
+            refreshInfo();
+            useUser.getState().updateCollectedFolder();
+            resolve(null);
+          }, 500),
+        );
       }
     } else {
       // 收藏
@@ -208,7 +214,13 @@ const Favorites: React.FC = () => {
       });
 
       if (res.code === 0) {
-        await refreshInfo();
+        await new Promise(resolve =>
+          setTimeout(() => {
+            refreshInfo();
+            useUser.getState().updateCollectedFolder();
+            resolve(null);
+          }, 500),
+        );
       }
     }
   };

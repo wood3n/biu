@@ -83,16 +83,16 @@ const SetGroupModal = ({ isOpen, onOpenChange, onClose, user, tags, onSuccess }:
           <>
             <ModalHeader className="flex flex-col gap-1">设置分组</ModalHeader>
             <ModalBody>
-              <CheckboxGroup value={selectedTags} onValueChange={setSelectedTags}>
+              <CheckboxGroup color="primary" value={selectedTags} onValueChange={setSelectedTags}>
                 {tags.map(tag => (
-                  <Checkbox key={tag.tagid} value={tag.tagid.toString()}>
+                  <Checkbox color="primary" key={tag.tagid} value={tag.tagid.toString()}>
                     {tag.name}
                   </Checkbox>
                 ))}
               </CheckboxGroup>
             </ModalBody>
             <ModalFooter>
-              <Button color="danger" variant="light" onPress={onClose}>
+              <Button variant="light" onPress={onClose}>
                 取消
               </Button>
               <Button color="primary" isLoading={loading} onPress={handleConfirmSetGroup}>

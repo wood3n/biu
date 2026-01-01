@@ -115,7 +115,8 @@ const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }
       <div className="flex flex-none items-center space-x-4">
         {Boolean(user?.isLogin) && !isSelf && (
           <AsyncButton
-            color={isFollow ? "primary" : "default"}
+            variant="shadow"
+            color={isFollow ? "success" : "default"}
             startContent={isFollow ? <RiCheckLine size={18} /> : <RiAddLine size={18} />}
             onPress={toggleFollow}
             className="mt-2"

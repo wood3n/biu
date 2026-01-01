@@ -120,7 +120,7 @@ const VideoSeries = () => {
       });
 
       if (res.code === 0) {
-        await refreshAsync();
+        await useUser.getState().updateCollectedFolder();
       }
     } else {
       // 收藏
@@ -130,7 +130,7 @@ const VideoSeries = () => {
       });
 
       if (res.code === 0) {
-        await refreshAsync();
+        await useUser.getState().updateCollectedFolder();
       }
     }
   };

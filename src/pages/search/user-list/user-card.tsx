@@ -82,12 +82,13 @@ const UserCard: React.FC<UserCardProps> = ({ u }) => {
 
           {/* Stats & Sign */}
           <div className="text-small text-default-500 flex w-full min-w-0 flex-col items-center space-y-1">
-            {u.usign && <span className="line-clamp-2 max-w-full min-w-0 flex-1">{u.usign}</span>}
+            {u.usign && <span className="line-clamp-2 max-w-full min-w-0 flex-1 break-all">{u.usign}</span>}
           </div>
           {/* Button */}
           <div className="mt-2">
             <AsyncButton
               size="sm"
+              color={isFollowed ? "success" : "default"}
               variant={isFollowed ? "flat" : "solid"}
               radius="sm"
               onPress={handleFollow}

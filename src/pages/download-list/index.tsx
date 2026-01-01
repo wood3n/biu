@@ -97,14 +97,12 @@ const DownloadList = () => {
       <div className="mb-2 flex items-center justify-between">
         <h1 className="flex items-center space-x-1">下载记录</h1>
         <div className="flex items-center space-x-1">
-          <Tooltip content="打开目录" closeDelay={0}>
-            <Button variant="flat" onPress={openDownloadDir} startContent={<RiFolderLine size={18} />}>
-              {downloadPath}
-            </Button>
-          </Tooltip>
+          <Button variant="flat" onPress={openDownloadDir} startContent={<RiFolderLine size={18} />}>
+            {downloadPath}
+          </Button>
         </div>
       </div>
-      <Card radius="md">
+      <Card radius="md" shadow="sm">
         <CardBody>
           <div className="w-full overflow-x-auto">
             <Table

@@ -138,7 +138,7 @@ const DownloadSelectModal = ({ type, outputFileType, mediaCount, isOpen, onOpenC
                     />
                     <span className="ml-2 min-w-0 flex-1 truncate">{item.title}</span>
                   </div>
-                  <Checkbox disableAnimation isSelected={isSelected} className="ml-2" />
+                  <Checkbox color="primary" disableAnimation isSelected={isSelected} className="ml-2" />
                 </div>
               );
             })}
@@ -146,6 +146,7 @@ const DownloadSelectModal = ({ type, outputFileType, mediaCount, isOpen, onOpenC
         </ModalBody>
         <ModalFooter>
           <Checkbox
+            color="primary"
             disableAnimation
             isSelected={selectedIds.length === list.length}
             onValueChange={checked => {
@@ -159,9 +160,7 @@ const DownloadSelectModal = ({ type, outputFileType, mediaCount, isOpen, onOpenC
           >
             全选
           </Checkbox>
-          <Button color="primary" onPress={handleDownload}>
-            下载
-          </Button>
+          <Button onPress={handleDownload}>下载</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

@@ -11,7 +11,15 @@ const PageListDrawer = () => {
   const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
   return (
-    <Popover disableAnimation placement="top" offset={28} radius="md" isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Popover
+      shadow="lg"
+      disableAnimation
+      placement="top"
+      offset={28}
+      radius="md"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+    >
       <PopoverTrigger>
         <IconButton onPress={onOpen}>
           <RiListRadio size={18} />

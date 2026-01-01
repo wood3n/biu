@@ -76,7 +76,7 @@ const ConfirmModal = () => {
               <Button variant="light" onPress={handleClose} isDisabled={loading}>
                 {cancelText}
               </Button>
-              <Button color={type === "primary" ? "primary" : type} onPress={handleConfirm} isLoading={loading}>
+              <Button color={type} onPress={handleConfirm} isLoading={loading}>
                 {confirmText}
               </Button>
             </ModalFooter>

@@ -1,10 +1,7 @@
 import React from "react";
 
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
-import { RiMore2Fill, RiPlayListAddLine } from "@remixicon/react";
-
-import { ReactComponent as AudioDownloadIcon } from "@/assets/icons/audio-download.svg";
-import { ReactComponent as VideoDownloadIcon } from "@/assets/icons/video-download.svg";
+import { RiFileMusicLine, RiFileVideoLine, RiMore2Fill, RiPlayListAddLine } from "@remixicon/react";
 
 interface MoreMenuProps {
   onAddToNext?: () => void;
@@ -24,18 +21,10 @@ const MoreMenu: React.FC<MoreMenuProps> = ({ onAddToNext, onDownloadAudio, onDow
         <DropdownItem key="add-next" startContent={<RiPlayListAddLine size={18} />} onPress={onAddToNext}>
           添加到下一首播放
         </DropdownItem>
-        <DropdownItem
-          key="download-audio"
-          startContent={<AudioDownloadIcon className="relative top-px left-px h-[16px] w-[16px]" />}
-          onPress={onDownloadAudio}
-        >
+        <DropdownItem key="download-audio" startContent={<RiFileMusicLine size={18} />} onPress={onDownloadAudio}>
           下载音频
         </DropdownItem>
-        <DropdownItem
-          key="download-video"
-          startContent={<VideoDownloadIcon className="relative top-px left-px h-[16px] w-[16px]" />}
-          onPress={onDownloadVideo}
-        >
+        <DropdownItem key="download-video" startContent={<RiFileVideoLine size={18} />} onPress={onDownloadVideo}>
           下载视频
         </DropdownItem>
       </DropdownMenu>

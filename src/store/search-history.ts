@@ -29,7 +29,7 @@ export const useSearchHistory = create<SearchHistoryState & SearchHistoryAction>
         if (items.some(i => i.value === value)) {
           set({ keyword: value, items: [newItem, ...items.filter(i => i.value !== value)] });
         } else {
-          set({ keyword: value, items: [...items, newItem] });
+          set({ keyword: value, items: [newItem, ...items] });
         }
       },
       delete: item => set(state => ({ items: state.items.filter(i => i.value !== item.value) })),

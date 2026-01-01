@@ -47,14 +47,14 @@ const SelectAllCheckboxGroup: React.FC<SelectAllCheckboxGroupProps> = ({
         value={selectedKeys}
         onValueChange={handleCheckboxGroupChange}
         isDisabled={disabled || !groupKeys.length}
-        color="primary"
+        color="success"
         orientation="horizontal"
         classNames={{
           wrapper: "gap-4",
         }}
       >
         {items.map(item => (
-          <Checkbox key={item.value} value={item.value}>
+          <Checkbox key={item.value} value={item.value} color="primary">
             {item.label}
           </Checkbox>
         ))}

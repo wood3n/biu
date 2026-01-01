@@ -79,17 +79,18 @@ const Header = memo(
             }}
           />
           <div className="flex min-w-0 flex-col items-start space-y-4">
-            <Button
-              variant="light"
-              className="block max-w-full truncate px-0 text-3xl"
-              onPress={() => {
-                if (isCreatedBySelf) {
-                  onEditOpen();
-                }
-              }}
-            >
-              {title}
-            </Button>
+            {isCreatedBySelf ? (
+              <Button
+                variant="light"
+                radius="sm"
+                className="block max-w-full truncate px-0 text-3xl"
+                onPress={onEditOpen}
+              >
+                {title}
+              </Button>
+            ) : (
+              <h1 className="text-3xl font-bold">{title}</h1>
+            )}
             {Boolean(desc) && <p className="text-foreground-400 line-clamp-1 text-sm">{desc}</p>}
             <div className="text-foreground-400 flex items-center space-x-1 text-sm">
               <span>

@@ -118,7 +118,7 @@ const Menu = ({ type, isCreatedBySelf, mediaCount, attr, onClearInvalid }: MenuP
         }}
       >
         <DropdownTrigger>
-          <Button isIconOnly className="hover:text-primary">
+          <Button isIconOnly variant="flat" className="hover:text-primary">
             <RiMoreLine />
           </Button>
         </DropdownTrigger>
