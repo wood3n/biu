@@ -249,14 +249,13 @@ export class DownloadQueue {
         downloadProgress: core.downloadProgress,
         mergeProgress: core.mergeProgress,
         convertProgress: core.convertProgress,
-        status:
-          core.status === "downloading"
-            ? "downloadPaused"
-            : core.status === "merging"
-              ? "mergePaused"
-              : core.status === "converting"
-                ? "convertPaused"
-                : core.status,
+        status: ["downloading", "waiting"].includes(core.status)
+          ? "downloadPaused"
+          : core.status === "merging"
+            ? "mergePaused"
+            : core.status === "converting"
+              ? "convertPaused"
+              : core.status,
         fileName: core.fileName,
         tempDir: core.tempDir,
         saveDir: core.saveDir,
