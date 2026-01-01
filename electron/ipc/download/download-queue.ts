@@ -100,7 +100,7 @@ export class DownloadQueue {
               cover: page.cover,
             }),
           );
-          this.cancelTask(core.id);
+          await this.cancelTask(core.id);
         }
       } else {
         throw new Error("无法获取视频分集信息");

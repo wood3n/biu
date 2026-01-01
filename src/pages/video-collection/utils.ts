@@ -1,5 +1,7 @@
+import { chunk } from "es-toolkit/array";
+
 import { getFavResourceIds } from "@/service/fav-resource";
-import { getFavResourceInfos } from "@/service/fav-resource-infos";
+import { getFavResourceInfos, type FavResourceInfo } from "@/service/fav-resource-infos";
 
 /** 获取收藏夹中的所有媒体 */
 export const getAllFavMedia = async ({ id: favFolderId }: { id: string }) => {
@@ -17,15 +19,30 @@ export const getAllFavMedia = async ({ id: favFolderId }: { id: string }) => {
     return [];
   }
 
-  const resources = allIds.map(item => `${item.id}:${item.type}`).join(",");
-  const res = await getFavResourceInfos({ resources, platform: "web" });
-
-  if (res.code !== 0 || !res.data) {
+  const validIds = allIds.filter(item => item.type === 2 || item.type === 12);
+  if (validIds.length === 0) {
     return [];
   }
 
-  return (res.data || [])
-    .filter(item => item.attr === 0)
+  const chunkSize = 50;
+  const chunks = chunk(validIds, chunkSize);
+  const results = await Promise.allSettled(
+    chunks.map(items => {
+      const resources = items.map(item => `${item.id}:${item.type}`).join(",");
+      return getFavResourceInfos({ resources, platform: "web" });
+    }),
+  );
+
+  const allInfos: FavResourceInfo[] = [];
+
+  for (const result of results) {
+    if (result.status === "fulfilled" && result.value.code === 0 && result.value.data) {
+      allInfos.push(...result.value.data);
+    }
+  }
+
+  return allInfos
+    .filter(item => [2, 12].includes(item.type) && item.attr === 0)
     .map(item => {
       if (item.type === 2) {
         return {
@@ -35,7 +52,6 @@ export const getAllFavMedia = async ({ id: favFolderId }: { id: string }) => {
           cover: item.cover,
           ownerMid: item.upper?.mid,
           ownerName: item.upper?.name,
-          sid: 0, // 添加缺失的属性以匹配类型
         };
       }
       return {
