@@ -1,5 +1,40 @@
 # Changelog
 
+## v1.8.0
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.7.1...v1.8.0)
+
+### 🚀 新功能
+
+- 新增全屏播放组件 ([fe8bf2e](https://github.com/wood3n/biu/commit/fe8bf2e))
+- 优化页面列表UI显示，支持compact紧凑模式UI ([a4df42e](https://github.com/wood3n/biu/commit/a4df42e))
+- 优化页面列表显示，补充图片请求参数 ([d2c9fd3](https://github.com/wood3n/biu/commit/d2c9fd3))
+- 优化主题切换 ([2ba248f](https://github.com/wood3n/biu/commit/2ba248f))
+- 新增代理设置功能 ([541aa81](https://github.com/wood3n/biu/commit/541aa81))
+
+### 🔥 功能优化
+
+- 优化播放列表等组件 ([ed358aa](https://github.com/wood3n/biu/commit/ed358aa))
+
+### 🩹 修复问题
+
+- 完善全屏播放弹窗功能 ([2b72a14](https://github.com/wood3n/biu/commit/2b72a14))
+- 移除无用的组件代码 ([e5b0e22](https://github.com/wood3n/biu/commit/e5b0e22))
+- 移除无用的console ([1ad43bf](https://github.com/wood3n/biu/commit/1ad43bf))
+- 搜索记录顺序调整&截取 ([a98419a](https://github.com/wood3n/biu/commit/a98419a))
+- 修复UI一致性 ([38c3201](https://github.com/wood3n/biu/commit/38c3201))
+- 修复UI一致性 ([ae7d802](https://github.com/wood3n/biu/commit/ae7d802))
+- 修复review问题 ([d57515f](https://github.com/wood3n/biu/commit/d57515f))
+- 修复关闭应用后没有按钮点击继续下载的问题 ([3123d48](https://github.com/wood3n/biu/commit/3123d48))
+- 修复恢复下载和收藏夹播放按钮显示问题 ([eeea362](https://github.com/wood3n/biu/commit/eeea362))
+- 修复tray icon显示和首页右键菜单显示 ([e962e4a](https://github.com/wood3n/biu/commit/e962e4a))
+- 统一收藏夹点击播放事件 ([e45c6c7](https://github.com/wood3n/biu/commit/e45c6c7))
+
+### ❤️ Contributors
+
+- Wood3n
+- Oxyg3n
+
 ## v1.7.1
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.7.1-beta.1...v1.7.1)
