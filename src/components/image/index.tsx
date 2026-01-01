@@ -1,17 +1,17 @@
 import { useState } from "react";
 
 import { Image as HeroImage, type ImageProps } from "@heroui/react";
-import { RiMovieLine, RiMusic2Fill } from "@remixicon/react";
+import { RiFileImageLine } from "@remixicon/react";
 import { twMerge } from "tailwind-merge";
 
 import { formatUrlProtocal } from "@/common/utils/url";
 
 interface Props extends ImageProps {
-  fileType?: "audio" | "video";
   params?: string;
+  emptyPlaceholder?: React.ReactNode;
 }
 
-const Image = ({ fileType = "audio", params, width, height, src, className, ...rest }: Props) => {
+const Image = ({ params, width, height, src, className, emptyPlaceholder, ...rest }: Props) => {
   const [isError, setIsError] = useState(false);
   const formatSrc = formatUrlProtocal(src);
   const finalSrc =
@@ -19,13 +19,13 @@ const Image = ({ fileType = "audio", params, width, height, src, className, ...r
       ? `${formatSrc}@${params}`
       : formatSrc;
 
-  if (isError) {
+  if (!src || isError) {
     return (
       <div
-        className={twMerge("rounded-medium border-content2 flex h-full items-center justify-center border", className)}
+        className={twMerge("border-content2 flex h-full items-center justify-center rounded-md border", className)}
         style={{ width, height }}
       >
-        {fileType === "audio" ? <RiMusic2Fill size="40%" /> : <RiMovieLine size="40%" />}
+        {emptyPlaceholder || <RiFileImageLine size="40%" className="text-default-500" />}
       </div>
     );
   }

@@ -1,7 +1,8 @@
 import { memo } from "react";
 import { useParams } from "react-router";
 
-import { Button, Link, Skeleton, useDisclosure, User } from "@heroui/react";
+import { Link, Skeleton, useDisclosure, User } from "@heroui/react";
+import { RiEdit2Line } from "@remixicon/react";
 import { useRequest } from "ahooks";
 import clx from "classnames";
 
@@ -23,7 +24,7 @@ interface Props {
   upMid?: number;
   upName?: string;
   mediaCount?: number;
-  onRefresh: VoidFunction;
+  onRefresh: () => Promise<unknown>;
 }
 
 const Header = memo(
@@ -50,11 +51,11 @@ const Header = memo(
     if (loading) {
       return (
         <div className="mb-4 flex space-x-4">
-          <Skeleton className="h-[168px] w-[200px]" />
+          <Skeleton className="rounedd-md h-[168px] w-[200px]" />
           <div className="flex min-w-0 flex-col items-start space-y-4">
-            <Skeleton className="h-[24px] w-[200px]" />
-            <Skeleton className="h-[16px] w-[200px]" />
-            <Skeleton className="h-[16px] w-[200px]" />
+            <Skeleton className="rounedd-md h-[24px] w-[200px]" />
+            <Skeleton className="rounedd-md h-[16px] w-[200px]" />
+            <Skeleton className="rounedd-md h-[16px] w-[200px]" />
           </div>
         </div>
       );
@@ -63,34 +64,33 @@ const Header = memo(
     return (
       <>
         <div className="mb-4 flex space-x-4">
-          <Image
-            isBlurred
-            radius="md"
-            src={cover}
-            alt={title}
-            width={200}
-            height={168}
-            params="672w_378h_1c.avif"
-            className={clx({
-              "border-content3 border": !cover,
-            })}
-            classNames={{
-              wrapper: "flex-none",
-            }}
-          />
-          <div className="flex min-w-0 flex-col items-start space-y-4">
-            {isCreatedBySelf ? (
-              <Button
-                variant="light"
-                radius="sm"
-                className="block max-w-full truncate px-0 text-3xl"
-                onPress={onEditOpen}
+          <div className="group relative flex-none">
+            <Image
+              radius="md"
+              shadow="lg"
+              src={cover}
+              alt={title}
+              width={200}
+              height={168}
+              params="672w_378h_1c.avif"
+              className={clx({
+                "border-content3 border": !cover,
+              })}
+            />
+            {isCreatedBySelf && (
+              <div
+                className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center rounded-md bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                onClick={onEditOpen}
               >
-                {title}
-              </Button>
-            ) : (
-              <h1 className="text-3xl font-bold">{title}</h1>
+                <div className="flex flex-col items-center gap-2">
+                  <RiEdit2Line size={28} />
+                  <span className="text-sm">修改</span>
+                </div>
+              </div>
             )}
+          </div>
+          <div className="flex min-w-0 flex-col items-start space-y-4">
+            <h1 className="text-3xl font-bold">{title}</h1>
             {Boolean(desc) && <p className="text-foreground-400 line-clamp-1 text-sm">{desc}</p>}
             <div className="text-foreground-400 flex items-center space-x-1 text-sm">
               <span>
@@ -117,7 +117,19 @@ const Header = memo(
             )}
           </div>
         </div>
-        <FavoritesEditModal mid={Number(id)} isOpen={isEditOpen} onOpenChange={onEditChange} onRefresh={onRefresh} />
+        <FavoritesEditModal
+          mid={Number(id)}
+          isOpen={isEditOpen}
+          onOpenChange={onEditChange}
+          onRefresh={() =>
+            new Promise(resolve =>
+              setTimeout(() => {
+                onRefresh();
+                resolve();
+              }, 1000),
+            )
+          }
+        />
       </>
     );
   },

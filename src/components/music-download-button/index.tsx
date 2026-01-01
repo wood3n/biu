@@ -1,4 +1,6 @@
-import { addToast, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
+import React, { useState } from "react";
+
+import { addToast, Button, Tooltip } from "@heroui/react";
 import { RiDownload2Fill, RiFileMusicLine, RiFileVideoLine } from "@remixicon/react";
 
 import AsyncButton from "@/components/async-button";
@@ -9,6 +11,7 @@ const MusicDownloadButton = () => {
   const list = usePlayList(s => s.list);
   const playId = usePlayList(s => s.playId);
   const playItem = list.find(item => item.id === playId);
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
   const downloadAudio = async () => {
     await window.electron.addMediaDownloadTask({
@@ -50,25 +53,43 @@ const MusicDownloadButton = () => {
   }
 
   return (
-    <Dropdown
+    <Tooltip
+      triggerScaleOnOpen={false}
+      isOpen={isTooltipOpen}
+      onOpenChange={setIsTooltipOpen}
+      placement="top"
+      closeDelay={500}
+      showArrow={false}
       classNames={{
-        content: "min-w-fit",
+        content: "py-3 px-2 min-w-[120px]",
       }}
+      content={
+        <div className="flex flex-col items-stretch gap-1">
+          <Button
+            size="sm"
+            variant="light"
+            startContent={<RiFileMusicLine size={16} />}
+            className="justify-start"
+            onPress={downloadAudio}
+          >
+            下载音频
+          </Button>
+          <Button
+            size="sm"
+            variant="light"
+            startContent={<RiFileVideoLine size={16} />}
+            className="justify-start"
+            onPress={downloadVideo}
+          >
+            下载视频
+          </Button>
+        </div>
+      }
     >
-      <DropdownTrigger>
-        <IconButton>
-          <RiDownload2Fill size={18} />
-        </IconButton>
-      </DropdownTrigger>
-      <DropdownMenu aria-label="选择下载视频或音频">
-        <DropdownItem key="downloadAudio" startContent={<RiFileMusicLine size={16} />} onPress={downloadAudio}>
-          下载音频
-        </DropdownItem>
-        <DropdownItem key="downloadVideo" startContent={<RiFileVideoLine size={16} />} onPress={downloadVideo}>
-          下载视频
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
+      <IconButton>
+        <RiDownload2Fill size={18} />
+      </IconButton>
+    </Tooltip>
   );
 };
 

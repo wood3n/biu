@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { isPrivateFav } from "@/common/utils/fav";
+import ImageUpload from "@/components/image-upload";
 import { postFavFolderAdd } from "@/service/fav-folder-add";
 import { postFavFolderEdit } from "@/service/fav-folder-edit";
 import { getFavFolderInfo } from "@/service/fav-folder-info";
@@ -26,6 +27,7 @@ import { useUser } from "@/store/user";
 const schema = z.object({
   title: z.string().trim().min(1, "名称为必填项"),
   intro: z.string().optional(),
+  cover: z.string().optional(),
   isPublic: z.boolean().default(true),
 });
 
@@ -35,7 +37,7 @@ interface Props {
   mid?: number;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onRefresh?: () => void;
+  onRefresh?: () => Promise<void>;
 }
 
 const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => {
@@ -50,7 +52,7 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
     formState: { touchedFields, isSubmitting, isSubmitted, isValid },
   } = useForm({
     resolver: zodResolver(schema),
-    defaultValues: { title: "", intro: "", isPublic: true },
+    defaultValues: { title: "", intro: "", isPublic: true, cover: "" },
     mode: "onChange",
   });
 
@@ -68,6 +70,7 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
               setValue("title", res.data.title ?? "");
               setValue("intro", res.data.intro ?? "");
               setValue("isPublic", !isPrivateFav(res.data.attr));
+              setValue("cover", res.data.cover ?? "");
             } else {
               addToast({ color: "danger", title: "加载失败", description: res?.message || "请稍后再试" });
             }
@@ -85,7 +88,7 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
       };
     } else {
       // 新建模式下清空表单
-      reset({ title: "", intro: "", isPublic: true });
+      reset({ title: "", intro: "", isPublic: true, cover: "" });
     }
   }, [isOpen, mid, reset]);
 
@@ -97,13 +100,14 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
           title: values.title.trim(),
           intro: values.intro?.trim() ? values.intro.trim() : "",
           privacy: values.isPublic ? 0 : 1,
+          cover: values.cover || undefined,
         });
 
         if (res?.code === 0) {
           updateOwnFolder();
           reset();
           onOpenChange(false);
-          onRefresh?.();
+          await onRefresh?.();
         } else {
           addToast({
             color: "danger",
@@ -116,6 +120,7 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
           title: values.title.trim(),
           intro: values.intro?.trim() ? values.intro.trim() : "",
           privacy: values.isPublic ? 0 : 1,
+          cover: values.cover || "",
         });
         if (res?.code === 0) {
           updateOwnFolder();
@@ -143,6 +148,7 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
     <Modal
       radius="md"
       size="md"
+      scrollBehavior="inside"
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       isDismissable={!isSubmitting}
@@ -152,6 +158,20 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
         <form onSubmit={handleSubmit(onSubmit)}>
           <ModalHeader className="py-3">{mid ? "修改收藏夹" : "新建收藏夹"}</ModalHeader>
           <ModalBody className="gap-4 py-4">
+            <Controller
+              name="cover"
+              control={control}
+              render={({ field }) => (
+                <ImageUpload
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isFetching || isSubmitting}
+                  width={240}
+                  height={150}
+                />
+              )}
+            />
+
             <Controller
               name="title"
               control={control}
