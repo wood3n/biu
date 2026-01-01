@@ -30,7 +30,12 @@ const Operations = ({
   return (
     <div className="mb-4 flex items-center justify-between">
       <div className="flex items-center space-x-2">
-        <AsyncButton color="primary" startContent={<RiPlayFill size={22} />} onPress={onPlayAll}>
+        <AsyncButton
+          color="primary"
+          startContent={<RiPlayFill size={22} />}
+          onPress={onPlayAll}
+          className="dark:text-black"
+        >
           播放全部
         </AsyncButton>
         <IconButton size="md" variant="flat" tooltip="添加到播放列表" onPress={onAddToPlayList}>
