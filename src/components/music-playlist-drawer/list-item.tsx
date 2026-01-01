@@ -1,23 +1,27 @@
+import { useState } from "react";
 import { useNavigate } from "react-router";
 
-import { Button } from "@heroui/react";
-import { RiPlayFill } from "@remixicon/react";
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
+import { RiMoreFill, RiPlayFill } from "@remixicon/react";
 import clx from "classnames";
 
 import Image from "@/components/image";
 import { type PlayData } from "@/store/play-list";
 
-import Menus from "./menu";
+import { getMenus } from "./menu";
 
 interface Props {
   data: PlayData;
+  isLogin: boolean;
   isPlaying?: boolean;
+  onAction: (key: string, itemData: PlayData) => void;
   onClose: VoidFunction;
   onPress?: VoidFunction;
 }
 
-const ListItem = ({ data, isPlaying, onPress, onClose }: Props) => {
+const ListItem = ({ data, isLogin, isPlaying, onAction, onClose, onPress }: Props) => {
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Button
@@ -55,7 +59,33 @@ const ListItem = ({ data, isPlaying, onPress, onClose }: Props) => {
             {data?.ownerName || "未知"}
           </span>
         </div>
-        <Menus data={data} />
+        <Dropdown
+          disableAnimation
+          isOpen={isOpen}
+          onOpenChange={setIsOpen}
+          classNames={{
+            content: "min-w-fit",
+          }}
+        >
+          <DropdownTrigger>
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              className={`flex-none transition-opacity duration-200 ${isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"} group-hover:pointer-events-auto group-hover:opacity-100`}
+            >
+              <RiMoreFill size={16} />
+            </Button>
+          </DropdownTrigger>
+          {/* @ts-ignore 忽略onAction类型问题 */}
+          <DropdownMenu aria-label="播放列表操作菜单" items={getMenus({ isLogin })} onAction={onAction}>
+            {item => (
+              <DropdownItem key={item.key} color={item.color} startContent={item.icon}>
+                {item.label}
+              </DropdownItem>
+            )}
+          </DropdownMenu>
+        </Dropdown>
       </div>
     </Button>
   );
