@@ -57,7 +57,7 @@ const MusicRecommendGridList: React.FC<MusicRecommendGridListProps> = ({
         />
       );
     },
-    [onMenuAction],
+    [onMenuAction, user?.isLogin],
   );
 
   return (

@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 
 import type { FavMedia } from "@/service/fav-resource";
 
@@ -6,7 +6,6 @@ import { formatSecondsToDate } from "@/common/utils/time";
 import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
 import VirtualPageList from "@/components/virtual-page-list";
-import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 
 import { getContextMenus } from "./menu";
@@ -19,6 +18,7 @@ interface FavoriteListProps {
   getScrollElement: () => HTMLElement | null;
   isCreatedBySelf: boolean;
   onMenuAction: (key: string, item: FavMedia) => void;
+  onItemPress: (item: FavMedia) => void;
 }
 
 const FavoriteList: React.FC<FavoriteListProps> = ({
@@ -29,21 +29,10 @@ const FavoriteList: React.FC<FavoriteListProps> = ({
   getScrollElement,
   isCreatedBySelf,
   onMenuAction,
+  onItemPress,
 }) => {
   const displayMode = useSettings(state => state.displayMode);
   const isCompact = displayMode === "compact";
-
-  const handlePress = useCallback((item: FavMedia) => {
-    usePlayList.getState().play({
-      type: item.type === 2 ? "mv" : "audio",
-      bvid: item.type === 2 ? item.bvid : undefined,
-      sid: item.type === 2 ? undefined : item.id,
-      title: item.title,
-      cover: item.cover,
-      ownerName: item.upper?.name,
-      ownerMid: item.upper?.mid,
-    });
-  }, []);
 
   return (
     <div className="w-full">
@@ -72,13 +61,7 @@ const FavoriteList: React.FC<FavoriteListProps> = ({
               playCount={item.cnt_info.play}
               duration={item.duration}
               pubTime={formatSecondsToDate(item.fav_time)}
-              onPress={
-                canPlay
-                  ? () => {
-                      handlePress(item);
-                    }
-                  : undefined
-              }
+              onPress={canPlay ? () => onItemPress(item) : undefined}
               menus={getContextMenus({
                 isCreatedBySelf,
                 type: item.type,

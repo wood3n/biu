@@ -4,7 +4,6 @@ import type { FavMedia } from "@/service/fav-resource";
 
 import MusicCard from "@/components/music-card";
 import VirtualGridPageList from "@/components/virtual-grid-page-list";
-import { usePlayList } from "@/store/play-list";
 
 import { getContextMenus } from "./menu";
 
@@ -16,6 +15,7 @@ interface FavoriteGridListProps {
   getScrollElement: () => HTMLElement | null;
   isCreatedBySelf: boolean;
   onMenuAction: (key: string, item: FavMedia) => void;
+  onItemPress: (item: FavMedia) => void;
 }
 
 const FavoriteGridList: React.FC<FavoriteGridListProps> = ({
@@ -26,6 +26,7 @@ const FavoriteGridList: React.FC<FavoriteGridListProps> = ({
   getScrollElement,
   isCreatedBySelf,
   onMenuAction,
+  onItemPress,
 }) => {
   const renderGridItem = useCallback(
     (item: FavMedia) => {
@@ -48,25 +49,11 @@ const FavoriteGridList: React.FC<FavoriteGridListProps> = ({
           onMenuAction={key => {
             onMenuAction(key, item);
           }}
-          onPress={
-            canPlay
-              ? () => {
-                  usePlayList.getState().play({
-                    type: item.type === 2 ? "mv" : "audio",
-                    sid: item.id,
-                    bvid: item.bvid,
-                    title: item.title,
-                    cover: item.cover,
-                    ownerName: item.upper?.name,
-                    ownerMid: item.upper?.mid,
-                  });
-                }
-              : undefined
-          }
+          onPress={canPlay ? () => onItemPress(item) : undefined}
         />
       );
     },
-    [isCreatedBySelf, onMenuAction],
+    [isCreatedBySelf, onItemPress, onMenuAction],
   );
 
   return (

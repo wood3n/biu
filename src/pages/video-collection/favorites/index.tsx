@@ -135,6 +135,18 @@ const Favorites: React.FC = () => {
     setKeyword(keyword || "");
   }, []);
 
+  const handleItemPress = useCallback((item: FavMedia) => {
+    usePlayList.getState().play({
+      type: item.type === 2 ? "mv" : "audio",
+      bvid: item.type === 2 ? item.bvid : undefined,
+      sid: item.type === 12 ? item.id : undefined,
+      title: item.title,
+      cover: item.cover,
+      ownerName: item.upper?.name,
+      ownerMid: item.upper?.mid,
+    });
+  }, []);
+
   const onPlayAll = async () => {
     if (!favFolderId) {
       addToast({ title: "收藏夹 ID 无效", color: "danger" });
@@ -375,6 +387,7 @@ const Favorites: React.FC = () => {
           onLoadMore={handleLoadMore}
           isCreatedBySelf={isCreatedBySelf}
           onMenuAction={handleMenuAction}
+          onItemPress={handleItemPress}
         />
       ) : (
         <FavoriteList
@@ -385,6 +398,7 @@ const Favorites: React.FC = () => {
           getScrollElement={() => (scrollRef.current?.osInstance()?.elements().viewport as HTMLElement | null) ?? null}
           isCreatedBySelf={isCreatedBySelf}
           onMenuAction={handleMenuAction}
+          onItemPress={handleItemPress}
         />
       )}
     </ScrollContainer>
