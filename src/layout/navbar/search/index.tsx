@@ -109,7 +109,7 @@ const SearchInput: React.FC = () => {
                   </span>
                 </div>
                 <div className="mb-1 flex flex-wrap gap-2">
-                  {searchHistoryItems.map(item => (
+                  {searchHistoryItems.slice(0, 10).map(item => (
                     <Chip
                       key={item.time}
                       isCloseable
