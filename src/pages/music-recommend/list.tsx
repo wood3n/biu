@@ -7,6 +7,7 @@ import MusicListHeader from "@/components/music-list-item/header";
 import VirtualPageList from "@/components/virtual-page-list";
 import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
+import { useUser } from "@/store/user";
 
 import { getContextMenus } from "./menu";
 
@@ -27,6 +28,7 @@ const MusicRecommendList: React.FC<MusicRecommendListProps> = ({
   getScrollElement,
   onMenuAction,
 }) => {
+  const user = useUser(state => state.user);
   const displayMode = useSettings(state => state.displayMode);
   const isCompact = displayMode === "compact";
 
@@ -66,7 +68,9 @@ const MusicRecommendList: React.FC<MusicRecommendListProps> = ({
               playCount={item.related_archive.vv_count}
               duration={item.related_archive.duration}
               onPress={() => handlePress(item)}
-              menus={getContextMenus()}
+              menus={getContextMenus({
+                isLogin: user?.isLogin,
+              })}
               onMenuAction={key => onMenuAction(key, item)}
             />
           );

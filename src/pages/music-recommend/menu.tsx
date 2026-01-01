@@ -1,11 +1,12 @@
 import { RiFileMusicLine, RiFileVideoLine, RiPlayCircleLine, RiPlayListAddLine, RiStarLine } from "@remixicon/react";
 
-export const getContextMenus = () => {
+export const getContextMenus = ({ isLogin }: { isLogin?: boolean }) => {
   return [
     {
       icon: <RiStarLine size={18} />,
       key: "favorite",
       label: "收藏",
+      hidden: !isLogin,
     },
     {
       icon: <RiPlayCircleLine size={18} />,

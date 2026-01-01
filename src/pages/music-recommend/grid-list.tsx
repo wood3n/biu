@@ -4,6 +4,7 @@ import MusicCard from "@/components/music-card";
 import VirtualGridPageList from "@/components/virtual-grid-page-list";
 import { type Data as MusicItem } from "@/service/music-comprehensive-web-rank";
 import { usePlayList } from "@/store/play-list";
+import { useUser } from "@/store/user";
 
 import { getContextMenus } from "./menu";
 
@@ -24,6 +25,8 @@ const MusicRecommendGridList: React.FC<MusicRecommendGridListProps> = ({
   getScrollElement,
   onMenuAction,
 }) => {
+  const user = useUser(state => state.user);
+
   const renderGridItem = useCallback(
     (item: MusicItem) => {
       return (
@@ -35,7 +38,9 @@ const MusicRecommendGridList: React.FC<MusicRecommendGridListProps> = ({
           duration={item.related_archive.duration}
           ownerName={item.related_archive.username}
           ownerMid={item.related_archive.uid}
-          menus={getContextMenus()}
+          menus={getContextMenus({
+            isLogin: user?.isLogin,
+          })}
           onMenuAction={key => {
             onMenuAction(key, item);
           }}
