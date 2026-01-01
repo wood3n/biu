@@ -74,7 +74,7 @@ const SearchInput: React.FC = () => {
       />
       <div
         className={classNames(
-          "bg-content1 rounded-medium absolute top-full left-0 z-100 mt-1 min-h-[200px] w-[360px] px-1 py-2 shadow",
+          "bg-content2 rounded-medium absolute top-full left-0 z-100 mt-1 min-h-[200px] w-[360px] px-1 py-2 shadow shadow-2xl",
           {
             hidden: !open,
             block: open,
