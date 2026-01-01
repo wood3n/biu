@@ -1,0 +1,36 @@
+import { useMemo } from "react";
+
+import { RiStarLine } from "@remixicon/react";
+
+import IconButton from "@/components/icon-button";
+import { useModalStore } from "@/store/modal";
+import { usePlayList } from "@/store/play-list";
+import { useUser } from "@/store/user";
+
+const MusicFavButton = () => {
+  const user = useUser(s => s.user);
+  const list = usePlayList(s => s.list);
+  const playId = usePlayList(s => s.playId);
+  const playItem = useMemo(() => list.find(item => item.id === playId), [list, playId]);
+  const onOpenFavSelectModal = useModalStore(s => s.onOpenFavSelectModal);
+
+  const handleOpen = () => {
+    if (!playItem) return;
+    onOpenFavSelectModal({
+      rid: playItem.type === "mv" ? String(playItem.aid) : String(playItem.sid),
+      title: "收藏",
+    });
+  };
+
+  if (!user?.isLogin) {
+    return null;
+  }
+
+  return (
+    <IconButton onPress={handleOpen}>
+      <RiStarLine size={18} />
+    </IconButton>
+  );
+};
+
+export default MusicFavButton;

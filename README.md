@@ -29,7 +29,7 @@
       <img src="./screenshots/download.png" alt="download" width="100%" />
     </td>
     <td width="50%" align="center">
-      <img src="./screenshots/settings.png" alt="settings" width="100%" />
+      <img src="./screenshots/fullscreen.jpg" alt="fullscreen" width="100%" />
     </td>
   </tr>
   <tr>
@@ -38,7 +38,7 @@
     </td>
     <td width="50%" align="center">
       <p> mini 播放器</p>
-      <img src="./screenshots/mini.png" alt="mini" width="100%" />
+      <img src="./screenshots/mini.jpg" alt="mini" width="100%" />
     </td>
   </tr>
 </table>
@@ -50,7 +50,7 @@
 - 🎧 高品质音频播放，优先拉取更高码率音频流（如无损 Flac，192K/Hi-Res）
 - 🔥 支持视频文件以及提取视频中的音频下载；支持收藏夹视频批量下载
 - 🧩 轻量界面，内置深色主题，同时可自定义部分主题样式，细腻的滚动与动效体验
-- 💿 系统托盘与最小化隐藏（Windows），便捷控制播放
+- 💿 系统托盘与最小化隐藏，便捷控制播放
 - 🍃 支持 mini 播放器模式，占用系统资源少，同时保留主窗口功能
 - ♻️ 安装包支持自动检测更新，始终保持最新体验
 

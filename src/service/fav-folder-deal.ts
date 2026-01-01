@@ -7,7 +7,7 @@ import { apiRequest } from "./request";
  */
 export interface FavFolderAddRequestParams {
   /** 视频id */
-  rid: string;
+  rid: string | number;
   /** 添加目标收藏夹id，逗号分隔 */
   add_media_ids?: string;
   /** 从目标收藏夹id移除，逗号分隔 */

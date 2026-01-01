@@ -35,10 +35,10 @@ interface Props {
   mid?: number;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  afterSubmit?: () => void;
+  onRefresh?: () => void;
 }
 
-const FavoritesEditModal = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) => {
+const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => {
   const updateOwnFolder = useUser(state => state.updateOwnFolder);
   const [isFetching, setIsFetching] = useState(false);
 
@@ -103,7 +103,7 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) =
           updateOwnFolder();
           reset();
           onOpenChange(false);
-          afterSubmit?.();
+          onRefresh?.();
         } else {
           addToast({
             color: "danger",
@@ -150,7 +150,7 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, afterSubmit }: Props) =
     >
       <ModalContent>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader className="border-b-1 border-b-zinc-800 py-3">{mid ? "修改收藏夹" : "新建收藏夹"}</ModalHeader>
+          <ModalHeader className="py-3">{mid ? "修改收藏夹" : "新建收藏夹"}</ModalHeader>
           <ModalBody className="gap-4 py-4">
             <Controller
               name="title"

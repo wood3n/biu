@@ -1,8 +1,40 @@
-import { app, ipcMain } from "electron";
+import { app, ipcMain, session } from "electron";
 import isDev from "electron-is-dev";
+import log from "electron-log";
 
 import { autoUpdater } from "../updater";
 import { channel } from "./channel";
+
+export const applyProxySettings = async (proxySettings?: ProxySettings) => {
+  try {
+    if (!proxySettings || proxySettings.type === "none") {
+      await session.defaultSession.setProxy({ mode: "direct" });
+      return;
+    }
+
+    const { type, host, port, username, password } = proxySettings;
+
+    if (!host || !port) {
+      await session.defaultSession.setProxy({ mode: "direct" });
+      return;
+    }
+
+    const scheme = type === "http" ? "http" : type === "socks4" ? "socks4" : "socks5";
+
+    const auth =
+      username && password
+        ? `${encodeURIComponent(username)}:${encodeURIComponent(password)}@`
+        : username
+          ? `${encodeURIComponent(username)}@`
+          : "";
+
+    const proxyRules = `${scheme}://${auth}${host}:${port}`;
+
+    await session.defaultSession.setProxy({ proxyRules });
+  } catch (error) {
+    log.error("[proxy] Failed to apply proxy settings:", error);
+  }
+};
 
 export function registerAppHandlers() {
   ipcMain.handle(channel.app.getVersion, async () => {
@@ -42,5 +74,9 @@ export function registerAppHandlers() {
 
   ipcMain.handle(channel.app.isDev, async () => {
     return isDev;
+  });
+
+  ipcMain.handle(channel.app.setProxySettings, async (_, proxySettings: ProxySettings) => {
+    await applyProxySettings(proxySettings);
   });
 }

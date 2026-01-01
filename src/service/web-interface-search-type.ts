@@ -122,6 +122,7 @@ export interface SearchUserItem {
   uname?: string;
   usign?: string;
   fans?: number;
+  videos?: number;
   level?: number;
   upic?: string;
   official_verify?: { type?: number; desc?: string };

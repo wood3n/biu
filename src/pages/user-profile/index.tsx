@@ -1,8 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { useParams } from "react-router";
 
 import { Spinner, Tab, Tabs } from "@heroui/react";
-import { useMount, useRequest } from "ahooks";
+import { useRequest } from "ahooks";
 
 import { UserRelation } from "@/common/constants/relation";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
@@ -14,8 +14,8 @@ import { useUser } from "@/store/user";
 
 import DynamicList from "./dynamic-list";
 import Favorites from "./favorites";
+import VideoPost from "./post";
 import SpaceInfo from "./space-info";
-import VideoPost from "./video-post";
 import VideoSeries from "./video-series";
 
 /**
@@ -26,13 +26,6 @@ const UserProfile = () => {
   const user = useUser(s => s.user);
   const isSelf = String(user?.mid) === id;
   const scrollRef = useRef<ScrollRefObject>(null);
-  const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);
-
-  useMount(() => {
-    if (scrollRef.current) {
-      setScrollElement(scrollRef.current.osInstance()?.elements().viewport || null);
-    }
-  });
 
   const { data: userInfo, loading } = useRequest(
     async () => {
@@ -97,23 +90,28 @@ const UserProfile = () => {
     {
       label: "动态",
       key: "dynamic",
-      content: <DynamicList mid={Number(id)} scrollElement={scrollElement} />,
+      content: (
+        <DynamicList
+          mid={Number(id)}
+          getScrollElement={() => scrollRef.current?.osInstance()?.elements().viewport || null}
+        />
+      ),
     },
     {
       label: "投稿",
       key: "video",
-      content: <VideoPost />,
+      content: <VideoPost getScrollElement={() => scrollRef.current?.osInstance()?.elements().viewport || null} />,
     },
     {
       label: "收藏夹",
       key: "collection",
       hidden: !isSelf && !spacePrivacy?.fav_video,
-      content: <Favorites />,
+      content: <Favorites getScrollElement={() => scrollRef.current?.osInstance()?.elements().viewport || null} />,
     },
     {
       label: "合集",
       key: "union",
-      content: <VideoSeries />,
+      content: <VideoSeries getScrollElement={() => scrollRef.current?.osInstance()?.elements().viewport || null} />,
     },
   ].filter(item => !item.hidden);
 
@@ -126,7 +124,7 @@ const UserProfile = () => {
   }
 
   return (
-    <ScrollContainer className="h-full w-full">
+    <ScrollContainer ref={scrollRef} className="h-full w-full">
       <SpaceInfo
         spaceInfo={userInfo}
         relationStats={relationStats}
@@ -134,8 +132,13 @@ const UserProfile = () => {
         refreshRelation={refreshRelation}
       />
       {relationWithMe !== UserRelation.Blocked && (
-        <div className="px-3 py-4">
-          <Tabs radius="md" classNames={{ cursor: "rounded-medium" }} aria-label="个人资料栏目" variant="solid">
+        <div className="p-4">
+          <Tabs
+            radius="md"
+            classNames={{ cursor: "rounded-medium", panel: "px-0 py-4" }}
+            aria-label="个人资料栏目"
+            variant="solid"
+          >
             {tabs.map(item => (
               <Tab key={item.key} title={item.label}>
                 {item.content}

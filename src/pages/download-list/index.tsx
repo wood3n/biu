@@ -15,7 +15,7 @@ import {
   TableRow,
   Tooltip,
 } from "@heroui/react";
-import { RiDeleteBinLine, RiExternalLinkLine, RiFolderLine, RiInformationLine } from "@remixicon/react";
+import { RiDeleteBinLine, RiExternalLinkLine, RiFolderLine } from "@remixicon/react";
 import { filesize } from "filesize";
 
 import { formatMillisecond } from "@/common/utils";
@@ -93,23 +93,16 @@ const DownloadList = () => {
   };
 
   return (
-    <ScrollContainer className="h-full w-full p-4">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="flex items-center space-x-1">
-          <span>下载记录</span>
-          <Tooltip closeDelay={0} content="下载功能需要 ffmpeg，请自行下载安装">
-            <RiInformationLine />
-          </Tooltip>
-        </h1>
+    <ScrollContainer className="h-full w-full px-4">
+      <div className="mb-2 flex items-center justify-between">
+        <h1 className="flex items-center space-x-1">下载记录</h1>
         <div className="flex items-center space-x-1">
-          <Tooltip content="打开目录" closeDelay={0}>
-            <Button variant="flat" onPress={openDownloadDir} startContent={<RiFolderLine size={18} />}>
-              {downloadPath}
-            </Button>
-          </Tooltip>
+          <Button variant="flat" onPress={openDownloadDir} startContent={<RiFolderLine size={18} />}>
+            {downloadPath}
+          </Button>
         </div>
       </div>
-      <Card radius="md">
+      <Card radius="md" shadow="sm">
         <CardBody>
           <div className="w-full overflow-x-auto">
             <Table

@@ -1,115 +1,109 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 
 import { useShallow } from "zustand/react/shallow";
 
 import { hexToHsl } from "@/common/utils/color";
 import { useSettings } from "@/store/settings";
-import { getThemeColors } from "@shared/settings/app-settings";
 
 interface Props {
   children: React.ReactNode;
 }
 
-/**
- * CSS变量名称映射
- */
-const CSS_VARIABLES = {
-  background: "--heroui-background",
-  content1: "--heroui-content1",
-  primary: "--heroui-primary",
-  radiusMedium: "--heroui-radius-medium",
-  foreground: "--heroui-foreground",
-} as const;
-
-/**
- * 设置CSS变量的辅助函数
- */
-function setCSSVariables(
-  style: CSSStyleDeclaration,
-  variables: {
-    background: string;
-    content1: string;
-    primary: string;
-    radius: string;
-    foreground: string;
-  },
-) {
-  style.setProperty(CSS_VARIABLES.background, variables.background);
-  style.setProperty(CSS_VARIABLES.content1, variables.content1);
-  style.setProperty(CSS_VARIABLES.primary, variables.primary);
-  style.setProperty(CSS_VARIABLES.radiusMedium, variables.radius);
-  style.setProperty(CSS_VARIABLES.foreground, variables.foreground);
-}
-
-/**
- * 规范化字体族名称
- */
-function normalizeFontFamily(fontFamily: string): string {
-  return fontFamily === "system-default" ? "system-ui" : fontFamily;
+function resolveTheme(theme: ThemeMode, systemTheme?: "light" | "dark") {
+  if (theme === "system") {
+    if (systemTheme) {
+      return systemTheme;
+    }
+    if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    return "light";
+  }
+  return theme;
 }
 
 const Theme = ({ children }: Props) => {
-  const { fontFamily, primaryColor, borderRadius, themeMode } = useSettings(
+  const { themeMode, fontFamily, primaryColor, borderRadius } = useSettings(
     useShallow(s => ({
+      themeMode: s.themeMode,
       fontFamily: s.fontFamily,
       primaryColor: s.primaryColor,
       borderRadius: s.borderRadius,
-      themeMode: s.themeMode,
     })),
   );
 
-  // 根据主题模式获取颜色配置
-  const themeColors = useMemo(() => getThemeColors(themeMode), [themeMode]);
+  const [systemTheme, setSystemTheme] = useState<"light" | "dark" | undefined>(undefined);
 
-  // 规范化字体族
-  const normalizedFontFamily = useMemo(() => normalizeFontFamily(fontFamily), [fontFamily]);
+  // 当 themeMode 为 system 时，监听系统主题变化并更新本地 systemTheme
+  useEffect(() => {
+    if (themeMode !== "system") {
+      return;
+    }
 
-  // 计算CSS变量值（避免重复计算）
-  const cssVariables = useMemo(
-    () => ({
-      background: hexToHsl(themeColors.contentBackgroundColor),
-      content1: hexToHsl(themeColors.backgroundColor),
-      primary: hexToHsl(primaryColor),
-      radius: `${borderRadius}px`,
-      foreground: themeColors.foregroundColor,
-    }),
-    [themeColors, primaryColor, borderRadius],
-  );
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      setSystemTheme(undefined);
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const applyTheme = (matches: boolean) => {
+      setSystemTheme(matches ? "dark" : "light");
+    };
+
+    applyTheme(mediaQuery.matches);
+
+    const mediaQueryHandler = (event: MediaQueryListEvent) => {
+      applyTheme(event.matches);
+    };
+
+    mediaQuery.addEventListener("change", mediaQueryHandler);
+
+    return () => {
+      mediaQuery.removeEventListener("change", mediaQueryHandler);
+    };
+  }, [themeMode]);
 
   // 将主题相关样式应用到 :root 和 body，确保挂载在 body 上的组件可读取到
   useEffect(() => {
-    const rootStyle = document.documentElement.style;
+    const root = document.documentElement;
+    const themeName = resolveTheme(themeMode, systemTheme);
+
+    root.classList.remove("light", "dark");
+    root.classList.add(themeName);
+    root.style.colorScheme = themeName;
+
+    const rootStyle = root.style;
     const bodyStyle = document.body.style;
-    const bodyElement = document.body;
 
-    // 更新主题类名
-    bodyElement.classList.remove("light", "dark");
-    bodyElement.classList.add(themeMode);
+    const primary = hexToHsl(primaryColor);
+    const radius = `${borderRadius}px`;
 
-    // 设置CSS变量
-    setCSSVariables(rootStyle, cssVariables);
-    setCSSVariables(bodyStyle, cssVariables);
+    // :root 级变量（全局）
+    rootStyle.setProperty("--heroui-primary", primary);
+    rootStyle.setProperty("--primary", primary);
+    rootStyle.setProperty("--heroui-radius-medium", radius);
+    rootStyle.setProperty("--radius-medium", radius);
+    rootStyle.setProperty("--radius", radius);
 
-    // 设置字体
-    bodyStyle.fontFamily = normalizedFontFamily;
-  }, [cssVariables, themeMode, normalizedFontFamily]);
-
-  // 计算内联样式
-  const inlineStyles = useMemo(
-    () => ({
-      fontFamily: normalizedFontFamily,
-      [CSS_VARIABLES.background]: cssVariables.background,
-      [CSS_VARIABLES.content1]: cssVariables.content1,
-      [CSS_VARIABLES.primary]: cssVariables.primary,
-      [CSS_VARIABLES.radiusMedium]: cssVariables.radius,
-    }),
-    [normalizedFontFamily, cssVariables],
-  );
+    // body 级变量与字体（用于挂载在 body 的 Portal 组件）
+    bodyStyle.setProperty("--heroui-primary", primary);
+    bodyStyle.setProperty("--primary", primary);
+    bodyStyle.setProperty("--heroui-radius-medium", radius);
+    bodyStyle.setProperty("--radius-medium", radius);
+    bodyStyle.setProperty("--radius", radius);
+    const validFontFamily = fontFamily === "system-default" ? "system-ui" : fontFamily;
+    bodyStyle.fontFamily = validFontFamily || bodyStyle.fontFamily;
+  }, [fontFamily, primaryColor, borderRadius, themeMode, systemTheme]);
 
   return (
     <main
-      className={`bg-background text-foreground h-screen w-screen overflow-hidden ${themeMode}`}
-      style={inlineStyles}
+      className={`bg-background text-foreground h-screen w-screen overflow-hidden ${resolveTheme(themeMode, systemTheme)}`}
+      style={{
+        fontFamily: fontFamily === "system-default" ? "system-ui" : fontFamily,
+        ["--heroui-primary" as any]: hexToHsl(primaryColor),
+        ["--heroui-radius-medium" as any]: `${borderRadius}px`,
+      }}
     >
       {children}
     </main>

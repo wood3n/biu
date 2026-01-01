@@ -97,6 +97,7 @@ const VideoPagesDownloadSelectModal = () => {
 
                   return (
                     <Checkbox
+                      color="primary"
                       disableAnimation
                       key={item.cid}
                       aria-label={item.part}
@@ -124,6 +125,7 @@ const VideoPagesDownloadSelectModal = () => {
         {Boolean(data?.length) && (
           <ModalFooter>
             <Checkbox
+              color="primary"
               aria-label="全选"
               isSelected={selectedCids.length === data?.length}
               onValueChange={isSelected => {

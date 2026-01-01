@@ -1,14 +1,12 @@
 import type { RouteObject } from "react-router";
 
 import Layout from "./layout";
-import ArtistRank from "./pages/artist-rank";
 import DownloadList from "./pages/download-list";
 import EmptyPage from "./pages/empty";
 import FollowList from "./pages/follow-list";
 import History from "./pages/history";
 import Later from "./pages/later";
 import MiniPlayer from "./pages/mini-player";
-import MusicRank from "./pages/music-rank";
 import MusicRecommend from "./pages/music-recommend";
 import NotFound from "./pages/not-found";
 import Search from "./pages/search";
@@ -23,14 +21,6 @@ const routes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <MusicRank />,
-      },
-      {
-        path: "artist-rank",
-        element: <ArtistRank />,
-      },
-      {
-        path: "music-recommend",
         element: <MusicRecommend />,
       },
       {

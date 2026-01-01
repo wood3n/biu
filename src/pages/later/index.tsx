@@ -1,158 +1,261 @@
-import { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { addToast, Button, Link, Pagination } from "@heroui/react";
-import { RiDeleteBinLine, RiRefreshLine } from "@remixicon/react";
-import { usePagination } from "ahooks";
+import { addToast, Button, Spinner } from "@heroui/react";
+import { RiDeleteBinLine } from "@remixicon/react";
 
-import { formatDuration } from "@/common/utils";
-import GridList from "@/components/grid-list";
-import MediaItem from "@/components/media-item";
-import ScrollContainer from "@/components/scroll-container";
+import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import { postHistoryToViewDel } from "@/service/history-toview-del";
-import { getHistoryToViewList } from "@/service/history-toview-list";
+import {
+  getHistoryToViewList,
+  type HistoryToViewListParams,
+  type ToViewVideoItem,
+} from "@/service/history-toview-list";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 
+import GridList from "./grid-list";
+import LaterList from "./list";
+import LaterSearch from "./search";
+
+const PAGE_SIZE = 20;
+
 const Later = () => {
+  const scrollerRef = useRef<ScrollRefObject>(null);
+
+  const [list, setList] = useState<ToViewVideoItem[]>([]);
+  const [hasMore, setHasMore] = useState(true);
   const [initialLoading, setInitialLoading] = useState(true);
-  const play = usePlayList(s => s.play);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const pageRef = useRef(1);
+  const keywordRef = useRef("");
+  const dateRangeRef = useRef<{ start?: number; end?: number } | null>(null);
+
   const displayMode = useSettings(state => state.displayMode);
 
-  const {
-    data,
-    error,
-    pagination,
-    runAsync: getData,
-    refreshAsync,
-  } = usePagination(
-    async ({ current = 1, pageSize }) => {
-      const res = await getHistoryToViewList({
-        pn: current,
-        ps: pageSize,
-        viewed: 0,
-      });
-      return {
-        total: res?.data?.count ?? 0,
-        list: res?.data?.list ?? [],
-      };
-    },
-    {
-      defaultPageSize: 20,
-      manual: true,
-    },
-  );
+  const fetchPage = useCallback(async (pn: number = 1) => {
+    const params: HistoryToViewListParams = {
+      pn,
+      ps: PAGE_SIZE,
+      key: keywordRef.current,
+    };
 
-  const initData = async () => {
+    if (dateRangeRef.current) {
+      if (dateRangeRef.current.start) {
+        params.add_time_start = Math.floor(dateRangeRef.current.start / 1000);
+      }
+      if (dateRangeRef.current.end) {
+        params.add_time_end = Math.floor(dateRangeRef.current.end / 1000);
+      }
+    }
+
+    const res = await getHistoryToViewList(params);
+    if (res?.code === 0 && res?.data) {
+      const items = res.data.list ?? [];
+      if (pn === 1) {
+        // 第一页：重置列表
+        setList(items);
+        setHasMore(items.length < (res.data.count ?? 0));
+      } else {
+        // 后续页：追加列表
+        setList(prev => {
+          const newList = [...prev, ...items];
+          setHasMore(newList.length < (res.data.count ?? 0));
+          return newList;
+        });
+      }
+    } else {
+      setHasMore(false);
+      if (pn === 1) {
+        setList([]);
+      }
+    }
+  }, []);
+
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
     try {
-      setInitialLoading(true);
-      await getData({ current: 1, pageSize: 20 });
+      setLoadingMore(true);
+      pageRef.current += 1;
+      await fetchPage(pageRef.current);
+    } catch {
+      pageRef.current -= 1;
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, hasMore, fetchPage]);
+
+  const refreshList = useCallback(async () => {
+    setInitialLoading(true);
+    setList([]);
+    pageRef.current = 1;
+    try {
+      await fetchPage(1);
     } finally {
       setInitialLoading(false);
     }
-  };
+  }, [fetchPage]);
+
+  const handleSearch = useCallback(
+    async (keyword: string) => {
+      keywordRef.current = keyword;
+      await refreshList();
+    },
+    [refreshList],
+  );
+
+  const handleDateRangeChange = useCallback(
+    async (range: { start?: number; end?: number } | null) => {
+      dateRangeRef.current = range;
+      await refreshList();
+    },
+    [refreshList],
+  );
 
   useEffect(() => {
-    initData();
+    refreshList();
+  }, [refreshList]);
+
+  const handleMenuAction = useCallback(async (key: string, item: ToViewVideoItem) => {
+    switch (key) {
+      case "delete":
+        useModalStore.getState().onOpenConfirmModal({
+          title: `确认移除“${item.title}”`,
+          confirmText: "移除",
+          onConfirm: async () => {
+            const res = await postHistoryToViewDel({
+              aid: item.aid,
+            });
+
+            if (res.code === 0) {
+              addToast({
+                title: "已移除",
+                color: "success",
+              });
+              setList(prev => prev.filter(i => i.aid !== item.aid));
+            }
+            return res.code === 0;
+          },
+        });
+        break;
+      case "play-next":
+        usePlayList.getState().addToNext({
+          type: "mv",
+          title: item.title,
+          cover: item.pic,
+          bvid: item.bvid,
+          ownerName: item.owner?.name,
+          ownerMid: item.owner?.mid,
+        });
+        break;
+      case "add-to-playlist":
+        usePlayList.getState().addList([
+          {
+            type: "mv",
+            title: item.title,
+            cover: item.pic,
+            bvid: item.bvid,
+            ownerName: item.owner?.name,
+            ownerMid: item.owner?.mid,
+          },
+        ]);
+        break;
+      case "download-audio":
+        await window.electron.addMediaDownloadTask({
+          outputFileType: "audio",
+          title: item.title,
+          cover: item.pic,
+          bvid: item.bvid,
+          cid: item.cid,
+        });
+        addToast({
+          title: "已添加下载任务",
+          color: "success",
+        });
+        break;
+      case "download-video":
+        await window.electron.addMediaDownloadTask({
+          outputFileType: "video",
+          title: item.title,
+          cover: item.pic,
+          bvid: item.bvid,
+          cid: item.cid,
+        });
+        addToast({
+          title: "已添加下载任务",
+          color: "success",
+        });
+        break;
+    }
   }, []);
 
-  const onOpenConfirmModal = useModalStore(s => s.onOpenConfirmModal);
-
-  const handleOpenDeleteModal = (item: any) => {
-    onOpenConfirmModal({
-      title: "确认删除吗？",
+  const handleClear = useCallback(() => {
+    useModalStore.getState().onOpenConfirmModal({
+      title: "删除已观看完的视频？",
       confirmText: "删除",
       onConfirm: async () => {
         const res = await postHistoryToViewDel({
-          aid: item.aid,
+          viewed: true,
         });
-
         if (res.code === 0) {
-          addToast({
-            title: "删除成功",
-            color: "success",
-          });
-          setTimeout(() => {
-            refreshAsync();
-          }, 500);
+          refreshList();
         }
-
         return res.code === 0;
       },
     });
-  };
+  }, [refreshList]);
 
-  const renderMediaItem = (item: any) => (
-    <div className="mb-4">
-      <MediaItem
-        displayMode={displayMode}
-        type="mv"
-        bvid={item.bvid}
-        aid={String(item.aid)}
-        title={item.title}
-        cover={item.pic}
-        coverHeight={200}
-        playCount={item.stat.view}
-        ownerName={item.owner?.name}
-        ownerMid={item.owner?.mid}
-        menus={[
-          {
-            key: "delete",
-            title: "删除",
-            icon: <RiDeleteBinLine size={16} />,
-            onPress: () => handleOpenDeleteModal(item),
-          },
-        ]}
-        footer={
-          displayMode === "card" && (
-            <div className="text-foreground-500 flex w-full items-center justify-between text-sm">
-              <Link href={`/user/${item.owner?.mid}`} className="text-foreground-500 text-sm hover:underline">
-                {item.owner?.name}
-              </Link>
-              <span>{formatDuration(item.duration as number)}</span>
-            </div>
-          )
-        }
-        onPress={() =>
-          play({
-            type: "mv",
-            bvid: item.bvid,
-            title: item.title,
-            cover: item.pic,
-            ownerName: item.owner?.name,
-            ownerMid: item.owner?.mid,
-          })
-        }
-      />
-    </div>
-  );
+  const isEmpty = useMemo(() => !initialLoading && list.length === 0, [initialLoading, list]);
 
   return (
-    <>
-      <ScrollContainer className="h-full w-full p-4">
-        <div className="mb-4 flex items-center space-x-1">
+    <ScrollContainer ref={scrollerRef} className="h-full w-full px-4">
+      <div className="mb-2">
+        <div className="flex items-center justify-between">
           <h1>稍后再看</h1>
-          <Button isIconOnly variant="light" size="sm" onPress={refreshAsync}>
-            <RiRefreshLine size={18} />
+          <Button variant="flat" startContent={<RiDeleteBinLine size={18} />} onPress={handleClear}>
+            清除已看完
           </Button>
         </div>
-        {displayMode === "card" ? (
-          <GridList loading={initialLoading} data={data?.list} itemKey="bvid" renderItem={renderMediaItem} />
-        ) : (
-          <div>{data?.list?.map((item: any) => renderMediaItem(item))}</div>
-        )}
-        {!error && pagination?.totalPage > 1 && (
-          <div className="flex w-full items-center justify-center py-6">
-            <Pagination
-              initialPage={1}
-              total={pagination?.totalPage}
-              page={pagination?.current}
-              onChange={next => getData({ current: next, pageSize: pagination?.pageSize })}
-            />
+        <LaterSearch onSearch={handleSearch} onDateRangeChange={handleDateRangeChange} />
+      </div>
+
+      <>
+        {initialLoading && (
+          <div className="flex h-[40vh] items-center justify-center">
+            <Spinner size="lg" label="Loading..." />
           </div>
         )}
-      </ScrollContainer>
-    </>
+
+        {/* 空状态 */}
+        {isEmpty && <div className="flex h-[40vh] items-center justify-center text-gray-500">暂无稍后再看内容</div>}
+
+        {/* 列表内容 */}
+        {list.length > 0 && (
+          <>
+            {displayMode === "card" ? (
+              <GridList
+                items={list}
+                hasMore={hasMore}
+                loading={loadingMore}
+                onLoadMore={loadMore}
+                getScrollElement={() => scrollerRef.current?.osInstance()?.elements().viewport || null}
+                onMenuAction={handleMenuAction}
+              />
+            ) : (
+              <LaterList
+                items={list}
+                hasMore={hasMore}
+                loading={loadingMore}
+                onLoadMore={loadMore}
+                getScrollElement={() => scrollerRef.current?.osInstance()?.elements().viewport || null}
+                onMenuAction={handleMenuAction}
+              />
+            )}
+          </>
+        )}
+      </>
+    </ScrollContainer>
   );
 };
 

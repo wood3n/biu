@@ -1,8 +1,10 @@
 import React from "react";
 import { useLocation, useParams } from "react-router";
 
-import { Button, Link as HeroLink, Image } from "@heroui/react";
+import { Button, Link as HeroLink } from "@heroui/react";
 import clx from "classnames";
+
+import Image from "@/components/image";
 
 export interface MenuItemProps {
   /** 菜单项标签 */
@@ -44,15 +46,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
       onPress={onPress}
       startContent={
         cover ? (
-          <Image
-            radius="md"
-            removeWrapper
-            src={cover}
-            alt={title}
-            height={32}
-            width={32}
-            className="rounded-medium object-cover"
-          />
+          <Image radius="md" removeWrapper src={cover} alt={title} height={32} width={32} params="672w_378h_1c.avif" />
         ) : isActive ? (
           // @ts-expect-error 忽略类型错误，因为 ActiveIcon 可能是 undefined
           <ActiveIcon size={18} />

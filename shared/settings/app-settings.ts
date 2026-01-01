@@ -7,12 +7,18 @@ export const defaultAppSettings: AppSettings = {
   primaryColor: "#17c964",
   audioQuality: "auto",
   hiddenMenuKeys: [],
-  displayMode: "card",
+  displayMode: "list",
   ffmpegPath: "",
-  themeMode: "dark",
+  themeMode: "system",
   pageTransition: "none",
-  searchMusicOnly: true,
   showSearchHistory: true,
+  proxySettings: {
+    type: "none",
+    host: "",
+    port: undefined,
+    username: "",
+    password: "",
+  },
 };
 
 export const lightThemeColors = {

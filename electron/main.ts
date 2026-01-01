@@ -4,6 +4,7 @@ import log from "electron-log";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { applyProxySettings } from "./ipc/app";
 import { channel } from "./ipc/channel";
 import { quitAndSaveTasks } from "./ipc/download";
 import { registerIpcHandlers } from "./ipc/index";
@@ -119,94 +120,90 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
-  createWindow();
-
-  injectAuthCookie();
-
-  installWebRequestInterceptors();
-
-  registerIpcHandlers({
-    getMainWindow: () => mainWindow,
-  });
-
-  setupAutoUpdater({
-    getMainWindow: () => mainWindow,
-  });
-
-  registerAllShortcuts(() => mainWindow);
-
-  if (process.platform !== "darwin") {
-    createTray({
-      getMainWindow: () => mainWindow,
-      // 退出：设置 app.quitting 标记，避免 close 事件拦截
-      onExit: () => {
-        (app as any).quitting = true;
-        app.quit();
-      },
-    });
-  }
-});
-
-app.on("activate", () => mainWindow?.show());
-
-app.on("before-quit", () => {
-  (app as any).quitting = true;
-});
-
-// 在 will-quit 阶段清理资源，确保进程干净退出
-app.on("will-quit", () => {
-  try {
-    quitAndSaveTasks();
-  } catch (err) {
-    log.error("[main] quitAndSaveTasks failed:", err);
-  }
-
-  try {
-    destroyTray();
-  } catch (err) {
-    // 修改说明：托盘销毁失败时记录日志，避免静默失败
-    log.warn("[main] destroyTray failed:", err);
-  }
-
-  destroyMiniPlayer();
-
-  stopCheckForUpdates();
-  autoUpdater.removeAllListeners();
-
-  unregisterAllShortcuts();
-
-  // 开发环境：Electron 退出时同时结束 Node.js 开发进程
-  if (isDev) {
-    process.exit(0);
-  }
-});
-
-app.on("window-all-closed", () => {
-  // 如果用户不是在 macOS(darwin) 上运行程序，调用 quit 方法在所有窗口关闭后结束 electron 进程
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
-
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
-  // 2. 如果获取锁失败，说明已经有实例在运行了
-  // 直接退出当前这个新的实例
   app.quit();
 } else {
-  // 3. 如果获取锁成功，说明这是第一个实例
+  app.whenReady().then(() => {
+    try {
+      const settings = appSettingsStore.get("appSettings");
+      applyProxySettings(settings?.proxySettings).catch(error => {
+        log.error("[main] Failed to apply proxy settings on startup:", error);
+      });
+    } catch (error) {
+      log.error("[main] Failed to read proxy settings from store:", error);
+    }
 
-  // 监听 'second-instance' 事件
-  // 当用户尝试启动第二个实例时，第一个实例（持有锁的实例）会收到这个事件
+    createWindow();
+    injectAuthCookie();
+
+    installWebRequestInterceptors();
+
+    registerIpcHandlers({
+      getMainWindow: () => mainWindow,
+    });
+
+    setupAutoUpdater({
+      getMainWindow: () => mainWindow,
+    });
+
+    registerAllShortcuts(() => mainWindow);
+
+    if (process.platform !== "darwin") {
+      createTray({
+        getMainWindow: () => mainWindow,
+        onExit: () => {
+          (app as any).quitting = true;
+          app.quit();
+        },
+      });
+    }
+  });
+
+  app.on("activate", () => mainWindow?.show());
+
+  app.on("before-quit", () => {
+    (app as any).quitting = true;
+  });
+
+  app.on("will-quit", () => {
+    try {
+      quitAndSaveTasks();
+    } catch (err) {
+      log.error("[main] quitAndSaveTasks failed:", err);
+    }
+
+    try {
+      destroyTray();
+    } catch (err) {
+      log.warn("[main] destroyTray failed:", err);
+    }
+
+    destroyMiniPlayer();
+
+    stopCheckForUpdates();
+    autoUpdater.removeAllListeners();
+
+    unregisterAllShortcuts();
+
+    if (isDev) {
+      process.exit(0);
+    }
+  });
+
+  app.on("window-all-closed", () => {
+    if (process.platform !== "darwin") {
+      app.quit();
+    }
+  });
+
   app.on("second-instance", () => {
-    // 这里的逻辑是：如果有人试图打开第二个，我们就把第一个实例窗口置顶显示
     if (mainWindow) {
       if (mainWindow.isMinimized()) {
-        mainWindow.restore(); // 如果窗口最小化了，先恢复
+        mainWindow.restore();
       }
-      mainWindow.focus(); // 聚焦窗口
+      mainWindow.focus();
     }
   });
 }

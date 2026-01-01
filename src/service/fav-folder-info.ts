@@ -8,7 +8,7 @@ import { apiRequest } from "./request";
  */
 export interface FavFolderInfoRequestParams {
   /** 目标收藏夹 id（完整 id，mlid） */
-  media_id: number;
+  media_id: number | string;
 }
 
 /**
@@ -35,7 +35,7 @@ export interface FavFolderInfoData {
   fid: number;
   /** 创建者 mid */
   mid: number;
-  /** 二进制位属性, 0：公开, 1：私密 */
+  /** 二进制位属性, 第0位是公开性，第1位表示是否为默认收藏夹 */
   attr: number;
   /** 收藏夹标题 */
   title: string;
@@ -57,7 +57,7 @@ export interface FavFolderInfoData {
   mtime: number;
   /** 状态（一般为 0） */
   state: number;
-  /** 收藏夹收藏状态 已收藏收藏夹：1 未收藏收藏夹：0（需要登录） */
+  /** 已收藏收藏夹：1；未收藏收藏夹：0 */
   fav_state: number;
   /** 点赞状态 已点赞：1 未点赞：0（需要登录） */
   like_state: number;

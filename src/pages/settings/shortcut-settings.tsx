@@ -132,7 +132,7 @@ const ShortcutSettingsPage = () => {
         })}
       </div>
       <div className="text-end">
-        <Checkbox isSelected={enableGlobalShortcuts} onValueChange={handleToggleEnableGlobalShortcut}>
+        <Checkbox color="primary" isSelected={enableGlobalShortcuts} onValueChange={handleToggleEnableGlobalShortcut}>
           启用全局快捷键
         </Checkbox>
       </div>

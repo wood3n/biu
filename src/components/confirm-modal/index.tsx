@@ -5,7 +5,6 @@ import { RiErrorWarningLine } from "@remixicon/react";
 import { useShallow } from "zustand/shallow";
 
 import { useModalStore } from "@/store/modal";
-import { useSettings } from "@/store/settings";
 
 type ConfirmModalType = "warning" | "danger" | "primary";
 
@@ -36,16 +35,7 @@ const ConfirmModal = () => {
     cancelText = "取消",
   } = confirmModalData || {};
 
-  const primaryColor = useSettings(s => s.primaryColor);
   const [loading, setLoading] = useState(false);
-
-  // 根据类型获取图标颜色
-  const getIconColor = () => {
-    if (type === "primary") {
-      return primaryColor;
-    }
-    return colorMap[type as Exclude<ConfirmModalType, "primary">];
-  };
 
   const handleClose = () => onConfirmModalOpenChange(false);
 
@@ -65,6 +55,7 @@ const ConfirmModal = () => {
     <Modal
       disableAnimation
       radius="md"
+      hideCloseButton
       isOpen={isConfirmModalOpen}
       onOpenChange={onConfirmModalOpenChange}
       isDismissable={false}
@@ -72,8 +63,8 @@ const ConfirmModal = () => {
       <ModalContent>
         {() => (
           <>
-            <ModalHeader className="flex items-center gap-1 [&>span]:text-[var(--heroui-foreground)]">
-              <RiErrorWarningLine color={getIconColor()} />
+            <ModalHeader className="flex items-center gap-1">
+              <RiErrorWarningLine color={colorMap[type]} className="flex-none" />
               <span>{title}</span>
             </ModalHeader>
             {description ? (
@@ -85,7 +76,7 @@ const ConfirmModal = () => {
               <Button variant="light" onPress={handleClose} isDisabled={loading}>
                 {cancelText}
               </Button>
-              <Button color={type === "primary" ? "primary" : type} onPress={handleConfirm} isLoading={loading}>
+              <Button color={type} onPress={handleConfirm} isLoading={loading}>
                 {confirmText}
               </Button>
             </ModalFooter>

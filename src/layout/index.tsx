@@ -5,6 +5,7 @@ import { Outlet, useLocation } from "react-router";
 import log from "electron-log/renderer";
 
 import Fallback from "@/components/error-fallback";
+import MusicPlayerDrawer from "@/components/full-screen-player";
 import PlayBar from "@/layout/playbar";
 import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
@@ -90,6 +91,7 @@ const Layout = () => {
         <div className="relative z-50 h-[88px] w-full flex-none">
           <PlayBar />
         </div>
+        <MusicPlayerDrawer />
       </div>
     </ErrorBoundary>
   );

@@ -84,7 +84,7 @@ export interface FavCntInfo {
  */
 export interface FavMedia {
   id: number; // 内容id 视频稿件:视频稿件avid 音频:音频auid 视频合集:视频合集id
-  /** 内容类型 2:视频稿件 12:音频 21:视频合集 */
+  /** 内容类型 2:视频稿件 12:音频 21:视频合集 24:电影 */
   type: number;
   title: string; // 标题
   cover: string; // 封面url
@@ -156,40 +156,7 @@ export interface FavResourceId {
  * @returns Promise<FavResourceListResponse>
  */
 export const getFavResourceList = async (params: FavResourceListRequestParams): Promise<FavResourceListResponse> => {
-  // 入参校验
-  if (!params.media_id) {
-    throw new Error("缺少必要参数: media_id");
-  }
-
-  if (params.ps < 1 || params.ps > 20) {
-    throw new Error("ps参数取值范围无效，必须在1-20之间");
-  }
-
-  try {
-    const response = await apiRequest.get<FavResourceListResponse>("/x/v3/fav/resource/list", { params });
-
-    // 处理不同的返回code状态
-    if (response.code === -403) {
-      throw new Error("权限不足，请登录");
-    }
-
-    if (response.code === -400) {
-      throw new Error(`请求错误: ${response.message || "参数错误"}`);
-    }
-
-    if (response.code !== 0) {
-      throw new Error(`接口返回错误: ${response.message || `未知错误 (${response.code})`}`);
-    }
-
-    return response;
-  } catch (error) {
-    // 捕获并处理请求异常
-    if (error instanceof Error) {
-      throw error;
-    } else {
-      throw new Error(`网络请求失败: ${JSON.stringify(error)}`);
-    }
-  }
+  return apiRequest.get<FavResourceListResponse>("/x/v3/fav/resource/list", { params });
 };
 
 /**

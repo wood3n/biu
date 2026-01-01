@@ -6,7 +6,7 @@ import { apiRequest } from "./request";
  * 需验证 Referer，登录非必需
  */
 export interface PolymerSeasonsArchivesListRequestParams {
-  /** 用户 mid（必要） */
+  /** up 的 mid（必要） */
   mid: number;
   /** 视频合集 ID（必要） */
   season_id: number;
@@ -20,10 +20,6 @@ export interface PolymerSeasonsArchivesListRequestParams {
   gaia_vtoken?: string;
   /** 页面位置（可选） */
   web_location?: string;
-  /** WBI 签名（可选） */
-  w_rid?: string;
-  /** UNIX 秒级时间戳（可选，WBI 相关） */
-  wts?: number;
 }
 
 /**

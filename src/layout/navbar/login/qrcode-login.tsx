@@ -42,8 +42,8 @@ const QrcodeLogin = ({ onClose }: QrcodeLoginProps) => {
         if (pollData?.code === 0) {
           try {
             await updateUser();
-          } catch (error) {
-            console.error("[qrcode-login] 更新用户信息失败:", error);
+          } catch {
+            addToast({ title: "更新用户信息失败", color: "danger" });
           }
 
           const { refresh_token } = pollData;
@@ -69,7 +69,7 @@ const QrcodeLogin = ({ onClose }: QrcodeLoginProps) => {
 
   return (
     <div className="flex flex-col items-center p-6">
-      <div className="text-foreground mb-4 text-lg font-medium">扫码登录</div>
+      <div className="mb-4 text-lg font-medium">扫码登录</div>
       <div className="border-divider bg-content1 relative flex h-40 w-40 items-center justify-center overflow-hidden rounded-lg border">
         {genLoading || !qrcodeData?.url ? (
           <Skeleton className="rounded-lg">

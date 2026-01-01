@@ -17,6 +17,7 @@ const SearchInput: React.FC = () => {
 
   const location = useLocation();
   const searchHistoryItems = useSearchHistory(s => s.items);
+  const keyword = useSearchHistory(s => s.keyword);
   const addSearchHistory = useSearchHistory(s => s.add);
   const deleteSearchHistory = useSearchHistory(s => s.delete);
   const clearSearchHistory = useSearchHistory(s => s.clear);
@@ -25,7 +26,7 @@ const SearchInput: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(keyword);
 
   useClickAway(() => {
     setOpen(false);
@@ -54,10 +55,6 @@ const SearchInput: React.FC = () => {
     setOpen(false);
   };
 
-  const handleSearchClick = () => {
-    submitSearch(value);
-  };
-
   return (
     <div ref={containerRef} className="relative w-[280px]">
       <Input
@@ -71,28 +68,13 @@ const SearchInput: React.FC = () => {
         }}
         onFocus={() => setOpen(true)}
         placeholder="搜索"
-        endContent={
-          <div
-            onClick={handleSearchClick}
-            className="bg-content2 hover:bg-content3 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md transition-colors"
-            role="button"
-            tabIndex={0}
-            onKeyDown={e => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleSearchClick();
-              }
-            }}
-            aria-label="搜索"
-          >
-            <RiSearchLine size={16} />
-          </div>
-        }
+        isClearable
+        startContent={<RiSearchLine size={16} />}
         className="window-no-drag w-full"
       />
       <div
         className={classNames(
-          "bg-content1 rounded-medium absolute top-full left-0 z-[100] mt-1 min-h-[200px] w-[360px] px-1 py-2 shadow",
+          "bg-content1 rounded-medium absolute top-full left-0 z-100 mt-1 min-h-[200px] w-[360px] px-1 py-2 shadow",
           {
             hidden: !open,
             block: open,
@@ -127,7 +109,7 @@ const SearchInput: React.FC = () => {
                   </span>
                 </div>
                 <div className="mb-1 flex flex-wrap gap-2">
-                  {searchHistoryItems.map(item => (
+                  {searchHistoryItems.slice(0, 10).map(item => (
                     <Chip
                       key={item.time}
                       isCloseable

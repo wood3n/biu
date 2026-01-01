@@ -11,10 +11,10 @@ import DynamicItem from "./item";
 
 interface DynamicListProps {
   mid: number;
-  scrollElement: HTMLElement | null;
+  getScrollElement: () => HTMLElement | null;
 }
 
-const DynamicList: React.FC<DynamicListProps> = ({ mid, scrollElement }) => {
+const DynamicList: React.FC<DynamicListProps> = ({ mid, getScrollElement }) => {
   const [items, setItems] = useState<WebDynamicItem[]>([]);
   const [offset, setOffset] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +24,7 @@ const DynamicList: React.FC<DynamicListProps> = ({ mid, scrollElement }) => {
 
   // Sentinel for infinite scroll
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const [inViewport] = useInViewport(loadMoreRef, { root: scrollElement });
+  const [inViewport] = useInViewport(loadMoreRef, { root: getScrollElement() });
 
   // Fetch data function
   const fetchData = useCallback(
@@ -75,7 +75,7 @@ const DynamicList: React.FC<DynamicListProps> = ({ mid, scrollElement }) => {
   }
 
   if (initialized && items.length === 0) {
-    return <Empty className="mt-20" title="暂无动态" />;
+    return <Empty title="暂无动态" />;
   }
 
   return (

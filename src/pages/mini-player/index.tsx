@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 
-import { Button, Image, Slider } from "@heroui/react";
+import { Button, Slider } from "@heroui/react";
 import {
   RiExpandDiagonalLine,
   RiPauseCircleFill,
@@ -13,6 +13,7 @@ import { useShallow } from "zustand/react/shallow";
 
 import { getPlayModeList } from "@/common/constants/audio";
 import { createBroadcastChannel, toggleMiniMode } from "@/common/utils/mini-player";
+import Image from "@/components/image";
 import { usePlayProgress } from "@/store/play-progress";
 
 import { usePlayState } from "./play-state";
@@ -59,16 +60,12 @@ const MiniPlayer = () => {
     postMessage("init");
 
     bcRef.current.onmessage = ev => {
-      try {
-        const { from, state } = ev.data || {};
-        if (from !== "main" || !state) return;
+      const { from, state } = ev.data || {};
+      if (from !== "main" || !state) return;
 
-        updatePlayState(state);
-        if (typeof state.currentTime === "number") {
-          setCurrentTime(state.currentTime);
-        }
-      } catch (err) {
-        console.error("[mini] failed to handle message from main", err);
+      updatePlayState(state);
+      if (typeof state.currentTime === "number") {
+        setCurrentTime(state.currentTime);
       }
     };
 
@@ -98,31 +95,12 @@ const MiniPlayer = () => {
     postMessage("next");
   };
 
-  const coverImage = useMemo(() => {
-    if (!cover) return null;
-    return (
-      <Image
-        removeWrapper
-        radius="none"
-        src={cover}
-        width={100}
-        height="100%"
-        className="object-cover"
-        style={
-          {
-            transform: "translateZ(0)",
-            backfaceVisibility: "hidden",
-            WebkitBackfaceVisibility: "hidden",
-          } as React.CSSProperties
-        }
-      />
-    );
-  }, [cover]);
-
   return (
     <div className="window-drag bg-content1 rounded-medium flex h-screen w-screen flex-col overflow-hidden select-none">
       <div className="flex h-full items-center">
-        {coverImage}
+        {Boolean(cover) && (
+          <Image removeWrapper radius="none" src={cover} width={100} height="100%" params="672w_378h_1c.avif" />
+        )}
         <div className="flex min-w-0 flex-1 flex-col space-y-1 px-2">
           <div className="flex min-w-0 flex-col">
             {title ? (

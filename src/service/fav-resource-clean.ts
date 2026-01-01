@@ -7,9 +7,7 @@ import { apiRequest } from "./request";
  */
 export interface FavResourceCleanRequestParams {
   /** 目标收藏夹 id */
-  media_id: number;
-  /** CSRF Token（bili_jct），Cookie 方式必要 */
-  csrf: string;
+  media_id: number | string;
 }
 
 /**
@@ -29,9 +27,9 @@ export interface FavResourceCleanResponse {
 /**
  * 清空所有失效内容
  */
-export function postFavResourceClean(params: FavResourceCleanRequestParams): Promise<FavResourceCleanResponse> {
-  const form = new URLSearchParams();
-  form.set("media_id", String(params.media_id));
-  form.set("csrf", params.csrf);
-  return apiRequest.post<FavResourceCleanResponse>("/x/v3/fav/resource/clean", form);
+export function postFavResourceClean(data: FavResourceCleanRequestParams): Promise<FavResourceCleanResponse> {
+  return apiRequest.post<FavResourceCleanResponse>("/x/v3/fav/resource/clean", data, {
+    useFormData: true,
+    useCSRF: true,
+  });
 }

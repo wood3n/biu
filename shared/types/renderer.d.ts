@@ -30,6 +30,8 @@ declare global {
     setCookie: (name: string, value: string, expirationDate?: number) => Promise<void>;
     /** 获取当前应用平台：macos | windows | linux */
     getPlatform: () => AppPlatForm;
+    /** 更新网络代理设置 */
+    setProxySettings: (proxySettings: ProxySettings) => Promise<void>;
     /** 上报当前播放状态到主进程（用于任务栏按钮切换） */
     updatePlaybackState: (isPlaying: boolean) => void;
     /** 订阅主进程下发的快捷键命令 */

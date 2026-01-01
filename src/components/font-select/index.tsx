@@ -5,18 +5,12 @@ import { Select, SelectItem } from "@heroui/react";
 import { defaultAppSettings } from "@shared/settings/app-settings";
 
 export interface FontSelectProps {
-  color?: "primary" | "secondary";
   value?: string;
   onChange: (value: string) => void;
   className?: string;
 }
 
-export default function FontSelect({
-  color,
-  value = defaultAppSettings.fontFamily,
-  onChange,
-  className,
-}: FontSelectProps) {
+export default function FontSelect({ value = defaultAppSettings.fontFamily, onChange, className }: FontSelectProps) {
   const [fonts, setFonts] = useState<Partial<IFontInfo>[]>([]);
 
   const getFonts = async () => {
@@ -32,13 +26,16 @@ export default function FontSelect({
 
   return (
     <Select
-      color={color}
       aria-label="选择字体"
       placeholder="选择字体"
       selectedKeys={new Set([selectedValue])}
       onChange={e => onChange?.(e.target.value)}
       items={fonts}
       className={className}
+      listboxProps={{
+        color: "primary",
+        hideSelectedIcon: true,
+      }}
     >
       {font => (
         <SelectItem key={font.familyName} style={{ fontFamily: font.familyName }}>

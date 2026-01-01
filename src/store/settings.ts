@@ -69,8 +69,8 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           ffmpegPath: state.ffmpegPath,
           themeMode: state.themeMode,
           pageTransition: state.pageTransition,
-          searchMusicOnly: state.searchMusicOnly,
           showSearchHistory: state.showSearchHistory,
+          proxySettings: state.proxySettings,
         };
       },
     },

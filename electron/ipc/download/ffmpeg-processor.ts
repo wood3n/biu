@@ -1,4 +1,3 @@
-import log from "electron-log";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "node:fs";
 import path from "node:path";
@@ -83,7 +82,6 @@ export const convert = async ({
     });
 
     command.on("error", err => {
-      log.error("Cannot process video: " + err.message);
       reject(err);
     });
 

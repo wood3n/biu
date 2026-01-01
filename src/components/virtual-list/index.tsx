@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import { useVirtualizer, type VirtualItem } from "@tanstack/react-virtual";
-import { type OverlayScrollbars } from "overlayscrollbars";
 
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 
@@ -12,66 +11,46 @@ interface VirtualListProps<T> {
   overscan?: number;
   className?: string;
   empty?: React.ReactNode;
-  scrollerRef?: React.RefObject<ScrollRefObject>;
 }
 
-export function VirtualList<T>({
-  data,
-  renderItem,
-  itemHeight,
-  overscan = 5,
-  className,
-  empty,
-  scrollerRef: propScrollerRef,
-}: VirtualListProps<T>) {
-  const [container, setContainer] = useState<HTMLElement | null>(null);
-  const internalScrollerRef = useRef<ScrollRefObject>(null);
-  const scrollerRef = propScrollerRef || internalScrollerRef;
+export function VirtualList<T>({ data, renderItem, itemHeight, overscan = 5, className, empty }: VirtualListProps<T>) {
+  const scrollerRef = useRef<ScrollRefObject>(null);
+  const [viewport, setViewport] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    let rafId: number;
+    const updateViewport = () => {
+      const instance = scrollerRef.current?.osInstance();
+      if (instance) {
+        setViewport(instance.elements().viewport as HTMLElement);
+      } else {
+        rafId = requestAnimationFrame(updateViewport);
+      }
+    };
+    updateViewport();
+    return () => cancelAnimationFrame(rafId);
+  }, []);
 
   const virtualizer = useVirtualizer({
     count: data.length,
-    getScrollElement: () => container,
+    getScrollElement: () => viewport,
     estimateSize: () => itemHeight,
     overscan,
   });
 
-  const virtualItems = virtualizer.getVirtualItems();
-  const totalSize = virtualizer.getTotalSize();
-
-  const handleInitialized = (instance: OverlayScrollbars) => {
-    setContainer(instance.elements().viewport as HTMLElement);
-  };
-
-  // Fallback: sometimes initialized event might be missed if we are not careful,
-  // or if the component is re-mounted.
-  useEffect(() => {
-    if (scrollerRef.current) {
-      const instance = scrollerRef.current.osInstance();
-      if (instance) {
-        setContainer(instance.elements().viewport as HTMLElement);
-      }
-    }
-  }, [scrollerRef]);
-
   return (
-    <ScrollContainer
-      ref={scrollerRef}
-      className={className}
-      events={{
-        initialized: handleInitialized,
-      }}
-    >
+    <ScrollContainer ref={scrollerRef} className={className}>
       {!data.length && empty ? (
         empty
       ) : (
         <div
           style={{
-            height: totalSize,
+            height: `${virtualizer.getTotalSize()}px`,
             width: "100%",
             position: "relative",
           }}
         >
-          {virtualItems.map(virtualItem => {
+          {virtualizer.getVirtualItems().map(virtualItem => {
             const item = data[virtualItem.index];
             return (
               <div
@@ -83,6 +62,7 @@ export function VirtualList<T>({
                   top: 0,
                   left: 0,
                   width: "100%",
+                  height: `${virtualItem.size}px`,
                   transform: `translate3d(0, ${virtualItem.start}px, 0)`,
                 }}
               >

@@ -1,6 +1,16 @@
 type AudioQuality = "auto" | "lossless" | "high" | "medium" | "low";
-type ThemeMode = "light" | "dark";
+type ThemeMode = "system" | "light" | "dark";
 type PageTransition = "none" | "fade" | "slide" | "scale" | "slideUp";
+
+type ProxyType = "none" | "http" | "socks4" | "socks5";
+
+interface ProxySettings {
+  type: ProxyType;
+  host?: string;
+  port?: number;
+  username?: string;
+  password?: string;
+}
 
 interface AppSettings {
   fontFamily: string;
@@ -11,10 +21,10 @@ interface AppSettings {
   autoStart: boolean;
   audioQuality: AudioQuality;
   hiddenMenuKeys: string[];
-  displayMode: "card" | "list";
+  displayMode: "card" | "list" | "compact";
   ffmpegPath?: string;
   themeMode: ThemeMode;
   pageTransition: PageTransition;
-  searchMusicOnly: boolean;
   showSearchHistory: boolean;
+  proxySettings: ProxySettings;
 }

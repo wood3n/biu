@@ -4,7 +4,7 @@ interface Data {
   info: Info;
   medias: Media[];
 }
-interface Media {
+export interface Media {
   id: number;
   title: string;
   cover: string;
@@ -62,7 +62,7 @@ export interface PolymerSeasonsArchivesListRequestParams {
 }
 
 /**
- * 获取视频合集详情
+ * 获取视频合集详情以及合集的所有视频
  */
 export function getUserVideoArchivesList(
   params: PolymerSeasonsArchivesListRequestParams,

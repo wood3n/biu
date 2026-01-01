@@ -2,13 +2,15 @@ import { Fragment } from "react";
 import { useParams } from "react-router";
 
 import { Avatar, Divider, Image, Tooltip } from "@heroui/react";
-import { RiAddLine, RiCheckLine, RiVerifiedBadgeFill } from "@remixicon/react";
+import { RiAddLine, RiCheckLine, RiFlashlightFill } from "@remixicon/react";
 
 import { UserRelation } from "@/common/constants/relation";
+import { formatNumber } from "@/common/utils/number";
 import AsyncButton from "@/components/async-button";
 import { postRelationModify, UserRelationAction } from "@/service/relation-modify";
 import { type RelationStatData } from "@/service/relation-stat";
 import { type SpaceAccInfoData } from "@/service/space-wbi-acc-info";
+import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
 
 interface Props {
@@ -20,6 +22,7 @@ interface Props {
 
 const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }: Props) => {
   const user = useUser(s => s.user);
+  const themeMode = useSettings(s => s.themeMode);
   const { id } = useParams();
   const isSelf = user?.mid === Number(id);
 
@@ -33,7 +36,7 @@ const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }
     },
     {
       title: "粉丝数",
-      value: relationStats?.follower,
+      value: formatNumber(relationStats?.follower),
     },
     {
       title: "等  级",
@@ -62,6 +65,10 @@ const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }
     }
   };
 
+  const isDarkTheme =
+    themeMode === "dark" || (themeMode === "system" && window.matchMedia?.("(prefers-color-scheme: dark)").matches);
+  const overlayOpacity = isDarkTheme ? 0.5 : 0.3;
+
   if (relationWithMe === UserRelation.Blocked) {
     return (
       <div className="flex h-[480px] w-full flex-col items-center justify-center space-y-6">
@@ -73,9 +80,9 @@ const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }
 
   return (
     <div
-      className="flex h-[200px] items-end justify-between space-x-8 bg-cover bg-center px-8 py-4 bg-blend-multiply"
+      className="flex h-[200px] items-end justify-between space-x-8 bg-cover bg-center px-8 py-4 text-white bg-blend-multiply"
       style={{
-        background: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${spaceInfo?.top_photo_v2?.l_200h_img}) center/cover no-repeat`,
+        background: `linear-gradient(rgba(0,0,0,${overlayOpacity}), rgba(0,0,0,${overlayOpacity})), url(${spaceInfo?.top_photo_v2?.l_200h_img}) center/cover no-repeat`,
       }}
     >
       <div className="flex min-w-0 grow items-end space-x-4">
@@ -85,10 +92,12 @@ const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }
             <div className="flex items-center space-x-2">
               {Boolean(spaceInfo?.official?.role) && (
                 <Tooltip closeDelay={0} content={spaceInfo?.official?.title}>
-                  <RiVerifiedBadgeFill color="#66AAF9" />
+                  <div className="bg-primary flex h-5 w-5 items-center justify-center rounded-full text-white ring-2 ring-white">
+                    <RiFlashlightFill size={12} />
+                  </div>
                 </Tooltip>
               )}
-              <h1>{spaceInfo?.name}</h1>
+              <h1 className="text-xl font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{spaceInfo?.name}</h1>
             </div>
             {Boolean(spaceInfo?.vip?.status) && (
               <Image
@@ -98,13 +107,16 @@ const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }
               />
             )}
           </div>
-          <p className="line-clamp-2 text-sm">{spaceInfo?.sign}</p>
+          <p className="line-clamp-2 text-sm text-white/80 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+            {spaceInfo?.sign}
+          </p>
         </div>
       </div>
       <div className="flex flex-none items-center space-x-4">
         {Boolean(user?.isLogin) && !isSelf && (
           <AsyncButton
-            color={isFollow ? "primary" : "default"}
+            variant="shadow"
+            color={isFollow ? "success" : "default"}
             startContent={isFollow ? <RiCheckLine size={18} /> : <RiAddLine size={18} />}
             onPress={toggleFollow}
             className="mt-2"
@@ -116,8 +128,10 @@ const SpaceInfo = ({ spaceInfo, relationStats, relationWithMe, refreshRelation }
           ? stats.map((item, idx) => (
               <Fragment key={idx}>
                 <div className="flex flex-col items-center justify-center">
-                  <span className="text-lg">{item.value}</span>
-                  <span className="text-sm whitespace-nowrap">{item.title}</span>
+                  <span className="text-lg font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{item.value}</span>
+                  <span className="text-sm whitespace-nowrap text-white/80 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                    {item.title}
+                  </span>
                 </div>
                 {idx !== stats.length - 1 && <Divider orientation="vertical" className="h-4" />}
               </Fragment>
