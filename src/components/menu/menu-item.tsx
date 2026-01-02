@@ -10,11 +10,11 @@ export interface MenuItemProps {
   /** 菜单项链接 */
   href?: string;
   /** 菜单项图标 */
-  icon?: React.ComponentType<{ size?: number | string }>;
+  icon?: React.ComponentType<{ size?: number | string; className?: string }>;
   /** 封面 */
   cover?: string;
   /** 激活状态图标 */
-  activeIcon?: React.ComponentType<{ size?: number | string }>;
+  activeIcon?: React.ComponentType<{ size?: number | string; className?: string }>;
   className?: string;
   onPress?: VoidFunction;
   collapsed?: boolean;
@@ -38,7 +38,12 @@ const MenuItem: React.FC<MenuItemProps> = ({
   }, [location.pathname, href, id]);
 
   const iconContent = useMemo(() => {
-    const icon = isActive && ActiveIcon ? <ActiveIcon size={18} /> : Icon ? <Icon size={18} /> : undefined;
+    const icon =
+      isActive && ActiveIcon ? (
+        <ActiveIcon size={18} className="text-primary" />
+      ) : Icon ? (
+        <Icon size={18} />
+      ) : undefined;
 
     if (!collapsed && icon) {
       return icon;

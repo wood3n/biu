@@ -128,10 +128,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   return (
     <div className={twMerge("flex flex-col items-start gap-3", className)}>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col items-start gap-2">
         <div
           className={twMerge(
-            "border-default-300 rounded-medium bg-default-100 group relative flex items-center justify-center border border-dashed",
+            "border-default-300 rounded-medium bg-default-100 group relative flex cursor-pointer items-center justify-center border border-dashed",
             previewUrl ? "" : "text-default-400",
           )}
           style={{ width, height }}

@@ -51,11 +51,11 @@ const Header = memo(
     if (loading) {
       return (
         <div className="mb-4 flex space-x-4">
-          <Skeleton className="rounedd-md h-[168px] w-[200px]" />
+          <Skeleton className="h-[168px] w-[200px] rounded-md" />
           <div className="flex min-w-0 flex-col items-start space-y-4">
-            <Skeleton className="rounedd-md h-[24px] w-[200px]" />
-            <Skeleton className="rounedd-md h-[16px] w-[200px]" />
-            <Skeleton className="rounedd-md h-[16px] w-[200px]" />
+            <Skeleton className="h-[24px] w-[200px] rounded-md" />
+            <Skeleton className="h-[16px] w-[200px] rounded-md" />
+            <Skeleton className="h-[16px] w-[200px] rounded-md" />
           </div>
         </div>
       );

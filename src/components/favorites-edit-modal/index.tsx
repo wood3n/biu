@@ -103,9 +103,9 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
         const res = await postFavFolderEdit({
           media_id: mid,
           title: values.title.trim(),
-          intro: values.intro?.trim() ? values.intro.trim() : "",
+          intro: values.intro?.trim(),
           privacy: values.isPublic ? 0 : 1,
-          cover: values.cover || undefined,
+          cover: values.cover,
         });
 
         if (res?.code === 0 && res.data.id) {
@@ -129,9 +129,9 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
       } else {
         const res = await postFavFolderAdd({
           title: values.title.trim(),
-          intro: values.intro?.trim() ? values.intro.trim() : "",
+          intro: values.intro?.trim(),
           privacy: values.isPublic ? 0 : 1,
-          cover: values.cover || "",
+          cover: values.cover,
         });
         if (res?.code === 0 && res.data.id) {
           addCreatedFavorite({
@@ -175,7 +175,7 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
         <form onSubmit={handleSubmit(onSubmit)} className="flex h-full min-h-0 flex-1 flex-col">
           <ModalHeader className="py-3">{mid ? "修改收藏夹" : "新建收藏夹"}</ModalHeader>
           <ModalBody className="min-h-0 p-0">
-            <ScrollContainer className="p-4">
+            <ScrollContainer className="px-4">
               <div className="flex flex-col space-y-4">
                 <Controller
                   name="cover"

@@ -14,7 +14,7 @@ interface Props {
   data: PlayData;
   isLogin: boolean;
   isPlaying?: boolean;
-  onAction: (key: string, itemData: PlayData) => void;
+  onAction: (key: string) => void;
   onClose: VoidFunction;
   onPress?: VoidFunction;
 }
