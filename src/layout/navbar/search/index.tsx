@@ -97,7 +97,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
         className="window-no-drag w-full"
         classNames={{
           inputWrapper:
-            "bg-default-400/20 dark:bg-default-500/20 hover:bg-default-400/30 dark:hover:bg-default-500/30 group-data-[focus=true]:bg-default-400/40 dark:group-data-[focus=true]:bg-default-500/40",
+            "bg-default-400/20 dark:bg-default-500/20 hover:bg-default-400/30 dark:hover:bg-default-500/30 group-data-[focus=true]:bg-default-400/30 dark:group-data-[focus=true]:bg-default-500/30",
         }}
       />
       <div
