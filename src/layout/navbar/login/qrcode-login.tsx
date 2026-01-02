@@ -2,22 +2,17 @@ import { Button, addToast, Skeleton } from "@heroui/react";
 import { RiRefreshLine } from "@remixicon/react";
 import { useRequest } from "ahooks";
 import clx from "classnames";
-import moment from "moment";
 import { QRCodeCanvas } from "qrcode.react";
 
 import { getPassportLoginWebQrcodeGenerate } from "@/service/passport-login-web-qrcode-generate";
 import { getPassportLoginWebQrcodePoll } from "@/service/passport-login-web-qrcode-poll";
-import { useToken } from "@/store/token";
-import { useUser } from "@/store/user";
 
 type QrcodeLoginProps = {
   onClose: () => void;
+  updateUserData: (refreshToken?: string) => Promise<void>;
 };
 
-const QrcodeLogin = ({ onClose }: QrcodeLoginProps) => {
-  const updateUser = useUser(state => state.updateUser);
-  const updateToken = useToken(state => state.updateToken);
-
+const QrcodeLogin = ({ onClose, updateUserData }: QrcodeLoginProps) => {
   const {
     loading: genLoading,
     data: qrcodeData,
@@ -40,18 +35,9 @@ const QrcodeLogin = ({ onClose }: QrcodeLoginProps) => {
       pollingWhenHidden: false,
       onSuccess: async pollData => {
         if (pollData?.code === 0) {
-          try {
-            await updateUser();
-          } catch {
-            addToast({ title: "更新用户信息失败", color: "danger" });
-          }
-
           const { refresh_token } = pollData;
 
-          updateToken({
-            tokenData: { refresh_token },
-            nextCheckRefreshTime: moment().add(2, "days").unix(),
-          });
+          await updateUserData(refresh_token);
 
           addToast({ title: "登录成功", color: "success" });
           onClose();

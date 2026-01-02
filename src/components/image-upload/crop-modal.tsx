@@ -114,12 +114,12 @@ const CropModal = ({ src, isOpen, onClose, onUploaded }: Props) => {
     >
       <ModalContent>
         <ModalHeader className="py-3">裁剪封面</ModalHeader>
-        <ModalBody className="gap-4">
+        <ModalBody className="items-center">
           {src && (
             <div className="flex items-center justify-center" style={{ width: 322, height: 202 }}>
               <ReactCrop
                 crop={crop}
-                aspect={1}
+                aspect={16 / 9}
                 onChange={(_, percentCrop) => {
                   setCrop(percentCrop);
                 }}

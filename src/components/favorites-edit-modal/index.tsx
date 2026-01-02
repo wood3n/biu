@@ -21,7 +21,9 @@ import ImageUpload from "@/components/image-upload";
 import { postFavFolderAdd } from "@/service/fav-folder-add";
 import { postFavFolderEdit } from "@/service/fav-folder-edit";
 import { getFavFolderInfo } from "@/service/fav-folder-info";
-import { useUser } from "@/store/user";
+import { useFavoritesStore } from "@/store/favorite";
+
+import ScrollContainer from "../scroll-container";
 
 // 表单校验规则：title 必填（去除首尾空格），intro 可选
 const schema = z.object({
@@ -34,6 +36,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 interface Props {
+  /** 收藏夹id */
   mid?: number;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
@@ -41,7 +44,8 @@ interface Props {
 }
 
 const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => {
-  const updateOwnFolder = useUser(state => state.updateOwnFolder);
+  const addCreatedFavorite = useFavoritesStore(state => state.addCreatedFavorite);
+  const modifyCreatedFavorite = useFavoritesStore(state => state.modifyCreatedFavorite);
   const [isFetching, setIsFetching] = useState(false);
 
   const {
@@ -90,6 +94,7 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
       // 新建模式下清空表单
       reset({ title: "", intro: "", isPublic: true, cover: "" });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, mid, reset]);
 
   const onSubmit = async (values: FormValues) => {
@@ -103,8 +108,14 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
           cover: values.cover || undefined,
         });
 
-        if (res?.code === 0) {
-          updateOwnFolder();
+        if (res?.code === 0 && res.data.id) {
+          modifyCreatedFavorite({
+            id: res.data.id,
+            title: res.data.title,
+            cover: res.data.cover,
+            type: res.data.type,
+            mid: res.data.mid,
+          });
           reset();
           onOpenChange(false);
           await onRefresh?.();
@@ -122,8 +133,14 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
           privacy: values.isPublic ? 0 : 1,
           cover: values.cover || "",
         });
-        if (res?.code === 0) {
-          updateOwnFolder();
+        if (res?.code === 0 && res.data.id) {
+          addCreatedFavorite({
+            id: res.data.id,
+            title: res.data.title,
+            cover: res.data.cover,
+            type: res.data.type,
+            mid: res.data.mid,
+          });
           addToast({ color: "success", title: "创建成功" });
           reset();
           onOpenChange(false);
@@ -155,72 +172,76 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
       disableAnimation
     >
       <ModalContent>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex h-full min-h-0 flex-1 flex-col">
           <ModalHeader className="py-3">{mid ? "修改收藏夹" : "新建收藏夹"}</ModalHeader>
-          <ModalBody className="gap-4 py-4">
-            <Controller
-              name="cover"
-              control={control}
-              render={({ field }) => (
-                <ImageUpload
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={isFetching || isSubmitting}
-                  width={240}
-                  height={150}
+          <ModalBody className="min-h-0 p-0">
+            <ScrollContainer className="p-4">
+              <div className="flex flex-col space-y-4">
+                <Controller
+                  name="cover"
+                  control={control}
+                  render={({ field }) => (
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={isFetching || isSubmitting}
+                      width={240}
+                      height={150}
+                    />
+                  )}
                 />
-              )}
-            />
 
-            <Controller
-              name="title"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Input
-                  label="名称"
-                  labelPlacement="outside"
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  onBlur={field.onBlur}
-                  placeholder="请输入收藏夹名称"
-                  isRequired
-                  isDisabled={isFetching || isSubmitting}
-                  isInvalid={(touchedFields.title || isSubmitted) && !!fieldState.error}
-                  errorMessage={fieldState.error?.message}
+                <Controller
+                  name="title"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Input
+                      label="名称"
+                      labelPlacement="outside"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      placeholder="请输入收藏夹名称"
+                      isRequired
+                      isDisabled={isFetching || isSubmitting}
+                      isInvalid={(touchedFields.title || isSubmitted) && !!fieldState.error}
+                      errorMessage={fieldState.error?.message}
+                    />
+                  )}
                 />
-              )}
-            />
 
-            <Controller
-              name="intro"
-              control={control}
-              render={({ field }) => (
-                <Textarea
-                  label="简介"
-                  labelPlacement="outside"
-                  placeholder="可选，简单介绍此收藏夹"
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  onBlur={field.onBlur}
-                  minRows={4}
-                  isDisabled={isFetching || isSubmitting}
+                <Controller
+                  name="intro"
+                  control={control}
+                  render={({ field }) => (
+                    <Textarea
+                      label="简介"
+                      labelPlacement="outside"
+                      placeholder="可选，简单介绍此收藏夹"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      minRows={4}
+                      isDisabled={isFetching || isSubmitting}
+                    />
+                  )}
                 />
-              )}
-            />
 
-            <Controller
-              name="isPublic"
-              control={control}
-              render={({ field }) => (
-                <Switch
-                  isSelected={Boolean(field.value)}
-                  onValueChange={field.onChange}
-                  isDisabled={isFetching || isSubmitting}
-                >
-                  {field.value ? "公开" : "私密"}
-                </Switch>
-              )}
-            />
+                <Controller
+                  name="isPublic"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      isSelected={Boolean(field.value)}
+                      onValueChange={field.onChange}
+                      isDisabled={isFetching || isSubmitting}
+                    >
+                      {field.value ? "公开" : "私密"}
+                    </Switch>
+                  )}
+                />
+              </div>
+            </ScrollContainer>
           </ModalBody>
           <ModalFooter>
             <Button

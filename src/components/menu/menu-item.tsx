@@ -1,16 +1,14 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useLocation, useParams } from "react-router";
 
-import { Button, Link as HeroLink } from "@heroui/react";
+import { Avatar, Button, Link as HeroLink, Tooltip } from "@heroui/react";
 import clx from "classnames";
-
-import Image from "@/components/image";
 
 export interface MenuItemProps {
   /** 菜单项标签 */
   title: string;
   /** 菜单项链接 */
-  href: string;
+  href?: string;
   /** 菜单项图标 */
   icon?: React.ComponentType<{ size?: number | string }>;
   /** 封面 */
@@ -19,6 +17,7 @@ export interface MenuItemProps {
   activeIcon?: React.ComponentType<{ size?: number | string }>;
   className?: string;
   onPress?: VoidFunction;
+  collapsed?: boolean;
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({
@@ -29,11 +28,58 @@ const MenuItem: React.FC<MenuItemProps> = ({
   activeIcon: ActiveIcon,
   className,
   onPress,
+  collapsed,
 }) => {
   const location = useLocation();
   const { id } = useParams();
 
-  const isActive = location.pathname === href || (id && href.split("?")[0].includes(id));
+  const isActive = useMemo(() => {
+    return location.pathname === href || (id && href?.split("?")[0].includes(id));
+  }, [location.pathname, href, id]);
+
+  const iconContent = useMemo(() => {
+    const icon = isActive && ActiveIcon ? <ActiveIcon size={18} /> : Icon ? <Icon size={18} /> : undefined;
+
+    if (!collapsed && icon) {
+      return icon;
+    }
+
+    return (
+      <Avatar
+        name={title}
+        src={cover ? `${cover}@672w_378h_1c.avif` : undefined}
+        showFallback
+        fallback={icon}
+        alt={title}
+        className="h-10 w-10 flex-none rounded-md"
+      />
+    );
+  }, [cover, isActive, Icon, ActiveIcon, title, collapsed]);
+
+  if (collapsed) {
+    const collapsedButton = (
+      <Button
+        as={href ? HeroLink : "button"}
+        href={href}
+        fullWidth
+        variant={isActive ? "flat" : "light"}
+        color="default"
+        onPress={onPress}
+        className={clx("justify-center rounded-md px-0 py-1", className, {
+          "h-auto": collapsed,
+          "text-primary": isActive,
+        })}
+      >
+        {iconContent}
+      </Button>
+    );
+
+    return (
+      <Tooltip closeDelay={0} content={title} placement="right" offset={-3}>
+        {collapsedButton}
+      </Tooltip>
+    );
+  }
 
   return (
     <Button
@@ -44,18 +90,8 @@ const MenuItem: React.FC<MenuItemProps> = ({
       variant={isActive ? "flat" : "light"}
       color="default"
       onPress={onPress}
-      startContent={
-        cover ? (
-          <Image radius="md" removeWrapper src={cover} alt={title} height={32} width={32} params="672w_378h_1c.avif" />
-        ) : isActive ? (
-          // @ts-expect-error 忽略类型错误，因为 ActiveIcon 可能是 undefined
-          <ActiveIcon size={18} />
-        ) : (
-          // @ts-expect-error 忽略类型错误，因为 Icon 可能是 undefined
-          <Icon size={18} />
-        )
-      }
-      className={clx("justify-start", className, {
+      startContent={iconContent}
+      className={clx("justify-start rounded-md px-2", className, {
         "text-primary": isActive,
       })}
     >

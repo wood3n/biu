@@ -10,7 +10,7 @@ export interface FavFolderCollectedListRequestParams {
   /** 页码 */
   pn: number;
   /** 目标用户 mid */
-  up_mid: number;
+  up_mid: number | string;
   /** 平台类型，填写 web 返回值才会包含用户收藏的视频合集 */
   platform?: string;
 }

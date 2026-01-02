@@ -122,6 +122,7 @@ const UserCard = () => {
     <>
       <Dropdown
         shouldBlockScroll={false}
+        triggerScaleOnOpen={false}
         classNames={{
           content: "min-w-[140px]",
         }}

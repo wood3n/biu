@@ -1,6 +1,7 @@
 import { useUser } from "@/store/user";
 
 import WindowAction from "../../components/window-action";
+import AppUpdateNotify from "./app-update";
 import Dev from "./dev";
 import Navigation from "./navigation";
 import Search from "./search";
@@ -19,6 +20,7 @@ const LayoutNavbar = () => {
         <Search />
       </div>
       <div className="window-no-drag flex items-center justify-center space-x-4 pl-20">
+        <AppUpdateNotify />
         <Dev />
         {Boolean(user?.isLogin) && <UserFeed />}
         <UserCard />

@@ -22,7 +22,7 @@ const Layout = () => {
 
   useEffect(() => {
     updateUser();
-  }, []);
+  }, [updateUser]);
 
   useEffect(() => {
     if (location !== displayLocation) {

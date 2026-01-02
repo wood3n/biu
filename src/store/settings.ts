@@ -71,6 +71,7 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           pageTransition: state.pageTransition,
           showSearchHistory: state.showSearchHistory,
           proxySettings: state.proxySettings,
+          sideMenuCollapsed: state.sideMenuCollapsed,
         };
       },
     },

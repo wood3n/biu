@@ -12,6 +12,7 @@ import { postFavFolderUnfav } from "@/service/fav-folder-unfav";
 import { getFavResourceList, type FavMedia } from "@/service/fav-resource";
 import { postFavResourceBatchDel } from "@/service/fav-resource-batch-del";
 import { postFavResourceClean } from "@/service/fav-resource-clean";
+import { useFavoritesStore } from "@/store/favorite";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
@@ -27,6 +28,8 @@ import FavoriteList from "./list";
 const Favorites: React.FC = () => {
   const { id: favFolderId } = useParams();
   const user = useUser(state => state.user);
+  const addCollectedFavorite = useFavoritesStore(state => state.addCollectedFavorite);
+  const rmCollectedFavorite = useFavoritesStore(state => state.rmCollectedFavorite);
   const displayMode = useSettings(state => state.displayMode);
 
   const playList = usePlayList(state => state.playList);
@@ -39,6 +42,8 @@ const Favorites: React.FC = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [listLoading, setListLoading] = useState(false);
+
+  const scrollRef = useRef<ScrollRefObject>(null);
 
   const {
     loading,
@@ -58,8 +63,7 @@ const Favorites: React.FC = () => {
     },
   );
 
-  const scrollRef = useRef<ScrollRefObject>(null);
-  const prevFavFolderIdRef = useRef<string | undefined>(favFolderId);
+  const isFavorite = favInfo?.fav_state === 1;
 
   const fetchData = useCallback(
     async (targetPage: number) => {
@@ -102,10 +106,9 @@ const Favorites: React.FC = () => {
 
   // 当收藏夹ID变化时，重置搜索参数
   useEffect(() => {
-    if (favFolderId && prevFavFolderIdRef.current !== favFolderId) {
+    if (favFolderId) {
       setKeyword("");
       setOrder("mtime");
-      prevFavFolderIdRef.current = favFolderId;
     }
   }, [favFolderId]);
 
@@ -210,10 +213,10 @@ const Favorites: React.FC = () => {
       });
 
       if (res.code === 0) {
+        rmCollectedFavorite(Number(favFolderId));
         await new Promise(resolve =>
           setTimeout(() => {
             refreshInfo();
-            useUser.getState().updateCollectedFolder();
             resolve(null);
           }, 500),
         );
@@ -226,10 +229,16 @@ const Favorites: React.FC = () => {
       });
 
       if (res.code === 0) {
+        addCollectedFavorite({
+          id: favInfo?.id as number,
+          title: favInfo?.title || "未命名收藏夹",
+          cover: favInfo?.cover,
+          type: CollectionType.Favorite,
+          mid: favInfo?.upper?.mid,
+        });
         await new Promise(resolve =>
           setTimeout(() => {
             refreshInfo();
-            useUser.getState().updateCollectedFolder();
             resolve(null);
           }, 500),
         );
@@ -247,8 +256,7 @@ const Favorites: React.FC = () => {
     }
   };
 
-  const isFavorite = favInfo?.fav_state === 1;
-  const isCreatedBySelf = user?.mid === favInfo?.upper?.mid;
+  const isCreatedBySelf = Boolean(favInfo?.upper) && Boolean(user?.mid) && user?.mid === favInfo?.upper?.mid;
 
   const handleMenuAction = useCallback(
     async (key: string, item: FavMedia) => {
@@ -359,6 +367,7 @@ const Favorites: React.FC = () => {
         onRefresh={refreshInfo}
       />
       <Operations
+        loading={loading}
         type={CollectionType.Favorite}
         order={order}
         onOrderChange={setOrder}

@@ -39,7 +39,7 @@
     "release:alpha": "git fetch --tags --force && changelogen --release --push --hideAuthorEmail --prerelease alpha"
   },
   "dependencies": {
-    "@heroui/react": "^2.8.3",
+    "@heroui/react": "^2.8.7",
     "@hookform/resolvers": "^5.2.2",
     "@internationalized/date": "^3.10.1",
     "@remixicon/react": "^4.6.0",

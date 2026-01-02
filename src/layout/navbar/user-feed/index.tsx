@@ -49,6 +49,7 @@ const UserFeed = () => {
             content={updateCount > 99 ? "99+" : updateCount}
             size="sm"
             variant="solid"
+            className="translate-x-1/3 -translate-y-1/3"
           >
             <Button isIconOnly size="sm" variant="light" onPress={handleOpen}>
               <RiTeamLine size={20} />

@@ -67,7 +67,7 @@ const Header = memo(
           <div className="group relative flex-none">
             <Image
               radius="md"
-              shadow="lg"
+              shadow="md"
               src={cover}
               alt={title}
               width={200}
