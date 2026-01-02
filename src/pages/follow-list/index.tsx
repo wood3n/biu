@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { addToast, Button, Input, Spinner, Tab, Tabs, Tooltip, useDisclosure } from "@heroui/react";
+import { addToast, Button, Input, Spinner, Tooltip, useDisclosure } from "@heroui/react";
 import { RiAddLine, RiDeleteBinLine, RiEditLine, RiSearchLine } from "@remixicon/react";
 
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
@@ -198,91 +198,128 @@ const FollowList = () => {
   };
 
   return (
-    <ScrollContainer ref={scrollRef} className="h-full w-full px-4 pb-4">
-      <div className="mb-4">
-        <h1 className="mb-2">我的关注</h1>
-        <div className="flex justify-between">
-          <div className="flex items-center">
-            <Tabs
-              aria-label="关注分组"
-              classNames={{
-                cursor: "rounded-medium",
-              }}
-              selectedKey={activeTab}
-              onSelectionChange={key => setActiveTab(key as string)}
-            >
-              <Tab key="all" title={`全部关注${allCount ? `(${allCount})` : ""}`} />
-              {tags.map(tag => (
-                <Tab key={String(tag.tagid)} title={`${tag.name}${tag.count ? `(${tag.count})` : ""}`} />
-              ))}
-            </Tabs>
-            <Tooltip content="创建分组" closeDelay={0}>
-              <Button onPress={handleOpenCreate} isIconOnly variant="flat" className="ml-2">
-                <RiAddLine size={18} />
-              </Button>
-            </Tooltip>
-            {isCustomTag && activeTag && (
-              <>
-                <Tooltip content="修改分组名称" closeDelay={0}>
-                  <Button onPress={() => handleOpenRename(activeTag)} isIconOnly variant="flat" className="ml-2">
-                    <RiEditLine size={18} />
+    <>
+      <div className="flex h-full w-full">
+        <div className="h-full w-50 pb-4">
+          <div className="border-divider/40 flex h-full flex-col border-r">
+            <div className="mb-2 flex items-center justify-between space-x-1 px-4">
+              <h1 className="min-w-0 truncate">{activeTab === "all" ? "全部关注" : activeTag?.name || "我的关注"}</h1>
+              <div className="flex items-center">
+                <Tooltip content="创建分组" closeDelay={0}>
+                  <Button size="sm" radius="md" onPress={handleOpenCreate} isIconOnly variant="light">
+                    <RiAddLine size={20} />
                   </Button>
                 </Tooltip>
-                <Tooltip content="删除分组" closeDelay={0}>
-                  <Button
-                    onPress={() => handleOpenDelete(activeTag)}
-                    isIconOnly
-                    variant="flat"
-                    color="danger"
-                    className="ml-2"
-                  >
-                    <RiDeleteBinLine size={18} />
-                  </Button>
-                </Tooltip>
-              </>
-            )}
-          </div>
-          {activeTab === "all" && (
-            <div className="flex items-center">
-              <Input
-                classNames={{
-                  base: "w-64",
-                  inputWrapper: "h-10",
-                }}
-                placeholder="搜索关注"
-                size="sm"
-                startContent={<RiSearchLine size={16} />}
-                value={inputValue}
-                onValueChange={onSearchChange}
-                isClearable
-                onClear={onClear}
-                onKeyDown={e => {
-                  if (e.key === "Enter") {
-                    onSearchSubmit();
-                  }
-                }}
-              />
+              </div>
             </div>
-          )}
+            <ScrollContainer enableBackToTop={false} className="h-full min-h-0 w-full flex-1 px-2">
+              <div className="flex min-h-0 flex-1 flex-col">
+                <Button
+                  fullWidth
+                  variant={activeTab === "all" ? "flat" : "light"}
+                  className="justify-between rounded-md px-3"
+                  onPress={() => setActiveTab("all")}
+                >
+                  <span className="truncate">{`全部关注${allCount ? `(${allCount})` : ""}`}</span>
+                </Button>
+                {tags.map(tag => {
+                  const key = String(tag.tagid);
+                  const isActive = activeTab === key;
+                  return (
+                    <Button
+                      key={key}
+                      fullWidth
+                      radius="md"
+                      variant={isActive ? "flat" : "light"}
+                      className="justify-between rounded-md px-3"
+                      onPress={() => setActiveTab(key)}
+                    >
+                      <span className="truncate">{`${tag.name}${tag.count ? `(${tag.count})` : ""}`}</span>
+                    </Button>
+                  );
+                })}
+              </div>
+            </ScrollContainer>
+          </div>
+        </div>
+
+        <div className="flex min-w-0 flex-1">
+          <ScrollContainer ref={scrollRef} className="h-full w-full px-4">
+            <div className="flex h-full flex-col">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center space-x-1">
+                  {isCustomTag && activeTag && (
+                    <>
+                      <Tooltip content="修改分组名称" closeDelay={0}>
+                        <Button
+                          onPress={() => handleOpenRename(activeTag)}
+                          isIconOnly
+                          radius="md"
+                          size="sm"
+                          variant="light"
+                        >
+                          <RiEditLine size={18} />
+                        </Button>
+                      </Tooltip>
+                      <Tooltip content="删除分组" closeDelay={0}>
+                        <Button
+                          onPress={() => handleOpenDelete(activeTag)}
+                          isIconOnly
+                          variant="light"
+                          size="sm"
+                          radius="md"
+                          color="danger"
+                        >
+                          <RiDeleteBinLine size={18} />
+                        </Button>
+                      </Tooltip>
+                    </>
+                  )}
+                </div>
+                {activeTab === "all" && (
+                  <div className="flex items-center">
+                    <Input
+                      classNames={{
+                        base: "w-64",
+                        inputWrapper: "h-10",
+                      }}
+                      placeholder="搜索关注"
+                      size="sm"
+                      startContent={<RiSearchLine size={16} />}
+                      value={inputValue}
+                      onValueChange={onSearchChange}
+                      isClearable
+                      onClear={onClear}
+                      onKeyDown={e => {
+                        if (e.key === "Enter") {
+                          onSearchSubmit();
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {loading && !list.length ? (
+                <div className="flex h-[40vh] items-center justify-center">
+                  <Spinner label="加载中" />
+                </div>
+              ) : (
+                <VirtualGridPageList
+                  items={list}
+                  itemKey="mid"
+                  renderItem={item => <UserCard u={item} refresh={reload} onSetGroup={handleOpenSetGroup} />}
+                  getScrollElement={() => scrollRef.current?.osInstance()?.elements().viewport || null}
+                  onLoadMore={loadMore}
+                  rowHeight={240}
+                  hasMore={hasMore}
+                  loading={loading}
+                />
+              )}
+            </div>
+          </ScrollContainer>
         </div>
       </div>
-
-      {loading && !list.length ? (
-        <div className="flex h-[40vh] items-center justify-center">
-          <Spinner label="加载中" />
-        </div>
-      ) : (
-        <VirtualGridPageList
-          items={list}
-          itemKey="mid"
-          renderItem={item => <UserCard u={item} refresh={reload} onSetGroup={handleOpenSetGroup} />}
-          getScrollElement={() => scrollRef.current?.osInstance()?.elements().viewport || null}
-          onLoadMore={loadMore}
-          rowHeight={240}
-          hasMore={hasMore}
-          loading={loading}
-        />
-      )}
       <GroupModal
         isOpen={isOpen}
         onOpenChange={onOpenChange}
@@ -300,7 +337,7 @@ const FollowList = () => {
         tags={tags}
         onSuccess={reload}
       />
-    </ScrollContainer>
+    </>
   );
 };
 

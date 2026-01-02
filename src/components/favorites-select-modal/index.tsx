@@ -136,6 +136,11 @@ const FavoritesSelectModal = () => {
             title: "已添加到收藏夹",
             color: "success",
           });
+        } else if (!selectedIds.length) {
+          addToast({
+            title: "已从收藏夹中移除",
+            color: "success",
+          });
         } else {
           addToast({
             title: "修改成功",

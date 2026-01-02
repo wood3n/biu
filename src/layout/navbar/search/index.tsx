@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router";
 
 import { Chip, Input, Listbox, ListboxItem } from "@heroui/react";
 import { RiSearchLine } from "@remixicon/react";
-import { useRequest, useClickAway } from "ahooks";
+import { useRequest, useClickAway, useDebounceFn } from "ahooks";
 import classNames from "classnames";
 
 import { getSearchSuggestMain } from "@/service/main-suggest";
@@ -11,7 +11,11 @@ import { useSearchHistory } from "@/store/search-history";
 import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
 
-const SearchInput: React.FC = () => {
+interface SearchInputProps {
+  onFocusChange?: (focused: boolean) => void;
+}
+
+const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
   const navigate = useNavigate();
   const user = useUser(s => s.user);
 
@@ -55,6 +59,22 @@ const SearchInput: React.FC = () => {
     setOpen(false);
   };
 
+  const { run: debounceSubmitSearch } = useDebounceFn(
+    (keyword: string) => {
+      submitSearch(keyword);
+    },
+    { wait: 300 },
+  );
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const next = e.relatedTarget as HTMLElement | null;
+    if (next && containerRef.current?.contains(next)) {
+      return;
+    }
+    setOpen(false);
+    onFocusChange?.(false);
+  };
+
   return (
     <div ref={containerRef} className="relative w-[280px]">
       <Input
@@ -63,18 +83,26 @@ const SearchInput: React.FC = () => {
         onValueChange={setValue}
         onKeyDown={e => {
           if (e.key === "Enter") {
-            submitSearch(e.target.value);
+            debounceSubmitSearch(e.currentTarget.value);
           }
         }}
-        onFocus={() => setOpen(true)}
+        onBlur={handleBlur}
+        onFocus={() => {
+          setOpen(true);
+          onFocusChange?.(true);
+        }}
         placeholder="搜索"
         isClearable
         startContent={<RiSearchLine size={16} />}
         className="window-no-drag w-full"
+        classNames={{
+          inputWrapper:
+            "bg-default-400/20 dark:bg-default-500/20 hover:bg-default-400/30 dark:hover:bg-default-500/30 group-data-[focus=true]:bg-default-400/40 dark:group-data-[focus=true]:bg-default-500/40",
+        }}
       />
       <div
         className={classNames(
-          "bg-content2 rounded-medium absolute top-full left-0 z-100 mt-1 min-h-[200px] w-[360px] px-1 py-2 shadow shadow-2xl",
+          "bg-content2 rounded-medium absolute top-full left-0 z-100 mt-1 min-h-[200px] w-[360px] px-1 py-2 shadow-2xl",
           {
             hidden: !open,
             block: open,

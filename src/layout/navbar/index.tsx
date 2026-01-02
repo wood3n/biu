@@ -1,3 +1,5 @@
+import React, { useState } from "react";
+
 import { useUser } from "@/store/user";
 
 import WindowAction from "../../components/window-action";
@@ -12,18 +14,28 @@ const platform = window.electron.getPlatform();
 
 const LayoutNavbar = () => {
   const user = useUser(s => s.user);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+
+  const isNoDrag = isSearchFocused || isUserDropdownOpen;
 
   return (
-    <div className="window-drag flex h-full items-center justify-between px-4">
-      <div className="window-no-drag flex items-center justify-start space-x-2 pr-20">
+    <div
+      className="flex h-full items-center justify-between px-4"
+      style={{
+        // @ts-ignore
+        "app-region": isNoDrag ? "no-drag" : "drag",
+      }}
+    >
+      <div className="window-no-drag flex items-center justify-start space-x-2">
         <Navigation />
-        <Search />
+        <Search onFocusChange={setIsSearchFocused} />
       </div>
-      <div className="window-no-drag flex items-center justify-center space-x-4 pl-20">
+      <div className="window-no-drag flex items-center justify-center space-x-4">
         <AppUpdateNotify />
         <Dev />
         {Boolean(user?.isLogin) && <UserFeed />}
-        <UserCard />
+        <UserCard onDropdownOpenChange={setIsUserDropdownOpen} />
         {["linux", "windows"].includes(platform) && <WindowAction />}
       </div>
     </div>

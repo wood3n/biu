@@ -28,7 +28,11 @@ import { useUser } from "@/store/user";
 
 import Login from "../login";
 
-const UserCard = () => {
+interface UserCardProps {
+  onDropdownOpenChange?: (open: boolean) => void;
+}
+
+const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
   const user = useUser(s => s.user);
   const clearUser = useUser(s => s.clear);
   const clearToken = useToken(s => s.clear);
@@ -126,6 +130,7 @@ const UserCard = () => {
         classNames={{
           content: "min-w-[140px]",
         }}
+        onOpenChange={onDropdownOpenChange}
       >
         <DropdownTrigger>
           <Avatar

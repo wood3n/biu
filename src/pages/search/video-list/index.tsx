@@ -108,7 +108,7 @@ export default function SearchVideo({ keyword, getScrollElement }: SearchVideoPr
       case "favorite":
         useModalStore.getState().onOpenFavSelectModal({
           rid: item.aid,
-          type: "mv",
+          type: 2,
           title: (
             <div>
               收藏
