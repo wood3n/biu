@@ -131,10 +131,18 @@ const FavoritesSelectModal = () => {
       if (res.code === 0) {
         onFavSelectModalOpenChange(false);
         const isFavorite = selectedIds.includes(Number(favId));
-        addToast({
-          title: "已修改收藏夹",
-          color: "success",
-        });
+        if (prevSelectedRef.current.length === 0) {
+          addToast({
+            title: "已添加到收藏夹",
+            color: "success",
+          });
+        } else {
+          addToast({
+            title: "修改成功",
+            color: "success",
+          });
+        }
+
         afterSubmit?.(isFavorite);
       } else {
         addToast({

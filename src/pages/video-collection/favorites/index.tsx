@@ -60,6 +60,15 @@ const Favorites: React.FC = () => {
     {
       ready: Boolean(favFolderId),
       refreshDeps: [favFolderId],
+      onSuccess: newData => {
+        if (newData?.id) {
+          useFavoritesStore.getState().modifyCreatedFavorite({
+            id: newData.id,
+            cover: newData.cover,
+            title: newData.title,
+          });
+        }
+      },
     },
   );
 
