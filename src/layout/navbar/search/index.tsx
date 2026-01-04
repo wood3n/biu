@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router";
 
 import { Chip, Input, Listbox, ListboxItem } from "@heroui/react";
 import { RiSearchLine } from "@remixicon/react";
-import { useRequest, useClickAway, useDebounceFn } from "ahooks";
+import { useRequest, useClickAway } from "ahooks";
 import classNames from "classnames";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
@@ -60,13 +60,6 @@ const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
     setOpen(false);
   };
 
-  const { run: debounceSubmitSearch } = useDebounceFn(
-    (keyword: string) => {
-      submitSearch(keyword);
-    },
-    { wait: 300 },
-  );
-
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const next = e.relatedTarget as HTMLElement | null;
     if (next && containerRef.current?.contains(next)) {
@@ -84,7 +77,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
         onValueChange={setValue}
         onKeyDown={e => {
           if (e.key === "Enter") {
-            debounceSubmitSearch(e.currentTarget.value);
+            submitSearch(e.currentTarget.value);
             inputRef.current?.blur();
             setOpen(false);
           }

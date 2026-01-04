@@ -70,6 +70,10 @@ const Header = memo(({ loading, type, attr, cover, title, desc, upMid, upName, m
             <div
               className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center rounded-md bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
               onClick={onEdit}
+              onKeyDown={e => e.key === "Enter" && onEdit()}
+              role="button"
+              tabIndex={0}
+              aria-label="修改封面"
             >
               <div className="flex flex-col items-center gap-2">
                 <RiEdit2Line size={28} />

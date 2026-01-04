@@ -28,26 +28,30 @@ export const useMusicFavStore = create<State & Action>()(set => ({
       return;
     }
 
-    if (playItem.type === "mv" && playItem.bvid) {
-      const res = await getWebInterfaceArchiveRelation({ bvid: playItem.bvid });
+    try {
+      if (playItem.type === "mv" && playItem.bvid) {
+        const res = await getWebInterfaceArchiveRelation({ bvid: playItem.bvid });
 
-      if (res.code === 0) {
-        set({ isFav: Boolean(res.data.favorite) });
+        if (res.code === 0) {
+          set({ isFav: Boolean(res.data.favorite) });
+        } else {
+          set({ isFav: false });
+        }
+      } else if (playItem.type === "audio" && playItem.sid) {
+        const res = await getCollResourceCheck({
+          rid: playItem.sid,
+          type: 12,
+        });
+
+        if (res.code === 0) {
+          set({ isFav: Boolean(res.data) });
+        } else {
+          set({ isFav: false });
+        }
       } else {
         set({ isFav: false });
       }
-    } else if (playItem.type === "audio" && playItem.sid) {
-      const res = await getCollResourceCheck({
-        rid: playItem.sid,
-        type: 12,
-      });
-
-      if (res.code === 0) {
-        set({ isFav: Boolean(res.data) });
-      } else {
-        set({ isFav: false });
-      }
-    } else {
+    } catch {
       set({ isFav: false });
     }
   },
