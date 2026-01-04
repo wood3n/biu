@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router";
 
 import { addToast } from "@heroui/react";
@@ -37,15 +37,18 @@ const VideoSeries = () => {
 
   const scrollRef = useRef<ScrollRefObject>(null);
 
-  const { data, loading, refreshAsync } = useRequest(
+  const { data, loading } = useRequest(
     async () => {
+      if (!id) {
+        return;
+      }
+
       const res = await getUserVideoArchivesList({
         season_id: Number(id),
       });
       return res?.data;
     },
     {
-      ready: Boolean(id),
       refreshDeps: [id],
     },
   );
@@ -207,18 +210,20 @@ const VideoSeries = () => {
 
   const isCreatedBySelf = data?.info?.upper?.mid === user?.mid;
 
+  const getScrollElement = useCallback(() => {
+    return scrollRef.current?.osInstance()?.elements().viewport as HTMLElement | null;
+  }, []);
+
   return (
-    <ScrollContainer ref={scrollRef} resetOnChange={id} className="scroll-container h-full w-full px-4 pb-6">
+    <ScrollContainer ref={scrollRef} className="h-full w-full px-4 pb-6">
       <Header
         type={CollectionType.VideoSeries}
-        isCreatedBySelf={isCreatedBySelf}
         cover={data?.info?.cover}
         title={data?.info?.title}
         desc={data?.info?.intro}
         upMid={data?.info?.upper?.mid}
         upName={data?.info?.upper?.name}
         mediaCount={data?.info?.media_count}
-        onRefresh={refreshAsync}
       />
 
       <Operations
@@ -245,7 +250,7 @@ const VideoSeries = () => {
           className="min-h-0 flex-1"
           data={filteredMedias}
           loading={loading}
-          getScrollElement={() => scrollRef.current?.osInstance()?.elements().viewport as HTMLElement | null}
+          getScrollElement={getScrollElement}
           onMenuAction={handleMenuAction}
         />
       ) : (
@@ -253,7 +258,7 @@ const VideoSeries = () => {
           className="min-h-0 flex-1"
           data={filteredMedias}
           loading={loading}
-          getScrollElement={() => scrollRef.current?.osInstance()?.elements().viewport as HTMLElement | null}
+          getScrollElement={getScrollElement}
           onMenuAction={handleMenuAction}
         />
       )}

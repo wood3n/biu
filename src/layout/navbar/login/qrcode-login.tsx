@@ -52,6 +52,7 @@ const QrcodeLogin = ({ onClose, updateUserData }: QrcodeLoginProps) => {
   );
 
   const isOvertime = pollData?.code === 86038;
+  const isPendingConfirm = pollData?.code === 86090 || pollData?.code === 0;
 
   return (
     <div className="flex flex-col items-center p-6">
@@ -79,8 +80,12 @@ const QrcodeLogin = ({ onClose, updateUserData }: QrcodeLoginProps) => {
           {isOvertime && <p className="mt-2 text-center text-sm font-bold text-white">二维码已失效，请刷新</p>}
         </div>
       </div>
-      <p className="text-default-500 dark:text-default-400 mt-4 text-sm whitespace-nowrap">
-        请使用bilibili手机客户端扫码登录
+      <p
+        className={clx("text-default-500 dark:text-default-400 mt-2 text-sm whitespace-nowrap", {
+          "text-warning-500 dark:text-warning-400": isPendingConfirm,
+        })}
+      >
+        {isPendingConfirm ? "二维码已扫码未确认" : "请使用bilibili手机客户端扫码登录"}
       </p>
     </div>
   );

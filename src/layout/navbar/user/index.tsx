@@ -20,8 +20,10 @@ import {
 } from "@remixicon/react";
 
 import { postPassportLoginExit } from "@/service/passport-login-exit";
+import { useFavoritesStore } from "@/store/favorite";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
+import { usePlayProgress } from "@/store/play-progress";
 import { useSettings } from "@/store/settings";
 import { useToken } from "@/store/token";
 import { useUser } from "@/store/user";
@@ -63,6 +65,13 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
         hiddenMenuKeys: [],
       });
       usePlayList.getState().clear();
+      useFavoritesStore.setState({
+        createdFavorites: [],
+        collectedFavorites: [],
+      });
+      usePlayProgress.setState({
+        currentTime: 0,
+      });
       navigate("/");
       return true;
     } else {

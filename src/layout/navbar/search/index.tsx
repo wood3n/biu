@@ -5,6 +5,7 @@ import { Chip, Input, Listbox, ListboxItem } from "@heroui/react";
 import { RiSearchLine } from "@remixicon/react";
 import { useRequest, useClickAway, useDebounceFn } from "ahooks";
 import classNames from "classnames";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
 import { getSearchSuggestMain } from "@/service/main-suggest";
 import { useSearchHistory } from "@/store/search-history";
@@ -84,6 +85,8 @@ const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
         onKeyDown={e => {
           if (e.key === "Enter") {
             debounceSubmitSearch(e.currentTarget.value);
+            inputRef.current?.blur();
+            setOpen(false);
           }
         }}
         onBlur={handleBlur}
@@ -91,6 +94,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
           setOpen(true);
           onFocusChange?.(true);
         }}
+        onClick={() => setOpen(true)}
         placeholder="搜索"
         isClearable
         startContent={<RiSearchLine size={16} />}
@@ -102,81 +106,88 @@ const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
       />
       <div
         className={classNames(
-          "bg-content2 rounded-medium absolute top-full left-0 z-100 mt-1 min-h-[200px] w-[360px] px-1 py-2 shadow-2xl",
+          "bg-content2 absolute top-full left-0 z-100 mt-1 h-auto max-h-[80dvh] w-[360px] overflow-hidden rounded-md shadow-2xl",
           {
             hidden: !open,
-            block: open,
+            "flex flex-col": open,
           },
         )}
       >
-        <Listbox
-          aria-label="搜索建议"
-          selectionMode="none"
-          items={
-            suggestionsData?.map(item => ({
-              key: item.value,
-              value: item.value,
-              name: item.name,
-            })) || []
-          }
-          emptyContent="暂无搜索建议"
-          topContent={
-            showSearchHistory &&
-            searchHistoryItems.length > 0 && (
-              <>
-                <div className="mb-1 flex items-center justify-between px-1">
-                  <span className="text-sm">搜索历史</span>
-                  <span
-                    className="text-foreground-400 hover:text-foreground-600 cursor-pointer text-xs"
-                    onClick={() => {
-                      clearSearchHistory();
-                      inputRef.current?.focus();
-                    }}
-                  >
-                    清除全部
-                  </span>
-                </div>
-                <div className="mb-1 flex flex-wrap gap-2">
-                  {searchHistoryItems.slice(0, 10).map(item => (
-                    <Chip
-                      key={item.time}
-                      isCloseable
-                      size="sm"
-                      onClose={() => {
-                        deleteSearchHistory(item);
+        <OverlayScrollbarsComponent className="h-full flex-1 p-2" options={{ scrollbars: { autoHide: "leave" } }}>
+          <Listbox
+            aria-label="搜索建议"
+            selectionMode="none"
+            items={
+              suggestionsData?.map(item => ({
+                key: item.value,
+                value: item.value,
+                name: item.name,
+              })) || []
+            }
+            emptyContent={<div className="flex items-center justify-center py-6">暂无搜索建议</div>}
+            topContent={
+              showSearchHistory &&
+              searchHistoryItems.length > 0 && (
+                <>
+                  <div className="mb-1 flex items-center justify-between px-1">
+                    <span className="text-sm">搜索历史</span>
+                    <span
+                      className="text-foreground-400 hover:text-foreground-600 cursor-pointer text-xs"
+                      onMouseDown={e => e.preventDefault()}
+                      onClick={e => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        clearSearchHistory();
                         inputRef.current?.focus();
                       }}
-                      onClick={() => {
-                        setOpen(false);
-                        setValue(item.value);
-                        submitSearch(item.value);
-                      }}
-                      className="min-w-0 cursor-pointer"
-                      classNames={{
-                        content: "truncate",
-                      }}
                     >
-                      {item.value}
-                    </Chip>
-                  ))}
-                </div>
-              </>
-            )
-          }
-        >
-          {item => (
-            <ListboxItem
-              key={item.key}
-              onPress={() => {
-                setOpen(false);
-                setValue(item.value);
-                submitSearch(item.value);
-              }}
-            >
-              <span dangerouslySetInnerHTML={{ __html: item.name }} />
-            </ListboxItem>
-          )}
-        </Listbox>
+                      清除全部
+                    </span>
+                  </div>
+                  <div className="mb-1 flex flex-wrap gap-2">
+                    {searchHistoryItems.slice(0, 10).map(item => (
+                      <Chip
+                        key={item.time}
+                        isCloseable
+                        size="sm"
+                        onClose={() => {
+                          deleteSearchHistory(item);
+                          inputRef.current?.focus();
+                        }}
+                        onMouseDown={e => e.preventDefault()}
+                        onClick={() => {
+                          setOpen(false);
+                          setValue(item.value);
+                          submitSearch(item.value);
+                          inputRef.current?.blur();
+                        }}
+                        className="min-w-0 cursor-pointer"
+                        classNames={{
+                          content: "truncate",
+                        }}
+                      >
+                        {item.value}
+                      </Chip>
+                    ))}
+                  </div>
+                </>
+              )
+            }
+          >
+            {item => (
+              <ListboxItem
+                key={item.key}
+                onPress={() => {
+                  setOpen(false);
+                  setValue(item.value);
+                  submitSearch(item.value);
+                }}
+              >
+                <span dangerouslySetInnerHTML={{ __html: item.name }} />
+              </ListboxItem>
+            )}
+          </Listbox>
+        </OverlayScrollbarsComponent>
       </div>
     </div>
   );

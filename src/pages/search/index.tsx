@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 
 import { Tabs, Tab } from "@heroui/react";
 
+import Empty from "@/components/empty";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import { useSearchHistory } from "@/store/search-history";
 
@@ -13,6 +14,10 @@ const Search = () => {
   const scrollerRef = useRef<ScrollRefObject>(null);
   const [searchType, setSearchType] = useState(SearchType.Video);
   const keyword = useSearchHistory(s => s.keyword);
+
+  if (!keyword) {
+    return <Empty />;
+  }
 
   return (
     <ScrollContainer ref={scrollerRef} className="h-full w-full">

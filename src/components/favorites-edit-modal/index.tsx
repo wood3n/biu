@@ -20,7 +20,7 @@ import { isPrivateFav } from "@/common/utils/fav";
 import ImageUpload from "@/components/image-upload";
 import { postFavFolderAdd } from "@/service/fav-folder-add";
 import { postFavFolderEdit } from "@/service/fav-folder-edit";
-import { getFavFolderInfo } from "@/service/fav-folder-info";
+import { getFavFolderInfo, type FavFolderInfoData } from "@/service/fav-folder-info";
 import { useFavoritesStore } from "@/store/favorite";
 
 import ScrollContainer from "../scroll-container";
@@ -40,10 +40,10 @@ interface Props {
   mid?: number;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onRefresh?: () => Promise<void>;
+  onSuccess?: (newData: FavFolderInfoData) => void;
 }
 
-const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => {
+const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onSuccess }: Props) => {
   const addCreatedFavorite = useFavoritesStore(state => state.addCreatedFavorite);
   const modifyCreatedFavorite = useFavoritesStore(state => state.modifyCreatedFavorite);
   const [isFetching, setIsFetching] = useState(false);
@@ -108,7 +108,7 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
           cover: values.cover,
         });
 
-        if (res?.code === 0 && res.data.id) {
+        if (res?.code === 0 && res.data?.id) {
           modifyCreatedFavorite({
             id: res.data.id,
             title: res.data.title,
@@ -118,7 +118,11 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
           });
           reset();
           onOpenChange(false);
-          await onRefresh?.();
+          onSuccess?.({
+            ...res.data,
+            // 接口数据更新存在延迟，这里使用上传的最新的 cover
+            cover: values.cover || "",
+          });
         } else {
           addToast({
             color: "danger",
@@ -133,7 +137,7 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
           privacy: values.isPublic ? 0 : 1,
           cover: values.cover,
         });
-        if (res?.code === 0 && res.data.id) {
+        if (res?.code === 0 && res.data?.id) {
           addCreatedFavorite({
             id: res.data.id,
             title: res.data.title,
@@ -144,6 +148,10 @@ const FavoritesEditModal = ({ mid, isOpen, onOpenChange, onRefresh }: Props) => 
           addToast({ color: "success", title: "创建成功" });
           reset();
           onOpenChange(false);
+          onSuccess?.({
+            ...res.data,
+            cover: values.cover || "",
+          });
         } else {
           addToast({
             color: "danger",

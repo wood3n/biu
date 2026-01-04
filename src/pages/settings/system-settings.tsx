@@ -166,8 +166,8 @@ export const SystemSettingsTab = ({
         </div>
       </div>
 
-      {/* 页面切换动画 */}
-      <div className="flex w-full items-center justify-between">
+      {/* 页面切换动画 FIXME:暂时移除，该功能会导致页面切换时重复渲染，数据请求double */}
+      {/* <div className="flex w-full items-center justify-between">
         <div className="mr-6 space-y-1">
           <div className="text-medium font-medium">页面切换动画</div>
           <div className="text-sm text-zinc-500">选择页面切换时的过渡效果</div>
@@ -194,7 +194,7 @@ export const SystemSettingsTab = ({
             )}
           />
         </div>
-      </div>
+      </div> */}
 
       <div className="flex w-full items-center justify-between">
         <div className="mr-6 space-y-1">

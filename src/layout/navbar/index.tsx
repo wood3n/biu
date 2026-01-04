@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+import clx from "classnames";
+
 import { useUser } from "@/store/user";
 
 import WindowAction from "../../components/window-action";
@@ -21,11 +23,10 @@ const LayoutNavbar = () => {
 
   return (
     <div
-      className="flex h-full items-center justify-between px-4"
-      style={{
-        // @ts-ignore
-        "app-region": isNoDrag ? "no-drag" : "drag",
-      }}
+      className={clx("flex h-full items-center justify-between px-4", {
+        "window-drag": !isNoDrag,
+        "window-no-drag": isNoDrag,
+      })}
     >
       <div className="window-no-drag flex items-center justify-start space-x-2">
         <Navigation />

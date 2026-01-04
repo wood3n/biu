@@ -8,7 +8,6 @@ const isMac = window.electron?.getPlatform() === "macos";
 
 interface LogoProps {
   isCollapsed: boolean;
-  onToggleCollapsed: () => void;
 }
 
 const Logo = ({ isCollapsed }: LogoProps) => {

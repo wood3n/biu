@@ -36,28 +36,6 @@ const ScrollContainer = ({
     }
   }, [resetOnChange, scrollRef]);
 
-  useEffect(() => {
-    if (!scrollRef?.current || !enableBackToTop) {
-      setShowBackToTop(false);
-      return;
-    }
-
-    const viewport = scrollRef.current.osInstance()?.elements().viewport as HTMLElement | null;
-
-    if (!viewport) return;
-
-    const handleScroll = () => {
-      setShowBackToTop(viewport.scrollTop > 400);
-    };
-
-    viewport.addEventListener("scroll", handleScroll);
-    handleScroll();
-
-    return () => {
-      viewport.removeEventListener("scroll", handleScroll);
-    };
-  }, [scrollRef, enableBackToTop]);
-
   const handleBackToTop = () => {
     const viewport = scrollRef.current?.osInstance()?.elements().viewport as HTMLElement | null;
 
@@ -77,6 +55,16 @@ const ScrollContainer = ({
         scrollbars: { autoHide: "leave", autoHideDelay: 2000, theme: "os-theme-light" },
         overflow: { x: "hidden" },
         ...options,
+      }}
+      events={{
+        scroll: instance => {
+          if (!enableBackToTop) {
+            setShowBackToTop(false);
+            return;
+          }
+          const viewport = instance.elements().viewport as HTMLElement | null;
+          setShowBackToTop((viewport?.scrollTop ?? 0) > 400);
+        },
       }}
       {...props}
     >

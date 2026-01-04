@@ -7,12 +7,7 @@ import moment from "moment";
 import { getCookitFromBSite } from "./common/utils/cookie";
 import { toggleMiniMode } from "./common/utils/mini-player";
 import { mapKeyToElectronAccelerator } from "./common/utils/shortcut";
-import ConfirmModal from "./components/confirm-modal";
-import FavoritesSelectModal from "./components/favorites-select-modal";
-import PlayListDrawer from "./components/music-playlist-drawer";
-import ReleaseNoteModal from "./components/release-note-modal";
 import Theme from "./components/theme";
-import VideoPagesDownloadSelectModal from "./components/video-pages-download-select-modal";
 import routes from "./routes";
 import { useAppUpdateStore } from "./store/app-update";
 import { usePlayList } from "./store/play-list";
@@ -181,11 +176,6 @@ export function App() {
         }}
       />
       <Theme>{routeElement}</Theme>
-      <FavoritesSelectModal />
-      <ConfirmModal />
-      <VideoPagesDownloadSelectModal />
-      <ReleaseNoteModal />
-      <PlayListDrawer />
     </HeroUIProvider>
   );
 }
