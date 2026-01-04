@@ -18,6 +18,8 @@ import { postFavFolderDeal } from "@/service/fav-folder-deal";
 import { getAudioCreatedFavList } from "@/service/medialist-gateway-base-created";
 import { postCollResourceDeal } from "@/service/medialist-gateway-coll-resource-deal";
 import { useModalStore } from "@/store/modal";
+import { useMusicFavStore } from "@/store/music-fav";
+import { usePlayList } from "@/store/play-list";
 import { useUser } from "@/store/user";
 
 import AsyncButton from "../async-button";
@@ -37,7 +39,7 @@ const FavoritesSelectModal = () => {
   const isFavSelectModalOpen = useModalStore(s => s.isFavSelectModalOpen);
   const onFavSelectModalOpenChange = useModalStore(s => s.onFavSelectModalOpenChange);
   const favSelectModalData = useModalStore(s => s.favSelectModalData);
-  const { rid, type = 2, title, favId, afterSubmit } = favSelectModalData || {};
+  const { rid, type = 2, title, onSuccess } = favSelectModalData || {};
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -130,12 +132,33 @@ const FavoritesSelectModal = () => {
 
       if (res.code === 0) {
         onFavSelectModalOpenChange(false);
-        const isFavorite = selectedIds.includes(Number(favId));
-        addToast({
-          title: "已修改收藏夹",
-          color: "success",
-        });
-        afterSubmit?.(isFavorite);
+        if (prevSelectedRef.current.length === 0 && selectedIds.length) {
+          addToast({
+            title: "已添加到收藏夹",
+            color: "success",
+          });
+        } else if (!selectedIds.length) {
+          addToast({
+            title: "已从收藏夹中移除",
+            color: "success",
+          });
+        } else {
+          addToast({
+            title: "修改成功",
+            color: "success",
+          });
+        }
+
+        // 刷新当前播放项的收藏状态
+        const playItem = usePlayList.getState().getPlayItem();
+        if (
+          (playItem?.type === "audio" && String(playItem?.sid) === String(rid)) ||
+          (playItem?.type === "mv" && String(playItem?.aid) === String(rid))
+        ) {
+          useMusicFavStore.getState().refreshIsFav();
+        }
+
+        onSuccess?.(selectedIds);
       } else {
         addToast({
           title: res.message,

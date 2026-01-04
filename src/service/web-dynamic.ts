@@ -29,9 +29,11 @@ export interface WebDynamicFeedSpaceParams {
  * 检测是否有新动态 - 请求参数 (推测)
  */
 export interface WebDynamicFeedAllUpdateParams {
-  offset?: string; // 偏移量 (通常传入 update_baseline)
-  timezone_offset?: number;
-  features?: string;
+  type?: "all" | "video" | "pgc" | "article"; // 动态类型
+  /** 用于检测是否有新动态, 默认为上次请求 获取全部动态列表 返回的 update_baseline, 实测填 0 也可正常获取 */
+  update_baseline?: number;
+  /** 333.1365 */
+  web_location?: string;
 }
 
 /**
@@ -335,7 +337,7 @@ export const getWebDynamicFeedAll = (params: WebDynamicFeedAllParams) => {
  * 注意：接口参数和返回结构可能需要根据实际抓包确认，此处基于常规推断
  */
 export const getWebDynamicFeedAllUpdate = (params: WebDynamicFeedAllUpdateParams) => {
-  return apiRequest.get<WebDynamicResponse<WebDynamicFeedData>>("/x/polymer/web-dynamic/v1/feed/all/update", {
+  return apiRequest.get<WebDynamicResponse<{ update_num: number }>>("/x/polymer/web-dynamic/v1/feed/all/update", {
     params,
   });
 };

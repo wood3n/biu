@@ -7,7 +7,7 @@ import { CollectionType } from "@/common/constants/collection";
 import VirtualGridPageList from "@/components/virtual-grid-page-list";
 import { getFavFolderCreatedList, type FavFolderCreatedList } from "@/service/fav-folder-created-list";
 
-import GridCard from "./grid-card";
+import GridCard from "../grid-card";
 
 interface Props {
   getScrollElement: () => HTMLElement | null;

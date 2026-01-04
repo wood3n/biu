@@ -3,13 +3,12 @@ import { useNavigate, useParams } from "react-router";
 
 import { Dropdown, DropdownTrigger, Button, DropdownMenu, DropdownItem, useDisclosure } from "@heroui/react";
 import { RiDeleteBinLine, RiEraserLine, RiFileMusicLine, RiFileVideoLine, RiMoreLine } from "@remixicon/react";
-import { useShallow } from "zustand/react/shallow";
 
 import { CollectionType } from "@/common/constants/collection";
 import { isDefaultFav } from "@/common/utils/fav";
 import { postFavFolderDel } from "@/service/fav-folder-del";
+import { useFavoritesStore } from "@/store/favorite";
 import { useModalStore } from "@/store/modal";
-import { useUser } from "@/store/user";
 
 import DownloadSelectModal from "../download-select-modal";
 
@@ -26,12 +25,6 @@ const Menu = ({ type, isCreatedBySelf, mediaCount, attr, onClearInvalid }: MenuP
   const { id } = useParams();
   const navigate = useNavigate();
   const [outputFileType, setOutputFileType] = useState<MediaDownloadOutputFileType>("audio");
-
-  const { updateUser } = useUser(
-    useShallow(state => ({
-      updateUser: state.updateUser,
-    })),
-  );
 
   const onOpenConfirmModal = useModalStore(s => s.onOpenConfirmModal);
 
@@ -94,8 +87,8 @@ const Menu = ({ type, isCreatedBySelf, mediaCount, attr, onClearInvalid }: MenuP
               media_ids: id as string,
             });
 
-            if (res.code === 0) {
-              await updateUser();
+            if (res.code === 0 && res.data === 0) {
+              useFavoritesStore.getState().rmCreatedFavorite(Number(id));
               navigate("/empty");
             }
 

@@ -63,6 +63,7 @@ const MusicRecommend = () => {
   useEffect(() => {
     // 首次加载
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleMenuAction = useCallback(async (key: string, item: MusicItem) => {

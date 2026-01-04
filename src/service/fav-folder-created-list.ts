@@ -7,7 +7,7 @@ import { apiRequest } from "./request";
  */
 export interface FavFolderCreatedListRequestParams {
   /** 目标用户 mid */
-  up_mid: number;
+  up_mid: number | string;
   /** 每页数量，默认 20，最大 50 */
   ps?: number;
   /** 当前页码，默认 1 */

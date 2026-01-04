@@ -7,7 +7,7 @@ import { CollectionType } from "@/common/constants/collection";
 import VirtualGridPageList from "@/components/virtual-grid-page-list";
 import { getSpaceSeasonsSeriesList } from "@/service/space-seasons-series-list";
 
-import GridCard from "./grid-card";
+import GridCard from "../grid-card";
 
 interface VideoSeriesItem {
   id: number;
@@ -120,6 +120,7 @@ const VideoSeries = ({ getScrollElement }: Props) => {
       hasMore={hasMore}
       onLoadMore={loadMore}
       getScrollElement={getScrollElement}
+      rowHeight={220}
       itemKey="id"
       renderItem={item => (
         <GridCard

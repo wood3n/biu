@@ -36,7 +36,7 @@ const List: React.FC<ListProps> = ({ items, getScrollElement, onMenuAction, load
   }, []);
 
   return (
-    <div className="w-full">
+    <div className="w-full px-4">
       <MusicListHeader />
       <VirtualPageList
         items={items}

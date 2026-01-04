@@ -27,4 +27,5 @@ interface AppSettings {
   pageTransition: PageTransition;
   showSearchHistory: boolean;
   proxySettings: ProxySettings;
+  sideMenuCollapsed: boolean;
 }

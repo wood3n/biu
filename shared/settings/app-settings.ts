@@ -19,6 +19,7 @@ export const defaultAppSettings: AppSettings = {
     username: "",
     password: "",
   },
+  sideMenuCollapsed: false,
 };
 
 export const lightThemeColors = {

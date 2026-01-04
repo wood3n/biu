@@ -3,15 +3,12 @@ import { Controller, useForm } from "react-hook-form";
 
 import { Button, Input, Select, SelectItem, addToast } from "@heroui/react";
 import { useRequest } from "ahooks";
-import moment from "moment";
 
 import { useGeetest } from "@/common/hooks/use-geetest";
 import { getGenericCountryList } from "@/service/generic-country-list";
 import { getPassportLoginDefaultCountry } from "@/service/passport-login-web-country";
 import { getPassportLoginWebLoginSms } from "@/service/passport-login-web-login-sms";
 import { passportLoginWebSmsSend } from "@/service/passport-login-web-sms-send";
-import { useToken } from "@/store/token";
-import { useUser } from "@/store/user";
 
 interface CodeLoginForm {
   phone: string;
@@ -22,9 +19,10 @@ const PHONE_REGEX_CN = /^(?:\+?86)?1\d{10}$/; // 简易中国大陆手机号校�
 
 interface Props {
   onClose: () => void;
+  updateUserData: (refreshToken?: string) => Promise<void>;
 }
 
-const CodeLogin = ({ onClose }: Props) => {
+const CodeLogin = ({ onClose, updateUserData }: Props) => {
   const [countryId, setCountryId] = useState<string>("1");
   const codeRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
@@ -36,9 +34,6 @@ const CodeLogin = ({ onClose }: Props) => {
 
     return () => clearTimeout(timer);
   }, []);
-
-  const updateUser = useUser(state => state.updateUser);
-  const updateToken = useToken(state => state.updateToken);
 
   useEffect(() => {
     const getDefaultCountry = async () => {
@@ -152,11 +147,7 @@ const CodeLogin = ({ onClose }: Props) => {
 
       if (resp.code === 0) {
         addToast({ title: "登录成功", color: "success" });
-        updateToken({
-          tokenData: { refresh_token: resp.data?.refresh_token },
-          nextCheckRefreshTime: moment().add(2, "days").unix(),
-        });
-        await updateUser();
+        await updateUserData(resp.data?.refresh_token);
         onClose();
       } else {
         addToast({ title: resp.message || "登录失败", color: "danger" });

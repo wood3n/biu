@@ -8,11 +8,13 @@ import FavToggle, { type FavToggleProps } from "./fav-toggle";
 import Menu, { type MenuProps } from "./menu";
 
 interface Props extends FavToggleProps, SearchProps, MenuProps {
+  loading?: boolean;
   onPlayAll: () => void;
   onAddToPlayList: () => void;
 }
 
 const Operations = ({
+  loading,
   type,
   mediaCount,
   attr,
@@ -41,7 +43,9 @@ const Operations = ({
         <IconButton size="md" variant="flat" tooltip="添加到播放列表" onPress={onAddToPlayList}>
           <RiPlayListAddLine size={18} />
         </IconButton>
-        {!isCreatedBySelf && <FavToggle isFavorite={isFavorite} onToggleFavorite={onToggleFavorite} />}
+        {!loading && isCreatedBySelf !== true && (
+          <FavToggle isFavorite={isFavorite} onToggleFavorite={onToggleFavorite} />
+        )}
         <Menu
           type={type}
           isCreatedBySelf={isCreatedBySelf}

@@ -111,10 +111,12 @@ const Volume = () => {
 
   return (
     <Tooltip
+      disableAnimation
       id={tooltipId}
       placement="top"
       delay={300}
       showArrow={false}
+      triggerScaleOnOpen={false}
       shouldCloseOnBlur={false}
       isOpen={isTooltipOpen}
       onOpenChange={setIsTooltipOpen}

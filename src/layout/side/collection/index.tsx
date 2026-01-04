@@ -1,23 +1,36 @@
-import { Button, Tooltip, useDisclosure } from "@heroui/react";
-import { RiAddLine, RiFolderLine, RiFolderOpenLine } from "@remixicon/react";
+import { useEffect } from "react";
 
-import FavoritesEditModal from "@/components/favorites-edit-modal";
+import { Button, Tooltip } from "@heroui/react";
+import { RiAddLine } from "@remixicon/react";
+
 import MenuGroup from "@/components/menu/menu-group";
+import { useFavoritesStore } from "@/store/favorite";
 import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
 
-const Collection = () => {
+interface Props {
+  isCollapsed?: boolean;
+  onOpenAddFavorite?: () => void;
+}
+
+const Collection = ({ isCollapsed, onOpenAddFavorite }: Props) => {
   const user = useUser(state => state.user);
-  const ownFolder = useUser(state => state.ownFolder);
-  const collectedFolder = useUser(state => state.collectedFolder);
+  const createdFavorites = useFavoritesStore(state => state.createdFavorites);
+  const collectedFavorites = useFavoritesStore(state => state.collectedFavorites);
+  const updateCreatedFavorites = useFavoritesStore(state => state.updateCreatedFavorites);
+  const updateCollectedFavorites = useFavoritesStore(state => state.updateCollectedFavorites);
   const hiddenMenuKeys = useSettings(state => state.hiddenMenuKeys);
-  const collectedFolderHasMore = useUser(state => state.collectedFolderHasMore);
-  const collectedFolderTotal = useUser(state => state.collectedFolderTotal);
-  const loadMoreCollectedFolder = useUser(state => state.loadMoreCollectedFolder);
 
-  const filteredCollectedFolder = collectedFolder.filter(item => !hiddenMenuKeys.includes(String(item.id)));
+  const filteredCollectedFavorites = collectedFavorites.filter(item => !hiddenMenuKeys.includes(String(item.id)));
 
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  useEffect(() => {
+    if (!user?.mid) {
+      return;
+    }
+
+    updateCreatedFavorites(user.mid);
+    updateCollectedFavorites(user.mid);
+  }, [updateCreatedFavorites, updateCollectedFavorites, user?.mid]);
 
   return (
     <>
@@ -26,45 +39,42 @@ const Collection = () => {
           title="我创建的"
           titleExtra={
             <Tooltip closeDelay={0} content="新建收藏夹">
-              <Button isIconOnly variant="light" size="sm" className="h-auto w-auto min-w-auto p-1" onPress={onOpen}>
+              <Button
+                isIconOnly
+                variant="light"
+                size="sm"
+                className="h-auto w-auto min-w-auto p-1"
+                onPress={onOpenAddFavorite}
+              >
                 <RiAddLine size={16} />
               </Button>
             </Tooltip>
           }
-          items={ownFolder
+          collapsed={isCollapsed}
+          items={createdFavorites
             .filter(item => !hiddenMenuKeys.includes(String(item.id)))
             .map(item => ({
               title: item.title,
               href: `/collection/${item.id}?mid=${item?.mid}`,
-              icon: RiFolderLine,
-              activeIcon: RiFolderOpenLine,
+              cover: item.cover,
             }))}
+          itemClassName="px-2 py-1 h-auto"
         />
       )}
-      {Boolean(filteredCollectedFolder?.length) && (
+      {Boolean(filteredCollectedFavorites?.length) && (
         <>
           <MenuGroup
             title="我收藏的"
-            items={filteredCollectedFolder.map(item => ({
+            items={filteredCollectedFavorites.map(item => ({
               title: item.title,
               href: `/collection/${item.id}?type=${item.type}&mid=${item?.mid}`,
               cover: item.cover,
-              icon: RiFolderLine,
-              activeIcon: RiFolderOpenLine,
             }))}
-            itemClassName="pl-3"
+            itemClassName="px-2 py-1 h-auto"
+            collapsed={isCollapsed}
           />
-          {collectedFolderHasMore && (
-            <div
-              className="cursor-pointer p-2 text-center text-sm text-zinc-500 transition-colors hover:text-zinc-700"
-              onClick={loadMoreCollectedFolder}
-            >
-              显示剩余{collectedFolderTotal - collectedFolder.length}个
-            </div>
-          )}
         </>
       )}
-      <FavoritesEditModal isOpen={isOpen} onOpenChange={onOpenChange} />
     </>
   );
 };

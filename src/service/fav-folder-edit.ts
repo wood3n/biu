@@ -1,3 +1,5 @@
+import { omitBy } from "es-toolkit/object";
+
 import type { FavFolderInfoData } from "./fav-folder-info";
 
 import { apiRequest } from "./request";
@@ -39,8 +41,12 @@ export interface FavFolderEditResponse {
  * 修改收藏夹
  */
 export function postFavFolderEdit(data: FavFolderEditRequestParams): Promise<FavFolderEditResponse> {
-  return apiRequest.post<FavFolderEditResponse>("/x/v3/fav/folder/edit", data, {
-    useCSRF: true,
-    useFormData: true,
-  });
+  return apiRequest.post<FavFolderEditResponse>(
+    "/x/v3/fav/folder/edit",
+    omitBy(data, v => v === undefined || v === "" || v === null),
+    {
+      useCSRF: true,
+      useFormData: true,
+    },
+  );
 }

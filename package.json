@@ -39,7 +39,7 @@
     "release:alpha": "git fetch --tags --force && changelogen --release --push --hideAuthorEmail --prerelease alpha"
   },
   "dependencies": {
-    "@heroui/react": "^2.8.3",
+    "@heroui/react": "^2.8.7",
     "@hookform/resolvers": "^5.2.2",
     "@internationalized/date": "^3.10.1",
     "@remixicon/react": "^4.6.0",
@@ -71,6 +71,7 @@
     "react-dom": "19.1.1",
     "react-error-boundary": "^6.0.0",
     "react-hook-form": "^7.62.0",
+    "react-image-crop": "^11.0.10",
     "react-router": "^7.8.2",
     "spark-md5": "^3.0.2",
     "tailwind-merge": "^3.4.0",

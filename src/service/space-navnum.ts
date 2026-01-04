@@ -6,7 +6,7 @@ import { apiRequest } from "./request";
  */
 export interface SpaceNavnumRequestParams {
   /** 目标用户 mid（必要） */
-  mid: number;
+  mid: number | string;
   /** 额外定位（可选） */
   web_location?: string;
 }

@@ -15,8 +15,8 @@ import { useUser } from "@/store/user";
 import DynamicList from "./dynamic-list";
 import Favorites from "./favorites";
 import VideoPost from "./post";
+import VideoSeries from "./series";
 import SpaceInfo from "./space-info";
-import VideoSeries from "./video-series";
 
 /**
  * 用户个人中心
