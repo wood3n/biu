@@ -1,5 +1,30 @@
 # Changelog
 
+## v1.9.0
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.8.0...v1.9.0)
+
+### 🚀 新功能
+
+- 支持收藏夹封面图设置 ([0f875ae](https://github.com/wood3n/biu/commit/0f875ae))
+- 顶部动态补充动态更新提示 ([984f0e0](https://github.com/wood3n/biu/commit/984f0e0))
+- 新增侧边菜单收缩功能 ([07484ba](https://github.com/wood3n/biu/commit/07484ba))
+
+### 🩹 修复问题
+
+- 修改播放列表菜单显示 ([b63d0cd](https://github.com/wood3n/biu/commit/b63d0cd))
+- 修改review问题 ([b2adec7](https://github.com/wood3n/biu/commit/b2adec7))
+- 补充更新侧边栏收藏夹逻辑 ([3eaf7bd](https://github.com/wood3n/biu/commit/3eaf7bd))
+- 优化交互 ([2713bfc](https://github.com/wood3n/biu/commit/2713bfc))
+- 优化搜索样式 ([77ecfef](https://github.com/wood3n/biu/commit/77ecfef))
+- 优化收藏按钮样式，修改review问题 ([d53f791](https://github.com/wood3n/biu/commit/d53f791))
+- 移除无用的文件 ([791c715](https://github.com/wood3n/biu/commit/791c715))
+- Solve review problem ([360814a](https://github.com/wood3n/biu/commit/360814a))
+
+### ❤️ Contributors
+
+- Wood3n
+
 ## v1.8.0
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.7.1...v1.8.0)
