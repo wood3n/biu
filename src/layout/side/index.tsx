@@ -36,7 +36,6 @@ const SideNav = () => {
       >
         <Logo isCollapsed={sideMenuCollapsed} />
         <ScrollContainer
-          enableBackToTop={false}
           className={clx("min-h-0 flex-1", {
             "px-4": !sideMenuCollapsed,
           })}

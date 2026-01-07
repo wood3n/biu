@@ -125,7 +125,7 @@ const MusicRecommend = () => {
   }, []);
 
   return (
-    <ScrollContainer ref={scrollerRef} className="h-full w-full px-4">
+    <ScrollContainer enableBackToTop ref={scrollerRef} className="h-full w-full px-4">
       <h1 className="mb-2">推荐音乐</h1>
       <>
         {/* 数据列表 */}

@@ -124,7 +124,7 @@ const UserProfile = () => {
   }
 
   return (
-    <ScrollContainer ref={scrollRef} className="h-full w-full">
+    <ScrollContainer enableBackToTop ref={scrollRef} className="h-full w-full">
       <SpaceInfo
         spaceInfo={userInfo}
         relationStats={relationStats}

@@ -13,7 +13,7 @@ const ScrollContainer = ({
   options,
   children,
   resetOnChange,
-  enableBackToTop = true,
+  enableBackToTop,
   ...props
 }: OverlayScrollbarsComponentProps & {
   ref?: React.RefObject<ScrollRefObject | null>;

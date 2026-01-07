@@ -24,7 +24,7 @@ const LeftControl = () => {
 
   return (
     <div className="flex h-full w-full items-center justify-start space-x-2">
-      <div className="group relative flex-none cursor-pointer" onClick={open}>
+      <div data-id="full-screen-player-open" className="group relative flex-none cursor-pointer" onClick={open}>
         <Image
           removeWrapper
           radius="md"
@@ -62,7 +62,7 @@ const LeftControl = () => {
         </span>
         {Boolean(playItem?.ownerName) && (
           <span
-            className="text-foreground-500 cursor-pointer text-sm hover:underline"
+            className="text-foreground-500 max-w-full cursor-pointer truncate text-sm whitespace-nowrap hover:underline"
             onClick={e => {
               e.stopPropagation();
               navigate(`/user/${playItem?.ownerMid}`);

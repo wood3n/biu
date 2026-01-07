@@ -2,12 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { Chip, Drawer, DrawerBody, DrawerContent, Image } from "@heroui/react";
-import { RiArrowDownSLine, RiArrowLeftSLine, RiExternalLinkLine } from "@remixicon/react";
+import { RiArrowDownSLine, RiArrowLeftSLine, RiPulseLine } from "@remixicon/react";
 import { useClickAway } from "ahooks";
 import { useShallow } from "zustand/shallow";
 
 import { hexToHsl } from "@/common/utils/color";
-import { openBiliVideoLink } from "@/common/utils/url";
 import AudioWaveform from "@/components/audio-waveform";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
@@ -46,6 +45,8 @@ const FullScreenPlayer = () => {
 
   const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1000);
   const [isPageListOpen, setIsPageListOpen] = useState(false);
+  const [isWaveOpen, setIsWaveOpen] = useState(false);
+
   const pageListRef = useRef<HTMLDivElement>(null);
 
   useClickAway(() => {
@@ -92,14 +93,13 @@ const FullScreenPlayer = () => {
       onClose={close}
       placement="bottom"
       size="full"
-      backdrop="blur"
       radius="none"
       isDismissable={false}
       hideCloseButton
       classNames={{
         base: "bg-transparent shadow-none m-0!",
-        wrapper: "z-200",
-        backdrop: "bg-black/80",
+        // wrapper: "z-200",
+        backdrop: "bg-background",
       }}
     >
       <DrawerContent className="dark text-foreground relative flex h-full flex-col overflow-hidden" style={themeVars}>
@@ -216,11 +216,12 @@ const FullScreenPlayer = () => {
                 <div className="relative flex min-h-0 w-full flex-1 items-center justify-center">
                   <Image
                     src={coverSrc}
-                    className="aspect-square w-[min(60vw,35vh)] max-w-[400px] object-cover transition-shadow ease-out"
+                    className="aspect-[4/3] w-[min(60vw,42vh)] max-w-[480px] object-cover transition-shadow ease-out"
                     radius="lg"
                     style={{
                       boxShadow: `0 28px 90px -35px rgb(var(--glow-rgb) / 0.55), 0 10px 32px -18px rgb(0 0 0 / 0.55)`,
                       transition: `box-shadow ${effectsProfile.transitionMs}ms ease`,
+                      aspectRatio: "4 / 3",
                     }}
                   />
 
@@ -256,7 +257,7 @@ const FullScreenPlayer = () => {
                 <div className="w-full max-w-5xl">
                   <div className="flex flex-col items-center px-4 pt-4">
                     <div className="mb-2 flex-none" style={{ width: waveformWidth, height: 90 }}>
-                      {isOpen && (
+                      {isOpen && isWaveOpen && (
                         <AudioWaveform
                           width={waveformWidth}
                           height={80}
@@ -269,20 +270,20 @@ const FullScreenPlayer = () => {
                   </div>
                   <div className="grid h-16 w-full grid-cols-[minmax(0,1fr)_minmax(0,3fr)_minmax(0,1fr)] px-6">
                     <div className="flex h-full items-center space-x-2">
-                      <IconButton
-                        tooltip="打开B站链接"
-                        onPress={() => {
-                          openBiliVideoLink(playItem);
-                        }}
-                      >
-                        <RiExternalLinkLine size={18} />
-                      </IconButton>
                       {Boolean(user?.isLogin) && <MusicFavButton />}
+                      <MusicDownloadButton />
+                      <IconButton
+                        tooltip={isWaveOpen ? "隐藏动态频谱" : "显示动态频谱"}
+                        className={isWaveOpen ? "text-primary" : ""}
+                        onPress={() => setIsWaveOpen(!isWaveOpen)}
+                        title="动态频谱显示切换"
+                      >
+                        <RiPulseLine size={18} />
+                      </IconButton>
                     </div>
                     <MusicPlayControl />
                     <div className="flex h-full items-center justify-end space-x-2">
                       <MusicPlayMode />
-                      <MusicDownloadButton />
                       <OpenPlaylistDrawerButton />
                       <MusicVolume />
                       <MusicRate />

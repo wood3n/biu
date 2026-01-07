@@ -110,7 +110,7 @@ const SettingsPage = () => {
   const system = useSystemSettingsForm();
 
   return (
-    <ScrollContainer className="h-full w-full">
+    <ScrollContainer enableBackToTop className="h-full w-full">
       <div className="m-auto mb-6 max-w-[900px] px-8 py-4">
         <div className="space-y-6">
           <h1>设置</h1>

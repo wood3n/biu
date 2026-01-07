@@ -23,6 +23,11 @@ const __dirname = path.dirname(__filename);
 
 log.initialize();
 
+// 为 chrome-devtools-mcp 开启远程调试端口，便于性能排查
+app.commandLine.appendSwitch("remote-debugging-port", "5680");
+// 可选隔离数据目录，避免污染用户默认浏览器配置
+app.commandLine.appendSwitch("user-data-dir", path.join(app.getPath("temp"), "biu-devtools"));
+
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {

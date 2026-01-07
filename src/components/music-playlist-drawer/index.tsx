@@ -81,7 +81,7 @@ const PlayListDrawer = () => {
     <Drawer
       radius="md"
       shadow="none"
-      backdrop="blur"
+      backdrop="opaque"
       size="sm"
       hideCloseButton
       disableAnimation

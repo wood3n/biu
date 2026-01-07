@@ -415,7 +415,7 @@ const Favorites = () => {
   );
 
   return (
-    <ScrollContainer ref={scrollRef} resetOnChange={favFolderId} className="h-full w-full px-4 pb-6">
+    <ScrollContainer enableBackToTop ref={scrollRef} resetOnChange={favFolderId} className="h-full w-full px-4 pb-6">
       <Header
         loading={loading}
         type={CollectionType.Favorite}
