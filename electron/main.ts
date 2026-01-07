@@ -45,7 +45,7 @@ function createWindow() {
     transparent: false,
     titleBarStyle: "hidden",
     titleBarOverlay: false,
-    trafficLightPosition: { x: 16, y: 16 },
+    trafficLightPosition: { x: 8, y: 12 },
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       webSecurity: true,
