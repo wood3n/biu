@@ -41,7 +41,7 @@ const LeftControl = () => {
         </div>
       </div>
       <div className="flex min-w-0 flex-col items-start space-y-1">
-        <span className="flex w-full items-center space-x-2">
+        <span className="flex w-full items-center">
           <span
             title={playItem?.pageTitle || playItem?.title}
             className="min-w-0 flex-1 cursor-pointer truncate hover:underline"
@@ -50,13 +50,13 @@ const LeftControl = () => {
             {playItem?.pageTitle || playItem?.title}
           </span>
           {Boolean(playItem?.isLossless) && (
-            <Chip size="sm" className="text-tiny">
+            <Chip size="sm" className="h-auto px-0 py-0.5 text-[10px]">
               无损
             </Chip>
           )}
           {Boolean(playItem?.isDolby) && (
-            <Chip size="sm" className="text-tiny">
-              杜比音频
+            <Chip size="sm" className="h-auto px-0 py-0.5 text-[10px]">
+              杜比
             </Chip>
           )}
         </span>

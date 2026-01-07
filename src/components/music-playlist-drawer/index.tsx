@@ -5,7 +5,6 @@ import { RiDeleteBinLine } from "@remixicon/react";
 import { uniqBy } from "es-toolkit/array";
 
 import { openBiliVideoLink } from "@/common/utils/url";
-import If from "@/components/if";
 import { VirtualList } from "@/components/virtual-list";
 import { useModalStore } from "@/store/modal";
 import { usePlayList, type PlayData } from "@/store/play-list";
@@ -13,7 +12,7 @@ import { useUser } from "@/store/user";
 
 import Empty from "../empty";
 import ListItem from "./list-item";
-import Settings from "./settings";
+// Settings removed: now controlled via MusicPlayMode popover
 
 const PlayListDrawer = () => {
   const isOpen = useModalStore(s => s.isPlayListDrawerOpen);
@@ -96,16 +95,13 @@ const PlayListDrawer = () => {
       <DrawerContent>
         <DrawerHeader className="border-divider/40 flex flex-row items-center justify-between space-x-2 border-b px-4 py-3">
           <h3>播放列表</h3>
-          <div className="inline-flex items-center">
-            <Settings />
-            <If condition={Boolean(pureList?.length)}>
-              <Tooltip closeDelay={0} content="清空播放列表">
-                <Button isIconOnly size="sm" variant="light" onPress={clear}>
-                  <RiDeleteBinLine size={16} />
-                </Button>
-              </Tooltip>
-            </If>
-          </div>
+          {Boolean(pureList?.length) && (
+            <Tooltip closeDelay={0} content="清空播放列表">
+              <Button isIconOnly size="sm" variant="light" onPress={clear}>
+                <RiDeleteBinLine size={16} />
+              </Button>
+            </Tooltip>
+          )}
         </DrawerHeader>
         {list.length ? (
           <>

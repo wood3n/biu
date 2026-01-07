@@ -14,6 +14,7 @@ const MusicRate = () => {
 
   return (
     <Tooltip
+      disableAnimation
       triggerScaleOnOpen={false}
       isOpen={isTooltipOpen}
       onOpenChange={setIsTooltipOpen}
