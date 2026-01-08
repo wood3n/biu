@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 import { getFavFolderCollectedList } from "@/service/fav-folder-collected-list";
 import { getFavFolderCreatedList } from "@/service/fav-folder-created-list";
@@ -15,6 +16,8 @@ export interface FavoriteItem {
 interface State {
   createdFavorites: FavoriteItem[];
   collectedFavorites: FavoriteItem[];
+  createdOrder: number[];
+  collectedOrder: number[];
 }
 
 interface Action {
@@ -22,54 +25,148 @@ interface Action {
   addCreatedFavorite: (favorite: FavoriteItem) => void;
   rmCreatedFavorite: (id: number) => void;
   modifyCreatedFavorite: (favorite: FavoriteItem) => void;
+  reorderCreatedFavorites: (activeId: number, overId: number) => void;
   updateCollectedFavorites: (userMid: number | string) => Promise<void>;
   addCollectedFavorite: (favorite: FavoriteItem) => void;
   rmCollectedFavorite: (id: number) => void;
+  reorderCollectedFavorites: (activeId: number, overId: number) => void;
 }
 
-export const useFavoritesStore = create<State & Action>()(set => ({
-  createdFavorites: [],
-  collectedFavorites: [],
-  updateCreatedFavorites: async (userMid: number | string) => {
-    const favorites = await getAllCreatedFavorites(userMid);
-    set(() => ({
-      createdFavorites: favorites,
-    }));
-  },
-  addCreatedFavorite: (favorite: FavoriteItem) =>
-    set(state => ({
-      createdFavorites: [favorite, ...state.createdFavorites],
-    })),
-  rmCreatedFavorite: (id: number) =>
-    set(state => ({
-      createdFavorites: state.createdFavorites.filter(item => item.id !== id),
-    })),
-  modifyCreatedFavorite: (favorite: FavoriteItem) =>
-    set(state => ({
-      createdFavorites: state.createdFavorites.map(item =>
-        item.id === favorite.id
-          ? {
-              ...item,
-              ...favorite,
-            }
-          : item,
-      ),
-    })),
-  updateCollectedFavorites: async (userMid: number | string) => {
-    const favorites = await getAllCollectedFavorites(userMid);
-    set(() => ({
-      collectedFavorites: favorites,
-    }));
-  },
-  addCollectedFavorite: (favorite: FavoriteItem) =>
-    set(state => ({
-      collectedFavorites: [favorite, ...state.collectedFavorites],
-    })),
-  rmCollectedFavorite: (id: number) =>
-    set(state => ({
-      collectedFavorites: state.collectedFavorites.filter(item => item.id !== id),
-    })),
-}));
+const applySavedOrder = <T extends { id: number }>(list: T[], order: number[]) => {
+  if (!order.length) {
+    return list;
+  }
+
+  const orderSet = new Set(order);
+  const ordered = order.map(id => list.find(item => item.id === id)).filter((item): item is T => Boolean(item));
+  const rest = list.filter(item => !orderSet.has(item.id));
+
+  return [...ordered, ...rest];
+};
+
+const reorderList = <T extends { id: number }>(list: T[], activeId: number, overId: number) => {
+  const from = list.findIndex(item => item.id === activeId);
+  const to = list.findIndex(item => item.id === overId);
+
+  if (from < 0 || to < 0 || from === to) {
+    return list;
+  }
+
+  const next = [...list];
+  const [moved] = next.splice(from, 1);
+  next.splice(to, 0, moved);
+
+  return next;
+};
+
+export const useFavoritesStore = create<State & Action>()(
+  persist(
+    (set, get) => ({
+      createdFavorites: [],
+      collectedFavorites: [],
+      createdOrder: [],
+      collectedOrder: [],
+      updateCreatedFavorites: async (userMid: number | string) => {
+        const favorites = await getAllCreatedFavorites(userMid);
+        const ordered = applySavedOrder(favorites, get().createdOrder);
+
+        set(() => ({
+          createdFavorites: ordered,
+          createdOrder: ordered.map(item => item.id),
+        }));
+      },
+      addCreatedFavorite: (favorite: FavoriteItem) =>
+        set(state => {
+          const next = [favorite, ...state.createdFavorites];
+
+          return {
+            createdFavorites: next,
+            createdOrder: next.map(item => item.id),
+          };
+        }),
+      rmCreatedFavorite: (id: number) =>
+        set(state => {
+          const next = state.createdFavorites.filter(item => item.id !== id);
+
+          return {
+            createdFavorites: next,
+            createdOrder: next.map(item => item.id),
+          };
+        }),
+      modifyCreatedFavorite: (favorite: FavoriteItem) =>
+        set(state => ({
+          createdFavorites: state.createdFavorites.map(item =>
+            item.id === favorite.id
+              ? {
+                  ...item,
+                  ...favorite,
+                }
+              : item,
+          ),
+        })),
+      reorderCreatedFavorites: (activeId: number, overId: number) =>
+        set(state => {
+          const next = reorderList(state.createdFavorites, activeId, overId);
+
+          if (next === state.createdFavorites) {
+            return state;
+          }
+
+          return {
+            createdFavorites: next,
+            createdOrder: next.map(item => item.id),
+          };
+        }),
+      updateCollectedFavorites: async (userMid: number | string) => {
+        const favorites = await getAllCollectedFavorites(userMid);
+        const ordered = applySavedOrder(favorites, get().collectedOrder);
+
+        set(() => ({
+          collectedFavorites: ordered,
+          collectedOrder: ordered.map(item => item.id),
+        }));
+      },
+      addCollectedFavorite: (favorite: FavoriteItem) =>
+        set(state => {
+          const next = [favorite, ...state.collectedFavorites];
+
+          return {
+            collectedFavorites: next,
+            collectedOrder: next.map(item => item.id),
+          };
+        }),
+      rmCollectedFavorite: (id: number) =>
+        set(state => {
+          const next = state.collectedFavorites.filter(item => item.id !== id);
+
+          return {
+            collectedFavorites: next,
+            collectedOrder: next.map(item => item.id),
+          };
+        }),
+      reorderCollectedFavorites: (activeId: number, overId: number) =>
+        set(state => {
+          const next = reorderList(state.collectedFavorites, activeId, overId);
+
+          if (next === state.collectedFavorites) {
+            return state;
+          }
+
+          return {
+            collectedFavorites: next,
+            collectedOrder: next.map(item => item.id),
+          };
+        }),
+    }),
+    {
+      name: "favorites-order",
+      partialize: state => ({
+        createdOrder: state.createdOrder,
+        collectedOrder: state.collectedOrder,
+      }),
+    },
+  ),
+);
 
 async function getAllCreatedFavorites(userMid: number | string) {
   const res = await getSpaceNavnum({

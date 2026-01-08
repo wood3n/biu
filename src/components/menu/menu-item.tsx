@@ -9,6 +9,8 @@ export interface MenuItemProps {
   title: string;
   /** 菜单项链接 */
   href?: string;
+  /** 唯一标识，用于排序等场景 */
+  id?: number | string;
   /** 菜单项图标 */
   icon?: React.ComponentType<{ size?: number | string; className?: string }>;
   /** 封面 */
@@ -62,26 +64,22 @@ const MenuItem: React.FC<MenuItemProps> = ({
   }, [cover, isActive, Icon, ActiveIcon, title, collapsed]);
 
   if (collapsed) {
-    const collapsedButton = (
-      <Button
-        as={href ? HeroLink : "button"}
-        href={href}
-        fullWidth
-        variant={isActive ? "flat" : "light"}
-        color="default"
-        onPress={onPress}
-        className={clx("justify-center rounded-md px-0 py-1", className, {
-          "h-auto": collapsed,
-          "text-primary": isActive,
-        })}
-      >
-        {iconContent}
-      </Button>
-    );
-
     return (
       <Tooltip closeDelay={0} content={title} placement="right" offset={-3}>
-        {collapsedButton}
+        <Button
+          as={href ? HeroLink : "button"}
+          href={href}
+          fullWidth
+          variant={isActive ? "flat" : "light"}
+          color={isActive ? "primary" : "default"}
+          onPress={onPress}
+          className={clx("w-full min-w-0 justify-center rounded-md px-0 py-1", className, {
+            "h-auto": collapsed,
+            "text-primary": isActive,
+          })}
+        >
+          {iconContent}
+        </Button>
       </Tooltip>
     );
   }
