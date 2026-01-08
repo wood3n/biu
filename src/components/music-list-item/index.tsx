@@ -5,8 +5,8 @@ import { Button } from "@heroui/react";
 import { RiPlayFill } from "@remixicon/react";
 import clx from "classnames";
 
-import { formatDuration } from "@/common/utils";
 import { formatNumber } from "@/common/utils/number";
+import { formatDuration } from "@/common/utils/time";
 import Image from "@/components/image";
 import { isSame, usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";

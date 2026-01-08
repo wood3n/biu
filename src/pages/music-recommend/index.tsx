@@ -121,6 +121,11 @@ const MusicRecommend = () => {
           color: "success",
         });
         break;
+      case "bililink":
+        window.electron.openExternal(`https://www.bilibili.com/video/${item.bvid}`);
+        break;
+      default:
+        break;
     }
   }, []);
 

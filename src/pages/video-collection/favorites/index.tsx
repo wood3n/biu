@@ -5,6 +5,7 @@ import { addToast, useDisclosure } from "@heroui/react";
 import { useRequest } from "ahooks";
 
 import { CollectionType } from "@/common/constants/collection";
+import { openBiliVideoLink } from "@/common/utils/url";
 import FavoritesEditModal from "@/components/favorites-edit-modal";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import { postFavFolderFav } from "@/service/fav-folder-fav";
@@ -408,6 +409,15 @@ const Favorites = () => {
             title: "已添加下载任务",
             color: "success",
           });
+          break;
+        case "bililink":
+          openBiliVideoLink({
+            type: item.type === 2 ? "mv" : "audio",
+            bvid: item.bvid,
+            sid: item.type === 12 ? item.id : undefined,
+          });
+          break;
+        default:
           break;
       }
     },

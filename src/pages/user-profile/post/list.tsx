@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 
 import type { SpaceArcVListItem } from "@/service/space-wbi-arc-search";
 
-import { formatSecondsToDate } from "@/common/utils";
+import { formatSecondsToDate } from "@/common/utils/time";
 import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
 import VirtualPageList from "@/components/virtual-page-list";

@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 
 import type { ToViewVideoItem } from "@/service/history-toview-list";
 
-import { formatSecondsToDate } from "@/common/utils";
+import { formatSecondsToDate } from "@/common/utils/time";
 import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
 import VirtualPageList from "@/components/virtual-page-list";

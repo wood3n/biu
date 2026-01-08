@@ -5,7 +5,7 @@ import { RiPlayFill } from "@remixicon/react";
 import clx from "classnames";
 import { twMerge } from "tailwind-merge";
 
-import { formatDuration } from "@/common/utils";
+import { formatDuration } from "@/common/utils/time";
 import Image from "@/components/image";
 import { usePlayList, type PlayData } from "@/store/play-list";
 

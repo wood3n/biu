@@ -4,7 +4,7 @@ import { Spinner } from "@heroui/react";
 
 import type { Media } from "@/service/user-video-archives-list";
 
-import { formatSecondsToDate } from "@/common/utils";
+import { formatSecondsToDate } from "@/common/utils/time";
 import Empty from "@/components/empty";
 import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";

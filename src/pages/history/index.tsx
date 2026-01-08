@@ -203,6 +203,9 @@ const History = () => {
           color: "success",
         });
         break;
+      case "bililink":
+        window.electron.openExternal(`https://www.bilibili.com/video/${item.history.bvid}`);
+        break;
       case "delete":
         useModalStore.getState().onOpenConfirmModal({
           title: `删除记录${item.title}`,

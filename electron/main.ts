@@ -39,9 +39,9 @@ function createWindow() {
     show: true,
     hasShadow: true,
     width: 1200,
-    height: 720,
-    minWidth: 1000,
-    minHeight: 600,
+    height: 800,
+    minWidth: 1200,
+    minHeight: 800,
     resizable: true,
     // 跟随 web 页面大小
     useContentSize: true,

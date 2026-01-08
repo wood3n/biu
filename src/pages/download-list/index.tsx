@@ -18,7 +18,7 @@ import {
 import { RiDeleteBinLine, RiExternalLinkLine, RiFolderLine } from "@remixicon/react";
 import { filesize } from "filesize";
 
-import { formatMillisecond } from "@/common/utils";
+import { formatMillisecond } from "@/common/utils/time";
 import { openBiliVideoLink } from "@/common/utils/url";
 import Empty from "@/components/empty";
 import Image from "@/components/image";

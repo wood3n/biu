@@ -1,6 +1,6 @@
 import type { PlayData } from "@/store/play-list";
 
-import { formatDuration } from "@/common/utils";
+import { formatDuration } from "@/common/utils/time";
 
 export const getDisplayTitle = (data: PlayData): string => {
   return data.pageTitle || data.title || "";

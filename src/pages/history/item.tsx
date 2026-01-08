@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import { Button } from "@heroui/react";
 import clx from "classnames";
 
-import { formatDuration } from "@/common/utils";
+import { formatDuration } from "@/common/utils/time";
 import ContextMenu, { type ContextMenuItem } from "@/components/context-menu";
 import Image from "@/components/image";
 import OperationMenu from "@/components/music-list-item/operation";
