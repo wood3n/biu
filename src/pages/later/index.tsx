@@ -187,6 +187,11 @@ const Later = () => {
           color: "success",
         });
         break;
+      case "bililink":
+        window.electron.openExternal(`https://www.bilibili.com/video/${item.bvid}`);
+        break;
+      default:
+        break;
     }
   }, []);
 
@@ -209,7 +214,7 @@ const Later = () => {
   const isEmpty = useMemo(() => !initialLoading && list.length === 0, [initialLoading, list]);
 
   return (
-    <ScrollContainer ref={scrollerRef} className="h-full w-full px-4">
+    <ScrollContainer enableBackToTop ref={scrollerRef} className="h-full w-full px-4">
       <div className="mb-2">
         <div className="flex items-center justify-between">
           <h1>稍后再看</h1>

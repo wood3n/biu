@@ -1,4 +1,11 @@
-import { RiFileMusicLine, RiFileVideoLine, RiPlayCircleLine, RiPlayListAddLine, RiStarLine } from "@remixicon/react";
+import {
+  RiExternalLinkLine,
+  RiFileMusicLine,
+  RiFileVideoLine,
+  RiPlayCircleLine,
+  RiPlayListAddLine,
+  RiStarLine,
+} from "@remixicon/react";
 
 export const getContextMenus = ({ isLogin }: { isLogin?: boolean }) => {
   return [
@@ -27,6 +34,11 @@ export const getContextMenus = ({ isLogin }: { isLogin?: boolean }) => {
       icon: <RiFileVideoLine size={18} />,
       key: "download-video",
       label: "下载视频",
+    },
+    {
+      icon: <RiExternalLinkLine size={18} />,
+      key: "bililink",
+      label: "在 B 站打开",
     },
   ];
 };

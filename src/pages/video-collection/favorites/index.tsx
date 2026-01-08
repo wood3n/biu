@@ -5,6 +5,7 @@ import { addToast, useDisclosure } from "@heroui/react";
 import { useRequest } from "ahooks";
 
 import { CollectionType } from "@/common/constants/collection";
+import { openBiliVideoLink } from "@/common/utils/url";
 import FavoritesEditModal from "@/components/favorites-edit-modal";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import { postFavFolderFav } from "@/service/fav-folder-fav";
@@ -409,13 +410,22 @@ const Favorites = () => {
             color: "success",
           });
           break;
+        case "bililink":
+          openBiliVideoLink({
+            type: item.type === 2 ? "mv" : "audio",
+            bvid: item.bvid,
+            sid: item.type === 12 ? item.id : undefined,
+          });
+          break;
+        default:
+          break;
       }
     },
     [favFolderId, isCreatedBySelf, handleRemoveItem, refreshInfo],
   );
 
   return (
-    <ScrollContainer ref={scrollRef} resetOnChange={favFolderId} className="h-full w-full px-4 pb-6">
+    <ScrollContainer enableBackToTop ref={scrollRef} resetOnChange={favFolderId} className="h-full w-full px-4 pb-6">
       <Header
         loading={loading}
         type={CollectionType.Favorite}

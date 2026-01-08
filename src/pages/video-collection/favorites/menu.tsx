@@ -1,4 +1,5 @@
 import {
+  RiExternalLinkLine,
   RiFileMusicLine,
   RiFileVideoLine,
   RiPlayCircleLine,
@@ -52,6 +53,11 @@ export const getContextMenus = ({ type, isCreatedBySelf }: Props) => {
       key: "download-video",
       label: "下载视频",
       hidden: canNotPlay || isAudio,
+    },
+    {
+      icon: <RiExternalLinkLine size={18} />,
+      key: "bililink",
+      label: "在 B 站打开",
     },
   ];
 };

@@ -205,6 +205,11 @@ const VideoSeries = () => {
           color: "success",
         });
         break;
+      case "bililink":
+        window.electron.openExternal(`https://www.bilibili.com/video/${item.bvid}`);
+        break;
+      default:
+        break;
     }
   };
 
@@ -215,7 +220,7 @@ const VideoSeries = () => {
   }, []);
 
   return (
-    <ScrollContainer ref={scrollRef} className="h-full w-full px-4 pb-6">
+    <ScrollContainer enableBackToTop ref={scrollRef} className="h-full w-full px-4 pb-6">
       <Header
         type={CollectionType.VideoSeries}
         cover={data?.info?.cover}

@@ -13,7 +13,7 @@ const ScrollContainer = ({
   options,
   children,
   resetOnChange,
-  enableBackToTop = true,
+  enableBackToTop,
   ...props
 }: OverlayScrollbarsComponentProps & {
   ref?: React.RefObject<ScrollRefObject | null>;
@@ -79,7 +79,7 @@ const ScrollContainer = ({
             variant="flat"
             onPress={handleBackToTop}
             aria-label="返回顶部"
-            className="bg-default/50 fixed right-6 bottom-[110px] z-20 shadow-xl shadow-black/30"
+            className="bg-default/50 fixed right-10 bottom-[120px] z-20 shadow-xl shadow-black/30"
           >
             <RiArrowUpSLine size={20} />
           </Button>

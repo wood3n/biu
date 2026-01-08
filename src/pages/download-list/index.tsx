@@ -18,7 +18,7 @@ import {
 import { RiDeleteBinLine, RiExternalLinkLine, RiFolderLine } from "@remixicon/react";
 import { filesize } from "filesize";
 
-import { formatMillisecond } from "@/common/utils";
+import { formatMillisecond } from "@/common/utils/time";
 import { openBiliVideoLink } from "@/common/utils/url";
 import Empty from "@/components/empty";
 import Image from "@/components/image";
@@ -93,7 +93,7 @@ const DownloadList = () => {
   };
 
   return (
-    <ScrollContainer className="h-full w-full px-4">
+    <ScrollContainer enableBackToTop className="h-full w-full px-4">
       <div className="mb-2 flex items-center justify-between">
         <h1 className="flex items-center space-x-1">下载记录</h1>
         <div className="flex items-center space-x-1">

@@ -1,5 +1,6 @@
 import {
   RiDeleteBinLine,
+  RiExternalLinkLine,
   RiFileMusicLine,
   RiFileVideoLine,
   RiPlayCircleLine,
@@ -33,6 +34,11 @@ export const getContextMenus = ({ business }: { business: string }) => {
       key: "download-video",
       label: "下载视频",
       hidden: !canPlay,
+    },
+    {
+      key: "bililink",
+      label: "在 B 站打开",
+      icon: <RiExternalLinkLine size={18} />,
     },
     {
       icon: <RiDeleteBinLine size={18} />,

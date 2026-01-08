@@ -23,6 +23,13 @@ const __dirname = path.dirname(__filename);
 
 log.initialize();
 
+if (isDev) {
+  // 为 chrome-devtools-mcp 开启远程调试端口
+  app.commandLine.appendSwitch("remote-debugging-port", "9222");
+  // 开发环境数据隔离
+  app.setPath("userData", path.join(app.getPath("appData"), `biu-dev`));
+}
+
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
@@ -32,9 +39,9 @@ function createWindow() {
     show: true,
     hasShadow: true,
     width: 1200,
-    height: 720,
-    minWidth: 1000,
-    minHeight: 600,
+    height: 800,
+    minWidth: 1200,
+    minHeight: 800,
     resizable: true,
     // 跟随 web 页面大小
     useContentSize: true,
@@ -45,7 +52,7 @@ function createWindow() {
     transparent: false,
     titleBarStyle: "hidden",
     titleBarOverlay: false,
-    trafficLightPosition: { x: 16, y: 16 },
+    trafficLightPosition: { x: 8, y: 8 },
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       webSecurity: true,

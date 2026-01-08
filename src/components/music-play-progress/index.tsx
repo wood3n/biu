@@ -3,7 +3,7 @@ import { memo, useState } from "react";
 import { Slider } from "@heroui/react";
 import { twMerge } from "tailwind-merge";
 
-import { formatDuration } from "@/common/utils";
+import { formatDuration } from "@/common/utils/time";
 import { usePlayList } from "@/store/play-list";
 import { usePlayProgress } from "@/store/play-progress";
 

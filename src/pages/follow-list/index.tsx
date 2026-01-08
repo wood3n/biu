@@ -212,7 +212,7 @@ const FollowList = () => {
                 </Tooltip>
               </div>
             </div>
-            <ScrollContainer enableBackToTop={false} className="h-full min-h-0 w-full flex-1 px-2">
+            <ScrollContainer className="h-full min-h-0 w-full flex-1 px-2">
               <div className="flex min-h-0 flex-1 flex-col">
                 <Button
                   fullWidth
@@ -244,7 +244,7 @@ const FollowList = () => {
         </div>
 
         <div className="flex min-w-0 flex-1">
-          <ScrollContainer ref={scrollRef} className="h-full w-full px-4">
+          <ScrollContainer ref={scrollRef} enableBackToTop className="h-full w-full px-4">
             <div className="flex h-full flex-col">
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center space-x-1">

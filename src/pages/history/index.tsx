@@ -203,6 +203,9 @@ const History = () => {
           color: "success",
         });
         break;
+      case "bililink":
+        window.electron.openExternal(`https://www.bilibili.com/video/${item.history.bvid}`);
+        break;
       case "delete":
         useModalStore.getState().onOpenConfirmModal({
           title: `删除记录${item.title}`,
@@ -243,7 +246,7 @@ const History = () => {
   const isEmpty = !loading && list.length === 0;
 
   return (
-    <ScrollContainer ref={scrollerRef} className="h-full w-full px-4">
+    <ScrollContainer enableBackToTop ref={scrollerRef} className="h-full w-full px-4">
       <div className="mb-2">
         <div className="flex items-center justify-between">
           <h1>历史记录</h1>

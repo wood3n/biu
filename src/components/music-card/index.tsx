@@ -3,8 +3,8 @@ import { memo, useMemo, type ReactNode } from "react";
 import { Link } from "@heroui/react";
 import { RiPlayFill, RiUserLine, RiYoutubeLine } from "@remixicon/react";
 
-import { formatDuration, formatSecondsToDate } from "@/common/utils";
 import { formatNumber } from "@/common/utils/number";
+import { formatDuration, formatSecondsToDate } from "@/common/utils/time";
 import ContextMenu, { type ContextMenuItem } from "@/components/context-menu";
 import Image from "@/components/image";
 

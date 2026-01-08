@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 
-import { formatSecondsToDate } from "@/common/utils";
+import { formatSecondsToDate } from "@/common/utils/time";
 import { formatUrlProtocal } from "@/common/utils/url";
 import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";

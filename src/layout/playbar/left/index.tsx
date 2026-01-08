@@ -24,7 +24,7 @@ const LeftControl = () => {
 
   return (
     <div className="flex h-full w-full items-center justify-start space-x-2">
-      <div className="group relative flex-none cursor-pointer" onClick={open}>
+      <div data-id="full-screen-player-open" className="group relative flex-none cursor-pointer" onClick={open}>
         <Image
           removeWrapper
           radius="md"
@@ -41,7 +41,7 @@ const LeftControl = () => {
         </div>
       </div>
       <div className="flex min-w-0 flex-col items-start space-y-1">
-        <span className="flex w-full items-center space-x-2">
+        <span className="flex w-full items-center">
           <span
             title={playItem?.pageTitle || playItem?.title}
             className="min-w-0 flex-1 cursor-pointer truncate hover:underline"
@@ -50,19 +50,19 @@ const LeftControl = () => {
             {playItem?.pageTitle || playItem?.title}
           </span>
           {Boolean(playItem?.isLossless) && (
-            <Chip size="sm" className="text-tiny">
+            <Chip size="sm" className="h-auto px-0 py-0.5 text-[10px]">
               无损
             </Chip>
           )}
           {Boolean(playItem?.isDolby) && (
-            <Chip size="sm" className="text-tiny">
-              杜比音频
+            <Chip size="sm" className="h-auto px-0 py-0.5 text-[10px]">
+              杜比
             </Chip>
           )}
         </span>
         {Boolean(playItem?.ownerName) && (
           <span
-            className="text-foreground-500 cursor-pointer text-sm hover:underline"
+            className="text-foreground-500 max-w-full cursor-pointer truncate text-sm whitespace-nowrap hover:underline"
             onClick={e => {
               e.stopPropagation();
               navigate(`/user/${playItem?.ownerMid}`);
