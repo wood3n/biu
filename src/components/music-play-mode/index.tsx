@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Popover, PopoverTrigger, PopoverContent, Switch } from "@heroui/react";
+import { Tooltip, Switch } from "@heroui/react";
 
 import { getPlayModeList, PlayMode } from "@/common/constants/audio";
 import IconButton from "@/components/icon-button";
@@ -36,40 +36,34 @@ const MusicPlayMode = () => {
 
   if (playMode === PlayMode.Random) {
     return (
-      <Popover
+      <Tooltip
         isOpen={isOpen}
         onOpenChange={setIsOpen}
         placement="top"
-        triggerScaleOnOpen={false}
-        motionProps={{
-          variants: {
-            enter: { opacity: 1, scale: 1, transition: { duration: 0.12 } },
-            exit: { opacity: 0, scale: 1, transition: { duration: 0.1 } },
-          },
-        }}
+        closeDelay={150}
+        content={
+          <div onMouseEnter={openPopover} onMouseLeave={closePopoverWithDelay}>
+            <Switch
+              size="sm"
+              disableAnimation
+              isSelected={shouldKeepPagesOrderInRandomPlayMode}
+              onValueChange={setShouldKeepPagesOrderInRandomPlayMode}
+            >
+              保持分集顺序
+            </Switch>
+          </div>
+        }
       >
-        <PopoverTrigger>
-          <IconButton
-            className="flex-none"
-            aria-label="播放模式"
-            onPress={togglePlayMode}
-            onMouseEnter={openPopover}
-            onMouseLeave={closePopoverWithDelay}
-          >
-            {PlayModeList.find(item => item.value === playMode)?.icon}
-          </IconButton>
-        </PopoverTrigger>
-        <PopoverContent className="px-3 py-2" onMouseEnter={openPopover} onMouseLeave={closePopoverWithDelay}>
-          <Switch
-            size="sm"
-            disableAnimation
-            isSelected={shouldKeepPagesOrderInRandomPlayMode}
-            onValueChange={setShouldKeepPagesOrderInRandomPlayMode}
-          >
-            保持分集顺序
-          </Switch>
-        </PopoverContent>
-      </Popover>
+        <IconButton
+          className="flex-none"
+          aria-label="播放模式"
+          onPress={togglePlayMode}
+          onMouseEnter={openPopover}
+          onMouseLeave={closePopoverWithDelay}
+        >
+          {PlayModeList.find(item => item.value === playMode)?.icon}
+        </IconButton>
+      </Tooltip>
     );
   }
 
