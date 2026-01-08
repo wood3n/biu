@@ -238,6 +238,8 @@ export const isSame = (
   return false;
 };
 
+const isMvItem = (item?: { type: PlayDataType }) => item?.type === "mv";
+
 export const usePlayList = create<State & Action>()(
   persist(
     immer((set, get) => {
@@ -343,7 +345,7 @@ export const usePlayList = create<State & Action>()(
               const currentTime = Math.round(audio.currentTime * 100) / 100;
               usePlayProgress.getState().setCurrentTime(currentTime);
               const playItem = get().getPlayItem?.();
-              if (playItem) {
+              if (isMvItem(playItem)) {
                 void reportHeartbeat(playItem, currentTime, audio.duration, 0);
               }
             };
@@ -361,7 +363,7 @@ export const usePlayList = create<State & Action>()(
               updatePlaybackState();
               updatePositionState();
               const playItem = get().getPlayItem?.();
-              if (playItem) {
+              if (isMvItem(playItem)) {
                 void reportHeartbeat(playItem, audio.currentTime, audio.duration, 1);
               }
             };
@@ -371,7 +373,7 @@ export const usePlayList = create<State & Action>()(
               updatePlaybackState();
               updatePositionState();
               const playItem = get().getPlayItem?.();
-              if (playItem) {
+              if (isMvItem(playItem)) {
                 void reportHeartbeat(playItem, audio.currentTime, audio.duration, 2);
               }
             };
@@ -382,10 +384,10 @@ export const usePlayList = create<State & Action>()(
               }
 
               const playItem = get().getPlayItem?.();
-              if (playItem) {
+              if (isMvItem(playItem)) {
                 void reportHeartbeat(playItem, audio.duration, audio.duration, 4);
+                endPlayReport();
               }
-              endPlayReport();
 
               const currentIndex = get().list.findIndex(item => item.id === get().playId);
               if (get().playMode === PlayMode.Sequence && currentIndex === get().list.length - 1) {
@@ -857,7 +859,10 @@ export const usePlayList = create<State & Action>()(
           });
         },
         clear: () => {
-          endPlayReport();
+          const currentPlayItem = get().getPlayItem?.();
+          if (isMvItem(currentPlayItem)) {
+            endPlayReport();
+          }
           if (audio) {
             audio.src = "";
             if (!audio.paused) {
@@ -909,7 +914,10 @@ function resetAudioAndPlay(url: string) {
 usePlayList.subscribe(async (state, prevState) => {
   if (state.playId !== prevState.playId) {
     if (!state.playId) {
-      endPlayReport();
+      const prevPlayItem = prevState.list.find(item => item.id === prevState.playId);
+      if (isMvItem(prevPlayItem)) {
+        endPlayReport();
+      }
     }
 
     if (audio && !audio.paused) {
@@ -920,7 +928,9 @@ usePlayList.subscribe(async (state, prevState) => {
     if (state.playId) {
       const playItem = state.list.find(item => item.id === state.playId);
       if (playItem) {
-        void beginPlayReport(playItem);
+        if (isMvItem(playItem)) {
+          void beginPlayReport(playItem);
+        }
       }
       if (isUrlValid(playItem?.audioUrl) && audio.paused && !state.isPlaying) {
         resetAudioAndPlay(playItem.audioUrl);

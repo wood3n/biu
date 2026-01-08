@@ -34,6 +34,8 @@ const SortableMenuItem = ({ id, disabled, ...itemProps }: Props) => {
       opacity: isDragging ? 0.7 : 1,
       cursor: disabled ? undefined : "grab",
       touchAction: disabled ? undefined : "none",
+      display: "flex",
+      alignItems: "center",
     } as CSSProperties;
   }, [transform, transition, isDragging, disabled]);
 

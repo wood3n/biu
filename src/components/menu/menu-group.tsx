@@ -5,14 +5,13 @@ import MenuItem, { type MenuItemProps } from "../../components/menu/menu-item";
 interface Props {
   title?: React.ReactNode;
   titleExtra?: React.ReactNode;
-  itemClassName?: string;
   items: MenuItemProps[];
   collapsed?: boolean;
   className?: string;
   renderItem?: (item: MenuItemProps, index: number) => React.ReactNode;
 }
 
-const MenuGroup = ({ title, titleExtra, itemClassName, items, collapsed, className, renderItem }: Props) => {
+const MenuGroup = ({ title, titleExtra, items, collapsed, className, renderItem }: Props) => {
   return (
     <>
       {!collapsed && Boolean(title) && (
@@ -34,12 +33,7 @@ const MenuGroup = ({ title, titleExtra, itemClassName, items, collapsed, classNa
           renderItem ? (
             renderItem(item, index)
           ) : (
-            <MenuItem
-              key={(item.id ?? item.href ?? item.title) as React.Key}
-              {...item}
-              className={itemClassName}
-              collapsed={collapsed}
-            />
+            <MenuItem key={(item.id ?? item.href ?? item.title) as React.Key} {...item} collapsed={collapsed} />
           ),
         )}
       </div>

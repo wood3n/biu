@@ -1,5 +1,3 @@
-import { omitBy } from "es-toolkit/object";
-
 import { apiRequest } from "./request";
 
 /**
@@ -81,14 +79,10 @@ export function postClickInterfaceClickWebH5(
   data: ClickInterfaceClickWebH5RequestBody,
   params?: ClickInterfaceClickWebH5UrlParams,
 ): Promise<ClickInterfaceClickWebH5Response> {
-  return apiRequest.post<ClickInterfaceClickWebH5Response>(
-    "/x/click-interface/click/web/h5",
-    omitBy(data, value => value === undefined || value === null || value === ""),
-    {
-      params,
-      useFormData: true,
-      useCSRF: true,
-      useWbi: true,
-    },
-  );
+  return apiRequest.post<ClickInterfaceClickWebH5Response>("/x/click-interface/click/web/h5", data, {
+    params,
+    useFormData: true,
+    useCSRF: true,
+    useWbi: true,
+  });
 }

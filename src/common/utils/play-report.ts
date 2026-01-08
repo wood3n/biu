@@ -84,14 +84,17 @@ export async function beginPlayReport(item?: ReportablePlayItem) {
     await postClickInterfaceClickWebH5(
       {
         mid: useUser.getState().user?.mid,
+        lv: useUser.getState().user?.level_info?.current_level,
         aid,
         cid,
+        type: 3,
+        sub_type: 0,
         part: item.pageIndex,
         ftime: startTs,
         stime: startTs,
         session,
+        referer_url: `https://www.bilibili.com/video/${item.bvid}`,
         outer: 0,
-        spmid: "333.788.0.0",
         platform: "web",
       },
       {
