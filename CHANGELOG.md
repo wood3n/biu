@@ -1,5 +1,33 @@
 # Changelog
 
+## v1.10.0
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.9.0...v1.10.0)
+
+### 🚀 新功能
+
+- 侧边菜单支持拖拽排序 ([6a90615](https://github.com/wood3n/biu/commit/6a90615))
+
+### 🩹 修复问题
+
+- 修复一些问题 ([f5e1cbf](https://github.com/wood3n/biu/commit/f5e1cbf))
+- 修复mac顶部logo在折叠菜单状态下的样式问题 ([1950741](https://github.com/wood3n/biu/commit/1950741))
+- 修改随机播放选项样式 ([1270dd4](https://github.com/wood3n/biu/commit/1270dd4))
+- 修复在部分滚动区域意外显示返回顶部按钮的问题 ([43a42ae](https://github.com/wood3n/biu/commit/43a42ae))
+- 修复侧边栏拖拽问题 ([eb64b6d](https://github.com/wood3n/biu/commit/eb64b6d))
+- 修复播放历史记录上报问题 ([5c2e32a](https://github.com/wood3n/biu/commit/5c2e32a))
+- 修复播放历史记录上报问题 ([1ccd3ed](https://github.com/wood3n/biu/commit/1ccd3ed))
+- 优化交互 ([9c035e4](https://github.com/wood3n/biu/commit/9c035e4))
+
+### 🏡 Chore
+
+- Add chrome-devtools-mcp config ([9414730](https://github.com/wood3n/biu/commit/9414730))
+
+### ❤️ Contributors
+
+- Wood3n
+- Oxyg3n
+
 ## v1.9.0
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.8.0...v1.9.0)
