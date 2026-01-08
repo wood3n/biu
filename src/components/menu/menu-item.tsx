@@ -20,6 +20,8 @@ export interface MenuItemProps {
   className?: string;
   onPress?: VoidFunction;
   collapsed?: boolean;
+  /** 用于 dnd-kit 等场景，把拖拽监听器绑定到可交互元素上 */
+  dndProps?: ({ className?: string } & Record<string, unknown>) | undefined;
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({
@@ -31,6 +33,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
   className,
   onPress,
   collapsed,
+  dndProps,
 }) => {
   const location = useLocation();
   const { id } = useParams();
@@ -63,6 +66,10 @@ const MenuItem: React.FC<MenuItemProps> = ({
     );
   }, [cover, isActive, Icon, ActiveIcon, title, collapsed]);
 
+  const { className: dndClassName, ...dndRest } = (dndProps ?? {}) as {
+    className?: string;
+  } & Record<string, unknown>;
+
   if (collapsed) {
     return (
       <Tooltip closeDelay={0} content={title} placement="right" offset={-3}>
@@ -73,10 +80,11 @@ const MenuItem: React.FC<MenuItemProps> = ({
           variant={isActive ? "flat" : "light"}
           color={isActive ? "primary" : "default"}
           onPress={onPress}
-          className={clx("w-full min-w-0 justify-center rounded-md px-0 py-1", className, {
+          className={clx("w-full min-w-0 justify-center rounded-md px-0 py-1", className, dndClassName, {
             "h-auto": collapsed,
             "text-primary": isActive,
           })}
+          {...(dndRest as any)}
         >
           {iconContent}
         </Button>
@@ -94,9 +102,10 @@ const MenuItem: React.FC<MenuItemProps> = ({
       color="default"
       onPress={onPress}
       startContent={iconContent}
-      className={clx("justify-start rounded-md px-2", className, {
+      className={clx("justify-start rounded-md px-2", className, dndClassName, {
         "text-primary": isActive,
       })}
+      {...(dndRest as any)}
     >
       <span className="truncate">{title}</span>
     </Button>

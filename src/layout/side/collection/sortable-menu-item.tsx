@@ -33,12 +33,13 @@ const SortableMenuItem = ({ id, disabled, ...itemProps }: Props) => {
       transition,
       opacity: isDragging ? 0.7 : 1,
       cursor: disabled ? undefined : "grab",
+      touchAction: disabled ? undefined : "none",
     } as CSSProperties;
   }, [transform, transition, isDragging, disabled]);
 
   return (
-    <div ref={setNodeRef} style={style} {...dragProps}>
-      <MenuItem {...itemProps} />
+    <div ref={setNodeRef} style={style}>
+      <MenuItem {...itemProps} dndProps={dragProps} />
     </div>
   );
 };
