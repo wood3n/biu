@@ -27,11 +27,11 @@ importers:
         specifier: ^3.10.1
         version: 3.10.1
       '@remixicon/react':
-        specifier: ^4.6.0
-        version: 4.7.0(react@19.1.1)
+        specifier: ^4.8.0
+        version: 4.8.0(react@19.1.1)
       '@tanstack/react-virtual':
-        specifier: ^3.13.12
-        version: 3.13.12(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+        specifier: ^3.13.18
+        version: 3.13.18(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       ahooks:
         specifier: ^3.9.5
         version: 3.9.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -87,7 +87,7 @@ importers:
         specifier: ^2.3.2
         version: 2.3.2
       overlayscrollbars:
-        specifier: ^2.12.0
+        specifier: ^2.13.0
         version: 2.13.0
       overlayscrollbars-react:
         specifier: ^0.5.6
@@ -2267,8 +2267,8 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
-  '@remixicon/react@4.7.0':
-    resolution: {integrity: sha512-ODBQjdbOjnFguCqctYkpDjERXOInNaBnRPDKfZOBvbzExBAwr2BaH/6AHFTg/UAFzBDkwtylfMT8iKPAkLwPLQ==}
+  '@remixicon/react@4.8.0':
+    resolution: {integrity: sha512-cbzR04GKWa3zWdgn0C2i+u/avb167iWeu9gqFO00UGu84meARPAm3oKowDZTU6dlk/WS3UHo6k//LMRM1l7CRw==}
     peerDependencies:
       react: '>=18.2.0'
 
@@ -2706,8 +2706,8 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  '@tanstack/react-virtual@3.13.12':
-    resolution: {integrity: sha512-Gd13QdxPSukP8ZrkbgS2RwoZseTTbQPLnQEn7HY/rqtM+8Zt95f7xKC7N0EsKs7aoz0WzZ+fditZux+F8EzYxA==}
+  '@tanstack/react-virtual@3.13.18':
+    resolution: {integrity: sha512-dZkhyfahpvlaV0rIKnvQiVoWPyURppl6w4m9IwMDpuIjcJ1sD9YGWrt0wISvgU7ewACXx2Ct46WPgI6qAD4v6A==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
@@ -2715,8 +2715,8 @@ packages:
   '@tanstack/virtual-core@3.11.3':
     resolution: {integrity: sha512-v2mrNSnMwnPJtcVqNvV0c5roGCBqeogN8jDtgtuHCphdwBasOZ17x8UV8qpHUh+u0MLfX43c0uUHKje0s+Zb0w==}
 
-  '@tanstack/virtual-core@3.13.12':
-    resolution: {integrity: sha512-1YBOJfRHV4sXUmWsFSf5rQor4Ss82G8dQWLRbnk3GA4jeP8hQt1hxXh0tmflpC0dz3VgEv/1+qwPyLeWkQuPFA==}
+  '@tanstack/virtual-core@3.13.18':
+    resolution: {integrity: sha512-Mx86Hqu1k39icq2Zusq+Ey2J6dDWTjDvEv43PJtRCoEYTLyfaPnxIQ6iy7YAOK0NV/qOEmZQ/uCufrppZxTgcg==}
 
   '@testing-library/dom@10.4.1':
     resolution: {integrity: sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==}
@@ -9651,7 +9651,7 @@ snapshots:
       '@react-types/shared': 3.32.1(react@19.1.1)
       react: 19.1.1
 
-  '@remixicon/react@4.7.0(react@19.1.1)':
+  '@remixicon/react@4.8.0(react@19.1.1)':
     dependencies:
       react: 19.1.1
 
@@ -10020,15 +10020,15 @@ snapshots:
       react: 19.1.1
       react-dom: 19.1.1(react@19.1.1)
 
-  '@tanstack/react-virtual@3.13.12(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
+  '@tanstack/react-virtual@3.13.18(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:
-      '@tanstack/virtual-core': 3.13.12
+      '@tanstack/virtual-core': 3.13.18
       react: 19.1.1
       react-dom: 19.1.1(react@19.1.1)
 
   '@tanstack/virtual-core@3.11.3': {}
 
-  '@tanstack/virtual-core@3.13.12': {}
+  '@tanstack/virtual-core@3.13.18': {}
 
   '@testing-library/dom@10.4.1':
     dependencies:
