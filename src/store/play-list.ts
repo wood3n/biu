@@ -209,6 +209,14 @@ const updatePlaybackState = () => {
   }
 };
 
+const playAudioSafely = async () => {
+  try {
+    await audio.play();
+  } catch (error) {
+    handlePlayError(error);
+  }
+};
+
 const updatePositionState = () => {
   if ("mediaSession" in navigator) {
     const dur = audio.duration;
@@ -496,7 +504,7 @@ export const usePlayList = create<State & Action>()(
               state.isPlaying = true;
             });
             await ensureAudioSrcValid();
-            await audio.play();
+            await playAudioSafely();
           } else {
             audio.pause();
             set(state => {
@@ -515,7 +523,7 @@ export const usePlayList = create<State & Action>()(
           if (isSame(currentItem, { type, bvid, sid })) {
             if (audio.paused) {
               await ensureAudioSrcValid();
-              await audio.play();
+              await playAudioSafely();
             }
             return;
           }
@@ -612,7 +620,7 @@ export const usePlayList = create<State & Action>()(
             case PlayMode.Loop: {
               if (list.length === 1) {
                 audio.currentTime = 0;
-                audio.play();
+                await playAudioSafely();
                 break;
               }
 
@@ -626,7 +634,7 @@ export const usePlayList = create<State & Action>()(
 
               if (list.length === 1) {
                 audio.currentTime = 0;
-                audio.play();
+                await playAudioSafely();
                 break;
               }
 
@@ -907,7 +915,7 @@ function resetAudioAndPlay(url: string) {
   audio.src = url;
   audio.currentTime = 0;
   audio.load();
-  audio.play();
+  void playAudioSafely();
 }
 
 // 切换歌曲时，更新当前播放的歌曲信息
