@@ -26,10 +26,8 @@ import {
   RiSunLine,
 } from "@remixicon/react";
 
-import ColorPicker from "@/components/color-picker";
 import FontSelect from "@/components/font-select";
 import UpdateCheckButton from "@/components/update-check-button";
-import { defaultAppSettings } from "@shared/settings/app-settings";
 
 import ImportExport from "./export-import";
 
@@ -196,25 +194,6 @@ export const SystemSettingsTab = ({
         </div>
       </div> */}
 
-      <div className="flex w-full items-center justify-between">
-        <div className="mr-6 space-y-1">
-          <div className="text-medium font-medium">主色调</div>
-          <div className="text-sm text-zinc-500">自定义应用的强调色</div>
-        </div>
-        <div className="flex w-[180px] justify-end">
-          <Controller
-            control={control}
-            name="primaryColor"
-            render={({ field }) => (
-              <ColorPicker
-                presets={[defaultAppSettings.primaryColor, "#66cc8a", "#9353d3", "#ffffff", "#db924b"]}
-                value={field.value}
-                onChange={field.onChange}
-              />
-            )}
-          />
-        </div>
-      </div>
       {/* 全局圆角设置 */}
       <div className="flex w-full items-center justify-between">
         <div className="mr-6 space-y-1">

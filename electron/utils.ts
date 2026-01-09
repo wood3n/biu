@@ -59,7 +59,6 @@ export const fixFfmpegPath = () => {
   );
 
   if (fs.existsSync(localFfmpegPath)) {
-    log.info(`Found local ffmpeg at ${localFfmpegPath}`);
     if (process.platform !== "win32") {
       try {
         fs.chmodSync(localFfmpegPath, "755");

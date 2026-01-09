@@ -1,4 +1,4 @@
-import { Button, Card, useDisclosure } from "@heroui/react";
+import { Button, useDisclosure } from "@heroui/react";
 import { RiArrowLeftDoubleLine, RiArrowRightDoubleLine } from "@remixicon/react";
 import clx from "classnames";
 
@@ -26,11 +26,9 @@ const SideNav = () => {
 
   return (
     <>
-      <Card
-        radius="none"
-        shadow="none"
+      <div
         className={clx(
-          "border-divider/20 flex h-full flex-none flex-col border-r-1 transition-[width] duration-200",
+          "border-divider/30 flex h-full flex-none flex-col border-r-1 transition-[width] duration-200",
           sideMenuCollapsed ? "w-[72px]" : "w-[200px]",
         )}
       >
@@ -49,11 +47,11 @@ const SideNav = () => {
           fullWidth
           radius="none"
           onPress={onToggleCollapsed}
-          className="bg-background border-divider/20 h-auto w-full flex-none border-t py-1 shadow-lg"
+          className="bg-content1 border-divider/30 h-auto w-full flex-none border-y py-1"
         >
           {sideMenuCollapsed ? <RiArrowRightDoubleLine size={16} /> : <RiArrowLeftDoubleLine size={16} />}
         </Button>
-      </Card>
+      </div>
       <FavoritesEditModal isOpen={isFavoritesEditModalOpen} onOpenChange={onOpenChangeFavoritesEditModal} />
     </>
   );

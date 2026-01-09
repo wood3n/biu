@@ -80,8 +80,8 @@ const PlayListDrawer = () => {
   return (
     <Drawer
       radius="md"
-      shadow="none"
-      backdrop="opaque"
+      shadow="lg"
+      backdrop="transparent"
       size="sm"
       hideCloseButton
       disableAnimation
@@ -90,6 +90,7 @@ const PlayListDrawer = () => {
       classNames={{
         backdrop: "z-200 window-no-drag",
         wrapper: "z-200",
+        base: "data-[placement=right]:mb-22",
       }}
     >
       <DrawerContent>

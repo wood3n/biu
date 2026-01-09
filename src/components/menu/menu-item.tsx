@@ -97,9 +97,10 @@ const MenuItem: React.FC<MenuItemProps> = ({
       as={href ? HeroLink : "button"}
       href={href}
       fullWidth
+      disableRipple
       radius="md"
       variant={isActive ? "flat" : "light"}
-      color="default"
+      color={isActive ? "primary" : "default"}
       onPress={onPress}
       startContent={iconContent}
       className={clx("justify-start rounded-md px-2", className, dndClassName, {

@@ -37,7 +37,15 @@ const Collection = ({ isCollapsed, onOpenAddFavorite }: Props) => {
   const filteredCollectedFavorites = collectedFavorites.filter(item => !hiddenMenuKeys.includes(String(item.id)));
   const filteredCreatedFavorites = createdFavorites.filter(item => !hiddenMenuKeys.includes(String(item.id)));
   const isDragEnabled = !isCollapsed;
-  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 180,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor),
+  );
 
   useEffect(() => {
     if (!user?.mid) {
