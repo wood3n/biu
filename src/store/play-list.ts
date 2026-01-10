@@ -224,6 +224,7 @@ const playAudioSafely = async () => {
           return;
         }
       }
+      return;
     }
     handlePlayError(error);
   }
