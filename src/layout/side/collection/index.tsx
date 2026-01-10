@@ -9,7 +9,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Button, Tooltip, addToast } from "@heroui/react";
 import {
   RiAddLine,
@@ -88,11 +88,11 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        delay: 180,
+        delay: 150,
         tolerance: 5,
       },
     }),
-    useSensor(KeyboardSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
   useEffect(() => {
@@ -209,16 +209,21 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
         title: favorite.title ? `确认删除「${favorite.title}」吗？` : "确认删除该收藏夹吗？",
         type: "danger",
         onConfirm: async () => {
-          const res = await postFavFolderDel({ media_ids: String(favorite.id) });
+          try {
+            const res = await postFavFolderDel({ media_ids: String(favorite.id) });
 
-          if (res.code === 0 && res.data === 0) {
-            rmCreatedFavorite(Number(favorite.id));
-            addToast({ title: "删除成功", color: "success" });
-            return true;
+            if (res.code === 0 && res.data === 0) {
+              rmCreatedFavorite(Number(favorite.id));
+              addToast({ title: "删除成功", color: "success" });
+              return true;
+            }
+
+            addToast({ title: res.message || "删除失败", color: "danger" });
+            return false;
+          } catch {
+            addToast({ title: "删除失败", color: "danger" });
+            return false;
           }
-
-          addToast({ title: res.message || "删除失败", color: "danger" });
-          return false;
         },
       });
     },
@@ -230,16 +235,21 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
       onOpenConfirmModal({
         title: favorite.title ? `确认取消收藏「${favorite.title}」吗？` : "确认取消收藏吗？",
         onConfirm: async () => {
-          const res = await postFavFolderUnfav({ media_id: favorite.id, platform: "web" });
+          try {
+            const res = await postFavFolderUnfav({ media_id: favorite.id, platform: "web" });
 
-          if (res.code === 0) {
-            rmCollectedFavorite(Number(favorite.id));
-            addToast({ title: "已取消收藏", color: "success" });
-            return true;
+            if (res.code === 0) {
+              rmCollectedFavorite(Number(favorite.id));
+              addToast({ title: "已取消收藏", color: "success" });
+              return true;
+            }
+
+            addToast({ title: res.message || "取消收藏失败", color: "danger" });
+            return false;
+          } catch {
+            addToast({ title: "取消收藏失败", color: "danger" });
+            return false;
           }
-
-          addToast({ title: res.message || "取消收藏失败", color: "danger" });
-          return false;
         },
       });
     },
@@ -388,7 +398,6 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
               handleCreatedMenuAction(action, {
                 id: Number(item.id),
                 title: item.title,
-                type: item.type as number,
               })
             }
             {...item}

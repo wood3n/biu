@@ -110,11 +110,22 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
       label: "刷新数据",
       startContent: <RiRefreshLine size={18} />,
       onPress: async () => {
-        await useUser.getState().updateUser();
-        const mid = useUser.getState().user?.mid;
-        if (mid) {
-          await useFavoritesStore.getState().updateCreatedFavorites(mid);
-          await useFavoritesStore.getState().updateCollectedFavorites(mid);
+        try {
+          await useUser.getState().updateUser();
+          const mid = useUser.getState().user?.mid;
+          if (mid) {
+            await useFavoritesStore.getState().updateCreatedFavorites(mid);
+            await useFavoritesStore.getState().updateCollectedFavorites(mid);
+          }
+          addToast({
+            title: "数据刷新成功",
+            color: "success",
+          });
+        } catch {
+          addToast({
+            title: "刷新数据失败",
+            color: "danger",
+          });
         }
       },
     },
