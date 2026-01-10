@@ -87,50 +87,22 @@ const Favorites = () => {
 
   const isFavorite = favInfo?.fav_state === 1;
 
-  const fetchPageData = useCallback(
-    async (targetPage: number): Promise<{ medias: FavMedia[]; hasMore: boolean } | null> => {
-      if (!favFolderId) {
-        return null;
-      }
-
-      const res = await getFavResourceList({
-        media_id: favFolderId,
-        ps: 20,
-        pn: targetPage,
-        platform: "web",
-        keyword: keyword || undefined,
-        order,
-        tid: 0,
-        type: 0,
-      });
-
-      if (!res?.data) {
-        return null;
-      }
-
-      return {
-        medias: res.data.medias ?? [],
-        hasMore: res.data.has_more ?? false,
-      };
-    },
-    [favFolderId, keyword, order],
-  );
-
-  const loadPage = useCallback(
-    async (targetPage: number) => {
+  // 创建通用的加载数据函数，封装重复的加载状态和错误处理逻辑
+  const loadResourceList = useCallback(
+    async (params: Parameters<typeof getFavResourceList>[0], targetPage: number) => {
       setListLoading(true);
       try {
-        const pageData = await fetchPageData(targetPage);
-        if (!pageData) {
+        const res = await getFavResourceList(params);
+        if (!res?.data) {
           setHasMore(false);
           return;
         }
 
-        setHasMore(pageData.hasMore);
+        setHasMore(res.data.has_more ?? false);
         if (targetPage === 1) {
-          setItems(pageData.medias);
+          setItems(res.data.medias ?? []);
         } else {
-          appendItems(pageData.medias);
+          appendItems(res.data.medias ?? []);
         }
       } catch (error) {
         addToast({
@@ -142,7 +114,27 @@ const Favorites = () => {
         setListLoading(false);
       }
     },
-    [appendItems, fetchPageData, setItems],
+    [appendItems, setItems],
+  );
+
+  const loadPage = useCallback(
+    async (targetPage: number) => {
+      // 使用通用加载函数加载数据
+      loadResourceList(
+        {
+          media_id: favFolderId,
+          ps: 20,
+          pn: targetPage,
+          platform: "web",
+          keyword: keyword || undefined,
+          order,
+          tid: 0,
+          type: 0,
+        },
+        targetPage,
+      );
+    },
+    [favFolderId, keyword, order, loadResourceList],
   );
 
   // 统一处理数据加载：当收藏夹ID变化时重置并重新加载
@@ -156,40 +148,26 @@ const Favorites = () => {
     clearItems();
     // 更新当前收藏夹ID引用
     currentFavFolderIdRef.current = favFolderId;
-    // 直接使用默认值加载数据，不依赖状态更新
-    const loadData = async () => {
-      setListLoading(true);
-      try {
-        const res = await getFavResourceList({
-          media_id: favFolderId,
-          ps: 20,
-          pn: 1,
-          platform: "web",
-          keyword: undefined,
-          order: "mtime",
-          tid: 0,
-          type: 0,
-        });
-
-        if (res?.data) {
-          setHasMore(res.data.has_more ?? false);
-          setItems(res.data.medias ?? []);
-        }
-      } catch (error) {
-        addToast({
-          title: error instanceof Error ? error.message : "获取收藏夹内容失败",
-          color: "danger",
-        });
-        setHasMore(false);
-      } finally {
-        setListLoading(false);
-        // 加载完成后清除标志
-        isSwitchingFavFolderRef.current = false;
-      }
-    };
-
-    loadData();
-  }, [clearItems, favFolderId, setItems]);
+    // 使用通用加载函数加载数据
+    loadResourceList(
+      {
+        media_id: favFolderId,
+        ps: 20,
+        pn: 1,
+        platform: "web",
+        keyword: undefined,
+        order: "mtime",
+        tid: 0,
+        type: 0,
+      },
+      1,
+    );
+    // 加载完成后清除标志
+    const timer = setTimeout(() => {
+      isSwitchingFavFolderRef.current = false;
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [clearItems, favFolderId, loadResourceList, setItems]);
 
   // 当排序方式或搜索关键字变化时重新加载数据（不包括收藏夹切换时的状态重置）
   useEffect(() => {
@@ -219,14 +197,10 @@ const Favorites = () => {
     pageRef.current = 1;
   }, []);
 
-  const handleKeywordSearch = useCallback(
-    (keyword?: string) => {
-      setKeyword(keyword || "");
-      pageRef.current = 1;
-      loadPage(1);
-    },
-    [loadPage],
-  );
+  const handleKeywordSearch = useCallback((keyword?: string) => {
+    setKeyword(keyword || "");
+    pageRef.current = 1;
+  }, []);
 
   const handleItemPress = useCallback((item: FavMedia) => {
     usePlayList.getState().play({
