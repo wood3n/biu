@@ -139,29 +139,35 @@ const Favorites = () => {
 
   // 统一处理数据加载：当收藏夹ID变化时重置并重新加载
   useEffect(() => {
-    pageRef.current = 1;
-    // 设置标志表示正在切换收藏夹
-    isSwitchingFavFolderRef.current = true;
-    // 重置状态
-    setKeyword("");
-    setOrder("mtime");
-    clearItems();
-    // 更新当前收藏夹ID引用
-    currentFavFolderIdRef.current = favFolderId;
-    // 使用通用加载函数加载数据
-    loadResourceList(
-      {
-        media_id: favFolderId,
-        ps: 20,
-        pn: 1,
-        platform: "web",
-        keyword: undefined,
-        order: "mtime",
-        tid: 0,
-        type: 0,
-      },
-      1,
-    );
+    const switchFolder = async () => {
+      pageRef.current = 1;
+      // 设置标志表示正在切换收藏夹
+      isSwitchingFavFolderRef.current = true;
+      // 重置状态
+      setKeyword("");
+      setOrder("mtime");
+      clearItems();
+      // 更新当前收藏夹ID引用
+      currentFavFolderIdRef.current = favFolderId;
+      // 使用通用加载函数加载数据
+      await loadResourceList(
+        {
+          media_id: favFolderId,
+          ps: 20,
+          pn: 1,
+          platform: "web",
+          keyword: undefined,
+          order: "mtime",
+          tid: 0,
+          type: 0,
+        },
+        1,
+      );
+      // 数据加载完成后重置标志
+      isSwitchingFavFolderRef.current = false;
+    };
+
+    switchFolder().catch(console.error);
   }, [clearItems, favFolderId, loadResourceList, setItems]);
 
   // 当排序方式或搜索关键字变化时重新加载数据（不包括收藏夹切换时的状态重置）
@@ -170,11 +176,6 @@ const Favorites = () => {
     // 避免在收藏夹切换时因为状态重置而触发重复请求
     if (pageRef.current === 1 && currentFavFolderIdRef.current === favFolderId && !isSwitchingFavFolderRef.current) {
       loadPage(1);
-    }
-
-    // 如果是切换收藏夹触发的，则在检查后重置标志
-    if (isSwitchingFavFolderRef.current) {
-      isSwitchingFavFolderRef.current = false;
     }
   }, [order, keyword, loadPage, favFolderId]);
   const handleLoadMore = useCallback(() => {
