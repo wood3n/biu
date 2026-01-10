@@ -39,6 +39,12 @@ const UserFeed = () => {
     onOpen();
   };
 
+  const button = (
+    <Button isIconOnly size="sm" variant="light" onPress={handleOpen} className="hover:text-primary">
+      <RiTeamLine size={20} />
+    </Button>
+  );
+
   return (
     <>
       <Tooltip closeDelay={0} content="动态">
@@ -51,14 +57,10 @@ const UserFeed = () => {
             variant="solid"
             className="translate-x-1/3 -translate-y-1/3"
           >
-            <Button isIconOnly size="sm" variant="light" onPress={handleOpen}>
-              <RiTeamLine size={20} />
-            </Button>
+            {button}
           </Badge>
         ) : (
-          <Button isIconOnly size="sm" variant="light" onPress={handleOpen}>
-            <RiTeamLine size={20} />
-          </Button>
+          button
         )}
       </Tooltip>
       <DynamicFeedDrawer isOpen={isOpen} onOpenChange={onOpenChange} />

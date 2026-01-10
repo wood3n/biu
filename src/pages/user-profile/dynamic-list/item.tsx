@@ -54,7 +54,7 @@ const DynamicItem = ({ item }: DynamicItemProps) => {
   };
 
   return (
-    <Card className="bg-content1 w-full border-none shadow-sm" radius="md">
+    <Card className="w-full border-none shadow-sm" radius="md">
       {/* Header: Time and Action + More Menu */}
       <CardHeader className="flex items-center justify-between px-4 pt-4 pb-0">
         <div className="text-small text-default-500 flex items-center gap-2">

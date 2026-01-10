@@ -3,6 +3,7 @@ import { useLocation, useParams } from "react-router";
 
 import { Avatar, Button, Link as HeroLink, Tooltip } from "@heroui/react";
 import clx from "classnames";
+import { twMerge } from "tailwind-merge";
 
 export interface MenuItemProps {
   /** 菜单项标签 */
@@ -103,9 +104,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
       color={isActive ? "primary" : "default"}
       onPress={onPress}
       startContent={iconContent}
-      className={clx("justify-start rounded-md px-2", className, dndClassName, {
-        "text-primary": isActive,
-      })}
+      className={twMerge("justify-start rounded-md px-2", className, dndClassName)}
       {...(dndRest as any)}
     >
       <span className="truncate">{title}</span>
