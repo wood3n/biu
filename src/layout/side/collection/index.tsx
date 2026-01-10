@@ -138,48 +138,56 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
   }, []);
 
   const handlePlaySeries = useCallback(async (id: number) => {
-    const res = await getUserVideoArchivesList({
-      season_id: Number(id),
-    });
+    try {
+      const res = await getUserVideoArchivesList({
+        season_id: Number(id),
+      });
 
-    if (!res?.data?.medias?.length) {
-      addToast({ title: "暂无可播放内容", color: "warning" });
-      return;
+      if (!res?.data?.medias?.length) {
+        addToast({ title: "暂无可播放内容", color: "warning" });
+        return;
+      }
+
+      await usePlayList.getState().playList(
+        res.data.medias.map(item => ({
+          type: "mv",
+          bvid: item.bvid,
+          title: item.title,
+          cover: item.cover,
+          ownerMid: item.upper?.mid,
+          ownerName: item.upper?.name,
+        })),
+      );
+    } catch {
+      addToast({ title: "播放合集失败", color: "danger" });
     }
-
-    await usePlayList.getState().playList(
-      res.data.medias.map(item => ({
-        type: "mv",
-        bvid: item.bvid,
-        title: item.title,
-        cover: item.cover,
-        ownerMid: item.upper?.mid,
-        ownerName: item.upper?.name,
-      })),
-    );
   }, []);
 
   const handleAddSeriesToPlaylist = useCallback(async (id: number) => {
-    const res = await getUserVideoArchivesList({
-      season_id: Number(id),
-    });
+    try {
+      const res = await getUserVideoArchivesList({
+        season_id: Number(id),
+      });
 
-    if (!res?.data?.medias?.length) {
-      addToast({ title: "暂无可播放内容", color: "warning" });
-      return;
+      if (!res?.data?.medias?.length) {
+        addToast({ title: "暂无可播放内容", color: "warning" });
+        return;
+      }
+
+      usePlayList.getState().addList(
+        res.data.medias.map(item => ({
+          type: "mv",
+          bvid: item.bvid,
+          title: item.title,
+          cover: item.cover,
+          ownerMid: item.upper?.mid,
+          ownerName: item.upper?.name,
+        })),
+      );
+      addToast({ title: "已添加合集到播放列表", color: "success" });
+    } catch {
+      addToast({ title: "添加到播放列表失败", color: "danger" });
     }
-
-    usePlayList.getState().addList(
-      res.data.medias.map(item => ({
-        type: "mv",
-        bvid: item.bvid,
-        title: item.title,
-        cover: item.cover,
-        ownerMid: item.upper?.mid,
-        ownerName: item.upper?.name,
-      })),
-    );
-    addToast({ title: "已添加合集到播放列表", color: "success" });
   }, []);
 
   const handleHideMenu = useCallback(

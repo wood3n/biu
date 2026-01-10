@@ -109,7 +109,14 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
       key: "refresh",
       label: "刷新数据",
       startContent: <RiRefreshLine size={18} />,
-      onPress: () => window.location.reload(),
+      onPress: async () => {
+        await useUser.getState().updateUser();
+        const mid = useUser.getState().user?.mid;
+        if (mid) {
+          await useFavoritesStore.getState().updateCreatedFavorites(mid);
+          await useFavoritesStore.getState().updateCollectedFavorites(mid);
+        }
+      },
     },
     {
       key: "feedback",

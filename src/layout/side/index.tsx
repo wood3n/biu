@@ -88,8 +88,8 @@ const SideNav = () => {
     const rawWidth = Math.max(COLLAPSED_WIDTH, startWidthRef.current + delta);
     const cappedWidth = Math.min(rawWidth, MAX_WIDTH);
     const willCollapse = cappedWidth < MIN_WIDTH;
-    const widthForView = willCollapse ? COLLAPSED_WIDTH : Math.max(MIN_WIDTH, Math.min(cappedWidth, MAX_WIDTH));
-    const widthToPersist = Math.max(MIN_WIDTH, Math.min(cappedWidth, MAX_WIDTH));
+    const widthForView = willCollapse ? COLLAPSED_WIDTH : Math.max(MIN_WIDTH, cappedWidth);
+    const widthToPersist = Math.max(MIN_WIDTH, cappedWidth);
 
     return { willCollapse, widthForView, widthToPersist };
   };
@@ -133,7 +133,7 @@ const SideNav = () => {
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
-      if (prevUserSelectRef.current !== null) {
+      if (isDraggingRef.current && prevUserSelectRef.current !== null) {
         document.body.style.userSelect = prevUserSelectRef.current;
       }
     };

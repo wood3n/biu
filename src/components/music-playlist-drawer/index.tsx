@@ -14,7 +14,8 @@ import { useUser } from "@/store/user";
 import Empty from "../empty";
 import IconButton from "../icon-button";
 import ListItem from "./list-item";
-// Settings removed: now controlled via MusicPlayMode popover
+
+const RowHeight = 64;
 
 const PlayListDrawer = () => {
   const scrollRef = useRef<ScrollRefObject | null>(null);
@@ -93,8 +94,7 @@ const PlayListDrawer = () => {
       return;
     }
 
-    const itemHeight = 64; // 与 VirtualList itemHeight 一致
-    const targetTop = targetIndex * itemHeight;
+    const targetTop = targetIndex * RowHeight;
     const maxTop = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
     const nextTop = Math.min(targetTop, maxTop);
 
@@ -143,7 +143,7 @@ const PlayListDrawer = () => {
               className="h-full w-full px-2"
               scrollRef={scrollRef}
               data={pureList}
-              itemHeight={64}
+              itemHeight={RowHeight}
               renderItem={item => (
                 <ListItem
                   data={item}
