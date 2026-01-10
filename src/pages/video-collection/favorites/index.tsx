@@ -162,11 +162,6 @@ const Favorites = () => {
       },
       1,
     );
-    // 加载完成后清除标志
-    const timer = setTimeout(() => {
-      isSwitchingFavFolderRef.current = false;
-    }, 0);
-    return () => clearTimeout(timer);
   }, [clearItems, favFolderId, loadResourceList, setItems]);
 
   // 当排序方式或搜索关键字变化时重新加载数据（不包括收藏夹切换时的状态重置）
@@ -176,8 +171,12 @@ const Favorites = () => {
     if (pageRef.current === 1 && currentFavFolderIdRef.current === favFolderId && !isSwitchingFavFolderRef.current) {
       loadPage(1);
     }
-  }, [order, keyword, loadPage, favFolderId]);
 
+    // 如果是切换收藏夹触发的，则在检查后重置标志
+    if (isSwitchingFavFolderRef.current) {
+      isSwitchingFavFolderRef.current = false;
+    }
+  }, [order, keyword, loadPage, favFolderId]);
   const handleLoadMore = useCallback(() => {
     if (!listLoading && hasMore) {
       pageRef.current += 1;
