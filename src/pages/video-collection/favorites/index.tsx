@@ -52,6 +52,8 @@ const Favorites = () => {
 
   const pageRef = useRef(1);
   const scrollRef = useRef<ScrollRefObject>(null);
+  const currentFavFolderIdRef = useRef(favFolderId);
+  const isSwitchingFavFolderRef = useRef(false);
 
   const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditChange } = useDisclosure();
 
@@ -143,14 +145,60 @@ const Favorites = () => {
     [appendItems, fetchPageData, setItems],
   );
 
-  // 统一处理数据加载：当 favFolderId、keyword 或 order 变化时重新加载
+  // 统一处理数据加载：当收藏夹ID变化时重置并重新加载
   useEffect(() => {
     pageRef.current = 1;
+    // 设置标志表示正在切换收藏夹
+    isSwitchingFavFolderRef.current = true;
+    // 重置状态
     setKeyword("");
     setOrder("mtime");
     clearItems();
-    loadPage(1);
-  }, [clearItems, favFolderId, loadPage]);
+    // 更新当前收藏夹ID引用
+    currentFavFolderIdRef.current = favFolderId;
+    // 直接使用默认值加载数据，不依赖状态更新
+    const loadData = async () => {
+      setListLoading(true);
+      try {
+        const res = await getFavResourceList({
+          media_id: favFolderId,
+          ps: 20,
+          pn: 1,
+          platform: "web",
+          keyword: undefined,
+          order: "mtime",
+          tid: 0,
+          type: 0,
+        });
+
+        if (res?.data) {
+          setHasMore(res.data.has_more ?? false);
+          setItems(res.data.medias ?? []);
+        }
+      } catch (error) {
+        addToast({
+          title: error instanceof Error ? error.message : "获取收藏夹内容失败",
+          color: "danger",
+        });
+        setHasMore(false);
+      } finally {
+        setListLoading(false);
+        // 加载完成后清除标志
+        isSwitchingFavFolderRef.current = false;
+      }
+    };
+
+    loadData();
+  }, [clearItems, favFolderId, setItems]);
+
+  // 当排序方式或搜索关键字变化时重新加载数据（不包括收藏夹切换时的状态重置）
+  useEffect(() => {
+    // 只有当pageRef.current为1、收藏夹ID没有变化且不是正在切换收藏夹时才重新加载
+    // 避免在收藏夹切换时因为状态重置而触发重复请求
+    if (pageRef.current === 1 && currentFavFolderIdRef.current === favFolderId && !isSwitchingFavFolderRef.current) {
+      loadPage(1);
+    }
+  }, [order, keyword, loadPage, favFolderId]);
 
   const handleLoadMore = useCallback(() => {
     if (!listLoading && hasMore) {
@@ -166,14 +214,10 @@ const Favorites = () => {
     [removeItem],
   );
 
-  const handleOrderChange = useCallback(
-    (order: string) => {
-      setOrder(order);
-      pageRef.current = 1;
-      loadPage(1);
-    },
-    [loadPage],
-  );
+  const handleOrderChange = useCallback((order: string) => {
+    setOrder(order);
+    pageRef.current = 1;
+  }, []);
 
   const handleKeywordSearch = useCallback(
     (keyword?: string) => {
