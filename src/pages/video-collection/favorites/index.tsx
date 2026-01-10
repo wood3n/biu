@@ -180,6 +180,7 @@ const Favorites = () => {
     };
     switchFolder().catch(error => {
       if (isMounted) {
+        isSwitchingFavFolderRef.current = false;
         console.error(error);
         addToast({
           title: error instanceof Error ? error.message : "切换收藏夹失败",
@@ -191,7 +192,7 @@ const Favorites = () => {
     return () => {
       isMounted = false;
     };
-  }, [clearItems, favFolderId, loadResourceList, setItems]);
+  }, [clearItems, favFolderId, loadResourceList]);
 
   // 当排序方式或搜索关键字变化时重新加载数据（不包括收藏夹切换时的状态重置）
   useEffect(() => {
