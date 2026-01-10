@@ -213,6 +213,18 @@ const playAudioSafely = async () => {
   try {
     await audio.play();
   } catch (error) {
+    if ((error as DOMException)?.name === "NotSupportedError") {
+      const refreshed = await refreshCurrentAudioSource();
+      if (refreshed) {
+        try {
+          await audio.play();
+          return;
+        } catch (retryError) {
+          handlePlayError(retryError);
+          return;
+        }
+      }
+    }
     handlePlayError(error);
   }
 };
@@ -910,6 +922,57 @@ export const usePlayList = create<State & Action>()(
     },
   ),
 );
+
+async function refreshCurrentAudioSource(): Promise<boolean> {
+  const { getPlayItem } = usePlayList.getState?.() ?? {};
+  const playItem = getPlayItem?.();
+
+  if (!playItem) {
+    return false;
+  }
+
+  try {
+    if (playItem.type === "mv" && playItem.bvid && playItem.cid) {
+      const mvPlayData = await getDashUrl(playItem.bvid, playItem.cid);
+      if (mvPlayData?.audioUrl) {
+        audio.src = mvPlayData.audioUrl;
+        usePlayList.setState(state => {
+          const listItem = state.list.find(item => item.id === state.playId);
+          if (listItem) {
+            listItem.audioUrl = mvPlayData.audioUrl;
+            listItem.videoUrl = mvPlayData.videoUrl;
+            listItem.isLossless = mvPlayData.isLossless;
+            listItem.isDolby = mvPlayData.isDolby;
+          }
+        });
+        return true;
+      }
+    }
+
+    if (playItem.type === "audio" && playItem.sid) {
+      const musicPlayData = await getAudioUrl(playItem.sid);
+      if (musicPlayData?.audioUrl) {
+        audio.src = musicPlayData.audioUrl;
+        usePlayList.setState(state => {
+          const listItem = state.list.find(item => item.id === state.playId);
+          if (listItem) {
+            listItem.audioUrl = musicPlayData.audioUrl;
+            listItem.isLossless = musicPlayData.isLossless;
+          }
+        });
+        return true;
+      }
+    }
+  } catch (refreshError) {
+    log.error("刷新播放链接失败", {
+      playItem,
+      refreshError,
+    });
+    handlePlayError(refreshError);
+  }
+
+  return false;
+}
 
 function resetAudioAndPlay(url: string) {
   audio.src = url;

@@ -486,7 +486,14 @@ const Favorites = () => {
         mid={Number(favFolderId)}
         isOpen={isEditOpen}
         onOpenChange={onEditChange}
-        onSuccess={mutateInfo}
+        onSuccess={info => {
+          mutateInfo(info);
+          useFavoritesStore.getState().modifyCreatedFavorite({
+            id: info.id,
+            cover: info.cover,
+            title: info.title,
+          });
+        }}
       />
     </ScrollContainer>
   );
