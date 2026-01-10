@@ -119,6 +119,9 @@ const Favorites = () => {
 
   const loadPage = useCallback(
     async (targetPage: number) => {
+      if (!favFolderId) {
+        return;
+      }
       // 使用通用加载函数加载数据
       loadResourceList(
         {
@@ -139,6 +142,13 @@ const Favorites = () => {
 
   // 统一处理数据加载：当收藏夹ID变化时重置并重新加载
   useEffect(() => {
+    let isMounted = true;
+    if (!favFolderId) {
+      // 当 favFolderId 不存在时，清空列表并返回
+      clearItems();
+      setHasMore(false);
+      return;
+    }
     const switchFolder = async () => {
       pageRef.current = 1;
       // 设置标志表示正在切换收藏夹
@@ -164,10 +174,23 @@ const Favorites = () => {
         1,
       );
       // 数据加载完成后重置标志
-      isSwitchingFavFolderRef.current = false;
+      if (isMounted) {
+        isSwitchingFavFolderRef.current = false;
+      }
     };
+    switchFolder().catch(error => {
+      if (isMounted) {
+        console.error(error);
+        addToast({
+          title: error instanceof Error ? error.message : "切换收藏夹失败",
+          color: "danger",
+        });
+      }
+    });
 
-    switchFolder().catch(console.error);
+    return () => {
+      isMounted = false;
+    };
   }, [clearItems, favFolderId, loadResourceList, setItems]);
 
   // 当排序方式或搜索关键字变化时重新加载数据（不包括收藏夹切换时的状态重置）
