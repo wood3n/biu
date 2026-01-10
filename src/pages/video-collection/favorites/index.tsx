@@ -5,6 +5,7 @@ import { addToast, useDisclosure } from "@heroui/react";
 import { useRequest } from "ahooks";
 
 import { CollectionType } from "@/common/constants/collection";
+import { getAllFavMedia } from "@/common/utils/fav";
 import { openBiliVideoLink } from "@/common/utils/url";
 import FavoritesEditModal from "@/components/favorites-edit-modal";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
@@ -24,7 +25,6 @@ import { useUser } from "@/store/user";
 
 import Header from "../header";
 import Operations from "../operation";
-import { getAllFavMedia } from "../utils";
 import FavoriteGridList from "./grid-list";
 import FavoriteList from "./list";
 

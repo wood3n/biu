@@ -1,20 +1,23 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 
-import { addToast, Button, Drawer, DrawerBody, DrawerContent, DrawerHeader, Tooltip } from "@heroui/react";
-import { RiDeleteBinLine } from "@remixicon/react";
+import { addToast, Drawer, DrawerBody, DrawerContent, DrawerHeader } from "@heroui/react";
+import { RiDeleteBinLine, RiFocus3Line } from "@remixicon/react";
 import { uniqBy } from "es-toolkit/array";
 
 import { openBiliVideoLink } from "@/common/utils/url";
+import { type ScrollRefObject } from "@/components/scroll-container";
 import { VirtualList } from "@/components/virtual-list";
 import { useModalStore } from "@/store/modal";
-import { usePlayList, type PlayData } from "@/store/play-list";
+import { isSame, usePlayList, type PlayData } from "@/store/play-list";
 import { useUser } from "@/store/user";
 
 import Empty from "../empty";
+import IconButton from "../icon-button";
 import ListItem from "./list-item";
 // Settings removed: now controlled via MusicPlayMode popover
 
 const PlayListDrawer = () => {
+  const scrollRef = useRef<ScrollRefObject | null>(null);
   const isOpen = useModalStore(s => s.isPlayListDrawerOpen);
   const setOpen = useModalStore(s => s.setPlayListDrawerOpen);
   const list = usePlayList(s => s.list);
@@ -27,10 +30,6 @@ const PlayListDrawer = () => {
   const pureList = useMemo(() => {
     return uniqBy(list, item => item.bvid);
   }, [list]);
-  const currentMedia = useMemo(() => pureList.find(item => item.bvid === playItem?.bvid), [pureList, playItem]);
-  const filteredList = useMemo(() => {
-    return pureList.filter(item => item.bvid !== playItem?.bvid);
-  }, [pureList, playItem]);
 
   const handleAction = useCallback(async (key: string, item: PlayData) => {
     switch (key) {
@@ -77,6 +76,35 @@ const PlayListDrawer = () => {
     }
   }, []);
 
+  const scrollToPlayItem = useCallback(() => {
+    if (!playItem) {
+      addToast({ title: "当前没有正在播放的歌曲", color: "warning" });
+      return;
+    }
+
+    const targetIndex = pureList.findIndex(item => isSame(playItem, item));
+    if (targetIndex < 0) {
+      addToast({ title: "未在列表中找到当前播放的歌曲", color: "warning" });
+      return;
+    }
+
+    const viewport = scrollRef.current?.osInstance()?.elements().viewport as HTMLElement | null;
+    if (!viewport) {
+      return;
+    }
+
+    const itemHeight = 64; // 与 VirtualList itemHeight 一致
+    const targetTop = targetIndex * itemHeight;
+    const maxTop = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
+    const nextTop = Math.min(targetTop, maxTop);
+
+    if (typeof viewport.scrollTo === "function") {
+      viewport.scrollTo({ top: nextTop, behavior: "smooth" });
+    } else {
+      viewport.scrollTop = nextTop;
+    }
+  }, [playItem, pureList]);
+
   return (
     <Drawer
       radius="md"
@@ -89,51 +117,45 @@ const PlayListDrawer = () => {
       onOpenChange={setOpen}
       classNames={{
         backdrop: "z-200 window-no-drag",
-        wrapper: "z-200",
+        wrapper: "z-200 window-no-drag",
         base: "data-[placement=right]:mb-22",
       }}
     >
       <DrawerContent>
         <DrawerHeader className="border-divider/40 flex flex-row items-center justify-between space-x-2 border-b px-4 py-3">
           <h3>播放列表</h3>
-          {Boolean(pureList?.length) && (
-            <Tooltip closeDelay={0} content="清空播放列表">
-              <Button isIconOnly size="sm" variant="light" onPress={clear}>
-                <RiDeleteBinLine size={16} />
-              </Button>
-            </Tooltip>
-          )}
+          <div className="flex items-center">
+            {Boolean(pureList?.length) && (
+              <>
+                <IconButton tooltip="定位当前播放" onPress={scrollToPlayItem}>
+                  <RiFocus3Line size={16} />
+                </IconButton>
+                <IconButton tooltip="清空播放列表" onPress={clear} className="hover:text-danger">
+                  <RiDeleteBinLine size={16} />
+                </IconButton>
+              </>
+            )}
+          </div>
         </DrawerHeader>
         {list.length ? (
-          <>
-            {Boolean(currentMedia) && (
-              <div className="border-divider/40 border-b px-2 py-1">
+          <DrawerBody className="overflow-hidden px-0">
+            <VirtualList
+              className="h-full w-full px-2"
+              scrollRef={scrollRef}
+              data={pureList}
+              itemHeight={64}
+              renderItem={item => (
                 <ListItem
+                  data={item}
                   isLogin={Boolean(user?.isLogin)}
-                  isPlaying
-                  data={currentMedia!}
+                  isPlaying={isSame(playItem, item)}
                   onClose={() => setOpen(false)}
-                  onAction={key => handleAction(key, currentMedia!)}
+                  onPress={() => playListItem(item.id)}
+                  onAction={key => handleAction(key, item)}
                 />
-              </div>
-            )}
-            <DrawerBody className="overflow-hidden px-0">
-              <VirtualList
-                className="h-full w-full px-2"
-                data={filteredList}
-                itemHeight={64}
-                renderItem={item => (
-                  <ListItem
-                    data={item}
-                    isLogin={Boolean(user?.isLogin)}
-                    onClose={() => setOpen(false)}
-                    onPress={() => playListItem(item.id)}
-                    onAction={key => handleAction(key, item)}
-                  />
-                )}
-              />
-            </DrawerBody>
-          </>
+              )}
+            />
+          </DrawerBody>
         ) : (
           <Empty />
         )}

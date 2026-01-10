@@ -11,10 +11,21 @@ interface VirtualListProps<T> {
   overscan?: number;
   className?: string;
   empty?: React.ReactNode;
+  /** external ref to control scroll (e.g., scroll to index) */
+  scrollRef?: React.RefObject<ScrollRefObject | null>;
 }
 
-export function VirtualList<T>({ data, renderItem, itemHeight, overscan = 5, className, empty }: VirtualListProps<T>) {
-  const scrollerRef = useRef<ScrollRefObject>(null);
+export function VirtualList<T>({
+  data,
+  renderItem,
+  itemHeight,
+  overscan = 5,
+  className,
+  empty,
+  scrollRef,
+}: VirtualListProps<T>) {
+  const internalRef = useRef<ScrollRefObject | null>(null);
+  const scrollerRef = scrollRef ?? internalRef;
   const [viewport, setViewport] = useState<HTMLElement | null>(null);
 
   useEffect(() => {

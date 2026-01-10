@@ -16,6 +16,7 @@ import {
   RiLoginCircleLine,
   RiLogoutCircleLine,
   RiProfileLine,
+  RiRefreshLine,
   RiSettings3Line,
 } from "@remixicon/react";
 
@@ -103,6 +104,12 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
       label: "设置",
       startContent: <RiSettings3Line size={18} />,
       onPress: () => navigate("/settings"),
+    },
+    {
+      key: "refresh",
+      label: "刷新数据",
+      startContent: <RiRefreshLine size={18} />,
+      onPress: () => window.location.reload(),
     },
     {
       key: "feedback",

@@ -26,6 +26,25 @@ const SideNav = () => {
     onOpen: onOpenFavoritesEditModal,
     onOpenChange: onOpenChangeFavoritesEditModal,
   } = useDisclosure();
+  const [editingFavoriteId, setEditingFavoriteId] = useState<number>();
+
+  const handleOpenAddFavorite = () => {
+    setEditingFavoriteId(undefined);
+    onOpenFavoritesEditModal();
+  };
+
+  const handleOpenEditFavorite = (id: number) => {
+    setEditingFavoriteId(id);
+    onOpenFavoritesEditModal();
+  };
+
+  const handleFavoritesEditModalChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setEditingFavoriteId(undefined);
+    }
+
+    onOpenChangeFavoritesEditModal();
+  };
 
   const sidebarWidth = (() => {
     if (sideMenuCollapsed) return COLLAPSED_WIDTH;
@@ -136,8 +155,12 @@ const SideNav = () => {
             "overflow-hidden": isDragging,
           })}
         >
-          <DefaultMenus isCollapsed={isCollapsedVisual} onOpenAddFavorite={onOpenFavoritesEditModal} />
-          <Collection isCollapsed={isCollapsedVisual} onOpenAddFavorite={onOpenFavoritesEditModal} />
+          <DefaultMenus isCollapsed={isCollapsedVisual} onOpenAddFavorite={handleOpenAddFavorite} />
+          <Collection
+            isCollapsed={isCollapsedVisual}
+            onOpenAddFavorite={handleOpenAddFavorite}
+            onOpenEditFavorite={handleOpenEditFavorite}
+          />
         </ScrollContainer>
         <Button
           size="sm"
@@ -154,7 +177,11 @@ const SideNav = () => {
           onMouseDown={onStartResize}
         />
       </div>
-      <FavoritesEditModal isOpen={isFavoritesEditModalOpen} onOpenChange={onOpenChangeFavoritesEditModal} />
+      <FavoritesEditModal
+        mid={editingFavoriteId}
+        isOpen={isFavoritesEditModalOpen}
+        onOpenChange={handleFavoritesEditModalChange}
+      />
     </>
   );
 };

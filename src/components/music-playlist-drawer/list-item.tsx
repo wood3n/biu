@@ -29,7 +29,7 @@ const ListItem = ({ data, isLogin, isPlaying, onAction, onClose, onPress }: Prop
       key={data.id}
       fullWidth
       disableAnimation
-      variant="light"
+      variant={isPlaying ? "flat" : "light"}
       color={isPlaying ? "primary" : "default"}
       onPress={onPress}
       className="group flex h-auto min-h-auto w-full min-w-auto items-center justify-between space-y-2 rounded-md p-2"

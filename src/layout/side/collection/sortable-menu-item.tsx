@@ -3,14 +3,17 @@ import { useMemo, type CSSProperties } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+import ContextMenu, { type ContextMenuItem } from "@/components/context-menu";
 import MenuItem, { type MenuItemProps } from "@/components/menu/menu-item";
 
 interface Props extends MenuItemProps {
   id: number | string;
   disabled?: boolean;
+  contextMenuItems?: ContextMenuItem[];
+  onContextMenuAction?: (key: string) => void;
 }
 
-const SortableMenuItem = ({ id, disabled, ...itemProps }: Props) => {
+const SortableMenuItem = ({ id, disabled, contextMenuItems, onContextMenuAction, ...itemProps }: Props) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
     disabled,
@@ -39,9 +42,21 @@ const SortableMenuItem = ({ id, disabled, ...itemProps }: Props) => {
     } as CSSProperties;
   }, [transform, transition, isDragging, disabled]);
 
+  const itemContent = <MenuItem {...itemProps} dndProps={dragProps} />;
+
   return (
     <div ref={setNodeRef} style={style}>
-      <MenuItem {...itemProps} dndProps={dragProps} />
+      {contextMenuItems?.length ? (
+        <ContextMenu
+          className="flex h-full w-full items-center"
+          items={contextMenuItems}
+          onAction={onContextMenuAction}
+        >
+          {itemContent}
+        </ContextMenu>
+      ) : (
+        itemContent
+      )}
     </div>
   );
 };

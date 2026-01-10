@@ -23,6 +23,7 @@ export interface MenuItemProps {
   collapsed?: boolean;
   /** 用于 dnd-kit 等场景，把拖拽监听器绑定到可交互元素上 */
   dndProps?: ({ className?: string } & Record<string, unknown>) | undefined;
+  [key: string]: unknown;
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({
