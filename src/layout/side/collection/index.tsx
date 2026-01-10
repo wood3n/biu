@@ -143,21 +143,23 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
         season_id: Number(id),
       });
 
-      if (!res?.data?.medias?.length) {
-        addToast({ title: "暂无可播放内容", color: "warning" });
-        return;
-      }
-
-      await usePlayList.getState().playList(
-        res.data.medias.map(item => ({
-          type: "mv",
+      const sortedMapped = res?.data?.medias
+        ?.toSorted((a, b) => b.pubtime - a.pubtime)
+        .map(item => ({
+          type: "mv" as const,
           bvid: item.bvid,
           title: item.title,
           cover: item.cover,
           ownerMid: item.upper?.mid,
           ownerName: item.upper?.name,
-        })),
-      );
+        }));
+
+      if (!sortedMapped?.length) {
+        addToast({ title: "暂无可播放内容", color: "warning" });
+        return;
+      }
+
+      await usePlayList.getState().playList(sortedMapped);
     } catch {
       addToast({ title: "播放合集失败", color: "danger" });
     }
@@ -169,21 +171,23 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
         season_id: Number(id),
       });
 
-      if (!res?.data?.medias?.length) {
-        addToast({ title: "暂无可播放内容", color: "warning" });
-        return;
-      }
-
-      usePlayList.getState().addList(
-        res.data.medias.map(item => ({
-          type: "mv",
+      const sortedMapped = res?.data?.medias
+        ?.toSorted((a, b) => b.pubtime - a.pubtime)
+        .map(item => ({
+          type: "mv" as const,
           bvid: item.bvid,
           title: item.title,
           cover: item.cover,
           ownerMid: item.upper?.mid,
           ownerName: item.upper?.name,
-        })),
-      );
+        }));
+
+      if (!sortedMapped?.length) {
+        addToast({ title: "暂无可播放内容", color: "warning" });
+        return;
+      }
+
+      usePlayList.getState().addList(sortedMapped);
       addToast({ title: "已添加合集到播放列表", color: "success" });
     } catch {
       addToast({ title: "添加到播放列表失败", color: "danger" });

@@ -108,7 +108,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
       className={twMerge("justify-start rounded-md px-2", className, dndClassName)}
       {...(dndRest as any)}
     >
-      <span className="truncate">{title}</span>
+      <span className="pointer-events-none truncate">{title}</span>
     </Button>
   );
 };

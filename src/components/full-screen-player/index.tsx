@@ -175,7 +175,7 @@ const FullScreenPlayer = () => {
               </div>
               <div className="flex min-h-0 flex-1 flex-col items-center justify-between">
                 <div className="p-6 text-center text-white">
-                  <h2 className="text-2xl font-bold">{playItem.pageTitle || playItem.title}</h2>
+                  <h2 className="text-2xl font-bold break-all">{playItem.pageTitle || playItem.title}</h2>
                   <button
                     type="button"
                     className="mt-2 text-white/60 hover:underline"
