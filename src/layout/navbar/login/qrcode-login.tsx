@@ -57,7 +57,7 @@ const QrcodeLogin = ({ onClose, updateUserData }: QrcodeLoginProps) => {
   return (
     <div className="flex flex-col items-center p-6">
       <div className="mb-4 text-lg font-medium">扫码登录</div>
-      <div className="border-divider bg-content1 relative flex h-40 w-40 items-center justify-center overflow-hidden rounded-lg border">
+      <div className="border-divider relative flex h-40 w-40 items-center justify-center overflow-hidden rounded-lg border">
         {genLoading || !qrcodeData?.url ? (
           <Skeleton className="rounded-lg">
             <div className="bg-default-300 h-[144px] w-[144px] rounded-lg" />

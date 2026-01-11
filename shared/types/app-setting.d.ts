@@ -28,4 +28,5 @@ interface AppSettings {
   showSearchHistory: boolean;
   proxySettings: ProxySettings;
   sideMenuCollapsed: boolean;
+  sideMenuWidth: number;
 }

@@ -81,7 +81,7 @@ const UserCard = ({ u, refresh, onSetGroup }: Props) => {
           )}
         </div>
         <div className="flex w-full flex-col items-center space-y-1">
-          <span className="text-lg">{u.uname}</span>
+          <span className="max-w-full min-w-0 truncate text-lg">{u.uname}</span>
           <span className="text-foreground-500 line-clamp-2 w-full text-center text-sm">{u.sign}</span>
         </div>
       </CardBody>

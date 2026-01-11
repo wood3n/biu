@@ -16,6 +16,7 @@ import {
   RiLoginCircleLine,
   RiLogoutCircleLine,
   RiProfileLine,
+  RiRefreshLine,
   RiSettings3Line,
 } from "@remixicon/react";
 
@@ -103,6 +104,30 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
       label: "设置",
       startContent: <RiSettings3Line size={18} />,
       onPress: () => navigate("/settings"),
+    },
+    {
+      key: "refresh",
+      label: "刷新数据",
+      startContent: <RiRefreshLine size={18} />,
+      onPress: async () => {
+        try {
+          await useUser.getState().updateUser();
+          const mid = useUser.getState().user?.mid;
+          if (mid) {
+            await useFavoritesStore.getState().updateCreatedFavorites(mid);
+            await useFavoritesStore.getState().updateCollectedFavorites(mid);
+          }
+          addToast({
+            title: "数据刷新成功",
+            color: "success",
+          });
+        } catch {
+          addToast({
+            title: "刷新数据失败",
+            color: "danger",
+          });
+        }
+      },
     },
     {
       key: "feedback",

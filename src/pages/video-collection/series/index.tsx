@@ -220,7 +220,7 @@ const VideoSeries = () => {
   }, []);
 
   return (
-    <ScrollContainer enableBackToTop ref={scrollRef} className="h-full w-full px-4 pb-6">
+    <ScrollContainer enableBackToTop ref={scrollRef} resetOnChange={id} className="h-full w-full px-4 pb-6">
       <Header
         type={CollectionType.VideoSeries}
         cover={data?.info?.cover}

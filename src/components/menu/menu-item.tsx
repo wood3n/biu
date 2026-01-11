@@ -3,6 +3,7 @@ import { useLocation, useParams } from "react-router";
 
 import { Avatar, Button, Link as HeroLink, Tooltip } from "@heroui/react";
 import clx from "classnames";
+import { twMerge } from "tailwind-merge";
 
 export interface MenuItemProps {
   /** 菜单项标签 */
@@ -22,6 +23,7 @@ export interface MenuItemProps {
   collapsed?: boolean;
   /** 用于 dnd-kit 等场景，把拖拽监听器绑定到可交互元素上 */
   dndProps?: ({ className?: string } & Record<string, unknown>) | undefined;
+  [key: string]: unknown;
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({
@@ -97,17 +99,16 @@ const MenuItem: React.FC<MenuItemProps> = ({
       as={href ? HeroLink : "button"}
       href={href}
       fullWidth
+      disableRipple
       radius="md"
       variant={isActive ? "flat" : "light"}
-      color="default"
+      color={isActive ? "primary" : "default"}
       onPress={onPress}
       startContent={iconContent}
-      className={clx("justify-start rounded-md px-2", className, dndClassName, {
-        "text-primary": isActive,
-      })}
+      className={twMerge("justify-start rounded-md px-2", className, dndClassName)}
       {...(dndRest as any)}
     >
-      <span className="truncate">{title}</span>
+      <span className="pointer-events-none truncate">{title}</span>
     </Button>
   );
 };

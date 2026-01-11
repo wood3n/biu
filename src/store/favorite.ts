@@ -210,13 +210,15 @@ async function getAllCreatedFavorites(userMid: number | string) {
     }
 
     response.data.list.forEach(item => {
-      favorites.push({
-        id: item.id,
-        title: item.title,
-        cover: item.cover,
-        type: item.type,
-        mid: item.mid,
-      });
+      if (item.state === 0) {
+        favorites.push({
+          id: item.id,
+          title: item.title,
+          cover: item.cover,
+          type: item.type,
+          mid: item.mid,
+        });
+      }
     });
   });
 
@@ -241,13 +243,15 @@ async function getAllCollectedFavorites(userMid: number | string) {
 
   if (firstRes.data.list?.length) {
     firstRes.data.list.forEach(item => {
-      favorites.push({
-        id: item.id,
-        title: item.title,
-        cover: item.cover,
-        type: item.type,
-        mid: item.mid,
-      });
+      if (item.state === 0) {
+        favorites.push({
+          id: item.id,
+          title: item.title,
+          cover: item.cover,
+          type: item.type,
+          mid: item.mid,
+        });
+      }
     });
   }
 
@@ -281,13 +285,15 @@ async function getAllCollectedFavorites(userMid: number | string) {
     }
 
     response.data.list.forEach(item => {
-      favorites.push({
-        id: item.id,
-        title: item.title,
-        cover: item.cover,
-        type: item.type,
-        mid: item.mid,
-      });
+      if (item.state === 0) {
+        favorites.push({
+          id: item.id,
+          title: item.title,
+          cover: item.cover,
+          type: item.type,
+          mid: item.mid,
+        });
+      }
     });
   });
 
