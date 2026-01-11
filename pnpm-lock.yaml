@@ -33,10 +33,10 @@ importers:
         specifier: ^3.13.18
         version: 3.13.18(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       ahooks:
-        specifier: ^3.9.5
+        specifier: ^3.9.6
         version: 3.9.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       axios:
-        specifier: ^1.11.0
+        specifier: ^1.13.2
         version: 1.13.2
       classnames:
         specifier: ^2.5.1
@@ -57,8 +57,8 @@ importers:
         specifier: ^6.6.2
         version: 6.6.2
       es-toolkit:
-        specifier: ^1.39.10
-        version: 1.42.0
+        specifier: ^1.43.0
+        version: 1.43.0
       filesize:
         specifier: ^11.0.13
         version: 11.0.13
@@ -75,7 +75,7 @@ importers:
         specifier: ^14.6.6
         version: 14.6.6
       immer:
-        specifier: ^10.1.3
+        specifier: ^10.2.0
         version: 10.2.0
       jsencrypt:
         specifier: ^3.5.4
@@ -126,11 +126,11 @@ importers:
         specifier: ^3.4.0
         version: 3.4.0
       zod:
-        specifier: ^4.1.11
-        version: 4.1.13
+        specifier: ^4.3.5
+        version: 4.3.5
       zustand:
-        specifier: ^5.0.8
-        version: 5.0.8(@types/react@19.2.7)(immer@10.2.0)(react@19.1.1)(use-sync-external-store@1.6.0(react@19.1.1))
+        specifier: ^5.0.9
+        version: 5.0.9(@types/react@19.2.7)(immer@10.2.0)(react@19.1.1)(use-sync-external-store@1.6.0(react@19.1.1))
     devDependencies:
       '@commitlint/cli':
         specifier: ^20.1.0
@@ -3942,8 +3942,8 @@ packages:
     resolution: {integrity: sha512-w+5mJ3GuFL+NjVtJlvydShqE1eN3h3PbI7/5LAsYJP/2qtuMXjfL2LpHSRqo4b4eSF5K/DH1JXKUAHSB2UW50g==}
     engines: {node: '>= 0.4'}
 
-  es-toolkit@1.42.0:
-    resolution: {integrity: sha512-SLHIyY7VfDJBM8clz4+T2oquwTQxEzu263AyhVK4jREOAwJ+8eebaa4wM3nlvnAqhDrMm2EsA6hWHaQsMPQ1nA==}
+  es-toolkit@1.43.0:
+    resolution: {integrity: sha512-SKCT8AsWvYzBBuUqMk4NPwFlSdqLpJwmy6AP322ERn8W2YLIB6JBXnwMI2Qsh2gfphT3q7EKAxKb23cvFHFwKA==}
 
   es6-error@4.1.1:
     resolution: {integrity: sha512-Um/+FxMr9CISWh0bi5Zv0iOD+4cFh5qLeks1qhAopKVAJw3drgKbKySikp7wGhDL0HPeaja0P5ULZrxLkniUVg==}
@@ -6784,11 +6784,11 @@ packages:
     resolution: {integrity: sha512-4LCcse/U2MHZ63HAJVE+v71o7yOdIe4cZ70Wpf8D/IyjDKYQLV5GD46B+hSTjJsvV5PztjvHoU580EftxjDZFQ==}
     engines: {node: '>=12.20'}
 
-  zod@4.1.13:
-    resolution: {integrity: sha512-AvvthqfqrAhNH9dnfmrfKzX5upOdjUVJYFqNSlkmGf64gRaTzlPwz99IHYnVs28qYAybvAlBV+H7pn0saFY4Ig==}
+  zod@4.3.5:
+    resolution: {integrity: sha512-k7Nwx6vuWx1IJ9Bjuf4Zt1PEllcwe7cls3VNzm4CQ1/hgtFUK2bRNG3rvnpPUhFjmqJKAKtjV576KnUkHocg/g==}
 
-  zustand@5.0.8:
-    resolution: {integrity: sha512-gyPKpIaxY9XcO2vSMrLbiER7QMAMGOQZVRdJ6Zi782jkbzZygq5GI9nG8g+sMgitRtndwaBSl7uiqC49o1SSiw==}
+  zustand@5.0.9:
+    resolution: {integrity: sha512-ALBtUj0AfjJt3uNRQoL1tL2tMvj6Gp/6e39dnfT6uzpelGru8v1tPOGBzayOWbPJvujM8JojDk3E1LxeFisBNg==}
     engines: {node: '>=12.20.0'}
     peerDependencies:
       '@types/react': '>=18.0.0'
@@ -7523,7 +7523,7 @@ snapshots:
       '@eslint-react/eff': 1.53.1
       '@typescript-eslint/utils': 8.48.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       ts-pattern: 5.9.0
-      zod: 4.1.13
+      zod: 4.3.5
     transitivePeerDependencies:
       - eslint
       - supports-color
@@ -7535,7 +7535,7 @@ snapshots:
       '@eslint-react/kit': 1.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       '@typescript-eslint/utils': 8.48.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       ts-pattern: 5.9.0
-      zod: 4.1.13
+      zod: 4.3.5
     transitivePeerDependencies:
       - eslint
       - supports-color
@@ -11555,7 +11555,7 @@ snapshots:
       is-date-object: 1.1.0
       is-symbol: 1.1.1
 
-  es-toolkit@1.42.0: {}
+  es-toolkit@1.43.0: {}
 
   es6-error@4.1.1:
     optional: true
@@ -12767,7 +12767,7 @@ snapshots:
       smol-toml: 1.5.2
       strip-json-comments: 5.0.3
       typescript: 5.9.3
-      zod: 4.1.13
+      zod: 4.3.5
 
   known-css-properties@0.37.0: {}
 
@@ -14591,9 +14591,9 @@ snapshots:
 
   yocto-queue@1.2.2: {}
 
-  zod@4.1.13: {}
+  zod@4.3.5: {}
 
-  zustand@5.0.8(@types/react@19.2.7)(immer@10.2.0)(react@19.1.1)(use-sync-external-store@1.6.0(react@19.1.1)):
+  zustand@5.0.9(@types/react@19.2.7)(immer@10.2.0)(react@19.1.1)(use-sync-external-store@1.6.0(react@19.1.1)):
     optionalDependencies:
       '@types/react': 19.2.7
       immer: 10.2.0
