@@ -1,5 +1,36 @@
 # Changelog
 
+## v1.11.0
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.10.0...v1.11.0)
+
+### 🚀 新功能
+
+- 侧边收藏夹菜单支持右键菜单 ([444cbbc](https://github.com/wood3n/biu/commit/444cbbc))
+
+### 🔥 功能优化
+
+- 侧边菜单蓝宽度支持拖拽修改 ([bde813d](https://github.com/wood3n/biu/commit/bde813d))
+
+### 🩹 修复问题
+
+- **deps:** Update ui libraries ([f7ea206](https://github.com/wood3n/biu/commit/f7ea206))
+- 优化主题切换组件代码，移除主题色配置功能 ([8cde702](https://github.com/wood3n/biu/commit/8cde702))
+- 解决播放异步报错问题 ([2d90b71](https://github.com/wood3n/biu/commit/2d90b71))
+- **deps:** Update dependency got to ^14.6.6 ([a9b24fa](https://github.com/wood3n/biu/commit/a9b24fa))
+- 修复之前重构导致失效收藏夹仍然显示的问题 ([5e99c6b](https://github.com/wood3n/biu/commit/5e99c6b))
+- 恢复主题设置 ([a9f5f75](https://github.com/wood3n/biu/commit/a9f5f75))
+- Review problem ([b00a986](https://github.com/wood3n/biu/commit/b00a986))
+- Review problem ([6b6a317](https://github.com/wood3n/biu/commit/6b6a317))
+- Review problem ([9bfe6a9](https://github.com/wood3n/biu/commit/9bfe6a9))
+- 修复播放时链接资源无法获取导致无法播放的问题 ([a41af9c](https://github.com/wood3n/biu/commit/a41af9c))
+- Review problem ([c1f927c](https://github.com/wood3n/biu/commit/c1f927c))
+- 修复收藏夹排序问题（#198） ([#198](https://github.com/wood3n/biu/issues/198))
+
+### ❤️ Contributors
+
+- Wood3n
+
 ## v1.10.0
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.9.0...v1.10.0)
