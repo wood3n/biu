@@ -16,9 +16,10 @@ const SearchWithSort = ({ onKeywordSearch, orderOptions, order, onOrderChange }:
       {Boolean(orderOptions?.length) && (
         <Select
           radius="md"
-          selectedKeys={order ? [order] : []}
+          selectedKeys={order ? new Set([order]) : new Set<string>()}
           onSelectionChange={keys => {
-            const selectedValue = Array.from(keys)[0];
+            if (keys === "all") return;
+            const selectedValue = keys instanceof Set ? Array.from(keys)[0] : keys;
             onOrderChange?.(selectedValue as string);
           }}
           items={orderOptions}
@@ -31,7 +32,11 @@ const SearchWithSort = ({ onKeywordSearch, orderOptions, order, onOrderChange }:
             innerWrapper: "w-20",
           }}
         >
-          {item => <SelectItem>{item.label}</SelectItem>}
+          {item => (
+            <SelectItem key={item.key} textValue={item.label}>
+              {item.label}
+            </SelectItem>
+          )}
         </Select>
       )}
     </div>
