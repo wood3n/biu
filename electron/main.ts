@@ -25,7 +25,7 @@ log.initialize();
 
 if (isDev) {
   // 为 chrome-devtools-mcp 开启远程调试端口
-  app.commandLine.appendSwitch("remote-debugging-port", "8348");
+  app.commandLine.appendSwitch("remote-debugging-port", "9232");
   // 开发环境数据隔离
   app.setPath("userData", path.join(app.getPath("appData"), `biu-dev`));
 }

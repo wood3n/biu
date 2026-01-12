@@ -3,7 +3,7 @@ import log from "electron-log";
 
 import { StoreNameMap } from "@shared/store";
 
-import { appSettingsStore, userStore, shortcutKeyStore } from "../store";
+import { appSettingsStore, lyricsCacheStore, shortcutKeyStore, userStore } from "../store";
 import { channel } from "./channel";
 
 export function registerStoreHandlers() {
@@ -18,6 +18,10 @@ export function registerStoreHandlers() {
 
     if (name === StoreNameMap.ShortcutSettings) {
       return shortcutKeyStore.store;
+    }
+
+    if (name === StoreNameMap.LyricsCache) {
+      return lyricsCacheStore.store;
     }
   });
 
@@ -40,6 +44,10 @@ export function registerStoreHandlers() {
       if (name === StoreNameMap.ShortcutSettings) {
         shortcutKeyStore.set(value);
       }
+
+      if (name === StoreNameMap.LyricsCache) {
+        lyricsCacheStore.set(value);
+      }
     } catch (err) {
       log.error(`[store:set] Error setting store ${String(name)}:`, err);
     }
@@ -56,6 +64,10 @@ export function registerStoreHandlers() {
 
     if (name === StoreNameMap.ShortcutSettings) {
       shortcutKeyStore.clear();
+    }
+
+    if (name === StoreNameMap.LyricsCache) {
+      lyricsCacheStore.clear();
     }
 
     return true;

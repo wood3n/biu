@@ -28,6 +28,12 @@ declare global {
     getCookie: (key: string) => Promise<string | undefined>;
     /** 设置 cookie */
     setCookie: (name: string, value: string, expirationDate?: number) => Promise<void>;
+    /** 搜索网易云歌曲 */
+    searchNeteaseSongs: (params: SearchSongByNeteaseParams) => Promise<SearchSongByNeteaseResponse>;
+    /** 获取网易云歌词 */
+    getNeteaseLyrics: (params: GetLyricsByNeteaseParams) => Promise<GetLyricsByNeteaseResponse>;
+    /** 在 LrcLib 搜索歌曲/歌词 */
+    searchLrclibLyrics: (params: SeachSongByLrclibParams) => Promise<SeachSongByLrclibResponse[]>;
     /** 获取当前应用平台：macos | windows | linux */
     getPlatform: () => AppPlatForm;
     /** 更新网络代理设置 */

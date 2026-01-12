@@ -7,8 +7,11 @@ import { StoreNameMap } from "@shared/store";
 
 import type { FullMediaDownloadTask } from "./ipc/download/types";
 
+import { getUserDataPath } from "./utils";
+
 export const appSettingsStore = new Store<{ appSettings: AppSettings }>({
   name: StoreNameMap.AppSettings,
+  cwd: getUserDataPath(),
   defaults: {
     appSettings: {
       ...defaultAppSettings,
@@ -19,16 +22,25 @@ export const appSettingsStore = new Store<{ appSettings: AppSettings }>({
 
 export const userStore = new Store<UserInfo>({
   name: StoreNameMap.UserLoginInfo,
+  cwd: getUserDataPath(),
   encryptionKey: StoreNameMap.UserLoginInfo,
 });
 
 export const mediaDownloadsStore = new Store<Record<string, FullMediaDownloadTask>>({
   name: StoreNameMap.MediaDownloads,
+  cwd: getUserDataPath(),
 });
 
 export const shortcutKeyStore = new Store<ShortcutSettings>({
   name: StoreNameMap.ShortcutSettings,
+  cwd: getUserDataPath(),
   defaults: {
     ...defaultShortcutSettings,
   },
+});
+
+export const lyricsCacheStore = new Store<Record<string, MusicLyrics>>({
+  name: StoreNameMap.LyricsCache,
+  cwd: getUserDataPath(),
+  defaults: {},
 });

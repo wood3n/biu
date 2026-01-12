@@ -50,9 +50,10 @@ const UserFeed = () => {
       <Tooltip closeDelay={0} content="动态">
         {updateCount > 0 ? (
           <Badge
-            color="danger"
+            isDot
+            color="warning"
             shape="circle"
-            content={updateCount > 99 ? "99+" : updateCount}
+            content=""
             size="sm"
             variant="solid"
             className="translate-x-1/3 -translate-y-1/3"
