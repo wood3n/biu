@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import { addToast, Spinner } from "@heroui/react";
 
-import { formatUrlProtocal } from "@/common/utils/url";
+import { formatUrlProtocol } from "@/common/utils/url";
 import Empty from "@/components/empty";
 import { getWebInterfaceWbiSearchType, type SearchVideoItem } from "@/service/web-interface-search-type";
 import { useModalStore } from "@/store/modal";
@@ -91,7 +91,7 @@ export default function SearchVideo({ keyword, getScrollElement }: SearchVideoPr
       type: "mv" as const,
       bvid: item.bvid,
       title: item.title,
-      cover: formatUrlProtocal(item.pic),
+      cover: formatUrlProtocol(item.pic),
       ownerName: item.author,
       ownerMid: item.mid,
     };
@@ -121,7 +121,7 @@ export default function SearchVideo({ keyword, getScrollElement }: SearchVideoPr
         await window.electron.addMediaDownloadTask({
           outputFileType: "audio",
           title: item.title,
-          cover: formatUrlProtocal(item.pic),
+          cover: formatUrlProtocol(item.pic),
           bvid: item.bvid,
         });
         addToast({
@@ -133,7 +133,7 @@ export default function SearchVideo({ keyword, getScrollElement }: SearchVideoPr
         await window.electron.addMediaDownloadTask({
           outputFileType: "video",
           title: item.title,
-          cover: formatUrlProtocal(item.pic),
+          cover: formatUrlProtocol(item.pic),
           bvid: item.bvid,
         });
         addToast({

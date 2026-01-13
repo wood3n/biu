@@ -1,5 +1,7 @@
 import got from "got";
 
+import { UserAgent } from "../../network/user-agent";
+
 export function getSongByNetease(params: SearchSongByNeteaseParams) {
   return got
     .get("https://interface.music.163.com/api/search/get", {
@@ -8,6 +10,11 @@ export function getSongByNetease(params: SearchSongByNeteaseParams) {
       },
       timeout: { request: 10000 },
       retry: { limit: 3 },
+      headers: {
+        Referer: "https://music.163.com/",
+        origin: "https://music.163.com",
+        "user-agent": UserAgent,
+      },
     })
     .json<SearchSongByNeteaseResponse>();
 }
@@ -25,6 +32,11 @@ export function getLyricsByNetease(params: GetLyricsByNeteaseParams) {
       },
       timeout: { request: 10000 },
       retry: { limit: 3 },
+      headers: {
+        Referer: "https://music.163.com/",
+        origin: "https://music.163.com",
+        "user-agent": UserAgent,
+      },
     })
     .json<GetLyricsByNeteaseResponse>();
 }

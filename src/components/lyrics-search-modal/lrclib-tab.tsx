@@ -20,9 +20,8 @@ const LrclibTab = ({ songs, loading, onAdoptLyrics }: LrclibTabProps) => {
   const [lyrics, setLyrics] = useState<string>("");
 
   const renderDuration = (value?: number) => {
-    const seconds = value ? Math.round(value / 1000) : undefined;
-    if (!seconds) return "--";
-    return formatDuration(seconds);
+    if (!value) return "--";
+    return formatDuration(value);
   };
 
   const handleSelect = useCallback((item: SearchSongByLrclibResponse) => {

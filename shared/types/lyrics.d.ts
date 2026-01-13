@@ -69,9 +69,12 @@ interface GetLyricsByNeteaseResponse {
   qfy?: boolean;
   transUser?: NeteaseUser;
   lyricUser?: NeteaseUser;
+  /** 歌词原文 */
   lrc?: NeteaseKlyric;
   klyric?: NeteaseKlyric;
+  /** 翻译歌词 */
   tlyric?: NeteaseKlyric;
+  /** 歌词发音，一些日语等歌曲会有 */
   romalrc?: NeteaseKlyric;
   code?: number;
 }
@@ -123,11 +126,8 @@ interface LyricLine {
 }
 
 interface MusicLyrics {
-  type: "mv" | "audio";
-  bvid: string;
-  cid: number;
   fontSize?: number;
   offset?: number;
-  lyrics: string;
+  lyrics?: string;
   tLyrics?: string;
 }

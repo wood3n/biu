@@ -5,7 +5,7 @@ import { Avatar, Card, CardBody, addToast } from "@heroui/react";
 import { RiAddLine, RiFlashlightFill, RiUserFollowLine } from "@remixicon/react";
 
 import { formatNumber } from "@/common/utils/number";
-import { formatUrlProtocal } from "@/common/utils/url";
+import { formatUrlProtocol } from "@/common/utils/url";
 import AsyncButton from "@/components/async-button";
 import { postRelationModify, UserRelationAction } from "@/service/relation-modify";
 
@@ -52,7 +52,7 @@ const UserCard: React.FC<UserCardProps> = ({ u }) => {
       <CardBody className="flex flex-col items-center gap-y-2">
         {/* Avatar Section */}
         <div className="relative flex-none">
-          <Avatar className="h-16 w-16" src={formatUrlProtocal(u.upic as string)} isBordered />
+          <Avatar className="h-16 w-16" src={formatUrlProtocol(u.upic as string)} isBordered />
           {u.official_verify?.type === 0 && (
             <div className="bg-warning ring-background absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full text-white ring-2">
               <RiFlashlightFill size={12} />

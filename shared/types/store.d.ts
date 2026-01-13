@@ -7,7 +7,7 @@ declare global {
     [StoreNameMap.AppSettings]: { appSettings: AppSettings };
     [StoreNameMap.UserLoginInfo]: UserInfo;
     [StoreNameMap.ShortcutSettings]: ShortcutSettings;
-    [StoreNameMap.LyricsCache]: Record<string, Partial<MusicLyrics>>;
+    [StoreNameMap.LyricsCache]: Record<string, MusicLyrics>;
   };
 }
 

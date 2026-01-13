@@ -10,7 +10,7 @@ import { immer } from "zustand/middleware/immer";
 import { getPlayModeList, PlayMode } from "@/common/constants/audio";
 import { getAudioUrl, getDashUrl, isUrlValid } from "@/common/utils/audio";
 import { beginPlayReport, endPlayReport, reportHeartbeat } from "@/common/utils/play-report";
-import { formatUrlProtocal } from "@/common/utils/url";
+import { formatUrlProtocol } from "@/common/utils/url";
 import { getAudioSongInfo } from "@/service/audio-song-info";
 import { getWebInterfaceView } from "@/service/web-interface-view";
 
@@ -132,7 +132,7 @@ const getMVData = async (bvid: string) => {
       aid: String(res?.data?.aid),
       cid: String(item.cid),
       title: res?.data?.title,
-      cover: formatUrlProtocal(res?.data?.pic),
+      cover: formatUrlProtocol(res?.data?.pic),
       ownerName: res?.data?.owner?.name,
       ownerMid: res?.data?.owner?.mid,
       hasMultiPart,
@@ -140,8 +140,8 @@ const getMVData = async (bvid: string) => {
       pageIndex: item.page,
       pageTitle: hasMultiPart ? item.part : res?.data?.title,
       pageCover: hasMultiPart
-        ? formatUrlProtocal(item.first_frame || res?.data?.pic)
-        : formatUrlProtocal(res?.data?.pic),
+        ? formatUrlProtocol(item.first_frame || res?.data?.pic)
+        : formatUrlProtocol(res?.data?.pic),
       totalPage: res?.data?.pages?.length,
       duration: item.duration,
     })) || []
@@ -157,7 +157,7 @@ const getAudioData = async (sid: number) => {
       type: "audio" as PlayDataType,
       sid,
       title: res?.data?.title || "",
-      cover: formatUrlProtocal(res?.data?.cover || ""),
+      cover: formatUrlProtocol(res?.data?.cover || ""),
       duration: res?.data?.duration || 0,
       ownerName: res?.data?.author || "",
       ownerMid: res?.data?.uid || 0,
@@ -556,7 +556,7 @@ export const usePlayList = create<State & Action>()(
               bvid,
               sid,
               title,
-              cover: cover ? formatUrlProtocal(cover) : undefined,
+              cover: cover ? formatUrlProtocol(cover) : undefined,
               ownerName,
               ownerMid,
             },
@@ -734,7 +734,7 @@ export const usePlayList = create<State & Action>()(
               bvid,
               sid,
               title,
-              cover: cover ? formatUrlProtocal(cover) : undefined,
+              cover: cover ? formatUrlProtocol(cover) : undefined,
               ownerName,
               ownerMid,
             },

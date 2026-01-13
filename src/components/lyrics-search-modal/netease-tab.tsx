@@ -49,7 +49,7 @@ const NeteaseTab = ({ songs, loading, onAdoptLyrics }: NeteaseTabProps) => {
 
     try {
       const res = await window.electron.getNeteaseLyrics({ id });
-      const text = res?.lrc?.lyric?.trim() || res?.klyric?.lyric?.trim() || res?.tlyric?.lyric?.trim() || "";
+      const text = res?.lrc?.lyric?.trim() || res?.klyric?.lyric?.trim() || "";
       const translation = res?.tlyric?.lyric?.trim() || "";
 
       if (!text) {

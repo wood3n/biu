@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button, Input, Modal, ModalBody, ModalContent, ModalHeader, Tab, Tabs, addToast } from "@heroui/react";
 
@@ -28,6 +28,7 @@ const LyricsSearchModal = ({ isOpen, onOpenChange, onLyricsAdopted }: Props) => 
   const [lrclibSongs, setLrclibSongs] = useState<SearchSongByLrclibResponse[]>([]);
   const [neteaseLoading, setNeteaseLoading] = useState(false);
   const [lrclibLoading, setLrclibLoading] = useState(false);
+  const keywordRef = useRef("");
 
   const resetState = useCallback(() => {
     setKeyword("");
@@ -48,56 +49,55 @@ const LyricsSearchModal = ({ isOpen, onOpenChange, onLyricsAdopted }: Props) => 
     }
   }, [playId, isOpen, getPlayItem]);
 
-  const handleSubmit = useCallback(async () => {
-    const query = keyword.trim();
-    if (query === "") {
-      addToast({ title: "请输入搜索关键词", color: "warning" });
-      return;
-    }
-
-    setNeteaseLoading(true);
-    setLrclibLoading(true);
-
-    try {
-      const [neteaseResult, lrclibResult] = await Promise.allSettled([
-        window.electron.searchNeteaseSongs({
-          s: query,
-          type: NETEASE_TYPE_SONG,
-          limit: DEFAULT_LIMIT,
-          offset: 0,
-        }),
-        window.electron.searchLrclibLyrics({ q: query }),
-      ]);
-
-      if (neteaseResult.status === "fulfilled") {
-        setNeteaseSongs(neteaseResult.value?.result?.songs ?? []);
-      } else {
-        setNeteaseSongs([]);
-        addToast({ title: "网易云搜索失败", color: "danger" });
-      }
-
-      if (lrclibResult.status === "fulfilled") {
-        setLrclibSongs(lrclibResult.value ?? []);
-      } else {
-        setLrclibSongs([]);
-        addToast({ title: "LrcLib 搜索失败", color: "danger" });
-      }
-    } finally {
-      setNeteaseLoading(false);
-      setLrclibLoading(false);
-    }
+  useEffect(() => {
+    keywordRef.current = keyword;
   }, [keyword]);
 
-  const handleTabChange = useCallback(
-    (key: string | number) => {
-      const nextKey = key as "netease" | "lrclib";
-      setActiveTab(nextKey);
-      if (keyword.trim()) {
-        void handleSubmit();
+  const handleSubmit = useCallback(
+    async (tab: "netease" | "lrclib" = activeTab) => {
+      const query = keywordRef.current.trim();
+      if (query === "") return;
+
+      if (tab === "netease") {
+        setLrclibLoading(false);
+        try {
+          setNeteaseLoading(true);
+          const res = await window.electron.searchNeteaseSongs({
+            s: query,
+            type: NETEASE_TYPE_SONG,
+            limit: DEFAULT_LIMIT,
+            offset: 0,
+          });
+
+          setNeteaseSongs(res?.result?.songs ?? []);
+        } catch {
+          setNeteaseSongs([]);
+          addToast({ title: "网易云搜索失败", color: "danger" });
+        } finally {
+          setNeteaseLoading(false);
+        }
+      } else {
+        setNeteaseLoading(false);
+        try {
+          setLrclibLoading(true);
+          const res = await window.electron.searchLrclibLyrics({ q: query });
+          setLrclibSongs(res ?? []);
+        } catch {
+          setLrclibSongs([]);
+          addToast({ title: "LrcLib 搜索失败", color: "danger" });
+        } finally {
+          setLrclibLoading(false);
+        }
       }
     },
-    [handleSubmit, keyword],
+    [activeTab],
   );
+
+  useEffect(() => {
+    if (isOpen) {
+      void handleSubmit(activeTab);
+    }
+  }, [isOpen, activeTab, handleSubmit]);
 
   const handleAdoptLyrics = useCallback<AdoptLyricsHandler>(
     async (lyricsText, tLyricsText) => {
@@ -112,16 +112,13 @@ const LyricsSearchModal = ({ isOpen, onOpenChange, onLyricsAdopted }: Props) => 
       }
 
       const nextLyrics: MusicLyrics = {
-        type: current.type,
-        bvid: current.bvid,
-        cid,
         lyrics: lyricsText,
         tLyrics: tLyricsText,
       };
 
       try {
         const store = await window.electron.getStore(StoreNameMap.LyricsCache);
-        const key = `${nextLyrics.bvid}-${nextLyrics.cid}`;
+        const key = `${current.bvid}-${current.cid}`;
         const prev = store?.[key] || {};
         const nextStore = { ...(store ?? {}), [key]: { ...prev, ...nextLyrics } };
         await window.electron.setStore(StoreNameMap.LyricsCache, nextStore);
@@ -156,16 +153,23 @@ const LyricsSearchModal = ({ isOpen, onOpenChange, onLyricsAdopted }: Props) => 
               onValueChange={setKeyword}
               placeholder="请输入歌曲或歌手名称"
               onKeyDown={e => {
-                if (e.key === "Enter") handleSubmit();
+                if (e.key === "Enter") handleSubmit(activeTab);
               }}
             />
-            <Button color="primary" onPress={handleSubmit}>
+            <Button color="primary" onPress={() => handleSubmit(activeTab)}>
               搜索
             </Button>
           </div>
           <Tabs
             selectedKey={activeTab}
-            onSelectionChange={handleTabChange}
+            onSelectionChange={key => {
+              const nextTab = key as "netease" | "lrclib";
+              setActiveTab(nextTab);
+              setNeteaseLoading(false);
+              setLrclibLoading(false);
+              setNeteaseSongs([]);
+              setLrclibSongs([]);
+            }}
             classNames={{
               panel: "py-0",
             }}

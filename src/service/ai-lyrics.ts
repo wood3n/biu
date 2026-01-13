@@ -1,4 +1,4 @@
-import { formatUrlProtocal } from "@/common/utils/url";
+import { formatUrlProtocol } from "@/common/utils/url";
 
 import { axiosInstance } from "./request";
 
@@ -28,5 +28,5 @@ export interface Body {
 }
 
 export function getLyric(url: string) {
-  return axiosInstance.get<GetLyricsByBiliAIResponse>(formatUrlProtocal(url)!);
+  return axiosInstance.get<GetLyricsByBiliAIResponse>(formatUrlProtocol(url)!);
 }

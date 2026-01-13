@@ -194,8 +194,9 @@ const Lyrics = () => {
     () =>
       debounce(async (playItem: PlayItem, nextOffset?: number, nextFontSize?: number) => {
         try {
+          if (!playItem?.bvid || !playItem?.cid) return;
           const store = await window.electron.getStore(StoreNameMap.LyricsCache);
-          const key = `${playItem!.bvid}-${playItem!.cid}`;
+          const key = `${playItem.bvid}-${playItem.cid}`;
           const prev = store?.[key] || {};
 
           await window.electron.setStore(StoreNameMap.LyricsCache, {
