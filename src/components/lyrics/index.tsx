@@ -33,6 +33,7 @@ const DEFAULT_OFFSET = 0;
 
 const Lyrics = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const rafIdRef = useRef<number | null>(null);
   const lineRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const [centerPadding, setCenterPadding] = useState(0);
   const [controlOpenState, setControlOpenState] = useState({ font: false, offset: false });
@@ -260,7 +261,11 @@ const Lyrics = () => {
     };
 
     if (!measure()) {
-      requestAnimationFrame(() => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+      rafIdRef.current = requestAnimationFrame(() => {
+        rafIdRef.current = null;
         void measure();
       });
     }
@@ -287,6 +292,15 @@ const Lyrics = () => {
   useEffect(() => {
     updateCenterPadding();
   }, [updateCenterPadding, fontSize, lyrics.length]);
+
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+    };
+  }, [activeIndex]);
 
   useEffect(() => {
     const handleResize = () => updateCenterPadding();
