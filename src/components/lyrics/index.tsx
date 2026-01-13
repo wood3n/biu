@@ -118,8 +118,6 @@ const Lyrics = () => {
         const cached = await tryLoadCachedLyrics();
         if (canceled) return;
 
-        console.log("cached lyrics:", cached);
-
         if (cached) {
           setOffset(typeof cached.offset === "number" ? cached.offset : DEFAULT_OFFSET);
           setFontSize(typeof cached.fontSize === "number" ? cached.fontSize : DEFAULT_FONT_SIZE);
@@ -198,10 +196,12 @@ const Lyrics = () => {
         try {
           const store = await window.electron.getStore(StoreNameMap.LyricsCache);
           const key = `${playItem!.bvid}-${playItem!.cid}`;
+          const prev = store?.[key] || {};
 
           await window.electron.setStore(StoreNameMap.LyricsCache, {
             ...(store || {}),
             [key]: {
+              ...prev,
               offset: nextOffset ?? 0,
               fontSize: nextFontSize ?? 0,
             },

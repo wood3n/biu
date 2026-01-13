@@ -25,7 +25,7 @@ const LyricsSearchModal = ({ isOpen, onOpenChange, onLyricsAdopted }: Props) => 
   const [keyword, setKeyword] = useState("");
   const [activeTab, setActiveTab] = useState<"netease" | "lrclib">("netease");
   const [neteaseSongs, setNeteaseSongs] = useState<NeteaseSong[]>([]);
-  const [lrclibSongs, setLrclibSongs] = useState<SeachSongByLrclibResponse[]>([]);
+  const [lrclibSongs, setLrclibSongs] = useState<SearchSongByLrclibResponse[]>([]);
   const [neteaseLoading, setNeteaseLoading] = useState(false);
   const [lrclibLoading, setLrclibLoading] = useState(false);
 

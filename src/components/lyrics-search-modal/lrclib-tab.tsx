@@ -9,7 +9,7 @@ import type { AdoptLyricsHandler } from "./netease-tab";
 import LyricsPreviewModal from "./lyrics-preview-modal";
 
 interface LrclibTabProps {
-  songs: SeachSongByLrclibResponse[];
+  songs: SearchSongByLrclibResponse[];
   loading: boolean;
   onAdoptLyrics: AdoptLyricsHandler;
 }
@@ -19,18 +19,13 @@ const LrclibTab = ({ songs, loading, onAdoptLyrics }: LrclibTabProps) => {
   const [previewTitle, setPreviewTitle] = useState<string>("");
   const [previewContent, setPreviewContent] = useState<string>("");
 
-  const normalizeSeconds = (value?: number) => {
-    if (!value) return undefined;
-    return value > 1000 ? Math.round(value / 1000) : Math.round(value);
-  };
-
   const renderDuration = (value?: number) => {
-    const seconds = normalizeSeconds(value);
+    const seconds = value ? Math.round(value / 1000) : undefined;
     if (!seconds) return "--";
     return formatDuration(seconds);
   };
 
-  const handleSelect = useCallback((item: SeachSongByLrclibResponse) => {
+  const handleSelect = useCallback((item: SearchSongByLrclibResponse) => {
     const text = item.syncedLyrics?.trim() || item.plainLyrics?.trim() || "";
     if (!text) {
       addToast({ title: "未找到歌词内容", color: "warning" });
@@ -66,7 +61,7 @@ const LrclibTab = ({ songs, loading, onAdoptLyrics }: LrclibTabProps) => {
           </TableHeader>
           <TableBody emptyContent="暂无数据" items={songs}>
             {item => (
-              <TableRow key={item.id ?? item.name} onClick={() => handleSelect(item)} className="cursor-pointer">
+              <TableRow key={item.id} onClick={() => handleSelect(item)} className="cursor-pointer">
                 <TableCell>{item.trackName || item.name || "--"}</TableCell>
                 <TableCell>{item.albumName || "--"}</TableCell>
                 <TableCell>{item.artistName || "--"}</TableCell>

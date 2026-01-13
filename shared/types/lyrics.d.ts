@@ -90,14 +90,14 @@ interface NeteaseUser {
   uptime?: number;
 }
 
-interface SeachSongByLrclibParams {
+interface SearchSongByLrclibParams {
   q: string;
   track_name?: string;
   artist_name?: string;
   album_name?: string;
 }
 
-interface SeachSongByLrclibResponse {
+interface SearchSongByLrclibResponse {
   id?: number;
   name?: string;
   trackName?: string;

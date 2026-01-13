@@ -107,5 +107,5 @@ api.example.json
 .electron
 
 .trae
-.vscode\mcp.json
-.github\instructions
+.vscode/mcp.json
+.github/instructions

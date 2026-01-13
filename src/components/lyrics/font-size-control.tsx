@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Popover, PopoverContent, PopoverTrigger, Slider } from "@heroui/react";
 import { RiFontSize } from "@remixicon/react";
@@ -30,18 +30,20 @@ const FontSizeControl = ({ value, min = 12, max = 48, onChange, onOpenChange }: 
     [max, min, onChange, step, value],
   );
 
-  const setSliderRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (sliderRef.current) {
-        sliderRef.current.removeEventListener("wheel", onWheel);
-      }
-      sliderRef.current = node;
-      if (node) {
-        node.addEventListener("wheel", onWheel, { passive: false });
-      }
-    },
-    [onWheel],
-  );
+  const setSliderRef = useCallback((node: HTMLDivElement | null) => {
+    sliderRef.current = node;
+  }, []);
+
+  useEffect(() => {
+    const node = sliderRef.current;
+    if (!node) return;
+
+    node.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      node.removeEventListener("wheel", onWheel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onWheel, sliderRef.current]);
 
   const handleOpenChange = useCallback(
     (next: boolean) => {

@@ -268,7 +268,7 @@ const FullScreenPlayer = () => {
                   <IconButton
                     className="h-24 w-6 min-w-0 rounded-l-xl rounded-r-none bg-white/10 px-0 backdrop-blur-md transition-colors hover:bg-white/20"
                     onPress={() => setIsPageListOpen(!isPageListOpen)}
-                    tooltip={isPageListOpen ? "关闭分集列表" : "显示分集列表"}
+                    tooltip="显示分集列表"
                     tooltipProps={{
                       placement: "left",
                     }}

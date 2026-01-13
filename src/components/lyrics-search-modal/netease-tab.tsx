@@ -20,13 +20,8 @@ const NeteaseTab = ({ songs, loading, onAdoptLyrics }: NeteaseTabProps) => {
   const [previewContent, setPreviewContent] = useState<string>("");
   const [previewLoading, setPreviewLoading] = useState(false);
 
-  const normalizeSeconds = (value?: number) => {
-    if (!value) return undefined;
-    return value > 1000 ? Math.round(value / 1000) : Math.round(value);
-  };
-
   const renderDuration = (value?: number) => {
-    const seconds = normalizeSeconds(value);
+    const seconds = value ? Math.round(value / 1000) : undefined;
     if (!seconds) return "--";
     return formatDuration(seconds);
   };
@@ -94,7 +89,7 @@ const NeteaseTab = ({ songs, loading, onAdoptLyrics }: NeteaseTabProps) => {
           </TableHeader>
           <TableBody emptyContent="暂无数据" items={songs}>
             {song => (
-              <TableRow key={song.id ?? song.name} onClick={() => handleSelect(song)} className="cursor-pointer">
+              <TableRow key={song.id} onClick={() => handleSelect(song)} className="cursor-pointer">
                 <TableCell>{song.name || "--"}</TableCell>
                 <TableCell>{song.album?.name || "--"}</TableCell>
                 <TableCell>{renderArtists(song.artists)}</TableCell>

@@ -33,7 +33,7 @@ declare global {
     /** 获取网易云歌词 */
     getNeteaseLyrics: (params: GetLyricsByNeteaseParams) => Promise<GetLyricsByNeteaseResponse>;
     /** 在 LrcLib 搜索歌曲/歌词 */
-    searchLrclibLyrics: (params: SeachSongByLrclibParams) => Promise<SeachSongByLrclibResponse[]>;
+    searchLrclibLyrics: (params: SearchSongByLrclibParams) => Promise<SearchSongByLrclibResponse[]>;
     /** 获取当前应用平台：macos | windows | linux */
     getPlatform: () => AppPlatForm;
     /** 更新网络代理设置 */
