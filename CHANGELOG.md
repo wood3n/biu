@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.12.0
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.11.0...v1.12.0)
+
+### 🚀 新功能
+
+- 全屏播放器新增歌词显示功能 ([7314f36](https://github.com/wood3n/biu/commit/7314f36))
+
+### 🩹 修复问题
+
+- 移除无用的文件 ([e87b941](https://github.com/wood3n/biu/commit/e87b941))
+- Revie problem ([435159a](https://github.com/wood3n/biu/commit/435159a))
+- Translate lyrics not show ([5520c7b](https://github.com/wood3n/biu/commit/5520c7b))
+- Review problem ([8f34d11](https://github.com/wood3n/biu/commit/8f34d11))
+- Review problem ([b8cc76a](https://github.com/wood3n/biu/commit/b8cc76a))
+
+### ❤️ Contributors
+
+- Wood3n
+
 ## v1.11.0
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.10.0...v1.11.0)
