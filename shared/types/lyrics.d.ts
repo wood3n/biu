@@ -105,7 +105,9 @@ interface SearchSongByLrclibResponse {
   albumName?: string;
   duration?: number;
   instrumental?: boolean;
+  /** 歌词文本 */
   plainLyrics?: null | string;
+  /** 歌词时间同步文本 */
   syncedLyrics?: null | string;
 }
 

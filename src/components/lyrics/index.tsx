@@ -266,11 +266,11 @@ const Lyrics = () => {
   }, [activeIndex]);
 
   const handleLyricsAdopted = useCallback(
-    (nextLyrics?: string) => {
+    (nextLyrics?: string, nextTLyrics?: string) => {
       onCloseSearch();
       if (nextLyrics) {
         setLyrics(parseLrc(nextLyrics));
-        setTranslatedLyrics([]);
+        setTranslatedLyrics(nextTLyrics ? parseLrc(nextTLyrics) : []);
       }
     },
     [onCloseSearch, parseLrc],

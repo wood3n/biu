@@ -6,7 +6,7 @@ import { formatDuration } from "@/common/utils/time";
 
 import LyricsPreviewModal from "./lyrics-preview-modal";
 
-export type AdoptLyricsHandler = (lyricsText: string) => Promise<boolean>;
+export type AdoptLyricsHandler = (lyricsText: string, tLyricsText?: string) => Promise<boolean>;
 
 interface NeteaseTabProps {
   songs: NeteaseSong[];
@@ -16,8 +16,9 @@ interface NeteaseTabProps {
 
 const NeteaseTab = ({ songs, loading, onAdoptLyrics }: NeteaseTabProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [previewTitle, setPreviewTitle] = useState<string>("");
-  const [previewContent, setPreviewContent] = useState<string>("");
+  const [lyricsTitle, setLyricsTitle] = useState<string>("");
+  const [lyrics, setLyrics] = useState<string>("");
+  const [tlyrics, setTlyrics] = useState<string>("");
   const [previewLoading, setPreviewLoading] = useState(false);
 
   const renderDuration = (value?: number) => {
@@ -40,15 +41,16 @@ const NeteaseTab = ({ songs, loading, onAdoptLyrics }: NeteaseTabProps) => {
       addToast({ title: "缺少歌曲 ID，无法预览", color: "warning" });
       return;
     }
-
-    setPreviewTitle(song.name || "歌词预览");
-    setPreviewContent("");
+    setLyrics("");
+    setTlyrics("");
+    setLyricsTitle("");
     setIsPreviewOpen(true);
     setPreviewLoading(true);
 
     try {
       const res = await window.electron.getNeteaseLyrics({ id });
       const text = res?.lrc?.lyric?.trim() || res?.klyric?.lyric?.trim() || res?.tlyric?.lyric?.trim() || "";
+      const translation = res?.tlyric?.lyric?.trim() || "";
 
       if (!text) {
         addToast({ title: "未找到歌词内容", color: "warning" });
@@ -56,7 +58,9 @@ const NeteaseTab = ({ songs, loading, onAdoptLyrics }: NeteaseTabProps) => {
         return;
       }
 
-      setPreviewContent(text);
+      setLyricsTitle(`${song.name || "未知歌曲"}-${renderArtists(song.artists)}`);
+      setLyrics(text);
+      setTlyrics(translation);
     } catch {
       addToast({ title: "获取歌词失败", color: "danger" });
       setIsPreviewOpen(false);
@@ -65,13 +69,16 @@ const NeteaseTab = ({ songs, loading, onAdoptLyrics }: NeteaseTabProps) => {
     }
   }, []);
 
-  const handleAdopt = useCallback(async () => {
-    if (!previewContent) return;
-    const ok = await onAdoptLyrics(previewContent);
-    if (ok) {
-      setIsPreviewOpen(false);
-    }
-  }, [onAdoptLyrics, previewContent]);
+  const handleAdopt = useCallback(
+    async (lyricsText: string, tLyricsText?: string) => {
+      if (!lyricsText) return;
+      const ok = await onAdoptLyrics(lyricsText, tLyricsText);
+      if (ok) {
+        setIsPreviewOpen(false);
+      }
+    },
+    [onAdoptLyrics],
+  );
 
   return (
     <div className="h-[340px] overflow-auto">
@@ -103,8 +110,9 @@ const NeteaseTab = ({ songs, loading, onAdoptLyrics }: NeteaseTabProps) => {
       <LyricsPreviewModal
         isOpen={isPreviewOpen}
         onOpenChange={setIsPreviewOpen}
-        title={previewTitle}
-        content={previewContent}
+        title={lyricsTitle}
+        lyrics={lyrics}
+        tlyrics={tlyrics}
         loading={previewLoading}
         onAdopt={handleAdopt}
       />

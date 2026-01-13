@@ -16,8 +16,8 @@ interface LrclibTabProps {
 
 const LrclibTab = ({ songs, loading, onAdoptLyrics }: LrclibTabProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [previewTitle, setPreviewTitle] = useState<string>("");
-  const [previewContent, setPreviewContent] = useState<string>("");
+  const [lyricsTitle, setLyricsTitle] = useState<string>("");
+  const [lyrics, setLyrics] = useState<string>("");
 
   const renderDuration = (value?: number) => {
     const seconds = value ? Math.round(value / 1000) : undefined;
@@ -26,24 +26,24 @@ const LrclibTab = ({ songs, loading, onAdoptLyrics }: LrclibTabProps) => {
   };
 
   const handleSelect = useCallback((item: SearchSongByLrclibResponse) => {
-    const text = item.syncedLyrics?.trim() || item.plainLyrics?.trim() || "";
+    const text = item.syncedLyrics?.trim() || "";
     if (!text) {
       addToast({ title: "未找到歌词内容", color: "warning" });
       return;
     }
 
-    setPreviewTitle(item.trackName || item.name || "歌词预览");
-    setPreviewContent(text);
+    setLyricsTitle(`${item.trackName}-${item.artistName}`);
+    setLyrics(text);
     setIsPreviewOpen(true);
   }, []);
 
   const handleAdopt = useCallback(async () => {
-    if (!previewContent) return;
-    const ok = await onAdoptLyrics(previewContent);
+    if (!lyrics) return;
+    const ok = await onAdoptLyrics(lyrics);
     if (ok) {
       setIsPreviewOpen(false);
     }
-  }, [onAdoptLyrics, previewContent]);
+  }, [onAdoptLyrics, lyrics]);
 
   return (
     <div className="h-[340px] overflow-auto">
@@ -75,8 +75,8 @@ const LrclibTab = ({ songs, loading, onAdoptLyrics }: LrclibTabProps) => {
       <LyricsPreviewModal
         isOpen={isPreviewOpen}
         onOpenChange={setIsPreviewOpen}
-        title={previewTitle}
-        content={previewContent}
+        title={lyricsTitle}
+        lyrics={lyrics}
         onAdopt={handleAdopt}
       />
     </div>
