@@ -38,6 +38,15 @@ html, body, #root {
   overflow: hidden;
 }
 
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 .suggest_high_light,.keyword {
   font-style: normal;
   color: #F54180;

@@ -1,3 +1,4 @@
+import { app } from "electron";
 import isDev from "electron-is-dev";
 import log from "electron-log";
 import ffmpeg from "fluent-ffmpeg";
@@ -9,6 +10,10 @@ import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
 import { appSettingsStore } from "./store";
 
 export const IconBase = isDev ? process.cwd() : process.resourcesPath;
+
+export const getUserDataPath = () => {
+  return isDev ? path.join(app.getPath("appData"), `biu-dev`) : app.getPath("userData");
+};
 
 export const getWindowIcon = () =>
   process.platform === "darwin"

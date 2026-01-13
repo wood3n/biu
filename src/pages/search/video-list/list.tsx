@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 
 import { formatSecondsToDate } from "@/common/utils/time";
-import { formatUrlProtocal } from "@/common/utils/url";
+import { formatUrlProtocol } from "@/common/utils/url";
 import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
 import VirtualPageList from "@/components/virtual-page-list";
@@ -29,7 +29,7 @@ const List: React.FC<ListProps> = ({ items, getScrollElement, onMenuAction, load
       type: "mv",
       bvid: item.bvid,
       title: item.title,
-      cover: formatUrlProtocal(item.pic),
+      cover: formatUrlProtocol(item.pic),
       ownerName: item.author,
       ownerMid: item.mid,
     });
@@ -53,7 +53,7 @@ const List: React.FC<ListProps> = ({ items, getScrollElement, onMenuAction, load
               title={<span dangerouslySetInnerHTML={{ __html: item.title }} />}
               type="mv"
               bvid={item.bvid}
-              cover={formatUrlProtocal(item.pic)}
+              cover={formatUrlProtocol(item.pic)}
               upName={item.author}
               upMid={item.mid}
               playCount={item.play}

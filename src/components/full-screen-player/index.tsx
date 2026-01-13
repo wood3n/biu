@@ -1,27 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router";
 
-import { Chip, Drawer, DrawerBody, DrawerContent, Image } from "@heroui/react";
-import { RiArrowDownSLine, RiArrowLeftSLine, RiPulseLine } from "@remixicon/react";
+import { Drawer, DrawerBody, DrawerContent, Image } from "@heroui/react";
+import { RiArrowDownSLine, RiArrowLeftSLine } from "@remixicon/react";
 import { useClickAway } from "ahooks";
+import clsx from "classnames";
 import { useShallow } from "zustand/shallow";
 
 import { hexToHsl } from "@/common/utils/color";
-import AudioWaveform from "@/components/audio-waveform";
+import Lyrics from "@/components/lyrics";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
-import { useUser } from "@/store/user";
 
 import Empty from "../empty";
 import IconButton from "../icon-button";
-import MusicDownloadButton from "../music-download-button";
-import MusicFavButton from "../music-fav-button";
 import MusicPlayControl from "../music-play-control";
 import MusicPlayMode from "../music-play-mode";
 import MusicPlayProgress from "../music-play-progress";
-import MusicRate from "../music-rate";
-import MusicVolume from "../music-volume";
 import OpenPlaylistDrawerButton from "../open-playlist-drawer-button";
 import WindowAction from "../window-action";
 import { useGlassmorphism } from "./glassmorphism";
@@ -30,7 +25,6 @@ import PageList from "./page-list";
 const platform = window.electron.getPlatform();
 
 const FullScreenPlayer = () => {
-  const user = useUser(s => s.user);
   const isOpen = useModalStore(s => s.isFullScreenPlayerOpen);
   const close = useModalStore(s => s.closeFullScreenPlayer);
   const { playId, list } = usePlayList(
@@ -41,13 +35,14 @@ const FullScreenPlayer = () => {
   );
   const primaryColor = useSettings(s => s.primaryColor);
   const playItem = list.find(item => item.id === playId);
-  const navigate = useNavigate();
 
   const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1000);
+  const [windowHeight, setWindowHeight] = useState(typeof window !== "undefined" ? window.innerHeight : 800);
   const [isPageListOpen, setIsPageListOpen] = useState(false);
-  const [isWaveOpen, setIsWaveOpen] = useState(false);
+  const [isUiVisible, setIsUiVisible] = useState(false);
 
   const pageListRef = useRef<HTMLDivElement>(null);
+  const hideUiTimeoutRef = useRef<number | null>(null);
 
   useClickAway(() => {
     if (isPageListOpen) {
@@ -58,7 +53,10 @@ const FullScreenPlayer = () => {
   useEffect(() => {
     if (!isOpen) return;
 
-    const handleResize = () => setWindowWidth(window.innerWidth);
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      setWindowHeight(window.innerHeight);
+    };
     window.addEventListener("resize", handleResize);
 
     // Initial check
@@ -67,7 +65,41 @@ const FullScreenPlayer = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, [isOpen]);
 
-  const waveformWidth = Math.min(windowWidth * 0.82, 900);
+  useEffect(() => {
+    return () => {
+      if (hideUiTimeoutRef.current) {
+        window.clearTimeout(hideUiTimeoutRef.current);
+        hideUiTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsUiVisible(true);
+    }
+  }, [isOpen]);
+
+  const handleMouseEnter = () => {
+    if (hideUiTimeoutRef.current) {
+      window.clearTimeout(hideUiTimeoutRef.current);
+      hideUiTimeoutRef.current = null;
+    }
+    setIsUiVisible(true);
+  };
+
+  const scheduleHideUi = (delay: number) => {
+    if (hideUiTimeoutRef.current) {
+      window.clearTimeout(hideUiTimeoutRef.current);
+    }
+    hideUiTimeoutRef.current = window.setTimeout(() => {
+      setIsUiVisible(false);
+    }, delay);
+  };
+
+  const handleMouseLeave = () => {
+    scheduleHideUi(2000);
+  };
 
   const coverSrc = playItem?.pageCover || playItem?.cover;
   const { effectsProfile, bgLayerA, bgLayerB, activeBgLayer, cssVars } = useGlassmorphism(
@@ -87,6 +119,9 @@ const FullScreenPlayer = () => {
 
   if (!playItem) return null;
 
+  const coverWidth = Math.max(260, Math.min(windowWidth * 0.7, windowHeight * 0.48, 520));
+  const coverHeight = coverWidth * 0.75;
+
   return (
     <Drawer
       isOpen={isOpen}
@@ -102,12 +137,20 @@ const FullScreenPlayer = () => {
         backdrop: "bg-background",
       }}
     >
-      <DrawerContent className="dark text-foreground relative flex h-full flex-col overflow-hidden" style={themeVars}>
+      <DrawerContent className="dark text-foreground relative h-full overflow-hidden" style={themeVars}>
         {onClose =>
           !isOpen ? (
             <Empty />
           ) : (
-            <DrawerBody className="relative gap-0 overflow-hidden p-0">
+            <DrawerBody
+              className="group/player relative flex flex-row gap-0 overflow-hidden p-0"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onMouseMove={() => {
+                setIsUiVisible(true);
+                scheduleHideUi(3000);
+              }}
+            >
               <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
                 <div
                   className="absolute inset-0"
@@ -166,131 +209,86 @@ const FullScreenPlayer = () => {
                   />
                 </div>
               </div>
-
-              <div className="window-drag flex w-full items-center justify-end p-4 text-white">
-                <IconButton title="关闭弹窗" onPress={onClose} className="window-no-drag">
-                  <RiArrowDownSLine size={24} />
-                </IconButton>
-                {["linux", "windows"].includes(platform) && <WindowAction />}
-              </div>
-              <div className="flex min-h-0 flex-1 flex-col items-center justify-between">
-                <div className="p-6 text-center text-white">
-                  <h2 className="text-2xl font-bold break-all">{playItem.pageTitle || playItem.title}</h2>
-                  <button
-                    type="button"
-                    className="mt-2 text-white/60 hover:underline"
-                    onClick={() => {
-                      onClose();
-                      navigate(`/user/${playItem.ownerMid}`);
-                    }}
-                  >
-                    {playItem.ownerName}
-                  </button>
-                  {(playItem.isLossless || playItem.isDolby) && (
-                    <div className="mt-2 flex items-center justify-center gap-2">
-                      {playItem.isLossless && (
-                        <Chip
-                          size="sm"
-                          classNames={{
-                            base: "bg-[#ffe443]/20 border border-[#ffe443]/30 backdrop-blur-md",
-                            content: "text-[#ffe443] font-medium text-xs",
-                          }}
-                        >
-                          无损
-                        </Chip>
-                      )}
-                      {playItem.isDolby && (
-                        <Chip
-                          size="sm"
-                          classNames={{
-                            base: "bg-[#00A1D6]/20 border border-[#00A1D6]/30 backdrop-blur-md",
-                            content: "text-[#00A1D6] font-medium text-xs",
-                          }}
-                        >
-                          杜比音频
-                        </Chip>
-                      )}
-                    </div>
-                  )}
+              <div
+                className={`absolute top-0 right-0 z-20 flex w-full justify-between px-6 py-4 transition-opacity duration-200 ${isUiVisible ? "opacity-100" : "pointer-events-none opacity-0"}`}
+              >
+                <div className="window-no-drag top-0 right-0 left-0 flex w-full max-w-2/5 items-center space-x-2">
+                  <IconButton title="关闭弹窗" onPress={onClose} className="">
+                    <RiArrowDownSLine size={28} />
+                  </IconButton>
+                  <h2 className="truncate text-xl">{playItem.pageTitle || playItem.title}</h2>
                 </div>
-                <div className="relative flex min-h-0 w-full flex-1 items-center justify-center">
+                <div className="window-no-drag top-0 right-0">
+                  {platform === "linux" || platform === "windows" ? <WindowAction /> : null}
+                </div>
+              </div>
+
+              <div className="flex h-full w-full items-center justify-center">
+                <div className="flex h-full w-full items-center justify-end px-12">
                   <Image
                     src={coverSrc}
-                    className="aspect-[4/3] w-[min(60vw,42vh)] max-w-[480px] object-cover transition-shadow ease-out"
                     radius="lg"
+                    className="transition-shadow ease-out"
+                    classNames={{
+                      img: "w-full h-full object-cover",
+                    }}
                     style={{
+                      width: coverWidth,
+                      height: coverHeight,
                       boxShadow: `0 28px 90px -35px rgb(var(--glow-rgb) / 0.55), 0 10px 32px -18px rgb(0 0 0 / 0.55)`,
                       transition: `box-shadow ${effectsProfile.transitionMs}ms ease`,
                       aspectRatio: "4 / 3",
                     }}
                   />
+                </div>
 
-                  <PageList
-                    ref={pageListRef}
-                    className={`absolute top-1/2 right-0 z-30 -translate-y-1/2 rounded-r-none transition-all duration-300 ease-out ${
-                      isPageListOpen ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-full opacity-0"
-                    }`}
-                    style={{
-                      width: 320,
-                      height: "min(42vh, 420px)",
-                    }}
-                    onClose={() => setIsPageListOpen(false)}
-                  />
-
-                  {playItem.hasMultiPart && !isPageListOpen && (
-                    <div className="absolute top-1/2 right-0 z-20 -translate-y-1/2">
-                      <IconButton
-                        className="h-24 w-6 min-w-0 rounded-l-xl rounded-r-none bg-white/10 px-0 backdrop-blur-md transition-colors hover:bg-white/20"
-                        onPress={() => setIsPageListOpen(!isPageListOpen)}
-                        tooltip={isPageListOpen ? "关闭分集列表" : "显示分集列表"}
-                        tooltipProps={{
-                          placement: "left",
-                        }}
-                      >
-                        <RiArrowLeftSLine size={24} className="text-white/80" />
-                      </IconButton>
-                    </div>
-                  )}
+                <div className="h-full w-full overflow-hidden px-12 py-24">
+                  <Lyrics />
                 </div>
               </div>
-              <div className="flex w-full flex-col items-center px-4 pb-6">
-                <div className="w-full max-w-5xl">
-                  <div className="flex flex-col items-center px-4 pt-4">
-                    <div className="mb-2 flex-none" style={{ width: waveformWidth, height: 90 }}>
-                      {isOpen && isWaveOpen && (
-                        <AudioWaveform
-                          width={waveformWidth}
-                          height={80}
-                          barColor={primaryColor}
-                          barCount={Math.floor(waveformWidth / 8)}
-                        />
-                      )}
-                    </div>
-                    <MusicPlayProgress className="w-full px-3" trackClassName="h-[6px]" />
-                  </div>
-                  <div className="grid h-16 w-full grid-cols-[minmax(0,1fr)_minmax(0,3fr)_minmax(0,1fr)] px-6">
-                    <div className="flex h-full items-center space-x-2">
-                      {Boolean(user?.isLogin) && <MusicFavButton />}
-                      <MusicDownloadButton />
-                      <IconButton
-                        tooltip={isWaveOpen ? "隐藏动态频谱" : "显示动态频谱"}
-                        className={isWaveOpen ? "text-primary" : ""}
-                        onPress={() => setIsWaveOpen(!isWaveOpen)}
-                        title="动态频谱显示切换"
-                      >
-                        <RiPulseLine size={18} />
-                      </IconButton>
-                    </div>
+
+              <div
+                className={clsx("absolute inset-x-0 bottom-0 z-30 transition-opacity duration-200", {
+                  "pointer-events-auto opacity-100": isUiVisible,
+                  "pointer-events-none opacity-0": !isUiVisible,
+                })}
+              >
+                <div className="mx-auto mb-4 flex w-full max-w-6xl flex-col items-center gap-2 px-12">
+                  <MusicPlayProgress className="w-full" trackClassName="h-[6px]" />
+                  <div className="flex w-full items-center justify-center space-x-4">
+                    <MusicPlayMode />
                     <MusicPlayControl />
-                    <div className="flex h-full items-center justify-end space-x-2">
-                      <MusicPlayMode />
-                      <OpenPlaylistDrawerButton />
-                      <MusicVolume />
-                      <MusicRate />
-                    </div>
+                    <OpenPlaylistDrawerButton />
                   </div>
                 </div>
               </div>
+
+              {isUiVisible && playItem.hasMultiPart && !isPageListOpen && (
+                <div className="absolute top-1/2 right-0 z-20 -translate-y-1/2">
+                  <IconButton
+                    className="h-24 w-6 min-w-0 rounded-l-xl rounded-r-none bg-white/10 px-0 backdrop-blur-md transition-colors hover:bg-white/20"
+                    onPress={() => setIsPageListOpen(!isPageListOpen)}
+                    tooltip="显示分集列表"
+                    tooltipProps={{
+                      placement: "left",
+                    }}
+                  >
+                    <RiArrowLeftSLine size={24} className="text-white/80" />
+                  </IconButton>
+                </div>
+              )}
+
+              <PageList
+                ref={pageListRef}
+                className={`absolute top-1/2 right-0 z-30 -translate-y-1/2 rounded-r-none transition-all duration-300 ease-out ${
+                  isPageListOpen ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-full opacity-0"
+                }`}
+                style={{
+                  width: 280,
+                  height: "min(60vh, 420px)",
+                }}
+                onClose={() => setIsPageListOpen(false)}
+              />
             </DrawerBody>
           )
         }

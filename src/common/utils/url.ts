@@ -3,7 +3,7 @@ export const getUrlParams = (url: string) => {
   return Object.fromEntries(urlParams.entries());
 };
 
-export const formatUrlProtocal = (url?: string) => {
+export const formatUrlProtocol = (url?: string) => {
   if (url && !url.startsWith("http")) {
     return `https:${url}`;
   }

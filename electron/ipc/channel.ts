@@ -32,6 +32,11 @@ export const channel = {
     sync: "download:sync",
     clear: "download:clear",
   },
+  lyrics: {
+    searchNeteaseSongs: "lyrics:netease-search",
+    getNeteaseLyrics: "lyrics:netease-lyrics",
+    searchLrclib: "lyrics:lrclib-search",
+  },
   router: {
     navigate: "router:navigate",
   },

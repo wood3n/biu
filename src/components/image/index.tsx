@@ -4,7 +4,7 @@ import { Image as HeroImage, type ImageProps } from "@heroui/react";
 import { RiFileImageLine } from "@remixicon/react";
 import { twMerge } from "tailwind-merge";
 
-import { formatUrlProtocal } from "@/common/utils/url";
+import { formatUrlProtocol } from "@/common/utils/url";
 
 interface Props extends ImageProps {
   params?: string;
@@ -13,7 +13,7 @@ interface Props extends ImageProps {
 
 const Image = ({ params, width, height, src, className, emptyPlaceholder, ...rest }: Props) => {
   const [isError, setIsError] = useState(false);
-  const formatSrc = formatUrlProtocal(src);
+  const formatSrc = formatUrlProtocol(src);
   const finalSrc =
     params && formatSrc && formatSrc.includes("/bfs/") && !formatSrc.includes("@")
       ? `${formatSrc}@${params}`
