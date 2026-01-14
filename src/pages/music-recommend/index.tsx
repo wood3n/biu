@@ -69,11 +69,6 @@ const MusicRecommend = () => {
   }, []);
 
   const handlePlayAll = useCallback(async () => {
-    if (!list.length) {
-      addToast({ title: "暂无可播放内容", color: "warning" });
-      return;
-    }
-
     const items = list
       .map(item => {
         const archive = item.related_archive;

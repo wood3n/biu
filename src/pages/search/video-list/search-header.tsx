@@ -54,7 +54,7 @@ export default function SearchHeader({
         <AsyncButton
           color="primary"
           size="sm"
-          startContent={<RiPlayFill size={16} />}
+          startContent={<RiPlayFill size={18} />}
           isDisabled={playAllDisabled}
           onPress={onPlayAll}
           className="dark:text-black"

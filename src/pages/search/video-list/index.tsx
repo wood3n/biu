@@ -87,11 +87,6 @@ export default function SearchVideo({ keyword, getScrollElement }: SearchVideoPr
   }, [retryInitial]);
 
   const handlePlayAll = useCallback(async () => {
-    if (!list.length) {
-      addToast({ title: "暂无可播放内容", color: "warning" });
-      return;
-    }
-
     const items = list.map(item => ({
       type: "mv" as const,
       bvid: item.bvid,
