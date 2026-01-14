@@ -10,6 +10,7 @@ import { immer } from "zustand/middleware/immer";
 import { getPlayModeList, PlayMode } from "@/common/constants/audio";
 import { getAudioUrl, getDashUrl, isUrlValid } from "@/common/utils/audio";
 import { beginPlayReport, endPlayReport, reportHeartbeat } from "@/common/utils/play-report";
+import { stripHtml } from "@/common/utils/str";
 import { formatUrlProtocol } from "@/common/utils/url";
 import { getAudioSongInfo } from "@/service/audio-song-info";
 import { getWebInterfaceView } from "@/service/web-interface-view";
@@ -171,6 +172,8 @@ const toastError = (title: string) => {
     color: "danger",
   });
 };
+
+const sanitizeTitle = (title: string) => stripHtml(title);
 
 const handlePlayError = (error: any) => {
   const errorMsg = error?.message || error?.name || "";
@@ -531,6 +534,7 @@ export const usePlayList = create<State & Action>()(
         play: async ({ type, bvid, sid, title, cover, ownerName, ownerMid }: PlayItem) => {
           const { list, playId } = get();
           const currentItem = list?.find(item => item.id === playId);
+          const sanitizedTitle = sanitizeTitle(title);
 
           // 当前正在播放，如果暂停了则播放
           if (isSame(currentItem, { type, bvid, sid })) {
@@ -555,7 +559,7 @@ export const usePlayList = create<State & Action>()(
               type,
               bvid,
               sid,
-              title,
+              title: sanitizedTitle,
               cover: cover ? formatUrlProtocol(cover) : undefined,
               ownerName,
               ownerMid,
@@ -598,6 +602,7 @@ export const usePlayList = create<State & Action>()(
         playList: async items => {
           const newList = items.map(item => ({
             ...item,
+            title: sanitizeTitle(item.title),
             id: idGenerator(),
           }));
 
@@ -699,6 +704,7 @@ export const usePlayList = create<State & Action>()(
         addToNext: async ({ type, title, bvid, sid, cover, ownerName, ownerMid }) => {
           const { playId, nextId: currentNextId, list } = get();
           const currentItem = list.find(item => item.id === playId);
+          const sanitizedTitle = sanitizeTitle(title);
           // 如果当前正在播放，则不添加
           if (isSame({ type, bvid, sid }, currentItem)) {
             return;
@@ -733,7 +739,7 @@ export const usePlayList = create<State & Action>()(
               type,
               bvid,
               sid,
-              title,
+              title: sanitizedTitle,
               cover: cover ? formatUrlProtocol(cover) : undefined,
               ownerName,
               ownerMid,
@@ -814,6 +820,7 @@ export const usePlayList = create<State & Action>()(
             })
             .map(item => ({
               ...item,
+              title: sanitizeTitle(item.title),
               id: idGenerator(),
             }));
 
