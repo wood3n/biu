@@ -86,6 +86,25 @@ export default function SearchVideo({ keyword, getScrollElement }: SearchVideoPr
     retryInitial();
   }, [retryInitial]);
 
+  const handlePlayAll = useCallback(async () => {
+    if (!list.length) {
+      addToast({ title: "暂无可播放内容", color: "warning" });
+      return;
+    }
+
+    const items = list.map(item => ({
+      type: "mv" as const,
+      bvid: item.bvid,
+      title: item.title,
+      cover: formatUrlProtocol(item.pic),
+      ownerName: item.author,
+      ownerMid: item.mid,
+    }));
+
+    await usePlayList.getState().addList(items);
+    addToast({ title: `已添加 ${items.length} 首到播放列表`, color: "success" });
+  }, [list]);
+
   const handleMenuAction = useCallback(async (key: string, item: SearchVideoItem) => {
     const musicItem = {
       type: "mv" as const,
@@ -151,7 +170,14 @@ export default function SearchVideo({ keyword, getScrollElement }: SearchVideoPr
 
   return (
     <>
-      <SearchHeader order={order} onOrderChange={setOrder} musicOnly={musicOnly} onMusicOnlyChange={setMusicOnly} />
+      <SearchHeader
+        order={order}
+        onOrderChange={setOrder}
+        musicOnly={musicOnly}
+        onMusicOnlyChange={setMusicOnly}
+        onPlayAll={handlePlayAll}
+        playAllDisabled={initialLoading || list.length === 0}
+      />
       {initialLoading && (
         <div className="flex min-h-[280px] items-center justify-center">
           <Spinner label="加载中" />
