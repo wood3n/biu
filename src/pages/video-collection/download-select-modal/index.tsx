@@ -101,7 +101,7 @@ const DownloadSelectModal = ({ type, outputFileType, mediaCount, isOpen, onOpenC
   }, [isOpen, type, mediaCount]);
 
   return (
-    <Modal disableAnimation scrollBehavior="inside" isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Modal radius="md" disableAnimation scrollBehavior="inside" isOpen={isOpen} onOpenChange={onOpenChange}>
       <ModalContent>
         <ModalHeader>选择要下载的{outputFileType === "audio" ? "音频" : "视频"}</ModalHeader>
         <ModalBody className="px-0">

@@ -62,6 +62,7 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           autoStart: state.autoStart,
           fontFamily: state.fontFamily,
           primaryColor: state.primaryColor,
+          backgroundColor: state.backgroundColor,
           borderRadius: state.borderRadius,
           audioQuality: state.audioQuality,
           hiddenMenuKeys: state.hiddenMenuKeys,

@@ -171,6 +171,7 @@ const FavoritesSelectModal = () => {
       onOpenChange={onFavSelectModalOpenChange}
       isDismissable={false}
       size="md"
+      radius="md"
       classNames={{
         backdrop: "z-200",
         wrapper: "z-200",

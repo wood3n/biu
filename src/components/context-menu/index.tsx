@@ -43,6 +43,7 @@ const ContextMenu = ({ children, items, className, onAction }: ContextMenuProps)
       {children}
       {position && (
         <Popover
+          radius="md"
           isOpen={isOpen}
           onOpenChange={openState => {
             if (!openState) {
@@ -74,11 +75,17 @@ const ContextMenu = ({ children, items, className, onAction }: ContextMenuProps)
                 onAction?.(key as string);
                 closeMenu();
               }}
+              className="p-2"
             >
               {items
                 .filter(item => !item.hidden)
                 .map(item => (
-                  <ListboxItem key={item.key} startContent={item.icon} className={item.className} color={item.color}>
+                  <ListboxItem
+                    key={item.key}
+                    startContent={item.icon}
+                    className={twMerge("rounded-medium", item.className)}
+                    color={item.color}
+                  >
                     {item.label}
                   </ListboxItem>
                 ))}

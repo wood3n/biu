@@ -35,7 +35,7 @@ const LyricsPreviewModal = ({
   };
 
   return (
-    <Modal disableAnimation isOpen={isOpen} onOpenChange={onOpenChange} placement="center" size="xl">
+    <Modal disableAnimation isOpen={isOpen} radius="md" onOpenChange={onOpenChange} placement="center" size="xl">
       <ModalContent>
         <ModalHeader>{title || "歌词预览"}</ModalHeader>
         <ModalBody className="px-0">

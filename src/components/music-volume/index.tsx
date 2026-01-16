@@ -1,9 +1,11 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 
-import { Button, Tooltip, Slider } from "@heroui/react";
+import { Tooltip, Slider } from "@heroui/react";
 import { RiVolumeDownLine, RiVolumeMuteLine, RiVolumeUpLine } from "@remixicon/react";
 
 import { usePlayList } from "@/store/play-list";
+
+import IconButton from "../icon-button";
 
 const Volume = () => {
   const volume = usePlayList(s => s.volume);
@@ -148,12 +150,8 @@ const Volume = () => {
         </div>
       }
     >
-      <Button
+      <IconButton
         ref={buttonRef}
-        isIconOnly
-        size="sm"
-        variant="light"
-        className="hover:text-primary"
         onPress={onToggleMute}
         aria-label={isMuted ? "取消静音" : "静音"}
         aria-describedby={tooltipId}
@@ -165,7 +163,7 @@ const Volume = () => {
         ) : (
           <RiVolumeDownLine size={18} />
         )}
-      </Button>
+      </IconButton>
     </Tooltip>
   );
 };

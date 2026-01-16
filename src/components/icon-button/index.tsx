@@ -8,7 +8,14 @@ interface Props extends ButtonProps {
 
 const IconButton = ({ tooltip, tooltipProps, children, className, ...props }: Props) => {
   const button = (
-    <Button isIconOnly size="sm" variant="light" className={twMerge("hover:text-primary", className)} {...props}>
+    <Button
+      isIconOnly
+      radius="md"
+      size="sm"
+      variant="light"
+      className={twMerge("hover:text-primary", className)}
+      {...props}
+    >
       {children}
     </Button>
   );

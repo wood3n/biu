@@ -99,7 +99,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
       />
       <div
         className={classNames(
-          "bg-content2 absolute top-full left-0 z-100 mt-1 h-auto max-h-[80dvh] w-[360px] overflow-hidden rounded-md shadow-2xl",
+          "bg-content2 rounded-medium absolute top-full left-0 z-100 mt-1 h-auto max-h-[80dvh] w-[360px] overflow-hidden shadow-2xl",
           {
             hidden: !open,
             "flex flex-col": open,
@@ -143,6 +143,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
                         key={item.time}
                         isCloseable
                         size="sm"
+                        radius="md"
                         onClose={() => {
                           deleteSearchHistory(item);
                           inputRef.current?.focus();
@@ -175,6 +176,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
                   setValue(item.value);
                   submitSearch(item.value);
                 }}
+                className="rounded-medium"
               >
                 <span dangerouslySetInnerHTML={{ __html: item.name }} />
               </ListboxItem>

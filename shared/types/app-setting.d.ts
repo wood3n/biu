@@ -15,6 +15,8 @@ interface ProxySettings {
 interface AppSettings {
   fontFamily: string;
   primaryColor: string;
+  /** 自定义背景色（为空表示使用主题默认） */
+  backgroundColor: string;
   borderRadius: number;
   downloadPath?: string;
   closeWindowOption: "hide" | "exit";

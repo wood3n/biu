@@ -5,6 +5,8 @@ import { Button, Tooltip } from "@heroui/react";
 import { PlayRate } from "@/common/constants/audio";
 import { usePlayList } from "@/store/play-list";
 
+import IconButton from "../icon-button";
+
 const MusicRate = () => {
   const rate = usePlayList(s => s.rate);
   const setRate = usePlayList(s => s.setRate);
@@ -30,6 +32,7 @@ const MusicRate = () => {
             <Button
               key={v}
               isIconOnly
+              radius="md"
               size="sm"
               color={v === rate ? "primary" : "default"}
               variant={v === rate ? "solid" : "light"}
@@ -43,16 +46,9 @@ const MusicRate = () => {
         </div>
       }
     >
-      <Button
-        isIconOnly
-        variant="light"
-        size="sm"
-        className="hover:text-primary min-w-fit text-[16px]"
-        aria-label="播放速率"
-        aria-describedby={tooltipId}
-      >
+      <IconButton className="min-w-fit text-[16px]" aria-label="播放速率" aria-describedby={tooltipId}>
         {rate}x
-      </Button>
+      </IconButton>
     </Tooltip>
   );
 };

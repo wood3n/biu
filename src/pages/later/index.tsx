@@ -218,7 +218,7 @@ const Later = () => {
       <div className="mb-2">
         <div className="flex items-center justify-between">
           <h1>稍后再看</h1>
-          <Button variant="flat" startContent={<RiDeleteBinLine size={18} />} onPress={handleClear}>
+          <Button variant="flat" size="sm" startContent={<RiDeleteBinLine size={18} />} onPress={handleClear}>
             清除已看完
           </Button>
         </div>

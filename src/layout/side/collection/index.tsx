@@ -381,6 +381,7 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
             <Button
               isIconOnly
               variant="light"
+              radius="md"
               size="sm"
               className="h-auto w-auto min-w-auto p-1"
               onPress={onOpenAddFavorite}

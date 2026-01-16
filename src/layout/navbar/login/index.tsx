@@ -49,7 +49,7 @@ const Login = ({ isOpen, onOpenChange }: Props) => {
   );
 
   return (
-    <Modal size="2xl" isOpen={isOpen} isDismissable={false} onOpenChange={onOpenChange}>
+    <Modal size="2xl" radius="md" isOpen={isOpen} isDismissable={false} onOpenChange={onOpenChange}>
       <ModalContent>
         <ModalBody className="flex-row items-center justify-center gap-8 py-8">
           <QrcodeLogin onClose={onClose} updateUserData={updateUserData} />

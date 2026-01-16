@@ -31,12 +31,11 @@ const timeTagPattern = /\[(\d{1,2}):(\d{1,2})(?:\.(\d{1,3}))?\]/g;
 const DEFAULT_FONT_SIZE = 20;
 const DEFAULT_OFFSET = 0;
 
-const Lyrics = () => {
+const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: boolean; showControls?: boolean }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rafIdRef = useRef<number | null>(null);
   const lineRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const [centerPadding, setCenterPadding] = useState(0);
-  const [controlOpenState, setControlOpenState] = useState({ font: false, offset: false });
   const playId = usePlayList(s => s.playId);
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
   const [translatedLyrics, setTranslatedLyrics] = useState<LyricLine[]>([]);
@@ -187,10 +186,6 @@ const Lyrics = () => {
     return 0;
   }, [currentMs, lyrics]);
 
-  const handleControlOpenChange = useCallback((key: "font" | "offset", open: boolean) => {
-    setControlOpenState(prev => ({ ...prev, [key]: open }));
-  }, []);
-
   const persistLyricsCache = useMemo(
     () =>
       debounce(async (playItem: PlayItem, nextOffset?: number, nextFontSize?: number) => {
@@ -324,7 +319,6 @@ const Lyrics = () => {
     const isActive = index === activeIndex;
     const translation = translationMap.get(line.time);
     const activeWeight = isActive ? "font-extrabold" : "font-normal";
-    const activeColor = isActive ? "text-white" : "text-white/60";
     const activeShadow = isActive ? activeTextBase : "";
 
     return (
@@ -334,12 +328,16 @@ const Lyrics = () => {
           lineRefs.current[index] = node;
         }}
         className={clsx(
-          "w-full transform-none py-2 text-left text-white transition-all duration-300 ease-out",
-          isActive ? "text-primary opacity-100" : "opacity-60",
+          "w-full transform-none py-2 transition-all duration-300 ease-out",
+          centered ? "text-center" : "text-left",
+          isActive ? "opacity-100" : "opacity-60",
         )}
         style={{ fontSize: isActive ? fontSize * 1.5 : fontSize, transform: "none" }}
       >
-        <div className={clsx("leading-snug break-words whitespace-pre-wrap", activeWeight, activeColor, activeShadow)}>
+        <div
+          className={clsx("leading-snug break-words whitespace-pre-wrap", activeWeight, activeShadow)}
+          style={{ color: color || undefined }}
+        >
           {line.text}
         </div>
         {translation ? (
@@ -351,7 +349,7 @@ const Lyrics = () => {
 
   return (
     <>
-      <div className="group/lyrics relative flex h-full w-full items-center justify-center overflow-hidden text-white">
+      <div className="group/lyrics relative flex h-full w-full items-center justify-center overflow-hidden">
         <div
           ref={containerRef}
           className="no-scrollbar relative h-full w-full max-w-4xl overflow-y-auto"
@@ -380,22 +378,16 @@ const Lyrics = () => {
         </div>
 
         <div
-          className="pointer-events-none absolute right-6 bottom-6 flex flex-col items-center space-y-3 text-sm text-white/80 opacity-0 transition-opacity duration-200 group-hover/lyrics:opacity-100 data-[controls-open=true]:opacity-100"
-          data-controls-open={controlOpenState.font || controlOpenState.offset}
+          className={clsx(
+            "pointer-events-none absolute right-6 bottom-6 flex flex-col items-center space-y-3 text-sm text-white/80 transition-opacity duration-200",
+            showControls ? "opacity-100" : "opacity-0",
+          )}
         >
           <div className="pointer-events-auto">
-            <FontSizeControl
-              value={fontSize}
-              onChange={handleFontSizeChange}
-              onOpenChange={open => handleControlOpenChange("font", open)}
-            />
+            <FontSizeControl value={fontSize} onChange={handleFontSizeChange} onOpenChange={() => {}} />
           </div>
           <div className="pointer-events-auto">
-            <OffsetControl
-              value={offset}
-              onChange={handleOffsetChange}
-              onOpenChange={open => handleControlOpenChange("offset", open)}
-            />
+            <OffsetControl value={offset} onChange={handleOffsetChange} onOpenChange={() => {}} />
           </div>
           <div className="pointer-events-auto">
             <IconButton

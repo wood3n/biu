@@ -66,6 +66,7 @@ const MusicListItem = ({
     <ContextMenu items={menus} onAction={onMenuAction}>
       <Button
         as="div"
+        radius="md"
         fullWidth
         disableAnimation
         variant={isPlay ? "flat" : "light"}

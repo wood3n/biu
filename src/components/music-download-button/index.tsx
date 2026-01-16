@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { addToast, Button, Tooltip } from "@heroui/react";
+import { addToast, Tooltip, Listbox, ListboxItem } from "@heroui/react";
 import { RiDownload2Fill, RiFileImageLine, RiFileMusicLine, RiFileVideoLine } from "@remixicon/react";
 
 import AsyncButton from "@/components/async-button";
@@ -94,46 +94,57 @@ const MusicDownloadButton = () => {
 
   return (
     <Tooltip
-      disableAnimation
       triggerScaleOnOpen={false}
       isOpen={isTooltipOpen}
       onOpenChange={setIsTooltipOpen}
+      disableAnimation
+      radius="md"
       placement="top"
       closeDelay={500}
       showArrow={false}
       classNames={{
-        content: "py-3 px-2 min-w-[120px]",
+        content: "p-2",
       }}
       content={
-        <div className="flex flex-col items-stretch gap-1">
-          <Button
-            size="sm"
-            variant="light"
+        <Listbox
+          aria-label="下载选项"
+          selectionMode="none"
+          onAction={key => {
+            if (key === "audio") {
+              void downloadAudio();
+            } else if (key === "video") {
+              void downloadVideo();
+            } else if (key === "cover") {
+              void downloadCover();
+            }
+            setIsTooltipOpen(false);
+          }}
+        >
+          <ListboxItem
+            className="rounded-medium"
+            key="audio"
+            textValue="下载音频"
             startContent={<RiFileMusicLine size={16} />}
-            className="justify-start"
-            onPress={downloadAudio}
           >
             下载音频
-          </Button>
-          <Button
-            size="sm"
-            variant="light"
+          </ListboxItem>
+          <ListboxItem
+            className="rounded-medium"
+            key="video"
+            textValue="下载视频"
             startContent={<RiFileVideoLine size={16} />}
-            className="justify-start"
-            onPress={downloadVideo}
           >
             下载视频
-          </Button>
-          <Button
-            size="sm"
-            variant="light"
+          </ListboxItem>
+          <ListboxItem
+            className="rounded-medium"
+            key="cover"
+            textValue="下载封面"
             startContent={<RiFileImageLine size={16} />}
-            className="justify-start"
-            onPress={downloadCover}
           >
             下载封面
-          </Button>
-        </div>
+          </ListboxItem>
+        </Listbox>
       }
     >
       <IconButton>

@@ -77,7 +77,7 @@ const SetGroupModal = ({ isOpen, onOpenChange, onClose, user, tags, onSuccess }:
   };
 
   return (
-    <Modal disableAnimation isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Modal radius="md" disableAnimation isOpen={isOpen} onOpenChange={onOpenChange}>
       <ModalContent>
         {onClose => (
           <>

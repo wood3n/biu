@@ -26,11 +26,10 @@ import {
   RiSunLine,
 } from "@remixicon/react";
 
-import ColorPicker from "@/components/color-picker";
 import FontSelect from "@/components/font-select";
 import UpdateCheckButton from "@/components/update-check-button";
-import { defaultAppSettings } from "@shared/settings/app-settings";
 
+import ColorSettings from "./color-settings";
 import ImportExport from "./export-import";
 
 type SystemSettingsTabProps = {
@@ -53,55 +52,6 @@ export const SystemSettingsTab = ({
   return (
     <Form className="space-y-6">
       <h2>外观</h2>
-      {/* 主题模式 */}
-      <div className="flex w-full items-center justify-between">
-        <div className="mr-6 space-y-1">
-          <div className="text-medium font-medium">主题</div>
-          <div className="text-sm text-zinc-500">选择浅色或深色主题</div>
-        </div>
-        <Controller
-          control={control}
-          name="themeMode"
-          render={({ field }) => (
-            <Tabs
-              aria-label="主题切换"
-              classNames={{
-                cursor: "rounded-medium",
-              }}
-              selectedKey={field.value}
-              onSelectionChange={key => field.onChange(key)}
-            >
-              <Tab
-                key="system"
-                title={
-                  <div className="flex items-center space-x-2">
-                    <RiComputerLine size={18} />
-                    <span>跟随系统</span>
-                  </div>
-                }
-              />
-              <Tab
-                key="light"
-                title={
-                  <div className="flex items-center space-x-2">
-                    <RiSunLine size={18} />
-                    <span>浅色</span>
-                  </div>
-                }
-              />
-              <Tab
-                key="dark"
-                title={
-                  <div className="flex items-center space-x-2">
-                    <RiMoonLine size={18} />
-                    <span>深色</span>
-                  </div>
-                }
-              />
-            </Tabs>
-          )}
-        />
-      </div>
       {/* 显示模式 */}
       <div className="flex w-full items-center justify-between">
         <div className="mr-6 space-y-1">
@@ -151,6 +101,60 @@ export const SystemSettingsTab = ({
           )}
         />
       </div>
+      {/* 主题模式 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">主题</div>
+          <div className="text-sm text-zinc-500">选择浅色或深色主题</div>
+        </div>
+
+        <Controller
+          control={control}
+          name="themeMode"
+          render={({ field }) => (
+            <Tabs
+              aria-label="主题切换"
+              classNames={{
+                cursor: "rounded-medium",
+              }}
+              selectedKey={field.value}
+              onSelectionChange={key => field.onChange(key)}
+            >
+              <Tab
+                key="system"
+                title={
+                  <div className="flex items-center space-x-2">
+                    <RiComputerLine size={18} />
+                    <span>跟随系统</span>
+                  </div>
+                }
+              />
+              <Tab
+                key="light"
+                title={
+                  <div className="flex items-center space-x-2">
+                    <RiSunLine size={18} />
+                    <span>浅色</span>
+                  </div>
+                }
+              />
+              <Tab
+                key="dark"
+                title={
+                  <div className="flex items-center space-x-2">
+                    <RiMoonLine size={18} />
+                    <span>深色</span>
+                  </div>
+                }
+              />
+            </Tabs>
+          )}
+        />
+      </div>
+      {/* color 自定义 */}
+      <div className="w-full">
+        <ColorSettings control={control} />
+      </div>
       {/* 字体选择 */}
       <div className="flex w-full items-center justify-between">
         <div className="mr-6 space-y-1">
@@ -195,27 +199,6 @@ export const SystemSettingsTab = ({
           />
         </div>
       </div> */}
-
-      <div className="flex w-full items-center justify-between">
-        <div className="mr-6 space-y-1">
-          <div className="text-medium font-medium">主色调</div>
-          <div className="text-sm text-zinc-500">自定义应用的强调色</div>
-        </div>
-        <div className="flex w-[180px] justify-end">
-          <Controller
-            control={control}
-            name="primaryColor"
-            render={({ field }) => (
-              <ColorPicker
-                presets={[defaultAppSettings.primaryColor, "#66cc8a", "#9353d3", "#ffffff", "#db924b"]}
-                value={field.value}
-                onChange={field.onChange}
-              />
-            )}
-          />
-        </div>
-      </div>
-
       {/* 全局圆角设置 */}
       <div className="flex w-full items-center justify-between">
         <div className="mr-6 space-y-1">
