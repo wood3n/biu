@@ -377,28 +377,25 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
           )}
         </div>
 
-        <div
-          className={clsx(
-            "text-foreground/80 pointer-events-none absolute right-6 bottom-6 flex flex-col items-center space-y-3 text-sm transition-opacity duration-200",
-            showControls ? "opacity-100" : "opacity-0",
-          )}
-        >
-          <div className="pointer-events-auto">
-            <FontSizeControl value={fontSize} onChange={handleFontSizeChange} onOpenChange={() => {}} />
+        {showControls && (
+          <div className="text-foreground/80 pointer-events-none absolute right-6 bottom-6 flex flex-col items-center space-y-3 text-sm transition-opacity duration-200">
+            <div className="pointer-events-auto">
+              <FontSizeControl value={fontSize} onChange={handleFontSizeChange} onOpenChange={() => {}} />
+            </div>
+            <div className="pointer-events-auto">
+              <OffsetControl value={offset} onChange={handleOffsetChange} onOpenChange={() => {}} />
+            </div>
+            <div className="pointer-events-auto">
+              <IconButton
+                type="button"
+                onPress={onOpenSearch}
+                className="bg-foreground/20 text-foreground hover:bg-foreground/30 min-w-0 rounded-full text-xs font-semibold"
+              >
+                <RiTBoxLine size={16} />
+              </IconButton>
+            </div>
           </div>
-          <div className="pointer-events-auto">
-            <OffsetControl value={offset} onChange={handleOffsetChange} onOpenChange={() => {}} />
-          </div>
-          <div className="pointer-events-auto">
-            <IconButton
-              type="button"
-              onPress={onOpenSearch}
-              className="bg-foreground/20 text-foreground hover:bg-foreground/30 min-w-0 rounded-full text-xs font-semibold"
-            >
-              <RiTBoxLine size={16} />
-            </IconButton>
-          </div>
-        </div>
+        )}
       </div>
       <LyricsSearchModal isOpen={isSearchOpen} onOpenChange={setIsSearchOpen} onLyricsAdopted={handleLyricsAdopted} />
     </>

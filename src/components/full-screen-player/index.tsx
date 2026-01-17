@@ -8,7 +8,7 @@ import { readableColor } from "color2k";
 import { useShallow } from "zustand/shallow";
 
 import { Themes } from "@/common/constants/theme";
-import { hexToHsl, resolveTheme } from "@/common/utils/color";
+import { hexToHsl, resolveTheme, isHex } from "@/common/utils/color";
 import AudioWaveform from "@/components/audio-waveform";
 import Lyrics from "@/components/lyrics";
 import { useFullScreenPlayerSettings } from "@/store/full-screen-player-settings";
@@ -159,9 +159,7 @@ const FullScreenPlayer = () => {
   const computedForegroundHex = useMemo(() => {
     if (showBlurredBackground) return undefined;
     const baseBg =
-      backgroundColor && /^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/.test(backgroundColor)
-        ? backgroundColor
-        : Themes[resolveTheme(themeMode)].colors!.background;
+      backgroundColor && isHex(backgroundColor) ? backgroundColor : Themes[resolveTheme(themeMode)].colors!.background;
     try {
       return readableColor(baseBg as string);
     } catch {
@@ -180,14 +178,14 @@ const FullScreenPlayer = () => {
     return vars;
   }, [cssVars, primaryColor, computedForegroundHex]);
 
+  const appTheme = useMemo(() => resolveTheme(themeMode), [themeMode]);
+
   if (!playItem) return null;
 
   const coverWidth = Math.max(260, Math.min(windowWidth * 0.7, windowHeight * 0.48, 520));
   const coverHeight = coverWidth * 0.75;
   const waveformWidth = Math.min(640, Math.max(400, Math.round(windowWidth * 0.5)));
   const waveformBarCount = Math.max(48, Math.min(128, Math.round(waveformWidth / 7.5)));
-
-  const appTheme = useMemo(() => resolveTheme(themeMode), [themeMode]);
 
   return (
     <Drawer

@@ -84,3 +84,7 @@ export function resolveTheme(theme: ThemeMode, systemTheme?: "light" | "dark") {
   }
   return theme;
 }
+
+export function isHex(v?: string) {
+  return /^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/.test(v || "");
+}

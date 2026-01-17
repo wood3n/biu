@@ -105,7 +105,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
       color={isActive ? "primary" : "default"}
       onPress={onPress}
       startContent={iconContent}
-      className={twMerge("justify-start px-2", className, dndClassName)}
+      className={twMerge("justify-start px-2 text-inherit", className, dndClassName)}
       {...(dndRest as any)}
     >
       <span className="pointer-events-none truncate">{title}</span>

@@ -4,6 +4,7 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { Switch } from "@heroui/react";
 import { useShallow } from "zustand/shallow";
 
+import { isHex } from "@/common/utils/color";
 import ColorPicker from "@/components/color-picker";
 import { useFullScreenPlayerSettings } from "@/store/full-screen-player-settings";
 
@@ -13,7 +14,6 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
     showSpectrum,
     showCover,
     showBlurredBackground,
-    bgThemeMode,
     backgroundColor,
     spectrumColor,
     lyricsColor,
@@ -24,7 +24,6 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
       showSpectrum: s.showSpectrum,
       showCover: s.showCover,
       showBlurredBackground: s.showBlurredBackground,
-      bgThemeMode: s.bgThemeMode,
       backgroundColor: s.backgroundColor,
       spectrumColor: s.spectrumColor,
       lyricsColor: s.lyricsColor,
@@ -38,7 +37,6 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
       showSpectrum,
       showCover,
       showBlurredBackground,
-      bgThemeMode,
       backgroundColor,
       spectrumColor,
       lyricsColor,
@@ -63,7 +61,6 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
     setValue("showSpectrum", showSpectrum);
     setValue("showCover", showCover);
     setValue("showBlurredBackground", showBlurredBackground);
-    setValue("bgThemeMode", bgThemeMode);
     setValue("backgroundColor", backgroundColor);
     setValue("spectrumColor", spectrumColor);
     setValue("lyricsColor", lyricsColor);
@@ -73,7 +70,6 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
     showSpectrum,
     showCover,
     showBlurredBackground,
-    bgThemeMode,
     backgroundColor,
     spectrumColor,
     lyricsColor,
@@ -84,37 +80,29 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
   useEffect(() => {
     if (!values || typeof values !== "object") return;
     update({
-      showLyrics: Boolean((values as any).showLyrics),
-      showSpectrum: Boolean((values as any).showSpectrum),
-      showCover: Boolean((values as any).showCover),
-      showBlurredBackground: Boolean((values as any).showBlurredBackground),
-      bgThemeMode: (values as any).bgThemeMode === "light" ? "light" : "dark",
-    } as any);
-  }, [
-    values?.showLyrics,
-    values?.showSpectrum,
-    values?.showCover,
-    values?.showBlurredBackground,
-    values?.bgThemeMode,
-    update,
-  ]);
+      showLyrics: values.showLyrics,
+      showSpectrum: values.showSpectrum,
+      showCover: values.showCover,
+      showBlurredBackground: values.showBlurredBackground,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values?.showLyrics, values?.showSpectrum, values?.showCover, values?.showBlurredBackground, update]);
 
   useEffect(() => {
     if (!values || typeof values !== "object") return;
-    const isHex = (v?: string) => /^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/.test(v || "");
     const sanitizeLyricsColor = (v?: string) => (isHex(v) ? v! : "#ffffff");
     const sanitizeSpectrumColor = (v?: string) => (v === "currentColor" || isHex(v) ? v! : "currentColor");
-    const sanitizeBackgroundColor = (v?: string, mode?: "light" | "dark") =>
-      isHex(v) ? v! : mode === "light" ? "#ffffff" : "#000000";
+    const sanitizeBackgroundColor = (v?: string) => (isHex(v) ? v! : "#ffffff");
     const id = window.setTimeout(() => {
       update({
-        spectrumColor: sanitizeSpectrumColor((values as any).spectrumColor),
-        lyricsColor: sanitizeLyricsColor((values as any).lyricsColor),
-        backgroundColor: sanitizeBackgroundColor((values as any).backgroundColor, (values as any).bgThemeMode),
-      } as any);
+        spectrumColor: sanitizeSpectrumColor(values.spectrumColor),
+        lyricsColor: sanitizeLyricsColor(values.lyricsColor),
+        backgroundColor: sanitizeBackgroundColor(values.backgroundColor),
+      });
     }, 200);
     return () => window.clearTimeout(id);
-  }, [values?.spectrumColor, values?.lyricsColor, values?.backgroundColor, values?.bgThemeMode, update]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values?.spectrumColor, values?.lyricsColor, values?.backgroundColor, update]);
 
   return (
     <div className="min-w-[320px] space-y-4">
@@ -134,7 +122,7 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
             name="lyricsColor"
             render={({ field }) => {
               const v = field.value;
-              const pickerValue = /^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/.test(v || "") ? v : "#ffffff";
+              const pickerValue = isHex(v) ? v : "#ffffff";
               return (
                 <ColorPicker
                   value={pickerValue}
@@ -169,7 +157,7 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
             name="spectrumColor"
             render={({ field }) => {
               const v = field.value;
-              const pickerValue = /^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/.test(v || "") ? v : "#ffffff";
+              const pickerValue = isHex(v) ? v : "#ffffff";
               return (
                 <ColorPicker
                   value={pickerValue}
@@ -179,7 +167,7 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
                 >
                   <div
                     className="border-default h-8 w-12 rounded-full border"
-                    style={{ backgroundColor: v && /^#/.test(v) ? v : undefined }}
+                    style={{ backgroundColor: isHex(v) ? v : undefined }}
                   />
                 </ColorPicker>
               );
@@ -212,22 +200,16 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
             control={control}
             name="backgroundColor"
             render={({ field }) => {
-              const v = field.value;
-              const pickerValue = /^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/.test(v || "")
-                ? v
-                : (values as any).bgThemeMode === "light"
-                  ? "#ffffff"
-                  : "#000000";
               return (
                 <ColorPicker
-                  value={pickerValue}
+                  value={field.value}
                   onChange={hex => field.onChange(hex)}
                   isOpen={backgroundPickerOpen && isUiVisible}
                   onOpenChange={setBackgroundPickerOpen}
                 >
                   <div
                     className="border-default h-8 w-12 rounded-full border"
-                    style={{ backgroundColor: pickerValue }}
+                    style={{ backgroundColor: field.value }}
                   />
                 </ColorPicker>
               );

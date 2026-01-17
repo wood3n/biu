@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { readableColor } from "color2k";
 import { useShallow } from "zustand/react/shallow";
 
 import { Themes } from "@/common/constants/theme";
-import { hexToHsl, resolveTheme } from "@/common/utils/color";
+import { hexToHsl, resolveTheme, isHex } from "@/common/utils/color";
 import { useSettings } from "@/store/settings";
 
 import { ThemeNameContext } from "./use-theme";
@@ -65,14 +66,18 @@ const Theme = ({ children }: Props) => {
     root.style.colorScheme = themeName;
 
     const rootStyle = root.style;
-    const _primaryColor = primaryColor || (Themes[themeName].colors?.primary as string);
-    const _backgroundColor = backgroundColor || (Themes[themeName].colors?.background as string);
+    const _primaryColor = isHex(primaryColor) ? primaryColor : (Themes[themeName].colors?.primary as string);
+    const _backgroundColor = isHex(backgroundColor)
+      ? backgroundColor
+      : (Themes[themeName].colors?.background as string);
 
     if (_primaryColor) {
       rootStyle.setProperty("--heroui-primary", hexToHsl(_primaryColor));
     }
     if (_backgroundColor) {
       rootStyle.setProperty("--heroui-background", hexToHsl(_backgroundColor));
+      const fgHex = readableColor(_backgroundColor);
+      rootStyle.setProperty("--heroui-foreground", hexToHsl(fgHex));
     }
     rootStyle.setProperty("--heroui-radius-medium", `${borderRadius}px`);
 
