@@ -1,14 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type BgThemeMode = "dark" | "light";
-
 export interface FullScreenPlayerSettingsState {
   showLyrics: boolean;
   showSpectrum: boolean;
   showCover: boolean;
   showBlurredBackground: boolean;
-  bgThemeMode: BgThemeMode;
   backgroundColor?: string;
   spectrumColor?: string;
   lyricsColor?: string;
@@ -24,7 +21,6 @@ const defaultSettings: FullScreenPlayerSettingsState = {
   showSpectrum: false,
   showCover: true,
   showBlurredBackground: true,
-  bgThemeMode: "dark",
   backgroundColor: undefined,
   spectrumColor: "currentColor",
   lyricsColor: "#ffffff",
@@ -44,7 +40,6 @@ export const useFullScreenPlayerSettings = create<FullScreenPlayerSettingsState 
         showSpectrum: state.showSpectrum,
         showCover: state.showCover,
         showBlurredBackground: state.showBlurredBackground,
-        bgThemeMode: state.bgThemeMode,
         backgroundColor: state.backgroundColor,
         spectrumColor: state.spectrumColor,
         lyricsColor: state.lyricsColor,

@@ -70,7 +70,7 @@ const OffsetControl = ({ value, min = -5000, max = 5000, onChange, onOpenChange 
           size="sm"
           variant="light"
           aria-label="调整歌词偏移"
-          className="min-w-0 rounded-full bg-white/20 text-xs font-semibold text-white hover:bg-white/30"
+          className="bg-foreground/20 text-foreground hover:bg-foreground/30 min-w-0 rounded-full text-xs font-semibold"
         >
           <RiTimeLine size={16} />
         </IconButton>

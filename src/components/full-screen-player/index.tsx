@@ -4,10 +4,11 @@ import { Drawer, DrawerBody, DrawerContent, Image, Popover, PopoverContent, Popo
 import { RiArrowDownSLine, RiArrowLeftSLine, RiSettings3Line } from "@remixicon/react";
 import { useClickAway } from "ahooks";
 import clsx from "classnames";
+import { readableColor } from "color2k";
 import { useShallow } from "zustand/shallow";
 
 import { Themes } from "@/common/constants/theme";
-import { hexToHsl, generateThemeColor } from "@/common/utils/color";
+import { hexToHsl, resolveTheme } from "@/common/utils/color";
 import AudioWaveform from "@/components/audio-waveform";
 import Lyrics from "@/components/lyrics";
 import { useFullScreenPlayerSettings } from "@/store/full-screen-player-settings";
@@ -38,27 +39,19 @@ const FullScreenPlayer = () => {
     })),
   );
   const primaryColor = useSettings(s => s.primaryColor);
-  const {
-    showLyrics,
-    showSpectrum,
-    showCover,
-    showBlurredBackground,
-    bgThemeMode,
-    backgroundColor,
-    spectrumColor,
-    lyricsColor,
-  } = useFullScreenPlayerSettings(
-    useShallow(s => ({
-      showLyrics: s.showLyrics,
-      showSpectrum: s.showSpectrum,
-      showCover: s.showCover,
-      showBlurredBackground: s.showBlurredBackground,
-      bgThemeMode: s.bgThemeMode,
-      backgroundColor: s.backgroundColor,
-      spectrumColor: s.spectrumColor,
-      lyricsColor: s.lyricsColor,
-    })),
-  );
+  const themeMode = useSettings(s => s.themeMode);
+  const { showLyrics, showSpectrum, showCover, showBlurredBackground, backgroundColor, spectrumColor, lyricsColor } =
+    useFullScreenPlayerSettings(
+      useShallow(s => ({
+        showLyrics: s.showLyrics,
+        showSpectrum: s.showSpectrum,
+        showCover: s.showCover,
+        showBlurredBackground: s.showBlurredBackground,
+        backgroundColor: s.backgroundColor,
+        spectrumColor: s.spectrumColor,
+        lyricsColor: s.lyricsColor,
+      })),
+    );
   const playItem = list.find(item => item.id === playId);
 
   const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1000);
@@ -71,7 +64,6 @@ const FullScreenPlayer = () => {
 
   const pageListRef = useRef<HTMLDivElement>(null);
   const hideUiTimeoutRef = useRef<number | null>(null);
-  const hideCursorTimeoutRef = useRef<number | null>(null);
 
   useClickAway(() => {
     if (isPageListOpen) {
@@ -100,10 +92,6 @@ const FullScreenPlayer = () => {
         window.clearTimeout(hideUiTimeoutRef.current);
         hideUiTimeoutRef.current = null;
       }
-      if (hideCursorTimeoutRef.current) {
-        window.clearTimeout(hideCursorTimeoutRef.current);
-        hideCursorTimeoutRef.current = null;
-      }
     };
   }, []);
 
@@ -112,6 +100,7 @@ const FullScreenPlayer = () => {
       setIsUiVisible(true);
     }
   }, [isOpen]);
+
   useEffect(() => {
     if (!isUiVisible && isSettingsOpen) {
       setIsSettingsOpen(false);
@@ -122,10 +111,6 @@ const FullScreenPlayer = () => {
     if (hideUiTimeoutRef.current) {
       window.clearTimeout(hideUiTimeoutRef.current);
       hideUiTimeoutRef.current = null;
-    }
-    if (hideCursorTimeoutRef.current) {
-      window.clearTimeout(hideCursorTimeoutRef.current);
-      hideCursorTimeoutRef.current = null;
     }
     if (!isUiVisible) {
       setIsUiVisible(true);
@@ -139,12 +124,6 @@ const FullScreenPlayer = () => {
     hideUiTimeoutRef.current = window.setTimeout(() => {
       setIsUiVisible(false);
     }, delay);
-  };
-
-  const scheduleHideCursor = () => {
-    if (hideCursorTimeoutRef.current) {
-      window.clearTimeout(hideCursorTimeoutRef.current);
-    }
   };
 
   const handleMouseLeave = () => {
@@ -177,13 +156,29 @@ const FullScreenPlayer = () => {
     }
   }, [isUiVisible]);
 
-  const themeVars = useMemo(
-    () => ({
+  const computedForegroundHex = useMemo(() => {
+    if (showBlurredBackground) return undefined;
+    const baseBg =
+      backgroundColor && /^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/.test(backgroundColor)
+        ? backgroundColor
+        : Themes[resolveTheme(themeMode)].colors!.background;
+    try {
+      return readableColor(baseBg as string);
+    } catch {
+      return undefined;
+    }
+  }, [backgroundColor, themeMode, showBlurredBackground]);
+
+  const themeVars = useMemo(() => {
+    const vars: React.CSSProperties = {
       ...cssVars,
       ["--heroui-primary" as any]: hexToHsl(primaryColor),
-    }),
-    [cssVars, primaryColor],
-  );
+    };
+    if (computedForegroundHex) {
+      vars["--heroui-foreground" as any] = hexToHsl(computedForegroundHex);
+    }
+    return vars;
+  }, [cssVars, primaryColor, computedForegroundHex]);
 
   if (!playItem) return null;
 
@@ -191,6 +186,8 @@ const FullScreenPlayer = () => {
   const coverHeight = coverWidth * 0.75;
   const waveformWidth = Math.min(640, Math.max(400, Math.round(windowWidth * 0.5)));
   const waveformBarCount = Math.max(48, Math.min(128, Math.round(waveformWidth / 7.5)));
+
+  const appTheme = useMemo(() => resolveTheme(themeMode), [themeMode]);
 
   return (
     <Drawer
@@ -201,23 +198,15 @@ const FullScreenPlayer = () => {
       radius="none"
       isDismissable={false}
       hideCloseButton
-      classNames={{
-        base: "bg-transparent shadow-none m-0!",
-        backdrop: "bg-transparent",
-      }}
     >
       <DrawerContent
-        className={clsx(bgThemeMode === "dark" && "dark", "text-foreground relative h-full overflow-hidden")}
+        className={clsx("bg-background text-foreground relative h-full overflow-hidden", {
+          dark: showBlurredBackground || appTheme === "dark",
+          light: !showBlurredBackground && appTheme === "light",
+        })}
         style={{
           ...themeVars,
           cursor: isUiVisible ? "auto" : "none",
-          colorScheme: bgThemeMode,
-          ["--heroui-background" as any]: hexToHsl(backgroundColor || Themes[bgThemeMode].colors.background),
-          ["--heroui-foreground" as any]: hexToHsl(
-            generateThemeColor(backgroundColor || Themes[bgThemeMode].colors.background, "background", bgThemeMode)
-              .foreground,
-          ),
-          backgroundColor: backgroundColor || Themes[bgThemeMode].colors.background,
         }}
       >
         {onClose =>
@@ -225,7 +214,7 @@ const FullScreenPlayer = () => {
             <Empty />
           ) : (
             <DrawerBody
-              className="group/player relative flex flex-row gap-0 overflow-hidden p-0"
+              className="group/player relative flex flex-row gap-0 overflow-hidden bg-transparent p-0"
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
               onMouseMove={() => {
@@ -233,15 +222,10 @@ const FullScreenPlayer = () => {
                   setIsUiVisible(true);
                 }
                 scheduleHideUi(3000);
-                scheduleHideCursor();
               }}
             >
               {!showBlurredBackground && (
-                <div
-                  aria-hidden
-                  className="absolute inset-0 -z-10"
-                  style={{ backgroundColor: backgroundColor || Themes[bgThemeMode].colors.background }}
-                />
+                <div aria-hidden className="absolute inset-0 -z-10" style={{ backgroundColor: backgroundColor }} />
               )}
               {showBlurredBackground && (
                 <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
@@ -310,7 +294,7 @@ const FullScreenPlayer = () => {
                   <IconButton title="关闭弹窗" onPress={onClose} className="">
                     <RiArrowDownSLine size={28} />
                   </IconButton>
-                  <h2 className="truncate text-xl">{playItem.pageTitle || playItem.title}</h2>
+                  <h2 className="truncate text-xl select-none">{playItem.pageTitle || playItem.title}</h2>
                   <Popover
                     isOpen={isSettingsOpen && isUiVisible}
                     onOpenChange={setIsSettingsOpen}
@@ -345,7 +329,7 @@ const FullScreenPlayer = () => {
                       className="transition-shadow ease-out"
                       classNames={{
                         wrapper: "pointer-events-none",
-                        img: "w-full h-full object-cover",
+                        img: "w-full h-full object-cover select-none pointer-events-none",
                       }}
                       style={{
                         width: coverWidth,

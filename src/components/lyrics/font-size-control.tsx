@@ -68,7 +68,7 @@ const FontSizeControl = ({ value, min = 12, max = 48, onChange, onOpenChange }: 
           size="sm"
           variant="light"
           aria-label="调整字体大小"
-          className="min-w-0 rounded-full bg-white/20 text-sm font-semibold text-white hover:bg-white/30"
+          className="bg-foreground/20 text-foreground hover:bg-foreground/30 min-w-0 rounded-full text-sm font-semibold"
         >
           <RiFontSize size={16} />
         </IconButton>

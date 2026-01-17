@@ -11,7 +11,7 @@ export const useStyle = () => {
 
     const rootEl: HTMLDivElement | null = document.querySelector("#root");
     if (rootEl) {
-      rootEl.style.background = "rgba(0, 0, 0, 0)";
+      rootEl.style.background = "hsl(var(--heroui-background))";
       rootEl.style.overflow = "hidden";
       rootEl.style.borderRadius = `${useSettings.getState().borderRadius}px`;
     }

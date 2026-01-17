@@ -65,9 +65,8 @@ const Theme = ({ children }: Props) => {
     root.style.colorScheme = themeName;
 
     const rootStyle = root.style;
-    const _primaryColor = primaryColor || Themes[themeName].colors.primary;
-    const _backgroundColor = backgroundColor || Themes[themeName].colors.background;
-    console.log(_primaryColor, _backgroundColor);
+    const _primaryColor = primaryColor || (Themes[themeName].colors?.primary as string);
+    const _backgroundColor = backgroundColor || (Themes[themeName].colors?.background as string);
 
     if (_primaryColor) {
       rootStyle.setProperty("--heroui-primary", hexToHsl(_primaryColor));

@@ -371,7 +371,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
               {lyrics.map((line, index) => renderLine(line, index))}
             </div>
           ) : (
-            <div className="flex h-full items-center justify-center text-white/70">
+            <div className="text-foreground/70 flex h-full items-center justify-center">
               {isLoading ? "歌词加载中..." : "暂无歌词"}
             </div>
           )}
@@ -379,7 +379,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
 
         <div
           className={clsx(
-            "pointer-events-none absolute right-6 bottom-6 flex flex-col items-center space-y-3 text-sm text-white/80 transition-opacity duration-200",
+            "text-foreground/80 pointer-events-none absolute right-6 bottom-6 flex flex-col items-center space-y-3 text-sm transition-opacity duration-200",
             showControls ? "opacity-100" : "opacity-0",
           )}
         >
@@ -393,7 +393,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
             <IconButton
               type="button"
               onPress={onOpenSearch}
-              className="min-w-0 rounded-full bg-white/20 text-xs font-semibold text-white hover:bg-white/30"
+              className="bg-foreground/20 text-foreground hover:bg-foreground/30 min-w-0 rounded-full text-xs font-semibold"
             >
               <RiTBoxLine size={16} />
             </IconButton>
