@@ -1,5 +1,29 @@
 # Changelog
 
+## v1.13.0
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.12.0...v1.13.0)
+
+### 🚀 新功能
+
+- Add play all button to music recommend and search pages ([ba87e45](https://github.com/wood3n/biu/commit/ba87e45))
+- 全屏播放增加样式设置 ([e0b9607](https://github.com/wood3n/biu/commit/e0b9607))
+
+### 🩹 修复问题
+
+- Sanitize HTML tags from playlist song titles ([5932d53](https://github.com/wood3n/biu/commit/5932d53))
+- 修复全屏播放颜色选择问题 ([51eda4b](https://github.com/wood3n/biu/commit/51eda4b))
+- 修复全屏播放颜色选择问题 ([dc811dc](https://github.com/wood3n/biu/commit/dc811dc))
+
+### 💅 Refactors
+
+- Optimize play all button behavior ([da9b8b8](https://github.com/wood3n/biu/commit/da9b8b8))
+
+### ❤️ Contributors
+
+- Wood3n
+- ShellMonster
+
 ## v1.12.0
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.11.0...v1.12.0)
