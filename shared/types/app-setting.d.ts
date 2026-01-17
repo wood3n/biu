@@ -31,4 +31,5 @@ interface AppSettings {
   proxySettings: ProxySettings;
   sideMenuCollapsed: boolean;
   sideMenuWidth: number;
+  reportPlayHistory: boolean;
 }

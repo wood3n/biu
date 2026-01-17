@@ -31,6 +31,7 @@ const useSystemSettingsForm = () => {
     pageTransition,
     showSearchHistory,
     proxySettings,
+    reportPlayHistory,
   } = useSettings(
     useShallow(s => ({
       fontFamily: s.fontFamily,
@@ -48,6 +49,7 @@ const useSystemSettingsForm = () => {
       pageTransition: s.pageTransition,
       showSearchHistory: s.showSearchHistory,
       proxySettings: s.proxySettings,
+      reportPlayHistory: s.reportPlayHistory,
     })),
   );
   const updateSettings = useSettings(s => s.update);
@@ -81,6 +83,7 @@ const useSystemSettingsForm = () => {
         username: "",
         password: "",
       },
+      reportPlayHistory,
     },
   });
 

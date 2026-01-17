@@ -265,6 +265,18 @@ export const SystemSettingsTab = ({
           />
         </div>
       </div>
+      {/* 播放记录上报 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">上报播放记录</div>
+          <div className="text-sm text-zinc-500">将播放进度同步到历史记录</div>
+        </div>
+        <Controller
+          control={control}
+          name="reportPlayHistory"
+          render={({ field }) => <Switch disableAnimation isSelected={field.value} onValueChange={field.onChange} />}
+        />
+      </div>
 
       <Divider />
       <h2>下载</h2>
