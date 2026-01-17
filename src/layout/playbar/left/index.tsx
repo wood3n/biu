@@ -26,7 +26,6 @@ const LeftControl = () => {
     <div className="flex h-full w-full items-center justify-start space-x-2">
       <div data-id="full-screen-player-open" className="group relative flex-none cursor-pointer" onClick={open}>
         <Image
-          removeWrapper
           radius="md"
           src={playItem?.pageCover || playItem?.cover}
           width={56}

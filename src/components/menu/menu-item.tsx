@@ -61,9 +61,10 @@ const MenuItem: React.FC<MenuItemProps> = ({
         name={title}
         src={cover ? `${cover}@672w_378h_1c.avif` : undefined}
         showFallback
+        radius="md"
         fallback={icon}
         alt={title}
-        className="h-10 w-10 flex-none rounded-md"
+        className="h-10 w-10 flex-none"
       />
     );
   }, [cover, isActive, Icon, ActiveIcon, title, collapsed]);
@@ -100,12 +101,11 @@ const MenuItem: React.FC<MenuItemProps> = ({
       href={href}
       fullWidth
       disableRipple
-      radius="md"
       variant={isActive ? "flat" : "light"}
       color={isActive ? "primary" : "default"}
       onPress={onPress}
       startContent={iconContent}
-      className={twMerge("justify-start rounded-md px-2", className, dndClassName)}
+      className={twMerge("justify-start px-2 text-inherit", className, dndClassName)}
       {...(dndRest as any)}
     >
       <span className="pointer-events-none truncate">{title}</span>

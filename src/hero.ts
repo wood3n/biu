@@ -1,18 +1,7 @@
 import { heroui } from "@heroui/react";
 
+import { Themes } from "./common/constants/theme";
+
 export default heroui({
-  themes: {
-    dark: {
-      colors: {
-        background: "#17181a",
-        primary: "#1ed760",
-      },
-    },
-    light: {
-      colors: {
-        background: "#ffffff",
-        primary: "#1ed760",
-      },
-    },
-  },
+  themes: Themes,
 });

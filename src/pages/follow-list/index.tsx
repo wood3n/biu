@@ -216,8 +216,9 @@ const FollowList = () => {
               <div className="flex min-h-0 flex-1 flex-col">
                 <Button
                   fullWidth
+                  radius="md"
                   variant={activeTab === "all" ? "flat" : "light"}
-                  className="justify-between rounded-md px-3"
+                  className="justify-between px-3"
                   onPress={() => setActiveTab("all")}
                 >
                   <span className="truncate">{`全部关注${allCount ? `(${allCount})` : ""}`}</span>
@@ -231,7 +232,7 @@ const FollowList = () => {
                       fullWidth
                       radius="md"
                       variant={isActive ? "flat" : "light"}
-                      className="justify-between rounded-md px-3"
+                      className="justify-between px-3"
                       onPress={() => setActiveTab(key)}
                     >
                       <span className="truncate">{`${tag.name}${tag.count ? `(${tag.count})` : ""}`}</span>
@@ -285,6 +286,7 @@ const FollowList = () => {
                       }}
                       placeholder="搜索关注"
                       size="sm"
+                      radius="md"
                       startContent={<RiSearchLine size={16} />}
                       value={inputValue}
                       onValueChange={onSearchChange}

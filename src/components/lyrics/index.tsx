@@ -31,12 +31,11 @@ const timeTagPattern = /\[(\d{1,2}):(\d{1,2})(?:\.(\d{1,3}))?\]/g;
 const DEFAULT_FONT_SIZE = 20;
 const DEFAULT_OFFSET = 0;
 
-const Lyrics = () => {
+const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: boolean; showControls?: boolean }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rafIdRef = useRef<number | null>(null);
   const lineRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const [centerPadding, setCenterPadding] = useState(0);
-  const [controlOpenState, setControlOpenState] = useState({ font: false, offset: false });
   const playId = usePlayList(s => s.playId);
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
   const [translatedLyrics, setTranslatedLyrics] = useState<LyricLine[]>([]);
@@ -187,10 +186,6 @@ const Lyrics = () => {
     return 0;
   }, [currentMs, lyrics]);
 
-  const handleControlOpenChange = useCallback((key: "font" | "offset", open: boolean) => {
-    setControlOpenState(prev => ({ ...prev, [key]: open }));
-  }, []);
-
   const persistLyricsCache = useMemo(
     () =>
       debounce(async (playItem: PlayItem, nextOffset?: number, nextFontSize?: number) => {
@@ -324,7 +319,6 @@ const Lyrics = () => {
     const isActive = index === activeIndex;
     const translation = translationMap.get(line.time);
     const activeWeight = isActive ? "font-extrabold" : "font-normal";
-    const activeColor = isActive ? "text-white" : "text-white/60";
     const activeShadow = isActive ? activeTextBase : "";
 
     return (
@@ -334,12 +328,16 @@ const Lyrics = () => {
           lineRefs.current[index] = node;
         }}
         className={clsx(
-          "w-full transform-none py-2 text-left text-white transition-all duration-300 ease-out",
-          isActive ? "text-primary opacity-100" : "opacity-60",
+          "w-full transform-none py-2 transition-all duration-300 ease-out",
+          centered ? "text-center" : "text-left",
+          isActive ? "opacity-100" : "opacity-60",
         )}
         style={{ fontSize: isActive ? fontSize * 1.5 : fontSize, transform: "none" }}
       >
-        <div className={clsx("leading-snug break-words whitespace-pre-wrap", activeWeight, activeColor, activeShadow)}>
+        <div
+          className={clsx("leading-snug break-words whitespace-pre-wrap", activeWeight, activeShadow)}
+          style={{ color: color || undefined }}
+        >
           {line.text}
         </div>
         {translation ? (
@@ -351,7 +349,7 @@ const Lyrics = () => {
 
   return (
     <>
-      <div className="group/lyrics relative flex h-full w-full items-center justify-center overflow-hidden text-white">
+      <div className="group/lyrics relative flex h-full w-full items-center justify-center overflow-hidden">
         <div
           ref={containerRef}
           className="no-scrollbar relative h-full w-full max-w-4xl overflow-y-auto"
@@ -373,40 +371,31 @@ const Lyrics = () => {
               {lyrics.map((line, index) => renderLine(line, index))}
             </div>
           ) : (
-            <div className="flex h-full items-center justify-center text-white/70">
+            <div className="text-foreground/70 flex h-full items-center justify-center">
               {isLoading ? "歌词加载中..." : "暂无歌词"}
             </div>
           )}
         </div>
 
-        <div
-          className="pointer-events-none absolute right-6 bottom-6 flex flex-col items-center space-y-3 text-sm text-white/80 opacity-0 transition-opacity duration-200 group-hover/lyrics:opacity-100 data-[controls-open=true]:opacity-100"
-          data-controls-open={controlOpenState.font || controlOpenState.offset}
-        >
-          <div className="pointer-events-auto">
-            <FontSizeControl
-              value={fontSize}
-              onChange={handleFontSizeChange}
-              onOpenChange={open => handleControlOpenChange("font", open)}
-            />
+        {showControls && (
+          <div className="text-foreground/80 pointer-events-none absolute right-6 bottom-6 flex flex-col items-center space-y-3 text-sm transition-opacity duration-200">
+            <div className="pointer-events-auto">
+              <FontSizeControl value={fontSize} onChange={handleFontSizeChange} onOpenChange={() => {}} />
+            </div>
+            <div className="pointer-events-auto">
+              <OffsetControl value={offset} onChange={handleOffsetChange} onOpenChange={() => {}} />
+            </div>
+            <div className="pointer-events-auto">
+              <IconButton
+                type="button"
+                onPress={onOpenSearch}
+                className="bg-foreground/20 text-foreground hover:bg-foreground/30 min-w-0 rounded-full text-xs font-semibold"
+              >
+                <RiTBoxLine size={16} />
+              </IconButton>
+            </div>
           </div>
-          <div className="pointer-events-auto">
-            <OffsetControl
-              value={offset}
-              onChange={handleOffsetChange}
-              onOpenChange={open => handleControlOpenChange("offset", open)}
-            />
-          </div>
-          <div className="pointer-events-auto">
-            <IconButton
-              type="button"
-              onPress={onOpenSearch}
-              className="min-w-0 rounded-full bg-white/20 text-xs font-semibold text-white hover:bg-white/30"
-            >
-              <RiTBoxLine size={16} />
-            </IconButton>
-          </div>
-        </div>
+        )}
       </div>
       <LyricsSearchModal isOpen={isSearchOpen} onOpenChange={setIsSearchOpen} onLyricsAdopted={handleLyricsAdopted} />
     </>

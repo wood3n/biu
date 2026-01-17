@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Button, Card, CardBody, CardFooter, CardHeader, Tooltip } from "@heroui/react";
+import { addToast, Button, Card, CardBody, CardFooter, CardHeader, Tooltip } from "@heroui/react";
 import { RiDownloadLine, RiExternalLinkLine, RiPlayCircleFill, RiThumbUpFill, RiThumbUpLine } from "@remixicon/react";
 import moment from "moment";
 
@@ -125,12 +125,17 @@ const DynamicItem = ({ item }: DynamicItemProps) => {
             variant="light"
             size="sm"
             className="text-default-500 data-[hover=true]:bg-default-100 flex-1 gap-1"
-            onPress={() => {
-              window.electron.addMediaDownloadTask({
+            onPress={async () => {
+              await window.electron.addMediaDownloadTask({
                 outputFileType: "video",
                 title: archive.title,
                 cover: archive.cover,
                 bvid: archive.bvid,
+              });
+
+              addToast({
+                title: "已添加下载任务",
+                color: "success",
               });
             }}
           >

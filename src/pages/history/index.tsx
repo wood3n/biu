@@ -250,7 +250,7 @@ const History = () => {
       <div className="mb-2">
         <div className="flex items-center justify-between">
           <h1>历史记录</h1>
-          <Button variant="flat" startContent={<RiDeleteBinLine size={18} />} onPress={handleClear}>
+          <Button variant="flat" size="sm" startContent={<RiDeleteBinLine size={18} />} onPress={handleClear}>
             清空
           </Button>
         </div>

@@ -78,6 +78,7 @@ const VideoPagesDownloadSelectModal = () => {
 
   return (
     <Modal
+      radius="md"
       scrollBehavior="inside"
       isOpen={isVideoPageDownloadModalOpen}
       onOpenChange={onVideoPageDownloadModalOpenChange}

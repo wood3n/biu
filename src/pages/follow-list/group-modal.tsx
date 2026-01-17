@@ -64,7 +64,7 @@ const GroupModal = ({ isOpen, onOpenChange, onClose, mode, tag, onSuccess }: Pro
   };
 
   return (
-    <Modal disableAnimation isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Modal radius="md" disableAnimation isOpen={isOpen} onOpenChange={onOpenChange}>
       <ModalContent>
         {onClose => (
           <>

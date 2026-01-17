@@ -168,7 +168,7 @@ export function App() {
         placement="bottom-right"
         toastOffset={90}
         maxVisibleToasts={3}
-        toastProps={{ timeout: 3000, color: "primary" }}
+        toastProps={{ timeout: 2000, color: "primary" }}
         regionProps={{
           classNames: {
             base: "z-[99999]",

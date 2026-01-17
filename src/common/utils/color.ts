@@ -71,3 +71,20 @@ function hexToRgb(hex: string): number[] {
 
   return [r, g, b];
 }
+
+export function resolveTheme(theme: ThemeMode, systemTheme?: "light" | "dark") {
+  if (theme === "system") {
+    if (systemTheme) {
+      return systemTheme;
+    }
+    if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    return "light";
+  }
+  return theme;
+}
+
+export function isHex(v?: string) {
+  return /^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/.test(v || "");
+}
