@@ -55,13 +55,20 @@ const generateSessionId = () => {
   return "";
 };
 
+const checkReportingEnabled = () => {
+  const { reportPlayHistory } = useSettings.getState();
+  if (!reportPlayHistory) {
+    currentSession = null;
+    return false;
+  }
+  return true;
+};
+
 /**
  * 开始上报：调用 click/web/h5 接口，建立心跳会话。
  */
 export async function beginPlayReport(item?: ReportablePlayItem) {
-  const { reportPlayHistory } = useSettings.getState();
-  if (!reportPlayHistory) {
-    currentSession = null;
+  if (!checkReportingEnabled()) {
     return;
   }
 
@@ -128,9 +135,7 @@ export async function reportHeartbeat(
   duration?: number,
   playType: number = 0,
 ) {
-  const { reportPlayHistory } = useSettings.getState();
-  if (!reportPlayHistory) {
-    currentSession = null;
+  if (!checkReportingEnabled()) {
     return;
   }
 

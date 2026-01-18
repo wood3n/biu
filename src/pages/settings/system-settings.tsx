@@ -268,8 +268,8 @@ export const SystemSettingsTab = ({
       {/* 播放记录上报 */}
       <div className="flex w-full items-center justify-between">
         <div className="mr-6 space-y-1">
-          <div className="text-medium font-medium">上报播放记录</div>
-          <div className="text-sm text-zinc-500">将播放进度同步到历史记录</div>
+          <div className="text-medium font-medium">上报本机播放记录</div>
+          <div className="text-sm text-zinc-500">将播放进度同步到Bilibili服务器</div>
         </div>
         <Controller
           control={control}
