@@ -32,4 +32,6 @@ interface AppSettings {
   sideMenuCollapsed: boolean;
   sideMenuWidth: number;
   reportPlayHistory: boolean;
+  /** 本地音乐目录列表 */
+  localMusicDirs: string[];
 }

@@ -1,7 +1,7 @@
 import { Button, Tooltip, type ButtonProps, type TooltipProps } from "@heroui/react";
 import { twMerge } from "tailwind-merge";
 
-interface Props extends ButtonProps {
+interface Props extends Omit<ButtonProps, "startContent"> {
   tooltip?: React.ReactNode;
   tooltipProps?: TooltipProps;
 }

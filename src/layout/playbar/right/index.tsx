@@ -7,11 +7,12 @@ import { usePlayList } from "@/store/play-list";
 
 const RightControl = () => {
   const playId = usePlayList(s => s.playId);
+  const getPlayItem = usePlayList(s => s.getPlayItem);
 
   return (
     <div className="flex h-full items-center justify-end space-x-2">
       <MusicPlayMode />
-      {Boolean(playId) && <MusicDownloadButton />}
+      {Boolean(playId) && getPlayItem()?.source !== "local" && <MusicDownloadButton />}
       <OpenPlaylistDrawerButton />
       <MusicVolume />
       <MusicRate />

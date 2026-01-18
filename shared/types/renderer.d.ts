@@ -2,6 +2,16 @@ declare global {
   type AppPlatForm = "macos" | "windows" | "linux";
 
   type StoreName = keyof StoreDataMap;
+  interface LocalMusicItem {
+    id: string;
+    path: string;
+    dir: string;
+    title: string;
+    size: number;
+    format: string;
+    duration?: number;
+    createdTime?: number;
+  }
 
   interface ElectronAPI {
     /** 获取指定name的存储值 */
@@ -104,6 +114,10 @@ declare global {
     retryMediaDownloadTask: (id: string) => Promise<void>;
     /** 清除下载任务列表 */
     clearMediaDownloadTaskList: () => Promise<void>;
+    /** 扫描本地音乐文件 */
+    scanLocalMusic: (dirs: string[]) => Promise<LocalMusicItem[]>;
+    /** 删除本地音乐文件 */
+    deleteLocalMusicFile: (filePath: string) => Promise<boolean>;
   }
 
   interface Window {

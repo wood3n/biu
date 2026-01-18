@@ -17,9 +17,11 @@ export interface ContextMenuProps {
   items: ContextMenuItem[];
   onAction?: (key: string) => void;
   className?: string;
+  contentClassName?: string;
+  disabled?: boolean;
 }
 
-const ContextMenu = ({ children, items, className, onAction }: ContextMenuProps) => {
+const ContextMenu = ({ children, items, className, contentClassName, disabled, onAction }: ContextMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
 
@@ -29,8 +31,24 @@ const ContextMenu = ({ children, items, className, onAction }: ContextMenuProps)
   }, [setIsOpen, setPosition]);
 
   const handleContextMenu = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    if (disabled) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    const target = event.target as HTMLElement | null;
+    let el: HTMLElement | null = target;
+    const container = event.currentTarget as HTMLElement;
+    while (el && el !== container) {
+      if (el.getAttribute("data-no-contextmenu") === "true") {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      el = el.parentElement;
+    }
     event.preventDefault();
-    const rect = event.currentTarget.getBoundingClientRect();
+    const rect = container.getBoundingClientRect();
     setPosition({
       x: event.clientX - rect.left,
       y: event.clientY - rect.top,
@@ -66,7 +84,7 @@ const ContextMenu = ({ children, items, className, onAction }: ContextMenuProps)
               }}
             />
           </PopoverTrigger>
-          <PopoverContent className="min-w-[160px] p-0">
+          <PopoverContent className={twMerge("min-w-[160px] p-0", contentClassName)}>
             {/* @ts-ignore 忽略 ListboxItem 的 key 类型错误 */}
             <Listbox
               aria-label="右键菜单"

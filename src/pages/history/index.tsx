@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { addToast, Button, Spinner } from "@heroui/react";
-import { RiDeleteBinLine, RiToggleFill, RiToggleLine } from "@remixicon/react";
+import { addToast, Spinner, Switch } from "@heroui/react";
+import { RiDeleteBinLine } from "@remixicon/react";
 import { useShallow } from "zustand/react/shallow";
 
+import IconButton from "@/components/icon-button";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import { postHistoryClear } from "@/service/history-clear";
 import { postHistoryDelete } from "@/service/history-delete";
@@ -250,20 +251,6 @@ const History = () => {
     });
   }, [refreshList]);
 
-  const handleReportPlayHistory = useCallback(() => {
-    const nextState = !reportPlayHistory;
-    useModalStore.getState().onOpenConfirmModal({
-      title: nextState
-        ? "本机此后的播放记录将会被上报到Bilibili服务器，确认启用记录？"
-        : "本机此后的播放记录将不再上报到Bilibili服务器，确认停止记录？",
-      confirmText: nextState ? "启用" : "停止",
-      onConfirm: async () => {
-        updateSettings({ reportPlayHistory: nextState });
-        return true;
-      },
-    });
-  }, [reportPlayHistory, updateSettings]);
-
   const isEmpty = !loading && list.length === 0;
 
   return (
@@ -271,18 +258,19 @@ const History = () => {
       <div className="mb-2">
         <div className="flex items-center justify-between">
           <h1>历史记录</h1>
-          <div className="flex w-50 items-center justify-end space-x-2">
-            <Button
-              variant="flat"
+          <div className="flex items-center justify-end space-x-2">
+            <Switch
               size="sm"
-              startContent={reportPlayHistory ? <RiToggleFill size={18} /> : <RiToggleLine size={18} />}
-              onPress={handleReportPlayHistory}
+              isSelected={reportPlayHistory}
+              onValueChange={() => {
+                updateSettings({ reportPlayHistory: !reportPlayHistory });
+              }}
             >
-              {reportPlayHistory ? "停止记录本机" : "启用记录本机"}
-            </Button>
-            <Button variant="flat" size="sm" startContent={<RiDeleteBinLine size={18} />} onPress={handleClear}>
-              清空
-            </Button>
+              记录播放历史
+            </Switch>
+            <IconButton variant="flat" size="sm" onPress={handleClear}>
+              <RiDeleteBinLine size={18} />
+            </IconButton>
           </div>
         </div>
         <HistorySearch onSearch={handleSearch} onDateRangeChange={handleDateRangeChange} />

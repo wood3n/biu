@@ -5,6 +5,7 @@ import { registerCookieIpcHandlers } from "./cookie";
 import { registerDialogHandlers } from "./dialog";
 import { registerDownloadHandlers } from "./download";
 import { registerFontHandlers } from "./font";
+import { registerLocalMusicHandlers } from "./local-music";
 import { registerLyricsHandlers } from "./lyrics";
 import { registerShortcutHandlers } from "./shortcut";
 import { registerStoreHandlers } from "./store";
@@ -20,4 +21,5 @@ export function registerIpcHandlers(props: IpcHandlerProps) {
   registerWindowHandlers(props);
   registerShortcutHandlers(props);
   registerLyricsHandlers();
+  registerLocalMusicHandlers();
 }
