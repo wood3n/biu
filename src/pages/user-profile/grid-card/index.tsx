@@ -1,17 +1,19 @@
 import React, { memo } from "react";
 
+import { CollectionType } from "@/common/constants/collection";
 import { formatSecondsToDate } from "@/common/utils/time";
 import Image from "@/components/image";
 
 export interface GridCardProps {
   title: string;
   cover: string;
+  type: CollectionType;
   createTime?: number;
   mediaCount?: number;
   onPress?: () => void;
 }
 
-const GridCard = memo(({ title, cover, createTime, mediaCount, onPress }: GridCardProps) => {
+const GridCard = memo(({ title, cover, type, createTime, mediaCount, onPress }: GridCardProps) => {
   return (
     <div className="group flex h-full max-h-full w-full cursor-pointer flex-col overflow-hidden" onClick={onPress}>
       {/* Stack Effect Container */}
@@ -30,7 +32,7 @@ const GridCard = memo(({ title, cover, createTime, mediaCount, onPress }: GridCa
           />
           {/* Overlay */}
           <div className="absolute right-2 bottom-2 z-20 rounded-sm bg-black/60 px-2 py-0.5 text-xs text-white backdrop-blur-sm">
-            <span>{`${mediaCount ?? 0}个视频`}</span>
+            <span>{`${type === CollectionType.VideoSeries ? "系列" : "合集"} · ${mediaCount ?? 0}个视频`}</span>
           </div>
         </div>
       </div>

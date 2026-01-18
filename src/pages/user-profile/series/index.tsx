@@ -15,13 +15,14 @@ interface VideoSeriesItem {
   cover: string;
   ctime: number;
   total: number;
+  type: CollectionType;
 }
 
 interface Props {
   getScrollElement: () => HTMLElement | null;
 }
 
-/** 个人空间视频合集 */
+/** 个人空间视频合集和系列 */
 const VideoSeries = ({ getScrollElement }: Props) => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -49,6 +50,7 @@ const VideoSeries = ({ getScrollElement }: Props) => {
           cover: item.meta.cover,
           ctime: item.meta.ptime,
           total: item.meta.total,
+          type: CollectionType.VideoCollections,
         })) ?? [];
       const seriesList =
         res?.data?.items_lists?.series_list?.map(item => ({
@@ -57,6 +59,7 @@ const VideoSeries = ({ getScrollElement }: Props) => {
           cover: item.meta.cover,
           total: item.meta.total,
           ctime: item.meta.ctime,
+          type: CollectionType.VideoSeries,
         })) ?? [];
 
       const items: VideoSeriesItem[] = [...seasonsList, ...seriesList];
@@ -126,9 +129,10 @@ const VideoSeries = ({ getScrollElement }: Props) => {
         <GridCard
           title={item?.title}
           cover={item?.cover}
+          type={item.type}
           createTime={item.ctime}
           mediaCount={item.total}
-          onPress={() => navigate(`/collection/${item.id}?type=${CollectionType.VideoSeries}`)}
+          onPress={() => navigate(`/collection/${item.id}?type=${item.type}`)}
         />
       )}
     />
