@@ -2,7 +2,9 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 
 import { addToast, Spinner } from "@heroui/react";
+import { RiPlayFill } from "@remixicon/react";
 
+import AsyncButton from "@/components/async-button";
 import SearchWithSort from "@/components/search-with-sort";
 import { getSpaceWbiArcSearch, type SpaceArcVListItem } from "@/service/space-wbi-arc-search";
 import { useModalStore } from "@/store/modal";
@@ -151,20 +153,53 @@ const VideoPost: React.FC<VideoPostProps> = ({ getScrollElement }) => {
     }
   }, []);
 
+  const handlePlayAll = useCallback(async () => {
+    const playItems = items
+      .map(item => ({
+        type: "mv" as const,
+        bvid: item.bvid,
+        title: item.title,
+        cover: item.pic,
+        ownerName: item.author,
+        ownerMid: item.mid,
+      }))
+      .filter(item => Boolean(item.bvid));
+
+    if (!playItems.length) {
+      addToast({ title: "暂无可播放内容", color: "warning" });
+      return;
+    }
+
+    await usePlayList.getState().addList(playItems);
+    addToast({ title: `已添加 ${playItems.length} 个投稿到播放列表`, color: "success" });
+  }, [items]);
+
   return (
     <div className="h-full w-full">
       <div className="mb-4 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div className="text-default-500 pl-2 text-sm">共 {total} 个视频</div>
-        <SearchWithSort
-          onKeywordSearch={setKeyword}
-          order={order}
-          orderOptions={[
-            { key: "pubdate", label: "最新发布" },
-            { key: "click", label: "最多播放" },
-            { key: "stow", label: "最多收藏" },
-          ]}
-          onOrderChange={setOrder}
-        />
+        <div className="flex items-center gap-3">
+          <AsyncButton
+            color="primary"
+            size="sm"
+            startContent={<RiPlayFill size={18} />}
+            isDisabled={initialLoading || items.length === 0}
+            onPress={handlePlayAll}
+            className="dark:text-black"
+          >
+            全部播放
+          </AsyncButton>
+          <SearchWithSort
+            onKeywordSearch={setKeyword}
+            order={order}
+            orderOptions={[
+              { key: "pubdate", label: "最新发布" },
+              { key: "click", label: "最多播放" },
+              { key: "stow", label: "最多收藏" },
+            ]}
+            onOrderChange={setOrder}
+          />
+        </div>
       </div>
       {initialLoading ? (
         <div className="flex h-[280px] items-center justify-center">
