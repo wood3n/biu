@@ -34,7 +34,7 @@ let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    title: "Biu",
+    title: isDev ? "Biu-dev" : "Biu",
     icon: getWindowIcon(),
     show: true,
     hasShadow: true,
