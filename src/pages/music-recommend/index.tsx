@@ -129,7 +129,6 @@ const MusicRecommend = () => {
   const init = useCallback(async () => {
     try {
       pageRef.current = 1;
-      setList([]);
       setHasMore(true);
       setLoadingMore(false);
       await fetchPage(1);
@@ -312,7 +311,12 @@ const MusicRecommend = () => {
             onMenuAction={handleMenuAction}
           />
         )}
-        {initialLoading && (
+        {initialLoading && list.length > 0 && (
+          <div className="bg-background/70 absolute inset-0 flex items-center justify-center">
+            <Spinner size="lg" />
+          </div>
+        )}
+        {initialLoading && list.length === 0 && (
           <div className="flex h-[40vh] items-center justify-center">
             <Spinner size="lg" />
           </div>
