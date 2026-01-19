@@ -2,6 +2,7 @@ import React from "react";
 
 import { Avatar } from "@heroui/react";
 import { RiAppsLine, RiSendInsLine } from "@remixicon/react";
+import clsx from "classnames";
 
 export interface AuthorItem {
   mid: number;
@@ -13,19 +14,16 @@ interface UserItemProps {
   author: AuthorItem | null;
   isSelected: boolean;
   onSelect: (mid: number | null) => void;
-  fallbackIcon?: React.ReactNode;
-  layout?: "row" | "column";
 }
 
-const UserItem: React.FC<UserItemProps> = ({ author, isSelected, onSelect, fallbackIcon, layout = "column" }) => {
+const UserItem: React.FC<UserItemProps> = ({ author, isSelected, onSelect }) => {
   const displayName = author?.name || "全部";
   const displayFace = author?.face || "";
   const isAll = author === null;
-  const isRow = layout === "row";
   return (
     <div
       title={displayName}
-      className={`group flex ${isRow ? "w-full flex-row items-center gap-3 px-2 py-2" : "w-16 flex-col items-center gap-2"} ${
+      className={`group flex w-full flex-row items-center gap-3 px-2 py-2 ${
         isSelected ? "text-primary" : "text-default-500"
       } cursor-pointer`}
       onClick={() => onSelect(author?.mid ?? null)}
@@ -43,16 +41,25 @@ const UserItem: React.FC<UserItemProps> = ({ author, isSelected, onSelect, fallb
         name={displayName}
         isBordered={isSelected}
         radius="full"
-        color={isSelected ? "primary" : "default"}
+        color={isSelected && !isAll ? "primary" : "default"}
         className="h-9 w-9 shrink-0 rounded-full transition-transform hover:scale-105"
         classNames={{
           img: "rounded-full",
         }}
-        fallback={fallbackIcon || (isAll ? <RiAppsLine size={18} /> : <RiSendInsLine size={18} />)}
+        fallback={
+          isAll ? (
+            <RiAppsLine
+              size={18}
+              className={clsx({
+                "text-primary": isSelected,
+              })}
+            />
+          ) : (
+            <RiSendInsLine size={18} />
+          )
+        }
       />
-      <span className={`group-hover:text-primary truncate ${isRow ? "w-full text-sm" : "w-full text-center text-xs"}`}>
-        {displayName}
-      </span>
+      <span className="group-hover:text-primary w-full truncate text-sm">{displayName}</span>
     </div>
   );
 };

@@ -110,14 +110,13 @@ const AuthorList: React.FC<AuthorListProps> = ({ selectedAuthorMid, onSelect }) 
         </div>
         <ScrollContainer ref={scrollRef} className="h-full min-h-0 w-full flex-1 px-2">
           <div className="flex min-h-0 flex-1 flex-col gap-2">
-            <UserItem author={null} isSelected={selectedAuthorMid === null} onSelect={onSelect} layout="row" />
+            <UserItem author={null} isSelected={selectedAuthorMid === null} onSelect={onSelect} />
             {list.map(author => (
               <UserItem
                 key={author.mid}
                 author={author}
                 isSelected={selectedAuthorMid === author.mid}
                 onSelect={onSelect}
-                layout="row"
               />
             ))}
             {loading && (

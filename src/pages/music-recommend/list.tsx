@@ -1,7 +1,5 @@
 import React, { useCallback } from "react";
 
-import type { Data as MusicItem } from "@/service/music-comprehensive-web-rank";
-
 import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
 import VirtualPageList from "@/components/virtual-page-list";
@@ -9,15 +7,17 @@ import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
 
+import type { RecommendItem } from "./types";
+
 import { getContextMenus } from "./menu";
 
 interface MusicRecommendListProps {
-  items: MusicItem[];
+  items: RecommendItem[];
   hasMore: boolean;
   loading: boolean;
   onLoadMore: () => void;
   getScrollElement: () => HTMLElement | null;
-  onMenuAction: (key: string, item: MusicItem) => void;
+  onMenuAction: (key: string, item: RecommendItem) => void;
 }
 
 const MusicRecommendList: React.FC<MusicRecommendListProps> = ({
@@ -32,14 +32,15 @@ const MusicRecommendList: React.FC<MusicRecommendListProps> = ({
   const displayMode = useSettings(state => state.displayMode);
   const isCompact = displayMode === "compact";
 
-  const handlePress = useCallback((item: MusicItem) => {
+  const handlePress = useCallback((item: RecommendItem) => {
+    if (!item.bvid) return;
     usePlayList.getState().play({
       type: "mv",
-      bvid: item.related_archive.bvid,
-      title: item.related_archive.title,
-      cover: item.related_archive.cover,
-      ownerName: item.related_archive.username,
-      ownerMid: item.related_archive.uid,
+      bvid: item.bvid,
+      title: item.title,
+      cover: item.cover,
+      ownerName: item.author,
+      ownerMid: item.authorMid,
     });
   }, []);
 
@@ -59,14 +60,14 @@ const MusicRecommendList: React.FC<MusicRecommendListProps> = ({
               hidePubTime
               key={item.id}
               index={index + 1}
-              title={item.related_archive.title}
+              title={item.title}
               type="mv"
-              bvid={item.related_archive.bvid}
-              cover={item.related_archive.cover}
-              upName={item.related_archive.username}
-              upMid={item.related_archive.uid}
-              playCount={item.related_archive.vv_count}
-              duration={item.related_archive.duration}
+              bvid={item.bvid}
+              cover={item.cover}
+              upName={item.author}
+              upMid={item.authorMid}
+              playCount={item.playCount}
+              duration={item.duration}
               onPress={() => handlePress(item)}
               menus={getContextMenus({
                 isLogin: user?.isLogin,
