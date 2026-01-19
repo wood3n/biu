@@ -2,7 +2,6 @@ import { ipcMain } from "electron";
 import log from "electron-log";
 import { parseFile } from "music-metadata";
 import crypto from "node:crypto";
-import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
 
@@ -29,6 +28,10 @@ async function walk(dir: string, list: string[]) {
 function toSafeTitle(filePath: string, metaTitle?: string) {
   if (metaTitle && metaTitle.trim()) return metaTitle.trim();
   return path.parse(filePath).name;
+}
+
+function isErrnoException(value: unknown): value is NodeJS.ErrnoException {
+  return typeof value === "object" && value !== null && "code" in value;
 }
 
 export function registerLocalMusicHandlers() {
@@ -74,12 +77,15 @@ export function registerLocalMusicHandlers() {
   });
 
   ipcMain.handle(channel.localMusic.deleteFile, async (_, filePath: string) => {
+    if (!filePath) return false;
     try {
-      if (!filePath || !fs.existsSync(filePath)) return false;
+      const stat = await fsp.stat(filePath);
+      if (!stat.isFile()) return false;
       await fsp.unlink(filePath);
       return true;
     } catch (err) {
-      log.error("[local-music] delete file error:", err);
+      if (isErrnoException(err) && err.code === "ENOENT") return false;
+      log.error("[local-music] delete file error:", filePath, err);
       return false;
     }
   });

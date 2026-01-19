@@ -15,7 +15,7 @@ export interface List {
   music_id?: string;
   archive_title?: string;
   music_corner?: string;
-  publish_time?: Date;
+  publish_time?: string;
   jump_url?: string;
   cover?: string;
   author?: string;
