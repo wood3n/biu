@@ -25,17 +25,20 @@ const CoverView = memo(() => {
   const cover = usePlayState(s => s.cover);
   if (!cover) return null;
   return (
-    <Image
-      removeWrapper
-      radius="none"
-      src={cover}
-      width={100}
-      height="100%"
-      params="672w_378h_1c.avif"
-      loading="eager"
-      decoding="async"
-      style={{ transform: "translateZ(0)", backfaceVisibility: "hidden", willChange: "transform", contain: "paint" }}
-    />
+    <div className="relative h-full w-[100px] flex-shrink-0">
+      <Image
+        removeWrapper
+        radius="none"
+        src={cover}
+        width={100}
+        height="100%"
+        params="672w_378h_1c.avif"
+        loading="eager"
+        decoding="async"
+        style={{ transform: "translateZ(0)", backfaceVisibility: "hidden", willChange: "transform", contain: "paint" }}
+      />
+      <div className="from-background pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l to-transparent" />
+    </div>
   );
 });
 
@@ -90,6 +93,7 @@ const MiniPlayer = () => {
       if (!bcRef.current) return;
       bcRef.current.close();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSeek = (v: number) => {

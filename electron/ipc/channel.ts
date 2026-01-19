@@ -75,7 +75,6 @@ export const channel = {
   },
   localMusic: {
     scan: "local-music:scan",
-    openFile: "local-music:open-file",
     deleteFile: "local-music:delete-file",
   },
   window: {

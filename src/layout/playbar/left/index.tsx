@@ -22,6 +22,7 @@ const LeftControl = () => {
   const playId = usePlayList(s => s.playId);
 
   const playItem = useMemo(() => list.find(item => item.id === playId), [list, playId]);
+  const isClickable = Boolean(playItem && playItem.source !== "local");
 
   return (
     <div className="flex h-full w-full items-center justify-start space-x-2">
@@ -45,13 +46,13 @@ const LeftControl = () => {
         <span className="flex w-full items-center">
           <span
             title={playItem?.pageTitle || playItem?.title}
-            className={clsx("min-w-0 flex-1 cursor-pointer truncate", {
-              "hover:underline": playItem?.source !== "local",
+            className={clsx("min-w-0 flex-1 truncate", {
+              "cursor-pointer": isClickable,
+              "hover:underline": isClickable,
             })}
             onClick={() => {
-              if (playItem?.source !== "local") {
-                openBiliVideoLink(playItem!);
-              }
+              if (!isClickable || !playItem) return;
+              openBiliVideoLink(playItem);
             }}
           >
             {playItem?.pageTitle || playItem?.title}
@@ -68,8 +69,8 @@ const LeftControl = () => {
           )}
         </span>
         <span
-          className={clsx("text-foreground-500 max-w-full cursor-pointer truncate text-sm whitespace-nowrap", {
-            "hover:underline": Boolean(playItem?.ownerMid),
+          className={clsx("text-foreground-500 max-w-full truncate text-sm whitespace-nowrap", {
+            "cursor-pointer hover:underline": Boolean(playItem?.ownerMid),
           })}
           onClick={e => {
             if (playItem?.source === "local" || !playItem?.ownerMid) return;
@@ -82,7 +83,7 @@ const LeftControl = () => {
       </div>
       <div className="flex items-center">
         {Boolean(playItem?.hasMultiPart) && <PageListDrawer />}
-        {Boolean(user?.isLogin) && Boolean(playId) && playItem?.source !== "local" && <MusicFavButton />}
+        {Boolean(user?.isLogin) && Boolean(playItem) && playItem?.source !== "local" && <MusicFavButton />}
       </div>
     </div>
   );

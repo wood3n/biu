@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { addToast, Spinner } from "@heroui/react";
-import { RiPlayFill } from "@remixicon/react";
+import { RiMusicAiLine, RiPlayFill } from "@remixicon/react";
 
 import AsyncButton from "@/components/async-button";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
@@ -12,6 +12,7 @@ import { useSettings } from "@/store/settings";
 
 import MusicRecommendGridList from "./grid-list";
 import MusicRecommendList from "./list";
+import NewMusicTop from "./new-music-top";
 
 const PAGE_SIZE = 20;
 
@@ -157,8 +158,12 @@ const MusicRecommend = () => {
 
   return (
     <ScrollContainer enableBackToTop ref={scrollerRef} className="h-full w-full px-4">
+      <NewMusicTop />
       <div className="mb-2 flex items-center justify-between">
-        <h1>推荐音乐</h1>
+        <div className="flex items-center gap-2">
+          <RiMusicAiLine className="text-primary" />
+          <h1>推荐音乐</h1>
+        </div>
         <AsyncButton
           color="primary"
           size="sm"

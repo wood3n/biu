@@ -1,4 +1,4 @@
-import { ipcMain, shell } from "electron";
+import { ipcMain } from "electron";
 import log from "electron-log";
 import { parseFile } from "music-metadata";
 import crypto from "node:crypto";
@@ -71,17 +71,6 @@ export function registerLocalMusicHandlers() {
       log.error("[local-music] scan error:", err);
     }
     return result;
-  });
-
-  ipcMain.handle(channel.localMusic.openFile, async (_, filePath: string) => {
-    try {
-      if (!filePath || !fs.existsSync(filePath)) return false;
-      const res = await shell.openPath(filePath);
-      return res === "";
-    } catch (err) {
-      log.error("[local-music] open file error:", err);
-      return false;
-    }
   });
 
   ipcMain.handle(channel.localMusic.deleteFile, async (_, filePath: string) => {

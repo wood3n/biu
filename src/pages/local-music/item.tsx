@@ -2,7 +2,6 @@ import React from "react";
 
 import { Button } from "@heroui/react";
 import { RiDeleteBinLine, RiFileMusicLine, RiPlayCircleLine, RiPlayFill, RiPlayListAddLine } from "@remixicon/react";
-import clx from "classnames";
 import clsx from "classnames";
 import { filesize } from "filesize";
 
@@ -61,12 +60,7 @@ const LocalMusicItemRow = ({
         onDoubleClick={() => onPlay()}
         className="group flex w-full items-center justify-between rounded-md p-2"
       >
-        <div
-          className={clx(
-            "grid w-full items-center gap-4",
-            "grid-cols-[40px_minmax(0,1fr)_100px_100px_100px_100px_40px]",
-          )}
-        >
+        <div className="grid w-full grid-cols-[40px_minmax(0,1fr)_100px_100px_100px_100px_40px] items-center gap-4">
           <div className="text-foreground-500 min-w-8 text-center text-xs tabular-nums">
             <span
               className={clsx({

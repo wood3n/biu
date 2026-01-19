@@ -262,8 +262,8 @@ const History = () => {
             <Switch
               size="sm"
               isSelected={reportPlayHistory}
-              onValueChange={() => {
-                updateSettings({ reportPlayHistory: !reportPlayHistory });
+              onValueChange={isSelected => {
+                updateSettings({ reportPlayHistory: isSelected });
               }}
             >
               记录播放历史
