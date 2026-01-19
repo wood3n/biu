@@ -119,7 +119,7 @@ function handleMessageFromMini(message: MiniPlayerMessageFromMini, channel: Broa
  * - 收到 mini 端的 `init/seek/next/prev/togglePlay/togglePlayMode` 会转发到主播放状态。
  * - 主播放状态发生变化会推送给 mini 端更新 UI。
  */
-export function startMiniPlayerMainSync() {
+function startMiniPlayerMainSync() {
   if (isBroadcasting) return;
 
   bc = createBroadcastChannel();
@@ -163,7 +163,7 @@ export function startMiniPlayerMainSync() {
 /**
  * 停止主窗口 -> mini 播放器的状态同步通道。
  */
-export function stopMiniPlayerMainSync() {
+function stopMiniPlayerMainSync() {
   if (!isBroadcasting) return;
 
   unsubscribePlayList?.();

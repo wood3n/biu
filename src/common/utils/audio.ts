@@ -9,7 +9,7 @@ import { audioQualitySort } from "../constants/audio";
 import { VideoFnval } from "../constants/video";
 import { getUrlParams } from "./url";
 
-export function sortAudio(audio: DashAudio[]) {
+function sortAudio(audio: DashAudio[]) {
   return audio.toSorted((a, b) => {
     if (a.bandwidth !== b.bandwidth) {
       return b.bandwidth - a.bandwidth;

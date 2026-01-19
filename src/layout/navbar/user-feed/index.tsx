@@ -1,14 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
-import { Tooltip, Button, Badge, useDisclosure } from "@heroui/react";
+import { Tooltip, Button, Badge } from "@heroui/react";
 import { RiTeamLine } from "@remixicon/react";
 import { useRequest } from "ahooks";
 
-import DynamicFeedDrawer from "@/components/dynamic-feed-drawer";
 import { getWebDynamicFeedAllUpdate } from "@/service/web-dynamic";
 
 const UserFeed = () => {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const navigate = useNavigate();
   const [updateCount, setUpdateCount] = useState(0);
 
   useRequest(
@@ -36,7 +36,7 @@ const UserFeed = () => {
 
   const handleOpen = () => {
     setUpdateCount(0);
-    onOpen();
+    navigate("/dynamic-feed");
   };
 
   const button = (
@@ -64,7 +64,6 @@ const UserFeed = () => {
           button
         )}
       </Tooltip>
-      <DynamicFeedDrawer isOpen={isOpen} onOpenChange={onOpenChange} />
     </>
   );
 };

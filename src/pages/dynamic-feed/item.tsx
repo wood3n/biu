@@ -5,10 +5,10 @@ import { Card, CardHeader, CardBody, addToast, User } from "@heroui/react";
 import { RiPlayFill } from "@remixicon/react";
 import moment from "moment";
 
+import type { WebDynamicItem } from "@/service/web-dynamic";
+
 import Image from "@/components/image";
 import { usePlayList } from "@/store/play-list";
-
-import type { WebDynamicItem } from "../../service/web-dynamic";
 
 import MoreMenu from "./more-menu";
 
@@ -25,10 +25,8 @@ const DynamicItem: React.FC<DynamicItemProps> = ({ item, onClose }) => {
   const addToNext = usePlayList(s => s.addToNext);
   const navigate = useNavigate();
 
-  // Format time
   const timeDisplay = author.pub_time || moment(author.pub_ts * 1000).fromNow();
 
-  // Get text content
   const textContent = dynamic.desc?.text || dynamic.major?.opus?.summary?.text || "";
 
   const handleDownload = async (type: "audio" | "video") => {

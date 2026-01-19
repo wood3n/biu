@@ -9,7 +9,7 @@ interface Props {
   onSearch?: (value: string) => void;
 }
 
-export const SearchButton = ({ onSearch }: Props) => {
+const SearchButton = ({ onSearch }: Props) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [value, setValue] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
