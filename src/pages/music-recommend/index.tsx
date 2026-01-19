@@ -66,8 +66,13 @@ const MusicRecommend = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const pageRef = useRef(1);
   const [activeTab, setActiveTab] = useState<RecommendTabKey>("music");
+  const scrollRestoreRef = useRef<{ tab: RecommendTabKey; top: number } | null>(null);
 
   const displayMode = useSettings(state => state.displayMode);
+
+  const getScrollElement = useCallback(() => {
+    return (scrollerRef.current?.osInstance()?.elements().viewport as HTMLElement | null) ?? null;
+  }, []);
 
   const fetchPage = useCallback(
     async (pn: number = 1) => {
@@ -137,6 +142,19 @@ const MusicRecommend = () => {
     setInitialLoading(true);
     init();
   }, [activeTab, init]);
+
+  useEffect(() => {
+    if (initialLoading) return;
+    const restore = scrollRestoreRef.current;
+    if (!restore || restore.tab !== activeTab) return;
+    const viewport = getScrollElement();
+    if (!viewport) return;
+    const top = restore.top;
+    requestAnimationFrame(() => {
+      viewport.scrollTop = top;
+      scrollRestoreRef.current = null;
+    });
+  }, [activeTab, getScrollElement, initialLoading, list.length]);
 
   const handlePlayAll = useCallback(async () => {
     const items = list
@@ -236,6 +254,7 @@ const MusicRecommend = () => {
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <RiMusicAiLine className="text-primary" />
+          <h1>分区</h1>
           <Tabs
             variant="light"
             size="lg"
@@ -244,7 +263,14 @@ const MusicRecommend = () => {
               cursor: "rounded-medium",
             }}
             selectedKey={activeTab}
-            onSelectionChange={key => setActiveTab(key as RecommendTabKey)}
+            onSelectionChange={key => {
+              const nextTab = key as RecommendTabKey;
+              const viewport = getScrollElement();
+              if (viewport) {
+                scrollRestoreRef.current = { tab: nextTab, top: viewport.scrollTop };
+              }
+              setActiveTab(nextTab);
+            }}
           >
             <Tab key="music" title="音乐" />
             <Tab key="guichu" title="鬼畜" />
@@ -262,21 +288,14 @@ const MusicRecommend = () => {
           全部播放
         </AsyncButton>
       </div>
-      <>
-        {/* 数据列表 */}
-        {initialLoading ? (
-          <div className="flex h-[500px] items-center justify-center">
-            <Spinner size="lg" label="Loading..." />
-          </div>
-        ) : displayMode === "card" ? (
+      <div className="relative">
+        {displayMode === "card" ? (
           <MusicRecommendGridList
             items={list}
             hasMore={hasMore}
             loading={loadingMore}
             onLoadMore={loadMore}
-            getScrollElement={() =>
-              (scrollerRef.current?.osInstance()?.elements().viewport as HTMLElement | null) ?? null
-            }
+            getScrollElement={getScrollElement}
             onMenuAction={handleMenuAction}
           />
         ) : (
@@ -285,13 +304,16 @@ const MusicRecommend = () => {
             hasMore={hasMore}
             loading={loadingMore}
             onLoadMore={loadMore}
-            getScrollElement={() =>
-              (scrollerRef.current?.osInstance()?.elements().viewport as HTMLElement | null) ?? null
-            }
+            getScrollElement={getScrollElement}
             onMenuAction={handleMenuAction}
           />
         )}
-      </>
+        {initialLoading && (
+          <div className="flex h-[40vh] items-center justify-center">
+            <Spinner size="lg" />
+          </div>
+        )}
+      </div>
     </ScrollContainer>
   );
 };
