@@ -423,7 +423,7 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
           className="hover:text-foreground flex items-center gap-1 text-sm text-zinc-500 transition-colors"
         >
           <RiArrowDownSLine size={16} className={`transition-transform ${isFolded ? "-rotate-90" : "rotate-0"}`} />
-          <span>{title}</span>
+          <span className="whitespace-nowrap">{title}</span>
         </button>
         {titleExtra}
       </div>
