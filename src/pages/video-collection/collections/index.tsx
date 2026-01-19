@@ -4,12 +4,12 @@ import { useParams } from "react-router";
 import { addToast } from "@heroui/react";
 import { useRequest } from "ahooks";
 
-import type { Media } from "@/service/user-video-archives-list";
-
 import { CollectionType } from "@/common/constants/collection";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
-import { getSeriesArchives } from "@/service/series-archives";
-import { getSeriesInfo } from "@/service/series-info";
+import { postFavSeasonFav } from "@/service/fav-season-fav";
+import { postFavSeasonUnfav } from "@/service/fav-season-unfav";
+import { getUserVideoArchivesList, type Media } from "@/service/user-video-archives-list";
+import { useFavoritesStore } from "@/store/favorite";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
@@ -20,94 +20,63 @@ import Operations from "../operation";
 import SeriesGridList from "./grid-list";
 import SeriesList from "./list";
 
-const Series = () => {
+/** 视频合集 */
+const VideoCollections = () => {
   const { id } = useParams();
   const user = useUser(state => state.user);
+  const collectedFavorites = useFavoritesStore(state => state.collectedFavorites);
+  const addCollectedFavorite = useFavoritesStore(state => state.addCollectedFavorite);
+  const rmCollectedFavorite = useFavoritesStore(state => state.rmCollectedFavorite);
   const displayMode = useSettings(state => state.displayMode);
   const playList = usePlayList(state => state.playList);
   const addList = usePlayList(state => state.addList);
+  const isFavorite = collectedFavorites?.some(item => item.id === Number(id));
 
   const [keyword, setKeyword] = useState<string>();
   const [order, setOrder] = useState("pubtime");
 
   const scrollRef = useRef<ScrollRefObject>(null);
 
-  const { data: meta, loading: infoLoading } = useRequest(
+  const { data, loading } = useRequest(
     async () => {
-      if (!id) return;
-      const res = await getSeriesInfo({ series_id: Number(id) });
-      return res?.data?.meta;
+      if (!id) {
+        return;
+      }
+
+      const res = await getUserVideoArchivesList({
+        season_id: Number(id),
+      });
+      return res?.data;
     },
     {
-      ready: Boolean(id),
       refreshDeps: [id],
     },
   );
 
-  const isCreatedBySelf = Boolean(meta?.mid) && Boolean(user?.mid) && meta?.mid === user?.mid;
-
-  const [medias, setMedias] = useState<Media[]>([]);
-  const [pageNum, setPageNum] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loadingMore, setLoadingMore] = useState(false);
-
   useEffect(() => {
-    setMedias([]);
-    setPageNum(1);
-    setTotalCount(0);
-    setKeyword("");
-    setOrder("pubtime");
+    if (id) {
+      setKeyword("");
+      setOrder("pubtime");
+    }
   }, [id]);
 
-  const fetchArchives = useCallback(async () => {
-    if (!id || !meta || loadingMore) return;
-    try {
-      setLoadingMore(true);
-      const res = await getSeriesArchives({
-        mid: Number(meta.mid),
-        series_id: Number(id),
-        sort: "desc",
-        pn: pageNum,
-        ps: 30,
-      });
-      const archives = res?.data?.archives ?? [];
-      const mapped: Media[] = archives.map(a => ({
-        id: a.aid,
-        title: a.title,
-        cover: a.pic,
-        duration: a.duration,
-        pubtime: a.pubdate,
-        bvid: a.bvid,
-        upper: { mid: Number(meta.mid), name: "" },
-        cnt_info: { collect: 0, play: a.stat?.view ?? 0, danmaku: 0, vt: a.stat?.vt ?? 0 },
-        enable_vt: Number(a.enable_vt ?? 0),
-        vt_display: a.vt_display,
-        is_self_view: false,
-      }));
-      setMedias(prev => [...prev].concat(mapped));
-      const total = res?.data?.page?.total ?? 0;
-      setTotalCount(prev => (prev > 0 ? prev : total));
-      setPageNum(prev => prev + 1);
-    } finally {
-      setLoadingMore(false);
-    }
-  }, [id, meta, loadingMore, pageNum]);
-
-  useEffect(() => {
-    if (meta?.total) {
-      fetchArchives();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [meta]);
-
+  // 过滤和排序媒体数据
   const filteredMedias = useMemo(() => {
+    const medias = data?.medias ?? [];
+
+    // 根据搜索关键词过滤title
     let result = medias;
     if (keyword) {
-      result = result.filter(item => item.title.toLowerCase().includes(keyword.toLowerCase()));
+      result = medias.filter(item => item.title.toLowerCase().includes(keyword.toLowerCase()));
     }
+
+    // 根据排序条件排序
     switch (order) {
       case "play":
         result = [...result].sort((a, b) => (b.cnt_info?.play || 0) - (a.cnt_info?.play || 0));
+        break;
+      case "collect":
+        result = [...result].sort((a, b) => (b.cnt_info?.collect || 0) - (a.cnt_info?.collect || 0));
         break;
       case "pubtime":
         result = [...result].sort((a, b) => (b.pubtime || 0) - (a.pubtime || 0));
@@ -115,8 +84,9 @@ const Series = () => {
       default:
         break;
     }
+
     return result;
-  }, [medias, keyword, order]);
+  }, [data?.medias, keyword, order]);
 
   const onPlayAll = () => {
     if (filteredMedias.length > 0) {
@@ -145,6 +115,36 @@ const Series = () => {
           ownerName: item.upper?.name,
         })),
       );
+    }
+  };
+
+  const toggleFavorite = async () => {
+    if (isFavorite) {
+      // 取消收藏
+      const res = await postFavSeasonUnfav({
+        season_id: Number(id),
+        platform: "web",
+      });
+
+      if (res.code === 0) {
+        rmCollectedFavorite(Number(id));
+      }
+    } else {
+      // 收藏
+      const res = await postFavSeasonFav({
+        season_id: Number(id),
+        platform: "web",
+      });
+
+      if (res.code === 0) {
+        addCollectedFavorite({
+          id: Number(id),
+          title: data?.info?.title || "未命名合集",
+          cover: data?.info?.cover,
+          type: CollectionType.VideoCollections,
+          mid: data?.info?.upper?.mid,
+        });
+      }
     }
   };
 
@@ -213,40 +213,38 @@ const Series = () => {
     }
   };
 
+  const isCreatedBySelf = data?.info?.upper?.mid === user?.mid;
+
   const getScrollElement = useCallback(() => {
     return scrollRef.current?.osInstance()?.elements().viewport as HTMLElement | null;
   }, []);
 
-  const hasMore = useMemo(() => {
-    const total = totalCount || meta?.total || 0;
-    return medias.length < total;
-  }, [medias.length, totalCount, meta?.total]);
-
-  const initialLoading = infoLoading || (medias.length === 0 && loadingMore);
-
   return (
     <ScrollContainer enableBackToTop ref={scrollRef} resetOnChange={id} className="h-full w-full px-4 pb-6">
       <Header
-        type={CollectionType.VideoSeries}
-        cover={medias?.[0]?.cover}
-        title={meta?.name}
-        desc={meta?.description}
-        upMid={meta?.mid}
-        mediaCount={meta?.total}
+        type={CollectionType.VideoCollections}
+        cover={data?.info?.cover}
+        title={data?.info?.title}
+        desc={data?.info?.intro}
+        upMid={data?.info?.upper?.mid}
+        mediaCount={data?.info?.media_count}
       />
 
       <Operations
-        loading={initialLoading}
-        type={CollectionType.VideoSeries}
+        loading={loading}
+        type={CollectionType.VideoCollections}
         order={order}
         onKeywordSearch={setKeyword}
         onOrderChange={setOrder}
         orderOptions={[
           { key: "pubtime", label: "最近投稿" },
           { key: "play", label: "最多播放" },
+          { key: "collect", label: "最多收藏" },
         ]}
-        mediaCount={meta?.total}
+        mediaCount={data?.info?.media_count}
+        isFavorite={isFavorite}
         isCreatedBySelf={isCreatedBySelf}
+        onToggleFavorite={toggleFavorite}
         onPlayAll={onPlayAll}
         onAddToPlayList={addToPlayList}
       />
@@ -255,25 +253,21 @@ const Series = () => {
         <SeriesGridList
           className="min-h-0 flex-1"
           data={filteredMedias}
-          loading={loadingMore}
+          loading={loading}
           getScrollElement={getScrollElement}
           onMenuAction={handleMenuAction}
-          hasMore={hasMore}
-          onLoadMore={fetchArchives}
         />
       ) : (
         <SeriesList
           className="min-h-0 flex-1"
           data={filteredMedias}
-          loading={loadingMore}
+          loading={loading}
           getScrollElement={getScrollElement}
           onMenuAction={handleMenuAction}
-          hasMore={hasMore}
-          onLoadMore={fetchArchives}
         />
       )}
     </ScrollContainer>
   );
 };
 
-export default Series;
+export default VideoCollections;

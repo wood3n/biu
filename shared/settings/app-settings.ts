@@ -27,4 +27,5 @@ export const defaultAppSettings: AppSettings = {
     collected: false,
   },
   reportPlayHistory: true,
+  localMusicDirs: [],
 };

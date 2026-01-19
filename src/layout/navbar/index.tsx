@@ -23,7 +23,7 @@ const LayoutNavbar = () => {
 
   return (
     <div
-      className={clx("flex h-full items-center justify-between px-4", {
+      className={clx("flex h-full items-center justify-between pr-2 pl-4", {
         "window-drag": !isNoDrag,
         "window-no-drag": isNoDrag,
       })}

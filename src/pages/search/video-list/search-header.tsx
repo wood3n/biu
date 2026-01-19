@@ -3,8 +3,9 @@ import React from "react";
 import { Tab, Tabs, Switch } from "@heroui/react";
 import { RiPlayFill } from "@remixicon/react";
 
-import AsyncButton from "@/components/async-button";
 import type { WebSearchTypeVideoParams } from "@/service/web-interface-search-type";
+
+import AsyncButton from "@/components/async-button";
 
 export type SortOrder = WebSearchTypeVideoParams["order"];
 

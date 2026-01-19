@@ -109,18 +109,20 @@ const MusicListItem = ({
               </div>
               <div className="ml-2 flex min-w-0 flex-col items-start justify-center space-y-1">
                 <span className={clx("w-full truncate text-left text-base", { "text-primary": isPlay })}>{title}</span>
-                <span
-                  className={clx("text-foreground-500 w-fit truncate text-sm", {
-                    "cursor-pointer hover:underline": Boolean(upMid),
-                  })}
-                  onClick={e => {
-                    e.stopPropagation();
-                    if (!upMid) return;
-                    navigate(`/user/${upMid}`);
-                  }}
-                >
-                  {upName || "未知"}
-                </span>
+                {Boolean(upName) && (
+                  <span
+                    className={clx("text-foreground-500 w-fit truncate text-sm", {
+                      "cursor-pointer hover:underline": Boolean(upMid),
+                    })}
+                    onClick={e => {
+                      e.stopPropagation();
+                      if (!upMid) return;
+                      navigate(`/user/${upMid}`);
+                    }}
+                  >
+                    {upName || "未知"}
+                  </span>
+                )}
               </div>
             </div>
           )}

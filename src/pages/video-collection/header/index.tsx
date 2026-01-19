@@ -18,12 +18,11 @@ interface Props {
   title?: string;
   desc?: string;
   upMid?: number;
-  upName?: string;
   mediaCount?: number;
   onEdit?: () => void;
 }
 
-const Header = memo(({ loading, type, attr, cover, title, desc, upMid, upName, mediaCount, onEdit }: Props) => {
+const Header = memo(({ loading, type, attr, cover, title, desc, upMid, mediaCount, onEdit }: Props) => {
   const { data: upInfo } = useRequest(
     async () => {
       const res = await getWebInterfaceCard({
@@ -89,7 +88,9 @@ const Header = memo(({ loading, type, attr, cover, title, desc, upMid, upName, m
             <span>
               {type === CollectionType.Favorite
                 ? `${attr ? (isPrivateFav(attr as number) ? "私密" : "公开") : ""}收藏夹`
-                : "视频合集"}
+                : type === CollectionType.VideoSeries
+                  ? "视频系列"
+                  : "视频合集"}
             </span>
             <span>•</span>
             <span>{mediaCount} 条视频</span>
@@ -101,7 +102,7 @@ const Header = memo(({ loading, type, attr, cover, title, desc, upMid, upName, m
             }}
             name={
               <Link color="foreground" href={`/user/${upMid}`} className="hover:underline">
-                {upName}
+                {upInfo?.card?.name}
               </Link>
             }
             className="justify-start"

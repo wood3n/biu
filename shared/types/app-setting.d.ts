@@ -36,4 +36,6 @@ interface AppSettings {
     collected: boolean;
   };
   reportPlayHistory: boolean;
+  /** 本地音乐目录列表 */
+  localMusicDirs: string[];
 }

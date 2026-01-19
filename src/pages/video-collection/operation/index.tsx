@@ -1,5 +1,6 @@
 import { RiPlayFill, RiPlayListAddLine } from "@remixicon/react";
 
+import { CollectionType } from "@/common/constants/collection";
 import AsyncButton from "@/components/async-button";
 import IconButton from "@/components/icon-button";
 import SearchWithSort, { type SearchProps } from "@/components/search-with-sort";
@@ -43,7 +44,7 @@ const Operations = ({
         <IconButton size="md" variant="flat" tooltip="添加到播放列表" onPress={onAddToPlayList}>
           <RiPlayListAddLine size={18} />
         </IconButton>
-        {!loading && isCreatedBySelf !== true && (
+        {!loading && type !== CollectionType.VideoSeries && isCreatedBySelf !== true && (
           <FavToggle isFavorite={isFavorite} onToggleFavorite={onToggleFavorite} />
         )}
         <Menu

@@ -68,7 +68,10 @@ export const SearchButton = ({ onSearch }: Props) => {
               isClearable
               radius="md"
               value={value}
-              onValueChange={setValue}
+              onValueChange={val => {
+                setValue(val);
+                handleSearch(val);
+              }}
               onClear={() => {
                 handleSearch("");
               }}

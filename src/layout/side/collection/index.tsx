@@ -326,7 +326,7 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
         case "play":
           if (item.type === CollectionType.Favorite) {
             await handlePlayFavorite(item.id, item.title);
-          } else if (item.type === CollectionType.VideoSeries) {
+          } else if (item.type === CollectionType.VideoCollections) {
             await handlePlaySeries(item.id);
           } else {
             addToast({ title: "无法识别收藏夹类型", color: "warning" });
@@ -335,7 +335,7 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
         case "add-to-playlist":
           if (item.type === CollectionType.Favorite) {
             await handleAddFavoriteToPlaylist(item.id, item.title);
-          } else if (item.type === CollectionType.VideoSeries) {
+          } else if (item.type === CollectionType.VideoCollections) {
             await handleAddSeriesToPlaylist(item.id);
           } else {
             addToast({ title: "无法识别收藏夹类型", color: "warning" });
