@@ -13,6 +13,7 @@ import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrate
 import { Button, Tooltip, addToast } from "@heroui/react";
 import {
   RiAddLine,
+  RiArrowDownSLine,
   RiDeleteBinLine,
   RiEdit2Line,
   RiEyeOffLine,
@@ -52,8 +53,33 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
   const reorderCreatedFavorites = useFavoritesStore(state => state.reorderCreatedFavorites);
   const reorderCollectedFavorites = useFavoritesStore(state => state.reorderCollectedFavorites);
   const hiddenMenuKeys = useSettings(state => state.hiddenMenuKeys);
+  const collectionFolded = useSettings(state => state.sideMenuCollectionFolded);
   const updateSettings = useSettings(state => state.update);
   const onOpenConfirmModal = useModalStore(state => state.onOpenConfirmModal);
+
+  const createdFolded = collectionFolded?.created ?? false;
+  const collectedFolded = collectionFolded?.collected ?? false;
+
+  const updateCollectionFolded = useCallback(
+    (next: Partial<AppSettings["sideMenuCollectionFolded"]>) => {
+      updateSettings({
+        sideMenuCollectionFolded: {
+          created: createdFolded,
+          collected: collectedFolded,
+          ...next,
+        },
+      });
+    },
+    [createdFolded, collectedFolded, updateSettings],
+  );
+
+  const handleToggleCreatedFolded = useCallback(() => {
+    updateCollectionFolded({ created: !createdFolded });
+  }, [createdFolded, updateCollectionFolded]);
+
+  const handleToggleCollectedFolded = useCallback(() => {
+    updateCollectionFolded({ collected: !collectedFolded });
+  }, [collectedFolded, updateCollectionFolded]);
 
   const createdContextMenus = useMemo<ContextMenuItem[]>(
     () => [
@@ -85,6 +111,8 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
   const filteredCollectedFavorites = collectedFavorites.filter(item => !hiddenMenuKeys.includes(String(item.id)));
   const filteredCreatedFavorites = createdFavorites.filter(item => !hiddenMenuKeys.includes(String(item.id)));
   const isDragEnabled = !isCollapsed;
+  const isCreatedDragEnabled = isDragEnabled && !createdFolded;
+  const isCollectedDragEnabled = isDragEnabled && !collectedFolded;
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -327,7 +355,7 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
   );
 
   const handleCreatedDragEnd = (event: DragEndEvent) => {
-    if (isCollapsed) {
+    if (isCollapsed || createdFolded) {
       return;
     }
 
@@ -341,7 +369,7 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
   };
 
   const handleCollectedDragEnd = (event: DragEndEvent) => {
-    if (isCollapsed) {
+    if (isCollapsed || collectedFolded) {
       return;
     }
 
@@ -373,45 +401,63 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
       return null;
     }
 
+    const header = !isCollapsed ? (
+      <div className="flex items-center justify-between p-2 text-sm text-zinc-500">
+        <button
+          type="button"
+          aria-expanded={!createdFolded}
+          onClick={handleToggleCreatedFolded}
+          className="hover:text-foreground flex items-center gap-1 text-sm text-zinc-500 transition-colors"
+        >
+          <RiArrowDownSLine size={16} className={`transition-transform ${createdFolded ? "-rotate-90" : "rotate-0"}`} />
+          <span>我创建的</span>
+        </button>
+        <Tooltip closeDelay={0} content="新建收藏夹">
+          <Button
+            isIconOnly
+            variant="light"
+            radius="md"
+            size="sm"
+            className="h-auto w-auto min-w-auto p-1"
+            onPress={onOpenAddFavorite}
+          >
+            <RiAddLine size={16} />
+          </Button>
+        </Tooltip>
+      </div>
+    ) : null;
+
+    if (createdFolded) {
+      return header;
+    }
+
     const group = (
-      <MenuGroup
-        title="我创建的"
-        titleExtra={
-          <Tooltip closeDelay={0} content="新建收藏夹">
-            <Button
-              isIconOnly
-              variant="light"
-              radius="md"
-              size="sm"
-              className="h-auto w-auto min-w-auto p-1"
-              onPress={onOpenAddFavorite}
-            >
-              <RiAddLine size={16} />
-            </Button>
-          </Tooltip>
-        }
-        collapsed={isCollapsed}
-        items={items}
-        renderItem={item => (
-          <SortableMenuItem
-            key={item.id}
-            id={item.id as number}
-            collapsed={isCollapsed}
-            disabled={!isDragEnabled}
-            contextMenuItems={createdContextMenus}
-            onContextMenuAction={action =>
-              handleCreatedMenuAction(action, {
-                id: Number(item.id),
-                title: item.title,
-              })
-            }
-            {...item}
-          />
-        )}
-      />
+      <>
+        {header}
+        <MenuGroup
+          items={items}
+          collapsed={isCollapsed}
+          renderItem={item => (
+            <SortableMenuItem
+              key={item.id}
+              id={item.id as number}
+              collapsed={isCollapsed}
+              disabled={!isCreatedDragEnabled}
+              contextMenuItems={createdContextMenus}
+              onContextMenuAction={action =>
+                handleCreatedMenuAction(action, {
+                  id: Number(item.id),
+                  title: item.title,
+                })
+              }
+              {...item}
+            />
+          )}
+        />
+      </>
     );
 
-    if (!isDragEnabled) {
+    if (!isCreatedDragEnabled) {
       return group;
     }
 
@@ -439,32 +485,55 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
       mid: item.mid,
     }));
 
-    const group = (
-      <MenuGroup
-        title="我收藏的"
-        items={items}
-        collapsed={isCollapsed}
-        renderItem={item => (
-          <SortableMenuItem
-            key={item.id}
-            id={item.id as number}
-            collapsed={isCollapsed}
-            disabled={!isDragEnabled}
-            contextMenuItems={collectedContextMenus}
-            onContextMenuAction={action =>
-              handleCollectedMenuAction(action, {
-                id: Number(item.id),
-                title: item.title,
-                type: item.type as number,
-              })
-            }
-            {...item}
+    const header = !isCollapsed ? (
+      <div className="flex items-center justify-between p-2 text-sm text-zinc-500">
+        <button
+          type="button"
+          aria-expanded={!collectedFolded}
+          onClick={handleToggleCollectedFolded}
+          className="hover:text-foreground flex items-center gap-1 text-sm text-zinc-500 transition-colors"
+        >
+          <RiArrowDownSLine
+            size={16}
+            className={`transition-transform ${collectedFolded ? "-rotate-90" : "rotate-0"}`}
           />
-        )}
-      />
+          <span>我收藏的</span>
+        </button>
+      </div>
+    ) : null;
+
+    if (collectedFolded) {
+      return header;
+    }
+
+    const group = (
+      <>
+        {header}
+        <MenuGroup
+          items={items}
+          collapsed={isCollapsed}
+          renderItem={item => (
+            <SortableMenuItem
+              key={item.id}
+              id={item.id as number}
+              collapsed={isCollapsed}
+              disabled={!isCollectedDragEnabled}
+              contextMenuItems={collectedContextMenus}
+              onContextMenuAction={action =>
+                handleCollectedMenuAction(action, {
+                  id: Number(item.id),
+                  title: item.title,
+                  type: item.type as number,
+                })
+              }
+              {...item}
+            />
+          )}
+        />
+      </>
     );
 
-    if (!isDragEnabled) {
+    if (!isCollectedDragEnabled) {
       return group;
     }
 

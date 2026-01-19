@@ -74,6 +74,7 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           proxySettings: state.proxySettings,
           sideMenuCollapsed: state.sideMenuCollapsed,
           sideMenuWidth: state.sideMenuWidth,
+          sideMenuCollectionFolded: state.sideMenuCollectionFolded,
           reportPlayHistory: state.reportPlayHistory,
         };
       },
