@@ -204,9 +204,11 @@ const LocalMusicPage = () => {
             </Button>
           )}
 
-          <IconButton size="md" variant="flat" color="default" tooltip="添加到播放列表" onPress={addAllToPlaylist}>
-            <RiPlayListAddLine size={18} />
-          </IconButton>
+          {Boolean(filtered.length) && (
+            <IconButton size="md" variant="flat" color="default" tooltip="添加到播放列表" onPress={addAllToPlaylist}>
+              <RiPlayListAddLine size={18} />
+            </IconButton>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <SearchButton

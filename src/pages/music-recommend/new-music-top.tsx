@@ -208,11 +208,7 @@ const NewMusicTop = () => {
                     />
                     {(typeof item.total_vv === "number" || typeof item.wish_count === "number") && (
                       <div className="absolute inset-x-0 bottom-0 z-10 bg-linear-to-t from-black/80 via-black/40 to-transparent p-2 text-white">
-                        <div className="line-clamp-1 text-xs">
-                          {`${formatNumber(item.total_vv ?? 0)}播放${
-                            typeof item.wish_count === "number" ? ` · ${formatNumber(item.wish_count)}想听` : ""
-                          }`}
-                        </div>
+                        <div className="line-clamp-1 text-xs">{`${formatNumber(item.total_vv ?? 0)}播放`}</div>
                       </div>
                     )}
                     <div className="pointer-events-none absolute right-2 bottom-8 z-40 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100">

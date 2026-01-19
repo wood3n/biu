@@ -119,6 +119,7 @@ const FullScreenPlayer = () => {
   };
 
   const scheduleHideUi = (delay: number) => {
+    if (isSettingsOpen) return;
     if (hideUiTimeoutRef.current) {
       window.clearTimeout(hideUiTimeoutRef.current);
     }
@@ -128,7 +129,7 @@ const FullScreenPlayer = () => {
   };
 
   const handleMouseLeave = () => {
-    scheduleHideUi(2000);
+    scheduleHideUi(3000);
   };
 
   const coverSrc = playItem?.pageCover || playItem?.cover;
@@ -296,7 +297,16 @@ const FullScreenPlayer = () => {
                   <h2 className="truncate text-xl select-none">{playItem.pageTitle || playItem.title}</h2>
                   <Popover
                     isOpen={isSettingsOpen && isUiVisible}
-                    onOpenChange={setIsSettingsOpen}
+                    onOpenChange={open => {
+                      setIsSettingsOpen(open);
+                      if (open) {
+                        if (hideUiTimeoutRef.current) {
+                          window.clearTimeout(hideUiTimeoutRef.current);
+                          hideUiTimeoutRef.current = null;
+                        }
+                        setIsUiVisible(true);
+                      }
+                    }}
                     placement="bottom-start"
                   >
                     <PopoverTrigger>

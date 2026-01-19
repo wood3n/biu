@@ -35,10 +35,11 @@ export function registerDialogHandlers() {
     }
   });
 
-  ipcMain.handle(channel.dialog.selectDirectory, async () => {
+  ipcMain.handle(channel.dialog.selectDirectory, async (_event: IpcMainInvokeEvent, title?: string) => {
+    const resolvedTitle = title?.trim() || "选择目录";
     const result = await dialog.showOpenDialog({
       properties: ["openDirectory", "createDirectory"],
-      title: "选择下载保存目录",
+      title: resolvedTitle,
     });
     if (result.canceled) return null;
     const dir = result.filePaths?.[0] ?? null;
