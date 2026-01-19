@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.14.0
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.13.0...v1.14.0)
+
+### 🚀 新功能
+
+- Add toggle to stop reporting playback history ([f6dd39e](https://github.com/wood3n/biu/commit/f6dd39e))
+- Add a button to enable/disable reporting playback history in history page ([4142a8a](https://github.com/wood3n/biu/commit/4142a8a))
+- 新增本地音乐页面 ([147f9cd](https://github.com/wood3n/biu/commit/147f9cd))
+
+### 🩹 修复问题
+
+- 修复视频系列数据显示问题 ([5ad3f8e](https://github.com/wood3n/biu/commit/5ad3f8e))
+- 移除无用的代码 ([b66e374](https://github.com/wood3n/biu/commit/b66e374))
+- Review problem ([1b54010](https://github.com/wood3n/biu/commit/1b54010))
+- Review problem ([1376532](https://github.com/wood3n/biu/commit/1376532))
+
+### ❤️ Contributors
+
+- Wood3n
+- UtopiaXC
+
 ## v1.13.0
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.12.0...v1.13.0)
