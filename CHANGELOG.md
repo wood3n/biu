@@ -1,5 +1,40 @@
 # Changelog
 
+## v1.15.0
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.14.0...v1.15.0)
+
+### 🚀 新功能
+
+- 为侧边栏收藏夹添加折叠功能 ([6498bdc](https://github.com/wood3n/biu/commit/6498bdc))
+- 推荐音乐增加音乐、鬼畜分区显示 ([ca4617f](https://github.com/wood3n/biu/commit/ca4617f))
+
+### 🩹 修复问题
+
+- 修复一些UI显示问题 ([845466d](https://github.com/wood3n/biu/commit/845466d))
+- 修复一些UI显示问题 ([992aa6b](https://github.com/wood3n/biu/commit/992aa6b))
+- 修复收藏夹分组标题换行问题 ([81a13cc](https://github.com/wood3n/biu/commit/81a13cc))
+- Use dev icon ([af9cd7a](https://github.com/wood3n/biu/commit/af9cd7a))
+- 修复筛选排序点击问题 ([7f71c05](https://github.com/wood3n/biu/commit/7f71c05))
+- 移除无用的文件和依赖 ([133f1f8](https://github.com/wood3n/biu/commit/133f1f8))
+- Update pnpm lock ([d78cfc2](https://github.com/wood3n/biu/commit/d78cfc2))
+- Review problem ([0f20b58](https://github.com/wood3n/biu/commit/0f20b58))
+- 优化数据请求 ([4a866ea](https://github.com/wood3n/biu/commit/4a866ea))
+
+### 💅 Refactors
+
+- 重构收藏夹分组渲染逻辑 ([6cdef07](https://github.com/wood3n/biu/commit/6cdef07))
+
+### 🎨 UI 调整
+
+- 优化顶部用户动态页面显示 ([5190753](https://github.com/wood3n/biu/commit/5190753))
+- 优化推荐音乐页面显示 ([edeb874](https://github.com/wood3n/biu/commit/edeb874))
+
+### ❤️ Contributors
+
+- Wood3n
+- ShellMonster
+
 ## v1.14.0
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.13.0...v1.14.0)
