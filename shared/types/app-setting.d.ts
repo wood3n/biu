@@ -31,6 +31,10 @@ interface AppSettings {
   proxySettings: ProxySettings;
   sideMenuCollapsed: boolean;
   sideMenuWidth: number;
+  sideMenuCollectionFolded: {
+    created: boolean;
+    collected: boolean;
+  };
   reportPlayHistory: boolean;
   /** 本地音乐目录列表 */
   localMusicDirs: string[];

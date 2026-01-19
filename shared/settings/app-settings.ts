@@ -22,6 +22,10 @@ export const defaultAppSettings: AppSettings = {
   },
   sideMenuCollapsed: false,
   sideMenuWidth: 200,
+  sideMenuCollectionFolded: {
+    created: false,
+    collected: false,
+  },
   reportPlayHistory: true,
   localMusicDirs: [],
 };

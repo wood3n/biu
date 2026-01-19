@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, type ReactNode } from "react";
 
 import {
   DndContext,
@@ -13,6 +13,7 @@ import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrate
 import { Button, Tooltip, addToast } from "@heroui/react";
 import {
   RiAddLine,
+  RiArrowDownSLine,
   RiDeleteBinLine,
   RiEdit2Line,
   RiEyeOffLine,
@@ -41,6 +42,16 @@ interface Props {
   onOpenEditFavorite?: (id: number) => void;
 }
 
+interface CollectionMenuItem {
+  id: number;
+  title: string;
+  href: string;
+  cover?: string;
+  className: string;
+  type?: number;
+  mid?: number;
+}
+
 const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Props) => {
   const user = useUser(state => state.user);
   const createdFavorites = useFavoritesStore(state => state.createdFavorites);
@@ -52,8 +63,30 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
   const reorderCreatedFavorites = useFavoritesStore(state => state.reorderCreatedFavorites);
   const reorderCollectedFavorites = useFavoritesStore(state => state.reorderCollectedFavorites);
   const hiddenMenuKeys = useSettings(state => state.hiddenMenuKeys);
+  const collectionFolded = useSettings(state => state.sideMenuCollectionFolded);
   const updateSettings = useSettings(state => state.update);
   const onOpenConfirmModal = useModalStore(state => state.onOpenConfirmModal);
+
+  const createdFolded = collectionFolded?.created ?? false;
+  const collectedFolded = collectionFolded?.collected ?? false;
+
+  const handleToggleCreatedFolded = useCallback(() => {
+    updateSettings({
+      sideMenuCollectionFolded: {
+        created: !createdFolded,
+        collected: collectedFolded,
+      },
+    });
+  }, [createdFolded, collectedFolded, updateSettings]);
+
+  const handleToggleCollectedFolded = useCallback(() => {
+    updateSettings({
+      sideMenuCollectionFolded: {
+        created: createdFolded,
+        collected: !collectedFolded,
+      },
+    });
+  }, [createdFolded, collectedFolded, updateSettings]);
 
   const createdContextMenus = useMemo<ContextMenuItem[]>(
     () => [
@@ -85,6 +118,8 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
   const filteredCollectedFavorites = collectedFavorites.filter(item => !hiddenMenuKeys.includes(String(item.id)));
   const filteredCreatedFavorites = createdFavorites.filter(item => !hiddenMenuKeys.includes(String(item.id)));
   const isDragEnabled = !isCollapsed;
+  const isCreatedDragEnabled = isDragEnabled && !createdFolded;
+  const isCollectedDragEnabled = isDragEnabled && !collectedFolded;
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -327,7 +362,7 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
   );
 
   const handleCreatedDragEnd = (event: DragEndEvent) => {
-    if (isCollapsed) {
+    if (isCollapsed || createdFolded) {
       return;
     }
 
@@ -341,7 +376,7 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
   };
 
   const handleCollectedDragEnd = (event: DragEndEvent) => {
-    if (isCollapsed) {
+    if (isCollapsed || collectedFolded) {
       return;
     }
 
@@ -352,6 +387,84 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
     }
 
     reorderCollectedFavorites(Number(active.id), Number(over.id));
+  };
+
+  const renderFavoriteGroup = ({
+    title,
+    items,
+    isFolded,
+    onToggleFolded,
+    titleExtra,
+    isDragEnabled: isGroupDragEnabled,
+    onDragEnd,
+    contextMenuItems,
+    onContextMenuAction,
+  }: {
+    title: string;
+    items: CollectionMenuItem[];
+    isFolded: boolean;
+    onToggleFolded: () => void;
+    titleExtra?: ReactNode;
+    isDragEnabled: boolean;
+    onDragEnd: (event: DragEndEvent) => void;
+    contextMenuItems: ContextMenuItem[];
+    onContextMenuAction: (action: string, item: CollectionMenuItem) => void;
+  }) => {
+    if (!items.length) {
+      return null;
+    }
+
+    const header = !isCollapsed ? (
+      <div className="flex items-center justify-between p-2 text-sm text-zinc-500">
+        <button
+          type="button"
+          aria-expanded={!isFolded}
+          onClick={onToggleFolded}
+          className="hover:text-foreground flex items-center gap-1 text-sm text-zinc-500 transition-colors"
+        >
+          <RiArrowDownSLine size={16} className={`transition-transform ${isFolded ? "-rotate-90" : "rotate-0"}`} />
+          <span className="whitespace-nowrap">{title}</span>
+        </button>
+        {titleExtra}
+      </div>
+    ) : null;
+
+    if (isFolded) {
+      return header;
+    }
+
+    const group = (
+      <>
+        {header}
+        <MenuGroup
+          items={items}
+          collapsed={isCollapsed}
+          renderItem={item => (
+            <SortableMenuItem
+              key={item.id}
+              id={item.id}
+              collapsed={isCollapsed}
+              disabled={!isGroupDragEnabled}
+              contextMenuItems={contextMenuItems}
+              onContextMenuAction={action => onContextMenuAction(action, item)}
+              {...item}
+            />
+          )}
+        />
+      </>
+    );
+
+    if (!isGroupDragEnabled) {
+      return group;
+    }
+
+    return (
+      <DndContext collisionDetection={closestCenter} onDragEnd={onDragEnd} sensors={sensors}>
+        <SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
+          {group}
+        </SortableContext>
+      </DndContext>
+    );
   };
 
   const renderCreatedGroup = () => {
@@ -369,66 +482,39 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
       mid: item.mid,
     }));
 
-    if (!items.length) {
-      return null;
-    }
+    const titleExtra = onOpenAddFavorite ? (
+      <Tooltip closeDelay={0} content="新建收藏夹">
+        <Button
+          isIconOnly
+          variant="light"
+          radius="md"
+          size="sm"
+          className="h-auto w-auto min-w-auto p-1"
+          onPress={onOpenAddFavorite}
+        >
+          <RiAddLine size={16} />
+        </Button>
+      </Tooltip>
+    ) : null;
 
-    const group = (
-      <MenuGroup
-        title="我创建的"
-        titleExtra={
-          <Tooltip closeDelay={0} content="新建收藏夹">
-            <Button
-              isIconOnly
-              variant="light"
-              radius="md"
-              size="sm"
-              className="h-auto w-auto min-w-auto p-1"
-              onPress={onOpenAddFavorite}
-            >
-              <RiAddLine size={16} />
-            </Button>
-          </Tooltip>
-        }
-        collapsed={isCollapsed}
-        items={items}
-        renderItem={item => (
-          <SortableMenuItem
-            key={item.id}
-            id={item.id as number}
-            collapsed={isCollapsed}
-            disabled={!isDragEnabled}
-            contextMenuItems={createdContextMenus}
-            onContextMenuAction={action =>
-              handleCreatedMenuAction(action, {
-                id: Number(item.id),
-                title: item.title,
-              })
-            }
-            {...item}
-          />
-        )}
-      />
-    );
-
-    if (!isDragEnabled) {
-      return group;
-    }
-
-    return (
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleCreatedDragEnd} sensors={sensors}>
-        <SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
-          {group}
-        </SortableContext>
-      </DndContext>
-    );
+    return renderFavoriteGroup({
+      title: "我创建的",
+      items,
+      isFolded: createdFolded,
+      onToggleFolded: handleToggleCreatedFolded,
+      titleExtra,
+      isDragEnabled: isCreatedDragEnabled,
+      onDragEnd: handleCreatedDragEnd,
+      contextMenuItems: createdContextMenus,
+      onContextMenuAction: (action, item) =>
+        handleCreatedMenuAction(action, {
+          id: item.id,
+          title: item.title,
+        }),
+    });
   };
 
   const renderCollectedGroup = () => {
-    if (!filteredCollectedFavorites?.length) {
-      return null;
-    }
-
     const items = filteredCollectedFavorites.map(item => ({
       id: item.id,
       title: item.title,
@@ -439,42 +525,21 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
       mid: item.mid,
     }));
 
-    const group = (
-      <MenuGroup
-        title="我收藏的"
-        items={items}
-        collapsed={isCollapsed}
-        renderItem={item => (
-          <SortableMenuItem
-            key={item.id}
-            id={item.id as number}
-            collapsed={isCollapsed}
-            disabled={!isDragEnabled}
-            contextMenuItems={collectedContextMenus}
-            onContextMenuAction={action =>
-              handleCollectedMenuAction(action, {
-                id: Number(item.id),
-                title: item.title,
-                type: item.type as number,
-              })
-            }
-            {...item}
-          />
-        )}
-      />
-    );
-
-    if (!isDragEnabled) {
-      return group;
-    }
-
-    return (
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleCollectedDragEnd} sensors={sensors}>
-        <SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
-          {group}
-        </SortableContext>
-      </DndContext>
-    );
+    return renderFavoriteGroup({
+      title: "我收藏的",
+      items,
+      isFolded: collectedFolded,
+      onToggleFolded: handleToggleCollectedFolded,
+      isDragEnabled: isCollectedDragEnabled,
+      onDragEnd: handleCollectedDragEnd,
+      contextMenuItems: collectedContextMenus,
+      onContextMenuAction: (action, item) =>
+        handleCollectedMenuAction(action, {
+          id: item.id,
+          title: item.title,
+          type: item.type,
+        }),
+    });
   };
 
   return (
