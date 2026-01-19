@@ -31,7 +31,8 @@ const UserItem: React.FC<UserItemProps> = ({ author, isSelected, onSelect }) => 
       aria-pressed={isSelected}
       tabIndex={0}
       onKeyDown={event => {
-        if (event.key === "Enter") {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
           onSelect(author?.mid ?? null);
         }
       }}

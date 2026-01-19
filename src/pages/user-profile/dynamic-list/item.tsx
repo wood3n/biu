@@ -58,12 +58,19 @@ const DynamicItem = ({ item }: DynamicItemProps) => {
   };
 
   const handleThumb = async () => {
-    setIsLike(!isLike);
-    setLikeCount(prev => prev + (isLike ? -1 : 1));
-    await postDynamicFeedThumb({
-      dyn_id_str: item.id_str,
-      up: isLike ? 2 : 1,
-    });
+    const prevIsLike = isLike;
+    const prevLikeCount = likeCount;
+    setIsLike(!prevIsLike);
+    setLikeCount(prev => prev + (prevIsLike ? -1 : 1));
+    try {
+      await postDynamicFeedThumb({
+        dyn_id_str: item.id_str,
+        up: prevIsLike ? 2 : 1,
+      });
+    } catch {
+      setIsLike(prevIsLike);
+      setLikeCount(prevLikeCount);
+    }
   };
 
   return (

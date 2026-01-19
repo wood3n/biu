@@ -186,8 +186,12 @@ const MusicRecommend = () => {
     }
     switch (key) {
       case "favorite":
+        if (!item.aid) {
+          addToast({ title: "该项目无法收藏", color: "warning" });
+          return;
+        }
         useModalStore.getState().onOpenFavSelectModal({
-          rid: Number(item.aid) || Number(item.id),
+          rid: Number(item.aid),
           type: 2,
           title: item.title,
         });

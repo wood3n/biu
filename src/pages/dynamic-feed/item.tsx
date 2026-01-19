@@ -49,12 +49,23 @@ const DynamicItem: React.FC<DynamicItemProps> = ({ item, className }) => {
   };
 
   const handleThumb = async () => {
-    setIsLike(!isLike);
-    setLikeCount(prev => prev + (isLike ? -1 : 1));
-    await postDynamicFeedThumb({
-      dyn_id_str: item.id_str,
-      up: isLike ? 2 : 1,
-    });
+    const prevIsLike = isLike;
+    const prevCount = likeCount;
+    setIsLike(!prevIsLike);
+    setLikeCount(prev => prev + (prevIsLike ? -1 : 1));
+    try {
+      await postDynamicFeedThumb({
+        dyn_id_str: item.id_str,
+        up: prevIsLike ? 2 : 1,
+      });
+    } catch {
+      setIsLike(prevIsLike);
+      setLikeCount(prevCount);
+      addToast({
+        title: "点赞失败，请稍后重试",
+        color: "danger",
+      });
+    }
   };
 
   return (

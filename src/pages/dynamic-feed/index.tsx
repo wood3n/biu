@@ -17,48 +17,68 @@ const DynamicFeedPage = () => {
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedAuthorMid, setSelectedAuthorMid] = useState<number | null>(null);
+  const requestIdRef = useRef(0);
 
   const scrollRef = useRef<ScrollRefObject>(null);
   const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);
 
-  const fetchData = useCallback(async (currentOffset: string = "", hostMid: number | null = null) => {
-    if (isLoadingRef.current) return;
-    isLoadingRef.current = true;
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const res = hostMid
-        ? await getWebDynamicFeedSpace({
-            host_mid: hostMid,
-            offset: currentOffset,
-            type: "video",
-            platform: "web",
-          })
-        : await getWebDynamicFeedAll({
-            type: "video",
-            offset: currentOffset,
-            platform: "web",
-          });
-
-      if (res.code === 0) {
-        setItems(prev => (currentOffset === "" ? res.data.items : [...prev, ...res.data.items]));
-        setOffset(res.data.offset);
-        setHasMore(res.data.has_more);
-      } else {
-        setError(res.message || "无法加载动态");
-      }
-    } catch {
-      setError("无法获取动态数据");
-    } finally {
-      isLoadingRef.current = false;
-      setIsLoading(false);
-    }
+  const invalidateRequests = useCallback(() => {
+    requestIdRef.current += 1;
+    isLoadingRef.current = false;
+    setIsLoading(false);
+    return requestIdRef.current;
   }, []);
 
+  const fetchData = useCallback(
+    async (currentOffset: string = "", hostMid: number | null = null, requestId = requestIdRef.current) => {
+      if (requestId !== requestIdRef.current || isLoadingRef.current) return;
+      isLoadingRef.current = true;
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const res = hostMid
+          ? await getWebDynamicFeedSpace({
+              host_mid: hostMid,
+              offset: currentOffset,
+              type: "video",
+              platform: "web",
+            })
+          : await getWebDynamicFeedAll({
+              type: "video",
+              offset: currentOffset,
+              platform: "web",
+            });
+
+        if (requestId !== requestIdRef.current) return;
+
+        if (res.code === 0) {
+          setItems(prev => (currentOffset === "" ? res.data.items : [...prev, ...res.data.items]));
+          setOffset(res.data.offset);
+          setHasMore(res.data.has_more);
+        } else {
+          setError(res.message || "无法加载动态");
+        }
+      } catch {
+        if (requestId !== requestIdRef.current) return;
+        setError("无法获取动态数据");
+      } finally {
+        if (requestId === requestIdRef.current) {
+          isLoadingRef.current = false;
+          setIsLoading(false);
+        }
+      }
+    },
+    [],
+  );
+
   useEffect(() => {
-    fetchData("");
-  }, [fetchData]);
+    const requestId = invalidateRequests();
+    fetchData("", null, requestId);
+    return () => {
+      invalidateRequests();
+    };
+  }, [fetchData, invalidateRequests]);
 
   useEffect(() => {
     const initScrollElement = () => {
@@ -85,20 +105,22 @@ const DynamicFeedPage = () => {
     if (!scrollElement || isLoading || !hasMore || error) return;
     const { scrollTop, scrollHeight, clientHeight } = scrollElement;
     if (scrollHeight - scrollTop - clientHeight < 200) {
-      fetchData(offset, selectedAuthorMid);
+      fetchData(offset, selectedAuthorMid, requestIdRef.current);
     }
   }, [scrollElement, isLoading, hasMore, offset, error, fetchData, selectedAuthorMid]);
 
   const handleSelectAuthor = useCallback(
     (mid: number | null) => {
       const nextMid = mid === null ? null : selectedAuthorMid === mid ? null : mid;
+      const requestId = invalidateRequests();
       setSelectedAuthorMid(nextMid);
       setOffset("");
       setHasMore(true);
       setItems([]);
-      fetchData("", nextMid);
+      setError(null);
+      fetchData("", nextMid, requestId);
     },
-    [fetchData, selectedAuthorMid],
+    [fetchData, invalidateRequests, selectedAuthorMid],
   );
 
   useEffect(() => {
@@ -152,7 +174,7 @@ const DynamicFeedPage = () => {
             {!isLoading && error && (
               <div className="flex flex-col items-center gap-2">
                 <p className="text-danger">{error}</p>
-                <Button size="sm" onPress={() => fetchData(offset, selectedAuthorMid)}>
+                <Button size="sm" onPress={() => fetchData(offset, selectedAuthorMid, requestIdRef.current)}>
                   Retry
                 </Button>
               </div>
