@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Button, Select, SelectItem } from "@heroui/react";
+import { addToast, Button, Select, SelectItem } from "@heroui/react";
 import { RiDeleteBinLine, RiFolderAddLine, RiRefreshLine, RiPlayFill, RiPlayListAddLine } from "@remixicon/react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
@@ -84,6 +84,10 @@ const LocalMusicPage = () => {
       audioUrl: toFileUrl(i.path),
     }));
     usePlayList.getState().addList?.(items);
+    addToast({
+      title: `${items.length}首歌曲已添加到播放列表`,
+      color: "success",
+    });
   };
 
   const addDirectory = async () => {
@@ -153,6 +157,11 @@ const LocalMusicPage = () => {
         audioUrl: toFileUrl(song.path),
       },
     ]);
+
+    addToast({
+      title: "已添加到播放列表",
+      color: "success",
+    });
   };
 
   const deleteFile = (filePath: string) => {

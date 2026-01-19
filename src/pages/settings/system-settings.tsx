@@ -396,9 +396,7 @@ export const SystemSettingsTab = ({
             </>
           )}
         </div>
-        <div className="flex w-[64px] justify-end">
-          <UpdateCheckButton />
-        </div>
+        <UpdateCheckButton />
       </div>
       <ImportExport />
     </Form>
