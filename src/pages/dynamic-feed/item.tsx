@@ -1,34 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router";
 
-import { Card, CardHeader, CardBody, addToast, User } from "@heroui/react";
-import { RiPlayFill } from "@remixicon/react";
+import { Button, Card, CardHeader, CardBody, addToast, User } from "@heroui/react";
+import { RiPlayFill, RiThumbUpFill, RiThumbUpLine } from "@remixicon/react";
 import moment from "moment";
+import { twMerge } from "tailwind-merge";
 
+import type { WebDynamicItem } from "@/service/web-dynamic";
+
+import { formatNumber } from "@/common/utils/number";
 import Image from "@/components/image";
+import { postDynamicFeedThumb } from "@/service/web-dynamic-feed-thumb";
 import { usePlayList } from "@/store/play-list";
-
-import type { WebDynamicItem } from "../../service/web-dynamic";
 
 import MoreMenu from "./more-menu";
 
 interface DynamicItemProps {
   item: WebDynamicItem;
-  onClose: () => void;
+  className?: string;
 }
 
-const DynamicItem: React.FC<DynamicItemProps> = ({ item, onClose }) => {
+const DynamicItem: React.FC<DynamicItemProps> = ({ item, className }) => {
   const author = item.modules.module_author;
   const dynamic = item.modules.module_dynamic;
+  const stat = item.modules.module_stat;
   const archive = dynamic.major?.archive;
   const play = usePlayList(s => s.play);
   const addToNext = usePlayList(s => s.addToNext);
   const navigate = useNavigate();
+  const [isLike, setIsLike] = useState(() => stat?.like?.status === true);
+  const [likeCount, setLikeCount] = useState(() => stat?.like?.count || 0);
 
-  // Format time
   const timeDisplay = author.pub_time || moment(author.pub_ts * 1000).fromNow();
 
-  // Get text content
   const textContent = dynamic.desc?.text || dynamic.major?.opus?.summary?.text || "";
 
   const handleDownload = async (type: "audio" | "video") => {
@@ -44,9 +48,29 @@ const DynamicItem: React.FC<DynamicItemProps> = ({ item, onClose }) => {
     });
   };
 
+  const handleThumb = async () => {
+    const prevIsLike = isLike;
+    const prevCount = likeCount;
+    setIsLike(!prevIsLike);
+    setLikeCount(prev => prev + (prevIsLike ? -1 : 1));
+    try {
+      await postDynamicFeedThumb({
+        dyn_id_str: item.id_str,
+        up: prevIsLike ? 2 : 1,
+      });
+    } catch {
+      setIsLike(prevIsLike);
+      setLikeCount(prevCount);
+      addToast({
+        title: "点赞失败，请稍后重试",
+        color: "danger",
+      });
+    }
+  };
+
   return (
     <Card className="border-default-100 mb-2 w-full rounded-none border-b bg-transparent pb-4 shadow-none">
-      <CardHeader className="flex items-start justify-between px-0 pt-4 pb-2">
+      <CardHeader className={twMerge("flex items-start justify-between px-0 pt-4 pb-2", className)}>
         <User
           isFocusable
           avatarProps={{
@@ -70,29 +94,39 @@ const DynamicItem: React.FC<DynamicItemProps> = ({ item, onClose }) => {
           }}
           onClick={() => {
             navigate(`/user/${author.mid}`);
-            onClose();
           }}
         />
-        <MoreMenu
-          onAddToNext={() => {
-            if (archive) {
-              addToNext({
-                type: "mv",
-                bvid: archive.bvid,
-                title: archive.title,
-                cover: archive.cover,
-                ownerName: author.name,
-                ownerMid: author.mid,
-              });
-              addToast({
-                title: "已添加到下一首播放",
-                color: "success",
-              });
-            }
-          }}
-          onDownloadAudio={() => handleDownload("audio")}
-          onDownloadVideo={() => handleDownload("video")}
-        />
+        <div className="flex items-center">
+          <Button
+            variant="light"
+            size="sm"
+            className="text-default-500 data-[hover=true]:bg-default-100 flex-1 gap-1"
+            onPress={handleThumb}
+          >
+            {isLike ? <RiThumbUpFill size={18} /> : <RiThumbUpLine size={18} />}
+            <span>{likeCount > 0 ? formatNumber(likeCount) : "点赞"}</span>
+          </Button>
+          <MoreMenu
+            onAddToNext={() => {
+              if (archive) {
+                addToNext({
+                  type: "mv",
+                  bvid: archive.bvid,
+                  title: archive.title,
+                  cover: archive.cover,
+                  ownerName: author.name,
+                  ownerMid: author.mid,
+                });
+                addToast({
+                  title: "已添加到下一首播放",
+                  color: "success",
+                });
+              }
+            }}
+            onDownloadAudio={() => handleDownload("audio")}
+            onDownloadVideo={() => handleDownload("video")}
+          />
+        </div>
       </CardHeader>
 
       <CardBody className="group text-small text-default-700 px-0 py-1 whitespace-pre-wrap">
@@ -108,7 +142,6 @@ const DynamicItem: React.FC<DynamicItemProps> = ({ item, onClose }) => {
               ownerMid: author?.mid || 0,
               type: "mv",
             });
-            onClose();
           }}
         >
           <div className="flex flex-row">

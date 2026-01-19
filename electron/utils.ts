@@ -18,7 +18,11 @@ export const getUserDataPath = () => {
 export const getWindowIcon = () =>
   process.platform === "darwin"
     ? undefined
-    : path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, process.platform === "win32" ? "logo.ico" : "logo.png");
+    : path.resolve(
+        IconBase,
+        ELECTRON_ICON_BASE_PATH,
+        process.platform === "win32" ? (isDev ? "dev.ico" : "logo.ico") : "logo.png",
+      );
 
 export const fixFfmpegPath = () => {
   try {

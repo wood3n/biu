@@ -123,7 +123,7 @@ const VideoSeries = ({ getScrollElement }: Props) => {
       hasMore={hasMore}
       onLoadMore={loadMore}
       getScrollElement={getScrollElement}
-      rowHeight={220}
+      rowHeight={250}
       itemKey="id"
       renderItem={item => (
         <GridCard

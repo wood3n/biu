@@ -248,6 +248,7 @@ export const SystemSettingsTab = ({
             name="audioQuality"
             render={({ field }) => (
               <Select
+                disallowEmptySelection
                 aria-label="音质偏好"
                 selectedKeys={field.value ? new Set([field.value]) : new Set()}
                 onSelectionChange={keys => {
@@ -396,9 +397,7 @@ export const SystemSettingsTab = ({
             </>
           )}
         </div>
-        <div className="flex w-[64px] justify-end">
-          <UpdateCheckButton />
-        </div>
+        <UpdateCheckButton />
       </div>
       <ImportExport />
     </Form>

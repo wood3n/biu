@@ -21,7 +21,7 @@ declare global {
     /** 清除指定name的存储值 */
     clearStore: (name: StoreName) => Promise<void>;
     /** 打开系统目录选择对话框，返回选中的目录路径 */
-    selectDirectory: () => Promise<string | null>;
+    selectDirectory: (title?: string) => Promise<string | null>;
     /** 显示指定路径的文件 */
     showFileInFolder: (filePath: string) => Promise<boolean>;
     /** 打开系统文件选择对话框，返回选中的文件路径 */

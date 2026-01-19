@@ -1,6 +1,7 @@
 import type { BrowserWindow, MenuItemConstructorOptions } from "electron";
 
 import { Tray, nativeImage, Menu } from "electron";
+import isDev from "electron-is-dev";
 import log from "electron-log";
 import path from "node:path";
 
@@ -36,7 +37,7 @@ function createTray({ getMainWindow, onExit }: Props) {
   }
 
   const isLinux = process.platform === "linux";
-  const iconName = isLinux ? "logo.png" : "tray.ico";
+  const iconName = isLinux ? "logo.png" : isDev ? "dev.ico" : "tray.ico";
   const trayIconPath = path.resolve(IconBase, ELECTRON_ICON_BASE_PATH, iconName);
   let icon = nativeImage.createFromPath(trayIconPath);
 

@@ -146,71 +146,6 @@ export interface SearchPhotoItem {
   upload_time?: number;
 }
 
-// ——— 分类筛选条件处理：把“用户排序顺序 / 时长 / 分区 / 分类”等参数统一规范化 ———
-export function normalizeTypeParams(params: WebSearchTypeParams): Record<string, string | number> {
-  const base: Record<string, string | number> = {
-    keyword: params.keyword,
-    page: params.page ?? 1,
-    page_size: params.page_size ?? 24,
-  };
-  switch (params.search_type) {
-    case "video":
-      return {
-        ...base,
-        search_type: "video",
-        order: params.order ?? "totalrank",
-        duration: params.duration ?? 0,
-        tids: params.tids ?? 0,
-      };
-    case "bili_user":
-      return {
-        ...base,
-        search_type: "bili_user",
-        order: params.order ?? 0,
-        order_sort: (params as WebSearchTypeUserParams).order_sort ?? 0,
-        user_type: (params as WebSearchTypeUserParams).user_type ?? 0,
-      };
-    case "article":
-      return {
-        ...base,
-        search_type: "article",
-        order: params.order ?? "totalrank",
-        category_id: (params as WebSearchTypeArticleParams).category_id ?? 0,
-      };
-    case "photo":
-      return {
-        ...base,
-        search_type: "photo",
-        order: params.order ?? "totalrank",
-        category_id: (params as WebSearchTypePhotoParams).category_id ?? 0,
-      };
-    case "live":
-      return {
-        ...base,
-        search_type: "live",
-        order: params.order ?? "online",
-      };
-    default:
-      return base;
-  }
-}
-
-/**
- * 分类结果统计：返回项数、分页等
- */
-export function summarizeTypeResult<T = any>(data: WebSearchTypeData<T>) {
-  const total = data.numResults ?? 0;
-  const pages = data.numPages ?? 0;
-  const size = data.pagesize ?? 20;
-  let count = 0;
-  if (Array.isArray(data.result)) count = data.result.length;
-  else if (data.result && typeof data.result === "object") {
-    const r = data.result as { live_room?: T[]; live_user?: T[] };
-    count = (r.live_room?.length ?? 0) + (r.live_user?.length ?? 0);
-  }
-  return { total, pages, pageSize: size, count };
-}
-
 /**
  * GET /x/web-interface/wbi/search/type
  */
@@ -227,10 +162,3 @@ export async function getWebInterfaceWbiSearchType<T = any>(
  * 客户端排序辅助（以视频为例）
  */
 export type TypeVideoSortKey = "pubdate" | "play" | "video_review" | "favorites" | "review";
-export function sortTypeVideoResults(items: SearchVideoItem[], key: TypeVideoSortKey, order: "asc" | "desc" = "desc") {
-  return [...items].sort((a, b) => {
-    const av = Number(a?.[key] ?? 0);
-    const bv = Number(b?.[key] ?? 0);
-    return order === "asc" ? av - bv : bv - av;
-  });
-}

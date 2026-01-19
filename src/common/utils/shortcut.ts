@@ -1,6 +1,6 @@
 import React from "react";
 
-export const isModifier = (key: string) => ["Control", "Shift", "Alt", "Meta"].includes(key);
+const isModifier = (key: string) => ["Control", "Shift", "Alt", "Meta"].includes(key);
 
 export const mapKeyToElectronAccelerator = (e: KeyboardEvent | React.KeyboardEvent): string | null => {
   const { key, ctrlKey, shiftKey, altKey, metaKey } = e;
@@ -24,7 +24,7 @@ export const mapKeyToElectronAccelerator = (e: KeyboardEvent | React.KeyboardEve
 
 export type ShortcutDisplayPlatform = "macos" | "windows" | "linux";
 
-export const getShortcutDisplayPlatform = (): ShortcutDisplayPlatform => {
+const getShortcutDisplayPlatform = (): ShortcutDisplayPlatform => {
   const w: any = globalThis as any;
 
   try {

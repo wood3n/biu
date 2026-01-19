@@ -1,13 +1,24 @@
 import React, { useState } from "react";
 
-import { addToast, Button, Card, CardBody, CardFooter, CardHeader, Tooltip } from "@heroui/react";
-import { RiDownloadLine, RiExternalLinkLine, RiPlayCircleFill, RiThumbUpFill, RiThumbUpLine } from "@remixicon/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+  User,
+} from "@heroui/react";
+import { RiExternalLinkLine, RiMoreLine, RiPlayFill, RiThumbUpFill, RiThumbUpLine } from "@remixicon/react";
 import moment from "moment";
 
 import type { WebDynamicItem } from "@/service/web-dynamic";
 
 import { formatNumber } from "@/common/utils/number";
 import { openBiliVideoLink } from "@/common/utils/url";
+import IconButton from "@/components/icon-button";
 import Image from "@/components/image";
 import { postDynamicFeedThumb } from "@/service/web-dynamic-feed-thumb";
 import { usePlayList } from "@/store/play-list";
@@ -23,6 +34,7 @@ const DynamicItem = ({ item }: DynamicItemProps) => {
   const archive = dynamic?.major?.archive || dynamic?.major?.ugc_season;
   const opus = dynamic?.major?.opus;
   const [isLike, setIsLike] = useState(() => stat?.like?.status === true);
+  const [likeCount, setLikeCount] = useState(() => stat?.like?.count || 0);
 
   const play = usePlayList(s => s.play);
 
@@ -46,112 +58,130 @@ const DynamicItem = ({ item }: DynamicItemProps) => {
   };
 
   const handleThumb = async () => {
-    setIsLike(!isLike);
-    await postDynamicFeedThumb({
-      dyn_id_str: item.id_str,
-      up: isLike ? 2 : 1,
-    });
+    const prevIsLike = isLike;
+    const prevLikeCount = likeCount;
+    setIsLike(!prevIsLike);
+    setLikeCount(prev => prev + (prevIsLike ? -1 : 1));
+    try {
+      await postDynamicFeedThumb({
+        dyn_id_str: item.id_str,
+        up: prevIsLike ? 2 : 1,
+      });
+    } catch {
+      setIsLike(prevIsLike);
+      setLikeCount(prevLikeCount);
+    }
   };
 
   return (
-    <Card className="w-full border-none shadow-sm" radius="md">
-      {/* Header: Time and Action + More Menu */}
-      <CardHeader className="flex items-center justify-between px-4 pt-4 pb-0">
-        <div className="text-small text-default-500 flex items-center gap-2">
-          <span>{timeDisplay}</span>
+    <Card className="border-default-100 mb-2 w-full rounded-none border-b bg-transparent pb-4 shadow-none">
+      <CardHeader className="flex items-start justify-between px-0 py-2">
+        <User
+          isFocusable
+          avatarProps={{
+            src: author.face,
+          }}
+          description={
+            <div className="text-tiny text-default-500 flex items-center gap-1">
+              <span>{timeDisplay}</span>
+              {author.pub_action && (
+                <>
+                  <span>·</span>
+                  <span>{author.pub_action}</span>
+                </>
+              )}
+            </div>
+          }
+          name={author.name}
+          className="cursor-pointer"
+          classNames={{
+            name: "hover:underline",
+          }}
+        />
+        <div className="flex items-center">
+          <Button
+            variant="light"
+            size="sm"
+            className="text-default-500 data-[hover=true]:bg-default-100 flex-1 gap-1"
+            onPress={handleThumb}
+          >
+            {isLike ? <RiThumbUpFill size={18} /> : <RiThumbUpLine size={18} />}
+            <span>{likeCount > 0 ? formatNumber(likeCount) : "点赞"}</span>
+          </Button>
+          <Dropdown>
+            <DropdownTrigger>
+              <IconButton>
+                <RiMoreLine size={16} />
+              </IconButton>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="用户动态操作"
+              items={[
+                {
+                  key: "open",
+                  label: "打开B站链接",
+                  icon: <RiExternalLinkLine size={18} />,
+                  onPress: () => {
+                    if (!archive) return;
+                    openBiliVideoLink({
+                      type: "mv",
+                      bvid: archive.bvid,
+                    });
+                  },
+                },
+              ]}
+            >
+              {item => (
+                <DropdownItem key={item.key} startContent={item.icon} onPress={item.onPress}>
+                  {item.label}
+                </DropdownItem>
+              )}
+            </DropdownMenu>
+          </Dropdown>
         </div>
       </CardHeader>
 
-      <CardBody className="px-4 py-3">
-        {/* 动态附带的文本内容 */}
-        {Boolean(textContent) && (
-          <div className="mb-2 text-base leading-relaxed whitespace-pre-wrap">{textContent}</div>
-        )}
-        {/* 动态附带的视频内容 */}
+      <CardBody className="group text-small text-default-700 px-0 py-1 whitespace-pre-wrap">
+        {Boolean(textContent) && <p className="mb-2 leading-relaxed">{textContent}</p>}
         {Boolean(archive) && (
           <div
-            className="group bg-default-100 hover:bg-default-200 flex cursor-pointer gap-3 rounded-lg p-3 transition-colors"
+            className="group border-default-200 dark:border-default-100 bg-default-50 hover:bg-default-100 relative mt-2 cursor-pointer overflow-hidden rounded-xl border"
             onClick={handlePlay}
           >
-            <div className="relative h-24 w-40 shrink-0 overflow-hidden rounded-md">
-              <Image
-                removeWrapper
-                src={archive.cover}
-                alt={archive.title}
-                className="h-full w-full"
-                radius="none"
-                params="472w_264h_1c_!web-dynamic.webp"
-              />
-              <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
-                <RiPlayCircleFill size={32} className="text-white/90" />
+            <div className="flex flex-row">
+              <div className="relative h-32 w-48 shrink-0">
+                <Image
+                  params="472w_264h_1c_!web-dynamic.webp"
+                  removeWrapper
+                  radius="none"
+                  src={archive.cover}
+                  alt={archive.title}
+                  className="h-full w-full object-cover"
+                  classNames={{
+                    wrapper: "w-full h-full",
+                    img: "w-full h-full",
+                  }}
+                />
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-[rgba(0,0,0,0.4)] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  <RiPlayFill size={32} className="text-white" />
+                </div>
+                <div className="absolute right-1 bottom-1 z-20 rounded bg-black/70 px-1 text-xs text-white">
+                  {archive.duration_text || ""}
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col justify-between py-1">
-              <div className="space-y-2">
-                <h3 className="text-default-900 line-clamp-2 text-sm font-medium">{archive.title}</h3>
-                <div className="text-default-500 line-clamp-2 text-xs">{archive.desc}</div>
-              </div>
-              <div className="text-default-500 flex items-center justify-between gap-3 text-xs">
-                <div className="text-xs">{archive.duration_text}</div>
-                <span className="flex items-center gap-1">
-                  <span>{archive.stat.play}</span>
-                  <span>播放</span>
-                </span>
+              <div className="flex min-w-0 grow flex-col justify-between p-3">
+                <div className="space-y-1">
+                  <h3 className="line-clamp-2 text-sm font-medium" title={archive.title || ""}>
+                    {archive.title || ""}
+                  </h3>
+                  <div className="text-default-500 line-clamp-1 text-xs">{archive.desc || ""}</div>
+                </div>
+                <span className="text-default-400 mt-1 text-xs">{archive.stat?.play || 0}观看</span>
               </div>
             </div>
           </div>
         )}
       </CardBody>
-
-      {/* Footer: Actions */}
-      <CardFooter className="border-default-100 flex items-center justify-between border-t px-2 py-1">
-        <Tooltip closeDelay={0} content="打开B站链接">
-          <Button
-            variant="light"
-            size="sm"
-            className="text-default-500 data-[hover=true]:bg-default-100 flex-1 gap-1"
-            onPress={() => {
-              openBiliVideoLink({
-                type: "mv",
-                bvid: archive.bvid,
-              });
-            }}
-          >
-            <RiExternalLinkLine size={18} />
-          </Button>
-        </Tooltip>
-        <Tooltip closeDelay={0} content="下载视频">
-          <Button
-            variant="light"
-            size="sm"
-            className="text-default-500 data-[hover=true]:bg-default-100 flex-1 gap-1"
-            onPress={async () => {
-              await window.electron.addMediaDownloadTask({
-                outputFileType: "video",
-                title: archive.title,
-                cover: archive.cover,
-                bvid: archive.bvid,
-              });
-
-              addToast({
-                title: "已添加下载任务",
-                color: "success",
-              });
-            }}
-          >
-            <RiDownloadLine size={18} />
-          </Button>
-        </Tooltip>
-        <Button
-          variant="light"
-          size="sm"
-          className="text-default-500 data-[hover=true]:bg-default-100 flex-1 gap-1"
-          onPress={handleThumb}
-        >
-          {isLike ? <RiThumbUpFill size={18} /> : <RiThumbUpLine size={18} />}
-          <span>{stat?.like?.count ? formatNumber(stat.like.count) : "点赞"}</span>
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

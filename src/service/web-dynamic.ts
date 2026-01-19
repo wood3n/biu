@@ -23,6 +23,8 @@ export interface WebDynamicFeedSpaceParams {
   host_mid: number; // 用户UID (必须)
   timezone_offset?: number; // 时区偏移量, 默认 -480
   features?: string; // 功能开关
+  platform?: string; // 平台, 如 web
+  type?: "video"; // 动态类型
 }
 
 /**
@@ -348,5 +350,6 @@ export const getWebDynamicFeedAllUpdate = (params: WebDynamicFeedAllUpdateParams
 export const getWebDynamicFeedSpace = (params: WebDynamicFeedSpaceParams) => {
   return apiRequest.get<WebDynamicResponse<WebDynamicFeedData>>("/x/polymer/web-dynamic/v1/feed/space", {
     params,
+    useWbi: true,
   });
 };

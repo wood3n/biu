@@ -25,7 +25,7 @@ log.initialize();
 
 if (isDev) {
   // 为 chrome-devtools-mcp 开启远程调试端口
-  app.commandLine.appendSwitch("remote-debugging-port", "9234");
+  app.commandLine.appendSwitch("remote-debugging-port", "");
   // 开发环境数据隔离
   app.setPath("userData", path.join(app.getPath("appData"), `biu-dev`));
 }
@@ -34,7 +34,7 @@ let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    title: "Biu",
+    title: isDev ? "Biu-dev" : "Biu",
     icon: getWindowIcon(),
     show: true,
     hasShadow: true,

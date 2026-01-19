@@ -21,7 +21,7 @@ const setCookie = async (details: Partial<CookiesSetDetails>) => {
 /**
  * 过期时间：259260 秒，3天零1分钟
  */
-export async function injectBiliTicketCookie() {
+async function injectBiliTicketCookie() {
   const ticket = await getBiliTicket();
 
   const expirationDate = Math.floor(Date.now() / 1000 + 259260);
@@ -42,7 +42,7 @@ export async function injectBiliTicketCookie() {
 /**
  * buvid4: 过期时间：30天
  */
-export async function injectBuvidCookie() {
+async function injectBuvidCookie() {
   const buvid = await getWebBuvid();
 
   await setCookie({

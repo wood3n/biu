@@ -13,7 +13,7 @@ interface ShortcutRecorderProps {
   onChange: (value: string) => void;
 }
 
-export const ShortcutKeyInput = ({ value, onChange, isDisabled, isInvalid, errorMessage }: ShortcutRecorderProps) => {
+const ShortcutKeyInput = ({ value, onChange, isDisabled, isInvalid, errorMessage }: ShortcutRecorderProps) => {
   const [focused, setFocused] = useState(false);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

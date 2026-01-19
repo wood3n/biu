@@ -92,15 +92,3 @@ export interface WebInterfaceArchiveLikeTripleResponse {
   /** 信息本体 */
   data: WebInterfaceArchiveLikeTripleData;
 }
-
-/**
- * 一键三连视频(web端)
- */
-export function postWebInterfaceArchiveLikeTriple(
-  data: WebInterfaceArchiveLikeTripleRequestParams,
-): Promise<WebInterfaceArchiveLikeTripleResponse> {
-  return apiRequest.post<WebInterfaceArchiveLikeTripleResponse>("/x/web-interface/archive/like/triple", data, {
-    useCSRF: true,
-    useFormData: true,
-  });
-}

@@ -2,19 +2,20 @@ import React, { useCallback } from "react";
 
 import MusicCard from "@/components/music-card";
 import VirtualGridPageList from "@/components/virtual-grid-page-list";
-import { type Data as MusicItem } from "@/service/music-comprehensive-web-rank";
 import { usePlayList } from "@/store/play-list";
 import { useUser } from "@/store/user";
+
+import type { RecommendItem } from "./types";
 
 import { getContextMenus } from "./menu";
 
 interface MusicRecommendGridListProps {
-  items: MusicItem[];
+  items: RecommendItem[];
   hasMore: boolean;
   loading: boolean;
   onLoadMore: () => void;
   getScrollElement: () => HTMLElement | null;
-  onMenuAction: (key: string, item: MusicItem) => void;
+  onMenuAction: (key: string, item: RecommendItem) => void;
 }
 
 const MusicRecommendGridList: React.FC<MusicRecommendGridListProps> = ({
@@ -28,16 +29,16 @@ const MusicRecommendGridList: React.FC<MusicRecommendGridListProps> = ({
   const user = useUser(state => state.user);
 
   const renderGridItem = useCallback(
-    (item: MusicItem) => {
+    (item: RecommendItem) => {
       return (
         <MusicCard
           key={item.id}
-          title={item.related_archive.title}
-          cover={item.related_archive.cover}
-          playCount={item.related_archive.vv_count}
-          duration={item.related_archive.duration}
-          ownerName={item.related_archive.username}
-          ownerMid={item.related_archive.uid}
+          title={item.title}
+          cover={item.cover}
+          playCount={item.playCount}
+          duration={item.duration}
+          ownerName={item.author}
+          ownerMid={item.authorMid}
           menus={getContextMenus({
             isLogin: user?.isLogin,
           })}
@@ -45,13 +46,14 @@ const MusicRecommendGridList: React.FC<MusicRecommendGridListProps> = ({
             onMenuAction(key, item);
           }}
           onPress={() => {
+            if (!item.bvid) return;
             usePlayList.getState().play({
               type: "mv",
-              bvid: item.related_archive.bvid,
-              title: item.related_archive.title,
-              cover: item.related_archive.cover,
-              ownerName: item.related_archive.username,
-              ownerMid: item.related_archive.uid,
+              bvid: item.bvid,
+              title: item.title,
+              cover: item.cover,
+              ownerName: item.author,
+              ownerMid: item.authorMid,
             });
           }}
         />

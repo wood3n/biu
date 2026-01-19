@@ -16,9 +16,12 @@ const SearchWithSort = ({ onKeywordSearch, orderOptions, order, onOrderChange }:
       {Boolean(orderOptions?.length) && (
         <Select
           radius="md"
+          selectionMode="single"
+          disallowEmptySelection
           selectedKeys={order ? new Set([order]) : new Set<string>()}
           onSelectionChange={keys => {
             if (keys === "all") return;
+            if (keys instanceof Set && keys.size === 0) return;
             const selectedValue = keys instanceof Set ? Array.from(keys)[0] : keys;
             onOrderChange?.(selectedValue as string);
           }}

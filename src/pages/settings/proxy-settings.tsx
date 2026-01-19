@@ -42,6 +42,7 @@ const ProxySettings: React.FC<ProxySettingsProps> = ({ control }) => {
             <div className="space-y-4">
               <div className="w-[240px]">
                 <Select
+                  disallowEmptySelection
                   aria-label="代理类型"
                   selectedKeys={new Set([value.type])}
                   onSelectionChange={keys => {
