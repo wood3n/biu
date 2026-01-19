@@ -14,13 +14,13 @@ const Navigation: React.FC = () => {
   return (
     <Button
       isIconOnly
-      variant={canGoBack ? "flat" : "light"}
+      variant="flat"
       radius="md"
       isDisabled={!canGoBack}
       onPress={() => navigate(-1)}
       className="w-8 min-w-8"
     >
-      <RiArrowLeftSLine size={20} className="text-content1-foreground" />
+      <RiArrowLeftSLine size={20} />
     </Button>
   );
 };

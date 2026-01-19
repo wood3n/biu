@@ -192,6 +192,7 @@ const CodeLogin = ({ onClose, updateUserData }: Props) => {
             startContent={
               <Select
                 variant="bordered"
+                disallowEmptySelection
                 disableAnimation
                 items={countryList || []}
                 className="w-[140px]"

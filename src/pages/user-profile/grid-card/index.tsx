@@ -16,10 +16,8 @@ export interface GridCardProps {
 const GridCard = memo(({ title, cover, type, createTime, mediaCount, onPress }: GridCardProps) => {
   return (
     <div className="group flex h-full max-h-full w-full cursor-pointer flex-col overflow-hidden" onClick={onPress}>
-      {/* Stack Effect Container */}
-      <div className="relative min-h-0 w-full flex-1">
-        {/* Main Card */}
-        <div className="relative z-10 aspect-video h-full w-full overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900">
+      <div className="relative w-full flex-none">
+        <div className="relative z-10 aspect-video w-full overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900">
           <Image
             radius="none"
             src={cover}

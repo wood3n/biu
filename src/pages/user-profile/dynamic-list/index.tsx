@@ -37,6 +37,8 @@ const DynamicList: React.FC<DynamicListProps> = ({ mid, getScrollElement }) => {
         const res = await getWebDynamicFeedSpace({
           host_mid: mid,
           offset: currentOffset,
+          type: "video",
+          platform: "web",
         });
 
         if (res.code === 0) {
@@ -80,15 +82,19 @@ const DynamicList: React.FC<DynamicListProps> = ({ mid, getScrollElement }) => {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col">
         {items.map((item, index) => (
           <DynamicItem key={`${item.id_str}-${index}`} item={item} />
         ))}
       </div>
 
-      {/* Loading indicator / Sentinel */}
-      <div ref={loadMoreRef} className="flex w-full justify-center py-6">
-        {isLoading && <Spinner size="sm" color="primary" />}
+      <div ref={loadMoreRef} className="flex w-full justify-center py-4">
+        {isLoading && (
+          <div className="text-default-500 flex items-center gap-2">
+            <Spinner size="sm" />
+            <span>Loading...</span>
+          </div>
+        )}
         {!hasMore && items.length > 0 && <div className="text-default-500 text-sm">没有更多了</div>}
       </div>
     </div>

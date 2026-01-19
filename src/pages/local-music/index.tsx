@@ -218,6 +218,7 @@ const LocalMusicPage = () => {
           />
           <Select
             className="w-[200px]"
+            disallowEmptySelection
             listboxProps={{
               color: "primary",
               hideSelectedIcon: true,

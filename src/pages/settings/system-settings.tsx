@@ -248,6 +248,7 @@ export const SystemSettingsTab = ({
             name="audioQuality"
             render={({ field }) => (
               <Select
+                disallowEmptySelection
                 aria-label="音质偏好"
                 selectedKeys={field.value ? new Set([field.value]) : new Set()}
                 onSelectionChange={keys => {
