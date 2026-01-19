@@ -143,6 +143,18 @@ const LocalMusicPage = () => {
     });
   };
 
+  const addToPlayList = (song: LocalMusicItem) => {
+    usePlayList.getState().addList([
+      {
+        id: song.id,
+        source: "local" as const,
+        type: "audio" as const,
+        title: song.title,
+        audioUrl: toFileUrl(song.path),
+      },
+    ]);
+  };
+
   const deleteFile = (filePath: string) => {
     onOpenConfirmModal({
       title: "删除文件",
@@ -159,8 +171,6 @@ const LocalMusicPage = () => {
       type: "danger",
     });
   };
-
-  console.log("filtered", filtered);
 
   return (
     <ScrollContainer ref={scrollRef} enableBackToTop className="h-full w-full px-4">
@@ -268,6 +278,7 @@ const LocalMusicPage = () => {
                     isPlaying={playItem?.id === song.id}
                     index={vItem.index + 1}
                     onAddToNext={() => addToNext(song)}
+                    onAddToPlayList={() => addToPlayList(song)}
                     onPlay={() => playFile(song)}
                     onOpen={() => openFile(song.path)}
                     onDelete={() => deleteFile(song.path)}

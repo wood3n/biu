@@ -40,7 +40,7 @@ const OperationMenu = ({ items, onAction, onOpenChange }: OperationMenuProps) =>
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[140px] p-0"
+        className="w-[160px] p-0"
         data-no-contextmenu="true"
         onContextMenuCapture={e => {
           e.preventDefault();
