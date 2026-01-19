@@ -23,4 +23,5 @@ export const defaultAppSettings: AppSettings = {
   sideMenuCollapsed: false,
   sideMenuWidth: 200,
   reportPlayHistory: true,
+  localMusicDirs: [],
 };

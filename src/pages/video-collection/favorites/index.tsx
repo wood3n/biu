@@ -442,7 +442,6 @@ const Favorites = () => {
         title={favInfo?.title}
         desc={favInfo?.intro}
         upMid={favInfo?.upper?.mid}
-        upName={favInfo?.upper?.name}
         mediaCount={favInfo?.media_count}
         onEdit={isCreatedBySelf ? onEditOpen : undefined}
       />

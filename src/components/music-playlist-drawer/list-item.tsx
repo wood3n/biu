@@ -56,7 +56,7 @@ const ListItem = ({ data, isLogin, isPlaying, onAction, onClose, onPress }: Prop
               onClose();
             }}
           >
-            {data?.ownerName || "未知"}
+            {data?.source === "local" ? "本地音乐" : data?.ownerName || "未知"}
           </span>
         </div>
         <Dropdown
@@ -77,8 +77,13 @@ const ListItem = ({ data, isLogin, isPlaying, onAction, onClose, onPress }: Prop
               <RiMoreFill size={16} />
             </Button>
           </DropdownTrigger>
-          {/* @ts-ignore 忽略onAction类型问题 */}
-          <DropdownMenu aria-label="播放列表操作菜单" items={getMenus({ isLogin })} onAction={onAction}>
+
+          <DropdownMenu
+            aria-label="播放列表操作菜单"
+            items={getMenus({ isLogin, isLocal: data.source === "local" })}
+            // @ts-ignore 忽略onAction类型问题
+            onAction={onAction}
+          >
             {item => (
               <DropdownItem key={item.key} color={item.color} startContent={item.icon}>
                 {item.label}

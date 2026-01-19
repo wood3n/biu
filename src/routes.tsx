@@ -6,6 +6,7 @@ import EmptyPage from "./pages/empty";
 import FollowList from "./pages/follow-list";
 import History from "./pages/history";
 import Later from "./pages/later";
+import LocalMusicPage from "./pages/local-music";
 import MiniPlayer from "./pages/mini-player";
 import MusicRecommend from "./pages/music-recommend";
 import NotFound from "./pages/not-found";
@@ -50,6 +51,10 @@ const routes: RouteObject[] = [
       {
         path: "download-list",
         element: <DownloadList />,
+      },
+      {
+        path: "local-music",
+        element: <LocalMusicPage />,
       },
       {
         path: "search",

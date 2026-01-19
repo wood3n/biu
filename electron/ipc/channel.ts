@@ -73,6 +73,10 @@ export const channel = {
     get: "cookie:get",
     set: "cookie:set",
   },
+  localMusic: {
+    scan: "local-music:scan",
+    deleteFile: "local-music:delete-file",
+  },
   window: {
     toggleMini: "window:toggle-mini",
     minimize: "window:minimize",

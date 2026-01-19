@@ -1,27 +1,30 @@
 import { RiDeleteBinLine, RiExternalLinkLine, RiFileMusicLine, RiFileVideoLine, RiStarLine } from "@remixicon/react";
 
-export const getMenus = ({ isLogin }: { isLogin: boolean }) =>
+export const getMenus = ({ isLogin, isLocal }: { isLogin: boolean; isLocal: boolean }) =>
   [
     {
       key: "favorite",
       label: "收藏",
       icon: <RiStarLine size={18} />,
-      hidden: !isLogin,
+      hidden: isLocal || !isLogin,
     },
     {
       key: "download-audio",
       label: "下载音频",
       icon: <RiFileMusicLine size={18} />,
+      hidden: isLocal,
     },
     {
       icon: <RiFileVideoLine size={18} />,
       key: "download-video",
       label: "下载视频",
+      hidden: isLocal,
     },
     {
       key: "bililink",
       label: "在 B 站打开",
       icon: <RiExternalLinkLine size={18} />,
+      hidden: isLocal,
     },
     {
       key: "del",
