@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.16.0
+
+[compare changes](https://github.com/wood3n/biu/compare/v1.15.0...v1.16.0)
+
+### 🚀 新功能
+
+- 为用户投稿页面添加全部播放按钮 ([0c25e07](https://github.com/wood3n/biu/commit/0c25e07))
+- 新增点赞按钮和一键三连功能 ([8515a5f](https://github.com/wood3n/biu/commit/8515a5f))
+
+### 🩹 修复问题
+
+- Review problem ([c5360dd](https://github.com/wood3n/biu/commit/c5360dd))
+
+### 🎨 UI 调整
+
+- 调整音乐推荐页面样式以及投稿播放全部的逻辑 ([60cc885](https://github.com/wood3n/biu/commit/60cc885))
+
+### ❤️ Contributors
+
+- Wood3n
+- ShellMonster
+
 ## v1.15.0
 
 [compare changes](https://github.com/wood3n/biu/compare/v1.14.0...v1.15.0)
