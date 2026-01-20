@@ -6,25 +6,31 @@ import { usePlayList } from "@/store/play-list";
 import { useUser } from "@/store/user";
 
 interface State {
+  isThumb: boolean;
   isFav: boolean;
 }
 
 interface Action {
   setIsFav: (value: boolean) => void;
+  setIsThumb: (value: boolean) => void;
   refreshIsFav: () => Promise<void>;
 }
 
 export const useMusicFavStore = create<State & Action>()(set => ({
+  isThumb: false,
   isFav: false,
   setIsFav: value => {
     set({ isFav: value });
+  },
+  setIsThumb: value => {
+    set({ isThumb: value });
   },
   refreshIsFav: async () => {
     const user = useUser.getState().user;
     const playItem = usePlayList.getState().getPlayItem();
 
     if (!user?.isLogin || !playItem) {
-      set({ isFav: false });
+      set({ isFav: false, isThumb: false });
       return;
     }
 
@@ -33,9 +39,9 @@ export const useMusicFavStore = create<State & Action>()(set => ({
         const res = await getWebInterfaceArchiveRelation({ bvid: playItem.bvid });
 
         if (res.code === 0) {
-          set({ isFav: Boolean(res.data.favorite) });
+          set({ isFav: Boolean(res.data.favorite), isThumb: Boolean(res.data.like) });
         } else {
-          set({ isFav: false });
+          set({ isFav: false, isThumb: false });
         }
       } else if (playItem.type === "audio" && playItem.sid) {
         const res = await getCollResourceCheck({
@@ -44,12 +50,12 @@ export const useMusicFavStore = create<State & Action>()(set => ({
         });
 
         if (res.code === 0) {
-          set({ isFav: Boolean(res.data) });
+          set({ isFav: Boolean(res.data), isThumb: false });
         } else {
-          set({ isFav: false });
+          set({ isFav: false, isThumb: false });
         }
       } else {
-        set({ isFav: false });
+        set({ isFav: false, isThumb: false });
       }
     } catch {
       set({ isFav: false });

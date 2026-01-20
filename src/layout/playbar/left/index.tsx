@@ -8,6 +8,7 @@ import clsx from "classnames";
 import { openBiliVideoLink } from "@/common/utils/url";
 import Image from "@/components/image";
 import MusicFavButton from "@/components/music-fav-button";
+import MusicThumb from "@/components/music-thumb";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 import { useUser } from "@/store/user";
@@ -83,7 +84,12 @@ const LeftControl = () => {
       </div>
       <div className="flex items-center">
         {Boolean(playItem?.hasMultiPart) && <PageListDrawer />}
-        {Boolean(user?.isLogin) && Boolean(playItem) && playItem?.source !== "local" && <MusicFavButton />}
+        {Boolean(user?.isLogin) && Boolean(playItem) && playItem?.source !== "local" && (
+          <>
+            <MusicFavButton />
+            <MusicThumb />
+          </>
+        )}
       </div>
     </div>
   );
