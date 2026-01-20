@@ -23,11 +23,16 @@ type UnifiedItem = {
   date?: string;
 };
 
-const NewMusicTop = () => {
+type NewMusicTopProps = {
+  onLayoutChange?: () => void;
+};
+
+const NewMusicTop = ({ onLayoutChange }: NewMusicTopProps) => {
   const [items, setItems] = useState<UnifiedItem[]>([]);
   const [newLoading, setNewLoading] = useState(true);
   const [newPage, setNewPage] = useState(1);
   const gridRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [colCount, setColCount] = useState(2);
 
   const handlePlay = React.useCallback((item: UnifiedItem) => {
@@ -104,6 +109,28 @@ const NewMusicTop = () => {
   }, []);
 
   useEffect(() => {
+    if (!onLayoutChange) return;
+    const target = containerRef.current;
+    if (!target) return;
+    let frameId: number | null = null;
+    const observer = new ResizeObserver(() => {
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+      }
+      frameId = requestAnimationFrame(() => {
+        onLayoutChange();
+      });
+    });
+    observer.observe(target);
+    return () => {
+      observer.disconnect();
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+      }
+    };
+  }, [onLayoutChange]);
+
+  useEffect(() => {
     const computeColsByBreakpoint = () => {
       const w = window.innerWidth;
       if (w >= 1280) return 6;
@@ -144,7 +171,7 @@ const NewMusicTop = () => {
   }, [items, newPage, pageSize]);
 
   return (
-    <div className="mb-4 space-y-3">
+    <div ref={containerRef} className="mb-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <RiMusic2Line className="text-primary" />
