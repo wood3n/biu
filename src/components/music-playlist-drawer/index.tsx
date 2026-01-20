@@ -128,7 +128,9 @@ const PlayListDrawer = () => {
     >
       <DrawerContent>
         <DrawerHeader className="border-divider/40 flex flex-row items-center justify-between space-x-2 border-b px-4 py-3">
-          <h3>播放列表</h3>
+          <h3>
+            播放列表<span className="text-default-500 text-sm">({pureList?.length || 0})</span>
+          </h3>
           <div className="flex items-center">
             {Boolean(pureList?.length) && (
               <>

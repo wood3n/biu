@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { addToast, Spinner, Tab, Tabs } from "@heroui/react";
-import { RiMusicAiLine, RiPlayFill } from "@remixicon/react";
+import { RiPlayFill } from "@remixicon/react";
 
 import AsyncButton from "@/components/async-button";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
@@ -67,11 +67,17 @@ const MusicRecommend = () => {
   const pageRef = useRef(1);
   const [activeTab, setActiveTab] = useState<RecommendTabKey>("music");
   const scrollRestoreRef = useRef<{ tab: RecommendTabKey; top: number } | null>(null);
+  const [popLayoutVersion, setPopLayoutVersion] = useState(0);
 
   const displayMode = useSettings(state => state.displayMode);
+  const listKey = `${activeTab}-${displayMode}-${activeTab === "pop" ? popLayoutVersion : 0}`;
 
   const getScrollElement = useCallback(() => {
     return (scrollerRef.current?.osInstance()?.elements().viewport as HTMLElement | null) ?? null;
+  }, []);
+
+  const handlePopLayoutChange = useCallback(() => {
+    setPopLayoutVersion(prev => prev + 1);
   }, []);
 
   const fetchPage = useCallback(
@@ -253,33 +259,28 @@ const MusicRecommend = () => {
 
   return (
     <ScrollContainer enableBackToTop ref={scrollerRef} className="h-full w-full px-4">
-      <NewMusicTop />
       <div className="mb-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <RiMusicAiLine className="text-primary" />
-          <h1>分区</h1>
-          <Tabs
-            variant="light"
-            size="lg"
-            radius="md"
-            classNames={{
-              cursor: "rounded-medium",
-            }}
-            selectedKey={activeTab}
-            onSelectionChange={key => {
-              const nextTab = key as RecommendTabKey;
-              const viewport = getScrollElement();
-              if (viewport) {
-                scrollRestoreRef.current = { tab: nextTab, top: viewport.scrollTop };
-              }
-              setActiveTab(nextTab);
-            }}
-          >
-            <Tab key="music" title="音乐" />
-            <Tab key="guichu" title="鬼畜" />
-            <Tab key="pop" title="流行" />
-          </Tabs>
-        </div>
+        <Tabs
+          variant="solid"
+          size="lg"
+          radius="md"
+          classNames={{
+            cursor: "rounded-medium",
+          }}
+          selectedKey={activeTab}
+          onSelectionChange={key => {
+            const nextTab = key as RecommendTabKey;
+            const viewport = getScrollElement();
+            if (viewport) {
+              scrollRestoreRef.current = { tab: nextTab, top: viewport.scrollTop };
+            }
+            setActiveTab(nextTab);
+          }}
+        >
+          <Tab key="music" title="音乐" />
+          <Tab key="guichu" title="鬼畜" />
+          <Tab key="pop" title="流行" />
+        </Tabs>
         <AsyncButton
           color="primary"
           size="md"
@@ -291,9 +292,11 @@ const MusicRecommend = () => {
           全部播放
         </AsyncButton>
       </div>
+      {activeTab === "pop" && <NewMusicTop onLayoutChange={handlePopLayoutChange} />}
       <div className="relative">
         {displayMode === "card" ? (
           <MusicRecommendGridList
+            key={listKey}
             items={list}
             hasMore={hasMore}
             loading={loadingMore}
@@ -303,6 +306,7 @@ const MusicRecommend = () => {
           />
         ) : (
           <MusicRecommendList
+            key={listKey}
             items={list}
             hasMore={hasMore}
             loading={loadingMore}
@@ -310,11 +314,6 @@ const MusicRecommend = () => {
             getScrollElement={getScrollElement}
             onMenuAction={handleMenuAction}
           />
-        )}
-        {initialLoading && list.length > 0 && (
-          <div className="bg-background/70 absolute inset-0 flex items-center justify-center">
-            <Spinner size="lg" />
-          </div>
         )}
         {initialLoading && list.length === 0 && (
           <div className="flex h-[40vh] items-center justify-center">

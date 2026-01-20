@@ -1,0 +1,29 @@
+@property --music-thumb-progress {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes music-thumb-progress {
+  from { --music-thumb-progress: 0deg; }
+  to { --music-thumb-progress: 360deg; }
+}
+
+.music-thumb-progress-target {
+  position: relative;
+}
+
+.music-thumb-progress {
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+
+  --music-thumb-progress: 0deg;
+
+  background: conic-gradient(hsl(var(--heroui-primary)) var(--music-thumb-progress), transparent 0deg);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
+  animation: music-thumb-progress 2s linear forwards;
+  pointer-events: none;
+  z-index: 1;
+}

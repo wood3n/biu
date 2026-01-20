@@ -11,6 +11,7 @@ import type { WebDynamicItem } from "@/service/web-dynamic";
 import { formatNumber } from "@/common/utils/number";
 import Image from "@/components/image";
 import { postDynamicFeedThumb } from "@/service/web-dynamic-feed-thumb";
+import { useMusicFavStore } from "@/store/music-fav";
 import { usePlayList } from "@/store/play-list";
 
 import MoreMenu from "./more-menu";
@@ -53,6 +54,10 @@ const DynamicItem: React.FC<DynamicItemProps> = ({ item, className }) => {
     const prevCount = likeCount;
     setIsLike(!prevIsLike);
     setLikeCount(prev => prev + (prevIsLike ? -1 : 1));
+    const playItem = usePlayList.getState().getPlayItem();
+    if (playItem?.bvid && archive?.bvid && playItem.bvid === archive.bvid) {
+      useMusicFavStore.getState().setIsThumb(!prevIsLike);
+    }
     try {
       await postDynamicFeedThumb({
         dyn_id_str: item.id_str,
@@ -61,6 +66,9 @@ const DynamicItem: React.FC<DynamicItemProps> = ({ item, className }) => {
     } catch {
       setIsLike(prevIsLike);
       setLikeCount(prevCount);
+      if (playItem?.bvid && archive?.bvid && playItem.bvid === archive.bvid) {
+        useMusicFavStore.getState().setIsThumb(prevIsLike);
+      }
       addToast({
         title: "点赞失败，请稍后重试",
         color: "danger",
