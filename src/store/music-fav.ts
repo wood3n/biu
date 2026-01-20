@@ -58,7 +58,7 @@ export const useMusicFavStore = create<State & Action>()(set => ({
         set({ isFav: false, isThumb: false });
       }
     } catch {
-      set({ isFav: false });
+      set({ isFav: false, isThumb: false });
     }
   },
 }));

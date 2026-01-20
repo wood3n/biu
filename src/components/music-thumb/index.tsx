@@ -9,6 +9,8 @@ import { postWebInterfaceArchiveLikeTriple } from "@/service/web-interface-archi
 import { useMusicFavStore } from "@/store/music-fav";
 import { usePlayList } from "@/store/play-list";
 
+import "./index.css";
+
 const MusicThumb = () => {
   const list = usePlayList(s => s.list);
   const playId = usePlayList(s => s.playId);
@@ -76,7 +78,7 @@ const MusicThumb = () => {
     } catch {
       addToast({ title: "一键三连失败，请稍后重试", color: "danger" });
     }
-  }, [playItem?.bvid, setIsFav, setIsThumb]);
+  }, [playItem?.aid, playItem?.bvid, setIsFav, setIsThumb]);
 
   const stopProgress = useCallback(() => {
     isPressingRef.current = false;
@@ -91,41 +93,7 @@ const MusicThumb = () => {
     }
   }, []);
 
-  const handleMouseDown = useCallback<React.MouseEventHandler<HTMLDivElement>>(
-    event => {
-      if (event.button !== 0) return;
-      if (isThumb) return;
-      isPressingRef.current = true;
-      if (longPressTimerRef.current) {
-        window.clearTimeout(longPressTimerRef.current);
-      }
-      if (progressDelayTimerRef.current) {
-        window.clearTimeout(progressDelayTimerRef.current);
-      }
-      progressDelayTimerRef.current = window.setTimeout(() => {
-        if (!isPressingRef.current) return;
-        setIsProgressing(true);
-      }, 500);
-      longPressTimerRef.current = window.setTimeout(() => {
-        if (!isPressingRef.current) return;
-        ignoreNextPressRef.current = true;
-        setIsProgressing(false);
-        handleTriple();
-      }, 2000);
-    },
-    [handleTriple, isThumb],
-  );
-
-  const handleMouseUp = useCallback<React.MouseEventHandler<HTMLDivElement>>(() => {
-    stopProgress();
-  }, [stopProgress]);
-
-  const handleMouseLeave = useCallback<React.MouseEventHandler<HTMLDivElement>>(() => {
-    stopProgress();
-  }, [stopProgress]);
-
-  const handleTouchStart = useCallback<React.TouchEventHandler<HTMLDivElement>>(() => {
-    if (isThumb) return;
+  const startPressing = useCallback(() => {
     isPressingRef.current = true;
     if (longPressTimerRef.current) {
       window.clearTimeout(longPressTimerRef.current);
@@ -142,8 +110,30 @@ const MusicThumb = () => {
       ignoreNextPressRef.current = true;
       setIsProgressing(false);
       handleTriple();
-    }, 2000);
-  }, [handleTriple, isThumb]);
+    }, 2500);
+  }, [handleTriple]);
+
+  const handleMouseDown = useCallback<React.MouseEventHandler<HTMLDivElement>>(
+    event => {
+      if (event.button !== 0) return;
+      if (isThumb) return;
+      startPressing();
+    },
+    [isThumb, startPressing],
+  );
+
+  const handleMouseUp = useCallback<React.MouseEventHandler<HTMLDivElement>>(() => {
+    stopProgress();
+  }, [stopProgress]);
+
+  const handleMouseLeave = useCallback<React.MouseEventHandler<HTMLDivElement>>(() => {
+    stopProgress();
+  }, [stopProgress]);
+
+  const handleTouchStart = useCallback<React.TouchEventHandler<HTMLDivElement>>(() => {
+    if (isThumb) return;
+    startPressing();
+  }, [isThumb, startPressing]);
 
   const handleTouchEnd = useCallback<React.TouchEventHandler<HTMLDivElement>>(() => {
     stopProgress();
@@ -163,32 +153,6 @@ const MusicThumb = () => {
         {isThumb ? <RiThumbUpFill size={18} className="text-primary" /> : <RiThumbUpLine size={18} />}
       </IconButton>
       {isProgressing && !isThumb && <div className="music-thumb-progress" />}
-      <style>{`
-        @property --music-thumb-progress {
-          syntax: "<angle>";
-          inherits: false;
-          initial-value: 0deg;
-        }
-        @keyframes music-thumb-progress {
-          from { --music-thumb-progress: 0deg; }
-          to { --music-thumb-progress: 360deg; }
-        }
-        .music-thumb-progress-target {
-          position: relative;
-        }
-        .music-thumb-progress {
-          position: absolute;
-          inset: -2px;
-          border-radius: 9999px;
-          --music-thumb-progress: 0deg;
-          background: conic-gradient(hsl(var(--heroui-primary)) var(--music-thumb-progress), transparent 0deg);
-          mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
-          -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
-          animation: music-thumb-progress 2s linear forwards;
-          pointer-events: none;
-          z-index: 1;
-        }
-      `}</style>
     </div>
   );
 };
