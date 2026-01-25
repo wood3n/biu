@@ -7,9 +7,9 @@ import { debounce } from "es-toolkit";
 
 import type { WebPlayerParams } from "@/service/web-player";
 
+import { useFullScreenPlayerSettings } from "@/store/full-screen-player-settings";
 import { usePlayList } from "@/store/play-list";
 import { usePlayProgress } from "@/store/play-progress";
-import { useFullScreenPlayerSettings } from "@/store/full-screen-player-settings";
 import { StoreNameMap } from "@shared/store";
 
 import IconButton from "../icon-button";
@@ -38,11 +38,11 @@ const formatTime = (timeMs: number): string => {
   const totalSeconds = Math.floor(timeMs / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  const milliseconds = Math.floor((timeMs % 1000) / 10);
+  const milliseconds = timeMs % 1000; // 保留完整的毫秒值
 
   const formattedMinutes = String(minutes).padStart(2, "0");
   const formattedSeconds = String(seconds).padStart(2, "0");
-  const formattedMilliseconds = String(milliseconds).padStart(2, "0");
+  const formattedMilliseconds = String(milliseconds).padStart(3, "0"); // 使用3位数格式化毫秒
 
   return `${formattedMinutes}:${formattedSeconds}.${formattedMilliseconds}`;
 };
