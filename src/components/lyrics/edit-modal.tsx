@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, Tabs, Tab, Input } from "@heroui/react";
-import { useDisclosure } from "@heroui/react";
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, Tabs, Tab } from "@heroui/react";
 
 interface LyricsEditModalProps {
   isOpen: boolean;
@@ -31,8 +30,8 @@ const LyricsEditModal = ({ isOpen, onOpenChange, lyrics, translatedLyrics, onSav
   }, [onOpenChange]);
 
   return (
-    <Modal 
-      isOpen={isOpen} 
+    <Modal
+      isOpen={isOpen}
       onOpenChange={onOpenChange}
       scrollBehavior="inside"
       size="2xl"
@@ -42,8 +41,8 @@ const LyricsEditModal = ({ isOpen, onOpenChange, lyrics, translatedLyrics, onSav
           <>
             <ModalHeader className="flex flex-col gap-1">编辑歌词</ModalHeader>
             <ModalBody>
-              <Tabs 
-                aria-label="歌词类型" 
+              <Tabs
+                aria-label="歌词类型"
                 selectedKey={activeTab}
                 onSelectionChange={(key) => setActiveTab(key as "original" | "translation")}
               >
@@ -53,7 +52,7 @@ const LyricsEditModal = ({ isOpen, onOpenChange, lyrics, translatedLyrics, onSav
                     labelPlacement="outside"
                     placeholder="请输入歌词，格式如：[00:12.34]这里是歌词内容"
                     value={originalLyrics}
-                    onChange={setOriginalLyrics}
+                    onChange={(e) => setOriginalLyrics(e.target.value)}
                     minRows={10}
                     maxRows={20}
                     className="w-full"
@@ -65,7 +64,7 @@ const LyricsEditModal = ({ isOpen, onOpenChange, lyrics, translatedLyrics, onSav
                     labelPlacement="outside"
                     placeholder="请输入翻译歌词，格式如：[00:12.34]这里是翻译内容"
                     value={translationLyrics}
-                    onChange={setTranslationLyrics}
+                    onChange={(e) => setTranslationLyrics(e.target.value)}
                     minRows={10}
                     maxRows={20}
                     className="w-full"

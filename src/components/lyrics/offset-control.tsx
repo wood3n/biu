@@ -15,7 +15,7 @@ interface OffsetControlProps {
 
 const formatLabel = (ms: number) => (ms >= 0 ? `+${ms}` : `${ms}`);
 
-const OffsetControl = ({ value, min = -30000, max = 30000, onChange, onOpenChange }: OffsetControlProps) => {
+const OffsetControl = ({ value, min = -7000, max = 7000, onChange, onOpenChange }: OffsetControlProps) => {
   const [open, setOpen] = useState(false);
   const [customOffset, setCustomOffset] = useState(value);
   const [useCustom, setUseCustom] = useState(false);

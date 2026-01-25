@@ -149,8 +149,8 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
           const hasLyrics = Boolean(cached.lyrics);
           const hasTranslated = Boolean(cached.tLyrics);
           if (hasLyrics || hasTranslated) {
-            setLyrics(parseLrc(cached.lyrics));
-            setTranslatedLyrics(parseLrc(cached.tLyrics));
+            setLyrics(parseLrc(cached.lyrics || undefined));
+            setTranslatedLyrics(parseLrc(cached.tLyrics || undefined));
             return;
           }
         }
@@ -195,16 +195,18 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
   }, [parseLrc, playId, tryLoadCachedLyrics]);
 
   const translationMap = useMemo(() => {
-    if (!translatedLyrics?.length) return new Map<number, string>();
+    if (!translatedLyrics || !Array.isArray(translatedLyrics) || !translatedLyrics.length) return new Map<number, string>();
     const map = new Map<number, string>();
     translatedLyrics.forEach(item => {
-      map.set(item.time, item.text);
+      if (item && typeof item === 'object' && 'time' in item && 'text' in item) {
+        map.set(item.time, item.text);
+      }
     });
     return map;
   }, [translatedLyrics]);
 
   const activeIndex = useMemo(() => {
-    if (!lyrics.length) return -1;
+    if (!lyrics || !Array.isArray(lyrics) || !lyrics.length) return -1;
     for (let i = lyrics.length - 1; i >= 0; i -= 1) {
       if (currentMs >= lyrics[i].time) return i;
     }
@@ -381,7 +383,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
           className={clsx("leading-snug break-words whitespace-pre-wrap", activeWeight, activeShadow)}
           style={{ color: color || undefined }}
         >
-          {line.text}
+          {line.text || ''}
         </div>
         {translation && showLyricsTranslation ? (
           <div className="mt-1 text-sm break-words whitespace-pre-wrap text-white/80">{translation}</div>
@@ -403,7 +405,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
               "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.15) 6%, rgba(0,0,0,0.5) 12%, black 24%, black 76%, rgba(0,0,0,0.5) 88%, rgba(0,0,0,0.15) 94%, transparent 100%)",
           }}
         >
-          {lyrics.length ? (
+          {lyrics && Array.isArray(lyrics) && lyrics.length ? (
             <div
               className="space-y-2"
               style={{
@@ -453,8 +455,8 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
       <LyricsEditModal
         isOpen={isEditOpen}
         onOpenChange={setIsEditOpen}
-        lyrics={lyrics.map(l => `[${formatTime(l.time)}]${l.text}`).join('\n')}
-        translatedLyrics={translatedLyrics.map(l => `[${formatTime(l.time)}]${l.text}`).join('\n')}
+        lyrics={lyrics && Array.isArray(lyrics) ? lyrics.map(l => `[${formatTime(l.time)}]${l.text}`).join('\n') : ''}
+        translatedLyrics={translatedLyrics && Array.isArray(translatedLyrics) ? translatedLyrics.map(l => `[${formatTime(l.time)}]${l.text}`).join('\n') : ''}
         onSave={handleLyricsSaved}
       />
     </>
