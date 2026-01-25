@@ -1,18 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { addToast, useDisclosure } from "@heroui/react";
-import { RiTBoxLine } from "@remixicon/react";
+import { RiTBoxLine, RiEditLine } from "@remixicon/react";
 import clsx from "classnames";
 import { debounce } from "es-toolkit";
 
 import type { WebPlayerParams } from "@/service/web-player";
 
+import { useFullScreenPlayerSettings } from "@/store/full-screen-player-settings";
 import { usePlayList } from "@/store/play-list";
 import { usePlayProgress } from "@/store/play-progress";
 import { StoreNameMap } from "@shared/store";
 
 import IconButton from "../icon-button";
 import LyricsSearchModal from "../lyrics-search-modal";
+import LyricsEditModal from "./edit-modal";
 import FontSizeControl from "./font-size-control";
 import { getLyricsByBili } from "./get-lyrics";
 import OffsetControl from "./offset-control";
@@ -31,6 +33,20 @@ const timeTagPattern = /\[(\d{1,2}):(\d{1,2})(?:\.(\d{1,3}))?\]/g;
 const DEFAULT_FONT_SIZE = 20;
 const DEFAULT_OFFSET = 0;
 
+// 将毫秒时间转换为LRC格式的时间标签
+const formatTime = (timeMs: number): string => {
+  const totalSeconds = Math.floor(timeMs / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  const milliseconds = timeMs % 1000; // 保留完整的毫秒值
+
+  const formattedMinutes = String(minutes).padStart(2, "0");
+  const formattedSeconds = String(seconds).padStart(2, "0");
+  const formattedMilliseconds = String(milliseconds).padStart(3, "0"); // 使用3位数格式化毫秒
+
+  return `${formattedMinutes}:${formattedSeconds}.${formattedMilliseconds}`;
+};
+
 const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: boolean; showControls?: boolean }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rafIdRef = useRef<number | null>(null);
@@ -45,12 +61,16 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
   const { currentTime } = usePlayProgress();
   const currentMs = currentTime * 1000 + offset;
 
+  const showLyricsTranslation = useFullScreenPlayerSettings(s => s.showLyricsTranslation);
+
   const {
     isOpen: isSearchOpen,
     onOpen: onOpenSearch,
     onClose: onCloseSearch,
     onOpenChange: setIsSearchOpen,
   } = useDisclosure();
+
+  const { isOpen: isEditOpen, onOpen: onOpenEdit, onClose: onCloseEdit, onOpenChange: setIsEditOpen } = useDisclosure();
 
   const parseLrc = useCallback((raw?: string | null) => {
     if (!raw) return [] as LyricLine[];
@@ -124,8 +144,8 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
           const hasLyrics = Boolean(cached.lyrics);
           const hasTranslated = Boolean(cached.tLyrics);
           if (hasLyrics || hasTranslated) {
-            setLyrics(parseLrc(cached.lyrics));
-            setTranslatedLyrics(parseLrc(cached.tLyrics));
+            setLyrics(parseLrc(cached.lyrics || undefined));
+            setTranslatedLyrics(parseLrc(cached.tLyrics || undefined));
             return;
           }
         }
@@ -170,16 +190,19 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
   }, [parseLrc, playId, tryLoadCachedLyrics]);
 
   const translationMap = useMemo(() => {
-    if (!translatedLyrics?.length) return new Map<number, string>();
+    if (!translatedLyrics || !Array.isArray(translatedLyrics) || !translatedLyrics.length)
+      return new Map<number, string>();
     const map = new Map<number, string>();
     translatedLyrics.forEach(item => {
-      map.set(item.time, item.text);
+      if (item && typeof item === "object" && "time" in item && "text" in item) {
+        map.set(item.time, item.text);
+      }
     });
     return map;
   }, [translatedLyrics]);
 
   const activeIndex = useMemo(() => {
-    if (!lyrics.length) return -1;
+    if (!lyrics || !Array.isArray(lyrics) || !lyrics.length) return -1;
     for (let i = lyrics.length - 1; i >= 0; i -= 1) {
       if (currentMs >= lyrics[i].time) return i;
     }
@@ -188,25 +211,36 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
 
   const persistLyricsCache = useMemo(
     () =>
-      debounce(async (playItem: PlayItem, nextOffset?: number, nextFontSize?: number) => {
-        try {
-          if (!playItem?.bvid || !playItem?.cid) return;
-          const store = await window.electron.getStore(StoreNameMap.LyricsCache);
-          const key = `${playItem.bvid}-${playItem.cid}`;
-          const prev = store?.[key] || {};
+      debounce(
+        async (
+          playItem: PlayItem,
+          nextOffset?: number,
+          nextFontSize?: number,
+          nextLyrics?: string,
+          nextTLyrics?: string,
+        ) => {
+          try {
+            if (!playItem?.bvid || !playItem?.cid) return;
+            const store = await window.electron.getStore(StoreNameMap.LyricsCache);
+            const key = `${playItem.bvid}-${playItem.cid}`;
+            const prev = store?.[key] || {};
 
-          await window.electron.setStore(StoreNameMap.LyricsCache, {
-            ...(store || {}),
-            [key]: {
-              ...prev,
-              offset: nextOffset ?? 0,
-              fontSize: nextFontSize ?? 0,
-            },
-          });
-        } catch {
-          addToast({ color: "danger", title: "保存失败" });
-        }
-      }, 500),
+            await window.electron.setStore(StoreNameMap.LyricsCache, {
+              ...(store || {}),
+              [key]: {
+                ...prev,
+                offset: nextOffset ?? prev.offset ?? 0,
+                fontSize: nextFontSize ?? prev.fontSize ?? 0,
+                lyrics: nextLyrics !== undefined ? nextLyrics : prev.lyrics,
+                tLyrics: nextTLyrics !== undefined ? nextTLyrics : prev.tLyrics,
+              },
+            });
+          } catch {
+            addToast({ color: "danger", title: "保存失败" });
+          }
+        },
+        500,
+      ),
     [],
   );
 
@@ -277,6 +311,22 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
     [onCloseSearch, parseLrc],
   );
 
+  const handleLyricsSaved = useCallback(
+    (editedLyrics: string, editedTranslatedLyrics?: string) => {
+      setLyrics(parseLrc(editedLyrics));
+      setTranslatedLyrics(editedTranslatedLyrics ? parseLrc(editedTranslatedLyrics) : []);
+
+      // 保存到缓存
+      const playItem = usePlayList.getState().getPlayItem();
+      if (playItem?.bvid && playItem?.cid) {
+        persistLyricsCache(playItem, offset, fontSize, editedLyrics, editedTranslatedLyrics);
+      }
+
+      onCloseEdit();
+    },
+    [onCloseEdit, offset, fontSize, parseLrc, persistLyricsCache],
+  );
+
   useEffect(() => {
     return () => {
       const cancelable = persistLyricsCache as { cancel?: () => void };
@@ -338,9 +388,9 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
           className={clsx("leading-snug break-words whitespace-pre-wrap", activeWeight, activeShadow)}
           style={{ color: color || undefined }}
         >
-          {line.text}
+          {line.text || ""}
         </div>
-        {translation ? (
+        {translation && showLyricsTranslation ? (
           <div className="mt-1 text-sm break-words whitespace-pre-wrap text-white/80">{translation}</div>
         ) : null}
       </div>
@@ -360,7 +410,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
               "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.15) 6%, rgba(0,0,0,0.5) 12%, black 24%, black 76%, rgba(0,0,0,0.5) 88%, rgba(0,0,0,0.15) 94%, transparent 100%)",
           }}
         >
-          {lyrics.length ? (
+          {lyrics && Array.isArray(lyrics) && lyrics.length ? (
             <div
               className="space-y-2"
               style={{
@@ -394,10 +444,30 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
                 <RiTBoxLine size={16} />
               </IconButton>
             </div>
+            <div className="pointer-events-auto">
+              <IconButton
+                type="button"
+                onPress={onOpenEdit}
+                className="bg-foreground/20 text-foreground hover:bg-foreground/30 min-w-0 rounded-full text-xs font-semibold"
+              >
+                <RiEditLine size={16} />
+              </IconButton>
+            </div>
           </div>
         )}
       </div>
       <LyricsSearchModal isOpen={isSearchOpen} onOpenChange={setIsSearchOpen} onLyricsAdopted={handleLyricsAdopted} />
+      <LyricsEditModal
+        isOpen={isEditOpen}
+        onOpenChange={setIsEditOpen}
+        lyrics={lyrics && Array.isArray(lyrics) ? lyrics.map(l => `[${formatTime(l.time)}]${l.text}`).join("\n") : ""}
+        translatedLyrics={
+          translatedLyrics && Array.isArray(translatedLyrics)
+            ? translatedLyrics.map(l => `[${formatTime(l.time)}]${l.text}`).join("\n")
+            : ""
+        }
+        onSave={handleLyricsSaved}
+      />
     </>
   );
 };

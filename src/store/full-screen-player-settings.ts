@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 
 export interface FullScreenPlayerSettingsState {
   showLyrics: boolean;
+  showLyricsTranslation: boolean;
   showSpectrum: boolean;
   showCover: boolean;
   showBlurredBackground: boolean;
@@ -18,6 +19,7 @@ interface Actions {
 
 const defaultSettings: FullScreenPlayerSettingsState = {
   showLyrics: true,
+  showLyricsTranslation: true,
   showSpectrum: false,
   showCover: true,
   showBlurredBackground: true,
@@ -37,6 +39,7 @@ export const useFullScreenPlayerSettings = create<FullScreenPlayerSettingsState 
       name: "full-screen-player-settings",
       partialize: state => ({
         showLyrics: state.showLyrics,
+        showLyricsTranslation: state.showLyricsTranslation,
         showSpectrum: state.showSpectrum,
         showCover: state.showCover,
         showBlurredBackground: state.showBlurredBackground,
