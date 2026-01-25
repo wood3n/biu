@@ -40,9 +40,9 @@ const formatTime = (timeMs: number): string => {
   const seconds = totalSeconds % 60;
   const milliseconds = Math.floor((timeMs % 1000) / 10);
 
-  const formattedMinutes = String(minutes).padStart(2, '0');
-  const formattedSeconds = String(seconds).padStart(2, '0');
-  const formattedMilliseconds = String(milliseconds).padStart(2, '0');
+  const formattedMinutes = String(minutes).padStart(2, "0");
+  const formattedSeconds = String(seconds).padStart(2, "0");
+  const formattedMilliseconds = String(milliseconds).padStart(2, "0");
 
   return `${formattedMinutes}:${formattedSeconds}.${formattedMilliseconds}`;
 };
@@ -70,12 +70,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
     onOpenChange: setIsSearchOpen,
   } = useDisclosure();
 
-  const {
-    isOpen: isEditOpen,
-    onOpen: onOpenEdit,
-    onClose: onCloseEdit,
-    onOpenChange: setIsEditOpen,
-  } = useDisclosure();
+  const { isOpen: isEditOpen, onOpen: onOpenEdit, onClose: onCloseEdit, onOpenChange: setIsEditOpen } = useDisclosure();
 
   const parseLrc = useCallback((raw?: string | null) => {
     if (!raw) return [] as LyricLine[];
@@ -195,7 +190,8 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
   }, [parseLrc, playId, tryLoadCachedLyrics]);
 
   const translationMap = useMemo(() => {
-    if (!translatedLyrics || !Array.isArray(translatedLyrics) || !translatedLyrics.length) return new Map<number, string>();
+    if (!translatedLyrics || !Array.isArray(translatedLyrics) || !translatedLyrics.length)
+      return new Map<number, string>();
     const map = new Map<number, string>();
     translatedLyrics.forEach(item => {
       if (item && typeof item === "object" && "time" in item && "text" in item) {
@@ -233,10 +229,10 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
               ...(store || {}),
               [key]: {
                 ...prev,
-                offset: nextOffset ?? 0,
-                fontSize: nextFontSize ?? 0,
-                lyrics: nextLyrics,
-                tLyrics: nextTLyrics,
+                offset: nextOffset ?? prev.offset ?? 0,
+                fontSize: nextFontSize ?? prev.fontSize ?? 0,
+                lyrics: nextLyrics !== undefined ? nextLyrics : prev.lyrics,
+                tLyrics: nextTLyrics !== undefined ? nextTLyrics : prev.tLyrics,
               },
             });
           } catch {
@@ -328,7 +324,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
 
       onCloseEdit();
     },
-    [onCloseEdit, offset, fontSize, parseLrc, persistLyricsCache]
+    [onCloseEdit, offset, fontSize, parseLrc, persistLyricsCache],
   );
 
   useEffect(() => {
@@ -465,7 +461,11 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
         isOpen={isEditOpen}
         onOpenChange={setIsEditOpen}
         lyrics={lyrics && Array.isArray(lyrics) ? lyrics.map(l => `[${formatTime(l.time)}]${l.text}`).join("\n") : ""}
-        translatedLyrics={translatedLyrics && Array.isArray(translatedLyrics) ? translatedLyrics.map(l => `[${formatTime(l.time)}]${l.text}`).join("\n") : ""}
+        translatedLyrics={
+          translatedLyrics && Array.isArray(translatedLyrics)
+            ? translatedLyrics.map(l => `[${formatTime(l.time)}]${l.text}`).join("\n")
+            : ""
+        }
         onSave={handleLyricsSaved}
       />
     </>

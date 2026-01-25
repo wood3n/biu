@@ -30,12 +30,7 @@ const LyricsEditModal = ({ isOpen, onOpenChange, lyrics, translatedLyrics, onSav
   }, [onOpenChange]);
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      scrollBehavior="inside"
-      size="2xl"
-    >
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior="inside" size="2xl">
       <ModalContent>
         {() => (
           <>
@@ -44,7 +39,9 @@ const LyricsEditModal = ({ isOpen, onOpenChange, lyrics, translatedLyrics, onSav
               <Tabs
                 aria-label="歌词类型"
                 selectedKey={activeTab}
-                onSelectionChange={(key) => { if (key === "original" || key === "translation") setActiveTab(key); }}
+                onSelectionChange={key => {
+                  if (key === "original" || key === "translation") setActiveTab(key);
+                }}
               >
                 <Tab key="original" title="原歌词">
                   <Textarea
@@ -52,7 +49,7 @@ const LyricsEditModal = ({ isOpen, onOpenChange, lyrics, translatedLyrics, onSav
                     labelPlacement="outside"
                     placeholder="请输入歌词，格式如：[00:12.34]这里是歌词内容"
                     value={originalLyrics}
-                    onChange={(e) => setOriginalLyrics(e.target.value)}
+                    onChange={e => setOriginalLyrics(e.target.value)}
                     minRows={10}
                     maxRows={20}
                     className="w-full"
@@ -64,7 +61,7 @@ const LyricsEditModal = ({ isOpen, onOpenChange, lyrics, translatedLyrics, onSav
                     labelPlacement="outside"
                     placeholder="请输入翻译歌词，格式如：[00:12.34]这里是翻译内容"
                     value={translationLyrics}
-                    onChange={(e) => setTranslationLyrics(e.target.value)}
+                    onChange={e => setTranslationLyrics(e.target.value)}
                     minRows={10}
                     maxRows={20}
                     className="w-full"

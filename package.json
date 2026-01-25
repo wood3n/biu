@@ -70,6 +70,7 @@
     "overlayscrollbars": "^2.13.0",
     "overlayscrollbars-react": "^0.5.6",
     "p-queue": "^9.0.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "qrcode.react": "^4.2.0",
     "react": "19.1.1",
     "react-colorful": "^5.6.1",

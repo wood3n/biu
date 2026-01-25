@@ -17,12 +17,12 @@ const formatLabel = (ms: number) => (ms >= 0 ? `+${ms}` : `${ms}`);
 
 const OffsetControl = ({ value, min = -7000, max = 7000, onChange, onOpenChange }: OffsetControlProps) => {
   const [open, setOpen] = useState(false);
-  const [customOffset, setCustomOffset] = useState(value);
+  const [customOffset, setCustomOffset] = useState(value.toString());
   const [useCustom, setUseCustom] = useState(false);
   const step = 50;
 
   useEffect(() => {
-    setCustomOffset(value);
+    setCustomOffset(value.toString());
   }, [value]);
 
   const handleOpenChange = useCallback(
@@ -34,17 +34,18 @@ const OffsetControl = ({ value, min = -7000, max = 7000, onChange, onOpenChange 
   );
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement> | string) => {
-    const val = typeof e === 'string' ? e : e.target.value;
+    const val = typeof e === "string" ? e : e.target.value;
+    setCustomOffset(val);
+
     const numVal = parseInt(val, 10);
-    if (!isNaN(numVal)) {
-      setCustomOffset(numVal);
+    if (!isNaN(numVal) && val.trim() !== "") {
       onChange(numVal);
     }
   };
 
   const handleSliderChange = (v: number | number[]) => {
     const val = Array.isArray(v) ? v[0] : v;
-    setCustomOffset(val);
+    setCustomOffset(val.toString());
     onChange(val);
   };
 
@@ -80,12 +81,12 @@ const OffsetControl = ({ value, min = -7000, max = 7000, onChange, onOpenChange 
               <Input
                 type="number"
                 value={customOffset.toString()}
-                onChange={(e) => handleCustomChange(e)}
+                onChange={e => handleCustomChange(e)}
                 className="w-24 text-center"
                 size="sm"
                 endContent={<span className="text-xs">ms</span>}
               />
-              <span className="text-foreground/60 whitespace-nowrap text-[10px] font-bold">
+              <span className="text-foreground/60 text-[10px] font-bold whitespace-nowrap">
                 {formatLabel(customOffset)} ms
               </span>
             </div>
@@ -107,7 +108,9 @@ const OffsetControl = ({ value, min = -7000, max = 7000, onChange, onOpenChange 
                   thumb: "after:hidden",
                 }}
               />
-              <span className="text-foreground/60 text-[10px] font-bold whitespace-nowrap">{formatLabel(value)} ms</span>
+              <span className="text-foreground/60 text-[10px] font-bold whitespace-nowrap">
+                {formatLabel(value)} ms
+              </span>
             </>
           )}
         </div>
