@@ -20,6 +20,7 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
   const isLocal = playItem?.source === "local";
   const {
     showLyrics,
+    showLyricsTranslation,
     showSpectrum,
     showCover,
     showBlurredBackground,
@@ -30,6 +31,7 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
   } = useFullScreenPlayerSettings(
     useShallow(s => ({
       showLyrics: s.showLyrics,
+      showLyricsTranslation: s.showLyricsTranslation,
       showSpectrum: s.showSpectrum,
       showCover: s.showCover,
       showBlurredBackground: s.showBlurredBackground,
@@ -43,6 +45,7 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
   const { control, setValue } = useForm({
     defaultValues: {
       showLyrics,
+      showLyricsTranslation,
       showSpectrum,
       showCover,
       showBlurredBackground,
@@ -67,6 +70,7 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
 
   useEffect(() => {
     setValue("showLyrics", showLyrics);
+    setValue("showLyricsTranslation", showLyricsTranslation);
     setValue("showSpectrum", showSpectrum);
     setValue("showCover", showCover);
     setValue("showBlurredBackground", showBlurredBackground);
@@ -76,6 +80,7 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
   }, [
     setValue,
     showLyrics,
+    showLyricsTranslation,
     showSpectrum,
     showCover,
     showBlurredBackground,
@@ -90,12 +95,13 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
     if (!values || typeof values !== "object") return;
     update({
       showLyrics: values.showLyrics,
+      showLyricsTranslation: values.showLyricsTranslation,
       showSpectrum: values.showSpectrum,
       showCover: values.showCover,
       showBlurredBackground: values.showBlurredBackground,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values?.showLyrics, values?.showSpectrum, values?.showCover, values?.showBlurredBackground, update]);
+  }, [values?.showLyrics, values?.showLyricsTranslation, values?.showSpectrum, values?.showCover, values?.showBlurredBackground, update]);
 
   useEffect(() => {
     if (!values || typeof values !== "object") return;
@@ -124,30 +130,40 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
         />
       </div>
       {values?.showLyrics && (
-        <div className="flex items-center justify-between">
-          <div className="text-medium mr-6">歌词字体颜色</div>
-          <Controller
-            control={control}
-            name="lyricsColor"
-            render={({ field }) => {
-              const v = field.value;
-              const pickerValue = isHex(v) ? v : "#ffffff";
-              return (
-                <ColorPicker
-                  value={pickerValue}
-                  onChange={hex => field.onChange(hex)}
-                  isOpen={lyricsPickerOpen && isUiVisible}
-                  onOpenChange={setLyricsPickerOpen}
-                >
-                  <div
-                    className="border-default h-8 w-12 rounded-full border"
-                    style={{ backgroundColor: field.value || undefined }}
-                  />
-                </ColorPicker>
-              );
-            }}
-          />
-        </div>
+        <>
+          <div className="flex items-center justify-between">
+            <div className="text-medium mr-6">显示歌词翻译</div>
+            <Controller
+              control={control}
+              name="showLyricsTranslation"
+              render={({ field }) => <Switch isSelected={field.value} onValueChange={field.onChange} />}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="text-medium mr-6">歌词字体颜色</div>
+            <Controller
+              control={control}
+              name="lyricsColor"
+              render={({ field }) => {
+                const v = field.value;
+                const pickerValue = isHex(v) ? v : "#ffffff";
+                return (
+                  <ColorPicker
+                    value={pickerValue}
+                    onChange={hex => field.onChange(hex)}
+                    isOpen={lyricsPickerOpen && isUiVisible}
+                    onOpenChange={setLyricsPickerOpen}
+                  >
+                    <div
+                      className="border-default h-8 w-12 rounded-full border"
+                      style={{ backgroundColor: field.value || undefined }}
+                    />
+                  </ColorPicker>
+                );
+              }}
+            />
+          </div>
+        </>
       )}
 
       <div className="flex items-center justify-between">

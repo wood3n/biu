@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { Popover, PopoverContent, PopoverTrigger, Slider } from "@heroui/react";
+import { Input, Popover, PopoverContent, PopoverTrigger, Slider, Switch } from "@heroui/react";
 import { RiTimeLine } from "@remixicon/react";
 
 import IconButton from "../icon-button";
@@ -15,8 +15,10 @@ interface OffsetControlProps {
 
 const formatLabel = (ms: number) => (ms >= 0 ? `+${ms}` : `${ms}`);
 
-const OffsetControl = ({ value, min = -5000, max = 5000, onChange, onOpenChange }: OffsetControlProps) => {
+const OffsetControl = ({ value, min = -30000, max = 30000, onChange, onOpenChange }: OffsetControlProps) => {
   const [open, setOpen] = useState(false);
+  const [customOffset, setCustomOffset] = useState(value);
+  const [useCustom, setUseCustom] = useState(false);
   const step = 50;
 
   const handleOpenChange = useCallback(
@@ -26,6 +28,20 @@ const OffsetControl = ({ value, min = -5000, max = 5000, onChange, onOpenChange 
     },
     [onOpenChange],
   );
+
+  const handleCustomChange = (val: string) => {
+    const numVal = parseInt(val, 10);
+    if (!isNaN(numVal)) {
+      setCustomOffset(numVal);
+      onChange(numVal);
+    }
+  };
+
+  const handleSliderChange = (v: number | number[]) => {
+    const val = Array.isArray(v) ? v[0] : v;
+    setCustomOffset(val);
+    onChange(val);
+  };
 
   return (
     <Popover
@@ -49,23 +65,46 @@ const OffsetControl = ({ value, min = -5000, max = 5000, onChange, onOpenChange 
       </PopoverTrigger>
       <PopoverContent className="px-3 py-2">
         <div className="flex flex-col items-center gap-2">
-          <Slider
-            aria-label="调整歌词偏移"
-            minValue={min}
-            maxValue={max}
-            step={step}
-            value={value}
-            onChange={v => onChange(v as number)}
-            size="sm"
-            color="primary"
-            orientation="vertical"
-            className="h-32"
-            classNames={{
-              track: "w-1",
-              thumb: "after:hidden",
-            }}
-          />
-          <span className="text-foreground/60 text-[10px] font-bold whitespace-nowrap">{formatLabel(value)} ms</span>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xs">自定义</span>
+            <Switch isSelected={useCustom} onValueChange={setUseCustom} />
+          </div>
+
+          {useCustom ? (
+            <div className="flex flex-col items-center gap-2">
+              <Input
+                type="number"
+                value={customOffset.toString()}
+                onChange={(e) => handleCustomChange(e.target.value)}
+                className="w-24 text-center"
+                size="sm"
+                endContent={<span className="text-xs">ms</span>}
+              />
+              <span className="text-foreground/60 text-[10px] font-bold whitespace-nowrap">
+                {formatLabel(customOffset)} ms
+              </span>
+            </div>
+          ) : (
+            <>
+              <Slider
+                aria-label="调整歌词偏移"
+                minValue={min}
+                maxValue={max}
+                step={step}
+                value={value}
+                onChange={handleSliderChange}
+                size="sm"
+                color="primary"
+                orientation="vertical"
+                className="h-32"
+                classNames={{
+                  track: "w-1",
+                  thumb: "after:hidden",
+                }}
+              />
+              <span className="text-foreground/60 text-[10px] font-bold whitespace-nowrap">{formatLabel(value)} ms</span>
+            </>
+          )}
         </div>
       </PopoverContent>
     </Popover>
