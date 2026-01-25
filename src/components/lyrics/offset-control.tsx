@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 
 import { Input, Popover, PopoverContent, PopoverTrigger, Slider, Switch } from "@heroui/react";
 import { RiTimeLine } from "@remixicon/react";
@@ -21,6 +21,10 @@ const OffsetControl = ({ value, min = -7000, max = 7000, onChange, onOpenChange 
   const [useCustom, setUseCustom] = useState(false);
   const step = 50;
 
+  useEffect(() => {
+    setCustomOffset(value);
+  }, [value]);
+
   const handleOpenChange = useCallback(
     (next: boolean) => {
       setOpen(next);
@@ -29,7 +33,8 @@ const OffsetControl = ({ value, min = -7000, max = 7000, onChange, onOpenChange 
     [onOpenChange],
   );
 
-  const handleCustomChange = (val: string) => {
+  const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement> | string) => {
+    const val = typeof e === 'string' ? e : e.target.value;
     const numVal = parseInt(val, 10);
     if (!isNaN(numVal)) {
       setCustomOffset(numVal);
@@ -65,7 +70,7 @@ const OffsetControl = ({ value, min = -7000, max = 7000, onChange, onOpenChange 
       </PopoverTrigger>
       <PopoverContent className="px-3 py-2">
         <div className="flex flex-col items-center gap-2">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="mb-2 flex items-center gap-2">
             <span className="text-xs">自定义</span>
             <Switch isSelected={useCustom} onValueChange={setUseCustom} />
           </div>
@@ -75,12 +80,12 @@ const OffsetControl = ({ value, min = -7000, max = 7000, onChange, onOpenChange 
               <Input
                 type="number"
                 value={customOffset.toString()}
-                onChange={(e) => handleCustomChange(e.target.value)}
+                onChange={(e) => handleCustomChange(e)}
                 className="w-24 text-center"
                 size="sm"
                 endContent={<span className="text-xs">ms</span>}
               />
-              <span className="text-foreground/60 text-[10px] font-bold whitespace-nowrap">
+              <span className="text-foreground/60 whitespace-nowrap text-[10px] font-bold">
                 {formatLabel(customOffset)} ms
               </span>
             </div>

@@ -101,7 +101,14 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
       showBlurredBackground: values.showBlurredBackground,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values?.showLyrics, values?.showLyricsTranslation, values?.showSpectrum, values?.showCover, values?.showBlurredBackground, update]);
+  }, [
+    values?.showLyrics,
+    values?.showLyricsTranslation,
+    values?.showSpectrum,
+    values?.showCover,
+    values?.showBlurredBackground,
+    update,
+  ]);
 
   useEffect(() => {
     if (!values || typeof values !== "object") return;

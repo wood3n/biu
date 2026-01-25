@@ -198,7 +198,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
     if (!translatedLyrics || !Array.isArray(translatedLyrics) || !translatedLyrics.length) return new Map<number, string>();
     const map = new Map<number, string>();
     translatedLyrics.forEach(item => {
-      if (item && typeof item === 'object' && 'time' in item && 'text' in item) {
+      if (item && typeof item === "object" && "time" in item && "text" in item) {
         map.set(item.time, item.text);
       }
     });
@@ -215,27 +215,36 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
 
   const persistLyricsCache = useMemo(
     () =>
-      debounce(async (playItem: PlayItem, nextOffset?: number, nextFontSize?: number, nextLyrics?: string, nextTLyrics?: string) => {
-        try {
-          if (!playItem?.bvid || !playItem?.cid) return;
-          const store = await window.electron.getStore(StoreNameMap.LyricsCache);
-          const key = `${playItem.bvid}-${playItem.cid}`;
-          const prev = store?.[key] || {};
+      debounce(
+        async (
+          playItem: PlayItem,
+          nextOffset?: number,
+          nextFontSize?: number,
+          nextLyrics?: string,
+          nextTLyrics?: string,
+        ) => {
+          try {
+            if (!playItem?.bvid || !playItem?.cid) return;
+            const store = await window.electron.getStore(StoreNameMap.LyricsCache);
+            const key = `${playItem.bvid}-${playItem.cid}`;
+            const prev = store?.[key] || {};
 
-          await window.electron.setStore(StoreNameMap.LyricsCache, {
-            ...(store || {}),
-            [key]: {
-              ...prev,
-              offset: nextOffset ?? 0,
-              fontSize: nextFontSize ?? 0,
-              lyrics: nextLyrics,
-              tLyrics: nextTLyrics,
-            },
-          });
-        } catch {
-          addToast({ color: "danger", title: "保存失败" });
-        }
-      }, 500),
+            await window.electron.setStore(StoreNameMap.LyricsCache, {
+              ...(store || {}),
+              [key]: {
+                ...prev,
+                offset: nextOffset ?? 0,
+                fontSize: nextFontSize ?? 0,
+                lyrics: nextLyrics,
+                tLyrics: nextTLyrics,
+              },
+            });
+          } catch {
+            addToast({ color: "danger", title: "保存失败" });
+          }
+        },
+        500,
+      ),
     [],
   );
 
@@ -383,7 +392,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
           className={clsx("leading-snug break-words whitespace-pre-wrap", activeWeight, activeShadow)}
           style={{ color: color || undefined }}
         >
-          {line.text || ''}
+          {line.text || ""}
         </div>
         {translation && showLyricsTranslation ? (
           <div className="mt-1 text-sm break-words whitespace-pre-wrap text-white/80">{translation}</div>
@@ -455,8 +464,8 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
       <LyricsEditModal
         isOpen={isEditOpen}
         onOpenChange={setIsEditOpen}
-        lyrics={lyrics && Array.isArray(lyrics) ? lyrics.map(l => `[${formatTime(l.time)}]${l.text}`).join('\n') : ''}
-        translatedLyrics={translatedLyrics && Array.isArray(translatedLyrics) ? translatedLyrics.map(l => `[${formatTime(l.time)}]${l.text}`).join('\n') : ''}
+        lyrics={lyrics && Array.isArray(lyrics) ? lyrics.map(l => `[${formatTime(l.time)}]${l.text}`).join("\n") : ""}
+        translatedLyrics={translatedLyrics && Array.isArray(translatedLyrics) ? translatedLyrics.map(l => `[${formatTime(l.time)}]${l.text}`).join("\n") : ""}
         onSave={handleLyricsSaved}
       />
     </>

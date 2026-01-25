@@ -37,14 +37,14 @@ const LyricsEditModal = ({ isOpen, onOpenChange, lyrics, translatedLyrics, onSav
       size="2xl"
     >
       <ModalContent>
-        {(onClose) => (
+        {() => (
           <>
             <ModalHeader className="flex flex-col gap-1">编辑歌词</ModalHeader>
             <ModalBody>
               <Tabs
                 aria-label="歌词类型"
                 selectedKey={activeTab}
-                onSelectionChange={(key) => setActiveTab(key as "original" | "translation")}
+                onSelectionChange={(key) => { if (key === "original" || key === "translation") setActiveTab(key); }}
               >
                 <Tab key="original" title="原歌词">
                   <Textarea
