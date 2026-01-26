@@ -84,8 +84,8 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.1.0",
-    "@commitlint/config-conventional": "^20.0.0",
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
     "@eslint-react/eslint-plugin": "^1.53.1",
     "@eslint/js": "^9.39.2",
     "@rollup/plugin-node-resolve": "^16.0.3",
@@ -102,7 +102,7 @@
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@types/spark-md5": "^3.0.5",
-    "@vitejs/plugin-react": "^5.1.1",
+    "@vitejs/plugin-react": "^5.1.2",
     "changelogen": "^0.6.2",
     "chokidar": "^4.0.3",
     "electron": "38.6.0",
@@ -117,9 +117,9 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.26",
     "eslint-plugin-unused-imports": "^4.3.0",
-    "globals": "^16.3.0",
+    "globals": "^16.5.0",
     "husky": "^9.1.7",
-    "jsdom": "^27.3.0",
+    "jsdom": "^27.4.0",
     "knip": "^5.80.2",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
@@ -131,8 +131,8 @@
     "stylelint": "^16.26.1",
     "stylelint-config-standard": "^39.0.1",
     "tailwindcss": "^4.1.18",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.42.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0",
     "vitest": "^4.0.16"
   },
   "lint-staged": {
