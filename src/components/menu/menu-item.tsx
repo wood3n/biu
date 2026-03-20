@@ -64,7 +64,10 @@ const MenuItem: React.FC<MenuItemProps> = ({
         radius="md"
         fallback={icon}
         alt={title}
-        className="h-10 w-10 flex-none"
+        className={clx("flex-none", {
+          "h-4.5 w-4.5": !collapsed,
+          "h-10 w-10": collapsed,
+        })}
       />
     );
   }, [cover, isActive, Icon, ActiveIcon, title, collapsed]);
@@ -87,7 +90,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
             "h-auto": collapsed,
             "text-primary": isActive,
           })}
-          {...(dndRest as any)}
+          {...(dndRest as Record<string, unknown>)}
         >
           {iconContent}
         </Button>
@@ -106,7 +109,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
       onPress={onPress}
       startContent={iconContent}
       className={twMerge("justify-start px-2 text-inherit", className, dndClassName)}
-      {...(dndRest as any)}
+      {...(dndRest as Record<string, unknown>)}
     >
       <span className="pointer-events-none truncate">{title}</span>
     </Button>
