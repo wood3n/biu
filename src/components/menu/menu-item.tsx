@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { useLocation, useParams } from "react-router";
 
-import { Avatar, Button, Link as HeroLink, Tooltip } from "@heroui/react";
+import { Button, Link as HeroLink, Avatar, Tooltip } from "@heroui/react";
 import clx from "classnames";
 import { twMerge } from "tailwind-merge";
 
@@ -10,19 +10,22 @@ export interface MenuItemProps {
   title: string;
   /** 菜单项链接 */
   href?: string;
-  /** 唯一标识，用于排序等场景 */
-  id?: number | string;
   /** 菜单项图标 */
   icon?: React.ComponentType<{ size?: number | string; className?: string }>;
   /** 封面 */
   cover?: string;
   /** 激活状态图标 */
   activeIcon?: React.ComponentType<{ size?: number | string; className?: string }>;
+  /** 菜单项样式 */
   className?: string;
+  /** 菜单项点击事件 */
   onPress?: VoidFunction;
+  /** 收缩菜单项 */
   collapsed?: boolean;
   /** 用于 dnd-kit 等场景，把拖拽监听器绑定到可交互元素上 */
   dndProps?: ({ className?: string } & Record<string, unknown>) | undefined;
+  /* 菜单项路径 用于匹配非跳转菜单 */
+  path?: string;
   [key: string]: unknown;
 }
 
@@ -35,85 +38,100 @@ const MenuItem: React.FC<MenuItemProps> = ({
   className,
   onPress,
   collapsed,
+  path,
   dndProps,
+  ...others
 }) => {
-  const location = useLocation();
-  const { id } = useParams();
-
-  const isActive = useMemo(() => {
-    return location.pathname === href || (id && href?.split("?")[0].includes(id));
-  }, [location.pathname, href, id]);
-
-  const iconContent = useMemo(() => {
-    const icon =
-      isActive && ActiveIcon ? (
-        <ActiveIcon size={18} className="text-primary" />
-      ) : Icon ? (
-        <Icon size={18} />
-      ) : undefined;
-
-    if (!collapsed && icon) {
-      return icon;
-    }
-
-    return (
-      <Avatar
-        name={title}
-        src={cover ? `${cover}@672w_378h_1c.avif` : undefined}
-        showFallback
-        radius="md"
-        fallback={icon}
-        alt={title}
-        className={clx("flex-none", {
-          "h-4.5 w-4.5": !collapsed,
-          "h-10 w-10": collapsed,
-        })}
-      />
-    );
-  }, [cover, isActive, Icon, ActiveIcon, title, collapsed]);
-
   const { className: dndClassName, ...dndRest } = (dndProps ?? {}) as {
     className?: string;
   } & Record<string, unknown>;
 
-  if (collapsed) {
+  const location = useLocation();
+  const { id } = useParams();
+
+  /* 菜单项激活状态 */
+  const isActive = useMemo(() => {
+    console.log(location.pathname);
     return (
-      <Tooltip closeDelay={0} content={title} placement="right" offset={-3}>
-        <Button
-          as={href ? HeroLink : "button"}
-          href={href}
-          fullWidth
-          variant={isActive ? "flat" : "light"}
-          color={isActive ? "primary" : "default"}
-          onPress={onPress}
-          className={clx("w-full min-w-0 justify-center rounded-md px-0 py-1", className, dndClassName, {
+      location.pathname === href ||
+      new RegExp(`^${path}`).test(location.pathname) ||
+      (id && href?.split("?")[0].includes(id))
+    );
+  }, [location.pathname, href, id, path]);
+
+  /* 菜单项图标 */
+  const menuIcon = useMemo(() => {
+    // Icon 存在
+    if (Icon) {
+      // 图标切换
+      const presentIcon =
+        isActive && ActiveIcon ? <ActiveIcon size={18} className="text-primary" /> : <Icon size={18} />;
+
+      // 是否折叠
+      return collapsed ? (
+        <Avatar className="h-10 w-10 flex-none" radius="md" fallback={presentIcon} alt={title} />
+      ) : (
+        presentIcon
+      );
+    }
+    // 没 Icon 使用 封面/首字
+    else {
+      return (
+        <Avatar
+          // 折叠 改变尺寸
+          className={clx("flex-none", {
+            "h-4 w-4": !collapsed,
+            "h-10 w-10": collapsed,
+          })}
+          name={title}
+          src={cover ? `${cover}@672w_378h_1c.avif` : undefined}
+          radius="md"
+          alt={title}
+        />
+      );
+    }
+  }, [Icon, title, cover, isActive, ActiveIcon, collapsed]);
+
+  const menuButton = useMemo(() => {
+    return (
+      <Button
+        as={href ? (HeroLink as any) : "button"}
+        href={href}
+        fullWidth
+        variant={isActive ? "flat" : "light"}
+        color={isActive ? "primary" : "default"}
+        onPress={onPress}
+        disableRipple={collapsed ? false : true}
+        startContent={collapsed ? undefined : menuIcon}
+        className={clx(
+          {
+            [twMerge("w-full min-w-0 justify-center rounded-md px-0 py-1")]: collapsed,
+            [twMerge("justify-start px-2 text-inherit")]: !collapsed,
+          },
+          className,
+          dndClassName,
+          {
             "h-auto": collapsed,
             "text-primary": isActive,
-          })}
-          {...(dndRest as Record<string, unknown>)}
-        >
-          {iconContent}
-        </Button>
+          },
+        )}
+        {...(dndRest as Record<string, unknown>)}
+        {...others}
+      >
+        {collapsed ? menuIcon : <span className="pointer-events-none truncate">{title}</span>}
+      </Button>
+    );
+  }, [className, collapsed, dndClassName, dndRest, href, isActive, menuIcon, onPress, others, title]);
+
+  if (collapsed) {
+    return (
+      <Tooltip content={title} placement="right">
+        {menuButton}
       </Tooltip>
     );
   }
 
-  return (
-    <Button
-      as={href ? HeroLink : "button"}
-      href={href}
-      fullWidth
-      disableRipple
-      variant={isActive ? "flat" : "light"}
-      color={isActive ? "primary" : "default"}
-      onPress={onPress}
-      startContent={iconContent}
-      className={twMerge("justify-start px-2 text-inherit", className, dndClassName)}
-      {...(dndRest as Record<string, unknown>)}
-    >
-      <span className="pointer-events-none truncate">{title}</span>
-    </Button>
-  );
+  return menuButton;
 };
 
 export default MenuItem;

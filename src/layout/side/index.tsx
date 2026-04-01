@@ -155,12 +155,14 @@ const SideNav = () => {
             "overflow-hidden": isDragging,
           })}
         >
-          <DefaultMenus isCollapsed={isCollapsedVisual} onOpenAddFavorite={handleOpenAddFavorite} />
-          <Collection
-            isCollapsed={isCollapsedVisual}
-            onOpenAddFavorite={handleOpenAddFavorite}
-            onOpenEditFavorite={handleOpenEditFavorite}
-          />
+          <div className="flex flex-col gap-1">
+            <DefaultMenus isCollapsed={isCollapsedVisual} />
+            <Collection
+              isCollapsed={isCollapsedVisual}
+              onOpenAddFavorite={handleOpenAddFavorite}
+              onOpenEditFavorite={handleOpenEditFavorite}
+            />
+          </div>
         </ScrollContainer>
         <Button
           size="sm"

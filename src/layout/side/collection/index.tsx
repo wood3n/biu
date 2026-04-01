@@ -1,31 +1,38 @@
-import { useCallback, useEffect, useMemo, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import {
+  closestCenter,
   DndContext,
   type DragEndEvent,
-  closestCenter,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { Button, Tooltip, addToast } from "@heroui/react";
+import { addToast } from "@heroui/react";
 import {
-  RiAddLine,
-  RiArrowDownSLine,
   RiDeleteBinLine,
   RiEdit2Line,
   RiEyeOffLine,
+  RiFolderAddLine,
   RiPlayCircleLine,
   RiPlayListAddLine,
   RiStarOffLine,
+  RiStarSmileLine,
+  RiStarSmileFill,
+  RiStackLine,
+  RiStackFill,
 } from "@remixicon/react";
+
+import type { MenuItemProps } from "@/components/menu/menu-item";
 
 import { CollectionType } from "@/common/constants/collection";
 import { getAllFavMedia } from "@/common/utils/fav";
 import { type ContextMenuItem } from "@/components/context-menu";
+import MenuFold from "@/components/menu/menu-fold";
 import MenuGroup from "@/components/menu/menu-group";
+import MenuItem from "@/components/menu/menu-item";
 import SortableMenuItem from "@/layout/side/collection/sortable-menu-item";
 import { postFavFolderDel } from "@/service/fav-folder-del";
 import { postFavFolderUnfav } from "@/service/fav-folder-unfav";
@@ -50,6 +57,15 @@ interface CollectionMenuItem {
   className: string;
   type?: number;
   mid?: number;
+}
+
+interface CollectionMenu extends MenuItemProps {
+  items: CollectionMenuItem[] | [MenuItemProps, ...CollectionMenuItem[]];
+  isFolded: boolean;
+  isDragEnabled: boolean;
+  onDragEnd: (event: DragEndEvent) => void;
+  contextMenuItems: ContextMenuItem[];
+  onContextMenuAction: (action: string, item: CollectionMenuItem) => void;
 }
 
 const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Props) => {
@@ -117,9 +133,12 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
 
   const filteredCollectedFavorites = collectedFavorites.filter(item => !hiddenMenuKeys.includes(String(item.id)));
   const filteredCreatedFavorites = createdFavorites.filter(item => !hiddenMenuKeys.includes(String(item.id)));
-  const isDragEnabled = !isCollapsed;
-  const isCreatedDragEnabled = isDragEnabled && !createdFolded;
-  const isCollectedDragEnabled = isDragEnabled && !collectedFolded;
+  const isDragEnabled = isCollapsed;
+  const isCreatedDragEnabled = isDragEnabled || !createdFolded;
+  const isCollectedDragEnabled = isDragEnabled || !collectedFolded;
+
+  console.log(isDragEnabled, createdFolded);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -361,192 +380,156 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
     ],
   );
 
-  const handleCreatedDragEnd = (event: DragEndEvent) => {
-    if (isCollapsed || createdFolded) {
-      return;
-    }
+  const handleCreatedDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      if (!isCreatedDragEnabled) {
+        return;
+      }
 
-    const { active, over } = event;
+      const { active, over } = event;
 
-    if (!over || active.id === over.id) {
-      return;
-    }
+      if (!over || active.id === over.id) {
+        return;
+      }
 
-    reorderCreatedFavorites(Number(active.id), Number(over.id));
-  };
+      reorderCreatedFavorites(Number(active.id), Number(over.id));
+    },
+    [isCreatedDragEnabled, reorderCreatedFavorites],
+  );
 
-  const handleCollectedDragEnd = (event: DragEndEvent) => {
-    if (isCollapsed || collectedFolded) {
-      return;
-    }
+  const handleCollectedDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      if (!isCollectedDragEnabled) {
+        return;
+      }
 
-    const { active, over } = event;
+      const { active, over } = event;
 
-    if (!over || active.id === over.id) {
-      return;
-    }
+      if (!over || active.id === over.id) {
+        return;
+      }
 
-    reorderCollectedFavorites(Number(active.id), Number(over.id));
-  };
+      reorderCollectedFavorites(Number(active.id), Number(over.id));
+    },
+    [isCollectedDragEnabled, reorderCollectedFavorites],
+  );
 
-  const renderFavoriteGroup = ({
-    title,
-    items,
-    isFolded,
-    onToggleFolded,
-    titleExtra,
-    isDragEnabled: isGroupDragEnabled,
-    onDragEnd,
-    contextMenuItems,
-    onContextMenuAction,
-  }: {
-    title: string;
-    items: CollectionMenuItem[];
-    isFolded: boolean;
-    onToggleFolded: () => void;
-    titleExtra?: ReactNode;
-    isDragEnabled: boolean;
-    onDragEnd: (event: DragEndEvent) => void;
-    contextMenuItems: ContextMenuItem[];
-    onContextMenuAction: (action: string, item: CollectionMenuItem) => void;
-  }) => {
-    if (!items.length) {
-      return null;
-    }
-
-    const header = !isCollapsed ? (
-      <div className="flex items-center justify-between p-2 text-sm text-zinc-500">
-        <button
-          type="button"
-          aria-expanded={!isFolded}
-          onClick={onToggleFolded}
-          className="hover:text-foreground flex items-center gap-1 text-sm text-zinc-500 transition-colors"
-        >
-          <RiArrowDownSLine size={16} className={`transition-transform ${isFolded ? "-rotate-90" : "rotate-0"}`} />
-          <span className="whitespace-nowrap">{title}</span>
-        </button>
-        {titleExtra}
-      </div>
-    ) : null;
-
-    if (isFolded) {
-      return header;
-    }
-
-    const group = (
-      <>
-        {header}
-        <MenuGroup
-          items={items}
-          collapsed={isCollapsed}
-          renderItem={item => (
-            <SortableMenuItem
-              key={item.id}
-              id={item.id}
-              collapsed={isCollapsed}
-              disabled={!isGroupDragEnabled}
-              contextMenuItems={contextMenuItems}
-              onContextMenuAction={action => onContextMenuAction(action, item)}
-              {...item}
-            />
-          )}
-        />
-      </>
-    );
-
-    if (!isGroupDragEnabled) {
-      return group;
-    }
-
-    return (
-      <DndContext collisionDetection={closestCenter} onDragEnd={onDragEnd} sensors={sensors}>
-        <SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
-          {group}
-        </SortableContext>
-      </DndContext>
-    );
-  };
-
-  const renderCreatedGroup = () => {
-    if (!user?.isLogin) {
-      return null;
-    }
-
-    const items = filteredCreatedFavorites.map(item => ({
-      id: item.id,
-      title: item.title,
-      href: `/collection/${item.id}?mid=${item?.mid}`,
-      cover: item.cover,
-      className: "px-2 py-1 h-auto",
-      type: item.type,
-      mid: item.mid,
-    }));
-
-    const titleExtra = onOpenAddFavorite ? (
-      <Tooltip closeDelay={0} content="新建收藏夹">
-        <Button
-          isIconOnly
-          variant="light"
-          radius="md"
-          size="sm"
-          className="h-auto w-auto min-w-auto p-1"
-          onPress={onOpenAddFavorite}
-        >
-          <RiAddLine size={16} />
-        </Button>
-      </Tooltip>
-    ) : null;
-
-    return renderFavoriteGroup({
-      title: "我创建的",
-      items,
-      isFolded: createdFolded,
-      onToggleFolded: handleToggleCreatedFolded,
-      titleExtra,
-      isDragEnabled: isCreatedDragEnabled,
-      onDragEnd: handleCreatedDragEnd,
-      contextMenuItems: createdContextMenus,
-      onContextMenuAction: (action, item) =>
-        handleCreatedMenuAction(action, {
+  const menuList = useMemo<CollectionMenu[]>(
+    () => [
+      {
+        title: "我的收藏",
+        icon: RiStarSmileLine,
+        activeIcon: RiStarSmileFill,
+        path: "/collection",
+        items: [
+          {
+            title: "新建收藏",
+            icon: RiFolderAddLine,
+            onPress: onOpenAddFavorite,
+            className: "px-2 py-1 h-auto",
+          },
+          ...filteredCreatedFavorites.map(item => ({
+            id: item.id,
+            title: item.title,
+            href: `/collection/${item.id}?mid=${item?.mid}`,
+            cover: item.cover,
+            className: "px-2 py-1 h-auto",
+            type: item.type,
+            mid: item.mid,
+          })),
+        ],
+        isFolded: createdFolded,
+        onPress: handleToggleCreatedFolded,
+        isDragEnabled: isCreatedDragEnabled,
+        onDragEnd: handleCreatedDragEnd,
+        contextMenuItems: createdContextMenus,
+        onContextMenuAction: (action, item) =>
+          handleCreatedMenuAction(action, {
+            id: item.id,
+            title: item.title,
+          }),
+      },
+      {
+        title: "我的合集",
+        icon: RiStackLine,
+        activeIcon: RiStackFill,
+        path: "/compilation",
+        items: filteredCollectedFavorites.map(item => ({
           id: item.id,
           title: item.title,
-        }),
-    });
-  };
-
-  const renderCollectedGroup = () => {
-    const items = filteredCollectedFavorites.map(item => ({
-      id: item.id,
-      title: item.title,
-      href: `/collection/${item.id}?type=${item.type}&mid=${item?.mid}`,
-      cover: item.cover,
-      className: "px-2 py-1 h-auto",
-      type: item.type,
-      mid: item.mid,
-    }));
-
-    return renderFavoriteGroup({
-      title: "我收藏的",
-      items,
-      isFolded: collectedFolded,
-      onToggleFolded: handleToggleCollectedFolded,
-      isDragEnabled: isCollectedDragEnabled,
-      onDragEnd: handleCollectedDragEnd,
-      contextMenuItems: collectedContextMenus,
-      onContextMenuAction: (action, item) =>
-        handleCollectedMenuAction(action, {
-          id: item.id,
-          title: item.title,
+          href: `/compilation/${item.id}?type=${item.type}&mid=${item?.mid}`,
+          cover: item.cover,
+          className: "px-2 py-1 h-auto",
           type: item.type,
-        }),
-    });
-  };
+          mid: item.mid,
+        })),
+        isFolded: collectedFolded,
+        onPress: handleToggleCollectedFolded,
+        isDragEnabled: isCollectedDragEnabled,
+        onDragEnd: handleCollectedDragEnd,
+        contextMenuItems: collectedContextMenus,
+        onContextMenuAction: (action, item) =>
+          handleCollectedMenuAction(action, {
+            id: item.id,
+            title: item.title,
+            type: item.type,
+          }),
+      },
+    ],
+    [
+      collectedContextMenus,
+      collectedFolded,
+      createdContextMenus,
+      createdFolded,
+      filteredCollectedFavorites,
+      filteredCreatedFavorites,
+      handleCollectedDragEnd,
+      handleCollectedMenuAction,
+      handleCreatedDragEnd,
+      handleCreatedMenuAction,
+      handleToggleCollectedFolded,
+      handleToggleCreatedFolded,
+      isCollectedDragEnabled,
+      isCreatedDragEnabled,
+      onOpenAddFavorite,
+    ],
+  );
 
   return (
-    <>
-      {renderCreatedGroup()}
-      {renderCollectedGroup()}
-    </>
+    <MenuGroup<CollectionMenu>
+      collapsed={isCollapsed}
+      items={menuList}
+      renderItem={({ isDragEnabled, contextMenuItems, onContextMenuAction, onDragEnd, items, ...otherProps }) => (
+        <DndContext collisionDetection={closestCenter} onDragEnd={onDragEnd} sensors={sensors}>
+          <SortableContext
+            items={(items as CollectionMenuItem[]).filter(item => item.id).map(item => item.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <MenuFold<CollectionMenuItem>
+              items={items as CollectionMenuItem[]}
+              collapsed={isCollapsed}
+              renderItem={(item, index) => {
+                const { id, ...otherProps } = item;
+                return id ? (
+                  <SortableMenuItem
+                    key={id}
+                    id={id}
+                    collapsed={isCollapsed}
+                    disabled={!isDragEnabled}
+                    contextMenuItems={contextMenuItems}
+                    onContextMenuAction={action => onContextMenuAction(action, item as CollectionMenuItem)}
+                    {...otherProps}
+                  />
+                ) : (
+                  <MenuItem key={index} {...(otherProps as MenuItemProps)} collapsed={isCollapsed} />
+                );
+              }}
+              {...otherProps}
+            />
+          </SortableContext>
+        </DndContext>
+      )}
+    />
   );
 };
 
