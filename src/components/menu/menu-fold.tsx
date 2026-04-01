@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Tooltip } from "@heroui/react";
 import clx from "classnames";
@@ -57,6 +57,15 @@ const MenuFold = <T = MenuItemProps,>({
       />
     );
   }, [items, collapsed, renderItem]);
+
+  /* 组件卸载时清理定时器 */
+  useEffect(() => {
+    return () => {
+      if (closeTimer.current) {
+        clearTimeout(closeTimer.current);
+      }
+    };
+  });
 
   return collapsed ? (
     <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>

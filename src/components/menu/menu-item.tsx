@@ -6,6 +6,8 @@ import clx from "classnames";
 import { twMerge } from "tailwind-merge";
 
 export interface MenuItemProps {
+  /** 菜单项 id */
+  id?: string | number;
   /** 菜单项标签 */
   title: string;
   /** 菜单项链接 */
@@ -51,10 +53,9 @@ const MenuItem: React.FC<MenuItemProps> = ({
 
   /* 菜单项激活状态 */
   const isActive = useMemo(() => {
-    console.log(location.pathname);
     return (
       location.pathname === href ||
-      new RegExp(`^${path}`).test(location.pathname) ||
+      (path && location.pathname.startsWith(path)) ||
       (id && href?.split("?")[0].includes(id))
     );
   }, [location.pathname, href, id, path]);
@@ -93,6 +94,9 @@ const MenuItem: React.FC<MenuItemProps> = ({
   }, [Icon, title, cover, isActive, ActiveIcon, collapsed]);
 
   const menuButton = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: _, ...restOthers } = others;
+
     return (
       <Button
         as={href ? (HeroLink as any) : "button"}
@@ -116,7 +120,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
           },
         )}
         {...(dndRest as Record<string, unknown>)}
-        {...others}
+        {...restOthers}
       >
         {collapsed ? menuIcon : <span className="pointer-events-none truncate">{title}</span>}
       </Button>

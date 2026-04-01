@@ -137,8 +137,6 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
   const isCreatedDragEnabled = isDragEnabled || !createdFolded;
   const isCollectedDragEnabled = isDragEnabled || !collectedFolded;
 
-  console.log(isDragEnabled, createdFolded);
-
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {

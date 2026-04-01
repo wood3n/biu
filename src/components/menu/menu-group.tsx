@@ -34,7 +34,7 @@ const MenuGroup = <T = MenuItemProps,>({ title, titleExtra, items, collapsed, cl
             return renderItem(item as T, index);
           }
           const { id, href, title } = item as MenuItemProps;
-          return <MenuItem key={(id as number) ?? href ?? title} {...(item as MenuItemProps)} collapsed={collapsed} />;
+          return <MenuItem key={id ?? href ?? title} {...(item as MenuItemProps)} collapsed={collapsed} />;
         })}
       </div>
     </div>
