@@ -27,12 +27,13 @@ const MenuFold = <T = MenuItemProps,>({
   const [isHover, setIsHover] = useState(false);
 
   // 延迟关闭定时器（核心）
-  const closeTimer = useRef<NodeJS.Timeout | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // —————— 鼠标进入触发区 ——————
   const handleMouseEnter = () => {
     if (closeTimer.current) {
       clearTimeout(closeTimer.current); // 清除延迟
+      closeTimer.current = null;
     }
     setIsHover(true);
   };
@@ -63,6 +64,7 @@ const MenuFold = <T = MenuItemProps,>({
     return () => {
       if (closeTimer.current) {
         clearTimeout(closeTimer.current);
+        closeTimer.current = null;
       }
     };
   });

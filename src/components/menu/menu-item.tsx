@@ -53,10 +53,11 @@ const MenuItem: React.FC<MenuItemProps> = ({
 
   /* 菜单项激活状态 */
   const isActive = useMemo(() => {
+    const hrefPath = href?.split("?")[0];
     return (
-      location.pathname === href ||
-      (path && location.pathname.startsWith(path)) ||
-      (id && href?.split("?")[0].includes(id))
+      location.pathname === hrefPath ||
+      (path ? location.pathname === path || location.pathname.startsWith(`${path}/`) : false) ||
+      (id ? hrefPath?.endsWith(`/${id}`) : false)
     );
   }, [location.pathname, href, id, path]);
 
