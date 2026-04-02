@@ -2,18 +2,18 @@ import clx from "classnames";
 
 import MenuItem, { type MenuItemProps } from "../../components/menu/menu-item";
 
-interface Props {
+interface Props<T = MenuItemProps> {
   title?: React.ReactNode;
   titleExtra?: React.ReactNode;
-  items: MenuItemProps[];
+  items: Array<T>;
   collapsed?: boolean;
   className?: string;
-  renderItem?: (item: MenuItemProps, index: number) => React.ReactNode;
+  renderItem?: (item: T, index: number) => React.ReactNode;
 }
 
-const MenuGroup = ({ title, titleExtra, items, collapsed, className, renderItem }: Props) => {
+const MenuGroup = <T = MenuItemProps,>({ title, titleExtra, items, collapsed, className, renderItem }: Props<T>) => {
   return (
-    <>
+    <div>
       {!collapsed && Boolean(title) && (
         <div className="flex items-center justify-between p-2 text-sm text-zinc-500">
           <span>{title}</span>
@@ -22,22 +22,22 @@ const MenuGroup = ({ title, titleExtra, items, collapsed, className, renderItem 
       )}
       <div
         className={clx(
-          "flex flex-col items-stretch",
+          "flex flex-col items-stretch gap-1",
           {
             "px-2": collapsed,
           },
           className,
         )}
       >
-        {items.map((item, index) =>
-          renderItem ? (
-            renderItem(item, index)
-          ) : (
-            <MenuItem key={(item.id ?? item.href ?? item.title) as React.Key} {...item} collapsed={collapsed} />
-          ),
-        )}
+        {items.map((item, index) => {
+          if (renderItem) {
+            return renderItem(item as T, index);
+          }
+          const { id, href, title } = item as MenuItemProps;
+          return <MenuItem key={id ?? href ?? title} {...(item as MenuItemProps)} collapsed={collapsed} />;
+        })}
       </div>
-    </>
+    </div>
   );
 };
 

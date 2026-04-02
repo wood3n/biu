@@ -42,6 +42,10 @@ const routes: RouteObject[] = [
         element: <Folder />,
       },
       {
+        path: "compilation/:id",
+        element: <Folder />,
+      },
+      {
         path: "user/:id",
         element: <UserProfile />,
       },
