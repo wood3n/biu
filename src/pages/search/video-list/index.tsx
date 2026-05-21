@@ -119,6 +119,17 @@ export default function SearchVideo({ keyword, getScrollElement }: SearchVideoPr
         usePlayList.getState().addList([musicItem]);
         addToast({ title: "已添加到播放列表", color: "success" });
         break;
+      case "add-to-custom-playlist":
+        useModalStore.getState().onOpenPlaylistSelectModal({
+          songs: [musicItem],
+          title: (
+            <div>
+              添加到歌单
+              <span dangerouslySetInnerHTML={{ __html: item.title }} />
+            </div>
+          ),
+        });
+        break;
       case "favorite":
         useModalStore.getState().onOpenFavSelectModal({
           rid: item.aid,

@@ -223,6 +223,20 @@ const MusicRecommend = () => {
           },
         ]);
         break;
+      case "add-to-custom-playlist":
+        useModalStore.getState().onOpenPlaylistSelectModal({
+          songs: [
+            {
+              type: "mv",
+              title: item.title,
+              cover: item.cover,
+              bvid: item.bvid,
+              sid: Number(item.id) || undefined,
+              ownerName: item.author,
+            },
+          ],
+        });
+        break;
       case "download-audio":
         await window.electron.addMediaDownloadTask({
           outputFileType: "audio",

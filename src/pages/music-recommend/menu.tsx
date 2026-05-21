@@ -3,6 +3,7 @@ import {
   RiFileMusicLine,
   RiFileVideoLine,
   RiPlayCircleLine,
+  RiPlayList2Line,
   RiPlayListAddLine,
   RiStarLine,
 } from "@remixicon/react";
@@ -24,6 +25,11 @@ export const getContextMenus = ({ isLogin }: { isLogin?: boolean }) => {
       icon: <RiPlayListAddLine size={18} />,
       key: "add-to-playlist",
       label: "添加到播放列表",
+    },
+    {
+      icon: <RiPlayList2Line size={18} />,
+      key: "add-to-custom-playlist",
+      label: "添加到歌单",
     },
     {
       icon: <RiFileMusicLine size={18} />,

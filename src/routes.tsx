@@ -11,6 +11,8 @@ import LocalMusicPage from "./pages/local-music";
 import MiniPlayer from "./pages/mini-player";
 import MusicRecommend from "./pages/music-recommend";
 import NotFound from "./pages/not-found";
+import PlaylistDetail from "./pages/playlist-detail";
+import PlaylistList from "./pages/playlist-list";
 import Search from "./pages/search";
 import Settings from "./pages/settings";
 import UserProfile from "./pages/user-profile";
@@ -56,6 +58,14 @@ const routes: RouteObject[] = [
       {
         path: "dynamic-feed",
         element: <DynamicFeed />,
+      },
+      {
+        path: "playlists",
+        element: <PlaylistList />,
+      },
+      {
+        path: "playlists/:id",
+        element: <PlaylistDetail />,
       },
       {
         path: "local-music",

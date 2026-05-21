@@ -8,6 +8,7 @@ declare global {
     [StoreNameMap.UserLoginInfo]: UserInfo;
     [StoreNameMap.ShortcutSettings]: ShortcutSettings;
     [StoreNameMap.LyricsCache]: Record<string, MusicLyrics>;
+    [StoreNameMap.UserPlaylists]: { playlists: unknown };
   };
 }
 
