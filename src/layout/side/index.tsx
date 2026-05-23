@@ -11,6 +11,7 @@ import { useSettings } from "@/store/settings";
 import Collection from "./collection";
 import DefaultMenus from "./default-menu";
 import Logo from "./logo";
+import UserPlaylistMenu from "./user-playlist";
 
 const COLLAPSED_WIDTH = 72;
 const MIN_WIDTH = 160;
@@ -156,6 +157,7 @@ const SideNav = () => {
           })}
         >
           <DefaultMenus isCollapsed={isCollapsedVisual} onOpenAddFavorite={handleOpenAddFavorite} />
+          <UserPlaylistMenu isCollapsed={isCollapsedVisual} />
           <Collection
             isCollapsed={isCollapsedVisual}
             onOpenAddFavorite={handleOpenAddFavorite}

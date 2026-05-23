@@ -4,6 +4,7 @@ import { createConfirmModalSlice, type ConfirmModalState } from "./confirm-modal
 import { createFavSelectModalSlice, type FavSelectModalState } from "./fav-select-modal";
 import { createFullScreenPlayerSlice, type FullScreenPlayerModalState } from "./full-screen-player";
 import { createPlayListDrawerSlice, type PlayListDrawerState } from "./play-list-drawer";
+import { createPlaylistSelectModalSlice, type PlaylistSelectModalState } from "./playlist-select-modal";
 import { createReleaseNoteModalSlice, type ReleaseNoteModalState } from "./release-note-modal";
 import { createVideoPageDownloadModalSlice, type VideoPageDownloadModalState } from "./video-page-download-modal";
 
@@ -13,7 +14,8 @@ export const useModalStore = create<
     VideoPageDownloadModalState &
     ReleaseNoteModalState &
     FullScreenPlayerModalState &
-    PlayListDrawerState
+    PlayListDrawerState &
+    PlaylistSelectModalState
 >((...a) => ({
   ...createFavSelectModalSlice(...a),
   ...createConfirmModalSlice(...a),
@@ -21,4 +23,5 @@ export const useModalStore = create<
   ...createReleaseNoteModalSlice(...a),
   ...createFullScreenPlayerSlice(...a),
   ...createPlayListDrawerSlice(...a),
+  ...createPlaylistSelectModalSlice(...a),
 }));

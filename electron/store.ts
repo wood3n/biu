@@ -44,3 +44,9 @@ export const lyricsCacheStore = new Store<Record<string, MusicLyrics>>({
   cwd: getUserDataPath(),
   defaults: {},
 });
+
+export const userPlaylistsStore = new Store<{ playlists: unknown }>({
+  name: StoreNameMap.UserPlaylists,
+  cwd: getUserDataPath(),
+  defaults: { playlists: [] },
+});

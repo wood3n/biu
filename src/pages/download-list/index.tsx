@@ -173,7 +173,10 @@ const DownloadList = () => {
                                 })
                               }
                             >
-                              <span className="min-w-0 flex-auto truncate">{item.title}</span>
+                              <span
+                                className="min-w-0 flex-auto truncate"
+                                dangerouslySetInnerHTML={{ __html: item.title }}
+                              />
                               <RiExternalLinkLine className="w-0 flex-none group-hover:w-[16px]" />
                             </div>
                             {Boolean(quality) && (

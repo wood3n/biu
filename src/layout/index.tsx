@@ -9,6 +9,7 @@ import Fallback from "@/components/error-fallback";
 import FavoritesSelectModal from "@/components/favorites-select-modal";
 import FullScreenPlayer from "@/components/full-screen-player";
 import PlayListDrawer from "@/components/music-playlist-drawer";
+import PlaylistSelectModal from "@/components/playlist-select-modal";
 import ReleaseNoteModal from "@/components/release-note-modal";
 import VideoPagesDownloadSelectModal from "@/components/video-pages-download-select-modal";
 import PlayBar from "@/layout/playbar";
@@ -23,7 +24,7 @@ const Layout = () => {
 
   useEffect(() => {
     updateUser();
-  }, []);
+  }, [updateUser]);
 
   return (
     <ErrorBoundary
@@ -52,6 +53,7 @@ const Layout = () => {
       <FavoritesSelectModal />
       <ConfirmModal />
       <VideoPagesDownloadSelectModal />
+      <PlaylistSelectModal />
       <ReleaseNoteModal />
       <PlayListDrawer />
       <FullScreenPlayer />

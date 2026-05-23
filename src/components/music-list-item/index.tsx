@@ -33,6 +33,7 @@ interface Props {
   menus: ContextMenuItem[];
   onMenuAction?: (key: string) => void;
   hidePubTime?: boolean;
+  dragHandle?: ReactNode;
 }
 
 const MusicListItem = ({
@@ -51,6 +52,7 @@ const MusicListItem = ({
   index,
   pubTime,
   hidePubTime,
+  dragHandle,
 }: Props) => {
   const navigate = useNavigate();
   const playId = usePlayList(state => state.playId);
@@ -79,7 +81,7 @@ const MusicListItem = ({
       >
         <div className={clx("grid w-full items-center gap-4", gridCols)}>
           {/* 1. 序号 */}
-          <div className="text-foreground-500 min-w-8 text-center text-xs tabular-nums">{index}</div>
+          <div className="text-foreground-500 min-w-8 text-center text-xs tabular-nums">{dragHandle ?? index}</div>
 
           {/* 2. 音乐信息 */}
           {isCompact ? (
