@@ -1,8 +1,8 @@
 import { BrowserWindow } from "electron";
 import isDev from "electron-is-dev";
+import Store from "electron-store";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import Store from "electron-store";
 
 import { channel } from "../ipc/channel"; // we'll use this if needed
 

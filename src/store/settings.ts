@@ -99,7 +99,7 @@ settingsBc.onmessage = (ev) => {
 // 只有在主动修改时进行广播，避免死循环
 useSettings.subscribe((state) => {
   if (!isReceivingSettings) {
-    const { getSettings, update, reset, ...data } = state;
+    const { getSettings: _getSettings, update: _update, reset: _reset, ...data } = state;
     settingsBc.postMessage(data);
   }
 });
