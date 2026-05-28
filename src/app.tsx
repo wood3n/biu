@@ -5,7 +5,7 @@ import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import moment from "moment";
 
 import { getCookitFromBSite } from "./common/utils/cookie";
-import { toggleMiniMode } from "./common/utils/mini-player";
+import { toggleMiniMode, startMiniPlayerMainSync } from "./common/utils/mini-player";
 import { mapKeyToElectronAccelerator } from "./common/utils/shortcut";
 import Theme from "./components/theme";
 import routes from "./routes";
@@ -28,6 +28,7 @@ export function App() {
 
   useEffect(() => {
     getCookitFromBSite();
+    startMiniPlayerMainSync(); // 全局开启状态广播，确保桌面歌词等跨窗口组件能随时收到状态更新
   }, []);
 
   useEffect(() => {

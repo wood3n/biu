@@ -10,6 +10,7 @@ import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
 import { channel } from "../ipc/channel";
 import { destroyMiniPlayer } from "../mini-player";
 import { IconBase } from "../utils";
+import { desktopLyricsWindow, updateDesktopLyricsLockStatus } from "./desktop-lyrics";
 
 interface Props {
   getMainWindow: () => BrowserWindow | null;
@@ -102,6 +103,14 @@ function createTray({ getMainWindow, onExit }: Props) {
     {
       label: "显示/隐藏界面",
       click: toggleMainWindowVisibility,
+    },
+    {
+      label: "解锁桌面歌词",
+      click: () => {
+        if (desktopLyricsWindow && !desktopLyricsWindow.isDestroyed()) {
+          updateDesktopLyricsLockStatus(false);
+        }
+      },
     },
     {
       type: "separator",

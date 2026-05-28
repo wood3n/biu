@@ -1,3 +1,6 @@
+import { RiTBoxLine } from "@remixicon/react";
+
+import IconButton from "@/components/icon-button";
 import MusicDownloadButton from "@/components/music-download-button";
 import MusicPlayMode from "@/components/music-play-mode";
 import MusicRate from "@/components/music-rate";
@@ -12,6 +15,9 @@ const RightControl = () => {
   return (
     <div className="flex h-full items-center justify-end space-x-2">
       <MusicPlayMode />
+      <IconButton onPress={() => window.electron.toggleDesktopLyrics()}>
+        <RiTBoxLine size={18} />
+      </IconButton>
       {Boolean(playId) && getPlayItem()?.source !== "local" && <MusicDownloadButton />}
       <OpenPlaylistDrawerButton />
       <MusicVolume />

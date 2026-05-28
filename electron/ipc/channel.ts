@@ -79,6 +79,10 @@ export const channel = {
   },
   window: {
     toggleMini: "window:toggle-mini",
+    toggleDesktopLyrics: "window:toggle-desktop-lyrics",
+    setDesktopLyricsLock: "window:set-desktop-lyrics-lock",
+    setDesktopLyricsIgnoreMouseEvents: "window:set-desktop-lyrics-ignore-mouse-events",
+    onDesktopLyricsLockChange: "window:on-desktop-lyrics-lock-change",
     minimize: "window:minimize",
     toggleMaximize: "window:toggle-maximize",
     close: "window:close",

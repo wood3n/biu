@@ -26,6 +26,7 @@ import {
   RiSunLine,
 } from "@remixicon/react";
 
+import ColorPicker from "@/components/color-picker";
 import FontSelect from "@/components/font-select";
 import UpdateCheckButton from "@/components/update-check-button";
 
@@ -166,6 +167,73 @@ export const SystemSettingsTab = ({
             control={control}
             name="fontFamily"
             render={({ field }) => <FontSelect value={field.value} onChange={field.onChange} />}
+          />
+        </div>
+      </div>
+
+      {/* 桌面歌词设置 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">桌面歌词字体</div>
+          <div className="text-sm text-zinc-500">选择桌面歌词字体</div>
+        </div>
+        <div className="w-[180px]">
+          <Controller
+            control={control}
+            name="desktopLyricsFontFamily"
+            render={({ field }) => <FontSelect value={field.value} onChange={field.onChange} />}
+          />
+        </div>
+      </div>
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">桌面歌词字体大小</div>
+          <div className="text-sm text-zinc-500">调整桌面歌词的显示文字大小</div>
+        </div>
+        <div className="w-[360px]">
+          <Controller
+            control={control}
+            name="desktopLyricsFontSize"
+            render={({ field }) => (
+              <Slider
+                showTooltip={false}
+                size="sm"
+                endContent={<span>{field.value}px</span>}
+                aria-label="桌面歌词字体大小"
+                step={2}
+                maxValue={64}
+                minValue={16}
+                value={field.value}
+                onChange={v => field.onChange(Number(v))}
+                classNames={{
+                  thumb: "after:hidden",
+                }}
+              />
+            )}
+          />
+        </div>
+      </div>
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">桌面歌词颜色</div>
+          <div className="text-sm text-zinc-500">设置桌面歌词的显示颜色</div>
+        </div>
+        <div className="w-[360px] flex justify-end">
+          <Controller
+            control={control}
+            name="desktopLyricsColor"
+            render={({ field }) => (
+              <ColorPicker
+                value={field.value}
+                onChange={field.onChange}
+                presets={["#60a5fa", "#ffffff", "#000000", "#ff7bb0", "#18a058"]}
+              >
+                <div
+                  className="border-default h-6 w-16 cursor-pointer rounded-medium border shadow-sm"
+                  style={{ backgroundColor: field.value || "#60a5fa" }}
+                />
+              </ColorPicker>
+            )}
           />
         </div>
       </div>
