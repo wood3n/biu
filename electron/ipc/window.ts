@@ -55,16 +55,19 @@ export function registerWindowHandlers({ getMainWindow }) {
     updateDesktopLyricsLockStatus(isLocked);
   });
 
-  ipcMain.handle(channel.window.setDesktopLyricsIgnoreMouseEvents, (event, ignore: boolean, options?: { forward: boolean }) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    if (win && !win.isDestroyed()) {
-      if (options) {
-        win.setIgnoreMouseEvents(ignore, options);
-      } else {
-        win.setIgnoreMouseEvents(ignore);
+  ipcMain.handle(
+    channel.window.setDesktopLyricsIgnoreMouseEvents,
+    (event, ignore: boolean, options?: { forward: boolean }) => {
+      const win = BrowserWindow.fromWebContents(event.sender);
+      if (win && !win.isDestroyed()) {
+        if (options) {
+          win.setIgnoreMouseEvents(ignore, options);
+        } else {
+          win.setIgnoreMouseEvents(ignore);
+        }
       }
-    }
-  });
+    },
+  );
 
   ipcMain.on(channel.window.toggleDevTools, event => {
     const win = BrowserWindow.fromWebContents(event.sender);

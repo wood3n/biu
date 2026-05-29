@@ -12,8 +12,8 @@ const __dirname = path.dirname(__filename);
 const desktopLyricsStore = new Store({
   name: "desktop-lyrics-settings",
   defaults: {
-    bounds: { width: 800, height: 120 }
-  }
+    bounds: { width: 800, height: 120 },
+  },
 });
 
 let desktopLyricsWindow: BrowserWindow | null = null;
@@ -25,7 +25,7 @@ const createDesktopLyricsWindow = () => {
   desktopLyricsWindow = new BrowserWindow({
     title: "Biu Desktop Lyrics",
     show: false, // 阻止初次白屏闪烁
-    backgroundColor: '#00000000', // 透明背景
+    backgroundColor: "#00000000", // 透明背景
     width: savedBounds?.width || 800,
     height: savedBounds?.height || 120,
     x: savedBounds?.x,
@@ -37,7 +37,7 @@ const createDesktopLyricsWindow = () => {
     transparent: true,
     hasShadow: false, // Better for lock through without shadow box
     alwaysOnTop: true,
-    type: 'toolbar', // Helps with alwaysOnTop on some Linux WMs
+    type: "toolbar", // Helps with alwaysOnTop on some Linux WMs
     skipTaskbar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
@@ -71,7 +71,7 @@ const createDesktopLyricsWindow = () => {
   desktopLyricsWindow.once("ready-to-show", () => {
     desktopLyricsWindow?.show();
   });
-  
+
   const saveBounds = () => {
     if (desktopLyricsWindow && !desktopLyricsWindow.isDestroyed()) {
       desktopLyricsStore.set("bounds", desktopLyricsWindow.getBounds());
@@ -80,7 +80,7 @@ const createDesktopLyricsWindow = () => {
 
   desktopLyricsWindow.on("moved", saveBounds);
   desktopLyricsWindow.on("resized", saveBounds);
-  
+
   // Set initial lock state
   updateDesktopLyricsLockStatus(false);
 };

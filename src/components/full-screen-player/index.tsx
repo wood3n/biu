@@ -395,9 +395,9 @@ const FullScreenPlayer = () => {
                   <MusicPlayProgress className="w-full" trackClassName="h-[6px]" />
                   <div className="flex w-full items-center justify-center space-x-4">
                     <MusicPlayMode />
-                      <IconButton title="桌面歌词" onPress={() => window.electron.toggleDesktopLyrics()}>
-                        <RiTBoxLine size={24} />
-                      </IconButton>
+                    <IconButton title="桌面歌词" onPress={() => window.electron.toggleDesktopLyrics()}>
+                      <RiTBoxLine size={24} />
+                    </IconButton>
                     <MusicPlayControl />
                     <OpenPlaylistDrawerButton />
                   </div>

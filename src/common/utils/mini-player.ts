@@ -127,7 +127,8 @@ function handleMessageFromMini(message: MiniPlayerMessageFromMini, channel: Broa
  */
 export function startMiniPlayerMainSync() {
   // 仅主窗口允许作为状态广播端，避免其他辅助窗口重复广播相互覆盖
-  const isSecondaryWindow = window.location.hash.includes("mini-player") || window.location.hash.includes("desktop-lyrics");
+  const isSecondaryWindow =
+    window.location.hash.includes("mini-player") || window.location.hash.includes("desktop-lyrics");
   if (isSecondaryWindow) return;
 
   if (isBroadcasting) return;

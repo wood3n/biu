@@ -90,17 +90,17 @@ export const useSettings = create<AppSettings & SettingsActions>()(
 const settingsBc = new BroadcastChannel("app-settings-sync-channel");
 let isReceivingSettings = false;
 
-settingsBc.onmessage = (ev) => {
+settingsBc.onmessage = ev => {
   isReceivingSettings = true;
   useSettings.setState(ev.data);
   isReceivingSettings = false;
 };
 
 // 只有在主动修改时进行广播，避免死循环
-useSettings.subscribe((state) => {
+useSettings.subscribe(state => {
   if (!isReceivingSettings) {
-    const { getSettings: _getSettings, update: _update, reset: _reset, ...data } = state;
+    // 动态过滤掉所有的函数，只保留纯数据，既防止 DataCloneError，也告别 ESLint 变量未使用警告
+    const data = Object.fromEntries(Object.entries(state).filter(([, value]) => typeof value !== "function"));
     settingsBc.postMessage(data);
   }
 });
-

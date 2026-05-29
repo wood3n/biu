@@ -5,10 +5,9 @@ import clx from "classnames";
 
 import { createBroadcastChannel } from "@/common/utils/mini-player";
 import IconButton from "@/components/icon-button";
+import { getLyricsByBili } from "@/components/lyrics/get-lyrics";
 import { useSettings } from "@/store/settings";
 import { StoreNameMap } from "@shared/store";
-
-import { getLyricsByBili } from "@/components/lyrics/get-lyrics";
 
 type LyricLine = {
   time: number;
@@ -53,7 +52,7 @@ export default function DesktopLyrics() {
       }
     }, 400); // 增加一点延迟，防止从文字移向按钮时中间的透明空隙触发离开
   };
-  
+
   const fontSize = useSettings(s => s.desktopLyricsFontSize) || 36;
   const fontColor = useSettings(s => s.desktopLyricsColor) || "#60a5fa";
   const fontFamily = useSettings(s => s.desktopLyricsFontFamily) || "system-ui";
@@ -101,7 +100,7 @@ export default function DesktopLyrics() {
     bcRef.current.onmessage = ev => {
       const { from, state } = ev.data || {};
       if (from !== "main" || !state) return;
-      
+
       if (typeof state.currentTime === "number") {
         setCurrentTime(state.currentTime);
       }
@@ -160,7 +159,9 @@ export default function DesktopLyrics() {
     };
 
     void fetchLyrics();
-    return () => { canceled = true; };
+    return () => {
+      canceled = true;
+    };
   }, [playState.bvid, playState.cid, playState.aid, parseLrc]);
 
   // Current MS calculation
@@ -188,18 +189,21 @@ export default function DesktopLyrics() {
 
   return (
     <div
-      className={clx("w-screen h-screen flex flex-col justify-center items-center overflow-hidden transition-all duration-300", {
-        "window-drag": !isLocked,
-        "window-no-drag": isLocked,
-        "bg-black/20": isHovered && !isLocked
-      })}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+      className={clx(
+        "flex h-screen w-screen flex-col items-center justify-center overflow-hidden transition-all duration-300",
+        {
+          "window-drag": !isLocked,
+          "window-no-drag": isLocked,
+          "bg-black/20": isHovered && !isLocked,
+        },
+      )}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
-      <div 
-        className={clx("absolute top-2 w-full flex justify-center gap-4 transition-opacity duration-300", {
+      <div
+        className={clx("absolute top-2 flex w-full justify-center gap-4 transition-opacity duration-300", {
           "opacity-100": isHovered,
-          "opacity-0 pointer-events-none": !isHovered
+          "pointer-events-none opacity-0": !isHovered,
         })}
       >
         <div
@@ -213,28 +217,36 @@ export default function DesktopLyrics() {
             handleMouseLeave();
           }}
         >
-          <IconButton title={isLocked ? "解锁 (Unlock)" : "锁定 (Lock)"} onPress={lockToggle} className="text-white hover:text-white pointer-events-auto window-no-drag">
+          <IconButton
+            title={isLocked ? "解锁 (Unlock)" : "锁定 (Lock)"}
+            onPress={lockToggle}
+            className="window-no-drag pointer-events-auto text-white hover:text-white"
+          >
             {isLocked ? <RiLockFill size={18} /> : <RiLockUnlockFill size={18} />}
           </IconButton>
         </div>
         {!isLocked && (
-          <IconButton title="关闭" onPress={closeWindow} className="text-white hover:text-white pointer-events-auto window-no-drag">
+          <IconButton
+            title="关闭"
+            onPress={closeWindow}
+            className="window-no-drag pointer-events-auto text-white hover:text-white"
+          >
             <RiCloseLine size={20} />
           </IconButton>
         )}
       </div>
 
-      <div className="w-full px-6 flex justify-center text-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
-        <span 
+      <div className="flex w-full justify-center px-6 text-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
+        <span
           style={{
             WebkitTextStroke: "1px rgba(0,0,0,0.6)", // Text stroke for visibility on light/dark backgrounds
             paintOrder: "stroke fill",
             color: fontColor, // 使用设置的颜色
             fontSize: `${fontSize}px`, // 使用设置的字体大小
             fontFamily: fontFamily, // 使用设置的字体
-            textShadow: "0px 2px 4px rgba(0,0,0,1)"
+            textShadow: "0px 2px 4px rgba(0,0,0,1)",
           }}
-          className="font-bold tracking-wider leading-tight text-white transition-all"
+          className="leading-tight font-bold tracking-wider text-white transition-all"
         >
           {activeLyric}
         </span>

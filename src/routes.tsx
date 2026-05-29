@@ -1,6 +1,7 @@
 import type { RouteObject } from "react-router";
 
 import Layout from "./layout";
+import DesktopLyrics from "./pages/desktop-lyrics";
 import DownloadList from "./pages/download-list";
 import DynamicFeed from "./pages/dynamic-feed";
 import EmptyPage from "./pages/empty";
@@ -9,7 +10,6 @@ import History from "./pages/history";
 import Later from "./pages/later";
 import LocalMusicPage from "./pages/local-music";
 import MiniPlayer from "./pages/mini-player";
-import DesktopLyrics from "./pages/desktop-lyrics";
 import MusicRecommend from "./pages/music-recommend";
 import NotFound from "./pages/not-found";
 import Search from "./pages/search";

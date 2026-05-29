@@ -218,7 +218,7 @@ export const SystemSettingsTab = ({
           <div className="text-medium font-medium">桌面歌词颜色</div>
           <div className="text-sm text-zinc-500">设置桌面歌词的显示颜色</div>
         </div>
-        <div className="w-[360px] flex justify-end">
+        <div className="flex w-[360px] justify-end">
           <Controller
             control={control}
             name="desktopLyricsColor"
@@ -229,7 +229,7 @@ export const SystemSettingsTab = ({
                 presets={["#60a5fa", "#ffffff", "#000000", "#ff7bb0", "#18a058"]}
               >
                 <div
-                  className="border-default h-6 w-16 cursor-pointer rounded-medium border shadow-sm"
+                  className="border-default rounded-medium h-6 w-16 cursor-pointer border shadow-sm"
                   style={{ backgroundColor: field.value || "#60a5fa" }}
                 />
               </ColorPicker>
