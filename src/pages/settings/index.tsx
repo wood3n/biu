@@ -32,6 +32,9 @@ const useSystemSettingsForm = () => {
     showSearchHistory,
     proxySettings,
     reportPlayHistory,
+    desktopLyricsFontSize,
+    desktopLyricsColor,
+    desktopLyricsFontFamily,
   } = useSettings(
     useShallow(s => ({
       fontFamily: s.fontFamily,
@@ -50,6 +53,9 @@ const useSystemSettingsForm = () => {
       showSearchHistory: s.showSearchHistory,
       proxySettings: s.proxySettings,
       reportPlayHistory: s.reportPlayHistory,
+      desktopLyricsFontSize: s.desktopLyricsFontSize,
+      desktopLyricsColor: s.desktopLyricsColor,
+      desktopLyricsFontFamily: s.desktopLyricsFontFamily,
     })),
   );
   const updateSettings = useSettings(s => s.update);
@@ -84,6 +90,9 @@ const useSystemSettingsForm = () => {
         password: "",
       },
       reportPlayHistory,
+      desktopLyricsFontSize,
+      desktopLyricsColor,
+      desktopLyricsFontFamily,
     },
   });
 

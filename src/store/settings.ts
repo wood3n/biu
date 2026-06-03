@@ -77,8 +77,30 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           sideMenuCollectionFolded: state.sideMenuCollectionFolded,
           reportPlayHistory: state.reportPlayHistory,
           localMusicDirs: state.localMusicDirs,
+          desktopLyricsFontSize: state.desktopLyricsFontSize,
+          desktopLyricsColor: state.desktopLyricsColor,
+          desktopLyricsFontFamily: state.desktopLyricsFontFamily,
         };
       },
     },
   ),
 );
+
+// 跨窗口同步 Settings 变化
+const settingsBc = new BroadcastChannel("app-settings-sync-channel");
+let isReceivingSettings = false;
+
+settingsBc.onmessage = ev => {
+  isReceivingSettings = true;
+  useSettings.setState(ev.data);
+  isReceivingSettings = false;
+};
+
+// 只有在主动修改时进行广播，避免死循环
+useSettings.subscribe(state => {
+  if (!isReceivingSettings) {
+    // 动态过滤掉所有的函数，只保留纯数据，既防止 DataCloneError，也告别 ESLint 变量未使用警告
+    const data = Object.fromEntries(Object.entries(state).filter(([, value]) => typeof value !== "function"));
+    settingsBc.postMessage(data);
+  }
+});

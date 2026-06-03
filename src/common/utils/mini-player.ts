@@ -17,6 +17,9 @@ export interface MiniPlayerMainStateSnapshot {
   duration: number;
   playMode?: PlayMode;
   playId?: string;
+  cid?: string | number;
+  bvid?: string;
+  aid?: string | number;
 }
 
 export interface MiniPlayerMessageFromMini {
@@ -57,6 +60,9 @@ function getMainStateSnapshot(): MiniPlayerMainStateSnapshot {
     title: playItem?.pageTitle || playItem?.title,
     cover: playItem?.pageCover || playItem?.cover,
     playId,
+    cid: playItem?.cid,
+    bvid: playItem?.bvid,
+    aid: playItem?.aid,
     isPlaying,
     currentTime: Number(currentTime ?? 0),
     playMode,
@@ -119,7 +125,12 @@ function handleMessageFromMini(message: MiniPlayerMessageFromMini, channel: Broa
  * - 收到 mini 端的 `init/seek/next/prev/togglePlay/togglePlayMode` 会转发到主播放状态。
  * - 主播放状态发生变化会推送给 mini 端更新 UI。
  */
-function startMiniPlayerMainSync() {
+export function startMiniPlayerMainSync() {
+  // 仅主窗口允许作为状态广播端，避免其他辅助窗口重复广播相互覆盖
+  const isSecondaryWindow =
+    window.location.hash.includes("mini-player") || window.location.hash.includes("desktop-lyrics");
+  if (isSecondaryWindow) return;
+
   if (isBroadcasting) return;
 
   bc = createBroadcastChannel();

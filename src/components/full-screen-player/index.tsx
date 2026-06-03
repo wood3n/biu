@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Drawer, DrawerBody, DrawerContent, Image, Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
-import { RiArrowDownSLine, RiArrowLeftSLine, RiSettings3Line } from "@remixicon/react";
+import { RiArrowDownSLine, RiArrowLeftSLine, RiSettings3Line, RiTBoxLine } from "@remixicon/react";
 import { useClickAway } from "ahooks";
 import clsx from "classnames";
 import { readableColor } from "color2k";
@@ -395,6 +395,9 @@ const FullScreenPlayer = () => {
                   <MusicPlayProgress className="w-full" trackClassName="h-[6px]" />
                   <div className="flex w-full items-center justify-center space-x-4">
                     <MusicPlayMode />
+                    <IconButton title="桌面歌词" onPress={() => window.electron.toggleDesktopLyrics()}>
+                      <RiTBoxLine size={24} />
+                    </IconButton>
                     <MusicPlayControl />
                     <OpenPlaylistDrawerButton />
                   </div>

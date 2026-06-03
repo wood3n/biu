@@ -80,6 +80,14 @@ declare global {
     quitAndInstall: () => Promise<void>;
     /** 切换 mini/主窗口 */
     toggleMiniPlayer: () => Promise<void>;
+    /** 切换桌面歌词窗口 */
+    toggleDesktopLyrics: () => Promise<void>;
+    /** 锁定/解锁桌面歌词 */
+    setDesktopLyricsLock: (isLocked: boolean) => Promise<void>;
+    /** 设置忽略鼠标事件 */
+    setDesktopLyricsIgnoreMouseEvents: (ignore: boolean, options?: { forward: boolean }) => Promise<void>;
+    /** 监听桌面歌词锁定状态变化 */
+    onDesktopLyricsLockChange: (cb: (isLocked: boolean) => void) => VoidFunction;
     /** 最小化窗口 */
     minimizeWindow: () => void;
     /** 最大化/还原窗口 */

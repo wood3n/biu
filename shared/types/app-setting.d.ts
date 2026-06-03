@@ -38,4 +38,10 @@ interface AppSettings {
   reportPlayHistory: boolean;
   /** 本地音乐目录列表 */
   localMusicDirs: string[];
+  /** 桌面歌词字体大小 */
+  desktopLyricsFontSize: number;
+  /** 桌面歌词颜色 */
+  desktopLyricsColor: string;
+  /** 桌面歌词字体 */
+  desktopLyricsFontFamily: string;
 }

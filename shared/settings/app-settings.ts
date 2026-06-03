@@ -28,4 +28,7 @@ export const defaultAppSettings: AppSettings = {
   },
   reportPlayHistory: true,
   localMusicDirs: [],
+  desktopLyricsFontSize: 36,
+  desktopLyricsColor: "#60a5fa",
+  desktopLyricsFontFamily: "system-ui",
 };

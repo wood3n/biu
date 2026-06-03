@@ -1,6 +1,7 @@
 import type { RouteObject } from "react-router";
 
 import Layout from "./layout";
+import DesktopLyrics from "./pages/desktop-lyrics";
 import DownloadList from "./pages/download-list";
 import DynamicFeed from "./pages/dynamic-feed";
 import EmptyPage from "./pages/empty";
@@ -74,6 +75,10 @@ const routes: RouteObject[] = [
   {
     path: "mini-player",
     element: <MiniPlayer />,
+  },
+  {
+    path: "desktop-lyrics",
+    element: <DesktopLyrics />,
   },
   {
     path: "*",

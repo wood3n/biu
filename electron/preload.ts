@@ -148,6 +148,15 @@ const api: ElectronAPI = {
   isDev: () => ipcRenderer.invoke(channel.app.isDev),
   // 检查应用更新
   checkAppUpdate: () => ipcRenderer.invoke(channel.app.checkUpdate),
+  toggleDesktopLyrics: () => ipcRenderer.invoke(channel.window.toggleDesktopLyrics),
+  setDesktopLyricsLock: isLocked => ipcRenderer.invoke(channel.window.setDesktopLyricsLock, isLocked),
+  setDesktopLyricsIgnoreMouseEvents: (ignore, options) =>
+    ipcRenderer.invoke(channel.window.setDesktopLyricsIgnoreMouseEvents, ignore, options),
+  onDesktopLyricsLockChange: cb => {
+    const handler = (_: Electron.IpcRendererEvent, isLocked: boolean) => cb(isLocked);
+    ipcRenderer.on(channel.window.onDesktopLyricsLockChange, handler);
+    return () => ipcRenderer.removeListener(channel.window.onDesktopLyricsLockChange, handler);
+  },
   // 监听应用更新事件
   onUpdateAvailable: cb => {
     const handler = (_, payload: AppUpdateReleaseInfo) => cb(payload);
