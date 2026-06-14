@@ -36,6 +36,8 @@ export const channel = {
     searchNeteaseSongs: "lyrics:netease-search",
     getNeteaseLyrics: "lyrics:netease-lyrics",
     searchLrclib: "lyrics:lrclib-search",
+    readLocal: "lyrics:read-local",
+    writeLocal: "lyrics:write-local",
   },
   router: {
     navigate: "router:navigate",

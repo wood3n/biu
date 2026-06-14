@@ -104,6 +104,29 @@ const LyricsSearchModal = ({ isOpen, onOpenChange, onLyricsAdopted }: Props) => 
       if (!lyricsText && !tLyricsText) return false;
 
       const current = getPlayItem();
+
+      // 本地文件：将歌词写回音频文件自身的标签，单文件可移植
+      if (current?.source === "local") {
+        const source = current.audioUrl;
+        if (!source) {
+          addToast({ title: "当前播放信息缺失，无法保存歌词", color: "warning" });
+          return false;
+        }
+        try {
+          const ok = await window.electron.writeLocalLyrics(source, lyricsText ?? tLyricsText ?? "");
+          if (!ok) {
+            addToast({ title: "歌词写入文件失败", color: "danger" });
+            return false;
+          }
+          onLyricsAdopted?.(lyricsText, tLyricsText);
+          return true;
+        } catch {
+          addToast({ title: "歌词写入文件失败", color: "danger" });
+          return false;
+        }
+      }
+
+      // B 站在线曲目：缓存进 Store
       const cid = current?.cid ? Number(current.cid) : undefined;
 
       if (!current?.bvid || cid === undefined || Number.isNaN(cid)) {

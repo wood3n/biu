@@ -31,6 +31,22 @@ const timeTagPattern = /\[(\d{1,2}):(\d{1,2})(?:\.(\d{1,3}))?\]/g;
 const DEFAULT_FONT_SIZE = 20;
 const DEFAULT_OFFSET = 0;
 
+/** 当前曲目是否为本地文件 */
+const isLocalItem = (item?: PlayItem) => item?.source === "local";
+
+/**
+ * 统一的歌词缓存键：
+ * - 本地文件用其 id（文件路径 MD5），与来源无关地稳定标识；
+ * - B 站在线曲目沿用 `${bvid}-${cid}`。
+ * 返回 null 表示信息不足、无法定位。
+ */
+const getLyricsKey = (item?: PlayItem): string | null => {
+  if (!item) return null;
+  if (isLocalItem(item)) return item.id ?? null;
+  if (item.bvid && item.cid) return `${item.bvid}-${item.cid}`;
+  return null;
+};
+
 const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: boolean; showControls?: boolean }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rafIdRef = useRef<number | null>(null);
@@ -82,12 +98,13 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
 
   const tryLoadCachedLyrics = useCallback(async () => {
     const playItem = usePlayList.getState().getPlayItem();
-    if (!playItem?.bvid || !playItem?.cid) return null;
+    const key = getLyricsKey(playItem);
+    if (!key) return null;
 
     const store = await window.electron.getStore(StoreNameMap.LyricsCache);
     if (!store || typeof store !== "object") return null;
 
-    return store[`${playItem.bvid}-${playItem.cid}`] ?? null;
+    return store[key] ?? null;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playId]);
 
@@ -98,6 +115,30 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
 
     const playItem = usePlayList.getState().getPlayItem();
     const fetchLyrics = async () => {
+      // 本地文件：偏好（offset/字号）从 Store 读取，歌词正文从文件内嵌标签读取
+      if (isLocalItem(playItem)) {
+        setIsLoading(true);
+        try {
+          const cached = await tryLoadCachedLyrics();
+          if (canceled) return;
+          setOffset(typeof cached?.offset === "number" ? cached.offset : DEFAULT_OFFSET);
+          setFontSize(typeof cached?.fontSize === "number" ? cached.fontSize : DEFAULT_FONT_SIZE);
+
+          const source = playItem?.audioUrl;
+          const embedded = source ? await window.electron.readLocalLyrics(source) : null;
+          if (canceled) return;
+          setLyrics(parseLrc(embedded));
+          setTranslatedLyrics([]);
+        } catch {
+          if (canceled) return;
+          setLyrics([]);
+          setTranslatedLyrics([]);
+        } finally {
+          if (!canceled) setIsLoading(false);
+        }
+        return;
+      }
+
       if (!playItem?.cid) {
         setLyrics([]);
         setTranslatedLyrics([]);
@@ -190,9 +231,9 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
     () =>
       debounce(async (playItem: PlayItem, nextOffset?: number, nextFontSize?: number) => {
         try {
-          if (!playItem?.bvid || !playItem?.cid) return;
+          const key = getLyricsKey(playItem);
+          if (!key) return;
           const store = await window.electron.getStore(StoreNameMap.LyricsCache);
-          const key = `${playItem.bvid}-${playItem.cid}`;
           const prev = store?.[key] || {};
 
           await window.electron.setStore(StoreNameMap.LyricsCache, {
@@ -215,8 +256,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
       setOffset(next);
 
       const playItem = usePlayList.getState().getPlayItem();
-      const cid = playItem?.cid ? Number(playItem.cid) : undefined;
-      if (!playItem?.bvid || cid === undefined || Number.isNaN(cid)) return;
+      if (!getLyricsKey(playItem)) return;
 
       persistLyricsCache(playItem, next, fontSize);
     },
@@ -229,8 +269,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
       setFontSize(next);
 
       const playItem = usePlayList.getState().getPlayItem();
-      const cid = playItem?.cid ? Number(playItem.cid) : undefined;
-      if (!playItem?.bvid || cid === undefined || Number.isNaN(cid)) return;
+      if (!getLyricsKey(playItem)) return;
 
       persistLyricsCache(playItem, offset, next);
     },

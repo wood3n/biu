@@ -44,6 +44,10 @@ declare global {
     getNeteaseLyrics: (params: GetLyricsByNeteaseParams) => Promise<GetLyricsByNeteaseResponse>;
     /** 在 LrcLib 搜索歌曲/歌词 */
     searchLrclibLyrics: (params: SearchSongByLrclibParams) => Promise<SearchSongByLrclibResponse[]>;
+    /** 读取本地音频文件内嵌的歌词文本，无则返回 null */
+    readLocalLyrics: (filePath: string) => Promise<string | null>;
+    /** 将歌词文本写回本地音频文件标签，返回是否成功 */
+    writeLocalLyrics: (filePath: string, lyrics: string) => Promise<boolean>;
     /** 获取当前应用平台：macos | windows | linux */
     getPlatform: () => AppPlatForm;
     /** 更新网络代理设置 */

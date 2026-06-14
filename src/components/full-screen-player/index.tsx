@@ -351,14 +351,15 @@ const FullScreenPlayer = () => {
                   </div>
                 )}
 
-                {!isLocal && showLyrics && (
+                {showLyrics && (
                   <div
                     className={clsx(
                       "h-full w-full overflow-hidden px-12 py-24",
-                      !showCover ? "flex items-center justify-center" : "",
+                      // 本地无在线封面（见上方 !isLocal && showCover），歌词按无封面布局居中
+                      isLocal || !showCover ? "flex items-center justify-center" : "",
                     )}
                   >
-                    <Lyrics color={lyricsColor} centered={!showCover} showControls={isUiVisible} />
+                    <Lyrics color={lyricsColor} centered={isLocal || !showCover} showControls={isUiVisible} />
                   </div>
                 )}
               </div>
