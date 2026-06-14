@@ -63,6 +63,7 @@ export class DownloadQueue {
       id,
       outputFileType: mediaInfo.outputFileType,
       title: mediaInfo.title,
+      artist: mediaInfo.artist,
       cover: mediaInfo.cover,
       bvid: mediaInfo.bvid,
       cid: mediaInfo.cid,
@@ -97,6 +98,7 @@ export class DownloadQueue {
               bvid: core.bvid,
               cid: page.cid,
               title: page.title,
+              artist: core.artist,
               cover: page.cover,
             }),
           );

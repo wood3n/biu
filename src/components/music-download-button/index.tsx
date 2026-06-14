@@ -17,6 +17,7 @@ const MusicDownloadButton = () => {
     await window.electron.addMediaDownloadTask({
       outputFileType: "audio",
       title: playItem?.pageTitle || playItem?.title || `audio-${Date.now()}`,
+      artist: playItem?.ownerName,
       cover: playItem?.pageCover || playItem?.cover,
       bvid: playItem?.bvid,
       cid: playItem?.cid,
@@ -33,6 +34,7 @@ const MusicDownloadButton = () => {
     await window.electron.addMediaDownloadTask({
       outputFileType: "video",
       title: playItem?.pageTitle || playItem?.title || `video-${Date.now()}`,
+      artist: playItem?.ownerName,
       cover: playItem?.pageCover || playItem?.cover,
       bvid: playItem?.bvid,
       cid: playItem?.cid,

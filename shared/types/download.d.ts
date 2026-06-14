@@ -16,6 +16,8 @@ interface MediaDownloadInfo {
   outputFileType: MediaDownloadOutputFileType;
   /** 标题 */
   title: string;
+  /** 作者/艺术家 */
+  artist?: string;
   /** 封面 */
   cover?: string;
   /** 视频bvid */

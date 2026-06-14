@@ -15,6 +15,7 @@ import { appSettingsStore } from "../../store";
 import { sanitizeFilename } from "../../utils";
 import { getAudioWebStreamUrl } from "../api/audio-stream-url";
 import { getDashurl } from "../api/dash-url";
+import { fetchCover, writeAudioTags } from "./audio-tags";
 import { convert } from "./ffmpeg-processor";
 import { ensureDir, getStreamAudioBandwidth, isUrlValid, removeDirOrFile, sortAudio } from "./utils";
 
@@ -24,6 +25,7 @@ const TempRootDir = path.join(os.tmpdir(), "biu-temp-downloader");
 export class DownloadCore extends EventEmitter {
   public id: string;
   public title!: string;
+  public artist?: string;
   public cover?: string;
   public createdTime?: number;
   public bvid?: string;
@@ -295,6 +297,13 @@ export class DownloadCore extends EventEmitter {
     this.savePath = finalSavePath;
     this.fileName = path.basename(finalSavePath);
     this.emitUpdate();
+
+    // 写入 artist / 封面元数据（仅音频）。失败不阻断，文件已下好
+    if (this.outputFileType === "audio") {
+      const coverBuffer = await fetchCover(this.cover, this.getHeaders());
+      writeAudioTags(this.savePath, { artist: this.artist, coverBuffer });
+    }
+
     await this.deleteTempFiles();
   }
 
