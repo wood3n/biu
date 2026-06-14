@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router";
 
 import { Chip } from "@heroui/react";
@@ -24,6 +24,24 @@ const LeftControl = () => {
 
   const playItem = useMemo(() => list.find(item => item.id === playId), [list, playId]);
   const isClickable = Boolean(playItem && playItem.source !== "local");
+
+  // 本地文件无封面时按需读取内嵌封面并回填，左下角与播放面板共用同一份 cover
+  const playItemId = playItem?.id;
+  const playItemSource = playItem?.source;
+  const playItemCover = playItem?.cover;
+  const playItemAudioUrl = playItem?.audioUrl;
+  useEffect(() => {
+    if (playItemSource !== "local" || playItemCover || !playItemAudioUrl || !playItemId) return;
+    let cancelled = false;
+    window.electron.readLocalCover(playItemAudioUrl).then(cover => {
+      if (!cancelled && cover) {
+        usePlayList.getState().setItemCover(playItemId, cover);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [playItemId, playItemSource, playItemCover, playItemAudioUrl]);
 
   return (
     <div className="flex h-full w-full items-center justify-start space-x-2">

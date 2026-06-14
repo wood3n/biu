@@ -122,6 +122,8 @@ interface Action {
 
   getAudio: () => HTMLAudioElement;
   getPlayItem: () => PlayData | undefined;
+  /** 为列表项写入封面（本地文件按需读取内嵌封面后回填） */
+  setItemCover: (id: string, cover: string) => void;
 }
 
 const idGenerator = () => `${Date.now()}${uniqueId()}`;
@@ -592,6 +594,7 @@ export const usePlayList = create<State & Action>()(
                     source,
                     audioUrl,
                     title: sanitizedTitle,
+                    cover,
                   },
                 ]
               : [
@@ -960,6 +963,14 @@ export const usePlayList = create<State & Action>()(
           const { playId, list } = get();
           const playItem = list.find(item => item.id === playId);
           return playItem;
+        },
+        setItemCover: (id, cover) => {
+          set(state => {
+            const item = state.list.find(i => i.id === id);
+            if (item && !item.cover) {
+              item.cover = cover;
+            }
+          });
         },
         getAudio: () => audio,
       };

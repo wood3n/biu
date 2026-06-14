@@ -4,7 +4,9 @@ export const getUrlParams = (url: string) => {
 };
 
 export const formatUrlProtocol = (url?: string) => {
-  if (url && !url.startsWith("http")) {
+  // 仅处理协议相对地址（//host/...），补全为 https；
+  // data:/blob:/file: 等带协议的 URL 原样返回，避免被破坏。
+  if (url && url.startsWith("//")) {
     return `https:${url}`;
   }
 

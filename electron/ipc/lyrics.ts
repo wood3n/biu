@@ -16,7 +16,7 @@ import { channel } from "./channel";
  * 将渲染端传来的本地文件标识转换为真实文件系统路径。
  * 优先使用原始路径；若传入的是 file:// URL 则解析回路径。
  */
-function resolveLocalPath(input: string): string {
+export function resolveLocalPath(input: string): string {
   if (input.startsWith("file://")) {
     try {
       return fileURLToPath(input);

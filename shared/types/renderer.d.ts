@@ -122,6 +122,8 @@ declare global {
     scanLocalMusic: (dirs: string[]) => Promise<LocalMusicItem[]>;
     /** 删除本地音乐文件 */
     deleteLocalMusicFile: (filePath: string) => Promise<boolean>;
+    /** 读取本地音频文件内嵌封面，返回 data URL，无则 null */
+    readLocalCover: (filePath: string) => Promise<string | null>;
   }
 
   interface Window {

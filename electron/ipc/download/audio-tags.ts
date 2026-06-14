@@ -22,6 +22,23 @@ export async function fetchCover(
   }
 }
 
+/** 读取音频文件内嵌封面，返回 { mime, base64 }；无图或失败返回 null */
+export function readAudioCover(filePath: string): { mime: string; base64: string } | null {
+  let file: TagFile | undefined;
+  try {
+    file = TagFile.createFromPath(filePath);
+    const pic = file.tag.pictures?.[0];
+    if (!pic) return null;
+    const base64 = Buffer.from(pic.data.toByteArray()).toString("base64");
+    return { mime: pic.mimeType || "image/jpeg", base64 };
+  } catch (err) {
+    log.warn("[local-music] read audio cover error:", filePath, err);
+    return null;
+  } finally {
+    file?.dispose();
+  }
+}
+
 /** 将 artist / 封面写入音频文件标签（m4a/mp3/flac）。失败只告警，不抛错 */
 export function writeAudioTags(filePath: string, tags: { artist?: string; coverBuffer?: Buffer }): void {
   if (!tags.artist && !tags.coverBuffer) return;

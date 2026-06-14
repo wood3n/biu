@@ -78,6 +78,7 @@ export const channel = {
   localMusic: {
     scan: "local-music:scan",
     deleteFile: "local-music:delete-file",
+    readCover: "local-music:read-cover",
   },
   window: {
     toggleMini: "window:toggle-mini",

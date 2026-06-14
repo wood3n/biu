@@ -12,6 +12,12 @@ interface BatchProgress {
   total: number;
 }
 
+/** 匹配选项：时长容忍阈值（秒）+ 是否覆盖已有歌词 */
+export interface MatchOptions {
+  toleranceSec: number;
+  overwrite: boolean;
+}
+
 const CONCURRENCY = 3;
 const SEARCH_LIMIT = 10;
 /** 时长差容忍阈值（秒） */
@@ -99,10 +105,10 @@ function extractNeteaseLyric(res: GetLyricsByNeteaseResponse | undefined): strin
  * LrcLib 取词：搜索一次即返歌词+时长，按时长差择优，仅用带时轴的 syncedLyrics。
  * 命中返回歌词文本，未命中/异常返回 null（交由网易兜底）。
  */
-async function fetchLyricFromLrclib(song: LocalMusicItem): Promise<string | null> {
+async function fetchLyricFromLrclib(song: LocalMusicItem, toleranceSec: number): Promise<string | null> {
   try {
     const songs = await window.electron.searchLrclibLyrics({ q: song.title });
-    const best = pickBestLrclibSong(songs, song.duration);
+    const best = pickBestLrclibSong(songs, song.duration, toleranceSec);
     return best?.syncedLyrics?.trim() || null;
   } catch {
     return null;
@@ -113,7 +119,7 @@ async function fetchLyricFromLrclib(song: LocalMusicItem): Promise<string | null
  * 网易取词（兜底）：搜候选 → 按时长差择优 → 二次请求拉歌词原文。
  * 命中返回歌词文本，未命中/异常返回 null。
  */
-async function fetchLyricFromNetease(song: LocalMusicItem): Promise<string | null> {
+async function fetchLyricFromNetease(song: LocalMusicItem, toleranceSec: number): Promise<string | null> {
   try {
     const searchRes = await window.electron.searchNeteaseSongs({
       s: song.title,
@@ -121,7 +127,7 @@ async function fetchLyricFromNetease(song: LocalMusicItem): Promise<string | nul
       limit: SEARCH_LIMIT,
       offset: 0,
     });
-    const best = pickBestNeteaseSong(searchRes?.result?.songs, song.duration);
+    const best = pickBestNeteaseSong(searchRes?.result?.songs, song.duration, toleranceSec);
     if (!best?.id) return null;
     const lyricRes = await window.electron.getNeteaseLyrics({ id: best.id });
     return extractNeteaseLyric(lyricRes) || null;
@@ -131,15 +137,18 @@ async function fetchLyricFromNetease(song: LocalMusicItem): Promise<string | nul
 }
 
 /** 对单首本地歌曲执行匹配流程：LrcLib 优先，网易兜底 */
-async function matchOne(song: LocalMusicItem): Promise<MatchStatus> {
-  // 1. 已有内嵌歌词则跳过
-  const existing = await window.electron.readLocalLyrics(song.path);
-  if (existing && existing.trim()) return "skipped";
+async function matchOne(song: LocalMusicItem, opts: MatchOptions): Promise<MatchStatus> {
+  // 1. 非覆盖模式下，已有内嵌歌词则跳过
+  if (!opts.overwrite) {
+    const existing = await window.electron.readLocalLyrics(song.path);
+    if (existing && existing.trim()) return "skipped";
+  }
 
   if (!song.title?.trim()) return "miss";
 
   // 2. LrcLib 优先 → 未命中转网易兜底
-  const lyric = (await fetchLyricFromLrclib(song)) ?? (await fetchLyricFromNetease(song));
+  const lyric =
+    (await fetchLyricFromLrclib(song, opts.toleranceSec)) ?? (await fetchLyricFromNetease(song, opts.toleranceSec));
   if (!lyric) return "miss";
 
   // 3. 写回文件
@@ -155,7 +164,7 @@ export function useBatchMatchLyrics() {
   const [progress, setProgress] = useState<BatchProgress>({ running: false, done: 0, total: 0 });
   const queueRef = useRef<PQueue | null>(null);
 
-  const start = useCallback(async (songs: LocalMusicItem[]) => {
+  const start = useCallback(async (songs: LocalMusicItem[], opts: MatchOptions) => {
     if (!songs.length || queueRef.current) return;
 
     const counts: Record<MatchStatus, number> = { matched: 0, skipped: 0, miss: 0, failed: 0 };
@@ -170,7 +179,7 @@ export function useBatchMatchLyrics() {
       songs.map(song =>
         queue.add(async () => {
           try {
-            const status = await matchOne(song);
+            const status = await matchOne(song, opts);
             counts[status] += 1;
           } catch {
             counts.failed += 1;
