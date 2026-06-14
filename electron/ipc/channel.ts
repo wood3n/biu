@@ -29,6 +29,7 @@ export const channel = {
     resume: "download:resume",
     cancel: "download:cancel",
     retry: "download:retry",
+    retryAllFailed: "download:retry-all-failed",
     sync: "download:sync",
     clear: "download:clear",
   },

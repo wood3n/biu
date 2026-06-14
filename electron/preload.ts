@@ -228,6 +228,8 @@ const api: ElectronAPI = {
   resumeMediaDownloadTask: id => ipcRenderer.invoke(channel.download.resume, id),
   // 重试文件下载任务
   retryMediaDownloadTask: id => ipcRenderer.invoke(channel.download.retry, id),
+  // 重试全部失败的下载任务
+  retryAllFailedMediaDownloadTask: () => ipcRenderer.invoke(channel.download.retryAllFailed),
   // 取消文件下载任务
   cancelMediaDownloadTask: id => ipcRenderer.invoke(channel.download.cancel, id),
   // 监听文件下载任务状态变化

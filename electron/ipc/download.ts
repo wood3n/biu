@@ -38,6 +38,10 @@ export function registerDownloadHandlers({ getMainWindow }: IpcHandlerProps) {
     downloadQueue.retryTask(id);
   });
 
+  ipcMain.handle(channel.download.retryAllFailed, async () => {
+    downloadQueue.retryAllFailed();
+  });
+
   ipcMain.handle(channel.download.clear, async () => {
     await downloadQueue.clearTasks();
   });

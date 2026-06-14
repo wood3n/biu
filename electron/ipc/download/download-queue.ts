@@ -191,6 +191,14 @@ export class DownloadQueue {
     }
   }
 
+  public retryAllFailed() {
+    this.taskMap.forEach(core => {
+      if (core.status === "failed") {
+        this.retryTask(core.id!);
+      }
+    });
+  }
+
   public getTaskList(): MediaDownloadTask[] {
     return Array.from(this.taskMap.values()).map(core => ({
       id: core.id,

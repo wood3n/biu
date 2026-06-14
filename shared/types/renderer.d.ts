@@ -116,6 +116,8 @@ declare global {
     cancelMediaDownloadTask: (id: string) => Promise<void>;
     /** 重试下载任务 */
     retryMediaDownloadTask: (id: string) => Promise<void>;
+    /** 重试全部失败的下载任务 */
+    retryAllFailedMediaDownloadTask: () => Promise<void>;
     /** 清除下载任务列表 */
     clearMediaDownloadTaskList: () => Promise<void>;
     /** 扫描本地音乐文件 */
