@@ -1,7 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { addToast, Button, Select, SelectItem } from "@heroui/react";
-import { RiDeleteBinLine, RiFolderAddLine, RiRefreshLine, RiPlayFill, RiPlayListAddLine } from "@remixicon/react";
+import {
+  RiDeleteBinLine,
+  RiFolderAddLine,
+  RiMagicLine,
+  RiRefreshLine,
+  RiPlayFill,
+  RiPlayListAddLine,
+} from "@remixicon/react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 import Empty from "@/components/empty";
@@ -13,6 +20,7 @@ import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 
 import LocalMusicItemRow from "./item";
+import { useBatchMatchLyrics } from "./use-batch-match-lyrics";
 
 const rowHeight = 42;
 
@@ -28,6 +36,8 @@ const LocalMusicPage = () => {
   const playList = usePlayList(s => s.list);
 
   const playItem = useMemo(() => playList.find(item => item.id === playId), [playId, playList]);
+
+  const { progress: matchProgress, start: startBatchMatch } = useBatchMatchLyrics();
 
   useEffect(() => {
     const init = async () => {
@@ -208,6 +218,19 @@ const LocalMusicPage = () => {
             <IconButton size="md" variant="flat" color="default" tooltip="添加到播放列表" onPress={addAllToPlaylist}>
               <RiPlayListAddLine size={18} />
             </IconButton>
+          )}
+
+          {Boolean(filtered.length) && (
+            <Button
+              size="md"
+              variant="flat"
+              color="default"
+              startContent={!matchProgress.running && <RiMagicLine size={18} />}
+              isLoading={matchProgress.running}
+              onPress={() => startBatchMatch(filtered)}
+            >
+              {matchProgress.running ? `匹配中 ${matchProgress.done}/${matchProgress.total}` : "一键匹配歌词"}
+            </Button>
           )}
         </div>
         <div className="flex items-center gap-2">
