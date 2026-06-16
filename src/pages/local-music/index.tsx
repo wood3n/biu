@@ -16,6 +16,7 @@ import Empty from "@/components/empty";
 import IconButton from "@/components/icon-button";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import SearchButton from "@/components/search-button";
+import { useLocateLocalSong } from "@/store/locate-local-song";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
@@ -62,6 +63,9 @@ const LocalMusicPage = () => {
   // 目录下拉受控：点叉移除前先关闭，避免下拉浮层挡住确认弹窗
   const [dirSelectOpen, setDirSelectOpen] = useState(false);
 
+  // 首次扫描是否已完成：定位时若列表尚未扫出，先等待而非误报"未找到"
+  const [scanned, setScanned] = useState(false);
+
   useEffect(() => {
     const init = async () => {
       if (localDirs?.length) {
@@ -70,6 +74,7 @@ const LocalMusicPage = () => {
       } else {
         setList([]);
       }
+      setScanned(true);
     };
     init();
   }, [localDirs]);
@@ -130,6 +135,37 @@ const LocalMusicPage = () => {
     estimateSize: () => rowHeight,
     overscan: 10,
   });
+
+  // 左下角播放栏请求定位：滚动到该本地歌所在行。若被目录/搜索过滤隐藏，先清过滤再于 filtered 更新后滚动
+  const locateNonce = useLocateLocalSong(s => s.nonce);
+  const pendingLocateId = useRef<string | null>(null);
+
+  useEffect(() => {
+    const { targetId } = useLocateLocalSong.getState();
+    if (!targetId) return;
+    useLocateLocalSong.getState().clear();
+    // 仅记录待定位 id 并清空过滤；是否存在交给下方 effect 在列表扫出后判定，避免初次挂载列表未就绪时误报
+    pendingLocateId.current = targetId;
+    setSelectedDir("all");
+    setKeyword("");
+  }, [locateNonce]);
+
+  // 依赖 locateNonce：本就在本页且无过滤可清时，filtered 引用不变，仅靠它无法触发滚动
+  useEffect(() => {
+    const targetId = pendingLocateId.current;
+    if (!targetId) return;
+    const idx = filtered.findIndex(i => i.id === targetId);
+    if (idx >= 0) {
+      pendingLocateId.current = null;
+      rowVirtualizer.scrollToIndex(idx, { align: "center" });
+      return;
+    }
+    // 扫描已完成但仍找不到 → 确实不在已扫描目录内；扫描未完成则继续等待 list 更新
+    if (scanned && !list.some(i => i.id === targetId)) {
+      pendingLocateId.current = null;
+      addToast({ title: "未在列表中找到该歌曲", color: "warning" });
+    }
+  }, [filtered, list, scanned, locateNonce, rowVirtualizer]);
 
   const playAll = async () => {
     await usePlayList.getState().playList(
@@ -220,14 +256,19 @@ const LocalMusicPage = () => {
     });
   };
 
-  const deleteFile = (filePath: string) => {
+  const deleteFile = (song: LocalMusicItem) => {
     onOpenConfirmModal({
       title: "删除文件",
-      description: "该操作会删除本地文件且不可恢复，请谨慎操作",
+      description: (
+        <>
+          <div className="text-foreground truncate font-medium">{song.title}</div>
+          <div>该操作会删除本地文件且不可恢复，请谨慎操作</div>
+        </>
+      ),
       onConfirm: async () => {
-        const ok = await window.electron.deleteLocalMusicFile(filePath);
+        const ok = await window.electron.deleteLocalMusicFile(song.path);
         if (ok) {
-          setList(prev => prev.filter(i => i.path !== filePath));
+          setList(prev => prev.filter(i => i.path !== song.path));
           return true;
         }
         return false;
@@ -437,7 +478,7 @@ const LocalMusicPage = () => {
                     onMatchLyrics={() => openMatchModal([song])}
                     onPlay={() => playFile(song)}
                     onOpen={() => openFile(song.path)}
-                    onDelete={() => deleteFile(song.path)}
+                    onDelete={() => deleteFile(song)}
                   />
                 </div>
               );
