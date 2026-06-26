@@ -4,6 +4,8 @@ import { addToast, Button, Checkbox, Select, SelectItem } from "@heroui/react";
 import {
   RiCheckboxMultipleLine,
   RiCloseLine,
+  RiDeleteBinLine,
+  RiFileList3Line,
   RiFolderAddLine,
   RiMagicLine,
   RiRefreshLine,
@@ -21,6 +23,9 @@ import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 
+import type { BatchResultItem } from "./batch-result";
+
+import BatchResultModal from "./batch-result-modal";
 import LocalMusicItemRow from "./item";
 import MatchLyricsModal from "./match-lyrics-modal";
 import { useBatchMatchLyrics, type MatchOptions } from "./use-batch-match-lyrics";
@@ -52,8 +57,21 @@ const LocalMusicPage = () => {
     setMatchModalOpen(true);
   };
 
-  const confirmMatch = (opts: MatchOptions) => {
-    startBatchMatch(matchTargets, opts);
+  // 批量操作结果详情弹窗：歌词匹配 / 删除完成后留存可回看，解决 toast 一闪而过
+  const [resultOpen, setResultOpen] = useState(false);
+  const [resultTitle, setResultTitle] = useState("");
+  const [resultItems, setResultItems] = useState<BatchResultItem[]>([]);
+
+  const openResult = (title: string, items: BatchResultItem[]) => {
+    if (!items.length) return;
+    setResultTitle(title);
+    setResultItems(items);
+    setResultOpen(true);
+  };
+
+  const confirmMatch = async (opts: MatchOptions) => {
+    const results = await startBatchMatch(matchTargets, opts);
+    openResult("歌词匹配结果", results);
   };
 
   // 批量操作模式：行首复选框，顶部按钮作用于已勾选项
@@ -278,167 +296,226 @@ const LocalMusicPage = () => {
     });
   };
 
+  const deleteSongs = (songs: LocalMusicItem[]) => {
+    if (!songs.length) return;
+    onOpenConfirmModal({
+      title: "批量删除文件",
+      description: (
+        <>
+          <div className="text-foreground font-medium">即将删除 {songs.length} 个本地文件</div>
+          <div>该操作会删除本地文件且不可恢复，请谨慎操作</div>
+        </>
+      ),
+      onConfirm: async () => {
+        const results: BatchResultItem[] = [];
+        const okPaths: string[] = [];
+        for (const song of songs) {
+          const ok = await window.electron.deleteLocalMusicFile(song.path);
+          results.push({ id: song.id, title: song.title, status: ok ? "deleted" : "delete-failed" });
+          if (ok) okPaths.push(song.path);
+        }
+        if (okPaths.length) {
+          const okSet = new Set(okPaths);
+          setList(prev => prev.filter(i => !okSet.has(i.path)));
+        }
+        exitSelectMode();
+        openResult("批量删除结果", results);
+        return true;
+      },
+      confirmText: "删除",
+      type: "danger",
+    });
+  };
+
   return (
     <ScrollContainer ref={scrollRef} enableBackToTop className="h-full w-full px-4">
-      <div className="mb-2 flex items-center justify-between">
-        <h1 className="flex items-center space-x-1">本地音乐</h1>
-        <div className="flex items-center space-x-1">
-          <Button size="sm" variant="flat" startContent={<RiFolderAddLine size={18} />} onPress={addDirectory}>
-            添加目录
-          </Button>
+      <div className="bg-background sticky top-0 z-20 pb-2">
+        <div className="mb-2 flex items-center justify-between">
+          <h1 className="flex items-center space-x-1">本地音乐</h1>
+          <div className="flex items-center space-x-1">
+            <Button size="sm" variant="flat" startContent={<RiFolderAddLine size={18} />} onPress={addDirectory}>
+              添加目录
+            </Button>
+          </div>
         </div>
-      </div>
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          {selectMode ? (
-            <>
-              <Button size="md" variant="flat" color="default" onPress={toggleSelectAll}>
-                {allSelected ? "取消全选" : "全选"}
-              </Button>
-
-              <IconButton
-                size="md"
-                variant="flat"
-                color="default"
-                tooltip="添加到播放列表"
-                isDisabled={!selectedSongs.length}
-                onPress={() => addSongsToPlaylist(selectedSongs)}
-              >
-                <RiPlayListAddLine size={18} />
-              </IconButton>
-
-              <Button
-                size="md"
-                variant="flat"
-                color="default"
-                startContent={!matchProgress.running && <RiMagicLine size={18} />}
-                isLoading={matchProgress.running}
-                isDisabled={!selectedSongs.length}
-                onPress={() => openMatchModal(selectedSongs)}
-              >
-                {matchProgress.running
-                  ? `匹配中 ${matchProgress.done}/${matchProgress.total}`
-                  : `一键匹配歌词${selectedSongs.length ? `（${selectedSongs.length}）` : ""}`}
-              </Button>
-
-              <Button size="md" variant="light" color="default" onPress={exitSelectMode}>
-                退出
-              </Button>
-            </>
-          ) : (
-            <>
-              {Boolean(list.length) && (
-                <Button
-                  color="primary"
-                  className="dark:text-black"
-                  startContent={<RiPlayFill size={18} />}
-                  onPress={playAll}
-                >
-                  播放全部
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            {selectMode ? (
+              <>
+                <Button size="md" variant="flat" color="default" onPress={toggleSelectAll}>
+                  {allSelected ? "取消全选" : "全选"}
                 </Button>
-              )}
 
-              {Boolean(filtered.length) && (
                 <IconButton
                   size="md"
                   variant="flat"
                   color="default"
                   tooltip="添加到播放列表"
-                  onPress={() => addSongsToPlaylist(filtered)}
+                  isDisabled={!selectedSongs.length}
+                  onPress={() => addSongsToPlaylist(selectedSongs)}
                 >
                   <RiPlayListAddLine size={18} />
                 </IconButton>
-              )}
 
-              {Boolean(filtered.length) && (
-                <Button
+                <IconButton
                   size="md"
                   variant="flat"
                   color="default"
-                  startContent={!matchProgress.running && <RiMagicLine size={18} />}
+                  tooltip={
+                    matchProgress.running
+                      ? `匹配中 ${matchProgress.done}/${matchProgress.total}`
+                      : `一键匹配歌词${selectedSongs.length ? `（${selectedSongs.length}）` : ""}`
+                  }
                   isLoading={matchProgress.running}
-                  onPress={() => openMatchModal(filtered)}
+                  isDisabled={!selectedSongs.length}
+                  onPress={() => openMatchModal(selectedSongs)}
                 >
-                  {matchProgress.running ? `匹配中 ${matchProgress.done}/${matchProgress.total}` : "一键匹配歌词"}
-                </Button>
-              )}
-            </>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <SearchButton
-            onSearch={val => {
-              setKeyword(val);
-            }}
-          />
-          <Select
-            className="w-[200px]"
-            disallowEmptySelection
-            isOpen={dirSelectOpen}
-            onOpenChange={setDirSelectOpen}
-            listboxProps={{
-              color: "primary",
-              hideSelectedIcon: true,
-            }}
-            items={[
-              { key: "all", label: "全部目录" },
-              ...(localDirs || []).map(dir => ({ key: dir, label: getDirName(dir) })),
-            ]}
-            selectedKeys={[selectedDir]}
-            onSelectionChange={keys => {
-              const v = Array.from(keys as Set<string>)[0];
-              setSelectedDir(v);
-            }}
-          >
-            {item => (
-              <SelectItem
-                key={item.key}
-                endContent={
-                  item.key === "all" ? undefined : (
-                    <span
-                      role="button"
-                      tabIndex={-1}
-                      aria-label="移除目录"
-                      className="text-foreground-400 hover:text-danger flex items-center"
-                      onClick={e => {
-                        e.stopPropagation();
-                        setDirSelectOpen(false);
-                        removeDirectory(item.key);
-                      }}
-                    >
-                      <RiCloseLine size={16} />
-                    </span>
-                  )
-                }
-              >
-                {item.label as string}
-              </SelectItem>
+                  <RiMagicLine size={18} />
+                </IconButton>
+
+                <IconButton
+                  size="md"
+                  variant="flat"
+                  color="danger"
+                  tooltip="删除所选"
+                  isDisabled={!selectedSongs.length}
+                  onPress={() => deleteSongs(selectedSongs)}
+                >
+                  <RiDeleteBinLine size={18} />
+                </IconButton>
+              </>
+            ) : (
+              <>
+                {Boolean(list.length) && (
+                  <Button
+                    color="primary"
+                    className="dark:text-black"
+                    startContent={<RiPlayFill size={18} />}
+                    onPress={playAll}
+                  >
+                    播放全部
+                  </Button>
+                )}
+
+                {Boolean(filtered.length) && (
+                  <IconButton
+                    size="md"
+                    variant="flat"
+                    color="default"
+                    tooltip="添加到播放列表"
+                    onPress={() => addSongsToPlaylist(filtered)}
+                  >
+                    <RiPlayListAddLine size={18} />
+                  </IconButton>
+                )}
+
+                {Boolean(filtered.length) && (
+                  <Button
+                    size="md"
+                    variant="flat"
+                    color="default"
+                    startContent={!matchProgress.running && <RiMagicLine size={18} />}
+                    isLoading={matchProgress.running}
+                    onPress={() => openMatchModal(filtered)}
+                  >
+                    {matchProgress.running ? `匹配中 ${matchProgress.done}/${matchProgress.total}` : "一键匹配歌词"}
+                  </Button>
+                )}
+              </>
             )}
-          </Select>
-          <IconButton variant="flat" size="md" color="default" tooltip="刷新" onPress={rescan}>
-            <RiRefreshLine size={18} />
-          </IconButton>
-          {!selectMode && Boolean(list.length) && (
-            <IconButton variant="flat" size="md" color="default" tooltip="批量操作" onPress={() => setSelectMode(true)}>
-              <RiCheckboxMultipleLine size={18} />
+          </div>
+          <div className="flex items-center gap-2">
+            <SearchButton
+              onSearch={val => {
+                setKeyword(val);
+              }}
+            />
+            <Select
+              className="w-[200px]"
+              disallowEmptySelection
+              isOpen={dirSelectOpen}
+              onOpenChange={setDirSelectOpen}
+              listboxProps={{
+                color: "primary",
+                hideSelectedIcon: true,
+              }}
+              items={[
+                { key: "all", label: "全部目录" },
+                ...(localDirs || []).map(dir => ({ key: dir, label: getDirName(dir) })),
+              ]}
+              selectedKeys={[selectedDir]}
+              onSelectionChange={keys => {
+                const v = Array.from(keys as Set<string>)[0];
+                setSelectedDir(v);
+              }}
+            >
+              {item => (
+                <SelectItem
+                  key={item.key}
+                  endContent={
+                    item.key === "all" ? undefined : (
+                      <span
+                        role="button"
+                        tabIndex={-1}
+                        aria-label="移除目录"
+                        className="text-foreground-400 hover:text-danger flex items-center"
+                        onClick={e => {
+                          e.stopPropagation();
+                          setDirSelectOpen(false);
+                          removeDirectory(item.key);
+                        }}
+                      >
+                        <RiCloseLine size={16} />
+                      </span>
+                    )
+                  }
+                >
+                  {item.label as string}
+                </SelectItem>
+              )}
+            </Select>
+            <IconButton variant="flat" size="md" color="default" tooltip="刷新" onPress={rescan}>
+              <RiRefreshLine size={18} />
             </IconButton>
-          )}
+            {Boolean(resultItems.length) && (
+              <IconButton
+                variant="flat"
+                size="md"
+                color="default"
+                tooltip="查看上次结果"
+                onPress={() => setResultOpen(true)}
+              >
+                <RiFileList3Line size={18} />
+              </IconButton>
+            )}
+            {Boolean(list.length) && (
+              <IconButton
+                variant="flat"
+                size="md"
+                color={selectMode ? "primary" : "default"}
+                tooltip={selectMode ? "退出批量操作" : "批量操作"}
+                onPress={() => (selectMode ? exitSelectMode() : setSelectMode(true))}
+              >
+                <RiCheckboxMultipleLine size={18} />
+              </IconButton>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="text-foreground-500 grid w-full grid-cols-[40px_minmax(0,1fr)_100px_100px_100px_100px_40px] items-center gap-4 rounded-md px-2 py-1 text-xs">
-        <div className="flex items-center justify-center">
-          {selectMode ? (
-            <Checkbox size="sm" isSelected={allSelected} onValueChange={toggleSelectAll} aria-label="全选" />
-          ) : (
-            "#"
-          )}
+        <div className="text-foreground-500 grid w-full grid-cols-[40px_minmax(0,1fr)_100px_100px_100px_100px_40px] items-center gap-4 rounded-md px-2 py-1 text-xs">
+          <div className="flex items-center justify-center">
+            {selectMode ? (
+              <Checkbox size="sm" isSelected={allSelected} onValueChange={toggleSelectAll} aria-label="全选" />
+            ) : (
+              "#"
+            )}
+          </div>
+          <div>标题</div>
+          <div className="text-right">大小</div>
+          <div className="text-right">格式</div>
+          <div className="text-right">时长</div>
+          <div className="text-right">创建时间</div>
+          <div className="text-right" />
         </div>
-        <div>标题</div>
-        <div className="text-right">大小</div>
-        <div className="text-right">格式</div>
-        <div className="text-right">时长</div>
-        <div className="text-right">创建时间</div>
-        <div className="text-right" />
       </div>
       {filtered.length === 0 ? (
         <Empty />
@@ -492,6 +569,7 @@ const LocalMusicPage = () => {
         onOpenChange={setMatchModalOpen}
         onConfirm={confirmMatch}
       />
+      <BatchResultModal isOpen={resultOpen} title={resultTitle} items={resultItems} onOpenChange={setResultOpen} />
     </ScrollContainer>
   );
 };

@@ -3,6 +3,8 @@ import { useCallback, useRef, useState } from "react";
 import { addToast } from "@heroui/react";
 import PQueue from "p-queue";
 
+import type { BatchResultItem } from "./batch-result";
+
 /** 单首匹配结果状态 */
 export type MatchStatus = "matched" | "skipped" | "miss" | "failed";
 
@@ -164,10 +166,11 @@ export function useBatchMatchLyrics() {
   const [progress, setProgress] = useState<BatchProgress>({ running: false, done: 0, total: 0 });
   const queueRef = useRef<PQueue | null>(null);
 
-  const start = useCallback(async (songs: LocalMusicItem[], opts: MatchOptions) => {
-    if (!songs.length || queueRef.current) return;
+  const start = useCallback(async (songs: LocalMusicItem[], opts: MatchOptions): Promise<BatchResultItem[]> => {
+    if (!songs.length || queueRef.current) return [];
 
     const counts: Record<MatchStatus, number> = { matched: 0, skipped: 0, miss: 0, failed: 0 };
+    const results: BatchResultItem[] = [];
     const total = songs.length;
     let done = 0;
     setProgress({ running: true, done: 0, total });
@@ -178,12 +181,14 @@ export function useBatchMatchLyrics() {
     await Promise.all(
       songs.map(song =>
         queue.add(async () => {
+          let status: MatchStatus = "failed";
           try {
-            const status = await matchOne(song, opts);
-            counts[status] += 1;
+            status = await matchOne(song, opts);
           } catch {
-            counts.failed += 1;
+            status = "failed";
           } finally {
+            counts[status] += 1;
+            results.push({ id: song.id, title: song.title, status });
             done += 1;
             setProgress({ running: true, done, total });
           }
@@ -199,6 +204,8 @@ export function useBatchMatchLyrics() {
       description: `已匹配 ${counts.matched} · 跳过 ${counts.skipped}（已有歌词）· 未命中 ${counts.miss} · 失败 ${counts.failed}`,
       color: counts.matched > 0 ? "success" : "default",
     });
+
+    return results;
   }, []);
 
   return { progress, start };
