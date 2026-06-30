@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router";
 
 import { Chip } from "@heroui/react";
@@ -9,6 +9,7 @@ import { openBiliVideoLink } from "@/common/utils/url";
 import Image from "@/components/image";
 import MusicFavButton from "@/components/music-fav-button";
 import MusicThumb from "@/components/music-thumb";
+import { useLocateLocalSong } from "@/store/locate-local-song";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 import { useUser } from "@/store/user";
@@ -23,7 +24,37 @@ const LeftControl = () => {
   const playId = usePlayList(s => s.playId);
 
   const playItem = useMemo(() => list.find(item => item.id === playId), [list, playId]);
-  const isClickable = Boolean(playItem && playItem.source !== "local");
+  const isLocal = Boolean(playItem && playItem.source === "local");
+  // 标题始终可点：本地歌跳本地音乐页并定位该行，非本地歌开 B 站视频链接
+  const isClickable = Boolean(playItem);
+
+  const onTitleClick = () => {
+    if (!playItem) return;
+    if (isLocal) {
+      navigate("/local-music");
+      useLocateLocalSong.getState().request(playItem.id);
+      return;
+    }
+    openBiliVideoLink(playItem);
+  };
+
+  // 本地文件无封面时按需读取内嵌封面并回填，左下角与播放面板共用同一份 cover
+  const playItemId = playItem?.id;
+  const playItemSource = playItem?.source;
+  const playItemCover = playItem?.cover;
+  const playItemAudioUrl = playItem?.audioUrl;
+  useEffect(() => {
+    if (playItemSource !== "local" || playItemCover || !playItemAudioUrl || !playItemId) return;
+    let cancelled = false;
+    window.electron.readLocalCover(playItemAudioUrl).then(cover => {
+      if (!cancelled && cover) {
+        usePlayList.getState().setItemCover(playItemId, cover);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [playItemId, playItemSource, playItemCover, playItemAudioUrl]);
 
   return (
     <div className="flex h-full w-full items-center justify-start space-x-2">
@@ -51,10 +82,7 @@ const LeftControl = () => {
               "cursor-pointer": isClickable,
               "hover:underline": isClickable,
             })}
-            onClick={() => {
-              if (!isClickable || !playItem) return;
-              openBiliVideoLink(playItem);
-            }}
+            onClick={onTitleClick}
           >
             {playItem?.pageTitle || playItem?.title}
           </span>

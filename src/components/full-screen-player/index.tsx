@@ -53,7 +53,6 @@ const FullScreenPlayer = () => {
       })),
     );
   const playItem = list.find(item => item.id === playId);
-  const isLocal = playItem?.source === "local";
 
   const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1000);
   const [windowHeight, setWindowHeight] = useState(typeof window !== "undefined" ? window.innerHeight : 800);
@@ -325,7 +324,7 @@ const FullScreenPlayer = () => {
               </div>
 
               <div className="flex h-full w-full items-center justify-center">
-                {!isLocal && showCover && (
+                {coverSrc && showCover && (
                   <div
                     className={clsx(
                       "flex h-full w-full items-center px-12",
@@ -351,14 +350,15 @@ const FullScreenPlayer = () => {
                   </div>
                 )}
 
-                {!isLocal && showLyrics && (
+                {showLyrics && (
                   <div
                     className={clsx(
                       "h-full w-full overflow-hidden px-12 py-24",
-                      !showCover ? "flex items-center justify-center" : "",
+                      // 无封面（见上方 coverSrc && showCover）时歌词按无封面布局居中
+                      !coverSrc || !showCover ? "flex items-center justify-center" : "",
                     )}
                   >
-                    <Lyrics color={lyricsColor} centered={!showCover} showControls={isUiVisible} />
+                    <Lyrics color={lyricsColor} centered={!coverSrc || !showCover} showControls={isUiVisible} />
                   </div>
                 )}
               </div>

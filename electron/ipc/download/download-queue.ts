@@ -63,6 +63,7 @@ export class DownloadQueue {
       id,
       outputFileType: mediaInfo.outputFileType,
       title: mediaInfo.title,
+      artist: mediaInfo.artist,
       cover: mediaInfo.cover,
       bvid: mediaInfo.bvid,
       cid: mediaInfo.cid,
@@ -97,6 +98,7 @@ export class DownloadQueue {
               bvid: core.bvid,
               cid: page.cid,
               title: page.title,
+              artist: core.artist,
               cover: page.cover,
             }),
           );
@@ -187,6 +189,14 @@ export class DownloadQueue {
       this.queueTask(core);
       this.broadcast({ type: "full" });
     }
+  }
+
+  public retryAllFailed() {
+    this.taskMap.forEach(core => {
+      if (core.status === "failed") {
+        this.retryTask(core.id!);
+      }
+    });
   }
 
   public getTaskList(): MediaDownloadTask[] {

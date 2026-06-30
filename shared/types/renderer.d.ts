@@ -44,6 +44,10 @@ declare global {
     getNeteaseLyrics: (params: GetLyricsByNeteaseParams) => Promise<GetLyricsByNeteaseResponse>;
     /** 在 LrcLib 搜索歌曲/歌词 */
     searchLrclibLyrics: (params: SearchSongByLrclibParams) => Promise<SearchSongByLrclibResponse[]>;
+    /** 读取本地音频文件内嵌的歌词文本，无则返回 null */
+    readLocalLyrics: (filePath: string) => Promise<string | null>;
+    /** 将歌词文本写回本地音频文件标签，返回是否成功 */
+    writeLocalLyrics: (filePath: string, lyrics: string) => Promise<boolean>;
     /** 获取当前应用平台：macos | windows | linux */
     getPlatform: () => AppPlatForm;
     /** 更新网络代理设置 */
@@ -112,12 +116,16 @@ declare global {
     cancelMediaDownloadTask: (id: string) => Promise<void>;
     /** 重试下载任务 */
     retryMediaDownloadTask: (id: string) => Promise<void>;
+    /** 重试全部失败的下载任务 */
+    retryAllFailedMediaDownloadTask: () => Promise<void>;
     /** 清除下载任务列表 */
     clearMediaDownloadTaskList: () => Promise<void>;
     /** 扫描本地音乐文件 */
     scanLocalMusic: (dirs: string[]) => Promise<LocalMusicItem[]>;
     /** 删除本地音乐文件 */
     deleteLocalMusicFile: (filePath: string) => Promise<boolean>;
+    /** 读取本地音频文件内嵌封面，返回 data URL，无则 null */
+    readLocalCover: (filePath: string) => Promise<string | null>;
   }
 
   interface Window {

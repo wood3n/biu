@@ -6,6 +6,8 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 
 import { channel } from "./channel";
+import { readAudioCover } from "./download/audio-tags";
+import { resolveLocalPath } from "./lyrics";
 
 const exts = new Set([".mp3", ".flac", ".wav", ".m4a", ".aac", ".ogg", ".wma", ".aiff"]);
 
@@ -88,5 +90,11 @@ export function registerLocalMusicHandlers() {
       log.error("[local-music] delete file error:", filePath, err);
       return false;
     }
+  });
+
+  ipcMain.handle(channel.localMusic.readCover, async (_, filePathOrUrl: string) => {
+    if (!filePathOrUrl) return null;
+    const cover = readAudioCover(resolveLocalPath(filePathOrUrl));
+    return cover ? `data:${cover.mime};base64,${cover.base64}` : null;
   });
 }

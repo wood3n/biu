@@ -21,9 +21,12 @@ const api: ElectronAPI = {
   searchNeteaseSongs: params => ipcRenderer.invoke(channel.lyrics.searchNeteaseSongs, params),
   getNeteaseLyrics: params => ipcRenderer.invoke(channel.lyrics.getNeteaseLyrics, params),
   searchLrclibLyrics: params => ipcRenderer.invoke(channel.lyrics.searchLrclib, params),
+  readLocalLyrics: filePath => ipcRenderer.invoke(channel.lyrics.readLocal, filePath),
+  writeLocalLyrics: (filePath, lyrics) => ipcRenderer.invoke(channel.lyrics.writeLocal, { filePath, lyrics }),
   setProxySettings: proxySettings => ipcRenderer.invoke(channel.app.setProxySettings, proxySettings),
   scanLocalMusic: dirs => ipcRenderer.invoke(channel.localMusic.scan, dirs),
   deleteLocalMusicFile: filePath => ipcRenderer.invoke(channel.localMusic.deleteFile, filePath),
+  readLocalCover: filePath => ipcRenderer.invoke(channel.localMusic.readCover, filePath),
   // 监听来自主进程的导航事件，并将路径回调给渲染端
   navigate: cb => {
     const navigateHandler = (_: Electron.IpcRendererEvent, path: string) => {
@@ -225,6 +228,8 @@ const api: ElectronAPI = {
   resumeMediaDownloadTask: id => ipcRenderer.invoke(channel.download.resume, id),
   // 重试文件下载任务
   retryMediaDownloadTask: id => ipcRenderer.invoke(channel.download.retry, id),
+  // 重试全部失败的下载任务
+  retryAllFailedMediaDownloadTask: () => ipcRenderer.invoke(channel.download.retryAllFailed),
   // 取消文件下载任务
   cancelMediaDownloadTask: id => ipcRenderer.invoke(channel.download.cancel, id),
   // 监听文件下载任务状态变化

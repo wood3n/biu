@@ -7,17 +7,8 @@ import { useShallow } from "zustand/shallow";
 import { isHex } from "@/common/utils/color";
 import ColorPicker from "@/components/color-picker";
 import { useFullScreenPlayerSettings } from "@/store/full-screen-player-settings";
-import { usePlayList } from "@/store/play-list";
 
 const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: boolean }) => {
-  const { playId, list } = usePlayList(
-    useShallow(state => ({
-      playId: state.playId,
-      list: state.list,
-    })),
-  );
-  const playItem = list.find(item => item.id === playId);
-  const isLocal = playItem?.source === "local";
   const {
     showLyrics,
     showSpectrum,
@@ -190,9 +181,7 @@ const FullScreenPlayerSettingsPanel = ({ isUiVisible = true }: { isUiVisible?: b
         <Controller
           control={control}
           name="showCover"
-          render={({ field }) => (
-            <Switch isSelected={field.value} onValueChange={field.onChange} isDisabled={isLocal} />
-          )}
+          render={({ field }) => <Switch isSelected={field.value} onValueChange={field.onChange} />}
         />
       </div>
 

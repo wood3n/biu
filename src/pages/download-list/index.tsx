@@ -15,7 +15,7 @@ import {
   TableRow,
   Tooltip,
 } from "@heroui/react";
-import { RiDeleteBinLine, RiExternalLinkLine, RiFolderLine } from "@remixicon/react";
+import { RiDeleteBinLine, RiExternalLinkLine, RiFolderLine, RiRefreshLine } from "@remixicon/react";
 import { filesize } from "filesize";
 
 import { formatMillisecond } from "@/common/utils/time";
@@ -27,6 +27,7 @@ import { useSettings } from "@/store/settings";
 
 import DownloadActions from "./actions";
 import DownloadProgress from "./progress";
+import { getStatusGroup, StatusGroups } from "./status-desc";
 
 const DownloadList = () => {
   const downloadPath = useSettings(s => s.downloadPath);
@@ -66,6 +67,10 @@ const DownloadList = () => {
     await window.electron.clearMediaDownloadTaskList();
   };
 
+  const retryAllFailed = async () => {
+    await window.electron.retryAllFailedMediaDownloadTask();
+  };
+
   const openDownloadDir = async () => {
     await window.electron.openDirectory(downloadPath);
   };
@@ -92,6 +97,51 @@ const DownloadList = () => {
     return "";
   };
 
+  const renderRow = (item: MediaDownloadTask) => {
+    const quality = getFileQuality(item);
+
+    return (
+      <TableRow key={item.id}>
+        <TableCell className="max-w-[280px] truncate">
+          <div className="flex items-center space-x-2">
+            <Image radius="md" src={item.cover} width={48} height={48} className="mr-2 object-cover" />
+            <div className="flex min-w-0 flex-1 flex-col items-start space-y-1 overflow-hidden">
+              <div
+                className="group flex max-w-full min-w-0 cursor-pointer items-center space-x-1 hover:underline"
+                onClick={() =>
+                  openBiliVideoLink({
+                    type: item.sid ? "audio" : "mv",
+                    bvid: item.bvid,
+                    sid: item.sid,
+                  })
+                }
+              >
+                <span className="min-w-0 flex-auto truncate">{item.title}</span>
+                <RiExternalLinkLine className="w-0 flex-none group-hover:w-[16px]" />
+              </div>
+              {Boolean(quality) && (
+                <Chip size="sm" radius="sm" variant="flat">
+                  {quality}
+                </Chip>
+              )}
+            </div>
+          </div>
+        </TableCell>
+        <TableCell>
+          <DownloadProgress data={item} />
+        </TableCell>
+        <TableCell>{item.totalBytes ? filesize(item.totalBytes) : "-"}</TableCell>
+        <TableCell>{item.createdTime ? formatMillisecond(item.createdTime) : "-"}</TableCell>
+        <TableCell>
+          <DownloadActions data={item} />
+        </TableCell>
+      </TableRow>
+    );
+  };
+
+  const filteredList = downloadList.filter(item => fileType === "all" || item.outputFileType === fileType);
+  const hasFailed = downloadList.some(item => item.status === "failed");
+
   return (
     <ScrollContainer enableBackToTop className="h-full w-full px-4">
       <div className="mb-2 flex items-center justify-between">
@@ -103,101 +153,88 @@ const DownloadList = () => {
         </div>
       </div>
       <Card radius="md" shadow="sm">
-        <CardBody>
-          <div className="w-full overflow-x-auto">
-            <Table
-              fullWidth
-              radius="md"
-              aria-label="下载列表"
-              removeWrapper
-              topContent={
-                <div className="flex justify-between">
-                  <RadioGroup
-                    orientation="horizontal"
-                    value={fileType}
-                    onValueChange={setFileType}
-                    classNames={{
-                      wrapper: "gap-4",
-                    }}
-                  >
-                    <Radio value="all">全部</Radio>
-                    <Radio value="audio">音频</Radio>
-                    <Radio value="video">视频</Radio>
-                  </RadioGroup>
-                  {Boolean(downloadList.length) && (
-                    <Tooltip content="清空记录" closeDelay={0}>
-                      <Button size="sm" isIconOnly onPress={clearDownloadList}>
-                        <RiDeleteBinLine size={18} />
-                      </Button>
-                    </Tooltip>
-                  )}
-                </div>
-              }
+        <CardBody className="space-y-4">
+          <div className="flex justify-between">
+            <RadioGroup
+              orientation="horizontal"
+              value={fileType}
+              onValueChange={setFileType}
               classNames={{
-                th: "first:rounded-s-medium last:rounded-e-medium",
+                wrapper: "gap-4",
               }}
             >
-              <TableHeader className="rounded-medium">
-                <TableColumn width={350}>文件</TableColumn>
-                <TableColumn align="center">状态</TableColumn>
-                <TableColumn width={120} align="center">
-                  大小
-                </TableColumn>
-                <TableColumn width={120} align="center">
-                  下载时间
-                </TableColumn>
-                <TableColumn width={120} align="center">
-                  操作
-                </TableColumn>
-              </TableHeader>
-              <TableBody
-                items={downloadList.filter(item => fileType === "all" || item.outputFileType === fileType)}
-                emptyContent={<Empty />}
-              >
-                {item => {
-                  const quality = getFileQuality(item);
-
-                  return (
-                    <TableRow key={item.id}>
-                      <TableCell className="max-w-[280px] truncate">
-                        <div className="flex items-center space-x-2">
-                          <Image radius="md" src={item.cover} width={48} height={48} className="mr-2 object-cover" />
-                          <div className="flex min-w-0 flex-1 flex-col items-start space-y-1 overflow-hidden">
-                            <div
-                              className="group flex max-w-full min-w-0 cursor-pointer items-center space-x-1 hover:underline"
-                              onClick={() =>
-                                openBiliVideoLink({
-                                  type: item.sid ? "audio" : "mv",
-                                  bvid: item.bvid,
-                                  sid: item.sid,
-                                })
-                              }
-                            >
-                              <span className="min-w-0 flex-auto truncate">{item.title}</span>
-                              <RiExternalLinkLine className="w-0 flex-none group-hover:w-[16px]" />
-                            </div>
-                            {Boolean(quality) && (
-                              <Chip size="sm" radius="sm" variant="flat">
-                                {quality}
-                              </Chip>
-                            )}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <DownloadProgress data={item} />
-                      </TableCell>
-                      <TableCell>{item.totalBytes ? filesize(item.totalBytes) : "-"}</TableCell>
-                      <TableCell>{item.createdTime ? formatMillisecond(item.createdTime) : "-"}</TableCell>
-                      <TableCell>
-                        <DownloadActions data={item} />
-                      </TableCell>
-                    </TableRow>
-                  );
-                }}
-              </TableBody>
-            </Table>
+              <Radio value="all">全部</Radio>
+              <Radio value="audio">音频</Radio>
+              <Radio value="video">视频</Radio>
+            </RadioGroup>
+            <div className="flex items-center space-x-1">
+              {hasFailed && (
+                <Button
+                  size="sm"
+                  variant="flat"
+                  color="warning"
+                  startContent={<RiRefreshLine size={16} />}
+                  onPress={retryAllFailed}
+                >
+                  重试全部
+                </Button>
+              )}
+              {Boolean(downloadList.length) && (
+                <Tooltip content="清空记录" closeDelay={0}>
+                  <Button size="sm" isIconOnly onPress={clearDownloadList}>
+                    <RiDeleteBinLine size={18} />
+                  </Button>
+                </Tooltip>
+              )}
+            </div>
           </div>
+          {filteredList.length === 0 ? (
+            <Empty />
+          ) : (
+            StatusGroups.map(group => {
+              const groupItems = filteredList.filter(item => getStatusGroup(item.status) === group.key);
+              if (groupItems.length === 0) {
+                return null;
+              }
+
+              return (
+                <div key={group.key} className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <h2 className="text-sm font-medium">{group.label}</h2>
+                    <Chip size="sm" radius="sm" variant="flat">
+                      {groupItems.length}
+                    </Chip>
+                  </div>
+                  <div className="w-full overflow-x-auto">
+                    <Table
+                      fullWidth
+                      radius="md"
+                      aria-label={`${group.label}下载列表`}
+                      removeWrapper
+                      classNames={{
+                        th: "first:rounded-s-medium last:rounded-e-medium",
+                      }}
+                    >
+                      <TableHeader className="rounded-medium">
+                        <TableColumn width={350}>文件</TableColumn>
+                        <TableColumn align="center">状态</TableColumn>
+                        <TableColumn width={120} align="center">
+                          大小
+                        </TableColumn>
+                        <TableColumn width={120} align="center">
+                          下载时间
+                        </TableColumn>
+                        <TableColumn width={120} align="center">
+                          操作
+                        </TableColumn>
+                      </TableHeader>
+                      <TableBody items={groupItems}>{item => renderRow(item)}</TableBody>
+                    </Table>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </CardBody>
       </Card>
     </ScrollContainer>
