@@ -25,6 +25,7 @@ import { useSettings } from "@/store/settings";
 
 import type { BatchResultItem } from "./batch-result";
 
+import AddToPlaylistModal from "./add-to-playlist-modal";
 import BatchResultModal from "./batch-result-modal";
 import LocalMusicItemRow from "./item";
 import MatchLyricsModal from "./match-lyrics-modal";
@@ -72,6 +73,14 @@ const LocalMusicPage = () => {
   const confirmMatch = async (opts: MatchOptions) => {
     const results = await startBatchMatch(matchTargets, opts);
     openResult("歌词匹配结果", results);
+  };
+
+  // 添加到播放列表弹窗：按目录勾选，默认全选
+  const [addModalOpen, setAddModalOpen] = useState(false);
+
+  const confirmAddByDirs = (selectedDirs: string[]) => {
+    const dirSet = new Set(selectedDirs);
+    addSongsToPlaylist(list.filter(i => dirSet.has(i.dir)));
   };
 
   // 批量操作模式：行首复选框，顶部按钮作用于已勾选项
@@ -146,6 +155,13 @@ const LocalMusicPage = () => {
     const parts = trimmed.split(/[/\\]/);
     return parts[parts.length - 1] || trimmed;
   };
+
+  // 按已配置目录统计歌曲数，供添加弹窗勾选；保留无歌曲目录便于用户知晓为空
+  const dirOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const item of list) counts.set(item.dir, (counts.get(item.dir) || 0) + 1);
+    return (localDirs || []).map(dir => ({ dir, name: getDirName(dir), count: counts.get(dir) || 0 }));
+  }, [list, localDirs]);
 
   const rowVirtualizer = useVirtualizer({
     count: filtered.length,
@@ -397,13 +413,13 @@ const LocalMusicPage = () => {
                   </Button>
                 )}
 
-                {Boolean(filtered.length) && (
+                {Boolean(list.length) && (
                   <IconButton
                     size="md"
                     variant="flat"
                     color="default"
                     tooltip="添加到播放列表"
-                    onPress={() => addSongsToPlaylist(filtered)}
+                    onPress={() => setAddModalOpen(true)}
                   >
                     <RiPlayListAddLine size={18} />
                   </IconButton>
@@ -568,6 +584,12 @@ const LocalMusicPage = () => {
         count={matchTargets.length}
         onOpenChange={setMatchModalOpen}
         onConfirm={confirmMatch}
+      />
+      <AddToPlaylistModal
+        isOpen={addModalOpen}
+        dirs={dirOptions}
+        onOpenChange={setAddModalOpen}
+        onConfirm={confirmAddByDirs}
       />
       <BatchResultModal isOpen={resultOpen} title={resultTitle} items={resultItems} onOpenChange={setResultOpen} />
     </ScrollContainer>
