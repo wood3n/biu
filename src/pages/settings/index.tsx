@@ -121,7 +121,14 @@ const SettingsPage = () => {
       <div className="m-auto mb-6 max-w-[900px] px-8 py-4">
         <div className="space-y-6">
           <h1>设置</h1>
-          <Tabs aria-label="设置选项" classNames={{ panel: "px-1 py-0", cursor: "rounded-medium" }}>
+          <Tabs
+            aria-label="设置选项"
+            classNames={{
+              panel: "px-1 py-0",
+              cursor: "rounded-medium",
+              tabList: "bg-default-200/80 dark:bg-default-100/10",
+            }}
+          >
             <Tab key="system" title="常规设置">
               <SystemSettingsTab {...system} />
             </Tab>

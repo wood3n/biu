@@ -66,6 +66,7 @@ export const SystemSettingsTab = ({
               aria-label="数据展示"
               classNames={{
                 cursor: "rounded-medium",
+                tabList: "bg-default-200/80 dark:bg-default-100/10",
               }}
               selectedKey={field.value}
               onSelectionChange={key => field.onChange(key)}
@@ -116,6 +117,7 @@ export const SystemSettingsTab = ({
               aria-label="主题切换"
               classNames={{
                 cursor: "rounded-medium",
+                tabList: "bg-default-200/80 dark:bg-default-100/10",
               }}
               selectedKey={field.value}
               onSelectionChange={key => field.onChange(key)}

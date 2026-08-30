@@ -477,7 +477,6 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
       title: item.title,
       href: `/collection/${item.id}?mid=${item?.mid}`,
       cover: item.cover,
-      className: "px-2 py-1 h-auto",
       type: item.type,
       mid: item.mid,
     }));
@@ -520,7 +519,6 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
       title: item.title,
       href: `/collection/${item.id}?type=${item.type}&mid=${item?.mid}`,
       cover: item.cover,
-      className: "px-2 py-1 h-auto",
       type: item.type,
       mid: item.mid,
     }));

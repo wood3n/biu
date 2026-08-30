@@ -12,6 +12,7 @@ import PlayListDrawer from "@/components/music-playlist-drawer";
 import ReleaseNoteModal from "@/components/release-note-modal";
 import VideoPagesDownloadSelectModal from "@/components/video-pages-download-select-modal";
 import PlayBar from "@/layout/playbar";
+import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
 
 import Navbar from "./navbar";
@@ -20,6 +21,7 @@ import SideNav from "./side";
 const Layout = () => {
   const updateUser = useUser(state => state.updateUser);
   const location = useLocation();
+  const playbarCollapsed = useSettings(s => s.playbarCollapsed);
 
   useEffect(() => {
     updateUser();
@@ -36,17 +38,21 @@ const Layout = () => {
       <div className="flex h-full flex-col">
         <div className="flex min-h-0 w-full flex-1">
           <SideNav />
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
             <div className="h-16 flex-none">
               <Navbar />
             </div>
-            <div className="min-h-0 flex-1 overflow-hidden">
+            <div
+              className={`main-content relative flex min-h-0 flex-1 flex-col overflow-hidden ${playbarCollapsed ? "playbar-collapsed" : ""}`}
+            >
               <Outlet />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-50 px-4 pb-4">
+                <div className="pointer-events-auto">
+                  <PlayBar />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="relative z-50 h-[88px] w-full flex-none shadow-2xl">
-          <PlayBar />
         </div>
       </div>
       <FavoritesSelectModal />

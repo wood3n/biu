@@ -152,10 +152,13 @@ const SideNav = () => {
         <ScrollContainer
           className={clx("min-h-0 flex-1 pb-2", {
             "px-4": !isCollapsedVisual,
+            "px-2": isCollapsedVisual,
             "overflow-hidden": isDragging,
+            "side-collapsed-center": isCollapsedVisual,
           })}
         >
           <DefaultMenus isCollapsed={isCollapsedVisual} onOpenAddFavorite={handleOpenAddFavorite} />
+          <div className={isCollapsedVisual ? "mt-4" : ""} />
           <Collection
             isCollapsed={isCollapsedVisual}
             onOpenAddFavorite={handleOpenAddFavorite}
@@ -168,7 +171,7 @@ const SideNav = () => {
           fullWidth
           radius="none"
           onPress={onToggleCollapsed}
-          className="bg-background border-divider/30 h-auto w-full flex-none border-y py-1"
+          className="text-foreground h-auto w-full flex-none border-y border-black/6 bg-white/70 py-1 backdrop-blur-2xl hover:bg-white/85 dark:border-white/10 dark:bg-[#1b1e22]/60 dark:hover:bg-[#1b1e22]/80"
         >
           {isCollapsedVisual ? <RiArrowRightDoubleLine size={16} /> : <RiArrowLeftDoubleLine size={16} />}
         </Button>

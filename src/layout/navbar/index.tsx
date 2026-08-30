@@ -35,8 +35,8 @@ const LayoutNavbar = () => {
       <div className="window-no-drag flex items-center justify-center space-x-4">
         <AppUpdateNotify />
         <Dev />
-        {Boolean(user?.isLogin) && <UserFeed />}
         <UserCard onDropdownOpenChange={setIsUserDropdownOpen} />
+        {Boolean(user?.isLogin) && <UserFeed />}
         {["linux", "windows"].includes(platform) && <WindowAction />}
       </div>
     </div>

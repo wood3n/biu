@@ -38,4 +38,10 @@ interface AppSettings {
   reportPlayHistory: boolean;
   /** 本地音乐目录列表 */
   localMusicDirs: string[];
+  /** 歌词翻译显示开关 */
+  showLyricsTranslation: boolean;
+  /** 歌词假名注音开关 */
+  showLyricsFurigana: boolean;
+  /** 播放栏折叠状态 */
+  playbarCollapsed: boolean;
 }

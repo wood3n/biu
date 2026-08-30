@@ -77,6 +77,9 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           sideMenuCollectionFolded: state.sideMenuCollectionFolded,
           reportPlayHistory: state.reportPlayHistory,
           localMusicDirs: state.localMusicDirs,
+          showLyricsTranslation: state.showLyricsTranslation,
+          showLyricsFurigana: state.showLyricsFurigana,
+          playbarCollapsed: state.playbarCollapsed,
         };
       },
     },

@@ -170,12 +170,11 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
       >
         <DropdownTrigger>
           <Avatar
-            isBordered
             showFallback
             size="sm"
             as="button"
             type="button"
-            className="mr-4 cursor-pointer transition-transform hover:scale-105"
+            classNames={{ base: "mr-4 size-7 min-w-7 cursor-pointer transition-transform hover:scale-105" }}
             src={user?.face}
           />
         </DropdownTrigger>

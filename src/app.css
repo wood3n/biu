@@ -60,3 +60,20 @@ html, body, #root {
 
   padding: 0;
 }
+
+/* 收起态侧边栏：让 OverlayScrollbars viewport 内容垂直居中 */
+.side-collapsed-center [data-overlay-scrollbar-viewport] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 播放栏悬浮：给主内容区滚动容器底部留空间 */
+.main-content [data-overlay-scrollbar-viewport] {
+  padding-bottom: 104px;
+}
+
+/* 播放栏折叠态：几乎不留底部空间，只有悬浮按钮 */
+.playbar-collapsed [data-overlay-scrollbar-viewport] {
+  padding-bottom: 16px;
+}

@@ -52,6 +52,29 @@ const MenuItem: React.FC<MenuItemProps> = ({
         <Icon size={18} />
       ) : undefined;
 
+    // 收起态：直接放大图标，不套 Avatar 圆角容器，只保留选中底色
+    if (collapsed) {
+      if (isActive && ActiveIcon) {
+        return <ActiveIcon size={24} className="text-primary" />;
+      }
+      if (Icon) {
+        return <Icon size={24} />;
+      }
+      // 有封面的收藏夹：收起态也用小封面，和功能图标同尺寸
+      if (cover) {
+        return (
+          <Avatar
+            name={title}
+            src={`${cover}@672w_378h_1c.avif`}
+            showFallback
+            radius="none"
+            alt={title}
+            className="size-8 flex-none rounded-[6px]"
+          />
+        );
+      }
+    }
+
     if (!collapsed && icon) {
       return icon;
     }
@@ -61,10 +84,10 @@ const MenuItem: React.FC<MenuItemProps> = ({
         name={title}
         src={cover ? `${cover}@672w_378h_1c.avif` : undefined}
         showFallback
-        radius="md"
+        radius="none"
         fallback={icon}
         alt={title}
-        className="h-10 w-10 flex-none"
+        className="size-5 flex-none rounded-[3px]"
       />
     );
   }, [cover, isActive, Icon, ActiveIcon, title, collapsed]);
@@ -79,14 +102,13 @@ const MenuItem: React.FC<MenuItemProps> = ({
         <Button
           as={href ? HeroLink : "button"}
           href={href}
-          fullWidth
           variant={isActive ? "flat" : "light"}
           color={isActive ? "primary" : "default"}
           onPress={onPress}
-          className={clx("w-full min-w-0 justify-center rounded-md px-0 py-1", className, dndClassName, {
-            "h-auto": collapsed,
+          className={clx("flex flex-none items-center justify-center rounded-lg px-0 py-0", className, dndClassName, {
             "text-primary": isActive,
           })}
+          style={{ width: 40, height: 40, minWidth: 40, maxWidth: 40 }}
           {...(dndRest as any)}
         >
           {iconContent}
@@ -105,7 +127,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
       color={isActive ? "primary" : "default"}
       onPress={onPress}
       startContent={iconContent}
-      className={twMerge("justify-start px-2 text-inherit", className, dndClassName)}
+      className={twMerge("h-9 justify-start px-2 text-inherit", className, dndClassName)}
       {...(dndRest as any)}
     >
       <span className="pointer-events-none truncate">{title}</span>
