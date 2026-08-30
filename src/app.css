@@ -77,3 +77,42 @@ html, body, #root {
 .playbar-collapsed [data-overlay-scrollbar-viewport] {
   padding-bottom: 72px;
 }
+
+/*
+ * 播放栏折叠/展开动画
+ * transform-origin 固定在右下角（折叠卡片的位置），
+ * 通过 scale + opacity 实现整体缩放，避免 width/display 切换导致的"从角缩放"怪异效果。
+ */
+@keyframes collapse-in {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  to {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+
+@keyframes expand-in {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-collapse-in {
+  animation: collapse-in 300ms ease-in-out forwards;
+  transform-origin: right bottom;
+}
+
+.animate-expand-in {
+  animation: expand-in 300ms ease-in-out forwards;
+  transform-origin: right bottom;
+}

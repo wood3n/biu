@@ -5,81 +5,94 @@ import { twMerge } from "tailwind-merge";
 interface Props {
   children: React.ReactNode;
   className?: string;
-  /** 滚动速度，px/帧，默认 0.5 */
+  /** 滚动速度：动画持续时间（秒），值越小越快，默认 8 */
   speed?: number;
+  /** 是否始终滚动（正在播放时），为 false 时仅 hover 才滚动 */
+  active?: boolean;
+  /** HTML title 属性（鼠标悬停 tooltip） */
+  title?: string;
+  /** 点击事件 */
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 /**
  * 文字溢出时自动滚动（marquee）显示
- * 不溢出则静止
- * 溢出时复制一份文字接在后面，形成从左滚出→右侧滚入的循环效果
+ *
+ * 设计要点：
+ * 1. 纯 CSS @keyframes animation 驱动 transform: translateX，GPU 合成层不触发 layout
+ * 2. 溢出检测用临时 probe 元素测量单份文字宽度，不依赖 span 自身的 scrollWidth（避免双份内容导致测量跳变）
+ * 3. ResizeObserver 只监听容器 div（宽度变化时重新判断溢出）
+ * 4. span 的 display 状态恒定，不因滚动切换而改变布局（防止 ResizeObserver 循环触发 → 抖动）
+ * 5. 不滚动时容器用 text-overflow: ellipsis 显示省略号
  */
-const MarqueeText = ({ children, className, speed = 0.5 }: Props) => {
+const MarqueeText = ({ children, className, speed = 8, active = false, title, onClick }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLSpanElement>(null);
-  const [shouldScroll, setShouldScroll] = useState(false);
-  const offsetRef = useRef(0);
-  const rafRef = useRef(0);
+  const [isOverflow, setIsOverflow] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(0);
 
+  const shouldScroll = isOverflow && (active || isHovered);
+
+  // 检测溢出：probe 元素测量文字真实宽度，ResizeObserver 只监听容器
   useEffect(() => {
-    const checkOverflow = () => {
-      const container = containerRef.current;
-      const text = textRef.current;
-      if (!container || !text) return;
-      setShouldScroll(text.scrollWidth > container.clientWidth + 2);
+    const container = containerRef.current;
+    if (!container) return;
+
+    const measure = () => {
+      const cw = container.clientWidth;
+      setContainerWidth(cw);
+
+      // 用 probe 元素测量文字宽度，不依赖 span 自身（避免布局干扰）
+      const probe = document.createElement("span");
+      probe.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;font:inherit";
+      probe.textContent = typeof children === "string" ? children : "";
+      container.appendChild(probe);
+      const textWidth = probe.offsetWidth;
+      container.removeChild(probe);
+
+      setIsOverflow(textWidth > cw + 2);
     };
-    checkOverflow();
-    const ro = new ResizeObserver(checkOverflow);
-    if (containerRef.current) ro.observe(containerRef.current);
-    if (textRef.current) ro.observe(textRef.current);
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(container);
     return () => ro.disconnect();
   }, [children]);
 
-  useEffect(() => {
-    if (!shouldScroll) {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      offsetRef.current = 0;
-      if (textRef.current) textRef.current.style.transform = "translateX(0)";
-      return;
-    }
-
-    const text = textRef.current;
-    const container = containerRef.current;
-    if (!text || !container) return;
-
-    // 测量单份文字宽度：复制后 scrollWidth 包含两份+gap，
-    // 用 (scrollWidth - gap) / 2 还原原始文字宽度
-    const gap = 24;
-    const singleWidth = (text.scrollWidth - gap) / 2;
-    const cycle = singleWidth + gap;
-
-    const animate = () => {
-      offsetRef.current += speed;
-      if (offsetRef.current > cycle) {
-        offsetRef.current -= cycle;
-      }
-      text.style.transform = `translateX(${-offsetRef.current}px)`;
-      rafRef.current = requestAnimationFrame(animate);
-    };
-    rafRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [shouldScroll, speed]);
+  // 滚动时通过 CSS variable 告诉 keyframes 容器宽度（控制 translateX 终点）
+  const animationDuration = speed;
+  const isScrolling = shouldScroll && containerWidth > 0;
 
   return (
-    <div ref={containerRef} className={twMerge("min-w-0 flex-1 overflow-hidden whitespace-nowrap", className)}>
-      <span ref={textRef} className="inline-block whitespace-nowrap" style={{ willChange: "transform" }}>
-        {shouldScroll ? (
-          <>
-            {children}
-            <span style={{ display: "inline-block", width: 24 }} />
-            {children}
-          </>
-        ) : (
-          children
-        )}
+    <div
+      ref={containerRef}
+      className={twMerge(
+        "min-w-0 flex-1 overflow-hidden whitespace-nowrap",
+        !isScrolling && "text-ellipsis",
+        className,
+      )}
+      style={
+        {
+          "--marquee-vw": `${containerWidth}px`,
+        } as React.CSSProperties
+      }
+      title={title}
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <span
+        className="inline-block whitespace-nowrap will-change-transform"
+        style={
+          isScrolling
+            ? {
+                animation: `marquee-scroll ${animationDuration}s linear infinite`,
+                animationPlayState: "running",
+              }
+            : undefined
+        }
+      >
+        {children}
       </span>
     </div>
   );
