@@ -173,6 +173,7 @@ const FullScreenPlayer = () => {
     const vars: React.CSSProperties = {
       ...cssVars,
       ["--heroui-primary" as any]: hexToHsl(primaryColor),
+      ["--heroui-primary-foreground" as any]: hexToHsl("#ffffff"),
     };
     if (computedForegroundHex) {
       vars["--heroui-foreground" as any] = hexToHsl(computedForegroundHex);
@@ -187,7 +188,7 @@ const FullScreenPlayer = () => {
   const coverWidth = Math.max(260, Math.min(windowWidth * 0.7, windowHeight * 0.48, 520));
   const coverHeight = coverWidth * 0.75;
   const waveformWidth = Math.min(640, Math.max(400, Math.round(windowWidth * 0.5)));
-  const waveformBarCount = Math.max(48, Math.min(128, Math.round(waveformWidth / 7.5)));
+  const waveformBarCount = Math.max(64, Math.min(160, Math.round(waveformWidth / 5)));
 
   return (
     <Drawer
@@ -288,13 +289,15 @@ const FullScreenPlayer = () => {
                 </div>
               )}
               <div
-                className={`absolute top-0 right-0 z-20 flex w-full justify-between px-6 py-4 transition-opacity duration-200 ${isUiVisible ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                className={`absolute top-0 right-0 z-20 flex w-full justify-between px-4 py-4 transition-opacity duration-200 ${isUiVisible ? "opacity-100" : "pointer-events-none opacity-0"}`}
               >
-                <div className="window-no-drag top-0 right-0 left-0 flex w-full max-w-2/5 items-center space-x-2">
-                  <IconButton title="关闭弹窗" onPress={onClose} className="">
-                    <RiArrowDownSLine size={28} />
+                <div className="window-no-drag flex items-center space-x-2 rounded-full border border-white/12 bg-black/25 py-1 pr-3 pl-1 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)] backdrop-blur-2xl">
+                  <IconButton title="关闭弹窗" onPress={onClose} className="text-white">
+                    <RiArrowDownSLine size={24} />
                   </IconButton>
-                  <h2 className="truncate text-xl select-none">{playItem.pageTitle || playItem.title}</h2>
+                  <h2 className="max-w-[40vw] truncate text-base font-medium text-white select-none">
+                    {playItem.pageTitle || playItem.title}
+                  </h2>
                   <Popover
                     isOpen={isSettingsOpen && isUiVisible}
                     onOpenChange={open => {
@@ -310,8 +313,8 @@ const FullScreenPlayer = () => {
                     placement="bottom-start"
                   >
                     <PopoverTrigger>
-                      <IconButton title="设置" tooltip="设置">
-                        <RiSettings3Line size={22} />
+                      <IconButton title="设置" tooltip="设置" className="text-white">
+                        <RiSettings3Line size={20} />
                       </IconButton>
                     </PopoverTrigger>
                     <PopoverContent className="p-4">
@@ -319,7 +322,7 @@ const FullScreenPlayer = () => {
                     </PopoverContent>
                   </Popover>
                 </div>
-                <div className="window-no-drag top-0 right-0">
+                <div className="window-no-drag flex items-center rounded-full border border-white/12 bg-black/25 px-1 backdrop-blur-2xl">
                   {platform === "linux" || platform === "windows" ? <WindowAction /> : null}
                 </div>
               </div>
@@ -385,14 +388,14 @@ const FullScreenPlayer = () => {
               <div
                 ref={controlsRef}
                 className={clsx(
-                  "absolute inset-x-0 bottom-0 z-40 transform transition-transform duration-300 ease-out",
+                  "absolute inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-4 transition-all duration-300 ease-out",
                   isUiVisible
                     ? "pointer-events-auto translate-y-0 opacity-100"
-                    : "pointer-events-none translate-y-full opacity-0",
+                    : "pointer-events-none translate-y-6 opacity-0",
                 )}
               >
-                <div className="mx-auto mb-4 flex w-full max-w-6xl flex-col items-center gap-2 px-12">
-                  <MusicPlayProgress className="w-full" trackClassName="h-[6px]" />
+                <div className="flex w-full max-w-3xl flex-col items-center gap-2 rounded-2xl border border-white/12 bg-white/8 px-8 py-3 shadow-[0_20px_60px_-15px_rgb(0_0_0/0.5)] backdrop-blur-2xl">
+                  <MusicPlayProgress className="w-full" trackClassName="h-[5px] bg-white/20" />
                   <div className="flex w-full items-center justify-center space-x-4">
                     <MusicPlayMode />
                     <MusicPlayControl />

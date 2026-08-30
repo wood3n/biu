@@ -65,7 +65,7 @@ const MusicRecommend = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const pageRef = useRef(1);
-  const [activeTab, setActiveTab] = useState<RecommendTabKey>("music");
+  const [activeTab, setActiveTab] = useState<RecommendTabKey>("pop");
   const scrollRestoreRef = useRef<{ tab: RecommendTabKey; top: number } | null>(null);
   const [popLayoutVersion, setPopLayoutVersion] = useState(0);
 
@@ -265,6 +265,7 @@ const MusicRecommend = () => {
           size="lg"
           radius="md"
           classNames={{
+            tabList: "bg-default-200/80 dark:bg-default-100/10",
             cursor: "rounded-medium",
           }}
           selectedKey={activeTab}
@@ -277,9 +278,9 @@ const MusicRecommend = () => {
             setActiveTab(nextTab);
           }}
         >
+          <Tab key="pop" title="推荐" />
           <Tab key="music" title="音乐" />
           <Tab key="guichu" title="鬼畜" />
-          <Tab key="pop" title="流行" />
         </Tabs>
         <AsyncButton
           color="primary"
@@ -287,7 +288,7 @@ const MusicRecommend = () => {
           startContent={<RiPlayFill size={18} />}
           isDisabled={initialLoading || list.length === 0}
           onPress={handlePlayAll}
-          className="dark:text-black"
+          className="text-white"
         >
           全部播放
         </AsyncButton>
