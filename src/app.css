@@ -73,7 +73,7 @@ html, body, #root {
   padding-bottom: 104px;
 }
 
-/* 播放栏折叠态：几乎不留底部空间，只有悬浮按钮 */
+/* 播放栏折叠态：底部留少量空间给折叠小卡片 */
 .playbar-collapsed [data-overlay-scrollbar-viewport] {
-  padding-bottom: 16px;
+  padding-bottom: 72px;
 }

@@ -12,6 +12,7 @@ import PlayListDrawer from "@/components/music-playlist-drawer";
 import ReleaseNoteModal from "@/components/release-note-modal";
 import VideoPagesDownloadSelectModal from "@/components/video-pages-download-select-modal";
 import PlayBar from "@/layout/playbar";
+import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
 
@@ -22,10 +23,12 @@ const Layout = () => {
   const updateUser = useUser(state => state.updateUser);
   const location = useLocation();
   const playbarCollapsed = useSettings(s => s.playbarCollapsed);
+  const init = usePlayList(s => s.init);
 
   useEffect(() => {
     updateUser();
-  }, []);
+    init();
+  }, [init]);
 
   return (
     <ErrorBoundary
@@ -46,8 +49,13 @@ const Layout = () => {
               className={`main-content relative flex min-h-0 flex-1 flex-col overflow-hidden ${playbarCollapsed ? "playbar-collapsed" : ""}`}
             >
               <Outlet />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-50 px-4 pb-4">
-                <div className="pointer-events-auto">
+              {/* 统一 wrapper 结构：折叠/展开只切换 class，不改变 DOM 层级，避免 PlayBar 重新挂载导致播放中断 */}
+              <div
+                className={`pointer-events-none absolute z-50 ${
+                  playbarCollapsed ? "right-4 bottom-4" : "inset-x-0 bottom-0 px-4 pb-4"
+                }`}
+              >
+                <div className={`pointer-events-auto ${playbarCollapsed ? "inline-block" : "w-full"}`}>
                   <PlayBar />
                 </div>
               </div>
