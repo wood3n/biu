@@ -1,3 +1,14 @@
+---
+AIGC:
+  ContentProducer: '001191110102MAD55U9H0F10002'
+  ContentPropagator: '001191110102MAD55U9H0F10002'
+  Label: '1'
+  ProduceID: '7bb49eb5-1116-4d45-9125-6646df7a7cb3'
+  PropagateID: '7bb49eb5-1116-4d45-9125-6646df7a7cb3'
+  ReservedCode1: 'd002f185-5680-416a-85e2-d03b6489b756'
+  ReservedCode2: 'd002f185-5680-416a-85e2-d03b6489b756'
+---
+
 <h1 align="center">Biu 音乐播放器</h1>
 <p align="center">
   <img src="./screenshots/logo.svg" alt="Biu logo" width="120" />
@@ -9,8 +20,8 @@
   非官方项目，与哔哩哔哩无任何官方关联或背书
 </p>
 <p align="center">
-  <a href="https://github.com/wood3n/biu/releases">
-    <img src="https://badgen.net/github/tag/wood3n/biu?label=最新版本&color=blueviolet" alt="Latest Version" />
+  <a href="https://github.com/xRetia/biu/releases">
+    <img src="https://badgen.net/github/tag/xRetia/biu?label=最新版本&color=blueviolet" alt="Latest Version" />
   </a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-orange.svg" alt="License" /></a>
 </p>
@@ -50,12 +61,18 @@
 - 🎧 高品质音频播放，优先拉取更高码率音频流（如无损 Flac，192K/Hi-Res）
 - 🔥 支持视频文件以及提取视频中的音频下载；支持收藏夹视频批量下载
 - 🧩 轻量界面，内置浅色和深色主题，同时可自定义部分主题样式，细腻的滚动与动效体验
+- 🪟 全局毛玻璃（Glassmorphism）风格：侧边栏、播放列表、右键菜单、弹窗面板等均采用主题感知毛玻璃背景，深色模式下采用深色胶囊风格
+- 🎨 UI 精细调校：间距/对齐/配色精确到像素，三色高亮主题色（#F56EE2 / #2C95FF / #01E3F8），控件 hover/active 状态统一处理
+- 📜 歌词面板：可调节字体大小与时间偏移，深色毛玻璃面板风格
+- 🪧 播放列表：主界面与全屏播放器均采用毛玻璃背景 + 正在播放绿色强调色 + 文本无缝滚动（Marquee）
+- ⬆️ 返回顶部按钮：毛玻璃 + 出场动画，全局可用
+- 🎛️ 全屏播放器设置面板：Modal 居中弹窗，分区布局，深色毛玻璃胶囊风格
 - 💿 系统托盘与最小化隐藏，便捷控制播放
 - 🍃 支持 mini 播放器模式，占用系统资源少，同时保留主窗口功能
 - ♻️ 安装包支持自动检测更新，始终保持最新体验
 
 ## 下载和使用
-- 下载页面：[GitHub Releases](https://github.com/wood3n/biu/releases/latest)
+- 下载页面：[GitHub Releases](https://github.com/xRetia/biu/releases/latest)
 - 快速选择：
   - <img alt="Windows" src="https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white" /> 优先选安装包 `win-setup`；需要免安装/无管理员权限选 `win-portable`
   - <img alt="macOS" src="https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white" /> 优先选 `dmg`；需要脚本/自动化分发可选 `zip`
@@ -285,10 +302,10 @@
 
 ## ♥️ Contributors
 
-<a href="https://github.com/wood3n/biu/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=wood3n/biu" />
+<a href="https://github.com/xRetia/biu/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=xRetia/biu" />
 </a>
 
 ## 🌟 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=wood3n/biu&type=date&legend=top-left)](https://www.star-history.com/#wood3n/biu&type=date&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=xRetia/biu&type=date&legend=top-left)](https://www.star-history.com/#xRetia/biu&type=date&legend=top-left)

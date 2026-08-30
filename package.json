@@ -1,6 +1,6 @@
 {
   "name": "biu",
-  "version": "1.16.0",
+  "version": "2.0.0-xretia",
   "private": true,
   "engines": {
     "node": "22.17.1"
@@ -9,13 +9,13 @@
   "description": "music application based on bilibili api",
   "author": "wood3n",
   "license": "PolyForm-Noncommercial-1.0.0",
-  "homepage": "https://github.com/wood3n/biu#readme",
+  "homepage": "https://github.com/xRetia/biu#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wood3n/biu.git"
+    "url": "git+https://github.com/xRetia/biu.git"
   },
   "bugs": {
-    "url": "https://github.com/wood3n/biu/issues"
+    "url": "https://github.com/xRetia/biu/issues"
   },
   "keywords": [
     "music",
