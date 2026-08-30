@@ -126,7 +126,7 @@ const PlayListDrawer = () => {
         base: "data-[placement=right]:mb-22",
       }}
     >
-      <DrawerContent>
+      <DrawerContent className="bg-background/70 backdrop-blur-2xl backdrop-saturate-150">
         <DrawerHeader className="border-divider/40 flex flex-row items-center justify-between space-x-2 border-b px-4 py-3">
           <h3>
             播放列表<span className="text-default-500 text-sm">({pureList?.length || 0})</span>
