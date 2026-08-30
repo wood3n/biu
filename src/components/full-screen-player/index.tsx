@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Drawer, DrawerBody, DrawerContent, Image, Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
+import { Drawer, DrawerBody, DrawerContent, Image, Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/react";
 import { RiArrowDownSLine, RiArrowLeftSLine, RiArrowRightSLine, RiSettings3Line } from "@remixicon/react";
 import { useClickAway } from "ahooks";
 import clsx from "classnames";
@@ -279,29 +279,21 @@ const FullScreenPlayer = () => {
                   <h2 className="max-w-[40vw] truncate text-base font-medium text-white select-none">
                     {playItem.pageTitle || playItem.title}
                   </h2>
-                  <Popover
-                    isOpen={isSettingsOpen && isUiVisible}
-                    onOpenChange={open => {
-                      setIsSettingsOpen(open);
-                      if (open) {
-                        if (hideUiTimeoutRef.current) {
-                          window.clearTimeout(hideUiTimeoutRef.current);
-                          hideUiTimeoutRef.current = null;
-                        }
-                        setIsUiVisible(true);
+                  <IconButton
+                    title="设置"
+                    tooltip="设置"
+                    className="text-white"
+                    onPress={() => {
+                      if (hideUiTimeoutRef.current) {
+                        window.clearTimeout(hideUiTimeoutRef.current);
+                        hideUiTimeoutRef.current = null;
                       }
+                      setIsUiVisible(true);
+                      setIsSettingsOpen(true);
                     }}
-                    placement="bottom-start"
                   >
-                    <PopoverTrigger>
-                      <IconButton title="设置" tooltip="设置" className="text-white">
-                        <RiSettings3Line size={20} />
-                      </IconButton>
-                    </PopoverTrigger>
-                    <PopoverContent className="p-4">
-                      <FullScreenPlayerSettingsPanel isUiVisible={isUiVisible} />
-                    </PopoverContent>
-                  </Popover>
+                    <RiSettings3Line size={20} />
+                  </IconButton>
                 </div>
                 {/* 封面关闭时：播放器胶囊紧贴窗口控制按钮右侧 */}
                 <div className="flex items-center gap-2">
@@ -445,6 +437,33 @@ const FullScreenPlayer = () => {
                 }}
                 onClose={() => setIsPlayListOpen(false)}
               />
+
+              <Modal
+                disableAnimation
+                isOpen={isSettingsOpen}
+                onOpenChange={setIsSettingsOpen}
+                radius="lg"
+                size="md"
+                placement="center"
+                hideCloseButton
+                isDismissable
+                classNames={{
+                  base: "bg-black/25 backdrop-blur-2xl backdrop-saturate-150 border border-white/12 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)]",
+                }}
+                className="text-white"
+                style={{
+                  ["--heroui-foreground" as any]: hexToHsl("#ffffff"),
+                }}
+              >
+                <ModalContent>
+                  <ModalHeader>
+                    <h2 className="text-lg font-semibold">播放器设置</h2>
+                  </ModalHeader>
+                  <ModalBody>
+                    <FullScreenPlayerSettingsPanel />
+                  </ModalBody>
+                </ModalContent>
+              </Modal>
             </DrawerBody>
           )
         }

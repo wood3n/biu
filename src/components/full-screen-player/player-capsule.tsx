@@ -36,7 +36,7 @@ const PlayerCapsule = ({ compact = false }: { compact?: boolean }) => {
         compact ? "px-2 py-1 pr-3" : "px-4 py-2 pr-6",
       )}
     >
-      <MusicPlayMode />
+      <MusicPlayMode variant="dark" />
       <IconButton
         radius="full"
         onPress={prev}
