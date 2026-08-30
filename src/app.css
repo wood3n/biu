@@ -78,45 +78,6 @@ html, body, #root {
   padding-bottom: 72px;
 }
 
-/*
- * 播放栏折叠/展开动画
- * transform-origin 固定在右下角（折叠卡片的位置），
- * 通过 scale + opacity 实现整体缩放，避免 width/display 切换导致的"从角缩放"怪异效果。
- */
-@keyframes collapse-in {
-  from {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  to {
-    transform: scale(0.4);
-    opacity: 0;
-  }
-}
-
-@keyframes expand-in {
-  from {
-    transform: scale(0.4);
-    opacity: 0;
-  }
-
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.animate-collapse-in {
-  animation: collapse-in 300ms ease-in-out forwards;
-  transform-origin: right bottom;
-}
-
-.animate-expand-in {
-  animation: expand-in 300ms ease-in-out forwards;
-  transform-origin: right bottom;
-}
-
 /* 文字溢出滚动（marquee）：无缝循环。
  * 轨道内渲染双份文字，translateX(-50%) 恰好位移一份文字宽度，
  * 第一份滚出后第二份无缝衔接，无空白间隙、无跳变 */
