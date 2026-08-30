@@ -51,7 +51,7 @@ const FullScreenPageList = ({
       <MusicPageList
         className="h-full w-full flex-1 p-1 pb-2"
         hideCover
-        itemClassName="hover:bg-white/10 data-[active=true]:bg-primary/20 text-foreground/80 data-[active=true]:text-primary h-8 min-h-8 p-1 [&_span.tabular-nums]:hidden"
+        itemClassName="hover:bg-white/10 data-[active=true]:bg-primary/20 text-foreground/80 data-[active=true]:text-primary h-8 min-h-8 p-1"
         itemHeight={32}
         itemTitleClassName="text-sm"
         onPressItem={onClose}
