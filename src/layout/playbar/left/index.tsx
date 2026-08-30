@@ -48,6 +48,7 @@ const LeftControl = () => {
         <span className="flex w-full items-center">
           <MarqueeText
             title={playItem?.pageTitle || playItem?.title}
+            active
             className={clsx({
               "cursor-pointer": isClickable,
               "hover:underline": isClickable,
@@ -71,6 +72,7 @@ const LeftControl = () => {
           )}
         </span>
         <MarqueeText
+          active
           className={clsx("text-foreground-500 w-full text-sm", {
             "cursor-pointer hover:underline": Boolean(playItem?.ownerMid),
           })}

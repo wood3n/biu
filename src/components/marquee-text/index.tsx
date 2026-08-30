@@ -7,7 +7,7 @@ interface Props {
   className?: string;
   /** 滚动速度：动画持续时间（秒），值越小越快，默认 8 */
   speed?: number;
-  /** 是否始终滚动（正在播放时），为 false 时仅 hover 才滚动 */
+  /** 是否始终滚动，为 false 时仅 hover 才滚动 */
   active?: boolean;
   /** HTML title 属性（鼠标悬停 tooltip） */
   title?: string;
@@ -20,16 +20,18 @@ interface Props {
  *
  * 设计要点：
  * 1. 纯 CSS @keyframes animation 驱动 transform: translateX，GPU 合成层不触发 layout
- * 2. 溢出检测用临时 probe 元素测量单份文字宽度，不依赖 span 自身的 scrollWidth（避免双份内容导致测量跳变）
+ * 2. 溢出检测用临时 probe 元素测量单份文字宽度，不依赖 span 自身的 scrollWidth
  * 3. ResizeObserver 只监听容器 div（宽度变化时重新判断溢出）
- * 4. span 的 display 状态恒定，不因滚动切换而改变布局（防止 ResizeObserver 循环触发 → 抖动）
- * 5. 不滚动时容器用 text-overflow: ellipsis 显示省略号
+ * 4. 无缝循环：滚动时轨道渲染双份文字，动画 translateX(-50%) 恰好位移一份文字宽，
+ *    第一份滚完时第二份无缝衔接，无空白间隙、无跳变
+ * 5. 轨道用 display:flex + width:max-content，规避 inline-block 的 baseline/line-height
+ *    额外行框高度（否则容器被撑高，歌名与歌手名上下间距变大）
+ * 6. 不滚动时单份文字用 text-overflow: ellipsis 显示省略号
  */
 const MarqueeText = ({ children, className, speed = 8, active = false, title, onClick }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isOverflow, setIsOverflow] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [containerWidth, setContainerWidth] = useState(0);
 
   const shouldScroll = isOverflow && (active || isHovered);
 
@@ -40,9 +42,8 @@ const MarqueeText = ({ children, className, speed = 8, active = false, title, on
 
     const measure = () => {
       const cw = container.clientWidth;
-      setContainerWidth(cw);
 
-      // 用 probe 元素测量文字宽度，不依赖 span 自身（避免布局干扰）
+      // 用 probe 元素测量文字宽度，不依赖 span 自身的 scrollWidth（避免布局干扰）
       const probe = document.createElement("span");
       probe.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;font:inherit";
       probe.textContent = typeof children === "string" ? children : "";
@@ -59,41 +60,30 @@ const MarqueeText = ({ children, className, speed = 8, active = false, title, on
     return () => ro.disconnect();
   }, [children]);
 
-  // 滚动时通过 CSS variable 告诉 keyframes 容器宽度（控制 translateX 终点）
-  const animationDuration = speed;
-  const isScrolling = shouldScroll && containerWidth > 0;
-
   return (
     <div
       ref={containerRef}
-      className={twMerge(
-        "min-w-0 flex-1 overflow-hidden whitespace-nowrap",
-        !isScrolling && "text-ellipsis",
-        className,
-      )}
-      style={
-        {
-          "--marquee-vw": `${containerWidth}px`,
-        } as React.CSSProperties
-      }
+      className={twMerge("w-full min-w-0 flex-1 overflow-hidden whitespace-nowrap", className)}
       title={title}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <span
-        className="inline-block whitespace-nowrap will-change-transform"
-        style={
-          isScrolling
-            ? {
-                animation: `marquee-scroll ${animationDuration}s linear infinite`,
-                animationPlayState: "running",
-              }
-            : undefined
-        }
-      >
-        {children}
-      </span>
+      {shouldScroll ? (
+        <div
+          className="pointer-events-none flex w-max whitespace-nowrap will-change-transform"
+          style={{ animation: `marquee-scroll ${speed}s linear infinite` }}
+        >
+          <span className="flex-none whitespace-nowrap">{children}</span>
+          <span aria-hidden="true" className="flex-none whitespace-nowrap">
+            {children}
+          </span>
+        </div>
+      ) : (
+        <span className="pointer-events-none block max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+          {children}
+        </span>
+      )}
     </div>
   );
 };
