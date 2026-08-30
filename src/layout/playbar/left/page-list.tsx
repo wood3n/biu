@@ -2,7 +2,9 @@ import React, { useState } from "react";
 
 import { Input, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@heroui/react";
 import { RiListRadio, RiSearchLine } from "@remixicon/react";
+import { twMerge } from "tailwind-merge";
 
+import { glassMenuClassName } from "@/common/constants/glass";
 import IconButton from "@/components/icon-button";
 import MusicPageList from "@/components/music-page-list";
 
@@ -26,7 +28,7 @@ const PageListDrawer = () => {
         </IconButton>
       </PopoverTrigger>
       <PopoverContent
-        className="bg-content2 w-auto min-w-[500px] overflow-hidden p-0"
+        className={twMerge(glassMenuClassName, "w-auto min-w-[500px] overflow-hidden p-0")}
         style={{ maxWidth: "min(500px, 90vw)" }}
       >
         <div className="border-b-content2 flex w-full flex-row items-center justify-between space-x-2 border-b px-4 py-3">

@@ -21,6 +21,7 @@ import {
 } from "@remixicon/react";
 import { twMerge } from "tailwind-merge";
 
+import { glassMenuClassName } from "@/common/constants/glass";
 import { postPassportLoginExit } from "@/service/passport-login-exit";
 import { useFavoritesStore } from "@/store/favorite";
 import { useModalStore } from "@/store/modal";
@@ -161,10 +162,11 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
     <>
       <Dropdown
         shouldBlockScroll={false}
+        disableAnimation
         triggerScaleOnOpen={false}
         radius="md"
         classNames={{
-          content: "min-w-[140px]",
+          content: twMerge(glassMenuClassName, "min-w-[140px]"),
         }}
         onOpenChange={onDropdownOpenChange}
       >

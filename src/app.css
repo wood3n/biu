@@ -78,6 +78,17 @@ html, body, #root {
   padding-bottom: 72px;
 }
 
+/* 毛玻璃菜单：菜单项 hover/focus 背景改为半透明，不遮挡毛玻璃 */
+.glass-menu [data-hover="true"],
+.glass-menu [data-focus="true"]:not([data-focus-visible="true"]) {
+  background-color: hsl(var(--heroui-foreground) / 15%);
+}
+
+.glass-menu [data-focus-visible="true"] {
+  outline: 2px solid hsl(var(--heroui-primary) / 60%);
+  outline-offset: 2px;
+}
+
 /* 文字溢出滚动（marquee）：无缝循环。
  * 轨道内渲染双份文字，translateX(-50%) 恰好位移一份文字宽度，
  * 第一份滚出后第二份无缝衔接，无空白间隙、无跳变 */
