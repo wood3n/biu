@@ -7,6 +7,7 @@ import { twMerge } from "tailwind-merge";
 
 import { formatDuration } from "@/common/utils/time";
 import Image from "@/components/image";
+import MarqueeText from "@/components/marquee-text";
 import { usePlayList, type PlayData } from "@/store/play-list";
 
 import Menus from "./menu";
@@ -62,15 +63,9 @@ const ListItem = ({ data, isActive, onPressItem, hideCover, className, titleClas
           </div>
         )}
         <div className={clx("flex min-w-0 flex-auto flex-col items-start space-y-1", { "ml-2": !hideCover })}>
-          <span
-            className={twMerge(
-              "w-full min-w-0 truncate text-base",
-              isActive ? "text-primary" : "text-foreground",
-              titleClassName,
-            )}
-          >
+          <MarqueeText className={twMerge("text-base", isActive ? "text-primary" : "text-foreground", titleClassName)}>
             {getDisplayTitle(data)}
-          </span>
+          </MarqueeText>
         </div>
         <Menus data={data} />
         {Boolean(data.duration) && (
