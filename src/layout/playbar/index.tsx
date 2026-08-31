@@ -96,14 +96,16 @@ function PlayBar() {
 
           {/* 右侧：封面 + 叠加播放/暂停按钮 */}
           <div className="group relative cursor-pointer" onClick={() => openFullScreenPlayer()}>
-            <Image
-              radius="md"
-              src={playItem?.pageCover || playItem?.cover}
-              width={48}
-              height={48}
-              params="96w_96h_1c.avif"
-              emptyPlaceholder={<RiMusic2Line size={20} />}
-            />
+            <div className="rounded-medium overflow-hidden">
+              <Image
+                radius="none"
+                src={playItem?.pageCover || playItem?.cover}
+                width={48}
+                height={48}
+                params="96w_96h_1c.avif"
+                emptyPlaceholder={<RiMusic2Line size={20} />}
+              />
+            </div>
             {/* 播放/暂停 overlay */}
             <div
               className="rounded-medium absolute inset-0 z-10 flex items-center justify-center bg-black/30 text-white transition-opacity group-hover:opacity-75"
