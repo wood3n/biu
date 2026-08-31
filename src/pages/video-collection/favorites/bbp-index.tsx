@@ -26,6 +26,7 @@ import Image from "@/components/image";
 import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
+import SearchWithSort from "@/components/search-with-sort";
 import VirtualPageList from "@/components/virtual-page-list";
 import { getWebInterfaceView } from "@/service/web-interface-view";
 import { useBBPPlaylistStore } from "@/store/bbp-playlist";
@@ -67,6 +68,9 @@ const BBPFavorites = () => {
 
   const [loading, setLoading] = useState(false);
   const [playCountMap, setPlayCountMap] = useState<Record<string, number>>({});
+  const [pubdateMap, setPubdateMap] = useState<Record<string, number>>({});
+  const [keyword, setKeyword] = useState<string>("");
+  const [order, setOrder] = useState("mtime");
   const [membersModalOpen, setMembersModalOpen] = useState(false);
   const [members, setMembers] = useState<BBPMember[]>([]);
   const [membersLoading, setMembersLoading] = useState(false);
@@ -100,7 +104,31 @@ const BBPFavorites = () => {
     };
   }, [playlistId, bbpToken, syncPlaylist]);
 
-  const playItems = useMemo(() => bbpTracksToPlayItems(tracks), [tracks]);
+  // 本地过滤 + 排序后的曲目列表
+  const displayTracks = useMemo(() => {
+    let list = tracks;
+    const kw = keyword.trim().toLowerCase();
+    if (kw) {
+      list = list.filter(t => t.title.toLowerCase().includes(kw) || (t.artist_name?.toLowerCase() ?? "").includes(kw));
+    }
+    if (order === "view") {
+      list = [...list].sort((a, b) => {
+        const va = a.bilibili_bvid ? (playCountMap[a.bilibili_bvid] ?? -1) : -1;
+        const vb = b.bilibili_bvid ? (playCountMap[b.bilibili_bvid] ?? -1) : -1;
+        return vb - va;
+      });
+    } else if (order === "pubtime") {
+      list = [...list].sort((a, b) => {
+        const pa = a.bilibili_bvid ? (pubdateMap[a.bilibili_bvid] ?? -1) : -1;
+        const pb = b.bilibili_bvid ? (pubdateMap[b.bilibili_bvid] ?? -1) : -1;
+        return pb - pa;
+      });
+    }
+    // "mtime" 与默认：维持 sort_key DESC（手动顺序）
+    return list;
+  }, [tracks, keyword, order, playCountMap, pubdateMap]);
+
+  const playItems = useMemo(() => bbpTracksToPlayItems(displayTracks), [displayTracks]);
 
   // 批量获取 B站播放量
   useEffect(() => {
@@ -119,23 +147,32 @@ const BBPFavorites = () => {
       const results = await Promise.all(
         batches.map(async batch => {
           const map: Record<string, number> = {};
+          const pdateMap: Record<string, number> = {};
           for (const bvid of batch) {
             try {
               const res = await getWebInterfaceView({ bvid });
               if (res.code === 0 && res.data?.stat) {
                 map[bvid] = res.data.stat.view;
+                if (res.data.pubdate) {
+                  pdateMap[bvid] = res.data.pubdate;
+                }
               }
             } catch {
               // 忽略单个失败
             }
           }
-          return map;
+          return { viewMap: map, pubdateMap: pdateMap };
         }),
       );
       if (canceled) return;
       const merged: Record<string, number> = {};
-      for (const m of results) Object.assign(merged, m);
+      const mergedPubdate: Record<string, number> = {};
+      for (const r of results) {
+        Object.assign(merged, r.viewMap);
+        Object.assign(mergedPubdate, r.pubdateMap);
+      }
       setPlayCountMap(merged);
+      setPubdateMap(mergedPubdate);
     })();
     return () => {
       canceled = true;
@@ -244,7 +281,7 @@ const BBPFavorites = () => {
   const handleMenuAction = useCallback(
     (key: string, trackKey: string, trackIndex: number) => {
       const item = playItems[trackIndex];
-      const track = tracks[trackIndex];
+      const track = displayTracks[trackIndex];
       if (!item) return;
       switch (key) {
         case "favorite": {
@@ -324,7 +361,7 @@ const BBPFavorites = () => {
           break;
       }
     },
-    [playItems, tracks, playlistId, removeTrack],
+    [playItems, displayTracks, playlistId, removeTrack],
   );
 
   // 菜单："移动"打开收藏弹窗，"取消收藏"仅可编辑歌单显示
@@ -426,31 +463,48 @@ const BBPFavorites = () => {
       </div>
 
       {/* 操作栏 */}
-      <div className="mb-4 flex items-center space-x-2">
-        <Button color="primary" startContent={<RiPlayFill size={22} />} onPress={handlePlayAll} className="text-white">
-          播放全部
-        </Button>
-        <IconButton size="md" variant="flat" tooltip="添加到播放列表" onPress={handleAddAllToPlaylist}>
-          <RiPlayListAddLine size={18} />
-        </IconButton>
-        {canEdit && (
-          <IconButton size="md" variant="flat" tooltip="管理成员" onPress={() => setMembersModalOpen(true)}>
-            <RiTeamLine size={18} />
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Button
+            color="primary"
+            startContent={<RiPlayFill size={22} />}
+            onPress={handlePlayAll}
+            className="text-white"
+          >
+            播放全部
+          </Button>
+          <IconButton size="md" variant="flat" tooltip="添加到播放列表" onPress={handleAddAllToPlaylist}>
+            <RiPlayListAddLine size={18} />
           </IconButton>
-        )}
-        <IconButton size="md" variant="flat" tooltip="刷新" onPress={handleRefresh} isDisabled={loading}>
-          <RiRefreshLine size={18} className={loading ? "animate-spin" : undefined} />
-        </IconButton>
+          {canEdit && (
+            <IconButton size="md" variant="flat" tooltip="管理成员" onPress={() => setMembersModalOpen(true)}>
+              <RiTeamLine size={18} />
+            </IconButton>
+          )}
+          <IconButton size="md" variant="flat" tooltip="刷新" onPress={handleRefresh} isDisabled={loading}>
+            <RiRefreshLine size={18} className={loading ? "animate-spin" : undefined} />
+          </IconButton>
+        </div>
+        <SearchWithSort
+          onKeywordSearch={setKeyword}
+          order={order}
+          onOrderChange={setOrder}
+          orderOptions={[
+            { key: "mtime", label: "默认排序" },
+            { key: "view", label: "最多播放" },
+            { key: "pubtime", label: "最近投稿" },
+          ]}
+        />
       </div>
 
       {/* 曲目列表 */}
       <div className="w-full">
         <MusicListHeader timeTitle="时长" hidePubTime />
-        {!loading && tracks.length === 0 ? (
-          <Empty title="歌单暂无曲目" />
+        {!loading && displayTracks.length === 0 ? (
+          <Empty title={tracks.length === 0 ? "歌单暂无曲目" : "未找到匹配的曲目"} />
         ) : (
           <VirtualPageList
-            items={tracks}
+            items={displayTracks}
             hasMore={false}
             loading={loading}
             getScrollElement={() =>
