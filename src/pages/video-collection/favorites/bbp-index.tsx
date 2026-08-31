@@ -434,11 +434,11 @@ const BBPFavorites = () => {
       </div>
 
       {/* 曲目列表 */}
-      {!loading && tracks.length === 0 ? (
-        <Empty title="歌单暂无曲目" />
-      ) : (
-        <div className="w-full">
-          <MusicListHeader timeTitle="时长" hidePubTime />
+      <div className="w-full">
+        <MusicListHeader timeTitle="时长" hidePubTime />
+        {!loading && tracks.length === 0 ? (
+          <Empty title="歌单暂无曲目" />
+        ) : (
           <VirtualPageList
             items={tracks}
             hasMore={false}
@@ -465,8 +465,8 @@ const BBPFavorites = () => {
               />
             )}
           />
-        </div>
-      )}
+        )}
+      </div>
 
       {/* 成员管理弹窗 */}
       <Modal
