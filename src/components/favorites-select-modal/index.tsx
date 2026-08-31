@@ -63,6 +63,8 @@ const FavoritesSelectModal = () => {
   /** 选中的 BBPlayer 歌单 ID（多选，与 B 站收藏夹可同时勾选） */
   const [selectedBBPIds, setSelectedBBPIds] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  /** 标记用户是否手动操作过 BBP 勾选，若手动操作过则异步同步不再覆盖 */
+  const bbpTouchedRef = useRef(false);
 
   const prevSelectedRef = useRef<number[]>([]);
   /** 当前曲目已包含的 BBP 歌单 ID（本地缓存判断，用于默认勾选） */
@@ -77,11 +79,14 @@ const FavoritesSelectModal = () => {
       setSelectedIds([]);
       setSelectedBBPIds([]);
       prevSelectedRef.current = [];
+      bbpTouchedRef.current = false;
     } else {
       // 打开时：B站收藏夹已在 useRequest 中设置；BBP 歌单按缓存预勾选
       setSelectedBBPIds(bvidFavPlaylistIds);
+      bbpTouchedRef.current = false;
     }
-  }, [isFavSelectModalOpen, bvidFavPlaylistIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFavSelectModalOpen]);
 
   // 打开弹窗时同步 BBP 歌单列表与曲目缓存，保证默认勾选判断准确
   useEffect(() => {
@@ -96,8 +101,8 @@ const FavoritesSelectModal = () => {
             .filter(p => p.role === "owner" || p.role === "editor")
             .map(p => useBBPPlaylistStore.getState().syncPlaylist(p.id)),
         );
-        if (!canceled) {
-          // 同步完成后刷新预勾选
+        if (!canceled && !bbpTouchedRef.current) {
+          // 同步完成后刷新预勾选，但仅当用户未手动操作过
           const favIds = playData?.bvid ? useBBPPlaylistStore.getState().getPlaylistIdsByBvid(playData.bvid) : [];
           setSelectedBBPIds(favIds);
         }
@@ -155,6 +160,7 @@ const FavoritesSelectModal = () => {
   };
 
   const toggleBBP = (id: string) => {
+    bbpTouchedRef.current = true;
     setSelectedBBPIds(prev => (prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]));
   };
 
