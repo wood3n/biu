@@ -180,7 +180,7 @@ const SideNav = () => {
           size="sm"
           isIconOnly
           fullWidth
-          radius="none"
+          radius="md"
           onPress={onToggleCollapsed}
           className="text-foreground h-auto w-full flex-none border-y border-black/6 bg-white/70 py-1 backdrop-blur-2xl hover:bg-white/85 dark:border-white/10 dark:bg-[#1b1e22]/60 dark:hover:bg-[#1b1e22]/80"
         >

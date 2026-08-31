@@ -7,7 +7,7 @@ interface Props extends Omit<ButtonProps, "startContent"> {
 }
 
 const IconButton = ({ tooltip, tooltipProps, children, className, variant = "light", ...props }: Props) => {
-  // solid 变体保留背景，其余变体 hover 透明
+  // solid 变体保留背景，其余变体 hover 保持 flat 默认变浅 + 文字强调色
   const isSolid = variant === "solid";
   const button = (
     <Button
@@ -15,7 +15,7 @@ const IconButton = ({ tooltip, tooltipProps, children, className, variant = "lig
       radius="md"
       size="sm"
       className={twMerge(
-        isSolid ? "!px-0 text-inherit hover:opacity-85" : "hover:text-primary !px-0 text-inherit hover:!bg-transparent",
+        isSolid ? "!px-0 text-inherit hover:opacity-85" : "hover:text-primary !px-0 text-inherit",
         className,
       )}
       variant={variant}

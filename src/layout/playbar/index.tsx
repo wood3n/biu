@@ -80,7 +80,7 @@ function PlayBar() {
           animate="animate"
           exit="exit"
           style={{ transformOrigin: "center" }}
-          className={`flex items-center gap-2 rounded-2xl border p-2 backdrop-blur-2xl ${containerCls}`}
+          className={`rounded-medium flex items-center gap-2 border p-2 backdrop-blur-2xl ${containerCls}`}
         >
           {/* 左侧：展开按钮 */}
           <IconButton
@@ -106,7 +106,7 @@ function PlayBar() {
             />
             {/* 播放/暂停 overlay */}
             <div
-              className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/30 text-white transition-opacity group-hover:opacity-75"
+              className="rounded-medium absolute inset-0 z-10 flex items-center justify-center bg-black/30 text-white transition-opacity group-hover:opacity-75"
               onClick={e => {
                 e.stopPropagation();
                 togglePlay();
@@ -128,7 +128,7 @@ function PlayBar() {
           animate="animate"
           exit="exit"
           style={{ transformOrigin: "center" }}
-          className={`grid h-[84px] grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_minmax(0,1.4fr)] items-center gap-4 rounded-2xl border px-6 backdrop-blur-2xl ${containerCls}`}
+          className={`rounded-medium grid h-[84px] grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_minmax(0,1.4fr)] items-center gap-4 border px-6 backdrop-blur-2xl ${containerCls}`}
         >
           <div className="h-full min-w-0">{Boolean(playId) && <Left />}</div>
           <Center />

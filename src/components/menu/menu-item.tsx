@@ -84,12 +84,12 @@ const MenuItem: React.FC<MenuItemProps> = ({
             showFallback
             radius="none"
             alt={title}
-            className="size-8 flex-none rounded-[6px]"
+            className="size-8 flex-none"
             classNames={{
               img: "object-cover",
               name: "text-white text-sm font-medium",
             }}
-            style={{ backgroundColor: bgColor }}
+            style={{ backgroundColor: bgColor, borderRadius: "calc(var(--heroui-radius-medium) * 0.75)" }}
           />
         );
       }
@@ -111,11 +111,11 @@ const MenuItem: React.FC<MenuItemProps> = ({
           radius="none"
           fallback={icon}
           alt={title}
-          className="size-5 flex-none rounded-[3px]"
+          className="size-5 flex-none"
           classNames={{
             name: "text-white text-xs font-medium",
           }}
-          style={{ backgroundColor: bgColor }}
+          style={{ backgroundColor: bgColor, borderRadius: "calc(var(--heroui-radius-medium) * 0.375)" }}
         />
       );
     }
@@ -134,9 +134,14 @@ const MenuItem: React.FC<MenuItemProps> = ({
           variant={isActive ? "flat" : "light"}
           color={isActive ? "primary" : "default"}
           onPress={onPress}
-          className={clx("flex flex-none items-center justify-center rounded-lg px-0 py-0", className, dndClassName, {
-            "text-primary": isActive,
-          })}
+          className={clx(
+            "rounded-medium flex flex-none items-center justify-center px-0 py-0",
+            className,
+            dndClassName,
+            {
+              "text-primary": isActive,
+            },
+          )}
           style={{ width: 40, height: 40, minWidth: 40, maxWidth: 40 }}
           {...(dndRest as any)}
         >
@@ -152,6 +157,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
       href={href}
       fullWidth
       disableRipple
+      radius="md"
       variant={isActive ? "flat" : "light"}
       color={isActive ? "primary" : "default"}
       onPress={onPress}
