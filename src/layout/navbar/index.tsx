@@ -32,10 +32,10 @@ const LayoutNavbar = () => {
         <Navigation />
         <Search onFocusChange={setIsSearchFocused} />
       </div>
-      <div className="window-no-drag flex items-center justify-center space-x-4">
+      <div className="window-no-drag flex items-center justify-center">
+        <UserCard onDropdownOpenChange={setIsUserDropdownOpen} />
         <AppUpdateNotify />
         <Dev />
-        <UserCard onDropdownOpenChange={setIsUserDropdownOpen} />
         {Boolean(user?.isLogin) && <UserFeed />}
         {["linux", "windows"].includes(platform) && <WindowAction />}
       </div>

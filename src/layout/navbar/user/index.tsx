@@ -176,7 +176,7 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
             size="sm"
             as="button"
             type="button"
-            classNames={{ base: "mr-4 size-7 min-w-7 cursor-pointer transition-transform hover:scale-105" }}
+            classNames={{ base: "mr-4 size-8 min-w-8 cursor-pointer transition-transform hover:scale-105" }}
             src={user?.face}
           />
         </DropdownTrigger>
