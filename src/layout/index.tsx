@@ -42,13 +42,16 @@ const Layout = () => {
         <div className="flex min-h-0 w-full flex-1">
           <SideNav />
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-            <div className="h-16 flex-none">
+            {/* 毛玻璃导航栏：absolute 悬浮于内容之上，内容可滚动穿过其下方 */}
+            <div className="absolute inset-x-0 top-0 z-40 h-16">
               <Navbar />
             </div>
             <div
               className={`main-content relative flex min-h-0 flex-1 flex-col overflow-hidden ${playbarCollapsed ? "playbar-collapsed" : ""}`}
             >
-              <Outlet />
+              <div className="min-h-0 flex-1">
+                <Outlet />
+              </div>
               {/* 统一 wrapper 结构：折叠/展开只切换 class，不改变 DOM 层级，避免 PlayBar 重新挂载导致播放中断 */}
               <div
                 className={`pointer-events-none absolute z-50 ${
