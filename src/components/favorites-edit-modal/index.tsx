@@ -16,6 +16,7 @@ import {
   addToast,
 } from "@heroui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { RiErrorWarningLine } from "@remixicon/react";
 import { z } from "zod";
 
 import { isPrivateFav } from "@/common/utils/fav";
@@ -248,10 +249,13 @@ const FavoritesEditModal = ({ mid, source = "bilibili", isOpen, onOpenChange, on
                   <p className="text-foreground-400 mt-1 text-xs">请先登录 BBPlayer 账号</p>
                 )}
                 {effectiveSource === "bbplayer" && bbpToken && (
-                  <p className="text-danger mt-1 text-xs">
-                    共享歌单存储在云端，所有成员可见。创建后不会出现在 BBPlayer
-                    手机端的本地歌单中，需在手机端「订阅共享歌单」或换设备恢复后查看。
-                  </p>
+                  <div className="bg-danger/10 rounded-medium mt-3 flex items-start gap-1.5 p-2.5">
+                    <RiErrorWarningLine size={14} className="text-danger mt-0.5 flex-none" />
+                    <p className="text-danger text-xs leading-relaxed">
+                      共享歌单存储在云端，所有成员可见。创建后不会出现在 BBPlayer
+                      手机端的本地歌单中，需在手机端「订阅共享歌单」或换设备恢复后查看。
+                    </p>
+                  </div>
                 )}
               </div>
             )}
