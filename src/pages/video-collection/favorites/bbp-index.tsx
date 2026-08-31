@@ -4,6 +4,10 @@ import { useLocation, useNavigate, useParams, useSearchParams } from "react-rout
 import {
   Button,
   Chip,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
   Modal,
   ModalBody,
   ModalContent,
@@ -18,6 +22,7 @@ import {
   RiFileCopyLine,
   RiFileMusicLine,
   RiFileVideoLine,
+  RiMoreLine,
   RiPlayFill,
   RiPlayListAddLine,
   RiRefreshLine,
@@ -25,9 +30,11 @@ import {
   RiStarOffLine,
   RiTeamLine,
 } from "@remixicon/react";
+import { twMerge } from "tailwind-merge";
 
 import type { BBPMember, BBPTrack } from "@/service/bbp-types";
 
+import { glassMenuClassName } from "@/common/constants/glass";
 import { bbpTracksToPlayItems } from "@/common/utils/bbp-track";
 import { openBiliVideoLink } from "@/common/utils/url";
 import { type ContextMenuItem } from "@/components/context-menu";
@@ -301,6 +308,26 @@ const BBPFavorites = () => {
       .finally(() => setLoading(false));
   }, [playlistId, bbpToken, syncPlaylist]);
 
+  const handleDownloadAll = useCallback(
+    async (fileType: MediaDownloadOutputFileType) => {
+      const downloadable = tracks.filter(t => t.bilibili_bvid);
+      if (!downloadable.length) {
+        addToast({ title: "没有可下载的内容", color: "warning" });
+        return;
+      }
+      await window.electron.addMediaDownloadTaskList(
+        downloadable.map(t => ({
+          outputFileType: fileType,
+          bvid: t.bilibili_bvid,
+          title: t.title,
+          cover: t.cover_url ?? undefined,
+        })),
+      );
+      addToast({ title: "下载任务已添加", color: "success" });
+    },
+    [tracks],
+  );
+
   const handleItemPress = useCallback(
     (trackIndex: number) => {
       const item = playItems[trackIndex];
@@ -535,6 +562,37 @@ const BBPFavorites = () => {
           <IconButton size="md" variant="flat" tooltip="刷新" onPress={handleRefresh} isDisabled={loading}>
             <RiRefreshLine size={18} className={loading ? "animate-spin" : undefined} />
           </IconButton>
+          <Dropdown
+            disableAnimation
+            placement="bottom-start"
+            shouldBlockScroll={false}
+            trigger="press"
+            classNames={{ content: twMerge(glassMenuClassName, "min-w-[120px]") }}
+          >
+            <DropdownTrigger>
+              <IconButton size="md" variant="flat" tooltip="更多">
+                <RiMoreLine size={18} />
+              </IconButton>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="歌单操作" variant="flat">
+              <DropdownItem
+                key="download-audio"
+                startContent={<RiFileMusicLine size={18} />}
+                onPress={() => handleDownloadAll("audio")}
+                isDisabled={!tracks.length}
+              >
+                下载全部音频
+              </DropdownItem>
+              <DropdownItem
+                key="download-video"
+                startContent={<RiFileVideoLine size={18} />}
+                onPress={() => handleDownloadAll("video")}
+                isDisabled={!tracks.length}
+              >
+                下载全部视频
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </div>
         <SearchWithSort
           onKeywordSearch={setKeyword}
