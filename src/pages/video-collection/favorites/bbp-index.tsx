@@ -21,6 +21,7 @@ import { bbpTracksToPlayItems } from "@/common/utils/bbp-track";
 import { openBiliVideoLink } from "@/common/utils/url";
 import { type ContextMenuItem } from "@/components/context-menu";
 import Empty from "@/components/empty";
+import IconButton from "@/components/icon-button";
 import Image from "@/components/image";
 import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
@@ -421,13 +422,13 @@ const BBPFavorites = () => {
         <Button color="primary" startContent={<RiPlayFill size={22} />} onPress={handlePlayAll} className="text-white">
           播放全部
         </Button>
-        <Button variant="flat" isIconOnly onPress={handleAddAllToPlaylist} aria-label="添加到播放列表">
+        <IconButton size="md" variant="flat" tooltip="添加到播放列表" onPress={handleAddAllToPlaylist}>
           <RiPlayListAddLine size={18} />
-        </Button>
+        </IconButton>
         {canEdit && (
-          <Button variant="flat" isIconOnly onPress={() => setMembersModalOpen(true)} aria-label="管理成员">
+          <IconButton size="md" variant="flat" tooltip="管理成员" onPress={() => setMembersModalOpen(true)}>
             <RiTeamLine size={18} />
-          </Button>
+          </IconButton>
         )}
       </div>
 
