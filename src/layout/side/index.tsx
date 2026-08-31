@@ -19,6 +19,7 @@ const MAX_WIDTH = 480;
 const SideNav = () => {
   const sideMenuCollapsed = useSettings(state => state.sideMenuCollapsed);
   const sideMenuWidth = useSettings(state => state.sideMenuWidth);
+  const sideMenuCollapsedCenter = useSettings(state => state.sideMenuCollapsedCenter);
   const updateSettings = useSettings(state => state.update);
 
   const {
@@ -164,7 +165,7 @@ const SideNav = () => {
             "px-4": !isCollapsedVisual,
             "px-2": isCollapsedVisual,
             "overflow-hidden": isDragging,
-            "side-collapsed-center": isCollapsedVisual,
+            "side-collapsed-center": isCollapsedVisual && sideMenuCollapsedCenter,
           })}
         >
           <DefaultMenus isCollapsed={isCollapsedVisual} onOpenAddFavorite={handleOpenAddFavorite} />

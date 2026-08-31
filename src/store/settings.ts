@@ -80,6 +80,7 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           showLyricsTranslation: state.showLyricsTranslation,
           showLyricsFurigana: state.showLyricsFurigana,
           playbarCollapsed: state.playbarCollapsed,
+          sideMenuCollapsedCenter: state.sideMenuCollapsedCenter,
         };
       },
     },

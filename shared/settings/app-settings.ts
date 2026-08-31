@@ -31,4 +31,5 @@ export const defaultAppSettings: AppSettings = {
   showLyricsTranslation: true,
   showLyricsFurigana: false,
   playbarCollapsed: false,
+  sideMenuCollapsedCenter: true,
 };

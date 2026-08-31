@@ -230,6 +230,18 @@ export const SystemSettingsTab = ({
           />
         </div>
       </div>
+      {/* 侧边栏垂直居中 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">侧边栏垂直居中</div>
+          <div className="text-sm text-zinc-500">侧边栏收起时图标在垂直方向居中</div>
+        </div>
+        <Controller
+          control={control}
+          name="sideMenuCollapsedCenter"
+          render={({ field }) => <Switch disableAnimation isSelected={field.value} onValueChange={field.onChange} />}
+        />
+      </div>
       <Divider />
       <h2>播放</h2>
       {/* 音质选择 */}

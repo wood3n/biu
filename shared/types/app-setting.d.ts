@@ -44,4 +44,6 @@ interface AppSettings {
   showLyricsFurigana: boolean;
   /** 播放栏折叠状态 */
   playbarCollapsed: boolean;
+  /** 侧边栏收起时垂直居中 */
+  sideMenuCollapsedCenter: boolean;
 }
