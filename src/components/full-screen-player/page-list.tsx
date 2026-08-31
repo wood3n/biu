@@ -38,6 +38,7 @@ const FullScreenPageList = ({
             inputWrapper: "bg-black/20 hover:bg-black/30 group-data-[focus=true]:bg-black/30",
           }}
           placeholder="搜索分集"
+          radius="md"
           size="sm"
           startContent={<RiSearchLine size={16} />}
           type="search"
