@@ -1,12 +1,13 @@
 import React, { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 
-import { Chip, Input, Listbox, ListboxItem } from "@heroui/react";
+import { Chip, Input, Listbox, ListboxItem, Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
 import { RiSearchLine } from "@remixicon/react";
-import { useRequest, useClickAway } from "ahooks";
-import classNames from "classnames";
+import { useRequest } from "ahooks";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
+import { twMerge } from "tailwind-merge";
 
+import { glassMenuClassName } from "@/common/constants/glass";
 import { getSearchSuggestMain } from "@/service/main-suggest";
 import { useSearchHistory } from "@/store/search-history";
 import { useSettings } from "@/store/settings";
@@ -28,14 +29,9 @@ const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
   const clearSearchHistory = useSearchHistory(s => s.clear);
   const showSearchHistory = useSettings(s => s.showSearchHistory);
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(keyword);
-
-  useClickAway(() => {
-    setOpen(false);
-  }, containerRef);
 
   const { data: suggestionsData } = useRequest(
     async () => {
@@ -60,53 +56,59 @@ const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
     setOpen(false);
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const next = e.relatedTarget as HTMLElement | null;
-    if (next && containerRef.current?.contains(next)) {
-      return;
-    }
-    setOpen(false);
-    onFocusChange?.(false);
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
+    onFocusChange?.(next);
   };
 
   return (
-    <div ref={containerRef} className="relative w-[280px]">
-      <Input
-        ref={inputRef}
-        value={value}
-        onValueChange={setValue}
-        onKeyDown={e => {
-          if (e.key === "Enter") {
-            submitSearch(e.currentTarget.value);
-            inputRef.current?.blur();
-            setOpen(false);
-          }
-        }}
-        onBlur={handleBlur}
-        onFocus={() => {
-          setOpen(true);
-          onFocusChange?.(true);
-        }}
-        onClick={() => setOpen(true)}
-        placeholder="搜索"
-        isClearable
-        startContent={<RiSearchLine size={16} />}
-        className="window-no-drag w-full"
-        classNames={{
-          inputWrapper:
-            "bg-default-400/20 dark:bg-default-500/20 hover:bg-default-400/30 dark:hover:bg-default-500/30 group-data-[focus=true]:bg-default-400/30 dark:group-data-[focus=true]:bg-default-500/30",
-        }}
-      />
-      <div
-        className={classNames(
-          "rounded-medium bg-background/70 absolute top-full left-0 z-100 mt-1 h-auto max-h-[80dvh] w-[360px] overflow-hidden border border-white/10 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)] backdrop-blur-2xl backdrop-saturate-150 dark:border-white/5",
-          {
-            hidden: !open,
-            "flex flex-col": open,
-          },
-        )}
-      >
-        <OverlayScrollbarsComponent className="h-full flex-1 p-2" options={{ scrollbars: { autoHide: "leave" } }}>
+    <Popover
+      isOpen={open}
+      onOpenChange={handleOpenChange}
+      placement="bottom-start"
+      offset={4}
+      disableAnimation
+      shouldBlockScroll={false}
+      backdrop="transparent"
+      classNames={{
+        base: "z-100",
+        content: "w-[360px] max-w-[360px]",
+      }}
+    >
+      <PopoverTrigger>
+        <div className="w-[280px]">
+          <Input
+            ref={inputRef}
+            value={value}
+            onValueChange={setValue}
+            onKeyDown={e => {
+              if (e.key === "Enter") {
+                submitSearch(e.currentTarget.value);
+                inputRef.current?.blur();
+                setOpen(false);
+              }
+            }}
+            onFocus={() => {
+              setOpen(true);
+              onFocusChange?.(true);
+            }}
+            onClick={() => setOpen(true)}
+            placeholder="搜索"
+            isClearable
+            startContent={<RiSearchLine size={16} />}
+            className="window-no-drag w-full"
+            classNames={{
+              inputWrapper:
+                "bg-default-400/20 dark:bg-default-500/20 hover:bg-default-400/30 dark:hover:bg-default-500/30 group-data-[focus=true]:bg-default-400/30 dark:group-data-[focus=true]:bg-default-500/30",
+            }}
+          />
+        </div>
+      </PopoverTrigger>
+      <PopoverContent className={twMerge(glassMenuClassName, "max-h-[80dvh] overflow-hidden p-0")}>
+        <OverlayScrollbarsComponent
+          className="h-full max-h-[80dvh] w-full flex-1 p-2"
+          options={{ scrollbars: { autoHide: "leave" } }}
+        >
           <Listbox
             aria-label="搜索建议"
             selectionMode="none"
@@ -183,8 +185,8 @@ const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
             )}
           </Listbox>
         </OverlayScrollbarsComponent>
-      </div>
-    </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 
