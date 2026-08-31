@@ -68,10 +68,9 @@ html, body, #root {
   justify-content: center;
 }
 
-/* 播放栏悬浮：给主内容区滚动容器底部留空间 */
-.main-content [data-overlay-scrollbar-viewport] {
-  padding-bottom: 104px;
-}
+/* 播放栏悬浮、毛玻璃导航栏悬浮：主内容区滚动容器的顶部/底部留空间
+ * 由 ScrollContainer 组件内 JS spacer（64px / 104px）统一实现，
+ * 不再走 CSS padding（OverlayScrollbars 会对 viewport 写入内联 padding 覆盖它） */
 
 /* 播放栏折叠态：底部留少量空间给折叠小卡片 */
 .playbar-collapsed [data-overlay-scrollbar-viewport] {

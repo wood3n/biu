@@ -11,6 +11,9 @@ import {
 import { useTheme } from "@/components/theme/use-theme";
 import { useSettings } from "@/store/settings";
 
+/** 毛玻璃导航栏悬浮时，主内容区滚动内容顶部预留高度 */
+const NAVBAR_SPACER_HEIGHT = 64;
+
 /** 播放条展开时，滚动内容底部预留高度（播放条 84px + 底部边距 16px + 安全余量 4px） */
 const PLAYBAR_SPACER_HEIGHT = 104;
 
@@ -20,6 +23,7 @@ const ScrollContainer = ({
   children,
   resetOnChange,
   enableBackToTop,
+  topSpacerHeight = NAVBAR_SPACER_HEIGHT,
   ...props
 }: OverlayScrollbarsComponentProps & {
   ref?: React.RefObject<ScrollRefObject | null>;
@@ -27,6 +31,8 @@ const ScrollContainer = ({
   resetOnChange?: unknown;
   /** 是否监听滚动并显示返回顶部按钮 */
   enableBackToTop?: boolean;
+  /** 主内容区顶部预留高度（毛玻璃导航栏悬浮占位），默认 64；自带内边距的页面可传更小值 */
+  topSpacerHeight?: number;
 }) => {
   const internalRef = useRef<OverlayScrollbarsComponentRef<"div"> | null>(null);
   const scrollRef = ref ?? internalRef;
@@ -40,7 +46,7 @@ const ScrollContainer = ({
     ? "border-white/10 bg-[#1b1e22]/60 shadow-[0_8px_30px_-8px_rgb(0_0_0/0.45)] hover:bg-[#1b1e22]/80"
     : "border-black/6 bg-white/60 shadow-[0_8px_30px_-10px_rgb(0_0_0/0.15)] hover:bg-white/80";
 
-  // 检测是否在主内容区（需要给悬浮播放条让位）
+  // 检测是否在主内容区（需要给悬浮播放条让位、给悬浮导航栏让位）
   useEffect(() => {
     const host = scrollRef.current?.osInstance()?.elements().host as HTMLElement | null;
     setInMainContent(!!host?.closest(".main-content"));
@@ -89,6 +95,7 @@ const ScrollContainer = ({
       {...props}
     >
       <>
+        {inMainContent && <div aria-hidden style={{ height: topSpacerHeight, flexShrink: 0 }} />}
         {children}
         <AnimatePresence>
           {enableBackToTop && showBackToTop && (
