@@ -15,11 +15,12 @@ import { postFavFolderUnfav } from "@/service/fav-folder-unfav";
 import { getFavResourceList, type FavMedia } from "@/service/fav-resource";
 import { postFavResourceBatchDel } from "@/service/fav-resource-batch-del";
 import { postFavResourceClean } from "@/service/fav-resource-clean";
+import { getWebInterfaceView } from "@/service/web-interface-view";
 import { useFavFolderItemsStore } from "@/store/fav-folder-items";
 import { getItemKey, useFavoritesStore } from "@/store/favorite";
 import { useModalStore } from "@/store/modal";
 import { useMusicFavStore } from "@/store/music-fav";
-import { isSame, usePlayList } from "@/store/play-list";
+import { isSame, usePlayList, type PlayData } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
 
@@ -317,16 +318,39 @@ const Favorites = () => {
     async (key: string, item: FavMedia) => {
       switch (key) {
         case "favorite":
-          useModalStore.getState().onOpenFavSelectModal({
-            rid: item.id,
-            type: item.type,
-            title: item.title,
-            onSuccess: selectedIds => {
-              if (isCreatedBySelf && !selectedIds.includes(Number(favFolderId))) {
-                handleRemoveItem(item.id);
+          void (async () => {
+            // 构造 playData：B站视频（type 2）可移入 BBPlayer 歌单，需要额外获取 cid；音频无 bvid 不支持
+            let playData: PlayData | undefined;
+            if (item.type === 2 && item.bvid) {
+              try {
+                const view = await getWebInterfaceView({ bvid: item.bvid });
+                const firstPage = view?.data?.pages?.[0];
+                playData = {
+                  id: String(item.id),
+                  type: "mv",
+                  bvid: item.bvid,
+                  cid: firstPage ? String(firstPage.cid) : undefined,
+                  title: item.title,
+                  cover: item.cover,
+                  ownerName: item.upper?.name,
+                  duration: item.duration,
+                };
+              } catch {
+                // 获取 cid 失败则仅走 B站收藏夹流程
               }
-            },
-          });
+            }
+            useModalStore.getState().onOpenFavSelectModal({
+              rid: item.id,
+              type: item.type,
+              title: item.title,
+              playData,
+              onSuccess: selectedIds => {
+                if (isCreatedBySelf && !selectedIds.includes(Number(favFolderId))) {
+                  handleRemoveItem(item.id);
+                }
+              },
+            });
+          })();
           break;
         case "cancelFavorite":
           useModalStore.getState().onOpenConfirmModal({
