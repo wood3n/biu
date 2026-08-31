@@ -9,7 +9,6 @@ import {
   RiFileVideoLine,
   RiPlayFill,
   RiPlayListAddLine,
-  RiStarFill,
   RiStarLine,
   RiStarOffLine,
 } from "@remixicon/react";
@@ -25,11 +24,11 @@ import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import VirtualPageList from "@/components/virtual-page-list";
-import { getWebInterfaceArchiveRelation } from "@/service/web-interface-archive-relation";
 import { getWebInterfaceView } from "@/service/web-interface-view";
 import { useBBPPlaylistStore } from "@/store/bbp-playlist";
 import { useBBPTokenStore } from "@/store/bbp-token";
 import { useModalStore } from "@/store/modal";
+import { useMusicFavStore } from "@/store/music-fav";
 import { usePlayList, type PlayData } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 
@@ -60,8 +59,6 @@ const BBPFavorites = () => {
 
   const [loading, setLoading] = useState(false);
   const [playCountMap, setPlayCountMap] = useState<Record<string, number>>({});
-  /** B站已收藏的 bvid 集合（共享收藏状态：B站收藏过即视为已收藏） */
-  const [favBvidSet, setFavBvidSet] = useState<Set<string>>(() => new Set());
   const scrollRef = useRef<ScrollRefObject>(null);
 
   const cache = playlistId ? playlistCache[playlistId] : undefined;
@@ -131,46 +128,6 @@ const BBPFavorites = () => {
     };
   }, [tracks]);
 
-  // 批量获取 B站收藏状态（共享收藏状态：B站已收藏即视为已收藏）
-  useEffect(() => {
-    if (!tracks.length) return;
-    let canceled = false;
-    const bvids = tracks.map(t => t.bilibili_bvid).filter(Boolean) as string[];
-    const uniqueBvids = [...new Set(bvids)];
-    if (!uniqueBvids.length) return;
-    const CONCURRENCY = 8;
-    const BATCH_SIZE = Math.ceil(uniqueBvids.length / CONCURRENCY);
-    const batches: string[][] = [];
-    for (let i = 0; i < uniqueBvids.length; i += BATCH_SIZE) {
-      batches.push(uniqueBvids.slice(i, i + BATCH_SIZE));
-    }
-    (async () => {
-      const results = await Promise.all(
-        batches.map(async batch => {
-          const set = new Set<string>();
-          for (const bvid of batch) {
-            try {
-              const res = await getWebInterfaceArchiveRelation({ bvid });
-              if (res.code === 0 && res.data?.favorite) {
-                set.add(bvid);
-              }
-            } catch {
-              // 忽略单个失败
-            }
-          }
-          return set;
-        }),
-      );
-      if (canceled) return;
-      const merged = new Set<string>();
-      for (const s of results) for (const bvid of s) merged.add(bvid);
-      setFavBvidSet(merged);
-    })();
-    return () => {
-      canceled = true;
-    };
-  }, [tracks]);
-
   const canEdit = role === "owner" || role === "editor";
 
   const handlePlayAll = useCallback(() => {
@@ -197,19 +154,6 @@ const BBPFavorites = () => {
       usePlayList.getState().play(item);
     },
     [playItems],
-  );
-
-  const handleRemoveTrack = useCallback(
-    async (trackKey: string) => {
-      if (!playlistId) return;
-      try {
-        await removeTrack(playlistId, trackKey);
-        addToast({ title: "已从歌单移除", color: "success" });
-      } catch {
-        addToast({ title: "移除失败", color: "danger" });
-      }
-    },
-    [playlistId, removeTrack],
   );
 
   const handleMenuAction = useCallback(
@@ -272,45 +216,56 @@ const BBPFavorites = () => {
           if (!track) return;
           openBiliVideoLink({ type: "mv", bvid: track.bilibili_bvid });
           break;
-        case "cancelFavorite":
-          handleRemoveTrack(trackKey);
+        case "cancelFavorite": {
+          if (!track) return;
+          useModalStore.getState().onOpenConfirmModal({
+            title: `确认取消收藏${track.title}？`,
+            type: "danger",
+            onConfirm: async () => {
+              try {
+                await removeTrack(playlistId!, trackKey);
+                addToast({ title: "已取消收藏", color: "success" });
+                useMusicFavStore.getState().refreshIsFav();
+                return true;
+              } catch {
+                addToast({ title: "移除失败", color: "danger" });
+                return false;
+              }
+            },
+          });
           break;
+        }
         default:
           break;
       }
     },
-    [playItems, tracks, handleRemoveTrack],
+    [playItems, tracks, playlistId, removeTrack],
   );
 
-  // 菜单按曲目生成：B站已收藏的显示"已收藏"（实心星），否则"收藏"；可编辑歌单额外提供"取消收藏"（从歌单移除）
-  const getTrackMenus = useCallback(
-    (track: BBPTrack): ContextMenuItem[] => {
-      const isBiliFav = Boolean(track.bilibili_bvid && favBvidSet.has(track.bilibili_bvid));
-      const menus: ContextMenuItem[] = [
-        {
-          key: "favorite",
-          label: isBiliFav ? "已收藏" : "收藏",
-          icon: isBiliFav ? <RiStarFill size={18} className="text-primary" /> : <RiStarLine size={18} />,
-        },
-        { key: "play-next", label: "下一首播放", icon: <RiPlayFill size={18} /> },
-        { key: "add-to-playlist", label: "添加到播放列表", icon: <RiPlayListAddLine size={18} /> },
-        { key: "download-audio", label: "下载音频", icon: <RiFileMusicLine size={18} /> },
-        { key: "download-video", label: "下载视频", icon: <RiFileVideoLine size={18} /> },
-        { key: "bililink", label: "在 B 站打开", icon: <RiExternalLinkLine size={18} /> },
-      ];
-      if (canEdit) {
-        menus.push({
-          key: "cancelFavorite",
-          label: "取消收藏",
-          icon: <RiStarOffLine size={18} />,
-          color: "danger",
-          className: "text-danger",
-        });
-      }
-      return menus;
-    },
-    [canEdit, favBvidSet],
-  );
+  // 菜单："移动"打开收藏弹窗，"取消收藏"仅可编辑歌单显示
+  const trackMenus = useMemo<ContextMenuItem[]>(() => {
+    const menus: ContextMenuItem[] = [
+      {
+        key: "favorite",
+        label: "移动",
+        icon: <RiStarLine size={18} />,
+      },
+      {
+        key: "cancelFavorite",
+        label: "取消收藏",
+        icon: <RiStarOffLine size={18} />,
+        color: "danger",
+        className: "text-danger",
+        hidden: !canEdit,
+      },
+      { key: "play-next", label: "下一首播放", icon: <RiPlayFill size={18} /> },
+      { key: "add-to-playlist", label: "添加到播放列表", icon: <RiPlayListAddLine size={18} /> },
+      { key: "download-audio", label: "下载音频", icon: <RiFileMusicLine size={18} /> },
+      { key: "download-video", label: "下载视频", icon: <RiFileVideoLine size={18} /> },
+      { key: "bililink", label: "在 B 站打开", icon: <RiExternalLinkLine size={18} /> },
+    ];
+    return menus;
+  }, [canEdit]);
 
   if (!bbpToken) {
     return (
@@ -423,7 +378,7 @@ const BBPFavorites = () => {
                 playCount={track.bilibili_bvid ? playCountMap[track.bilibili_bvid] : undefined}
                 hidePubTime
                 onPress={() => handleItemPress(index)}
-                menus={getTrackMenus(track)}
+                menus={trackMenus}
                 onMenuAction={key => handleMenuAction(key, track.unique_key, index)}
               />
             )}
