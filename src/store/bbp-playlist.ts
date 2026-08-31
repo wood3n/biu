@@ -8,8 +8,12 @@ import { bbpPlaylistChangesPull } from "@/service/bbp-playlist-changes-pull";
 import { bbpPlaylistChangesSubmit } from "@/service/bbp-playlist-changes-submit";
 import { bbpPlaylistCreate } from "@/service/bbp-playlist-create";
 import { bbpPlaylistDelete } from "@/service/bbp-playlist-delete";
+import { bbpPlaylistInvite } from "@/service/bbp-playlist-invite";
+import { bbpPlaylistInviteRotate } from "@/service/bbp-playlist-invite-rotate";
 import { bbpPlaylistLeave } from "@/service/bbp-playlist-leave";
+import { bbpPlaylistMembers } from "@/service/bbp-playlist-members";
 import { bbpPlaylistSubscribe } from "@/service/bbp-playlist-subscribe";
+import { bbpPlaylistUpdate } from "@/service/bbp-playlist-update";
 
 interface BBPPlaylistCacheEntry {
   lastSyncAt: number;
@@ -50,6 +54,17 @@ interface BBPPlaylistAction {
   leavePlaylist: (playlistId: string) => Promise<void>;
   /** 删除歌单（owner） */
   deletePlaylist: (playlistId: string) => Promise<void>;
+  /** 更新歌单元信息（owner） */
+  updatePlaylist: (
+    playlistId: string,
+    data: { title?: string; description?: string; cover_url?: string },
+  ) => Promise<void>;
+  /** 获取歌单成员列表（owner / editor） */
+  fetchMembers: (playlistId: string) => Promise<BBPMember[]>;
+  /** 获取编辑者邀请码（owner） */
+  fetchInviteCode: (playlistId: string) => Promise<string | null>;
+  /** 轮换邀请码（owner） */
+  rotateInviteCode: (playlistId: string) => Promise<string | null>;
   /** 获取缓存中的曲目列表 */
   getCachedTracks: (playlistId: string) => BBPTrack[];
   /** 获取包含指定 bvid 的歌单 ID 列表（基于本地缓存） */
@@ -102,13 +117,17 @@ export const useBBPPlaylistStore = create<BBPPlaylistState & BBPPlaylistAction>(
 
           for (const change of res.tracks ?? []) {
             if (change.op === "upsert" && change.track) {
-              trackMap.set(change.track.unique_key, change.track);
+              // sort_key 可能在 change 层级而非 track 内部，合并确保完整
+              trackMap.set(change.track.unique_key, {
+                ...change.track,
+                sort_key: change.sort_key ?? change.track.sort_key ?? "",
+              });
             } else if (change.op === "delete" && change.track_unique_key) {
               trackMap.delete(change.track_unique_key);
             }
           }
 
-          const nextTracks = [...trackMap.values()].sort((a, b) => a.sort_key.localeCompare(b.sort_key));
+          const nextTracks = [...trackMap.values()].sort((a, b) => (a.sort_key ?? "").localeCompare(b.sort_key ?? ""));
 
           const nextEntry: BBPPlaylistCacheEntry = {
             lastSyncAt: res.server_time,
@@ -183,7 +202,7 @@ export const useBBPPlaylistStore = create<BBPPlaylistState & BBPPlaylistAction>(
             sort_key: sortKey,
           };
           trackMap.set(track.unique_key, fullTrack);
-          const nextTracks = [...trackMap.values()].sort((a, b) => a.sort_key.localeCompare(b.sort_key));
+          const nextTracks = [...trackMap.values()].sort((a, b) => (a.sort_key ?? "").localeCompare(b.sort_key ?? ""));
           return {
             playlistCache: {
               ...state.playlistCache,
@@ -271,6 +290,72 @@ export const useBBPPlaylistStore = create<BBPPlaylistState & BBPPlaylistAction>(
             playlistCache: restCache,
           };
         });
+      },
+
+      updatePlaylist: async (playlistId, data) => {
+        await bbpPlaylistUpdate({ id: playlistId, ...data });
+
+        // 更新本地歌单列表
+        set(state => ({
+          playlists: state.playlists.map(p =>
+            p.id === playlistId
+              ? {
+                  ...p,
+                  ...(data.title !== undefined ? { title: data.title } : {}),
+                  ...(data.description !== undefined ? { description: data.description } : {}),
+                  ...(data.cover_url !== undefined ? { coverUrl: data.cover_url } : {}),
+                }
+              : p,
+          ),
+        }));
+
+        // 更新缓存中的 metadata
+        set(state => {
+          const prev = state.playlistCache[playlistId];
+          if (!prev) return state;
+          return {
+            playlistCache: {
+              ...state.playlistCache,
+              [playlistId]: {
+                ...prev,
+                metadata: {
+                  title: data.title ?? prev.metadata?.title ?? "",
+                  description: data.description ?? prev.metadata?.description ?? "",
+                  cover_url: data.cover_url ?? prev.metadata?.cover_url ?? "",
+                },
+              },
+            },
+          };
+        });
+      },
+
+      fetchMembers: async playlistId => {
+        const res = await bbpPlaylistMembers({ id: playlistId });
+        const members = res.members ?? [];
+
+        // 更新缓存
+        set(state => {
+          const prev = state.playlistCache[playlistId];
+          if (!prev) return state;
+          return {
+            playlistCache: {
+              ...state.playlistCache,
+              [playlistId]: { ...prev, members },
+            },
+          };
+        });
+
+        return members;
+      },
+
+      fetchInviteCode: async playlistId => {
+        const res = await bbpPlaylistInvite({ id: playlistId });
+        return res.editor_invite_code ?? null;
+      },
+
+      rotateInviteCode: async playlistId => {
+        const res = await bbpPlaylistInviteRotate({ id: playlistId });
+        return res.editor_invite_code ?? null;
       },
 
       getCachedTracks: playlistId => {

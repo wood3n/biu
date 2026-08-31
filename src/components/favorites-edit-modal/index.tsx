@@ -44,22 +44,24 @@ type FormValues = z.input<typeof schema>;
 interface Props {
   /** 收藏夹id */
   mid?: number;
+  /** BBPlayer 歌单 id */
+  bbpId?: string;
   source?: "bilibili" | "bbplayer";
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onSuccess?: (newData: FavFolderInfoData) => void;
 }
 
-const FavoritesEditModal = ({ mid, source = "bilibili", isOpen, onOpenChange, onSuccess }: Props) => {
+const FavoritesEditModal = ({ mid, bbpId, source = "bilibili", isOpen, onOpenChange, onSuccess }: Props) => {
   const addCreatedFavorite = useFavoritesStore(state => state.addCreatedFavorite);
   const modifyCreatedFavorite = useFavoritesStore(state => state.modifyCreatedFavorite);
   const [isFetching, setIsFetching] = useState(false);
 
-  const isEditMode = Boolean(mid);
+  const isEditMode = Boolean(mid || bbpId);
 
   // 新建模式下当前选中的来源
   const [activeSource, setActiveSource] = useState<"bilibili" | "bbplayer">(source);
-  const effectiveSource = isEditMode ? "bilibili" : activeSource;
+  const effectiveSource = isEditMode ? (bbpId ? "bbplayer" : "bilibili") : activeSource;
 
   // 检查 BBPlayer 是否已登录
   const bbpToken = useBBPTokenStore(state => state.token);
@@ -82,7 +84,7 @@ const FavoritesEditModal = ({ mid, source = "bilibili", isOpen, onOpenChange, on
     mode: "onChange",
   });
 
-  // 当传入 mid 且弹窗打开时，获取收藏夹数据并填充表单
+  // 当传入 mid 或 bbpId 且弹窗打开时，获取收藏夹数据并填充表单
   useEffect(() => {
     if (!isOpen) return;
     if (mid) {
@@ -112,17 +114,26 @@ const FavoritesEditModal = ({ mid, source = "bilibili", isOpen, onOpenChange, on
       return () => {
         canceled = true;
       };
+    } else if (bbpId) {
+      // BBP 编辑模式：从本地缓存读取歌单元信息
+      const cache = useBBPPlaylistStore.getState().playlistCache[bbpId];
+      const metadata = cache?.metadata;
+      const playlist = useBBPPlaylistStore.getState().playlists.find(p => p.id === bbpId);
+      setValue("title", metadata?.title ?? playlist?.title ?? "");
+      setValue("description", metadata?.description ?? playlist?.description ?? "");
+      setValue("cover", metadata?.cover_url ?? playlist?.coverUrl ?? "");
+      setValue("isPublic", true);
     } else {
       // 新建模式下清空表单
       reset({ title: "", intro: "", description: "", isPublic: true, cover: "" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, mid, reset]);
+  }, [isOpen, mid, bbpId, reset]);
 
   const onSubmit = async (values: FormValues) => {
     try {
       if (mid) {
-        // 编辑模式（仅 B站）
+        // 编辑模式（B站）
         const res = await postFavFolderEdit({
           media_id: mid,
           title: values.title.trim(),
@@ -153,6 +164,26 @@ const FavoritesEditModal = ({ mid, source = "bilibili", isOpen, onOpenChange, on
             description: res?.message || "请稍后再试",
           });
         }
+      } else if (bbpId) {
+        // 编辑模式（BBP 歌单）
+        const bbpStore = useBBPPlaylistStore.getState();
+        await bbpStore.updatePlaylist(bbpId, {
+          title: values.title.trim(),
+          description: values.description?.trim() || undefined,
+          cover_url: values.cover || undefined,
+        });
+
+        // 同步侧边栏：直接更新单条缓存，不触发全量拉取（避免 B站 收藏夹被清空）
+        modifyCreatedFavorite({
+          id: 0,
+          bbpId: bbpId,
+          title: values.title.trim(),
+          cover: values.cover || undefined,
+          source: "bbplayer",
+        });
+        addToast({ color: "success", title: "修改成功" });
+        reset();
+        onOpenChange(false);
       } else if (effectiveSource === "bbplayer") {
         // 新建 BBPlayer 共享歌单
         const bbpStore = useBBPPlaylistStore.getState();
@@ -210,7 +241,7 @@ const FavoritesEditModal = ({ mid, source = "bilibili", isOpen, onOpenChange, on
     }
   };
 
-  const headerTitle = mid ? "修改收藏夹" : "新建收藏夹";
+  const headerTitle = isEditMode ? "修改收藏夹" : "新建收藏夹";
 
   return (
     <Modal
@@ -270,7 +301,13 @@ const FavoritesEditModal = ({ mid, source = "bilibili", isOpen, onOpenChange, on
                       onChange={field.onChange}
                       disabled={isFetching || isSubmitting}
                       width={240}
-                      height={150}
+                      height={effectiveSource === "bbplayer" ? 240 : 150}
+                      aspect={effectiveSource === "bbplayer" ? 1 : 16 / 9}
+                      hint={
+                        effectiveSource === "bbplayer"
+                          ? "建议上传正方形封面≥400×400，jpeg或png格式，图片≤5MB"
+                          : "建议上传高清封面≥960×600，jpeg或png格式，图片≤5MB"
+                      }
                     />
                   )}
                 />

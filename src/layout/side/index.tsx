@@ -27,20 +27,30 @@ const SideNav = () => {
     onOpenChange: onOpenChangeFavoritesEditModal,
   } = useDisclosure();
   const [editingFavoriteId, setEditingFavoriteId] = useState<number>();
+  const [editingBBPId, setEditingBBPId] = useState<string>();
 
   const handleOpenAddFavorite = () => {
     setEditingFavoriteId(undefined);
+    setEditingBBPId(undefined);
     onOpenFavoritesEditModal();
   };
 
   const handleOpenEditFavorite = (id: number) => {
     setEditingFavoriteId(id);
+    setEditingBBPId(undefined);
+    onOpenFavoritesEditModal();
+  };
+
+  const handleOpenEditBBPFavorite = (bbpId: string) => {
+    setEditingFavoriteId(undefined);
+    setEditingBBPId(bbpId);
     onOpenFavoritesEditModal();
   };
 
   const handleFavoritesEditModalChange = (isOpen: boolean) => {
     if (!isOpen) {
       setEditingFavoriteId(undefined);
+      setEditingBBPId(undefined);
     }
 
     onOpenChangeFavoritesEditModal();
@@ -163,6 +173,7 @@ const SideNav = () => {
             isCollapsed={isCollapsedVisual}
             onOpenAddFavorite={handleOpenAddFavorite}
             onOpenEditFavorite={handleOpenEditFavorite}
+            onOpenEditBBPFavorite={handleOpenEditBBPFavorite}
           />
         </ScrollContainer>
         <Button
@@ -182,6 +193,7 @@ const SideNav = () => {
       </div>
       <FavoritesEditModal
         mid={editingFavoriteId}
+        bbpId={editingBBPId}
         isOpen={isFavoritesEditModalOpen}
         onOpenChange={handleFavoritesEditModalChange}
       />

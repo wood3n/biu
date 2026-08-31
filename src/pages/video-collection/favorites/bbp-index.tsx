@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useSearchParams } from "react-router";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router";
 
-import { Button, Skeleton, addToast } from "@heroui/react";
+import { Button, Chip, Modal, ModalBody, ModalContent, ModalHeader, Skeleton, addToast } from "@heroui/react";
 import {
   RiExternalLinkLine,
   RiFileCopyLine,
@@ -9,11 +9,13 @@ import {
   RiFileVideoLine,
   RiPlayFill,
   RiPlayListAddLine,
+  RiRefreshLine,
   RiStarLine,
   RiStarOffLine,
+  RiTeamLine,
 } from "@remixicon/react";
 
-import type { BBPTrack } from "@/service/bbp-types";
+import type { BBPMember, BBPTrack } from "@/service/bbp-types";
 
 import { bbpTracksToPlayItems } from "@/common/utils/bbp-track";
 import { openBiliVideoLink } from "@/common/utils/url";
@@ -47,6 +49,8 @@ const bbpTrackToPlayData = (track: BBPTrack): PlayData => ({
 const BBPFavorites = () => {
   const { id: playlistId } = useParams();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const role = (searchParams.get("role") as "owner" | "editor" | "subscriber" | null) ?? "subscriber";
 
   const displayMode = useSettings(state => state.displayMode);
@@ -56,9 +60,18 @@ const BBPFavorites = () => {
   const playlistCache = useBBPPlaylistStore(state => state.playlistCache);
   const syncPlaylist = useBBPPlaylistStore(state => state.syncPlaylist);
   const removeTrack = useBBPPlaylistStore(state => state.removeTrack);
+  const fetchMembers = useBBPPlaylistStore(state => state.fetchMembers);
+  const fetchInviteCode = useBBPPlaylistStore(state => state.fetchInviteCode);
+  const rotateInviteCode = useBBPPlaylistStore(state => state.rotateInviteCode);
 
   const [loading, setLoading] = useState(false);
   const [playCountMap, setPlayCountMap] = useState<Record<string, number>>({});
+  const [membersModalOpen, setMembersModalOpen] = useState(false);
+  const [members, setMembers] = useState<BBPMember[]>([]);
+  const [membersLoading, setMembersLoading] = useState(false);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [rotating, setRotating] = useState(false);
   const scrollRef = useRef<ScrollRefObject>(null);
 
   const cache = playlistId ? playlistCache[playlistId] : undefined;
@@ -129,6 +142,69 @@ const BBPFavorites = () => {
   }, [tracks]);
 
   const canEdit = role === "owner" || role === "editor";
+  const isOwner = role === "owner";
+
+  // 通过 URL hash #members 自动打开成员管理弹窗
+  useEffect(() => {
+    if (!playlistId || !bbpToken) return;
+    if (location.hash !== "#members") return;
+    setMembersModalOpen(true);
+    // 清除 hash，避免刷新时重复打开（用 navigate 保持 react-router 状态一致）
+    navigate(location.pathname + location.search, { replace: true });
+  }, [location.hash, location.pathname, location.search, playlistId, bbpToken, navigate]);
+
+  // 打开成员管理弹窗时加载成员和邀请码
+  useEffect(() => {
+    if (!membersModalOpen || !playlistId) return;
+    let canceled = false;
+    setMembersLoading(true);
+    setInviteLoading(true);
+    (async () => {
+      try {
+        const list = await fetchMembers(playlistId);
+        if (!canceled) setMembers(list);
+      } catch {
+        if (!canceled) addToast({ title: "获取成员列表失败", color: "danger" });
+      } finally {
+        if (!canceled) setMembersLoading(false);
+      }
+    })();
+    if (isOwner) {
+      (async () => {
+        try {
+          const code = await fetchInviteCode(playlistId);
+          if (!canceled) setInviteCode(code);
+        } catch {
+          // 忽略
+        } finally {
+          if (!canceled) setInviteLoading(false);
+        }
+      })();
+    }
+    return () => {
+      canceled = true;
+    };
+  }, [membersModalOpen, playlistId, fetchMembers, fetchInviteCode, isOwner]);
+
+  const handleRotateInviteCode = useCallback(async () => {
+    if (!playlistId) return;
+    setRotating(true);
+    try {
+      const newCode = await rotateInviteCode(playlistId);
+      setInviteCode(newCode);
+      addToast({ title: "邀请码已更新", color: "success" });
+    } catch {
+      addToast({ title: "更新邀请码失败", color: "danger" });
+    } finally {
+      setRotating(false);
+    }
+  }, [playlistId, rotateInviteCode]);
+
+  const handleCopyInviteCode = useCallback(() => {
+    if (!inviteCode) return;
+    navigator.clipboard.writeText(inviteCode);
+    addToast({ title: "邀请码已复制", color: "success" });
+  }, [inviteCode]);
 
   const handlePlayAll = useCallback(() => {
     if (!playItems.length) {
@@ -349,6 +425,12 @@ const BBPFavorites = () => {
           <RiPlayListAddLine size={18} />
           添加到播放列表
         </Button>
+        {canEdit && (
+          <Button variant="flat" onPress={() => setMembersModalOpen(true)}>
+            <RiTeamLine size={18} />
+            管理成员
+          </Button>
+        )}
       </div>
 
       {/* 曲目列表 */}
@@ -385,6 +467,99 @@ const BBPFavorites = () => {
           />
         </div>
       )}
+
+      {/* 成员管理弹窗 */}
+      <Modal
+        radius="md"
+        size="md"
+        scrollBehavior="inside"
+        isOpen={membersModalOpen}
+        onOpenChange={setMembersModalOpen}
+        disableAnimation
+      >
+        <ModalContent>
+          <ModalHeader>管理成员</ModalHeader>
+          <ModalBody className="pb-6">
+            {/* 成员列表 */}
+            <div className="space-y-1">
+              {membersLoading ? (
+                <div className="text-foreground-400 py-4 text-center text-sm">加载中...</div>
+              ) : members.length === 0 ? (
+                <div className="text-foreground-400 py-4 text-center text-sm">暂无成员</div>
+              ) : (
+                members.map(member => (
+                  <div key={member.account_id} className="bg-default-100/50 flex items-center gap-3 rounded-md p-2">
+                    <Image
+                      src={member.avatar_url ?? undefined}
+                      alt={member.name}
+                      width={36}
+                      height={36}
+                      radius="full"
+                      className="flex-none"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-medium">{member.name}</div>
+                      <div className="text-foreground-400 text-xs">{member.account_id}</div>
+                    </div>
+                    <Chip
+                      size="sm"
+                      variant="flat"
+                      color={member.role === "owner" ? "warning" : member.role === "editor" ? "primary" : "default"}
+                    >
+                      {member.role === "owner" ? "创建者" : member.role === "editor" ? "编辑者" : "订阅者"}
+                    </Chip>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* 邀请码区域（仅 owner 可见） */}
+            {isOwner && (
+              <div className="border-content3/20 mt-4 border-t pt-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-medium">编辑者邀请码</span>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      isIconOnly
+                      className="h-7 min-h-7 w-7 min-w-7"
+                      onPress={handleRotateInviteCode}
+                      isLoading={rotating}
+                      title="重置邀请码"
+                    >
+                      {!rotating && <RiRefreshLine size={14} />}
+                    </Button>
+                  </div>
+                </div>
+                {inviteLoading ? (
+                  <div className="text-foreground-400 py-2 text-sm">加载中...</div>
+                ) : inviteCode ? (
+                  <div className="flex items-center gap-2">
+                    <code className="bg-default-100 dark:bg-default-50 rounded-small px-3 py-1.5 font-mono text-sm">
+                      {inviteCode}
+                    </code>
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      className="h-7 min-h-7 px-2"
+                      startContent={<RiFileCopyLine size={14} />}
+                      onPress={handleCopyInviteCode}
+                    >
+                      复制
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-foreground-400 py-2 text-sm">未设置邀请码</div>
+                )}
+                <p className="text-foreground-400 mt-2 text-xs leading-relaxed">
+                  将邀请码分享给其他用户，他们在订阅歌单时输入邀请码即可成为编辑者，拥有添加和移除曲目的权限。
+                </p>
+              </div>
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </ScrollContainer>
   );
 };

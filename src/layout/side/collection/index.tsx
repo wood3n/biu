@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, type ReactNode } from "react";
+import { useNavigate } from "react-router";
 
 import {
   DndContext,
@@ -45,6 +46,7 @@ interface Props {
   isCollapsed?: boolean;
   onOpenAddFavorite?: () => void;
   onOpenEditFavorite?: (id: number) => void;
+  onOpenEditBBPFavorite?: (bbpId: string) => void;
 }
 
 interface CollectionMenuItem {
@@ -61,7 +63,8 @@ interface CollectionMenuItem {
   role?: "owner" | "editor" | "subscriber";
 }
 
-const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Props) => {
+const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite, onOpenEditBBPFavorite }: Props) => {
+  const navigate = useNavigate();
   const user = useUser(state => state.user);
   const createdFavorites = useFavoritesStore(state => state.createdFavorites);
   const collectedFavorites = useFavoritesStore(state => state.collectedFavorites);
@@ -438,16 +441,15 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
           break;
         case "edit":
           if (item.source === "bbplayer") {
-            // BBPlayer 共享歌单编辑暂不支持从侧边栏打开，后续迭代
-            addToast({ title: "请在歌单详情页编辑", color: "warning" });
+            onOpenEditBBPFavorite?.(item.bbpId!);
           } else {
             onOpenEditFavorite?.(Number(item.id));
           }
           break;
         case "manage-members":
           if (item.bbpId) {
-            // 后续迭代
-            addToast({ title: "请在歌单详情页管理成员", color: "warning" });
+            // 跳转到歌单详情页，通过 hash 指示打开成员管理
+            navigate(`/collection/${item.bbpId}?source=bbplayer&role=${item.role ?? "owner"}#members`);
           }
           break;
         case "hide":
@@ -470,6 +472,8 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
       handleLeaveBBPPlaylist,
       handlePlayFavorite,
       onOpenEditFavorite,
+      onOpenEditBBPFavorite,
+      navigate,
     ],
   );
 
@@ -500,14 +504,14 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
           break;
         case "edit":
           if (item.source === "bbplayer") {
-            addToast({ title: "请在歌单详情页编辑", color: "warning" });
+            onOpenEditBBPFavorite?.(item.bbpId!);
           } else {
             onOpenEditFavorite?.(Number(item.id));
           }
           break;
         case "manage-members":
           if (item.bbpId) {
-            addToast({ title: "请在歌单详情页管理成员", color: "warning" });
+            navigate(`/collection/${item.bbpId}?source=bbplayer&role=${item.role ?? "subscriber"}#members`);
           }
           break;
         case "hide":
@@ -532,6 +536,8 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
       handleUnfavoriteFavorite,
       handleLeaveBBPPlaylist,
       onOpenEditFavorite,
+      onOpenEditBBPFavorite,
+      navigate,
     ],
   );
 
