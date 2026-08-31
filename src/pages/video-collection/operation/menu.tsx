@@ -9,7 +9,7 @@ import { CollectionType } from "@/common/constants/collection";
 import { glassMenuClassName } from "@/common/constants/glass";
 import { isDefaultFav } from "@/common/utils/fav";
 import { postFavFolderDel } from "@/service/fav-folder-del";
-import { useFavoritesStore } from "@/store/favorite";
+import { getItemKey, useFavoritesStore } from "@/store/favorite";
 import { useModalStore } from "@/store/modal";
 
 import DownloadSelectModal from "../download-select-modal";
@@ -90,7 +90,7 @@ const Menu = ({ type, isCreatedBySelf, mediaCount, attr, onClearInvalid }: MenuP
             });
 
             if (res.code === 0 && res.data === 0) {
-              useFavoritesStore.getState().rmCreatedFavorite(Number(id));
+              useFavoritesStore.getState().rmCreatedFavorite(getItemKey({ id: Number(id) }));
               navigate("/empty");
             }
 

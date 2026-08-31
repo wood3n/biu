@@ -9,7 +9,7 @@ import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-conta
 import { postFavSeasonFav } from "@/service/fav-season-fav";
 import { postFavSeasonUnfav } from "@/service/fav-season-unfav";
 import { getUserVideoArchivesList, type Media } from "@/service/user-video-archives-list";
-import { useFavoritesStore } from "@/store/favorite";
+import { getItemKey, useFavoritesStore } from "@/store/favorite";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
@@ -127,7 +127,7 @@ const VideoCollections = () => {
       });
 
       if (res.code === 0) {
-        rmCollectedFavorite(Number(id));
+        rmCollectedFavorite(getItemKey({ id: Number(id) }));
       }
     } else {
       // 收藏
@@ -143,6 +143,7 @@ const VideoCollections = () => {
           cover: data?.info?.cover,
           type: CollectionType.VideoCollections,
           mid: data?.info?.upper?.mid,
+          source: "bilibili",
         });
       }
     }

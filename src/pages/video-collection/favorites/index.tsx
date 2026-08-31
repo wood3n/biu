@@ -16,7 +16,7 @@ import { getFavResourceList, type FavMedia } from "@/service/fav-resource";
 import { postFavResourceBatchDel } from "@/service/fav-resource-batch-del";
 import { postFavResourceClean } from "@/service/fav-resource-clean";
 import { useFavFolderItemsStore } from "@/store/fav-folder-items";
-import { useFavoritesStore } from "@/store/favorite";
+import { getItemKey, useFavoritesStore } from "@/store/favorite";
 import { useModalStore } from "@/store/modal";
 import { useMusicFavStore } from "@/store/music-fav";
 import { isSame, usePlayList } from "@/store/play-list";
@@ -267,7 +267,7 @@ const Favorites = () => {
       });
 
       if (res.code === 0) {
-        rmCollectedFavorite(Number(favFolderId));
+        rmCollectedFavorite(getItemKey({ id: Number(favFolderId) }));
         await new Promise(resolve =>
           setTimeout(() => {
             refreshInfo();
@@ -289,6 +289,7 @@ const Favorites = () => {
           cover: favInfo?.cover,
           type: CollectionType.Favorite,
           mid: favInfo?.upper?.mid,
+          source: "bilibili",
         });
         await new Promise(resolve =>
           setTimeout(() => {

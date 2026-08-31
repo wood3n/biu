@@ -15,6 +15,7 @@ import {
   RiFeedbackLine,
   RiLoginCircleLine,
   RiLogoutCircleLine,
+  RiMusic2Line,
   RiProfileLine,
   RiRefreshLine,
   RiSettings3Line,
@@ -23,7 +24,10 @@ import { twMerge } from "tailwind-merge";
 
 import nofaceImg from "@/assets/images/noface.jpg";
 import { glassMenuClassName } from "@/common/constants/glass";
+import BBPLoginModal from "@/components/bbp-login-modal";
 import { postPassportLoginExit } from "@/service/passport-login-exit";
+import { useBBPPlaylistStore } from "@/store/bbp-playlist";
+import { useBBPTokenStore } from "@/store/bbp-token";
 import { useFavoritesStore } from "@/store/favorite";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
@@ -45,7 +49,11 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
   const navigate = useNavigate();
   const updateSettings = useSettings(s => s.update);
 
+  const bbpToken = useBBPTokenStore(s => s.token);
+  const bbpAccount = useBBPTokenStore(s => s.account);
+
   const { isOpen: isLoginModalOpen, onOpen: openLoginModal, onOpenChange: onLoginModalOpenChange } = useDisclosure();
+  const { isOpen: isBBPLoginOpen, onOpen: openBBPLogin, onOpenChange: onBBPLoginOpenChange } = useDisclosure();
 
   const onOpenConfirmModal = useModalStore(s => s.onOpenConfirmModal);
 
@@ -65,6 +73,7 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
     if (res?.code === 0) {
       clearToken();
       clearUser();
+      useBBPTokenStore.getState().clear();
       updateSettings({
         hiddenMenuKeys: [],
       });
@@ -119,6 +128,10 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
           if (mid) {
             await useFavoritesStore.getState().updateCreatedFavorites(mid);
             await useFavoritesStore.getState().updateCollectedFavorites(mid);
+          } else if (useBBPTokenStore.getState().token) {
+            await useBBPPlaylistStore.getState().fetchPlaylists();
+            await useFavoritesStore.getState().updateCreatedFavorites("");
+            await useFavoritesStore.getState().updateCollectedFavorites("");
           }
           addToast({
             title: "数据刷新成功",
@@ -157,6 +170,49 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
         });
       },
     },
+    {
+      key: "bbp-divider",
+      label: "",
+      isDivider: true,
+      hidden: !bbpToken,
+    },
+    {
+      key: "bbp-account",
+      label: bbpAccount ? `BBPlayer: ${bbpAccount.name}` : "BBPlayer 已登录",
+      startContent: <RiMusic2Line size={18} />,
+      isReadOnly: true,
+      className: "cursor-default opacity-60",
+      hidden: !bbpToken,
+    },
+    {
+      key: "bbp-login",
+      label: "登录 BBPlayer",
+      startContent: <RiMusic2Line size={18} />,
+      hidden: Boolean(bbpToken),
+      onPress: openBBPLogin,
+    },
+    {
+      key: "bbp-logout",
+      label: "退出 BBPlayer",
+      startContent: <RiLogoutCircleLine size={18} />,
+      color: "danger" as const,
+      className: "text-danger",
+      hidden: !bbpToken,
+      onPress: () => {
+        onOpenConfirmModal({
+          title: "确认退出 BBPlayer 账号？",
+          type: "danger",
+          onConfirm: async () => {
+            useBBPTokenStore.getState().clear();
+            useBBPPlaylistStore.getState().clearCache();
+            await useFavoritesStore.getState().updateCreatedFavorites("");
+            await useFavoritesStore.getState().updateCollectedFavorites("");
+            addToast({ title: "已退出 BBPlayer", color: "success" });
+            return true;
+          },
+        });
+      },
+    },
   ].filter(item => !item.hidden);
 
   return (
@@ -167,7 +223,7 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
         triggerScaleOnOpen={false}
         radius="md"
         classNames={{
-          content: twMerge(glassMenuClassName, "min-w-[140px]"),
+          content: twMerge(glassMenuClassName, "min-w-[160px]"),
         }}
         onOpenChange={onDropdownOpenChange}
       >
@@ -190,6 +246,7 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
         </DropdownMenu>
       </Dropdown>
       <Login isOpen={isLoginModalOpen} onOpenChange={onLoginModalOpenChange} />
+      <BBPLoginModal isOpen={isBBPLoginOpen} onOpenChange={onBBPLoginOpenChange} />
     </>
   );
 };
