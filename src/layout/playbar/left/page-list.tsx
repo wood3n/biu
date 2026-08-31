@@ -46,7 +46,7 @@ const PageListDrawer = () => {
               mainWrapper: "h-full",
               input: "text-small",
               inputWrapper:
-                "h-full font-normal text-default-500 bg-default-200/50 dark:bg-default-100/10 backdrop-blur-md",
+                "h-full font-normal text-default-500 bg-default-300/55! hover:bg-default-300/55! data-[hover=true]:bg-default-300/55! group-data-[focus=true]:bg-default-300/55! dark:bg-default-100/15! dark:hover:bg-default-100/15! dark:data-[hover=true]:bg-default-100/15! dark:group-data-[focus=true]:bg-default-100/15!",
             }}
             placeholder="搜索分集"
             radius="md"
