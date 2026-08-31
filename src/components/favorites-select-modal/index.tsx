@@ -37,7 +37,7 @@ const playDataToBBPTrack = (playData: NonNullable<FavSelectModalData["playData"]
     return null;
   }
   return {
-    unique_key: `bilibili:${playData.bvid}:${playData.cid}`,
+    unique_key: `bilibili::${playData.bvid}::${playData.cid}`,
     title: playData.title,
     artist_name: playData.ownerName ?? "",
     cover_url: playData.cover ?? "",
