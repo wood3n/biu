@@ -52,6 +52,8 @@ interface BBPPlaylistAction {
   deletePlaylist: (playlistId: string) => Promise<void>;
   /** 获取缓存中的曲目列表 */
   getCachedTracks: (playlistId: string) => BBPTrack[];
+  /** 获取包含指定 bvid 的歌单 ID 列表（基于本地缓存） */
+  getPlaylistIdsByBvid: (bvid: string) => string[];
   /** 清空所有缓存 */
   clearCache: () => void;
 }
@@ -221,6 +223,13 @@ export const useBBPPlaylistStore = create<BBPPlaylistState & BBPPlaylistAction>(
 
       getCachedTracks: playlistId => {
         return get().playlistCache[playlistId]?.tracks ?? [];
+      },
+
+      getPlaylistIdsByBvid: bvid => {
+        const { playlistCache } = get();
+        return Object.entries(playlistCache)
+          .filter(([, entry]) => entry.tracks.some(track => track.bilibili_bvid === bvid))
+          .map(([id]) => id);
       },
 
       clearCache: () =>
