@@ -36,7 +36,7 @@ const StageProgress = ({ data }: Props) => {
   }, [data.downloadProgress, data.status, data.mergeProgress, data.convertProgress]);
 
   return (
-    <div className="flex h-full flex-col justify-center space-y-1">
+    <div className="flex flex-col justify-center space-y-1">
       <Progress
         aria-label={StatusDesc[data.status]}
         value={progressValue}
