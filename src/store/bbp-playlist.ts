@@ -1,3 +1,4 @@
+import { generateKeyBetween } from "fractional-indexing";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -127,7 +128,7 @@ export const useBBPPlaylistStore = create<BBPPlaylistState & BBPPlaylistAction>(
             }
           }
 
-          const nextTracks = [...trackMap.values()].sort((a, b) => (a.sort_key ?? "").localeCompare(b.sort_key ?? ""));
+          const nextTracks = [...trackMap.values()].sort((a, b) => (b.sort_key ?? "").localeCompare(a.sort_key ?? ""));
 
           const nextEntry: BBPPlaylistCacheEntry = {
             lastSyncAt: res.server_time,
@@ -146,12 +147,14 @@ export const useBBPPlaylistStore = create<BBPPlaylistState & BBPPlaylistAction>(
       },
 
       createPlaylist: async (title, tracks) => {
+        let prevKey: string | null = null;
         const res = await bbpPlaylistCreate({
           title,
-          tracks: tracks?.map((track, index) => ({
-            track,
-            sort_key: String(index),
-          })),
+          tracks: tracks?.map(track => {
+            const sortKey = generateKeyBetween(prevKey, null);
+            prevKey = sortKey;
+            return { track, sort_key: sortKey };
+          }),
         });
 
         const newPlaylist: BBPPlaylistSummary = {
@@ -173,8 +176,10 @@ export const useBBPPlaylistStore = create<BBPPlaylistState & BBPPlaylistAction>(
 
       addTrack: async (playlistId, track) => {
         const cache = get().playlistCache[playlistId];
-        const trackCount = cache?.tracks.length ?? 0;
-        const sortKey = String(trackCount).padStart(4, "0");
+        const prevTracks = cache?.tracks ?? [];
+        // 取当前最大的 sort_key（DESC 排序下第一个即为最大）
+        const maxKey = prevTracks.length > 0 ? (prevTracks[0].sort_key ?? null) : null;
+        const sortKey = generateKeyBetween(maxKey, null);
         const change: BBPChange = {
           op: "upsert",
           track,
@@ -202,7 +207,7 @@ export const useBBPPlaylistStore = create<BBPPlaylistState & BBPPlaylistAction>(
             sort_key: sortKey,
           };
           trackMap.set(track.unique_key, fullTrack);
-          const nextTracks = [...trackMap.values()].sort((a, b) => (a.sort_key ?? "").localeCompare(b.sort_key ?? ""));
+          const nextTracks = [...trackMap.values()].sort((a, b) => (b.sort_key ?? "").localeCompare(a.sort_key ?? ""));
           return {
             playlistCache: {
               ...state.playlistCache,
