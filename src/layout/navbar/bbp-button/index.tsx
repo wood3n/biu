@@ -1,11 +1,18 @@
-import { useDisclosure } from "@heroui/react";
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, addToast, type DropdownItemProps } from "@heroui/react";
+import {
+  Button,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  addToast,
+  useDisclosure,
+  type DropdownItemProps,
+} from "@heroui/react";
 import { RiLogoutCircleLine, RiMusic2Line, RiUser3Line } from "@remixicon/react";
 import { twMerge } from "tailwind-merge";
 
 import { glassMenuClassName } from "@/common/constants/glass";
 import BBPLoginModal from "@/components/bbp-login-modal";
-import IconButton from "@/components/icon-button";
 import { useBBPPlaylistStore } from "@/store/bbp-playlist";
 import { useBBPTokenStore } from "@/store/bbp-token";
 import { useFavoritesStore } from "@/store/favorite";
@@ -82,9 +89,16 @@ const BBPButton = () => {
         }}
       >
         <DropdownTrigger>
-          <IconButton tooltip="BBPlayer" className={isLogin ? "text-primary" : undefined}>
+          <Button
+            isIconOnly
+            variant="light"
+            radius="md"
+            size="sm"
+            title="BBPlayer"
+            className="hover:text-primary !px-0 text-inherit hover:!bg-transparent"
+          >
             <RiMusic2Line size={18} />
-          </IconButton>
+          </Button>
         </DropdownTrigger>
         <DropdownMenu aria-label="BBPlayer 操作" variant="flat" items={items}>
           {({ key, label, className, ...rest }) => (

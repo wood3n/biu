@@ -79,23 +79,39 @@ html, body, #root {
 
 /* 输入选择控件背景统一为半透明灰，与 tabList 一致，暗色下不过亮 */
 [data-slot="input-wrapper"],
-[data-slot="trigger"] {
+[data-slot="trigger"]:not(button),
+button[data-slot="trigger"][aria-expanded="true"] {
   background-color: hsl(var(--heroui-default-200) / 80%);
 }
 
 [data-slot="input-wrapper"]:hover,
-[data-slot="trigger"]:hover {
+[data-slot="trigger"]:not(button):hover,
+button[data-slot="trigger"][aria-expanded="true"]:hover {
   background-color: hsl(var(--heroui-default-300) / 80%);
 }
 
 .dark [data-slot="input-wrapper"],
-.dark [data-slot="trigger"] {
+.dark [data-slot="trigger"]:not(button),
+.dark button[data-slot="trigger"][aria-expanded="true"] {
   background-color: hsl(var(--heroui-default-100) / 10%);
 }
 
 .dark [data-slot="input-wrapper"]:hover,
-.dark [data-slot="trigger"]:hover {
+.dark [data-slot="trigger"]:not(button):hover,
+.dark button[data-slot="trigger"][aria-expanded="true"]:hover {
   background-color: hsl(var(--heroui-default-200) / 15%);
+}
+
+/* Dropdown/Popover 展开时 trigger 按钮的灰色背景，
+   覆盖 Button 组件的 hover:!bg-transparent */
+button[data-slot="trigger"][aria-expanded="true"],
+button[data-slot="trigger"][aria-expanded="true"]:hover {
+  background-color: hsl(var(--heroui-default-200) / 80%) !important;
+}
+
+.dark button[data-slot="trigger"][aria-expanded="true"],
+.dark button[data-slot="trigger"][aria-expanded="true"]:hover {
+  background-color: hsl(var(--heroui-default-100) / 10%) !important;
 }
 
 /* 毛玻璃菜单：菜单项 hover/focus 背景改为半透明，不遮挡毛玻璃 */

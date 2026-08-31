@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 
-import { Input, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@heroui/react";
+import { Button, Input, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@heroui/react";
 import { RiListRadio, RiSearchLine } from "@remixicon/react";
 import { twMerge } from "tailwind-merge";
 
 import { glassMenuClassName } from "@/common/constants/glass";
-import IconButton from "@/components/icon-button";
 import MusicPageList from "@/components/music-page-list";
 
 const PageListDrawer = () => {
@@ -23,9 +22,17 @@ const PageListDrawer = () => {
       onOpenChange={onOpenChange}
     >
       <PopoverTrigger>
-        <IconButton onPress={onOpen}>
+        <Button
+          isIconOnly
+          variant="light"
+          radius="md"
+          size="sm"
+          title="分集"
+          onPress={onOpen}
+          className="hover:text-primary !px-0 text-inherit hover:!bg-transparent"
+        >
           <RiListRadio size={18} />
-        </IconButton>
+        </Button>
       </PopoverTrigger>
       <PopoverContent
         className={twMerge(glassMenuClassName, "w-auto min-w-[500px] overflow-hidden p-0")}
