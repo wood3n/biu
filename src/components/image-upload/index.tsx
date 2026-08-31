@@ -13,6 +13,8 @@ export interface ImageUploadProps {
   accept?: string;
   width?: number | string;
   height?: number | string;
+  aspect?: number;
+  hint?: string;
   className?: string;
 }
 
@@ -23,6 +25,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   accept = "image/*",
   width = 128,
   height = 128,
+  aspect = 16 / 9,
+  hint = "建议上传高清封面≥960×600，jpeg或png格式，图片≤5MB",
   className,
 }) => {
   const [previewUrl, setPreviewUrl] = useState<string | undefined>(value);
@@ -156,7 +160,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             </div>
           )}
         </div>
-        <span className="text-tiny text-default-400">建议上传高清封面≥960×600，jpeg或png格式，图片≤5MB</span>
+        <span className="text-tiny text-default-400">{hint}</span>
       </div>
 
       <input
@@ -169,7 +173,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         disabled={disabled}
       />
 
-      <CropModal src={cropImageSrc} isOpen={isModalOpen} onClose={handleModalClose} onUploaded={handleUploaded} />
+      <CropModal
+        src={cropImageSrc}
+        isOpen={isModalOpen}
+        aspect={aspect}
+        onClose={handleModalClose}
+        onUploaded={handleUploaded}
+      />
 
       {error && <span className="text-tiny text-danger">{error}</span>}
     </div>
