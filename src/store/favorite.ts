@@ -23,6 +23,8 @@ interface State {
   collectedFavorites: FavoriteItem[];
   createdOrder: string[];
   collectedOrder: string[];
+  lastFetchAt: number;
+  lastFetchUserMid: string;
 }
 
 interface Action {
@@ -35,6 +37,7 @@ interface Action {
   addCollectedFavorite: (favorite: FavoriteItem) => void;
   rmCollectedFavorite: (key: string) => void;
   reorderCollectedFavorites: (activeKey: string, overKey: string) => void;
+  fetchFavoritesIfStale: (userMid: number | string, maxAgeMs?: number) => Promise<void>;
 }
 
 export const getItemKey = (item: { id: number; bbpId?: string }): string =>
@@ -76,6 +79,8 @@ export const useFavoritesStore = create<State & Action>()(
       collectedFavorites: [],
       createdOrder: [],
       collectedOrder: [],
+      lastFetchAt: 0,
+      lastFetchUserMid: "",
       updateCreatedFavorites: async (userMid: number | string) => {
         const bilibiliPromise = userMid ? getAllCreatedFavorites(userMid) : Promise.resolve([] as FavoriteItem[]);
         const bbpPromise = getBBPFavorites();
@@ -88,6 +93,7 @@ export const useFavoritesStore = create<State & Action>()(
         set(() => ({
           createdFavorites: ordered,
           createdOrder: ordered.map(item => getItemKey(item)),
+          lastFetchAt: Date.now(),
         }));
       },
       addCreatedFavorite: (favorite: FavoriteItem) =>
@@ -144,6 +150,7 @@ export const useFavoritesStore = create<State & Action>()(
         set(() => ({
           collectedFavorites: ordered,
           collectedOrder: ordered.map(item => getItemKey(item)),
+          lastFetchAt: Date.now(),
         }));
       },
       addCollectedFavorite: (favorite: FavoriteItem) =>
@@ -177,9 +184,20 @@ export const useFavoritesStore = create<State & Action>()(
             collectedOrder: next.map(item => getItemKey(item)),
           };
         }),
+      fetchFavoritesIfStale: async (userMid: number | string, maxAgeMs = 5 * 60 * 1000) => {
+        const { lastFetchAt, lastFetchUserMid, createdFavorites, collectedFavorites } = get();
+        const midKey = String(userMid);
+        const hasData = createdFavorites.length > 0 || collectedFavorites.length > 0;
+        const midChanged = midKey !== lastFetchUserMid;
+        if (hasData && !midChanged && Date.now() - lastFetchAt < maxAgeMs) {
+          return;
+        }
+        set(() => ({ lastFetchAt: Date.now(), lastFetchUserMid: midKey }));
+        await Promise.all([get().updateCreatedFavorites(userMid), get().updateCollectedFavorites(userMid)]);
+      },
     }),
     {
-      name: "favorites-order",
+      name: "favorites-cache",
       partialize: state => ({
         createdOrder: state.createdOrder,
         collectedOrder: state.collectedOrder,
