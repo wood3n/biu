@@ -134,12 +134,14 @@ button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"])
 /* 毛玻璃菜单：菜单项 hover/focus 背景改为半透明，不遮挡毛玻璃
    注意：HeroUI 菜单项在鼠标 hover 后会保留 data-focus=true（键盘焦点残留），
    因此这里只用 data-hover=true 作为高亮条件；键盘聚焦（data-focus-visible=true）
-   单独用 outline 表示，避免鼠标移开后高亮块残留 */
-.glass-menu [data-hover="true"] {
+   单独用 outline 表示，避免鼠标移开后高亮块残留。
+   :not([data-slot]) 只命中菜单项（li，无 data-slot），
+   排除 Input/Select 等控件的 base 层（矩形无圆角，hover 会露直角） */
+.glass-menu [data-hover="true"]:not([data-slot]) {
   background-color: hsl(var(--heroui-foreground) / 15%);
 }
 
-.glass-menu [data-focus-visible="true"] {
+.glass-menu [data-focus-visible="true"]:not([data-slot]) {
   outline: 2px solid hsl(var(--heroui-primary) / 60%);
   outline-offset: 2px;
 }
