@@ -77,6 +77,27 @@ html, body, #root {
   padding-bottom: 72px;
 }
 
+/* 输入选择控件背景统一为半透明灰，与 tabList 一致，暗色下不过亮 */
+[data-slot="input-wrapper"],
+[data-slot="trigger"] {
+  background-color: hsl(var(--heroui-default-200) / 80%);
+}
+
+[data-slot="input-wrapper"]:hover,
+[data-slot="trigger"]:hover {
+  background-color: hsl(var(--heroui-default-300) / 80%);
+}
+
+.dark [data-slot="input-wrapper"],
+.dark [data-slot="trigger"] {
+  background-color: hsl(var(--heroui-default-100) / 10%);
+}
+
+.dark [data-slot="input-wrapper"]:hover,
+.dark [data-slot="trigger"]:hover {
+  background-color: hsl(var(--heroui-default-200) / 15%);
+}
+
 /* 毛玻璃菜单：菜单项 hover/focus 背景改为半透明，不遮挡毛玻璃 */
 .glass-menu [data-hover="true"],
 .glass-menu [data-focus="true"]:not([data-focus-visible="true"]) {
