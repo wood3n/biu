@@ -62,7 +62,7 @@ html, body, #root {
 }
 
 /* 收起态侧边栏：让 OverlayScrollbars viewport 内容垂直居中 */
-.side-collapsed-center [data-overlay-scrollbar-viewport] {
+.side-collapsed-center [data-overlayscrollbars-viewport] {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -73,7 +73,7 @@ html, body, #root {
  * 不再走 CSS padding（OverlayScrollbars 会对 viewport 写入内联 padding 覆盖它） */
 
 /* 播放栏折叠态：底部留少量空间给折叠小卡片 */
-.playbar-collapsed [data-overlay-scrollbar-viewport] {
+.playbar-collapsed [data-overlayscrollbars-viewport] {
   padding-bottom: 72px;
 }
 
