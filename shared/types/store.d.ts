@@ -8,6 +8,15 @@ declare global {
     [StoreNameMap.UserLoginInfo]: UserInfo;
     [StoreNameMap.ShortcutSettings]: ShortcutSettings;
     [StoreNameMap.LyricsCache]: Record<string, MusicLyrics>;
+    [StoreNameMap.BBPAccount]: {
+      token?: string;
+      account?: {
+        id: string;
+        username: string;
+        name: string;
+        face: string | null;
+      };
+    };
   };
 }
 
