@@ -41,6 +41,7 @@ const PlayListDrawer = () => {
           rid: item.id,
           type: item.type === "mv" ? 2 : 12,
           title: item.title,
+          playData: item,
         });
         break;
       case "download-audio":

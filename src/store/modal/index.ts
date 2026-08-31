@@ -7,6 +7,9 @@ import { createPlayListDrawerSlice, type PlayListDrawerState } from "./play-list
 import { createReleaseNoteModalSlice, type ReleaseNoteModalState } from "./release-note-modal";
 import { createVideoPageDownloadModalSlice, type VideoPageDownloadModalState } from "./video-page-download-modal";
 
+export type { ConfirmModalData } from "./confirm-modal";
+export type { FavSelectModalData } from "./fav-select-modal";
+
 export const useModalStore = create<
   FavSelectModalState &
     ConfirmModalState &

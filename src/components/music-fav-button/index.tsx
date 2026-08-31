@@ -30,6 +30,7 @@ const MusicFavButton = () => {
       rid: playItem.type === "mv" ? String(playItem.aid) : String(playItem.sid),
       type: playItem.type === "mv" ? 2 : 12,
       title: "收藏",
+      playData: playItem,
       onSuccess: selectedIds => {
         setIsFav(Boolean(selectedIds?.length));
 
