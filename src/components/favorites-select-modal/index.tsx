@@ -32,10 +32,10 @@ const playDataToBBPTrack = (playData: NonNullable<FavSelectModalData["playData"]
     return null;
   }
   return {
-    unique_key: `${playData.bvid}-${playData.cid}`,
+    unique_key: `bilibili:${playData.bvid}:${playData.cid}`,
     title: playData.title,
     artist_name: playData.ownerName ?? "",
-    cover_url: playData.cover ?? null,
+    cover_url: playData.cover ?? "",
     duration: playData.duration,
     bilibili_bvid: playData.bvid,
     bilibili_cid: playData.cid,
@@ -123,7 +123,7 @@ const FavoritesSelectModal = () => {
   };
 
   const handleConfirm = async () => {
-    if (!rid) return;
+    if (!rid && !selectedBBPId) return;
 
     // 如果选中了 BBPlayer 歌单，走 BBPlayer 添加流程
     if (selectedBBPId && playData) {
@@ -150,6 +150,7 @@ const FavoritesSelectModal = () => {
     }
 
     // B站收藏夹流程
+    if (!rid) return;
     const prevSelectedFolderIds = data?.filter(item => item.fav_state === 1)?.map(item => item.id) || [];
     const delMediaIds = prevSelectedFolderIds.filter(id => !selectedIds.includes(id)).join(",");
     const addMediaIds = selectedIds.filter(id => !prevSelectedFolderIds.includes(id)).join(",");
