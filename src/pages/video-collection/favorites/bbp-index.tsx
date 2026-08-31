@@ -2,9 +2,22 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 
 import { Button, Skeleton, addToast } from "@heroui/react";
-import { RiFileCopyLine, RiPlayFill, RiPlayListAddLine } from "@remixicon/react";
+import {
+  RiExternalLinkLine,
+  RiFileCopyLine,
+  RiFileMusicLine,
+  RiFileVideoLine,
+  RiPlayFill,
+  RiPlayListAddLine,
+  RiStarFill,
+  RiStarLine,
+  RiStarOffLine,
+} from "@remixicon/react";
+
+import type { BBPTrack } from "@/service/bbp-types";
 
 import { bbpTracksToPlayItems } from "@/common/utils/bbp-track";
+import { openBiliVideoLink } from "@/common/utils/url";
 import { type ContextMenuItem } from "@/components/context-menu";
 import Empty from "@/components/empty";
 import Image from "@/components/image";
@@ -12,11 +25,25 @@ import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import VirtualPageList from "@/components/virtual-page-list";
+import { getWebInterfaceArchiveRelation } from "@/service/web-interface-archive-relation";
 import { getWebInterfaceView } from "@/service/web-interface-view";
 import { useBBPPlaylistStore } from "@/store/bbp-playlist";
 import { useBBPTokenStore } from "@/store/bbp-token";
-import { usePlayList } from "@/store/play-list";
+import { useModalStore } from "@/store/modal";
+import { usePlayList, type PlayData } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
+
+/** 将 BBPlayer 曲目转换为 PlayData（用于收藏弹窗的 playData） */
+const bbpTrackToPlayData = (track: BBPTrack): PlayData => ({
+  id: track.unique_key,
+  type: "mv",
+  bvid: track.bilibili_bvid,
+  cid: track.bilibili_cid,
+  title: track.title,
+  cover: track.cover_url ?? undefined,
+  ownerName: track.artist_name,
+  duration: track.duration,
+});
 
 const BBPFavorites = () => {
   const { id: playlistId } = useParams();
@@ -33,6 +60,8 @@ const BBPFavorites = () => {
 
   const [loading, setLoading] = useState(false);
   const [playCountMap, setPlayCountMap] = useState<Record<string, number>>({});
+  /** B站已收藏的 bvid 集合（共享收藏状态：B站收藏过即视为已收藏） */
+  const [favBvidSet, setFavBvidSet] = useState<Set<string>>(() => new Set());
   const scrollRef = useRef<ScrollRefObject>(null);
 
   const cache = playlistId ? playlistCache[playlistId] : undefined;
@@ -102,6 +131,46 @@ const BBPFavorites = () => {
     };
   }, [tracks]);
 
+  // 批量获取 B站收藏状态（共享收藏状态：B站已收藏即视为已收藏）
+  useEffect(() => {
+    if (!tracks.length) return;
+    let canceled = false;
+    const bvids = tracks.map(t => t.bilibili_bvid).filter(Boolean) as string[];
+    const uniqueBvids = [...new Set(bvids)];
+    if (!uniqueBvids.length) return;
+    const CONCURRENCY = 8;
+    const BATCH_SIZE = Math.ceil(uniqueBvids.length / CONCURRENCY);
+    const batches: string[][] = [];
+    for (let i = 0; i < uniqueBvids.length; i += BATCH_SIZE) {
+      batches.push(uniqueBvids.slice(i, i + BATCH_SIZE));
+    }
+    (async () => {
+      const results = await Promise.all(
+        batches.map(async batch => {
+          const set = new Set<string>();
+          for (const bvid of batch) {
+            try {
+              const res = await getWebInterfaceArchiveRelation({ bvid });
+              if (res.code === 0 && res.data?.favorite) {
+                set.add(bvid);
+              }
+            } catch {
+              // 忽略单个失败
+            }
+          }
+          return set;
+        }),
+      );
+      if (canceled) return;
+      const merged = new Set<string>();
+      for (const s of results) for (const bvid of s) merged.add(bvid);
+      setFavBvidSet(merged);
+    })();
+    return () => {
+      canceled = true;
+    };
+  }, [tracks]);
+
   const canEdit = role === "owner" || role === "editor";
 
   const handlePlayAll = useCallback(() => {
@@ -146,8 +215,30 @@ const BBPFavorites = () => {
   const handleMenuAction = useCallback(
     (key: string, trackKey: string, trackIndex: number) => {
       const item = playItems[trackIndex];
+      const track = tracks[trackIndex];
       if (!item) return;
       switch (key) {
+        case "favorite": {
+          if (!track?.bilibili_bvid) return;
+          // B站收藏夹流程需要 aid，先获取一次
+          void (async () => {
+            let rid = "";
+            try {
+              const view = await getWebInterfaceView({ bvid: track.bilibili_bvid });
+              if (view.code === 0 && view.data?.aid) {
+                rid = String(view.data.aid);
+              }
+            } catch {
+              // 获取 aid 失败则仅走 BBP 歌单流程
+            }
+            useModalStore.getState().onOpenFavSelectModal({
+              title: track.title,
+              rid,
+              playData: bbpTrackToPlayData(track),
+            });
+          })();
+          break;
+        }
         case "play-next":
           usePlayList.getState().addToNext(item);
           break;
@@ -155,26 +246,71 @@ const BBPFavorites = () => {
           usePlayList.getState().addList([item]);
           addToast({ title: "已添加到播放列表", color: "success" });
           break;
-        case "remove":
+        case "download-audio":
+          if (!track) return;
+          void window.electron.addMediaDownloadTask({
+            outputFileType: "audio",
+            title: track.title,
+            cover: track.cover_url ?? undefined,
+            bvid: track.bilibili_bvid,
+            cid: track.bilibili_cid,
+          });
+          addToast({ title: "已添加下载任务", color: "success" });
+          break;
+        case "download-video":
+          if (!track) return;
+          void window.electron.addMediaDownloadTask({
+            outputFileType: "video",
+            title: track.title,
+            cover: track.cover_url ?? undefined,
+            bvid: track.bilibili_bvid,
+            cid: track.bilibili_cid,
+          });
+          addToast({ title: "已添加下载任务", color: "success" });
+          break;
+        case "bililink":
+          if (!track) return;
+          openBiliVideoLink({ type: "mv", bvid: track.bilibili_bvid });
+          break;
+        case "cancelFavorite":
           handleRemoveTrack(trackKey);
           break;
         default:
           break;
       }
     },
-    [playItems, handleRemoveTrack],
+    [playItems, tracks, handleRemoveTrack],
   );
 
-  const trackMenus = useMemo<ContextMenuItem[]>(() => {
-    const menus: ContextMenuItem[] = [
-      { key: "play-next", label: "下一首播放", icon: <RiPlayFill size={18} /> },
-      { key: "add-to-playlist", label: "添加到播放列表", icon: <RiPlayListAddLine size={18} /> },
-    ];
-    if (canEdit) {
-      menus.push({ key: "remove", label: "从歌单移除", color: "danger", className: "text-danger" });
-    }
-    return menus;
-  }, [canEdit]);
+  // 菜单按曲目生成：B站已收藏的显示"已收藏"（实心星），否则"收藏"；可编辑歌单额外提供"取消收藏"（从歌单移除）
+  const getTrackMenus = useCallback(
+    (track: BBPTrack): ContextMenuItem[] => {
+      const isBiliFav = Boolean(track.bilibili_bvid && favBvidSet.has(track.bilibili_bvid));
+      const menus: ContextMenuItem[] = [
+        {
+          key: "favorite",
+          label: isBiliFav ? "已收藏" : "收藏",
+          icon: isBiliFav ? <RiStarFill size={18} className="text-primary" /> : <RiStarLine size={18} />,
+        },
+        { key: "play-next", label: "下一首播放", icon: <RiPlayFill size={18} /> },
+        { key: "add-to-playlist", label: "添加到播放列表", icon: <RiPlayListAddLine size={18} /> },
+        { key: "download-audio", label: "下载音频", icon: <RiFileMusicLine size={18} /> },
+        { key: "download-video", label: "下载视频", icon: <RiFileVideoLine size={18} /> },
+        { key: "bililink", label: "在 B 站打开", icon: <RiExternalLinkLine size={18} /> },
+      ];
+      if (canEdit) {
+        menus.push({
+          key: "cancelFavorite",
+          label: "取消收藏",
+          icon: <RiStarOffLine size={18} />,
+          color: "danger",
+          className: "text-danger",
+        });
+      }
+      return menus;
+    },
+    [canEdit, favBvidSet],
+  );
 
   if (!bbpToken) {
     return (
@@ -287,7 +423,7 @@ const BBPFavorites = () => {
                 playCount={track.bilibili_bvid ? playCountMap[track.bilibili_bvid] : undefined}
                 hidePubTime
                 onPress={() => handleItemPress(index)}
-                menus={trackMenus}
+                menus={getTrackMenus(track)}
                 onMenuAction={key => handleMenuAction(key, track.unique_key, index)}
               />
             )}
