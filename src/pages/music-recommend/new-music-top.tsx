@@ -222,7 +222,7 @@ const NewMusicTop = ({ onLayoutChange }: NewMusicTopProps) => {
                   onClick={() => handlePlay(item)}
                   className="group w-full cursor-pointer select-none"
                 >
-                  <div className="relative aspect-square w-full">
+                  <div className="rounded-medium relative aspect-square w-full overflow-hidden">
                     <Image
                       radius="md"
                       src={item.cover || ""}
