@@ -421,14 +421,12 @@ const BBPFavorites = () => {
         <Button color="primary" startContent={<RiPlayFill size={22} />} onPress={handlePlayAll} className="text-white">
           播放全部
         </Button>
-        <Button variant="flat" onPress={handleAddAllToPlaylist}>
+        <Button variant="flat" isIconOnly onPress={handleAddAllToPlaylist} aria-label="添加到播放列表">
           <RiPlayListAddLine size={18} />
-          添加到播放列表
         </Button>
         {canEdit && (
-          <Button variant="flat" onPress={() => setMembersModalOpen(true)}>
+          <Button variant="flat" isIconOnly onPress={() => setMembersModalOpen(true)} aria-label="管理成员">
             <RiTeamLine size={18} />
-            管理成员
           </Button>
         )}
       </div>
