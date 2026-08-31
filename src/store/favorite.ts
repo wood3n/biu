@@ -329,7 +329,7 @@ async function getBBPFavorites() {
     return { created: [] as FavoriteItem[], collected: [] as FavoriteItem[] };
   }
 
-  await useBBPPlaylistStore.getState().fetchPlaylists();
+  await useBBPPlaylistStore.getState().fetchPlaylistsIfStale();
 
   const { playlists } = useBBPPlaylistStore.getState();
 
