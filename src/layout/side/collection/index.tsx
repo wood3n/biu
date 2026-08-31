@@ -68,6 +68,7 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite, onOpen
   const user = useUser(state => state.user);
   const createdFavorites = useFavoritesStore(state => state.createdFavorites);
   const collectedFavorites = useFavoritesStore(state => state.collectedFavorites);
+  const favoritesHydrated = useFavoritesStore(state => state.hasHydrated);
   const rmCreatedFavorite = useFavoritesStore(state => state.rmCreatedFavorite);
   const rmCollectedFavorite = useFavoritesStore(state => state.rmCollectedFavorite);
   const reorderCreatedFavorites = useFavoritesStore(state => state.reorderCreatedFavorites);
@@ -195,12 +196,16 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite, onOpen
   const bbpToken = useBBPTokenStore(state => state.token);
 
   useEffect(() => {
+    // 等待收藏夹缓存水合完成，避免首帧闪空
+    if (!favoritesHydrated) {
+      return;
+    }
     if (user?.mid) {
       fetchFavoritesIfStale(user.mid);
     } else if (bbpToken) {
       fetchFavoritesIfStale("");
     }
-  }, [fetchFavoritesIfStale, user?.mid, bbpToken]);
+  }, [fetchFavoritesIfStale, user?.mid, bbpToken, favoritesHydrated]);
 
   const handlePlayFavorite = useCallback(async (item: FavoriteItem) => {
     try {

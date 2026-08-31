@@ -16,6 +16,9 @@ import { bbpPlaylistMembers } from "@/service/bbp-playlist-members";
 import { bbpPlaylistSubscribe } from "@/service/bbp-playlist-subscribe";
 import { bbpPlaylistUpdate } from "@/service/bbp-playlist-update";
 
+/** 歌单列表 in-flight 请求（并发去重） */
+let playlistsFetchPromise: Promise<void> | null = null;
+
 interface BBPPlaylistCacheEntry {
   lastSyncAt: number;
   tracks: BBPTrack[];
@@ -83,23 +86,44 @@ export const useBBPPlaylistStore = create<BBPPlaylistState & BBPPlaylistAction>(
       lastFetchAt: 0,
 
       fetchPlaylists: async () => {
-        set(() => ({ loading: true }));
+        // 并发去重：多个调用方同时触发时复用同一个 in-flight 请求
+        if (playlistsFetchPromise) {
+          return playlistsFetchPromise;
+        }
+        playlistsFetchPromise = (async () => {
+          set(() => ({ loading: true }));
+
+          try {
+            const res = await bbpMePlaylists();
+
+            set(() => ({
+              playlists: res.playlists ?? [],
+              lastFetchAt: Date.now(),
+            }));
+          } finally {
+            set(() => ({ loading: false }));
+          }
+        })();
 
         try {
-          const res = await bbpMePlaylists();
-
-          set(() => ({
-            playlists: res.playlists ?? [],
-            lastFetchAt: Date.now(),
-          }));
+          await playlistsFetchPromise;
         } finally {
-          set(() => ({ loading: false }));
+          playlistsFetchPromise = null;
         }
       },
 
       fetchPlaylistsIfStale: async (maxAgeMs = 5 * 60 * 1000) => {
         const { lastFetchAt, playlists } = get();
-        if (playlists.length > 0 && Date.now() - lastFetchAt < maxAgeMs) {
+        // 有缓存立即返回（缓存永不过期兜底），后台静默刷新服务器数据
+        if (playlists.length > 0) {
+          void get()
+            .fetchPlaylists()
+            .catch(() => {
+              // 静默失败：保留缓存
+            });
+          return;
+        }
+        if (Date.now() - lastFetchAt < maxAgeMs) {
           return;
         }
         await get().fetchPlaylists();

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 import { getFavFolderCollectedList } from "@/service/fav-folder-collected-list";
 import { getFavFolderCreatedList } from "@/service/fav-folder-created-list";
@@ -25,6 +25,8 @@ interface State {
   collectedOrder: string[];
   lastFetchAt: number;
   lastFetchUserMid: string;
+  /** persist 是否已完成水合（从本地存储恢复） */
+  hasHydrated: boolean;
 }
 
 interface Action {
@@ -37,7 +39,15 @@ interface Action {
   addCollectedFavorite: (favorite: FavoriteItem) => void;
   rmCollectedFavorite: (key: string) => void;
   reorderCollectedFavorites: (activeKey: string, overKey: string) => void;
+  /**
+   * 缓存永不过期：每次启动先读本地缓存立即渲染，同时后台静默刷新服务器数据，
+   * 服务器数据到达后接替缓存。返回 Promise<boolean>：true 表示本次发起了刷新。
+   */
+  refreshFavorites: (userMid: number | string) => Promise<boolean>;
+  /** 兼容旧调用：读取缓存优先 + 后台刷新（不阻塞 UI） */
   fetchFavoritesIfStale: (userMid: number | string, maxAgeMs?: number) => Promise<void>;
+  /** persist 水合完成后标记 */
+  setHasHydrated: (value: boolean) => void;
 }
 
 export const getItemKey = (item: { id: number; bbpId?: string }): string =>
@@ -81,6 +91,8 @@ export const useFavoritesStore = create<State & Action>()(
       collectedOrder: [],
       lastFetchAt: 0,
       lastFetchUserMid: "",
+      hasHydrated: false,
+      setHasHydrated: value => set(() => ({ hasHydrated: value })),
       updateCreatedFavorites: async (userMid: number | string) => {
         const bilibiliPromise = userMid ? getAllCreatedFavorites(userMid) : Promise.resolve([] as FavoriteItem[]);
         const bbpPromise = getBBPFavorites();
@@ -184,6 +196,16 @@ export const useFavoritesStore = create<State & Action>()(
             collectedOrder: next.map(item => getItemKey(item)),
           };
         }),
+      refreshFavorites: async (userMid: number | string) => {
+        const midKey = String(userMid);
+        // 换用户时直接刷新，不依赖旧的缓存兜底
+        if (midKey !== get().lastFetchUserMid) {
+          set(() => ({ createdFavorites: [], collectedFavorites: [] }));
+        }
+        set(() => ({ lastFetchAt: Date.now(), lastFetchUserMid: midKey }));
+        await Promise.all([get().updateCreatedFavorites(userMid), get().updateCollectedFavorites(userMid)]);
+        return true;
+      },
       fetchFavoritesIfStale: async (userMid: number | string, maxAgeMs = 5 * 60 * 1000) => {
         const { lastFetchAt, lastFetchUserMid, createdFavorites, collectedFavorites } = get();
         const midKey = String(userMid);
@@ -192,15 +214,39 @@ export const useFavoritesStore = create<State & Action>()(
         if (hasData && !midChanged && Date.now() - lastFetchAt < maxAgeMs) {
           return;
         }
-        set(() => ({ lastFetchAt: Date.now(), lastFetchUserMid: midKey }));
-        await Promise.all([get().updateCreatedFavorites(userMid), get().updateCollectedFavorites(userMid)]);
+        // 无数据或切换账号时 await（等待首屏数据），有数据时后台静默刷新
+        const task = get().refreshFavorites(userMid);
+        if (!hasData || midChanged) {
+          await task;
+        }
       },
     }),
     {
       name: "favorites-cache",
+      storage: createJSONStorage(() => localStorage),
+      version: 2,
+      migrate: persisted => {
+        const saved = persisted as { createdOrder?: string[]; collectedOrder?: string[] } | null;
+        // 旧版本只持久化了 order，列表数据需要首次启动刷新，静默兜底即可
+        return {
+          createdFavorites: [] as FavoriteItem[],
+          collectedFavorites: [] as FavoriteItem[],
+          createdOrder: saved?.createdOrder ?? [],
+          collectedOrder: saved?.collectedOrder ?? [],
+          lastFetchAt: 0,
+          lastFetchUserMid: "",
+        };
+      },
+      onRehydrateStorage: () => state => {
+        state?.setHasHydrated(true);
+      },
       partialize: state => ({
+        createdFavorites: state.createdFavorites,
+        collectedFavorites: state.collectedFavorites,
         createdOrder: state.createdOrder,
         collectedOrder: state.collectedOrder,
+        lastFetchAt: state.lastFetchAt,
+        lastFetchUserMid: state.lastFetchUserMid,
       }),
     },
   ),

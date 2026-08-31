@@ -16,7 +16,7 @@ import { getFavResourceList, type FavMedia } from "@/service/fav-resource";
 import { postFavResourceBatchDel } from "@/service/fav-resource-batch-del";
 import { postFavResourceClean } from "@/service/fav-resource-clean";
 import { getWebInterfaceView } from "@/service/web-interface-view";
-import { useFavFolderItemsStore } from "@/store/fav-folder-items";
+import { useFavFolderItemsStore, getFavFolderCache, saveFavFolderCache } from "@/store/fav-folder-items";
 import { getItemKey, useFavoritesStore } from "@/store/favorite";
 import { useModalStore } from "@/store/modal";
 import { useMusicFavStore } from "@/store/music-fav";
@@ -132,6 +132,10 @@ const Favorites = () => {
         setHasMore(pageData.hasMore);
         if (targetPage === 1) {
           setItems(pageData.medias);
+          // 默认排序（最近收藏）首页落缓存，供下次启动秒开
+          if (!keywordValue && orderValue === "mtime") {
+            saveFavFolderCache(favFolderId!, pageData.medias, pageData.hasMore);
+          }
         } else {
           appendItems(pageData.medias);
         }
@@ -145,10 +149,10 @@ const Favorites = () => {
         setListLoading(false);
       }
     },
-    [appendItems, fetchPageData, keyword, order, setItems],
+    [appendItems, fetchPageData, keyword, order, setItems, favFolderId],
   );
 
-  // 初次或收藏夹变化时加载数据
+  // 初次或收藏夹变化时加载数据：先读本地缓存立即渲染，再后台静默刷新服务器
   useEffect(() => {
     const defaultKeyword = "";
     const defaultOrder = "mtime";
@@ -156,6 +160,13 @@ const Favorites = () => {
     setKeyword(defaultKeyword);
     setOrder(defaultOrder);
     clearItems();
+    if (favFolderId) {
+      const cached = getFavFolderCache(favFolderId);
+      if (cached?.medias.length) {
+        setItems(cached.medias);
+        setHasMore(cached.hasMore);
+      }
+    }
     void loadPage(1, defaultKeyword, defaultOrder);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clearItems, favFolderId]);

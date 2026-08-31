@@ -99,6 +99,25 @@ const BBPFavorites = () => {
   useEffect(() => {
     if (!playlistId || !bbpToken) return;
     let canceled = false;
+    // 从 store 实时读取，避免 persist 异步水合导致的时序问题
+    const cachedTracks = useBBPPlaylistStore.getState().playlistCache[playlistId]?.tracks ?? [];
+    // 有本地缓存：立即渲染，后台静默同步刷新（不阻塞 UI、不显示骨架屏）
+    if (cachedTracks.length) {
+      void (async () => {
+        try {
+          await syncPlaylist(playlistId);
+        } catch (error) {
+          if (!canceled) {
+            addToast({ title: "获取歌单内容失败", color: "danger" });
+            console.error(error);
+          }
+        }
+      })();
+      return () => {
+        canceled = true;
+      };
+    }
+    // 无缓存：显示加载态，等服务器数据
     setLoading(true);
     (async () => {
       try {
