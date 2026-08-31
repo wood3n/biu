@@ -401,10 +401,10 @@ const BBPFavorites = () => {
               </div>
               {bbpAccount && <div className="text-foreground-400 text-sm">创建者：{bbpAccount.name}</div>}
               {playlistId && (
-                <div className="flex items-center gap-2">
-                  <code className="bg-default-100 dark:bg-default-50 rounded-small text-foreground-400 px-2 py-0.5 text-xs">
+                <div className="-ml-2 flex items-center gap-2">
+                  <span className="bg-default-100 dark:bg-default-50 rounded-small text-foreground-400 px-2 py-0.5 text-xs">
                     ID: {playlistId}
-                  </code>
+                  </span>
                   <Button
                     size="sm"
                     variant="flat"
