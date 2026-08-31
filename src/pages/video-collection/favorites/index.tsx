@@ -167,6 +167,12 @@ const Favorites = () => {
     }
   }, [listLoading, hasMore, loadPage]);
 
+  const handleRefresh = useCallback(() => {
+    pageRef.current = 1;
+    clearItems();
+    loadPage(1);
+  }, [clearItems, loadPage]);
+
   const handleRemoveItem = useCallback(
     (id: number) => {
       removeItem(id);
@@ -488,6 +494,8 @@ const Favorites = () => {
         onToggleFavorite={toggleFavorite}
         onPlayAll={onPlayAll}
         onAddToPlayList={addAllMedia}
+        onRefresh={handleRefresh}
+        refreshing={listLoading}
         onClearInvalid={clearInvalid}
       />
 

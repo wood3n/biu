@@ -224,6 +224,14 @@ const BBPFavorites = () => {
     addToast({ title: `已添加 ${playItems.length} 首到播放列表`, color: "success" });
   }, [playItems]);
 
+  const handleRefresh = useCallback(() => {
+    if (!playlistId || !bbpToken) return;
+    setLoading(true);
+    syncPlaylist(playlistId)
+      .catch(() => addToast({ title: "刷新失败", color: "danger" }))
+      .finally(() => setLoading(false));
+  }, [playlistId, bbpToken, syncPlaylist]);
+
   const handleItemPress = useCallback(
     (trackIndex: number) => {
       const item = playItems[trackIndex];
@@ -430,6 +438,9 @@ const BBPFavorites = () => {
             <RiTeamLine size={18} />
           </IconButton>
         )}
+        <IconButton size="md" variant="flat" tooltip="刷新" onPress={handleRefresh} isDisabled={loading}>
+          <RiRefreshLine size={18} className={loading ? "animate-spin" : undefined} />
+        </IconButton>
       </div>
 
       {/* 曲目列表 */}

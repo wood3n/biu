@@ -78,7 +78,6 @@ const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
       <PopoverTrigger>
         <div className="w-[280px]">
           <Input
-            radius="md"
             ref={inputRef}
             value={value}
             onValueChange={setValue}
