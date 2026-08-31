@@ -109,6 +109,66 @@ html, body, #root {
   outline-offset: 2px;
 }
 
+/* Toast 毛玻璃：保留各色背景色，降低不透明度让 backdrop-blur 穿透生效 */
+
+/* HeroUI flat 变体各色背景改为半透明（亮色） */
+[data-toast].bg-success-50 {
+  background-color: hsl(var(--heroui-success-50) / 70%) !important;
+}
+
+[data-toast].bg-danger-50 {
+  background-color: hsl(var(--heroui-danger-50) / 70%) !important;
+}
+
+[data-toast].bg-warning-50 {
+  background-color: hsl(var(--heroui-warning-50) / 70%) !important;
+}
+
+[data-toast].bg-primary-50 {
+  background-color: hsl(var(--heroui-primary-50) / 70%) !important;
+}
+
+[data-toast].bg-secondary-50 {
+  background-color: hsl(var(--heroui-secondary-50) / 70%) !important;
+}
+
+[data-toast].bg-content1 {
+  background-color: hsl(var(--heroui-content1) / 70%) !important;
+}
+
+.dark [data-toast].bg-content1 {
+  background-color: hsl(var(--heroui-content1) / 70%) !important;
+}
+
+.dark [data-toast] {
+  background-color: hsl(var(--heroui-content1) / 70%) !important;
+}
+
+.dark [data-toast].bg-success-50,
+.dark [data-toast][class*="bg-success"] {
+  background-color: hsl(var(--heroui-success) / 15%) !important;
+}
+
+.dark [data-toast].bg-danger-50,
+.dark [data-toast][class*="bg-danger"] {
+  background-color: hsl(var(--heroui-danger) / 15%) !important;
+}
+
+.dark [data-toast].bg-warning-50,
+.dark [data-toast][class*="bg-warning"] {
+  background-color: hsl(var(--heroui-warning) / 15%) !important;
+}
+
+.dark [data-toast].bg-primary-50,
+.dark [data-toast][class*="bg-primary"] {
+  background-color: hsl(var(--heroui-primary) / 15%) !important;
+}
+
+.dark [data-toast].bg-secondary-50,
+.dark [data-toast][class*="bg-secondary"] {
+  background-color: hsl(var(--heroui-secondary) / 15%) !important;
+}
+
 /* 文字溢出滚动（marquee）：无缝循环。
  * 轨道内渲染双份文字，translateX(-50%) 恰好位移一份文字宽度，
  * 第一份滚出后第二份无缝衔接，无空白间隙、无跳变 */

@@ -165,10 +165,16 @@ export function App() {
   return (
     <HeroUIProvider navigate={navigate} useHref={useHref} locale="zh-CN">
       <ToastProvider
-        placement="bottom-right"
-        toastOffset={90}
+        placement="top-right"
+        toastOffset={64}
         maxVisibleToasts={3}
-        toastProps={{ timeout: 2000, color: "primary" }}
+        toastProps={{
+          timeout: 2000,
+          color: "primary",
+          classNames: {
+            base: ["backdrop-blur-2xl backdrop-saturate-150 border border-white/10 dark:border-white/5 shadow-lg"],
+          },
+        }}
         regionProps={{
           classNames: {
             base: "z-[99999]",
