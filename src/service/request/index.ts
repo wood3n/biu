@@ -11,7 +11,7 @@ import { requestInterceptors } from "./request-interceptors";
 import { geetestInterceptors } from "./response-interceptors";
 
 const axiosConfig: CreateAxiosDefaults = {
-  timeout: 10000,
+  timeout: 30000,
   withCredentials: true,
 };
 
