@@ -1,8 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router";
 
-import { Button, Chip, Modal, ModalBody, ModalContent, ModalHeader, Skeleton, addToast } from "@heroui/react";
 import {
+  Button,
+  Chip,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalHeader,
+  Skeleton,
+  useDisclosure,
+  addToast,
+} from "@heroui/react";
+import {
+  RiEdit2Line,
   RiExternalLinkLine,
   RiFileCopyLine,
   RiFileMusicLine,
@@ -21,6 +32,7 @@ import { bbpTracksToPlayItems } from "@/common/utils/bbp-track";
 import { openBiliVideoLink } from "@/common/utils/url";
 import { type ContextMenuItem } from "@/components/context-menu";
 import Empty from "@/components/empty";
+import FavoritesEditModal from "@/components/favorites-edit-modal";
 import IconButton from "@/components/icon-button";
 import Image from "@/components/image";
 import MusicListItem from "@/components/music-list-item";
@@ -72,6 +84,7 @@ const BBPFavorites = () => {
   const [keyword, setKeyword] = useState<string>("");
   const [order, setOrder] = useState("mtime");
   const [membersModalOpen, setMembersModalOpen] = useState(false);
+  const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
   const [members, setMembers] = useState<BBPMember[]>([]);
   const [membersLoading, setMembersLoading] = useState(false);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
@@ -403,18 +416,35 @@ const BBPFavorites = () => {
     <ScrollContainer enableBackToTop ref={scrollRef} resetOnChange={playlistId} className="h-full w-full px-4 pb-6">
       {/* 页面头部 */}
       <div className="mb-4 flex space-x-4">
-        <div className="flex-none">
+        <div className="group relative flex-none">
           {loading && !metadata ? (
             <Skeleton className="h-[168px] w-[200px] rounded-md" />
           ) : (
-            <Image
-              radius="md"
-              src={metadata?.cover_url}
-              alt={metadata?.title}
-              width={200}
-              height={168}
-              className={!metadata?.cover_url ? "border-content3 border" : undefined}
-            />
+            <>
+              <Image
+                radius="md"
+                src={metadata?.cover_url}
+                alt={metadata?.title}
+                width={200}
+                height={168}
+                className={!metadata?.cover_url ? "border-content3 border" : undefined}
+              />
+              {canEdit && (
+                <div
+                  className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center rounded-md bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                  onClick={onEditOpen}
+                  onKeyDown={e => e.key === "Enter" && onEditOpen()}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="修改歌单"
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <RiEdit2Line size={28} />
+                    <span className="text-sm">修改</span>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
         <div className="flex min-w-0 flex-col items-start space-y-4">
@@ -429,34 +459,36 @@ const BBPFavorites = () => {
               {Boolean(metadata?.description) && (
                 <p className="text-foreground-400 line-clamp-1 text-sm">{metadata?.description}</p>
               )}
-              <div className="text-foreground-400 flex items-center space-x-1 text-sm">
-                <span>BBPlayer 共享歌单</span>
-                <span>•</span>
-                <span>{roleLabel}</span>
-                <span>•</span>
-                <span>{tracks.length} 首</span>
-              </div>
-              {bbpAccount && <div className="text-foreground-400 text-sm">创建者：{bbpAccount.name}</div>}
-              {playlistId && (
-                <div className="-ml-2 flex items-center gap-2">
-                  <span className="bg-default-100 dark:bg-default-50 rounded-small text-foreground-400 px-2 py-0.5 text-xs">
-                    ID: {playlistId}
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="flat"
-                    className="h-6 min-h-6 px-2"
-                    startContent={<RiFileCopyLine size={14} />}
-                    onPress={() => {
-                      const shareUrl = `https://be.bbplayer.roitium.com/playlists/${playlistId}/preview`;
-                      navigator.clipboard.writeText(shareUrl);
-                      addToast({ title: "分享链接已复制", color: "success" });
-                    }}
-                  >
-                    复制分享链接
-                  </Button>
+              <div className="flex flex-col space-y-1">
+                <div className="text-foreground-400 flex items-center space-x-1 text-sm">
+                  <span>BBPlayer 共享歌单</span>
+                  <span>•</span>
+                  <span>{roleLabel}</span>
+                  <span>•</span>
+                  <span>{tracks.length} 首</span>
                 </div>
-              )}
+                {bbpAccount && <div className="text-foreground-400 text-sm">创建者：{bbpAccount.name}</div>}
+                {playlistId && (
+                  <div className="-ml-2 flex items-center gap-2">
+                    <span className="bg-default-100 dark:bg-default-50 rounded-small text-foreground-400 px-2 py-0.5 text-xs">
+                      ID: {playlistId}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      className="h-6 min-h-6 px-2"
+                      startContent={<RiFileCopyLine size={14} />}
+                      onPress={() => {
+                        const shareUrl = `https://be.bbplayer.roitium.com/playlists/${playlistId}/preview`;
+                        navigator.clipboard.writeText(shareUrl);
+                        addToast({ title: "分享链接已复制", color: "success" });
+                      }}
+                    >
+                      复制分享链接
+                    </Button>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>
@@ -624,6 +656,9 @@ const BBPFavorites = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
+
+      {/* 编辑歌单弹窗（仅可编辑角色） */}
+      {canEdit && <FavoritesEditModal bbpId={playlistId} isOpen={isEditOpen} onOpenChange={onEditOpenChange} />}
     </ScrollContainer>
   );
 };
