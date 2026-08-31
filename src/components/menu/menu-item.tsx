@@ -73,35 +73,23 @@ const MenuItem: React.FC<MenuItemProps> = ({
       if (Icon) {
         return <Icon size={24} />;
       }
-      // 有封面的收藏夹：收起态也用小封面，和功能图标同尺寸
-      if (cover) {
-        if (coverBadge) {
-          // 非 B站图床：直接使用原始 URL，加载失败时用随机色+白字头像
-          const bgColor = getStableColor(title);
-          return (
-            <Avatar
-              name={title}
-              src={cover}
-              showFallback
-              radius="none"
-              alt={title}
-              classNames={{
-                base: "size-8 flex-none rounded-[6px]",
-                img: "object-cover",
-                name: "text-white text-xs font-medium",
-              }}
-              style={{ backgroundColor: bgColor }}
-            />
-          );
-        }
+      // 收藏夹封面：有图用图，无图用随机色+白字（BBPlayer 歌单 + B站收藏夹统一）
+      {
+        const bgColor = getStableColor(title);
+        const src = cover ? (coverBadge ? cover : `${cover}@672w_378h_1c.avif`) : undefined;
         return (
           <Avatar
             name={title}
-            src={`${cover}@672w_378h_1c.avif`}
+            src={src}
             showFallback
             radius="none"
             alt={title}
             className="size-8 flex-none rounded-[6px]"
+            classNames={{
+              img: "object-cover",
+              name: "text-white text-sm font-medium",
+            }}
+            style={{ backgroundColor: bgColor }}
           />
         );
       }
@@ -111,36 +99,26 @@ const MenuItem: React.FC<MenuItemProps> = ({
       return icon;
     }
 
-    if (coverBadge) {
+    // 展开态：收藏夹封面，有图用图，无图用随机色+白字
+    {
       const bgColor = getStableColor(title);
+      const src = cover ? (coverBadge ? cover : `${cover}@672w_378h_1c.avif`) : undefined;
       return (
         <Avatar
           name={title}
-          src={cover}
+          src={src}
           showFallback
           radius="none"
           fallback={icon}
           alt={title}
+          className="size-5 flex-none rounded-[3px]"
           classNames={{
-            base: "size-5 flex-none rounded-[3px]",
-            name: "text-white text-[10px] font-medium",
+            name: "text-white text-xs font-medium",
           }}
           style={{ backgroundColor: bgColor }}
         />
       );
     }
-
-    return (
-      <Avatar
-        name={title}
-        src={cover ? (coverBadge ? cover : `${cover}@672w_378h_1c.avif`) : undefined}
-        showFallback
-        radius="none"
-        fallback={icon}
-        alt={title}
-        className="size-5 flex-none rounded-[3px]"
-      />
-    );
   }, [cover, coverBadge, isActive, Icon, ActiveIcon, title, collapsed]);
 
   const { className: dndClassName, ...dndRest } = (dndProps ?? {}) as {
