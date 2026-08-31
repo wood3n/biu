@@ -12,6 +12,7 @@ import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
 import ScrollContainer, { type ScrollRefObject } from "@/components/scroll-container";
 import VirtualPageList from "@/components/virtual-page-list";
+import { getWebInterfaceView } from "@/service/web-interface-view";
 import { useBBPPlaylistStore } from "@/store/bbp-playlist";
 import { useBBPTokenStore } from "@/store/bbp-token";
 import { usePlayList } from "@/store/play-list";
@@ -31,6 +32,7 @@ const BBPFavorites = () => {
   const removeTrack = useBBPPlaylistStore(state => state.removeTrack);
 
   const [loading, setLoading] = useState(false);
+  const [playCountMap, setPlayCountMap] = useState<Record<string, number>>({});
   const scrollRef = useRef<ScrollRefObject>(null);
 
   const cache = playlistId ? playlistCache[playlistId] : undefined;
@@ -59,6 +61,46 @@ const BBPFavorites = () => {
   }, [playlistId, bbpToken, syncPlaylist]);
 
   const playItems = useMemo(() => bbpTracksToPlayItems(tracks), [tracks]);
+
+  // 批量获取 B站播放量
+  useEffect(() => {
+    if (!tracks.length) return;
+    let canceled = false;
+    const bvids = tracks.map(t => t.bilibili_bvid).filter(Boolean) as string[];
+    const uniqueBvids = [...new Set(bvids)];
+    if (!uniqueBvids.length) return;
+    const CONCURRENCY = 8;
+    const BATCH_SIZE = Math.ceil(uniqueBvids.length / CONCURRENCY);
+    const batches: string[][] = [];
+    for (let i = 0; i < uniqueBvids.length; i += BATCH_SIZE) {
+      batches.push(uniqueBvids.slice(i, i + BATCH_SIZE));
+    }
+    (async () => {
+      const results = await Promise.all(
+        batches.map(async batch => {
+          const map: Record<string, number> = {};
+          for (const bvid of batch) {
+            try {
+              const res = await getWebInterfaceView({ bvid });
+              if (res.code === 0 && res.data?.stat) {
+                map[bvid] = res.data.stat.view;
+              }
+            } catch {
+              // 忽略单个失败
+            }
+          }
+          return map;
+        }),
+      );
+      if (canceled) return;
+      const merged: Record<string, number> = {};
+      for (const m of results) Object.assign(merged, m);
+      setPlayCountMap(merged);
+    })();
+    return () => {
+      canceled = true;
+    };
+  }, [tracks]);
 
   const canEdit = role === "owner" || role === "editor";
 
@@ -223,7 +265,7 @@ const BBPFavorites = () => {
         <Empty title="歌单暂无曲目" />
       ) : (
         <div className="w-full">
-          <MusicListHeader timeTitle="时长" />
+          <MusicListHeader timeTitle="时长" hidePubTime />
           <VirtualPageList
             items={tracks}
             hasMore={false}
@@ -242,6 +284,7 @@ const BBPFavorites = () => {
                 cover={track.cover_url ?? undefined}
                 upName={track.artist_name}
                 duration={track.duration}
+                playCount={track.bilibili_bvid ? playCountMap[track.bilibili_bvid] : undefined}
                 hidePubTime
                 onPress={() => handleItemPress(index)}
                 menus={trackMenus}
