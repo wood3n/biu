@@ -70,9 +70,11 @@ const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
       disableAnimation
       shouldBlockScroll={false}
       backdrop="transparent"
+      triggerScaleOnOpen={false}
       classNames={{
         base: "z-100",
         content: "w-[360px] max-w-[360px]",
+        trigger: "rounded-medium",
       }}
     >
       <PopoverTrigger>
