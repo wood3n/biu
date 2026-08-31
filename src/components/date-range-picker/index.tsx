@@ -58,10 +58,13 @@ const DateRangePicker = ({ onDateRangeChange }: Props) => {
     <div className="-ml-1 flex items-center space-x-4">
       <Tabs
         aria-label="时间范围"
-        variant="light"
+        variant="solid"
+        size="sm"
+        radius="md"
         selectedKey={selectedKey}
         onSelectionChange={key => handlePresetChange(key as string)}
         classNames={{
+          tabList: "bg-default-200/80 dark:bg-default-100/10",
           cursor: "rounded-medium",
         }}
       >
