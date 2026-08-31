@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 
 import { Tooltip, Button, Badge } from "@heroui/react";
-import { RiTeamLine } from "@remixicon/react";
+import { RiRssLine } from "@remixicon/react";
 import { useRequest } from "ahooks";
 
 import { getWebDynamicFeedAllUpdate } from "@/service/web-dynamic";
@@ -41,7 +41,7 @@ const UserFeed = () => {
 
   const button = (
     <Button isIconOnly size="sm" variant="light" onPress={handleOpen} className="hover:text-primary">
-      <RiTeamLine size={20} />
+      <RiRssLine size={20} />
     </Button>
   );
 
