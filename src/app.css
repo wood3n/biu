@@ -131,9 +131,11 @@ button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"])
 }
 /* stylelint-enable no-descending-specificity */
 
-/* 毛玻璃菜单：菜单项 hover/focus 背景改为半透明，不遮挡毛玻璃 */
-.glass-menu [data-hover="true"],
-.glass-menu [data-focus="true"]:not([data-focus-visible="true"]) {
+/* 毛玻璃菜单：菜单项 hover/focus 背景改为半透明，不遮挡毛玻璃
+   注意：HeroUI 菜单项在鼠标 hover 后会保留 data-focus=true（键盘焦点残留），
+   因此这里只用 data-hover=true 作为高亮条件；键盘聚焦（data-focus-visible=true）
+   单独用 outline 表示，避免鼠标移开后高亮块残留 */
+.glass-menu [data-hover="true"] {
   background-color: hsl(var(--heroui-foreground) / 15%);
 }
 
