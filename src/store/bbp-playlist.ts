@@ -151,9 +151,14 @@ export const useBBPPlaylistStore = create<BBPPlaylistState & BBPPlaylistAction>(
       },
 
       addTrack: async (playlistId, track) => {
+        const cache = get().playlistCache[playlistId];
+        const trackCount = cache?.tracks.length ?? 0;
+        const sortKey = String(trackCount).padStart(4, "0");
         const change: BBPChange = {
           op: "upsert",
           track,
+          sort_key: sortKey,
+          operation_at: Date.now(),
         };
 
         await bbpPlaylistChangesSubmit({ id: playlistId, changes: [change] });
@@ -165,6 +170,7 @@ export const useBBPPlaylistStore = create<BBPPlaylistState & BBPPlaylistAction>(
         const change: BBPChange = {
           op: "remove",
           track_unique_key: trackUniqueKey,
+          operation_at: Date.now(),
         };
 
         await bbpPlaylistChangesSubmit({ id: playlistId, changes: [change] });
@@ -177,6 +183,7 @@ export const useBBPPlaylistStore = create<BBPPlaylistState & BBPPlaylistAction>(
           op: "reorder",
           track_unique_key: trackUniqueKey,
           sort_key: newSortKey,
+          operation_at: Date.now(),
         };
 
         await bbpPlaylistChangesSubmit({ id: playlistId, changes: [change] });
