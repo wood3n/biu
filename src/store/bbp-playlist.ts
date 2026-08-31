@@ -165,7 +165,40 @@ export const useBBPPlaylistStore = create<BBPPlaylistState & BBPPlaylistAction>(
 
         await bbpPlaylistChangesSubmit({ id: playlistId, changes: [change] });
 
-        await get().syncPlaylist(playlistId);
+        // 乐观更新：直接将曲目写入本地缓存，不依赖服务器同步延迟
+        set(state => {
+          const prev = state.playlistCache[playlistId];
+          const prevTracks = prev?.tracks ?? [];
+          const trackMap = new Map(prevTracks.map(t => [t.unique_key, t]));
+          // 写入完整 BBPTrack 对象（从 BBPTrackInput 扩展）
+          const fullTrack: BBPTrack = {
+            unique_key: track.unique_key,
+            title: track.title,
+            artist_name: track.artist_name,
+            artist_id: track.artist_id ?? null,
+            cover_url: track.cover_url ?? null,
+            duration: track.duration ?? 0,
+            bilibili_bvid: track.bilibili_bvid,
+            bilibili_cid: track.bilibili_cid,
+            sort_key: sortKey,
+          };
+          trackMap.set(track.unique_key, fullTrack);
+          const nextTracks = [...trackMap.values()].sort((a, b) => a.sort_key.localeCompare(b.sort_key));
+          return {
+            playlistCache: {
+              ...state.playlistCache,
+              [playlistId]: {
+                lastSyncAt: prev?.lastSyncAt ?? 0,
+                tracks: nextTracks,
+                metadata: prev?.metadata ?? null,
+                members: prev?.members ?? [],
+              },
+            },
+          };
+        });
+
+        // 后台同步，获取服务器最新状态（不阻塞调用方）
+        void get().syncPlaylist(playlistId);
       },
 
       removeTrack: async (playlistId, trackUniqueKey) => {
@@ -177,7 +210,26 @@ export const useBBPPlaylistStore = create<BBPPlaylistState & BBPPlaylistAction>(
 
         await bbpPlaylistChangesSubmit({ id: playlistId, changes: [change] });
 
-        await get().syncPlaylist(playlistId);
+        // 乐观更新：直接从本地缓存移除曲目
+        set(state => {
+          const prev = state.playlistCache[playlistId];
+          const prevTracks = prev?.tracks ?? [];
+          const nextTracks = prevTracks.filter(t => t.unique_key !== trackUniqueKey);
+          return {
+            playlistCache: {
+              ...state.playlistCache,
+              [playlistId]: {
+                lastSyncAt: prev?.lastSyncAt ?? 0,
+                tracks: nextTracks,
+                metadata: prev?.metadata ?? null,
+                members: prev?.members ?? [],
+              },
+            },
+          };
+        });
+
+        // 后台同步，获取服务器最新状态（不阻塞调用方）
+        void get().syncPlaylist(playlistId);
       },
 
       reorderTrack: async (playlistId, trackUniqueKey, newSortKey) => {
