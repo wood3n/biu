@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { addToast, Button, Checkbox, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
-import { RiMusic2Line } from "@remixicon/react";
 import { useRequest } from "ahooks";
 
 import { getFavFolderCreatedListAll } from "@/service/fav-folder-created-list-all";
@@ -343,6 +342,7 @@ const FavoritesSelectModal = () => {
                   )}
                   {editableBBPPlaylists.map(playlist => {
                     const checked = selectedBBPIds.includes(playlist.id);
+                    const trackCount = useBBPPlaylistStore.getState().getCachedTracks(playlist.id).length;
                     return (
                       <div
                         role="button"
@@ -359,13 +359,10 @@ const FavoritesSelectModal = () => {
                           onClick={e => e.stopPropagation()}
                           aria-label={playlist.title}
                         />
-                        <RiMusic2Line size={16} className="text-foreground-400 flex-none" />
                         <div className="flex min-w-0 flex-1 items-center justify-between">
                           <div className="min-w-0">
                             <div className="truncate text-sm font-medium">{playlist.title}</div>
-                            <div className="mt-0.5 text-xs text-zinc-500">
-                              {playlist.role === "owner" ? "创建者" : "编辑者"}
-                            </div>
+                            <div className="mt-0.5 text-xs text-zinc-500">{trackCount} 个内容</div>
                           </div>
                         </div>
                       </div>
