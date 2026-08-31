@@ -6,6 +6,7 @@ import { useUser } from "@/store/user";
 
 import WindowAction from "../../components/window-action";
 import AppUpdateNotify from "./app-update";
+import BBPButton from "./bbp-button";
 import Dev from "./dev";
 import Navigation from "./navigation";
 import Search from "./search";
@@ -40,6 +41,7 @@ const LayoutNavbar = () => {
         <UserCard onDropdownOpenChange={setIsUserDropdownOpen} />
         <AppUpdateNotify />
         <Dev />
+        <BBPButton />
         {Boolean(user?.isLogin) && <UserFeed />}
         {["linux", "windows"].includes(platform) && <WindowAction />}
       </div>
