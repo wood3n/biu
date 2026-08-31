@@ -110,3 +110,4 @@ api.example.json
 .vscode/mcp.json
 .github/instructions
 HTTPAPI.md
+.temp/
