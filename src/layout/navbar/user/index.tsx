@@ -21,6 +21,7 @@ import {
 } from "@remixicon/react";
 import { twMerge } from "tailwind-merge";
 
+import nofaceImg from "@/assets/images/noface.jpg";
 import { glassMenuClassName } from "@/common/constants/glass";
 import { postPassportLoginExit } from "@/service/passport-login-exit";
 import { useFavoritesStore } from "@/store/favorite";
@@ -177,7 +178,7 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
             as="button"
             type="button"
             classNames={{ base: "mr-4 size-8 min-w-8 cursor-pointer transition-transform hover:scale-105" }}
-            src={user?.face}
+            src={user?.face || nofaceImg}
           />
         </DropdownTrigger>
         <DropdownMenu aria-label="用户操作" variant="flat" items={dropdownItems}>
