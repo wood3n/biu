@@ -53,6 +53,7 @@ interface CollectionMenuItem {
   title: string;
   href: string;
   cover?: string;
+  coverBadge?: boolean;
   className?: string;
   type?: number;
   mid?: number;
@@ -666,6 +667,7 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
           ? `/collection/${item.bbpId}?source=bbplayer&role=${item.role ?? "owner"}`
           : `/collection/${item.id}?mid=${item?.mid}`,
         cover: item.cover,
+        coverBadge: isBBP,
         type: item.type,
         mid: item.mid,
         source: item.source,
@@ -724,6 +726,7 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
           ? `/collection/${item.bbpId}?source=bbplayer&role=${item.role ?? "subscriber"}`
           : `/collection/${item.id}?type=${item.type}&mid=${item?.mid}`,
         cover: item.cover,
+        coverBadge: isBBP,
         type: item.type,
         mid: item.mid,
         source: item.source,

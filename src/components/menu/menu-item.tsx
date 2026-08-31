@@ -5,6 +5,16 @@ import { Avatar, Button, Link as HeroLink, Tooltip } from "@heroui/react";
 import clx from "classnames";
 import { twMerge } from "tailwind-merge";
 
+/** 根据字符串生成稳定的随机色（HSL） */
+const getStableColor = (seed: string) => {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const h = Math.abs(hash) % 360;
+  return `hsl(${h}, 55%, 45%)`;
+};
+
 export interface MenuItemProps {
   /** 菜单项标签 */
   title: string;
@@ -16,6 +26,8 @@ export interface MenuItemProps {
   icon?: React.ComponentType<{ size?: number | string; className?: string }>;
   /** 封面 */
   cover?: string;
+  /** 封面为非B站图床，直接使用原始 URL（不加 .avif 后缀），收起态用随机色+白字头像 */
+  coverBadge?: boolean;
   /** 激活状态图标 */
   activeIcon?: React.ComponentType<{ size?: number | string; className?: string }>;
   className?: string;
@@ -30,6 +42,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
   title,
   href,
   cover,
+  coverBadge,
   icon: Icon,
   activeIcon: ActiveIcon,
   className,
@@ -62,6 +75,25 @@ const MenuItem: React.FC<MenuItemProps> = ({
       }
       // 有封面的收藏夹：收起态也用小封面，和功能图标同尺寸
       if (cover) {
+        if (coverBadge) {
+          // 非 B站图床：直接使用原始 URL，加载失败时用随机色+白字头像
+          const bgColor = getStableColor(title);
+          return (
+            <Avatar
+              name={title}
+              src={cover}
+              showFallback
+              radius="none"
+              alt={title}
+              classNames={{
+                base: "size-8 flex-none rounded-[6px]",
+                img: "object-cover",
+                name: "text-white text-xs font-medium",
+              }}
+              style={{ backgroundColor: bgColor }}
+            />
+          );
+        }
         return (
           <Avatar
             name={title}
@@ -79,10 +111,29 @@ const MenuItem: React.FC<MenuItemProps> = ({
       return icon;
     }
 
+    if (coverBadge) {
+      const bgColor = getStableColor(title);
+      return (
+        <Avatar
+          name={title}
+          src={cover}
+          showFallback
+          radius="none"
+          fallback={icon}
+          alt={title}
+          classNames={{
+            base: "size-5 flex-none rounded-[3px]",
+            name: "text-white text-[10px] font-medium",
+          }}
+          style={{ backgroundColor: bgColor }}
+        />
+      );
+    }
+
     return (
       <Avatar
         name={title}
-        src={cover ? `${cover}@672w_378h_1c.avif` : undefined}
+        src={cover ? (coverBadge ? cover : `${cover}@672w_378h_1c.avif`) : undefined}
         showFallback
         radius="none"
         fallback={icon}
@@ -90,7 +141,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
         className="size-5 flex-none rounded-[3px]"
       />
     );
-  }, [cover, isActive, Icon, ActiveIcon, title, collapsed]);
+  }, [cover, coverBadge, isActive, Icon, ActiveIcon, title, collapsed]);
 
   const { className: dndClassName, ...dndRest } = (dndProps ?? {}) as {
     className?: string;
