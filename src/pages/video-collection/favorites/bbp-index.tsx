@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router";
 
-import { Button, Chip, Modal, ModalBody, ModalContent, ModalHeader, Skeleton, Tooltip, addToast } from "@heroui/react";
+import { Button, Chip, Modal, ModalBody, ModalContent, ModalHeader, Skeleton, addToast } from "@heroui/react";
 import {
   RiExternalLinkLine,
   RiFileCopyLine,
@@ -21,6 +21,7 @@ import { bbpTracksToPlayItems } from "@/common/utils/bbp-track";
 import { openBiliVideoLink } from "@/common/utils/url";
 import { type ContextMenuItem } from "@/components/context-menu";
 import Empty from "@/components/empty";
+import IconButton from "@/components/icon-button";
 import Image from "@/components/image";
 import MusicListItem from "@/components/music-list-item";
 import MusicListHeader from "@/components/music-list-item/header";
@@ -421,17 +422,13 @@ const BBPFavorites = () => {
         <Button color="primary" startContent={<RiPlayFill size={22} />} onPress={handlePlayAll} className="text-white">
           播放全部
         </Button>
-        <Tooltip closeDelay={0} content="添加到播放列表">
-          <Button variant="flat" isIconOnly onPress={handleAddAllToPlaylist}>
-            <RiPlayListAddLine size={18} />
-          </Button>
-        </Tooltip>
+        <IconButton size="md" variant="flat" tooltip="添加到播放列表" onPress={handleAddAllToPlaylist}>
+          <RiPlayListAddLine size={18} />
+        </IconButton>
         {canEdit && (
-          <Tooltip closeDelay={0} content="管理成员">
-            <Button variant="flat" isIconOnly onPress={() => setMembersModalOpen(true)}>
-              <RiTeamLine size={18} />
-            </Button>
-          </Tooltip>
+          <IconButton size="md" variant="flat" tooltip="管理成员" onPress={() => setMembersModalOpen(true)}>
+            <RiTeamLine size={18} />
+          </IconButton>
         )}
       </div>
 
