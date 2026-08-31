@@ -77,7 +77,12 @@ const OperationMenu = ({ items, onAction, onOpenChange }: OperationMenuProps) =>
             <ListboxItem
               key={item.key}
               startContent={item.icon}
-              className={twMerge("rounded-medium", item.className)}
+              className={twMerge(
+                "rounded-medium",
+                item.color === "danger" &&
+                  "text-danger data-[hover=true]:bg-danger! data-[hover=true]:text-danger-foreground! data-[focus=true]:bg-danger! data-[focus=true]:text-danger-foreground!",
+                item.className,
+              )}
               color={item.color}
             >
               {item.label}
