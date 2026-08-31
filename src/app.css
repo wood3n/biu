@@ -77,7 +77,10 @@ html, body, #root {
   padding-bottom: 72px;
 }
 
-/* 输入选择控件背景统一为半透明灰，与 tabList 一致，暗色下不过亮 */
+/* stylelint-disable no-descending-specificity --
+ * base/hover/覆盖组按「折叠→展开」语义排列，特定性存在降序，
+ * no-descending-specificity 保守误报，属历史遗留，此处统一忽略。
+ * 输入选择控件背景统一为半透明灰，与 tabList 一致，暗色下不过亮 */
 [data-slot="input-wrapper"],
 [data-slot="trigger"]:not(button),
 button[data-slot="trigger"][aria-expanded="true"] {
@@ -113,6 +116,20 @@ button[data-slot="trigger"][aria-expanded="true"]:hover {
 .dark button[data-slot="trigger"][aria-expanded="true"]:hover {
   background-color: hsl(var(--heroui-default-100) / 10%) !important;
 }
+
+/* Select 的 trigger 是 button[data-slot="trigger"] 且带 aria-haspopup="listbox"，
+   折叠态即需要半透明灰底；展开态（aria-expanded="true"）由上方规则覆盖，
+   与 Popover/Dropdown 菜单按钮（aria-haspopup="dialog"）仅展开态有灰底区分 */
+button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"]),
+button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"]):hover {
+  background-color: hsl(var(--heroui-default-200) / 80%);
+}
+
+.dark button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"]),
+.dark button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"]):hover {
+  background-color: hsl(var(--heroui-default-100) / 10%);
+}
+/* stylelint-enable no-descending-specificity */
 
 /* 毛玻璃菜单：菜单项 hover/focus 背景改为半透明，不遮挡毛玻璃 */
 .glass-menu [data-hover="true"],
