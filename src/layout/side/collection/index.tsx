@@ -65,12 +65,11 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
   const user = useUser(state => state.user);
   const createdFavorites = useFavoritesStore(state => state.createdFavorites);
   const collectedFavorites = useFavoritesStore(state => state.collectedFavorites);
-  const updateCreatedFavorites = useFavoritesStore(state => state.updateCreatedFavorites);
-  const updateCollectedFavorites = useFavoritesStore(state => state.updateCollectedFavorites);
   const rmCreatedFavorite = useFavoritesStore(state => state.rmCreatedFavorite);
   const rmCollectedFavorite = useFavoritesStore(state => state.rmCollectedFavorite);
   const reorderCreatedFavorites = useFavoritesStore(state => state.reorderCreatedFavorites);
   const reorderCollectedFavorites = useFavoritesStore(state => state.reorderCollectedFavorites);
+  const fetchFavoritesIfStale = useFavoritesStore(state => state.fetchFavoritesIfStale);
   const hiddenMenuKeys = useSettings(state => state.hiddenMenuKeys);
   const collectionFolded = useSettings(state => state.sideMenuCollectionFolded);
   const updateSettings = useSettings(state => state.update);
@@ -132,9 +131,9 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
       { key: "manage-members", label: "管理成员", icon: <RiTeamLine size={18} /> },
       { key: "hide", label: "隐藏", icon: <RiEyeOffLine size={18} /> },
       {
-        key: "leave",
-        label: "退出歌单",
-        icon: <RiLogoutCircleLine size={18} />,
+        key: "delete",
+        label: "删除歌单",
+        icon: <RiDeleteBinLine size={18} />,
         color: "danger",
         className: "text-danger",
       },
@@ -194,13 +193,11 @@ const Collection = ({ isCollapsed, onOpenAddFavorite, onOpenEditFavorite }: Prop
 
   useEffect(() => {
     if (user?.mid) {
-      updateCreatedFavorites(user.mid);
-      updateCollectedFavorites(user.mid);
+      fetchFavoritesIfStale(user.mid);
     } else if (bbpToken) {
-      updateCreatedFavorites("");
-      updateCollectedFavorites("");
+      fetchFavoritesIfStale("");
     }
-  }, [updateCreatedFavorites, updateCollectedFavorites, user?.mid, bbpToken]);
+  }, [fetchFavoritesIfStale, user?.mid, bbpToken]);
 
   const handlePlayFavorite = useCallback(async (item: FavoriteItem) => {
     try {
