@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 
 import { Button, Skeleton, addToast } from "@heroui/react";
-import { RiPlayFill, RiPlayListAddLine } from "@remixicon/react";
+import { RiFileCopyLine, RiPlayFill, RiPlayListAddLine } from "@remixicon/react";
 
 import { bbpTracksToPlayItems } from "@/common/utils/bbp-track";
 import { type ContextMenuItem } from "@/components/context-menu";
@@ -182,6 +182,26 @@ const BBPFavorites = () => {
                 <span>{tracks.length} 首</span>
               </div>
               {bbpAccount && <div className="text-foreground-400 text-sm">创建者：{bbpAccount.name}</div>}
+              {playlistId && (
+                <div className="flex items-center gap-2">
+                  <code className="bg-default-100 dark:bg-default-50 rounded-small text-foreground-400 px-2 py-0.5 text-xs">
+                    ID: {playlistId}
+                  </code>
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    className="h-6 min-h-6 px-2"
+                    startContent={<RiFileCopyLine size={14} />}
+                    onPress={() => {
+                      const shareUrl = `https://be.bbplayer.roitium.com/playlists/${playlistId}/preview`;
+                      navigator.clipboard.writeText(shareUrl);
+                      addToast({ title: "分享链接已复制", color: "success" });
+                    }}
+                  >
+                    复制分享链接
+                  </Button>
+                </div>
+              )}
             </>
           )}
         </div>
