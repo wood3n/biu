@@ -283,8 +283,7 @@ const FavoritesEditModal = ({ mid, bbpId, source = "bilibili", isOpen, onOpenCha
                   <div className="bg-danger/10 rounded-medium mt-3 flex items-start gap-1.5 p-2.5">
                     <RiErrorWarningLine size={14} className="text-danger mt-0.5 flex-none" />
                     <p className="text-danger text-xs leading-relaxed">
-                      共享歌单存储在云端，所有成员可见。创建后不会出现在 BBPlayer
-                      手机端的本地歌单中，需在手机端「订阅共享歌单」或换设备恢复后查看。
+                      云端共享，所有成员可见。创建后需在 BBPlayer 手机端「订阅共享歌单」查看。
                     </p>
                   </div>
                 )}
@@ -300,8 +299,8 @@ const FavoritesEditModal = ({ mid, bbpId, source = "bilibili", isOpen, onOpenCha
                       value={field.value}
                       onChange={field.onChange}
                       disabled={isFetching || isSubmitting}
-                      width={240}
-                      height={effectiveSource === "bbplayer" ? 240 : 150}
+                      width={120}
+                      height={effectiveSource === "bbplayer" ? 120 : 75}
                       aspect={effectiveSource === "bbplayer" ? 1 : 16 / 9}
                       hint={
                         effectiveSource === "bbplayer"
