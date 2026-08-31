@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { addToast, Button, Checkbox, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
-import { RiMusic2Line } from "@remixicon/react";
 import { useRequest } from "ahooks";
 
 import { getFavFolderCreatedListAll } from "@/service/fav-folder-created-list-all";
@@ -48,7 +47,6 @@ const playDataToBBPTrack = (playData: NonNullable<FavSelectModalData["playData"]
   };
 };
 
-/** 将视频的播放数据转换为 BBPlayer track input */
 const FavoritesSelectModal = () => {
   const user = useUser(s => s.user);
   const isFavSelectModalOpen = useModalStore(s => s.isFavSelectModalOpen);
@@ -58,18 +56,22 @@ const FavoritesSelectModal = () => {
 
   const bbpToken = useBBPTokenStore(s => s.token);
   const bbpPlaylists = useBBPPlaylistStore(s => s.playlists);
+  // Bug3 修复：订阅 playlistCache 变化，确保 bvidFavPlaylistIds 跟随缓存更新
+  const bbpPlaylistCache = useBBPPlaylistStore(s => s.playlistCache);
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   /** 选中的 BBPlayer 歌单 ID（多选，与 B 站收藏夹可同时勾选） */
   const [selectedBBPIds, setSelectedBBPIds] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  /** 标记用户是否手动操作过 BBP 勾选，若手动操作过则异步同步不再覆盖 */
+  const bbpTouchedRef = useRef(false);
 
   const prevSelectedRef = useRef<number[]>([]);
   /** 当前曲目已包含的 BBP 歌单 ID（本地缓存判断，用于默认勾选） */
   const bvidFavPlaylistIds = useMemo(
     () => (playData?.bvid ? useBBPPlaylistStore.getState().getPlaylistIdsByBvid(playData.bvid) : []),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isFavSelectModalOpen, playData?.bvid, bbpPlaylists],
+    [isFavSelectModalOpen, playData?.bvid, bbpPlaylists, bbpPlaylistCache],
   );
 
   useEffect(() => {
@@ -77,11 +79,15 @@ const FavoritesSelectModal = () => {
       setSelectedIds([]);
       setSelectedBBPIds([]);
       prevSelectedRef.current = [];
+      bbpTouchedRef.current = false;
     } else {
       // 打开时：B站收藏夹已在 useRequest 中设置；BBP 歌单按缓存预勾选
-      setSelectedBBPIds(bvidFavPlaylistIds);
+      const favIds = playData?.bvid ? useBBPPlaylistStore.getState().getPlaylistIdsByBvid(playData.bvid) : [];
+      setSelectedBBPIds(favIds);
+      bbpTouchedRef.current = false;
     }
-  }, [isFavSelectModalOpen, bvidFavPlaylistIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFavSelectModalOpen]);
 
   // 打开弹窗时同步 BBP 歌单列表与曲目缓存，保证默认勾选判断准确
   useEffect(() => {
@@ -96,8 +102,8 @@ const FavoritesSelectModal = () => {
             .filter(p => p.role === "owner" || p.role === "editor")
             .map(p => useBBPPlaylistStore.getState().syncPlaylist(p.id)),
         );
-        if (!canceled) {
-          // 同步完成后刷新预勾选
+        if (!canceled && !bbpTouchedRef.current) {
+          // 同步完成后刷新预勾选，但仅当用户未手动操作过
           const favIds = playData?.bvid ? useBBPPlaylistStore.getState().getPlaylistIdsByBvid(playData.bvid) : [];
           setSelectedBBPIds(favIds);
         }
@@ -155,6 +161,7 @@ const FavoritesSelectModal = () => {
   };
 
   const toggleBBP = (id: string) => {
+    bbpTouchedRef.current = true;
     setSelectedBBPIds(prev => (prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]));
   };
 
@@ -164,6 +171,8 @@ const FavoritesSelectModal = () => {
 
   const handleConfirm = async () => {
     if (!rid && selectedBBPIds.length === 0) return;
+
+    console.log("[FavModal] handleConfirm", { rid, selectedIds, selectedBBPIds, bvidFavPlaylistIds });
 
     setSubmitting(true);
 
@@ -207,42 +216,61 @@ const FavoritesSelectModal = () => {
     try {
       setSubmitting(true);
 
-      // 并行执行 BBP 操作
+      // BBP 和 B站 API 并行执行
+      const allPromises: Promise<void>[] = [];
+
+      // BBP 操作
       if (bbpStops.length) {
-        const bbpResults = await Promise.allSettled(bbpStops);
-        if (bbpResults.some(r => r.status === "rejected")) hasError = true;
+        console.log("[FavModal] BBP stops:", bbpStops.length);
+        allPromises.push(
+          ...bbpStops.map(p =>
+            p.then(
+              () => {},
+              err => {
+                throw err;
+              },
+            ),
+          ),
+        );
       }
 
-      // B站收藏夹流程
-      if (rid) {
-        let res: any;
-        if (type === 12) {
-          res = await postCollResourceDeal({
-            rid,
-            type: 12,
-            add_media_ids: addMediaIds,
-            del_media_ids: delMediaIds,
-          });
-        } else {
-          res = await postFavFolderDeal({
-            rid,
-            add_media_ids: addMediaIds,
-            del_media_ids: delMediaIds,
-            type,
-            platform: "web",
-            ga: 1,
-            gaia_source: "web_normal",
-          });
-        }
+      // B站收藏夹流程（无变更时跳过 API 调用）
+      if (rid && (addMediaIds || delMediaIds)) {
+        allPromises.push(
+          (async () => {
+            let res: any;
+            if (type === 12) {
+              res = await postCollResourceDeal({
+                rid,
+                type: 12,
+                add_media_ids: addMediaIds,
+                del_media_ids: delMediaIds,
+              });
+            } else {
+              res = await postFavFolderDeal({
+                rid,
+                add_media_ids: addMediaIds,
+                del_media_ids: delMediaIds,
+                type,
+                platform: "web",
+                ga: 1,
+                gaia_source: "web_normal",
+              });
+            }
 
-        if (res.code !== 0) {
-          hasError = true;
-          addToast({ title: res.message, color: "danger" });
-        } else {
-          if (addMediaIds) results.push("已添加到收藏夹");
-          if (delMediaIds) results.push("已从收藏夹中移除");
-        }
+            if (res.code !== 0) {
+              addToast({ title: res.message, color: "danger" });
+              throw new Error(res.message);
+            } else {
+              if (addMediaIds) results.push("已添加到收藏夹");
+              if (delMediaIds) results.push("已从收藏夹中移除");
+            }
+          })(),
+        );
       }
+
+      const allResults = await Promise.allSettled(allPromises);
+      if (allResults.some(r => r.status === "rejected")) hasError = true;
 
       if (hasError) {
         addToast({ title: "部分操作失败，请重试", color: "danger" });
@@ -337,6 +365,7 @@ const FavoritesSelectModal = () => {
                   )}
                   {editableBBPPlaylists.map(playlist => {
                     const checked = selectedBBPIds.includes(playlist.id);
+                    const trackCount = useBBPPlaylistStore.getState().getCachedTracks(playlist.id).length;
                     return (
                       <div
                         role="button"
@@ -353,13 +382,10 @@ const FavoritesSelectModal = () => {
                           onClick={e => e.stopPropagation()}
                           aria-label={playlist.title}
                         />
-                        <RiMusic2Line size={16} className="text-foreground-400 flex-none" />
                         <div className="flex min-w-0 flex-1 items-center justify-between">
                           <div className="min-w-0">
                             <div className="truncate text-sm font-medium">{playlist.title}</div>
-                            <div className="mt-0.5 text-xs text-zinc-500">
-                              {playlist.role === "owner" ? "创建者" : "编辑者"}
-                            </div>
+                            <div className="mt-0.5 text-xs text-zinc-500">{trackCount} 个内容</div>
                           </div>
                         </div>
                       </div>
