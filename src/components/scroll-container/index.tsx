@@ -9,6 +9,10 @@ import {
 } from "overlayscrollbars-react";
 
 import { useTheme } from "@/components/theme/use-theme";
+import { useSettings } from "@/store/settings";
+
+/** 播放条展开时，滚动内容底部预留高度（播放条 84px + 底部边距 16px + 安全余量 4px） */
+const PLAYBAR_SPACER_HEIGHT = 104;
 
 const ScrollContainer = ({
   ref,
@@ -27,12 +31,20 @@ const ScrollContainer = ({
   const internalRef = useRef<OverlayScrollbarsComponentRef<"div"> | null>(null);
   const scrollRef = ref ?? internalRef;
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [inMainContent, setInMainContent] = useState(false);
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const playbarCollapsed = useSettings(s => s.playbarCollapsed);
 
   const glassCls = isDark
     ? "border-white/10 bg-[#1b1e22]/60 shadow-[0_8px_30px_-8px_rgb(0_0_0/0.45)] hover:bg-[#1b1e22]/80"
     : "border-black/6 bg-white/60 shadow-[0_8px_30px_-10px_rgb(0_0_0/0.15)] hover:bg-white/80";
+
+  // 检测是否在主内容区（需要给悬浮播放条让位）
+  useEffect(() => {
+    const host = scrollRef.current?.osInstance()?.elements().host as HTMLElement | null;
+    setInMainContent(!!host?.closest(".main-content"));
+  }, [scrollRef]);
 
   // 统一的滚动重置逻辑
   useEffect(() => {
@@ -95,6 +107,9 @@ const ScrollContainer = ({
             </motion.div>
           )}
         </AnimatePresence>
+        {!playbarCollapsed && inMainContent && (
+          <div aria-hidden style={{ height: PLAYBAR_SPACER_HEIGHT, flexShrink: 0 }} />
+        )}
       </>
     </OverlayScrollbarsComponent>
   );
