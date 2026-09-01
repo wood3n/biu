@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { addToast, useDisclosure } from "@heroui/react";
-import { RiCharacterRecognitionLine, RiTBoxLine, RiTranslate } from "@remixicon/react";
+import { RiChat3Line, RiCharacterRecognitionLine, RiTBoxLine, RiTranslate } from "@remixicon/react";
 import clsx from "classnames";
 import { debounce } from "es-toolkit";
 
@@ -32,7 +32,18 @@ const timeTagPattern = /\[(\d{1,2}):(\d{1,2})(?:\.(\d{1,3}))?\]/g;
 const DEFAULT_FONT_SIZE = 20;
 const DEFAULT_OFFSET = 0;
 
-const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: boolean; showControls?: boolean }) => {
+const Lyrics = ({
+  color,
+  centered,
+  showControls,
+  onOpenComments,
+}: {
+  color?: string;
+  centered?: boolean;
+  showControls?: boolean;
+  /** 打开评论面板（仅在线视频曲目提供） */
+  onOpenComments?: () => void;
+}) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rafIdRef = useRef<number | null>(null);
   const lineRefs = useRef<Record<number, HTMLDivElement | null>>({});
@@ -428,6 +439,19 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
 
         {showControls && (
           <div className="text-foreground/80 pointer-events-none absolute right-6 bottom-6 flex flex-col items-center space-y-3 text-sm transition-opacity duration-200">
+            {onOpenComments && (
+              <div className="pointer-events-auto">
+                <IconButton
+                  type="button"
+                  aria-label="查看评论"
+                  tooltip="查看评论"
+                  className="bg-foreground/10 text-foreground/50 hover:bg-foreground/20 hover:text-foreground min-w-0 rounded-full text-xs font-semibold"
+                  onPress={onOpenComments}
+                >
+                  <RiChat3Line size={16} />
+                </IconButton>
+              </div>
+            )}
             <div className="pointer-events-auto">
               <IconButton
                 type="button"

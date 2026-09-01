@@ -19,6 +19,7 @@ import { useSettings } from "@/store/settings";
 import Empty from "../empty";
 import IconButton from "../icon-button";
 import WindowAction from "../window-action";
+import CommentPanel from "./comment-panel";
 import { useGlassmorphism } from "./glassmorphism";
 import PageList from "./page-list";
 import PlayList from "./play-list";
@@ -58,10 +59,12 @@ const FullScreenPlayer = () => {
   const [windowHeight, setWindowHeight] = useState(typeof window !== "undefined" ? window.innerHeight : 800);
   const [isPageListOpen, setIsPageListOpen] = useState(false);
   const [isPlayListOpen, setIsPlayListOpen] = useState(false);
+  const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [isUiVisible, setIsUiVisible] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const pageListRef = useRef<HTMLDivElement>(null);
   const playListRef = useRef<HTMLDivElement>(null);
+  const commentRef = useRef<HTMLDivElement>(null);
   const hideUiTimeoutRef = useRef<number | null>(null);
 
   useClickAway(() => {
@@ -74,6 +77,11 @@ const FullScreenPlayer = () => {
       setIsPlayListOpen(false);
     }
   }, playListRef);
+  useClickAway(() => {
+    if (isCommentOpen) {
+      setIsCommentOpen(false);
+    }
+  }, commentRef);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -119,6 +127,14 @@ const FullScreenPlayer = () => {
     if (!isUiVisible) {
       setIsUiVisible(true);
     }
+  };
+
+  /** 打开评论面板：收起左右侧滑面板 */
+  const openComments = () => {
+    setIsPageListOpen(false);
+    setIsPlayListOpen(false);
+    setIsUiVisible(true);
+    setIsCommentOpen(true);
   };
 
   const scheduleHideUi = (delay: number) => {
@@ -342,7 +358,12 @@ const FullScreenPlayer = () => {
                       !showCover ? "flex items-center justify-center" : "",
                     )}
                   >
-                    <Lyrics color={lyricsColor} centered={!showCover} showControls={isUiVisible} />
+                    <Lyrics
+                      color={lyricsColor}
+                      centered={!showCover}
+                      showControls={isUiVisible}
+                      onOpenComments={playItem.type === "mv" ? openComments : undefined}
+                    />
                   </div>
                 )}
               </div>
@@ -436,6 +457,16 @@ const FullScreenPlayer = () => {
                   height: "min(60vh, 420px)",
                 }}
                 onClose={() => setIsPlayListOpen(false)}
+              />
+
+              {/* 底部：评论面板，从下往上滑出 */}
+              <CommentPanel
+                ref={commentRef}
+                className={`window-no-drag absolute inset-x-0 bottom-0 z-50 rounded-t-3xl transition-all duration-300 ease-out ${
+                  isCommentOpen ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-full opacity-0"
+                }`}
+                style={{ height: "min(80vh, 700px)" }}
+                onClose={() => setIsCommentOpen(false)}
               />
 
               <Modal
