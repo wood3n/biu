@@ -3,10 +3,10 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: 'e7612e86-0ec1-47af-a9e4-c7ee65230beb'
-  PropagateID: 'e7612e86-0ec1-47af-a9e4-c7ee65230beb'
-  ReservedCode1: 'b78b75b8-93bd-44df-baac-31b371469141'
-  ReservedCode2: 'b78b75b8-93bd-44df-baac-31b371469141'
+  ProduceID: '81433edd-35d4-4ada-8eec-279d17fb0392'
+  PropagateID: '81433edd-35d4-4ada-8eec-279d17fb0392'
+  ReservedCode1: '90778cae-ab47-4a4b-a95f-47d962c5b914'
+  ReservedCode2: '90778cae-ab47-4a4b-a95f-47d962c5b914'
 ---
 
 <h1 align="center">Biu 音乐播放器</h1>
@@ -29,27 +29,34 @@ AIGC:
 <table>
   <tr>
     <td width="50%" align="center">
-      <img src="./screenshots/home.png" alt="home" width="100%" />
+      <img src="./screenshots/home.png" alt="首页推荐" width="100%" />
     </td>
     <td width="50%" align="center">
-      <img src="./screenshots/main.png" alt="main" width="100%" />
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <img src="./screenshots/download.png" alt="download" width="100%" />
-    </td>
-    <td width="50%" align="center">
-      <img src="./screenshots/fullscreen.jpg" alt="fullscreen" width="100%" />
+      <img src="./screenshots/search.png" alt="搜索" width="100%" />
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
-      <img src="./screenshots/playlist.png" alt="playlist" width="100%" />
+      <img src="./screenshots/player.png" alt="播放器与歌词" width="100%" />
     </td>
     <td width="50%" align="center">
-      <p> mini 播放器</p>
-      <img src="./screenshots/mini.jpg" alt="mini" width="100%" />
+      <img src="./screenshots/player-list-in-player.png" alt="播放列表" width="100%" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./screenshots/fullscreen.png" alt="全屏歌词" width="100%" />
+    </td>
+    <td width="50%" align="center">
+      <img src="./screenshots/bbp-favorite.png" alt="BBPlayer 共享歌单" width="100%" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./screenshots/download.png" alt="下载管理" width="100%" />
+    </td>
+    <td width="50%" align="center">
+      <img src="./screenshots/space.png" alt="个人空间" width="100%" />
     </td>
   </tr>
 </table>
@@ -57,6 +64,14 @@ AIGC:
 ---
 
 ## ✨ 特色功能
+
+### 🌟 亮点功能
+
+- **かな 日文歌词假名标注**：日文歌词自动标注假名注音（振假名），支持开关切换，方便学唱与阅读
+- **🌐 歌词翻译可调**：歌词翻译支持开关、字体大小调节、时间偏移微调，满足不同阅读习惯
+- **🔍 歌词自动搜索优化**：智能匹配歌词来源，自动搜索准确率与命中率大幅提升，减少手动查找
+- **🪟 UI 重构与毛玻璃特效**：全新布局设计，全局毛玻璃（Glassmorphism）风格，侧边栏、播放列表、右键菜单、弹窗面板均采用主题感知毛玻璃背景
+- **📱 BBPlayer 收藏夹兼容**：支持创建 BBPlayer 共享歌单，与手机端 BBPlayer 收藏夹双向兼容，云端同步
 
 ### 账号与登录
 - 🔐 支持密码登录、短信登录，全局接入极验风控校验
@@ -67,7 +82,7 @@ AIGC:
 - 🎧 高品质音频播放，优先拉取更高码率音频流（如无损 Flac，192K/Hi-Res）
 - 🎵 支持音频质量偏好设置
 - 📊 音频频谱波形可视化显示
-- ♻️ 完善自动播放与自动搜索歌词逻辑
+- ♻️ 完善自动播放与优化自动搜索歌词逻辑，智能匹配准确率大幅提升
 - 🔇 默认支持鼠标滚轮调整音量
 
 ### 下载功能
@@ -77,20 +92,23 @@ AIGC:
 - 🎬 内置精简版 ffmpeg，无需额外安装即可提取音频；同时支持自定义 ffmpeg 系统路径设置
 
 ### 歌词功能
-- 📜 全屏播放器歌词显示，支持歌词翻译开关与假名注音
-- 🔤 歌词面板可调节字体大小与时间偏移，深色毛玻璃面板风格
+- 📜 全屏播放器歌词显示，逐行聚焦滚动，当前播放行高亮放大
+- かな 日文歌词假名标注（振假名），支持开关切换，方便学唱
+- 🌐 歌词翻译支持开关、字体大小调节、时间偏移微调
+- 🔤 深色毛玻璃歌词面板风格，沉浸式阅读体验
+- 🔍 歌词自动搜索优化，智能匹配准确率大幅提升
 
 ### 播放器界面
-- 🖥️ 全屏播放组件，重构全屏播放器布局与播放列表
+- 🖥️ 全屏播放组件，全新布局设计，左右分栏（封面+歌词），沉浸式体验
 - 🎛️ 全屏播放器样式设置面板（Modal 居中弹窗，分区布局，深色毛玻璃胶囊风格）
-- 📑 播放列表与分集列表改用整行右键菜单（移除三点按钮）
+- 📑 播放列表与分集列表改用整行右键菜单（移除三点按钮），支持播放列表内搜索
 - 📜 文本无缝滚动（Marquee）：正在播放项常驻滚动，其余项 hover 滚动；播放栏标题常驻滚动
 - 📂 播放栏折叠功能：折叠/展开改为水平拉伸弹回动画，不影响播放进度
 - 🍃 支持 mini 播放器模式，占用系统资源少，同时保留主窗口功能
 - 📻 私人 FM 功能
 
 ### UI / 视觉体验
-- 🪟 全局毛玻璃（Glassmorphism）风格：侧边栏、播放列表、右键菜单、弹窗面板等均采用主题感知毛玻璃背景，深色模式下采用深色胶囊风格
+- 🪟 全局毛玻璃（Glassmorphism）风格：全新布局重构，侧边栏、播放列表、右键菜单、弹窗面板、搜索下拉、播放控制栏等均采用主题感知毛玻璃背景，深色模式下采用深色胶囊风格
 - 🎨 UI 精细调校：间距/对齐/配色精确到像素，三色高亮主题色（#F56EE2 / #2C95FF / #01E3F8），控件 hover/active 状态统一处理
 - 🌓 内置浅色和深色主题，支持跟随系统，可自定义部分主题样式
 - 📋 支持 compact 紧凑模式 UI，优化页面列表显示
@@ -102,6 +120,7 @@ AIGC:
 - 🗂️ 侧边菜单支持拖拽排序、可折叠收缩，宽度支持拖拽修改
 - 📁 收藏夹支持分组折叠、右键菜单、封面图设置、批量播放全部
 - 🗂️ 收藏侧边栏专门优化，分组标题换行修复
+- 📱 BBPlayer 共享歌单：支持创建 BBPlayer 共享歌单，与手机端 BBPlayer 收藏夹双向兼容，云端同步共享
 
 ### 内容浏览
 - 🎵 每日推荐音乐，支持音乐/鬼畜分区显示
