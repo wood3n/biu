@@ -83,7 +83,7 @@ const CommentItem = ({ data, className }: Props) => {
   const totalReplies = data.rcount || data.count || 0;
   const previewReplies = data.replies ?? [];
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [subReplies, setSubReplies] = useState<ReplyItem[]>(previewReplies);
   /** 楼中楼页码（首页预览已含第 1 页前几条，从第 2 页继续拉） */
   const pageRef = useRef(1);
@@ -92,32 +92,32 @@ const CommentItem = ({ data, className }: Props) => {
   /** 预览数据变化时同步（切歌重载后 items 全量替换） */
   useEffect(() => {
     setSubReplies(previewReplies);
-    setIsExpanded(false);
+    setIsExpanded(true);
     pageRef.current = 1;
   }, [data.rpid_str]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /** 展开时若预览为空，先拉第一页 */
-  const handleToggle = useCallback(async () => {
-    if (isExpanded) {
-      setIsExpanded(false);
-      return;
-    }
-    setIsExpanded(true);
-    if (!subReplies.length && totalReplies > 0) {
-      pageRef.current = 1;
-      setLoadingMore(true);
-      try {
-        const res = await getReplyReply({ oid, type: 1, root: Number(data.rpid_str), ps: 10, pn: 1 });
+  /** 无预览但有回复时自动拉第一页（默认展开） */
+  useEffect(() => {
+    if (!isExpanded || subReplies.length || !totalReplies || loadingMore) return;
+    let cancelled = false;
+    setLoadingMore(true);
+    getReplyReply({ oid, type: 1, root: Number(data.rpid_str), ps: 10, pn: 1 })
+      .then(res => {
+        if (cancelled) return;
         if (res.code !== 0) throw new Error(res.message || "获取回复失败");
         setSubReplies(res.data.replies ?? []);
         pageRef.current = 2;
-      } catch (error: any) {
-        addToast({ title: error?.message || "获取回复失败", color: "danger" });
-      } finally {
-        setLoadingMore(false);
-      }
-    }
-  }, [isExpanded, subReplies.length, totalReplies, oid, data.rpid_str]);
+      })
+      .catch((error: any) => {
+        if (!cancelled) addToast({ title: error?.message || "获取回复失败", color: "danger" });
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingMore(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isExpanded, subReplies.length, totalReplies, oid, data.rpid_str]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** 加载下一页楼中楼 */
   const handleLoadMore = useCallback(async () => {
@@ -199,7 +199,7 @@ const CommentItem = ({ data, className }: Props) => {
           {hasSubReplies && (
             <span
               className="flex cursor-pointer items-center gap-1 transition-colors hover:text-neutral-800"
-              onClick={handleToggle}
+              onClick={() => setIsExpanded(v => !v)}
             >
               <RiChat3Line size={14} />
               {isExpanded ? "收起回复" : `${totalReplies}条回复`}
@@ -207,8 +207,8 @@ const CommentItem = ({ data, className }: Props) => {
           )}
         </div>
         {/* 楼中楼 */}
-        {isExpanded && (
-          <div className="mt-1 flex flex-col rounded-lg bg-neutral-100 px-3 py-1.5">
+        {isExpanded && (subReplies.length > 0 || loadingMore) && (
+          <div className="mt-1 flex flex-col rounded-lg bg-white/40 px-3 py-1.5 ring-1 ring-white/30">
             {subReplies.map(reply => (
               <SubReplyItem key={reply.rpid_str} data={reply} />
             ))}

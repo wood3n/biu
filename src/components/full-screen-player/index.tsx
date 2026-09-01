@@ -77,11 +77,15 @@ const FullScreenPlayer = () => {
       setIsPlayListOpen(false);
     }
   }, playListRef);
-  useClickAway(() => {
-    if (isCommentOpen) {
-      setIsCommentOpen(false);
-    }
-  }, commentRef);
+  useClickAway(
+    () => {
+      if (isCommentOpen) {
+        setIsCommentOpen(false);
+      }
+    },
+    commentRef,
+    "mousedown",
+  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -462,10 +466,13 @@ const FullScreenPlayer = () => {
               {/* 底部：评论面板，从下往上滑出 */}
               <CommentPanel
                 ref={commentRef}
-                className={`window-no-drag absolute inset-x-0 bottom-0 z-50 rounded-t-3xl transition-all duration-300 ease-out ${
+                className={`window-no-drag absolute inset-x-0 bottom-0 z-50 transition-all duration-300 ease-out ${
                   isCommentOpen ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-full opacity-0"
                 }`}
-                style={{ height: "min(80vh, 700px)" }}
+                style={{
+                  height: "min(80vh, 700px)",
+                  borderRadius: "var(--heroui-radius-medium) var(--heroui-radius-medium) 0 0",
+                }}
                 onClose={() => setIsCommentOpen(false)}
               />
 

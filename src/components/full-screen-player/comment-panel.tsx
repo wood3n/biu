@@ -158,20 +158,20 @@ const CommentPanel = ({ ref, className, style, onClose }: Props & { ref?: React.
     <div
       ref={ref}
       className={twMerge(
-        "flex flex-col overflow-hidden bg-white text-neutral-900 shadow-[0_-8px_40px_-12px_rgb(0_0_0/0.25)] ring-1 ring-black/8",
+        "flex flex-col overflow-hidden bg-white/70 text-neutral-900 shadow-[0_-8px_40px_-12px_rgb(0_0_0/0.25)] ring-1 ring-white/40 backdrop-blur-2xl backdrop-saturate-150",
         className,
       )}
       style={style}
     >
-      {/* 头部：左上角关闭 + 评论总数 */}
-      <div className="flex w-full flex-none items-center gap-2 border-b border-black/8 px-2 py-2">
-        <IconButton aria-label="关闭评论" onPress={onClose} className="hover:text-danger text-neutral-600">
-          <RiCloseLine size={22} />
-        </IconButton>
-        <span className="text-sm font-medium text-neutral-900 select-none">
+      {/* 头部：标题左上 + 关闭按钮右上 */}
+      <div className="flex w-full flex-none items-center border-b border-black/8 px-2 py-2">
+        <span className="ml-1 text-sm font-medium text-neutral-900 select-none">
           评论
           {totalCount > 0 && <span className="ml-1 text-neutral-400">{totalCount}</span>}
         </span>
+        <IconButton aria-label="关闭评论" onPress={onClose} className="hover:text-danger mr-1 ml-auto text-neutral-600">
+          <RiCloseLine size={22} />
+        </IconButton>
       </div>
 
       {/* 评论列表 */}
