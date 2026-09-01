@@ -3,10 +3,10 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: 'b26d3bd7-bb16-4c83-ba9a-caad0ad4b044'
-  PropagateID: 'b26d3bd7-bb16-4c83-ba9a-caad0ad4b044'
-  ReservedCode1: '5aa21c36-340d-4e82-94ee-6ad5d555f63b'
-  ReservedCode2: '5aa21c36-340d-4e82-94ee-6ad5d555f63b'
+  ProduceID: '132a59ec-0cf5-4005-97bd-bb5c4414715b'
+  PropagateID: '132a59ec-0cf5-4005-97bd-bb5c4414715b'
+  ReservedCode1: 'e5b7c10a-802e-44fa-872b-b5914f9d361a'
+  ReservedCode2: 'e5b7c10a-802e-44fa-872b-b5914f9d361a'
 ---
 
 <h1 align="center">Biu 音乐播放器</h1>
@@ -62,8 +62,16 @@ AIGC:
   <tr>
     <td width="50%" align="center">
       <img src="./screenshots/miniplayer.png" alt="迷你播放器" width="100%" />
+      <br />
+      <sub>迷你播放器</sub>
     </td>
-    <td width="50%" align="center">
+    <td width="50%" align="left">
+      <h4>迷你播放器功能</h4>
+      <ul>
+        <li>🎵 <b>动态歌词</b>：实时显示当前歌词行，文字溢出时自动滚动</li>
+        <li>🏷️ <b>悬停显示歌名</b>：鼠标放在上一曲 / 播放暂停 / 下一曲按钮上时，切换显示「歌名 - 歌手」</li>
+        <li>🪟 <b>Win11 亚克力毛玻璃</b>：Windows 11 系统级 Acrylic 背景模糊，半透明质感</li>
+      </ul>
     </td>
   </tr>
 </table>
@@ -349,7 +357,7 @@ AIGC:
 ---
 
 <p align="center">
-  <img src="./screenshots/ta-logo.svg" alt="TeleAgent" width="80" />
+  <img src="./screenshots/ta-logo.svg" alt="TeleAgent" width="200" />
 </p>
 <p align="center">
   xRetia 二次修改版由 TeleAgent 星辰超级智能体创作
