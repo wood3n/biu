@@ -80,6 +80,8 @@ const FullScreenPlayer = () => {
   }, playListRef);
   useClickAway(
     () => {
+      // 图片预览打开时，点击预览层不应关闭评论面板
+      if (useModalStore.getState().imagePreviewData) return;
       if (isCommentOpen) {
         setIsCommentOpen(false);
       }

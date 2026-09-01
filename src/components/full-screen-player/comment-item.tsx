@@ -7,6 +7,7 @@ import clx from "classnames";
 import { formatRelativeTime } from "@/common/utils/time";
 import Image from "@/components/image";
 import { getReplyReply, type ReplyContent, type ReplyItem } from "@/service/reply-main";
+import { useModalStore } from "@/store/modal";
 
 interface Props {
   data: ReplyItem;
@@ -174,18 +175,18 @@ const CommentItem = ({ data, className }: Props) => {
             ),
           )}
         </p>
-        {/* 图片评论 */}
+        {/* 图片评论：点击放大查看 */}
         {Boolean(data.content.pictures?.length) && (
           <div className="flex flex-wrap gap-2">
             {data.content.pictures!.map(pic => (
-              <Image
+              // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- 点击查看大图为纯展示交互
+              <img
                 key={pic.img_src}
-                removeWrapper
-                radius="md"
-                src={pic.img_src}
+                src={`${pic.img_src}@240w_240h_1c.avif`}
                 alt="评论图片"
-                params="240w_240h_1c.avif"
-                className="size-24 flex-none object-cover"
+                loading="lazy"
+                className="size-24 flex-none cursor-zoom-in rounded-md object-cover transition-opacity hover:opacity-85"
+                onClick={() => useModalStore.getState().onOpenImagePreview({ url: pic.img_src, alt: "评论图片" })}
               />
             ))}
           </div>
