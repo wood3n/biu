@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { addToast, Spinner } from "@heroui/react";
-import { RiCloseLine } from "@remixicon/react";
+import { RiCloseLine, RiExternalLinkLine } from "@remixicon/react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { twMerge } from "tailwind-merge";
@@ -35,6 +35,16 @@ const CommentPanel = ({ ref, className, style, onClose }: Props & { ref?: React.
   );
   const playItem = list.find(item => item.id === playId);
   const oid = playItem?.aid ? Number(playItem.aid) : undefined;
+  const bvid = playItem?.bvid;
+
+  /** 在 B 站打开当前曲目视频页 */
+  const handleOpenInBilibili = useCallback(() => {
+    if (!bvid) {
+      addToast({ title: "当前曲目无法跳转", color: "warning" });
+      return;
+    }
+    window.electron.openExternal(`https://www.bilibili.com/video/${bvid}`);
+  }, [bvid]);
 
   const [items, setItems] = useState<ReplyItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -169,7 +179,16 @@ const CommentPanel = ({ ref, className, style, onClose }: Props & { ref?: React.
           评论
           {totalCount > 0 && <span className="ml-1 text-neutral-400">{totalCount}</span>}
         </span>
-        <IconButton aria-label="关闭评论" onPress={onClose} className="hover:text-danger mr-1 ml-auto text-neutral-600">
+        <IconButton
+          aria-label="在B站打开"
+          tooltip="在B站打开"
+          tooltipProps={{ placement: "top" }}
+          onPress={handleOpenInBilibili}
+          className="hover:text-primary mr-1 ml-auto text-neutral-600"
+        >
+          <RiExternalLinkLine size={18} />
+        </IconButton>
+        <IconButton aria-label="关闭评论" onPress={onClose} className="hover:text-danger mr-1 text-neutral-600">
           <RiCloseLine size={22} />
         </IconButton>
       </div>
