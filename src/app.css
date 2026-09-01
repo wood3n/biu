@@ -218,3 +218,16 @@ button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"])
     transform: translateX(-50%);
   }
 }
+
+/* mini 播放器单行滚动文字：纯 CSS 无缝 marquee
+ * 容器 overflow-hidden，内容 whitespace-nowrap + 双份渲染，
+ * translateX(-50%) 位移一份宽度后重置 */
+@keyframes marquee {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}

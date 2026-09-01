@@ -4,7 +4,7 @@ import { StoreNameMap } from "@shared/store";
 
 const timeTagPattern = /\[(\d{1,2}):(\d{1,2})(?:\.(\d{1,3}))?\]/g;
 
-function parseLrcToLines(raw?: string | null) {
+export function parseLrcToLines(raw?: string | null) {
   if (!raw) return [] as LyricLine[];
 
   const result: LyricLine[] = [];

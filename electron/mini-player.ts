@@ -14,7 +14,7 @@ const createMiniPlayer = () => {
     show: true,
     hasShadow: true,
     width: 320,
-    height: 100,
+    height: 67,
     resizable: false,
     roundedCorners: false,
     center: true,
