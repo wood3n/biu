@@ -116,7 +116,6 @@ const CoverView = memo(() => {
         decoding="async"
         style={{ transform: "translateZ(0)", backfaceVisibility: "hidden", willChange: "transform", contain: "paint" }}
       />
-      <div className="from-background pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l to-transparent" />
     </div>
   );
 });
@@ -320,13 +319,9 @@ const MiniPlayer = () => {
   return (
     <div className="window-drag rounded-medium flex h-screen w-screen overflow-hidden select-none">
       <CoverView />
-      <div className="flex min-w-0 flex-1 flex-col">
-        {/* 第一行：歌词/歌名（hover 此区域显示歌名） */}
-        <div
-          className="window-no-drag flex min-h-0 flex-1 items-center justify-center overflow-hidden px-2"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
+      <div className="window-no-drag flex min-w-0 flex-1 flex-col">
+        {/* 第一行：歌词/歌名 */}
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-2">
           <InfoView
             title={title}
             ownerName={ownerName}
@@ -348,7 +343,11 @@ const MiniPlayer = () => {
           >
             {playModeIcon}
           </Button>
-          <div className="flex items-center space-x-0.5">
+          <div
+            className="flex items-center space-x-0.5"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
             <Button
               isDisabled={!title || isSingle}
               isIconOnly

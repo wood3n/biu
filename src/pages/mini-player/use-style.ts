@@ -11,7 +11,8 @@ export const useStyle = () => {
 
     const rootEl: HTMLDivElement | null = document.querySelector("#root");
     if (rootEl) {
-      rootEl.style.background = "hsl(var(--heroui-background))";
+      rootEl.style.background = "hsl(var(--heroui-background) / 0.6)";
+      rootEl.style.backdropFilter = "blur(40px) saturate(1.5)";
       rootEl.style.overflow = "hidden";
       rootEl.style.borderRadius = `${useSettings.getState().borderRadius}px`;
     }
@@ -24,6 +25,7 @@ export const useStyle = () => {
         document.body.style.removeProperty("margin");
         document.body.style.removeProperty("overflow");
         rootEl.style.removeProperty("background");
+        rootEl.style.removeProperty("backdrop-filter");
         rootEl.style.removeProperty("overflow");
         rootEl.style.removeProperty("border-radius");
       }

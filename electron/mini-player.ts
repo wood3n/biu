@@ -21,6 +21,7 @@ const createMiniPlayer = () => {
     // 隐藏窗口标题栏和窗口按钮
     frame: false,
     transparent: true,
+    backgroundMaterial: "acrylic",
     titleBarOverlay: false,
     alwaysOnTop: true,
     skipTaskbar: true,
