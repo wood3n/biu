@@ -464,14 +464,14 @@ const BBPFavorites = () => {
       <div className="mb-4 flex space-x-4">
         <div className="group relative flex-none">
           {loading && !metadata ? (
-            <Skeleton className="h-[168px] w-[200px] rounded-md" />
+            <Skeleton className="h-[168px] w-[168px] rounded-md" />
           ) : (
             <>
               <Image
                 radius="md"
                 src={metadata?.cover_url}
                 alt={metadata?.title}
-                width={200}
+                width={168}
                 height={168}
                 className={!metadata?.cover_url ? "border-content3 border" : undefined}
               />
