@@ -3,10 +3,10 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: 'b9c46a2f-3b35-4d71-9d21-5e62de3733fd'
-  PropagateID: 'b9c46a2f-3b35-4d71-9d21-5e62de3733fd'
-  ReservedCode1: '59f86802-4ad6-40b2-8819-d8f086f5bb44'
-  ReservedCode2: '59f86802-4ad6-40b2-8819-d8f086f5bb44'
+  ProduceID: 'b26d3bd7-bb16-4c83-ba9a-caad0ad4b044'
+  PropagateID: 'b26d3bd7-bb16-4c83-ba9a-caad0ad4b044'
+  ReservedCode1: '5aa21c36-340d-4e82-94ee-6ad5d555f63b'
+  ReservedCode2: '5aa21c36-340d-4e82-94ee-6ad5d555f63b'
 ---
 
 <h1 align="center">Biu 音乐播放器</h1>
@@ -345,6 +345,15 @@ AIGC:
 
 ## 📄 许可证
 本项目以 PolyForm Noncommercial License 1.0.0（非商业许可）发布，禁止任何商业用途。详情参见 [`LICENSE`](LICENSE)（SPDX：`PolyForm-Noncommercial-1.0.0`）。
+
+---
+
+<p align="center">
+  <img src="./screenshots/ta-logo.svg" alt="TeleAgent" width="80" />
+</p>
+<p align="center">
+  xRetia 二次修改版由 TeleAgent 星辰超级智能体创作
+</p>
 
 ---
 
