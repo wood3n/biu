@@ -1,14 +1,3 @@
----
-AIGC:
-  ContentProducer: '001191110102MAD55U9H0F10002'
-  ContentPropagator: '001191110102MAD55U9H0F10002'
-  Label: '1'
-  ProduceID: '7220039b-4144-4122-adb6-57bf39f18d64'
-  PropagateID: '7220039b-4144-4122-adb6-57bf39f18d64'
-  ReservedCode1: '1e3158c0-0ac2-49b8-b700-3082b4d2566b'
-  ReservedCode2: '1e3158c0-0ac2-49b8-b700-3082b4d2566b'
----
-
 <p align="right">
   <img src="./screenshots/ta-logo.svg" alt="TeleAgent" width="120" />
 </p>
