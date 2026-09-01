@@ -11,6 +11,7 @@ import { Themes } from "@/common/constants/theme";
 import { hexToHsl, resolveTheme, isHex } from "@/common/utils/color";
 import AudioWaveform from "@/components/audio-waveform";
 import Lyrics from "@/components/lyrics";
+import UtilityControls from "@/components/lyrics/utility-controls";
 import { useFullScreenPlayerSettings } from "@/store/full-screen-player-settings";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
@@ -371,6 +372,15 @@ const FullScreenPlayer = () => {
                   </div>
                 )}
               </div>
+
+              {/* 歌词未显示或本地曲目时：常驻工具组（评论 + 音量）仍显示 */}
+              {isUiVisible && (!showLyrics || isLocal) && (
+                <div className="pointer-events-none absolute inset-0 z-20 flex items-end justify-end px-12 py-24">
+                  <div className="pointer-events-auto mr-6 mb-6">
+                    <UtilityControls onOpenComments={playItem.type === "mv" ? openComments : undefined} />
+                  </div>
+                </div>
+              )}
 
               {showSpectrum && (
                 <div

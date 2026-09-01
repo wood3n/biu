@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { addToast, useDisclosure } from "@heroui/react";
-import { RiChat3Line, RiCharacterRecognitionLine, RiTBoxLine, RiTranslate } from "@remixicon/react";
+import { RiCharacterRecognitionLine, RiTBoxLine, RiTranslate } from "@remixicon/react";
 import clsx from "classnames";
 import { debounce } from "es-toolkit";
 
@@ -17,6 +17,7 @@ import LyricsSearchModal from "../lyrics-search-modal";
 import FontSizeControl from "./font-size-control";
 import { getLyricsAuto } from "./get-lyrics";
 import OffsetControl from "./offset-control";
+import UtilityControls from "./utility-controls";
 
 type LyricLine = {
   time: number; // milliseconds
@@ -438,21 +439,12 @@ const Lyrics = ({
         </div>
 
         {showControls && (
-          <div className="text-foreground/80 pointer-events-none absolute right-6 bottom-6 flex flex-col items-center space-y-3 text-sm transition-opacity duration-200">
-            {onOpenComments && (
-              <div className="pointer-events-auto">
-                <IconButton
-                  type="button"
-                  aria-label="查看评论"
-                  tooltip="查看评论"
-                  className="bg-foreground/10 text-foreground/50 hover:bg-foreground/20 hover:text-foreground min-w-0 rounded-full text-xs font-semibold"
-                  onPress={onOpenComments}
-                >
-                  <RiChat3Line size={16} />
-                </IconButton>
-              </div>
-            )}
-            <div className="pointer-events-auto">
+          <div className="text-foreground/80 pointer-events-none absolute right-6 bottom-6 flex flex-col items-center text-sm transition-opacity duration-200">
+            {/* 第一组：查看评论 + 音量调节（常驻功能） */}
+            <UtilityControls onOpenComments={onOpenComments} />
+
+            {/* 第二组：歌词显示选项 */}
+            <div className="pointer-events-auto mt-5 flex flex-col items-center gap-3">
               <IconButton
                 type="button"
                 aria-label={showTranslation ? "隐藏歌词翻译" : "显示歌词翻译"}
@@ -467,8 +459,6 @@ const Lyrics = ({
               >
                 <RiTranslate size={16} />
               </IconButton>
-            </div>
-            <div className="pointer-events-auto">
               <IconButton
                 type="button"
                 aria-label={showFurigana ? "隐藏汉字假名标注" : "显示汉字假名标注"}
@@ -484,13 +474,11 @@ const Lyrics = ({
                 <RiCharacterRecognitionLine size={16} />
               </IconButton>
             </div>
-            <div className="pointer-events-auto">
+
+            {/* 第三组：歌词调整工具 */}
+            <div className="pointer-events-auto mt-5 flex flex-col items-center gap-3">
               <FontSizeControl value={fontSize} onChange={handleFontSizeChange} onOpenChange={() => {}} />
-            </div>
-            <div className="pointer-events-auto">
               <OffsetControl value={offset} onChange={handleOffsetChange} onOpenChange={() => {}} />
-            </div>
-            <div className="pointer-events-auto">
               <IconButton
                 type="button"
                 onPress={onOpenSearch}
