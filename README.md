@@ -3,11 +3,15 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: '132a59ec-0cf5-4005-97bd-bb5c4414715b'
-  PropagateID: '132a59ec-0cf5-4005-97bd-bb5c4414715b'
-  ReservedCode1: 'e5b7c10a-802e-44fa-872b-b5914f9d361a'
-  ReservedCode2: 'e5b7c10a-802e-44fa-872b-b5914f9d361a'
+  ProduceID: '7220039b-4144-4122-adb6-57bf39f18d64'
+  PropagateID: '7220039b-4144-4122-adb6-57bf39f18d64'
+  ReservedCode1: '1e3158c0-0ac2-49b8-b700-3082b4d2566b'
+  ReservedCode2: '1e3158c0-0ac2-49b8-b700-3082b4d2566b'
 ---
+
+<p align="right">
+  <img src="./screenshots/ta-logo.svg" alt="TeleAgent" width="120" />
+</p>
 
 <h1 align="center">Biu 音乐播放器</h1>
 <p align="center">
@@ -40,7 +44,7 @@ AIGC:
       <img src="./screenshots/player.png" alt="播放器与歌词" width="100%" />
     </td>
     <td width="50%" align="center">
-      <img src="./screenshots/player-list-in-player.png" alt="播放列表" width="100%" />
+      <img src="./screenshots/player-comment.png" alt="评论面板" width="100%" />
     </td>
   </tr>
   <tr>
@@ -86,6 +90,7 @@ AIGC:
 - **🌐 歌词翻译可调**：歌词翻译支持开关、字体大小调节、时间偏移微调，满足不同阅读习惯
 - **🔍 歌词自动搜索优化**：智能匹配歌词来源，自动搜索准确率与命中率大幅提升，减少手动查找
 - **🪟 UI 重构与毛玻璃特效**：全新布局设计，全局毛玻璃（Glassmorphism）风格，侧边栏、播放列表、右键菜单、弹窗面板均采用主题感知毛玻璃背景
+- **💬 评论查看**：全屏播放器内直接浏览 B 站评论，支持楼中楼展开、图片点击放大、表情显示，还可一键跳转 B 站
 - **📱 BBPlayer 收藏夹兼容**：支持创建 BBPlayer 共享歌单，与手机端 BBPlayer 收藏夹双向兼容，云端同步
 
 ### 账号与登录
