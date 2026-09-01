@@ -94,7 +94,6 @@ const DownloadList = () => {
         <div className="flex items-center justify-between">
           <Tabs
             variant="solid"
-            size="sm"
             radius="md"
             classNames={{
               tabList: "bg-default-200/80 dark:bg-default-100/10",
@@ -111,7 +110,7 @@ const DownloadList = () => {
           </Tabs>
           {Boolean(filteredList.length) && (
             <Tooltip content="清空记录" closeDelay={0}>
-              <Button size="sm" isIconOnly variant="flat" onPress={clearDownloadList}>
+              <Button isIconOnly variant="flat" onPress={clearDownloadList}>
                 <RiDeleteBinLine size={18} />
               </Button>
             </Tooltip>

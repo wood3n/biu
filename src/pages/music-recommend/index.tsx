@@ -262,7 +262,6 @@ const MusicRecommend = () => {
       <div className="mb-2 flex items-center justify-between">
         <Tabs
           variant="solid"
-          size="lg"
           radius="md"
           classNames={{
             tabList: "bg-default-200/80 dark:bg-default-100/10",

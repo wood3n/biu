@@ -59,7 +59,6 @@ const DateRangePicker = ({ onDateRangeChange }: Props) => {
       <Tabs
         aria-label="时间范围"
         variant="solid"
-        size="sm"
         radius="md"
         selectedKey={selectedKey}
         onSelectionChange={key => handlePresetChange(key as string)}
