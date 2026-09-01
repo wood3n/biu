@@ -63,7 +63,7 @@ const DateRangePicker = ({ onDateRangeChange }: Props) => {
         selectedKey={selectedKey}
         onSelectionChange={key => handlePresetChange(key as string)}
         classNames={{
-          tabList: "bg-default-200/80 dark:bg-default-100/10",
+          tabList: "bg-default-200/80 dark:bg-default-100/10 shadow-xs",
           cursor: "rounded-medium",
         }}
       >

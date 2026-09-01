@@ -40,7 +40,7 @@ export default function SearchHeader({
         variant="light"
         radius="md"
         classNames={{
-          tabList: "bg-default-200/80 dark:bg-default-100/10",
+          tabList: "bg-default-200/80 dark:bg-default-100/10 shadow-xs",
           cursor: "rounded-medium",
         }}
         className="-ml-1"
