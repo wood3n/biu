@@ -3,10 +3,10 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: '81433edd-35d4-4ada-8eec-279d17fb0392'
-  PropagateID: '81433edd-35d4-4ada-8eec-279d17fb0392'
-  ReservedCode1: '90778cae-ab47-4a4b-a95f-47d962c5b914'
-  ReservedCode2: '90778cae-ab47-4a4b-a95f-47d962c5b914'
+  ProduceID: 'b9c46a2f-3b35-4d71-9d21-5e62de3733fd'
+  PropagateID: 'b9c46a2f-3b35-4d71-9d21-5e62de3733fd'
+  ReservedCode1: '59f86802-4ad6-40b2-8819-d8f086f5bb44'
+  ReservedCode2: '59f86802-4ad6-40b2-8819-d8f086f5bb44'
 ---
 
 <h1 align="center">Biu 音乐播放器</h1>
@@ -59,6 +59,13 @@ AIGC:
       <img src="./screenshots/space.png" alt="个人空间" width="100%" />
     </td>
   </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./screenshots/miniplayer.png" alt="迷你播放器" width="100%" />
+    </td>
+    <td width="50%" align="center">
+    </td>
+  </tr>
 </table>
 
 ---
@@ -104,7 +111,10 @@ AIGC:
 - 📑 播放列表与分集列表改用整行右键菜单（移除三点按钮），支持播放列表内搜索
 - 📜 文本无缝滚动（Marquee）：正在播放项常驻滚动，其余项 hover 滚动；播放栏标题常驻滚动
 - 📂 播放栏折叠功能：折叠/展开改为水平拉伸弹回动画，不影响播放进度
-- 🍃 支持 mini 播放器模式，占用系统资源少，同时保留主窗口功能
+- 🍃 迷你播放器模式，占用系统资源少，同时保留主窗口功能
+  - 🎵 动态歌词：迷你窗口实时显示当前歌词行，溢出文字自动滚动
+  - 🏷️ 悬停显示歌名：鼠标放在上一曲/播放暂停/下一曲按钮上时，切换显示「歌名 - 歌手」
+  - 🪟 Win11 亚克力毛玻璃：Windows 11 系统级 Acrylic 背景模糊，半透明质感
 - 📻 私人 FM 功能
 
 ### UI / 视觉体验
