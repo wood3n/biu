@@ -202,7 +202,7 @@ const CommentItem = ({ data, className }: Props) => {
               onClick={() => setIsExpanded(v => !v)}
             >
               <RiChat3Line size={14} />
-              {isExpanded ? "收起回复" : `${totalReplies}条回复`}
+              {isExpanded ? `收起${totalReplies}条回复` : `${totalReplies}条回复`}
             </span>
           )}
         </div>
