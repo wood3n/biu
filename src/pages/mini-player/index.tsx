@@ -423,7 +423,7 @@ const MiniPlayer = () => {
               },
             ),
             filler: "rounded-t-none",
-            thumb: clx("w-2.5 h-2.5 after:h-1.5 after:bg-primary opacity-0", {
+            thumb: clx("w-2.5 h-2.5 before:w-2.5 before:h-2.5 after:h-1.5 after:bg-primary opacity-0", {
               "group-hover:opacity-100": Boolean(title),
             }),
           }}
