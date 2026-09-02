@@ -29,6 +29,24 @@ import Operations from "../operation";
 import FavoriteGridList from "./grid-list";
 import FavoriteList from "./list";
 
+/** 刷新图标最短旋转时长（ms），快速请求时避免图标一闪而过 */
+const MIN_SPIN_MS = 1000;
+
+const delay = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+/** 执行加载并保证至少耗时 MIN_SPIN_MS（无论成败），失败时原样抛出 */
+const loadWithMinSpin = async <T,>(load: () => Promise<T>): Promise<T> => {
+  const startedAt = Date.now();
+  try {
+    return await load();
+  } finally {
+    const remaining = MIN_SPIN_MS - (Date.now() - startedAt);
+    if (remaining > 0) {
+      await delay(remaining);
+    }
+  }
+};
+
 /** 收藏夹详情 TODO:加上创建的视频合集 */
 const Favorites = () => {
   const { id: favFolderId } = useParams();
@@ -123,7 +141,7 @@ const Favorites = () => {
     async (targetPage: number, keywordValue = keyword, orderValue = order) => {
       setListLoading(true);
       try {
-        const pageData = await fetchPageData(targetPage, keywordValue, orderValue);
+        const pageData = await loadWithMinSpin(() => fetchPageData(targetPage, keywordValue, orderValue));
         if (!pageData) {
           setHasMore(false);
           return;
