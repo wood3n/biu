@@ -8,7 +8,7 @@ import {
   useDisclosure,
   type DropdownItemProps,
 } from "@heroui/react";
-import { RiLogoutCircleLine, RiMusic2Line, RiUser3Line } from "@remixicon/react";
+import { RiDownloadLine, RiExternalLinkLine, RiLogoutCircleLine, RiMusic2Line, RiUser3Line } from "@remixicon/react";
 import { twMerge } from "tailwind-merge";
 
 import { glassMenuClassName } from "@/common/constants/glass";
@@ -48,6 +48,13 @@ const BBPButton = () => {
       startContent: <RiMusic2Line size={18} />,
       hidden: isLogin,
       onPress: openBBPLogin,
+    },
+    {
+      key: "bbp-download",
+      label: "下载 App",
+      startContent: <RiDownloadLine size={18} />,
+      endContent: <RiExternalLinkLine size={18} />,
+      onPress: () => window.electron.openExternal("https://github.com/bbplayer-app/bbplayer/releases"),
     },
     {
       key: "bbp-logout",
@@ -94,13 +101,13 @@ const BBPButton = () => {
             variant="light"
             radius="md"
             size="sm"
-            title="BBPlayer"
+            title="移动端账号"
             className="hover:text-primary !px-0 text-inherit hover:!bg-transparent"
           >
             <RiMusic2Line size={18} />
           </Button>
         </DropdownTrigger>
-        <DropdownMenu aria-label="BBPlayer 操作" variant="flat" items={items}>
+        <DropdownMenu aria-label="移动端账号操作" variant="flat" items={items}>
           {({ key, label, className, ...rest }) => (
             <DropdownItem className={twMerge("rounded-medium", className)} key={key} {...rest}>
               {label}
