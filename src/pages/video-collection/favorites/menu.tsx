@@ -28,6 +28,8 @@ export const getContextMenus = ({ type, isCreatedBySelf }: Props) => {
       icon: <RiStarOffLine size={18} />,
       key: "cancelFavorite",
       label: "取消收藏",
+      color: "danger",
+      className: "text-danger",
       hidden: !isCreatedBySelf,
     },
     {

@@ -3,6 +3,8 @@ import React, { useCallback, useState } from "react";
 import { Listbox, ListboxItem, Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
 import { twMerge } from "tailwind-merge";
 
+import { glassMenuClassName } from "@/common/constants/glass";
+
 export interface ContextMenuItem {
   key: string;
   label: React.ReactNode;
@@ -84,11 +86,12 @@ const ContextMenu = ({ children, items, className, contentClassName, disabled, o
               }}
             />
           </PopoverTrigger>
-          <PopoverContent className={twMerge("min-w-[160px] p-0", contentClassName)}>
+          <PopoverContent className={twMerge(glassMenuClassName, "min-w-[160px] p-0", contentClassName)}>
             {/* @ts-ignore 忽略 ListboxItem 的 key 类型错误 */}
             <Listbox
               aria-label="右键菜单"
               selectionMode="none"
+              variant="flat"
               onAction={key => {
                 onAction?.(key as string);
                 closeMenu();
@@ -101,7 +104,12 @@ const ContextMenu = ({ children, items, className, contentClassName, disabled, o
                   <ListboxItem
                     key={item.key}
                     startContent={item.icon}
-                    className={twMerge("rounded-medium", item.className)}
+                    className={twMerge(
+                      "rounded-medium",
+                      item.color === "danger" &&
+                        "text-danger data-[hover=true]:bg-danger! data-[hover=true]:text-danger-foreground! data-[focus=true]:bg-danger! data-[focus=true]:text-danger-foreground!",
+                      item.className,
+                    )}
                     color={item.color}
                   >
                     {item.label}

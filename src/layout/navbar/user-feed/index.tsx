@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
-import { Tooltip, Button, Badge } from "@heroui/react";
-import { RiTeamLine } from "@remixicon/react";
+import { Tooltip, Badge } from "@heroui/react";
+import { RiNotificationLine } from "@remixicon/react";
 import { useRequest } from "ahooks";
 
+import IconButton from "@/components/icon-button";
 import { getWebDynamicFeedAllUpdate } from "@/service/web-dynamic";
 
 const UserFeed = () => {
@@ -40,9 +41,9 @@ const UserFeed = () => {
   };
 
   const button = (
-    <Button isIconOnly size="sm" variant="light" onPress={handleOpen} className="hover:text-primary">
-      <RiTeamLine size={20} />
-    </Button>
+    <IconButton title="动态" onPress={handleOpen} className="hover:text-primary">
+      <RiNotificationLine size={18} />
+    </IconButton>
   );
 
   return (

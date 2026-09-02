@@ -4,6 +4,8 @@ import { Button, Listbox, ListboxItem, Popover, PopoverContent, PopoverTrigger }
 import { RiMore2Line } from "@remixicon/react";
 import { twMerge } from "tailwind-merge";
 
+import { glassMenuClassName } from "@/common/constants/glass";
+
 export interface LocalOperationItem {
   key: string;
   label: string;
@@ -40,7 +42,7 @@ const OperationMenu = ({ items, onAction, onOpenChange }: OperationMenuProps) =>
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[160px] p-0"
+        className={twMerge(glassMenuClassName, "w-[160px] p-0")}
         data-no-contextmenu="true"
         onContextMenuCapture={e => {
           e.preventDefault();
@@ -54,6 +56,7 @@ const OperationMenu = ({ items, onAction, onOpenChange }: OperationMenuProps) =>
         <Listbox
           aria-label="操作菜单"
           selectionMode="none"
+          variant="flat"
           items={items.filter(item => !item.hidden)}
           data-no-contextmenu="true"
           onContextMenuCapture={e => {
@@ -74,7 +77,12 @@ const OperationMenu = ({ items, onAction, onOpenChange }: OperationMenuProps) =>
             <ListboxItem
               key={item.key}
               startContent={item.icon}
-              className={twMerge("rounded-medium", item.className)}
+              className={twMerge(
+                "rounded-medium",
+                item.color === "danger" &&
+                  "text-danger data-[hover=true]:bg-danger! data-[hover=true]:text-danger-foreground! data-[focus=true]:bg-danger! data-[focus=true]:text-danger-foreground!",
+                item.className,
+              )}
               color={item.color}
             >
               {item.label}

@@ -7,6 +7,7 @@ import clsx from "classnames";
 
 import { openBiliVideoLink } from "@/common/utils/url";
 import Image from "@/components/image";
+import MarqueeText from "@/components/marquee-text";
 import MusicFavButton from "@/components/music-fav-button";
 import MusicThumb from "@/components/music-thumb";
 import { useModalStore } from "@/store/modal";
@@ -34,20 +35,21 @@ const LeftControl = () => {
           width={56}
           height={56}
           classNames={{
-            wrapper: "flex-none",
+            wrapper: "flex-none shadow-[0_8px_20px_-6px_rgb(0_0_0/0.4)]",
           }}
           params="672w_378h_1c.avif"
           emptyPlaceholder={<RiMusic2Line />}
         />
-        <div className="text-primary absolute top-0 left-0 z-10 flex h-full w-full items-center justify-center overflow-hidden rounded-md bg-[rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100">
+        <div className="absolute top-0 left-0 z-10 flex h-full w-full items-center justify-center overflow-hidden rounded-lg bg-black/20 text-white opacity-0 backdrop-blur-[2px] transition-opacity duration-200 group-hover:opacity-100">
           <RiArrowUpSLine size={32} />
         </div>
       </div>
-      <div className="flex min-w-0 flex-col items-start space-y-1">
+      <div className="flex max-w-[80%] min-w-0 flex-col items-start space-y-1">
         <span className="flex w-full items-center">
-          <span
+          <MarqueeText
             title={playItem?.pageTitle || playItem?.title}
-            className={clsx("min-w-0 flex-1 truncate", {
+            active
+            className={clsx({
               "cursor-pointer": isClickable,
               "hover:underline": isClickable,
             })}
@@ -57,7 +59,7 @@ const LeftControl = () => {
             }}
           >
             {playItem?.pageTitle || playItem?.title}
-          </span>
+          </MarqueeText>
           {Boolean(playItem?.isLossless) && (
             <Chip size="sm" className="h-auto px-0 py-0.5 text-[10px]">
               无损
@@ -69,8 +71,9 @@ const LeftControl = () => {
             </Chip>
           )}
         </span>
-        <span
-          className={clsx("text-foreground-500 max-w-full truncate text-sm whitespace-nowrap", {
+        <MarqueeText
+          active
+          className={clsx("text-foreground-500 w-full text-sm", {
             "cursor-pointer hover:underline": Boolean(playItem?.ownerMid),
           })}
           onClick={e => {
@@ -80,7 +83,7 @@ const LeftControl = () => {
           }}
         >
           {playItem?.source === "local" ? "本地音乐" : playItem?.ownerName || "未知"}
-        </span>
+        </MarqueeText>
       </div>
       <div className="flex items-center">
         {Boolean(playItem?.hasMultiPart) && <PageListDrawer />}

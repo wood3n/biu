@@ -6,6 +6,7 @@ import { useUser } from "@/store/user";
 
 import WindowAction from "../../components/window-action";
 import AppUpdateNotify from "./app-update";
+import BBPButton from "./bbp-button";
 import Dev from "./dev";
 import Navigation from "./navigation";
 import Search from "./search";
@@ -23,20 +24,25 @@ const LayoutNavbar = () => {
 
   return (
     <div
-      className={clx("flex h-full items-center justify-between pr-2 pl-4", {
-        "window-drag": !isNoDrag,
-        "window-no-drag": isNoDrag,
-      })}
+      className={clx(
+        "flex h-full items-center justify-between pr-2 pl-4",
+        "bg-background/70 border-b border-white/10 backdrop-blur-2xl backdrop-saturate-150 dark:border-white/5",
+        {
+          "window-drag": !isNoDrag,
+          "window-no-drag": isNoDrag,
+        },
+      )}
     >
       <div className="window-no-drag flex items-center justify-start space-x-2">
         <Navigation />
         <Search onFocusChange={setIsSearchFocused} />
       </div>
-      <div className="window-no-drag flex items-center justify-center space-x-4">
+      <div className="window-no-drag flex items-center justify-center">
+        <UserCard onDropdownOpenChange={setIsUserDropdownOpen} />
         <AppUpdateNotify />
         <Dev />
+        <BBPButton />
         {Boolean(user?.isLogin) && <UserFeed />}
-        <UserCard onDropdownOpenChange={setIsUserDropdownOpen} />
         {["linux", "windows"].includes(platform) && <WindowAction />}
       </div>
     </div>

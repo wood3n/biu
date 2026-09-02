@@ -1,6 +1,6 @@
 {
   "name": "biu",
-  "version": "1.16.0",
+  "version": "2.3.1-xretia",
   "private": true,
   "engines": {
     "node": "22.17.1"
@@ -9,13 +9,13 @@
   "description": "music application based on bilibili api",
   "author": "wood3n",
   "license": "PolyForm-Noncommercial-1.0.0",
-  "homepage": "https://github.com/wood3n/biu#readme",
+  "homepage": "https://github.com/xRetia/biu#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wood3n/biu.git"
+    "url": "git+https://github.com/xRetia/biu.git"
   },
   "bugs": {
-    "url": "https://github.com/wood3n/biu/issues"
+    "url": "https://github.com/xRetia/biu/issues"
   },
   "keywords": [
     "music",
@@ -60,10 +60,14 @@
     "filesize": "^11.0.13",
     "fluent-ffmpeg": "^2.1.3",
     "font-list": "^2.0.1",
+    "fractional-indexing": "^4.0.0",
     "framer-motion": "^12.23.12",
     "got": "^14.6.6",
     "immer": "^10.1.3",
     "jsencrypt": "^3.5.4",
+    "kuromoji": "^0.1.2",
+    "kuroshiro": "^1.2.0",
+    "kuroshiro-analyzer-kuromoji": "^1.1.0",
     "moment": "^2.30.1",
     "moment-duration-format": "^2.3.2",
     "music-metadata": "^11.10.6",

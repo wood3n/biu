@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Drawer, DrawerBody, DrawerContent, Image, Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
-import { RiArrowDownSLine, RiArrowLeftSLine, RiSettings3Line } from "@remixicon/react";
+import { Drawer, DrawerBody, DrawerContent, Image, Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/react";
+import { RiArrowDownSLine, RiArrowLeftSLine, RiArrowRightSLine, RiSettings3Line } from "@remixicon/react";
 import { useClickAway } from "ahooks";
 import clsx from "classnames";
 import { readableColor } from "color2k";
@@ -11,6 +11,7 @@ import { Themes } from "@/common/constants/theme";
 import { hexToHsl, resolveTheme, isHex } from "@/common/utils/color";
 import AudioWaveform from "@/components/audio-waveform";
 import Lyrics from "@/components/lyrics";
+import UtilityControls from "@/components/lyrics/utility-controls";
 import { useFullScreenPlayerSettings } from "@/store/full-screen-player-settings";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
@@ -18,13 +19,13 @@ import { useSettings } from "@/store/settings";
 
 import Empty from "../empty";
 import IconButton from "../icon-button";
-import MusicPlayControl from "../music-play-control";
-import MusicPlayMode from "../music-play-mode";
-import MusicPlayProgress from "../music-play-progress";
-import OpenPlaylistDrawerButton from "../open-playlist-drawer-button";
 import WindowAction from "../window-action";
+import CommentPanel from "./comment-panel";
 import { useGlassmorphism } from "./glassmorphism";
 import PageList from "./page-list";
+import PlayList from "./play-list";
+import PlayerCapsule from "./player-capsule";
+import FullScreenProgressBar from "./progress-bar";
 import FullScreenPlayerSettingsPanel from "./settings-panel";
 
 const platform = window.electron.getPlatform();
@@ -58,12 +59,13 @@ const FullScreenPlayer = () => {
   const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1000);
   const [windowHeight, setWindowHeight] = useState(typeof window !== "undefined" ? window.innerHeight : 800);
   const [isPageListOpen, setIsPageListOpen] = useState(false);
+  const [isPlayListOpen, setIsPlayListOpen] = useState(false);
+  const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [isUiVisible, setIsUiVisible] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const controlsRef = useRef<HTMLDivElement>(null);
-  const [controlsHeight, setControlsHeight] = useState(80);
-
   const pageListRef = useRef<HTMLDivElement>(null);
+  const playListRef = useRef<HTMLDivElement>(null);
+  const commentRef = useRef<HTMLDivElement>(null);
   const hideUiTimeoutRef = useRef<number | null>(null);
 
   useClickAway(() => {
@@ -71,6 +73,22 @@ const FullScreenPlayer = () => {
       setIsPageListOpen(false);
     }
   }, pageListRef);
+  useClickAway(() => {
+    if (isPlayListOpen) {
+      setIsPlayListOpen(false);
+    }
+  }, playListRef);
+  useClickAway(
+    () => {
+      // 图片预览打开时，点击预览层不应关闭评论面板
+      if (useModalStore.getState().imagePreviewData) return;
+      if (isCommentOpen) {
+        setIsCommentOpen(false);
+      }
+    },
+    commentRef,
+    "mousedown",
+  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -118,6 +136,14 @@ const FullScreenPlayer = () => {
     }
   };
 
+  /** 打开评论面板：收起左右侧滑面板 */
+  const openComments = () => {
+    setIsPageListOpen(false);
+    setIsPlayListOpen(false);
+    setIsUiVisible(true);
+    setIsCommentOpen(true);
+  };
+
   const scheduleHideUi = (delay: number) => {
     if (isSettingsOpen) return;
     if (hideUiTimeoutRef.current) {
@@ -139,25 +165,6 @@ const FullScreenPlayer = () => {
     isOpen,
   );
 
-  useEffect(() => {
-    const updateHeight = () => {
-      const el = controlsRef.current;
-      if (el) {
-        setControlsHeight(el.offsetHeight || 80);
-      }
-    };
-    updateHeight();
-    window.addEventListener("resize", updateHeight);
-    return () => window.removeEventListener("resize", updateHeight);
-  }, []);
-
-  useEffect(() => {
-    const el = controlsRef.current;
-    if (el) {
-      setControlsHeight(el.offsetHeight || 80);
-    }
-  }, [isUiVisible]);
-
   const computedForegroundHex = useMemo(() => {
     if (showBlurredBackground) return undefined;
     const baseBg =
@@ -173,6 +180,7 @@ const FullScreenPlayer = () => {
     const vars: React.CSSProperties = {
       ...cssVars,
       ["--heroui-primary" as any]: hexToHsl(primaryColor),
+      ["--heroui-primary-foreground" as any]: hexToHsl("#ffffff"),
     };
     if (computedForegroundHex) {
       vars["--heroui-foreground" as any] = hexToHsl(computedForegroundHex);
@@ -184,10 +192,7 @@ const FullScreenPlayer = () => {
 
   if (!playItem) return null;
 
-  const coverWidth = Math.max(260, Math.min(windowWidth * 0.7, windowHeight * 0.48, 520));
-  const coverHeight = coverWidth * 0.75;
-  const waveformWidth = Math.min(640, Math.max(400, Math.round(windowWidth * 0.5)));
-  const waveformBarCount = Math.max(48, Math.min(128, Math.round(waveformWidth / 7.5)));
+  const coverSize = Math.max(220, Math.min(windowWidth * 0.42, windowHeight * 0.42, 480));
 
   return (
     <Drawer
@@ -288,39 +293,37 @@ const FullScreenPlayer = () => {
                 </div>
               )}
               <div
-                className={`absolute top-0 right-0 z-20 flex w-full justify-between px-6 py-4 transition-opacity duration-200 ${isUiVisible ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                className={`absolute top-0 right-0 left-0 z-20 flex w-full items-center justify-between gap-2 px-4 py-4 transition-opacity duration-200 ${isUiVisible ? "opacity-100" : "pointer-events-none opacity-0"}`}
               >
-                <div className="window-no-drag top-0 right-0 left-0 flex w-full max-w-2/5 items-center space-x-2">
-                  <IconButton title="关闭弹窗" onPress={onClose} className="">
-                    <RiArrowDownSLine size={28} />
+                <div className="window-no-drag flex items-center space-x-2 rounded-full border border-white/12 bg-black/25 py-1 pr-3 pl-1 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)] backdrop-blur-2xl">
+                  <IconButton title="关闭弹窗" onPress={onClose} className="text-white">
+                    <RiArrowDownSLine size={24} />
                   </IconButton>
-                  <h2 className="truncate text-xl select-none">{playItem.pageTitle || playItem.title}</h2>
-                  <Popover
-                    isOpen={isSettingsOpen && isUiVisible}
-                    onOpenChange={open => {
-                      setIsSettingsOpen(open);
-                      if (open) {
-                        if (hideUiTimeoutRef.current) {
-                          window.clearTimeout(hideUiTimeoutRef.current);
-                          hideUiTimeoutRef.current = null;
-                        }
-                        setIsUiVisible(true);
+                  <h2 className="max-w-[40vw] truncate text-base font-medium text-white select-none">
+                    {playItem.pageTitle || playItem.title}
+                  </h2>
+                  <IconButton
+                    title="设置"
+                    tooltip="设置"
+                    className="text-white"
+                    onPress={() => {
+                      if (hideUiTimeoutRef.current) {
+                        window.clearTimeout(hideUiTimeoutRef.current);
+                        hideUiTimeoutRef.current = null;
                       }
+                      setIsUiVisible(true);
+                      setIsSettingsOpen(true);
                     }}
-                    placement="bottom-start"
                   >
-                    <PopoverTrigger>
-                      <IconButton title="设置" tooltip="设置">
-                        <RiSettings3Line size={22} />
-                      </IconButton>
-                    </PopoverTrigger>
-                    <PopoverContent className="p-4">
-                      <FullScreenPlayerSettingsPanel isUiVisible={isUiVisible} />
-                    </PopoverContent>
-                  </Popover>
+                    <RiSettings3Line size={20} />
+                  </IconButton>
                 </div>
-                <div className="window-no-drag top-0 right-0">
-                  {platform === "linux" || platform === "windows" ? <WindowAction /> : null}
+                {/* 封面关闭时：播放器胶囊紧贴窗口控制按钮右侧 */}
+                <div className="flex items-center gap-2">
+                  {!isLocal && !showCover && <PlayerCapsule compact />}
+                  <div className="window-no-drag flex items-center rounded-full border border-white/12 bg-black/25 px-1 backdrop-blur-2xl">
+                    {platform === "linux" || platform === "windows" ? <WindowAction /> : null}
+                  </div>
                 </div>
               </div>
 
@@ -332,22 +335,26 @@ const FullScreenPlayer = () => {
                       showLyrics ? "justify-end" : "justify-center",
                     )}
                   >
-                    <Image
-                      src={coverSrc}
-                      radius="lg"
-                      className="transition-shadow ease-out"
-                      classNames={{
-                        wrapper: "pointer-events-none",
-                        img: "w-full h-full object-cover select-none pointer-events-none",
-                      }}
-                      style={{
-                        width: coverWidth,
-                        height: coverHeight,
-                        boxShadow: `0 28px 90px -35px rgb(var(--glow-rgb) / 0.55), 0 10px 32px -18px rgb(0 0 0 / 0.55)`,
-                        transition: `box-shadow ${effectsProfile.transitionMs}ms ease`,
-                        aspectRatio: "4 / 3",
-                      }}
-                    />
+                    <div className="flex flex-col items-center gap-6">
+                      <Image
+                        src={coverSrc}
+                        radius="lg"
+                        className="transition-shadow ease-out"
+                        classNames={{
+                          wrapper: "pointer-events-none",
+                          img: "w-full h-full object-cover select-none pointer-events-none",
+                        }}
+                        style={{
+                          width: coverSize,
+                          height: coverSize,
+                          boxShadow: `0 28px 90px -35px rgb(var(--glow-rgb) / 0.55), 0 10px 32px -18px rgb(0 0 0 / 0.55)`,
+                          transition: `box-shadow ${effectsProfile.transitionMs}ms ease`,
+                          aspectRatio: "1 / 1",
+                        }}
+                      />
+                      {/* 封面下方：播放控件胶囊（不自动隐藏） */}
+                      <PlayerCapsule />
+                    </div>
                   </div>
                 )}
 
@@ -358,54 +365,63 @@ const FullScreenPlayer = () => {
                       !showCover ? "flex items-center justify-center" : "",
                     )}
                   >
-                    <Lyrics color={lyricsColor} centered={!showCover} showControls={isUiVisible} />
+                    <Lyrics
+                      color={lyricsColor}
+                      centered={!showCover}
+                      showControls={isUiVisible}
+                      onOpenComments={playItem.type === "mv" ? openComments : undefined}
+                    />
                   </div>
                 )}
               </div>
+
+              {/* 歌词未显示或本地曲目时：常驻工具组（评论 + 音量）仍显示 */}
+              {isUiVisible && (!showLyrics || isLocal) && (
+                <div className="pointer-events-none absolute inset-0 z-20 flex items-end justify-end px-12 py-24">
+                  <div className="pointer-events-auto mr-6 mb-6">
+                    <UtilityControls onOpenComments={playItem.type === "mv" ? openComments : undefined} />
+                  </div>
+                </div>
+              )}
 
               {showSpectrum && (
                 <div
                   className="pointer-events-none absolute inset-x-0 z-30 flex w-full justify-center"
                   style={{
-                    bottom: isUiVisible ? controlsHeight + 12 : 24,
+                    bottom: isUiVisible ? 20 : 8,
                     transition: "bottom 300ms ease",
                   }}
                 >
-                  <div className="mx-auto flex w-full max-w-6xl justify-center px-12">
+                  <div className="max-w-8xl mx-auto flex w-full justify-center px-6">
                     <AudioWaveform
-                      width={waveformWidth}
-                      height={40}
-                      barCount={waveformBarCount}
+                      width={Math.min(1400, Math.max(600, Math.round(windowWidth * 0.85)))}
+                      height={30}
+                      barCount={Math.max(80, Math.min(200, Math.round((windowWidth * 0.85) / 4)))}
                       barColor={spectrumColor || "currentColor"}
                     />
                   </div>
                 </div>
               )}
 
+              {/* 底部进度条：贴紧窗口最底部，带辉光 */}
               <div
-                ref={controlsRef}
                 className={clsx(
-                  "absolute inset-x-0 bottom-0 z-40 transform transition-transform duration-300 ease-out",
-                  isUiVisible
-                    ? "pointer-events-auto translate-y-0 opacity-100"
-                    : "pointer-events-none translate-y-full opacity-0",
+                  "absolute inset-x-0 bottom-0 z-40 transition-opacity duration-300 ease-out",
+                  isUiVisible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
                 )}
               >
-                <div className="mx-auto mb-4 flex w-full max-w-6xl flex-col items-center gap-2 px-12">
-                  <MusicPlayProgress className="w-full" trackClassName="h-[6px]" />
-                  <div className="flex w-full items-center justify-center space-x-4">
-                    <MusicPlayMode />
-                    <MusicPlayControl />
-                    <OpenPlaylistDrawerButton />
-                  </div>
-                </div>
+                <FullScreenProgressBar isDisabled={!isUiVisible} />
               </div>
 
+              {/* 右侧：分集列表按钮，箭头 < */}
               {isUiVisible && playItem.hasMultiPart && !isPageListOpen && (
                 <div className="absolute top-1/2 right-0 z-20 -translate-y-1/2">
                   <IconButton
                     className="h-24 w-6 min-w-0 rounded-l-xl rounded-r-none bg-white/10 px-0 backdrop-blur-md transition-colors hover:bg-white/20"
-                    onPress={() => setIsPageListOpen(!isPageListOpen)}
+                    onPress={() => {
+                      setIsPlayListOpen(false);
+                      setIsPageListOpen(true);
+                    }}
                     tooltip="显示分集列表"
                     tooltipProps={{
                       placement: "left",
@@ -427,6 +443,77 @@ const FullScreenPlayer = () => {
                 }}
                 onClose={() => setIsPageListOpen(false)}
               />
+
+              {/* 左侧：播放列表按钮，箭头 > */}
+              {isUiVisible && !isPlayListOpen && (
+                <div className="absolute top-1/2 left-0 z-20 -translate-y-1/2">
+                  <IconButton
+                    className="h-24 w-6 min-w-0 rounded-l-none rounded-r-xl bg-white/10 px-0 backdrop-blur-md transition-colors hover:bg-white/20"
+                    onPress={() => {
+                      setIsPageListOpen(false);
+                      setIsPlayListOpen(true);
+                    }}
+                    tooltip="显示播放列表"
+                    tooltipProps={{
+                      placement: "right",
+                    }}
+                  >
+                    <RiArrowRightSLine size={24} className="text-white/80" />
+                  </IconButton>
+                </div>
+              )}
+
+              <PlayList
+                ref={playListRef}
+                className={`absolute top-1/2 left-0 z-30 -translate-y-1/2 rounded-l-none transition-all duration-300 ease-out ${
+                  isPlayListOpen ? "translate-x-0 opacity-100" : "pointer-events-none -translate-x-full opacity-0"
+                }`}
+                style={{
+                  width: 320,
+                  height: "min(60vh, 420px)",
+                }}
+                onClose={() => setIsPlayListOpen(false)}
+              />
+
+              {/* 底部：评论面板，从下往上滑出 */}
+              <CommentPanel
+                ref={commentRef}
+                className={`window-no-drag absolute inset-x-0 bottom-0 z-50 transition-all duration-300 ease-out ${
+                  isCommentOpen ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-full opacity-0"
+                }`}
+                style={{
+                  height: "min(80vh, 700px)",
+                  borderRadius: "var(--heroui-radius-medium) var(--heroui-radius-medium) 0 0",
+                }}
+                onClose={() => setIsCommentOpen(false)}
+              />
+
+              <Modal
+                disableAnimation
+                isOpen={isSettingsOpen}
+                onOpenChange={setIsSettingsOpen}
+                radius="lg"
+                size="md"
+                placement="center"
+                hideCloseButton
+                isDismissable
+                classNames={{
+                  base: "bg-black/25 backdrop-blur-2xl backdrop-saturate-150 border border-white/12 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)]",
+                }}
+                className="text-white"
+                style={{
+                  ["--heroui-foreground" as any]: hexToHsl("#ffffff"),
+                }}
+              >
+                <ModalContent>
+                  <ModalHeader>
+                    <h2 className="text-lg font-semibold">播放器设置</h2>
+                  </ModalHeader>
+                  <ModalBody>
+                    <FullScreenPlayerSettingsPanel />
+                  </ModalBody>
+                </ModalContent>
+              </Modal>
             </DrawerBody>
           )
         }

@@ -6,6 +6,8 @@ import { twMerge } from "tailwind-merge";
 
 import type { ContextMenuItem } from "@/components/context-menu";
 
+import { glassMenuClassName } from "@/common/constants/glass";
+
 export interface OperationMenuProps {
   items: ContextMenuItem[];
   onAction?: (key: string) => void;
@@ -21,11 +23,12 @@ const OperationMenu = ({ items, onAction }: OperationMenuProps) => {
           <RiMore2Line size={16} />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="min-w-[140px] p-0">
+      <PopoverContent className={twMerge(glassMenuClassName, "min-w-[140px] p-0")}>
         {/* @ts-ignore 忽略 ListboxItem 的 key 类型错误 */}
         <Listbox
           aria-label="操作菜单"
           selectionMode="none"
+          variant="flat"
           onAction={key => {
             onAction?.(key as string);
             setIsOpen(false);
@@ -38,7 +41,12 @@ const OperationMenu = ({ items, onAction }: OperationMenuProps) => {
               <ListboxItem
                 key={item.key}
                 startContent={item.icon}
-                className={twMerge("rounded-medium", item.className)}
+                className={twMerge(
+                  "rounded-medium",
+                  item.color === "danger" &&
+                    "text-danger data-[hover=true]:bg-danger! data-[hover=true]:text-danger-foreground! data-[focus=true]:bg-danger! data-[focus=true]:text-danger-foreground!",
+                  item.className,
+                )}
                 color={item.color}
               >
                 {item.label}

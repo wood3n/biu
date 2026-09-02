@@ -17,7 +17,6 @@ const MusicFavButton = () => {
   const onOpenFavSelectModal = useModalStore(s => s.onOpenFavSelectModal);
   const isFav = useMusicFavStore(s => s.isFav);
   const refreshIsFav = useMusicFavStore(s => s.refreshIsFav);
-  const setIsFav = useMusicFavStore(s => s.setIsFav);
 
   useEffect(() => {
     refreshIsFav();
@@ -30,8 +29,10 @@ const MusicFavButton = () => {
       rid: playItem.type === "mv" ? String(playItem.aid) : String(playItem.sid),
       type: playItem.type === "mv" ? 2 : 12,
       title: "收藏",
-      onSuccess: selectedIds => {
-        setIsFav(Boolean(selectedIds?.length));
+      playData: playItem,
+      onSuccess: () => {
+        // 收藏弹窗可能同时修改 B站收藏夹与 BBPlayer 歌单，统一重新查询共享收藏状态
+        void refreshIsFav();
 
         if (location.pathname.startsWith("/collection/")) {
           const searchParams = new URLSearchParams(location.search);

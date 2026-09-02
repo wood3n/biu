@@ -66,6 +66,7 @@ export const SystemSettingsTab = ({
               aria-label="数据展示"
               classNames={{
                 cursor: "rounded-medium",
+                tabList: "bg-default-200/80 dark:bg-default-100/10",
               }}
               selectedKey={field.value}
               onSelectionChange={key => field.onChange(key)}
@@ -116,6 +117,7 @@ export const SystemSettingsTab = ({
               aria-label="主题切换"
               classNames={{
                 cursor: "rounded-medium",
+                tabList: "bg-default-200/80 dark:bg-default-100/10",
               }}
               selectedKey={field.value}
               onSelectionChange={key => field.onChange(key)}
@@ -228,6 +230,18 @@ export const SystemSettingsTab = ({
           />
         </div>
       </div>
+      {/* 侧边栏垂直居中 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">侧边栏垂直居中</div>
+          <div className="text-sm text-zinc-500">侧边栏收起时图标在垂直方向居中</div>
+        </div>
+        <Controller
+          control={control}
+          name="sideMenuCollapsedCenter"
+          render={({ field }) => <Switch disableAnimation isSelected={field.value} onValueChange={field.onChange} />}
+        />
+      </div>
       <Divider />
       <h2>播放</h2>
       {/* 音质选择 */}
@@ -275,6 +289,18 @@ export const SystemSettingsTab = ({
         <Controller
           control={control}
           name="reportPlayHistory"
+          render={({ field }) => <Switch disableAnimation isSelected={field.value} onValueChange={field.onChange} />}
+        />
+      </div>
+      {/* 窗口七彩跑马灯 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">七彩跑马灯</div>
+          <div className="text-sm text-zinc-500">播放时窗口边框显示随音乐律动的彩色光带</div>
+        </div>
+        <Controller
+          control={control}
+          name="marqueeEnabled"
           render={({ field }) => <Switch disableAnimation isSelected={field.value} onValueChange={field.onChange} />}
         />
       </div>

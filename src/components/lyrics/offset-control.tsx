@@ -29,7 +29,7 @@ const OffsetControl = ({ value, min = -5000, max = 5000, onChange, onOpenChange 
 
   return (
     <Popover
-      placement="right"
+      placement="left"
       showArrow={false}
       shouldCloseOnBlur={false}
       disableAnimation
@@ -47,7 +47,7 @@ const OffsetControl = ({ value, min = -5000, max = 5000, onChange, onOpenChange 
           <RiTimeLine size={16} />
         </IconButton>
       </PopoverTrigger>
-      <PopoverContent className="px-3 py-2">
+      <PopoverContent className="border border-white/12 bg-black/25 px-3 py-2 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)] backdrop-blur-2xl backdrop-saturate-150">
         <div className="flex flex-col items-center gap-2">
           <Slider
             aria-label="调整歌词偏移"
@@ -62,10 +62,10 @@ const OffsetControl = ({ value, min = -5000, max = 5000, onChange, onOpenChange 
             className="h-32"
             classNames={{
               track: "w-1",
-              thumb: "after:hidden",
+              thumb: "after:hidden data-[hover=true]:bg-primary data-[hover=true]:scale-100",
             }}
           />
-          <span className="text-foreground/60 text-[10px] font-bold whitespace-nowrap">{formatLabel(value)} ms</span>
+          <span className="text-[10px] font-bold whitespace-nowrap text-white/60">{formatLabel(value)} ms</span>
         </div>
       </PopoverContent>
     </Popover>

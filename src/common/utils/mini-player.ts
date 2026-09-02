@@ -13,6 +13,9 @@ export interface MiniPlayerMainStateSnapshot {
   isPlaying: boolean;
   title?: string;
   cover?: string;
+  ownerName?: string;
+  bvid?: string;
+  cid?: string;
   currentTime: number;
   duration: number;
   playMode?: PlayMode;
@@ -56,6 +59,9 @@ function getMainStateSnapshot(): MiniPlayerMainStateSnapshot {
     isSingle: list.length === 1,
     title: playItem?.pageTitle || playItem?.title,
     cover: playItem?.pageCover || playItem?.cover,
+    ownerName: playItem?.ownerName,
+    bvid: playItem?.bvid,
+    cid: playItem?.cid,
     playId,
     isPlaying,
     currentTime: Number(currentTime ?? 0),

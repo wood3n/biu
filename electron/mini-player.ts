@@ -12,15 +12,19 @@ const createMiniPlayer = () => {
   miniPlayer = new BrowserWindow({
     title: "Biu Mini Player",
     show: true,
-    hasShadow: true,
+    hasShadow: false,
     width: 320,
-    height: 100,
+    height: 67,
     resizable: false,
     roundedCorners: false,
     center: true,
     // 隐藏窗口标题栏和窗口按钮
     frame: false,
+    // 直角边形态：transparent 禁用 DWM 窗口框架渲染（无系统阴影），
+    // 亚克力由系统按窗口矩形整块绘制，直角窗口与其天然对齐，无露馅；
+    // 圆角与亚克力、无阴影在 Win11 上不可兼得，故 UI 整体走直角设计
     transparent: true,
+    backgroundMaterial: "acrylic",
     titleBarOverlay: false,
     alwaysOnTop: true,
     skipTaskbar: true,

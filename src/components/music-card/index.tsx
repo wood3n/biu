@@ -50,7 +50,7 @@ const MusicCard = memo(
                 <div className="pointer-events-none absolute right-2 bottom-8 z-40 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100">
                   <div className="bg-primary rounded-full shadow-2xl">
                     <div className="flex h-10 w-10 items-center justify-center">
-                      <RiPlayFill className="text-black" size={26} />
+                      <RiPlayFill className="text-white" size={26} />
                     </div>
                   </div>
                 </div>

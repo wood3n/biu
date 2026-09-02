@@ -13,9 +13,11 @@ import {
 } from "@heroui/react";
 import { RiExternalLinkLine, RiMoreLine, RiPlayFill, RiThumbUpFill, RiThumbUpLine } from "@remixicon/react";
 import moment from "moment";
+import { twMerge } from "tailwind-merge";
 
 import type { WebDynamicItem } from "@/service/web-dynamic";
 
+import { glassMenuClassName } from "@/common/constants/glass";
 import { formatNumber } from "@/common/utils/number";
 import { openBiliVideoLink } from "@/common/utils/url";
 import IconButton from "@/components/icon-button";
@@ -116,7 +118,7 @@ const DynamicItem = ({ item }: DynamicItemProps) => {
             {isLike ? <RiThumbUpFill size={18} /> : <RiThumbUpLine size={18} />}
             <span>{likeCount > 0 ? formatNumber(likeCount) : "点赞"}</span>
           </Button>
-          <Dropdown>
+          <Dropdown disableAnimation classNames={{ content: twMerge(glassMenuClassName) }}>
             <DropdownTrigger>
               <IconButton>
                 <RiMoreLine size={16} />
@@ -124,6 +126,7 @@ const DynamicItem = ({ item }: DynamicItemProps) => {
             </DropdownTrigger>
             <DropdownMenu
               aria-label="用户动态操作"
+              variant="flat"
               items={[
                 {
                   key: "open",
