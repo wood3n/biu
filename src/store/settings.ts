@@ -81,6 +81,7 @@ export const useSettings = create<AppSettings & SettingsActions>()(
           showLyricsFurigana: state.showLyricsFurigana,
           playbarCollapsed: state.playbarCollapsed,
           sideMenuCollapsedCenter: state.sideMenuCollapsedCenter,
+          marqueeEnabled: state.marqueeEnabled,
         };
       },
     },

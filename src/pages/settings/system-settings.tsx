@@ -292,6 +292,18 @@ export const SystemSettingsTab = ({
           render={({ field }) => <Switch disableAnimation isSelected={field.value} onValueChange={field.onChange} />}
         />
       </div>
+      {/* 窗口七彩跑马灯 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">七彩跑马灯</div>
+          <div className="text-sm text-zinc-500">播放时窗口边框显示随音乐律动的彩色光带</div>
+        </div>
+        <Controller
+          control={control}
+          name="marqueeEnabled"
+          render={({ field }) => <Switch disableAnimation isSelected={field.value} onValueChange={field.onChange} />}
+        />
+      </div>
 
       <Divider />
       <h2>下载</h2>

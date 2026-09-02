@@ -32,4 +32,5 @@ export const defaultAppSettings: AppSettings = {
   showLyricsFurigana: false,
   playbarCollapsed: false,
   sideMenuCollapsedCenter: true,
+  marqueeEnabled: false,
 };

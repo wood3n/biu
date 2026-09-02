@@ -18,6 +18,7 @@ import { getPlayModeList } from "@/common/constants/audio";
 import { createBroadcastChannel, toggleMiniMode } from "@/common/utils/mini-player";
 import Image from "@/components/image";
 import { getLyricsAuto, parseLrcToLines } from "@/components/lyrics/get-lyrics";
+import MarqueeLights from "@/components/marquee-lights";
 import { usePlayProgress } from "@/store/play-progress";
 import { StoreNameMap } from "@shared/store";
 
@@ -334,6 +335,17 @@ const MiniPlayer = () => {
 
   return (
     <div className="window-drag flex h-screen w-screen overflow-hidden select-none">
+      {/* 七彩跑马灯光带：迷你窗口是透明+亚克力，外发光无法溢出，只保留对角 L 形光带 + 律动 */}
+      <MarqueeLights
+        mode="listen"
+        block={8}
+        gap={2}
+        thickness={2}
+        bandCount={2}
+        radius={0}
+        zIndex={60}
+        isPlaying={isPlaying}
+      />
       <CoverView />
       {/* 右栏整体跟随根节点可拖动，交互控件（按钮/进度条）各自豁免 */}
       <div className="flex min-w-0 flex-1 flex-col">

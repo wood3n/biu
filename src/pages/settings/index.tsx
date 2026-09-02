@@ -33,6 +33,7 @@ const useSystemSettingsForm = () => {
     proxySettings,
     reportPlayHistory,
     sideMenuCollapsedCenter,
+    marqueeEnabled,
   } = useSettings(
     useShallow(s => ({
       fontFamily: s.fontFamily,
@@ -52,6 +53,7 @@ const useSystemSettingsForm = () => {
       proxySettings: s.proxySettings,
       reportPlayHistory: s.reportPlayHistory,
       sideMenuCollapsedCenter: s.sideMenuCollapsedCenter,
+      marqueeEnabled: s.marqueeEnabled,
     })),
   );
   const updateSettings = useSettings(s => s.update);
@@ -87,6 +89,7 @@ const useSystemSettingsForm = () => {
       },
       reportPlayHistory,
       sideMenuCollapsedCenter,
+      marqueeEnabled,
     },
   });
 

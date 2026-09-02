@@ -46,4 +46,6 @@ interface AppSettings {
   playbarCollapsed: boolean;
   /** 侧边栏收起时垂直居中 */
   sideMenuCollapsedCenter: boolean;
+  /** 窗口七彩跑马灯开关（BPM 联动） */
+  marqueeEnabled: boolean;
 }
