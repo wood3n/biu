@@ -67,6 +67,24 @@ const bbpTrackToPlayData = (track: BBPTrack): PlayData => ({
   duration: track.duration,
 });
 
+/** 刷新图标最短旋转时长（ms），快速请求时避免图标一闪而过 */
+const MIN_SPIN_MS = 1000;
+
+const delay = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+/** 执行同步并保证至少耗时 MIN_SPIN_MS（无论成败），失败时原样抛出 */
+const syncWithMinSpin = async (sync: () => Promise<unknown>) => {
+  const startedAt = Date.now();
+  try {
+    await sync();
+  } finally {
+    const remaining = MIN_SPIN_MS - (Date.now() - startedAt);
+    if (remaining > 0) {
+      await delay(remaining);
+    }
+  }
+};
+
 const BBPFavorites = () => {
   const { id: playlistId } = useParams();
   const [searchParams] = useSearchParams();
@@ -86,6 +104,8 @@ const BBPFavorites = () => {
   const rotateInviteCode = useBBPPlaylistStore(state => state.rotateInviteCode);
 
   const [loading, setLoading] = useState(false);
+  /** 后台静默同步中（有缓存时打开页面的增量刷新），仅驱动刷新图标 */
+  const [syncing, setSyncing] = useState(false);
   const [playCountMap, setPlayCountMap] = useState<Record<string, number>>({});
   const [pubdateMap, setPubdateMap] = useState<Record<string, number>>({});
   const [keyword, setKeyword] = useState<string>("");
@@ -103,6 +123,9 @@ const BBPFavorites = () => {
   const tracks = useMemo(() => cache?.tracks ?? [], [cache?.tracks]);
   const metadata = cache?.metadata;
 
+  /** 带最短旋转时长的歌单同步，保证刷新图标至少转 1s */
+  const runSync = useCallback((id: string) => syncWithMinSpin(() => syncPlaylist(id)), [syncPlaylist]);
+
   useEffect(() => {
     if (!playlistId || !bbpToken) return;
     let canceled = false;
@@ -110,14 +133,17 @@ const BBPFavorites = () => {
     const cachedTracks = useBBPPlaylistStore.getState().playlistCache[playlistId]?.tracks ?? [];
     // 有本地缓存：立即渲染，后台静默同步刷新（不阻塞 UI、不显示骨架屏）
     if (cachedTracks.length) {
+      setSyncing(true);
       void (async () => {
         try {
-          await syncPlaylist(playlistId);
+          await runSync(playlistId);
         } catch (error) {
           if (!canceled) {
             addToast({ title: "获取歌单内容失败", color: "danger" });
             console.error(error);
           }
+        } finally {
+          if (!canceled) setSyncing(false);
         }
       })();
       return () => {
@@ -128,7 +154,7 @@ const BBPFavorites = () => {
     setLoading(true);
     (async () => {
       try {
-        await syncPlaylist(playlistId);
+        await runSync(playlistId);
       } catch (error) {
         if (!canceled) {
           addToast({ title: "获取歌单内容失败", color: "danger" });
@@ -141,7 +167,7 @@ const BBPFavorites = () => {
     return () => {
       canceled = true;
     };
-  }, [playlistId, bbpToken, syncPlaylist]);
+  }, [playlistId, bbpToken, runSync]);
 
   // 本地过滤 + 排序后的曲目列表
   const displayTracks = useMemo(() => {
@@ -303,10 +329,10 @@ const BBPFavorites = () => {
   const handleRefresh = useCallback(() => {
     if (!playlistId || !bbpToken) return;
     setLoading(true);
-    syncPlaylist(playlistId)
+    runSync(playlistId)
       .catch(() => addToast({ title: "刷新失败", color: "danger" }))
       .finally(() => setLoading(false));
-  }, [playlistId, bbpToken, syncPlaylist]);
+  }, [playlistId, bbpToken, runSync]);
 
   const handleDownloadAll = useCallback(
     async (fileType: MediaDownloadOutputFileType) => {
@@ -559,8 +585,8 @@ const BBPFavorites = () => {
               <RiTeamLine size={18} />
             </IconButton>
           )}
-          <IconButton size="md" variant="flat" tooltip="刷新" onPress={handleRefresh} isDisabled={loading}>
-            <RiRefreshLine size={18} className={loading ? "animate-spin" : undefined} />
+          <IconButton size="md" variant="flat" tooltip="刷新" onPress={handleRefresh} isDisabled={loading || syncing}>
+            <RiRefreshLine size={18} className={loading || syncing ? "animate-spin" : undefined} />
           </IconButton>
           <Dropdown
             disableAnimation
