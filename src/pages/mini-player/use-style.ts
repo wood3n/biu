@@ -1,6 +1,10 @@
 import { useEffect } from "react";
 
+import { useTheme } from "@/components/theme/use-theme";
+
 export const useStyle = () => {
+  const { theme } = useTheme();
+
   useEffect(() => {
     document.documentElement.style.background = "transparent";
     document.body.style.background = "transparent";
@@ -10,9 +14,9 @@ export const useStyle = () => {
     const rootEl: HTMLDivElement | null = document.querySelector("#root");
     if (rootEl) {
       // 直角形态：亚克力由系统 backgroundMaterial 提供，
-      // 网页只需透明底让亚克力透出，不画背景色也不画圆角；
+      // 网页叠一层主题色纱提亮/压暗亚克力：浅色白纱、深色黑纱；
       // 加 1px 半透明描边，让窗口轮廓在浅色桌面上可辨
-      rootEl.style.background = "transparent";
+      rootEl.style.background = theme === "dark" ? "rgba(0, 0, 0, 0.5)" : "rgba(255, 255, 255, 0.5)";
       rootEl.style.overflow = "hidden";
       rootEl.style.outline = "1px solid hsl(var(--heroui-foreground) / 12%)";
       rootEl.style.outlineOffset = "-1px";
@@ -33,5 +37,5 @@ export const useStyle = () => {
         rootEl.style.removeProperty("outline-offset");
       }
     };
-  }, []);
+  }, [theme]);
 };

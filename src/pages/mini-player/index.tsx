@@ -13,6 +13,7 @@ import { useShallow } from "zustand/react/shallow";
 
 import type { WebPlayerParams } from "@/service/web-player";
 
+import { ReactComponent as LogoIcon } from "@/assets/icons/logo.svg";
 import { getPlayModeList } from "@/common/constants/audio";
 import { createBroadcastChannel, toggleMiniMode } from "@/common/utils/mini-player";
 import Image from "@/components/image";
@@ -102,20 +103,35 @@ const MarqueeText = memo(({ text, className }: { text: string; className?: strin
 
 const CoverView = memo(() => {
   const cover = usePlayState(s => s.cover);
-  if (!cover) return null;
+  if (cover) {
+    return (
+      <div className="relative h-full flex-shrink-0" style={{ width: COVER_WIDTH }}>
+        <Image
+          removeWrapper
+          radius="none"
+          src={cover}
+          width={COVER_WIDTH}
+          height="100%"
+          params="672w_378h_1c.avif"
+          loading="eager"
+          decoding="async"
+          style={{
+            transform: "translateZ(0)",
+            backfaceVisibility: "hidden",
+            willChange: "transform",
+            contain: "paint",
+          }}
+        />
+      </div>
+    );
+  }
+  // 无封面时显示 logo 占位
   return (
-    <div className="relative h-full flex-shrink-0" style={{ width: COVER_WIDTH }}>
-      <Image
-        removeWrapper
-        radius="none"
-        src={cover}
-        width={COVER_WIDTH}
-        height="100%"
-        params="672w_378h_1c.avif"
-        loading="eager"
-        decoding="async"
-        style={{ transform: "translateZ(0)", backfaceVisibility: "hidden", willChange: "transform", contain: "paint" }}
-      />
+    <div
+      className="bg-default-200/40 flex h-full flex-shrink-0 items-center justify-center"
+      style={{ width: COVER_WIDTH }}
+    >
+      <LogoIcon className="text-default-300/60 h-7 w-7" />
     </div>
   );
 });
