@@ -136,11 +136,11 @@ const InfoView = memo(
     activeLyricIndex: number;
     isHovered: boolean;
   }) => {
-    const textStyle = "text-center text-xs font-medium whitespace-nowrap";
+    const textStyle = "text-center text-[13px] font-medium whitespace-nowrap";
 
     // hover 且有歌词 → 显示 歌名 - 歌手
     if (isHovered) {
-      if (!title) return <span className="truncate text-center text-xs text-zinc-500">暂无播放内容</span>;
+      if (!title) return <span className="truncate text-center text-[13px] text-zinc-500">暂无播放内容</span>;
       const text = ownerName ? `${title} - ${ownerName}` : title;
       return <MarqueeText text={text} className={textStyle} />;
     }
@@ -154,8 +154,8 @@ const InfoView = memo(
     }
 
     // 无歌词时 fallback 显示歌名
-    if (!title) return <span className="truncate text-center text-xs text-zinc-500">暂无播放内容</span>;
-    return <span className="truncate text-center text-xs font-medium">{title}</span>;
+    if (!title) return <span className="truncate text-center text-[13px] text-zinc-500">暂无播放内容</span>;
+    return <span className="truncate text-center text-[13px] font-medium">{title}</span>;
   },
 );
 
@@ -317,9 +317,10 @@ const MiniPlayer = () => {
   }, [displayTime, lyrics]);
 
   return (
-    <div className="window-drag rounded-medium flex h-screen w-screen overflow-hidden select-none">
+    <div className="window-drag flex h-screen w-screen overflow-hidden select-none">
       <CoverView />
-      <div className="window-no-drag flex min-w-0 flex-1 flex-col">
+      {/* 右栏整体跟随根节点可拖动，交互控件（按钮/进度条）各自豁免 */}
+      <div className="flex min-w-0 flex-1 flex-col">
         {/* 第一行：歌词/歌名 */}
         <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-2">
           <InfoView
@@ -338,7 +339,7 @@ const MiniPlayer = () => {
             variant="light"
             disableAnimation
             onPress={togglePlayMode}
-            className="hover:text-primary window-no-drag"
+            className="hover:text-primary window-no-drag h-6 min-w-6"
             aria-label="播放模式"
           >
             {playModeIcon}
@@ -355,7 +356,7 @@ const MiniPlayer = () => {
               variant="light"
               disableAnimation
               onPress={prev}
-              className="hover:text-primary window-no-drag"
+              className="hover:text-primary window-no-drag h-6 min-w-6"
             >
               <RiSkipBackFill size={16} />
             </Button>
@@ -368,7 +369,7 @@ const MiniPlayer = () => {
               onPress={() => {
                 togglePlay();
               }}
-              className="hover:text-primary window-no-drag"
+              className="hover:text-primary window-no-drag h-6 min-w-6"
             >
               {isPlaying ? <RiPauseCircleFill size={24} /> : <RiPlayCircleFill size={24} />}
             </Button>
@@ -381,7 +382,7 @@ const MiniPlayer = () => {
               onPress={() => {
                 next();
               }}
-              className="hover:text-primary window-no-drag"
+              className="hover:text-primary window-no-drag h-6 min-w-6"
             >
               <RiSkipForwardFill size={16} />
             </Button>
@@ -392,7 +393,7 @@ const MiniPlayer = () => {
             variant="light"
             disableAnimation
             onPress={toggleMiniMode}
-            className="hover:text-primary window-no-drag"
+            className="hover:text-primary window-no-drag h-6 min-w-6"
           >
             <RiExpandDiagonalLine size={14} />
           </Button>
