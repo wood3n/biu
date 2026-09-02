@@ -1,4 +1,124 @@
+---
+AIGC:
+  ContentProducer: '001191110102MAD55U9H0F10002'
+  ContentPropagator: '001191110102MAD55U9H0F10002'
+  Label: '1'
+  ProduceID: '8aec60f5-1f43-4e9e-b10a-2bb8207563ac'
+  PropagateID: '8aec60f5-1f43-4e9e-b10a-2bb8207563ac'
+  ReservedCode1: 'f3a33bdb-a39d-43aa-ae52-981647d619a2'
+  ReservedCode2: 'f3a33bdb-a39d-43aa-ae52-981647d619a2'
+---
+
 # Changelog
+
+## v2.2.0-xretia
+
+[compare changes](https://github.com/xRetia/biu/compare/v2.1.0-xretia...v2.2.0-xretia)
+
+### 🚀 新功能
+
+- 全屏播放器新增评论面板，支持虚拟滚动、表情展示与自动加载更多 ([c8012d2](https://github.com/xRetia/biu/commit/c8012d2))
+- 评论图片支持点击放大预览，独立于评论面板不影响其状态 ([f5fcad9](https://github.com/xRetia/biu/commit/f5fcad9))
+- 评论面板新增「在 B 站打开」按钮与收起标签回复数显示 ([4821050](https://github.com/xRetia/biu/commit/4821050))
+- 歌词控制按钮按功能分为三组，评论与音量按钮常驻显示 ([b792b02](https://github.com/xRetia/biu/commit/b792b02))
+- BBPlayer 收藏夹操作栏新增「…」菜单，提供下载全部音频/视频 ([115c595](https://github.com/xRetia/biu/commit/115c595))
+- BBPlayer 收藏夹后台同步时刷新图标最少旋转 1 秒 ([0213f21](https://github.com/xRetia/biu/commit/0213f21))
+- 迷你播放器支持直角边框、亚克力模糊与更大范围的拖拽区域 ([b2e5768](https://github.com/xRetia/biu/commit/b2e5768))
+
+### 🩹 修复问题
+
+- 修复楼中楼「加载更多」误关评论面板的问题 ([98bb5cd](https://github.com/xRetia/biu/commit/98bb5cd))
+- 修复评论图片预览滚轮缩放导致页面异常滚动与点击穿透的问题，预览交互整体简化 ([98bb5cd](https://github.com/xRetia/biu/commit/98bb5cd))
+- 统一筛选标签栏与按钮高度为 40px，补充阴影对齐视觉高度 ([c896457](https://github.com/xRetia/biu/commit/c896457))
+- BBPlayer 收藏夹封面缩略图宽度调整为 168px ([44eede4](https://github.com/xRetia/biu/commit/44eede4))
+- 修复迷你播放器进度条滑块样式问题 ([562f76b](https://github.com/xRetia/biu/commit/562f76b))
+
+### 🎨 UI 调整
+
+- 评论面板毛玻璃背景与楼中楼默认展开 ([3df6c51](https://github.com/xRetia/biu/commit/3df6c51))
+- 筛选标签栏添加阴影保持与并排控件视觉高度一致 ([5eed54c](https://github.com/xRetia/biu/commit/5eed54c))
+
+## v2.1.0-xretia
+
+[compare changes](https://github.com/xRetia/biu/compare/v2.0.0-xretia...v2.1.0-xretia)
+
+### 🚀 新功能
+
+- 迷你播放器双行布局，歌词支持条件跑马灯滚动 ([479c99a](https://github.com/xRetia/biu/commit/479c99a))
+- 迷你播放器亚克力模糊效果，悬停时显示歌名 ([bda9fd5](https://github.com/xRetia/biu/commit/bda9fd5))
+
+### 🩹 修复问题
+
+- 搜索输入下拉面板改用 createPortal 实现，避免 Popover 劫持焦点 ([8aa1492](https://github.com/xRetia/biu/commit/8aa1492))
+- 调整迷你播放器进度条滑块样式 ([562f76b](https://github.com/xRetia/biu/commit/562f76b))
+
+## v2.0.0-xretia
+
+[compare changes](https://github.com/xRetia/biu/compare/v1.16.0...v2.0.0-xretia)
+
+### 🚀 新功能
+
+- 新增 BBPlayer 共享歌单：登录、歌单列表、缓存与过期自动刷新、播放栏收藏状态共享、修改与成员管理、下载全部音频/视频等完整功能 ([7f9f1f4](https://github.com/xRetia/biu/commit/7f9f1f4) → [115c595](https://github.com/xRetia/biu/commit/115c595))
+- 播放栏折叠功能与折叠态横向小卡片 ([8dffe04](https://github.com/xRetia/biu/commit/8dffe04), [69651a7](https://github.com/xRetia/biu/commit/69651a7))
+- 歌词翻译开关与假名注音功能 ([679309a](https://github.com/xRetia/biu/commit/679309a))
+- 全屏播放器布局与播放列表重构 ([efb44ef](https://github.com/xRetia/biu/commit/efb44ef))
+- 播放列表与分集列表改用整行右键菜单 ([7721ead](https://github.com/xRetia/biu/commit/7721ead))
+- 导航栏毛玻璃悬浮，内容可滚动穿过 ([f0d6e49](https://github.com/xRetia/biu/commit/f0d6e49))
+- 搜索建议面板改为毛玻璃效果 ([7132fe5](https://github.com/xRetia/biu/commit/7132fe5))
+- 全屏播放器设置面板改为 Modal 居中弹窗 + 深色毛玻璃 ([cbfebaf](https://github.com/xRetia/biu/commit/cbfebaf))
+- 全弹出菜单统一毛玻璃背景 ([15d3f62](https://github.com/xRetia/biu/commit/15d3f62))
+- 主界面播放列表参考全屏播放器改造 ([cd80b3b](https://github.com/xRetia/biu/commit/cd80b3b))
+- 收藏弹窗支持 B 站收藏夹与 BBPlayer 歌单同屏多选互移 ([ee50000](https://github.com/xRetia/biu/commit/ee50000))
+- BBPlayer 歌单支持删除（owner）([91b157f](https://github.com/xRetia/biu/commit/91b157f))
+- BBPlayer 收藏夹本地搜索与排序 ([62c5102](https://github.com/xRetia/biu/commit/62c5102))
+- 收藏夹编辑弹窗与取消收藏危险项菜单样式 ([a2b6df8](https://github.com/xRetia/biu/commit/a2b6df8), [4f29b23](https://github.com/xRetia/biu/commit/4f29b23))
+- 歌单本地缓存并启动时优先渲染缓存 ([2858169](https://github.com/xRetia/biu/commit/2858169))
+- 折叠侧边栏支持垂直居中显示选项 ([2f66424](https://github.com/xRetia/biu/commit/2f66424))
+- 图片上传组件支持自定义裁剪比例 ([04fa391](https://github.com/xRetia/biu/commit/04fa391))
+- 侧边栏收起态 BBPlayer 歌单图标随机色背景 ([7e3cfe4](https://github.com/xRetia/biu/commit/7e3cfe4))
+- BBPlayer 歌单页显示 ID 与复制分享链接按钮 ([84885d3](https://github.com/xRetia/biu/commit/84885d3))
+- 未登录默认头像改为 B 站默认头像 ([90e5af1](https://github.com/xRetia/biu/commit/90e5af1))
+- 动态入口图标替换为铃铛通知样式 ([999decd](https://github.com/xRetia/biu/commit/999decd))
+
+### 🩹 修复问题
+
+- BBPlayer unique_key 双冒号格式与 sort_key fractional-indexing 对齐 BBPlayer 手机端 ([4cc4d4b](https://github.com/xRetia/biu/commit/4cc4d4b))
+- 收藏弹窗 BBP 与 B 站 API 并行执行，异步同步不覆盖用户手动勾选 ([beea4d5](https://github.com/xRetia/biu/commit/beea4d5), [5e81133](https://github.com/xRetia/biu/commit/5e81133))
+- 修复播放栏折叠/展开影响播放进度的问题 ([69651a7](https://github.com/xRetia/biu/commit/69651a7))
+- 修复 marquee 无缝循环与播放栏常驻滚动 ([79d1b07](https://github.com/xRetia/biu/commit/79d1b07))
+- 修复播放按钮居中、频谱辉光截断并支持自动搜索歌词 ([bd5752b](https://github.com/xRetia/biu/commit/bd5752b))
+- 修复返回顶部按钮样式并加入出场动画 ([b69b889](https://github.com/xRetia/biu/commit/b69b889))
+- 修复播放栏折叠展开改为水平拉伸弹回动画 ([6de3865](https://github.com/xRetia/biu/commit/6de3865))
+- 修复菜单设置勾选无效问题 ([6d5af14](https://github.com/xRetia/biu/commit/6d5af14))
+- 修复导航栏 BBPlayer 和播放栏分集按钮灰色背景 ([dcc8892](https://github.com/xRetia/biu/commit/dcc8892))
+- 修复 BBP 歌单详情页列错位和播放量不显示 ([7d45112](https://github.com/xRetia/biu/commit/7d45112))
+- 修复添加歌曲到 BBPlayer 歌单失败的问题 ([e198f8e](https://github.com/xRetia/biu/commit/e198f8e), [513fb56](https://github.com/xRetia/biu/commit/513fb56))
+- 修复 B 站收藏夹不显示的问题 ([b9c4709](https://github.com/xRetia/biu/commit/b9c4709))
+- 修复侧边栏图标尺寸和彩色 badge 统一 ([efeb723](https://github.com/xRetia/biu/commit/efeb723))
+- 修复分集列表搜索框圆角跟随设置 ([032eb3f](https://github.com/xRetia/biu/commit/032eb3f))
+- 搜索框 trigger 圆角跟随设置并禁用点击缩放 ([afe9ac7](https://github.com/xRetia/biu/commit/afe9ac7))
+- 毛玻璃样式应用到页面列表搜索输入框 ([f398741](https://github.com/xRetia/biu/commit/f398741))
+- 毛玻璃菜单 hover 高亮只作用于菜单项 ([8e3510c](https://github.com/xRetia/biu/commit/8e3510c))
+- 修复 user-profile 收藏夹 GridCard 缺失 type 属性 ([6d74fcc](https://github.com/xRetia/biu/commit/6d74fcc))
+
+### 💅 Refactors
+
+- 登录从用户菜单剥离为导航栏独立 BBPlayer 按钮 ([2e2cafd](https://github.com/xRetia/biu/commit/2e2cafd))
+- 下载记录页改为平铺列表样式并使用 Tabs 筛选 ([89d6d27](https://github.com/xRetia/biu/commit/89d6d27))
+- 滚动占位改为 JS spacer 并支持自定义顶部高度 ([95fc8ff](https://github.com/xRetia/biu/commit/95fc8ff))
+- bbplayer 提示改为背景卡片 + 感叹号图标 ([1969556](https://github.com/xRetia/biu/commit/1969556))
+- 精简共享歌单提示并缩小封面尺寸 ([e000549](https://github.com/xRetia/biu/commit/e000549))
+
+### 🎨 UI 调整
+
+- 登录弹窗毛玻璃化，手机号与国家码输入框并排布局 ([fe9bc7d](https://github.com/xRetia/biu/commit/fe9bc7d))
+- Toast 毛玻璃化并移至右上角导航栏下方 ([721c2c2](https://github.com/xRetia/biu/commit/721c2c2))
+- 右键菜单危险操作项选中时白字红底，未选中红字 ([7ca0d08](https://github.com/xRetia/biu/commit/7ca0d08))
+- 全局统一输入控件背景为半透明灰 ([6d5c33a](https://github.com/xRetia/biu/commit/6d5c33a))
+- 时间筛选 Tabs 改为 solid 变体并统一背景 ([cee6a35](https://github.com/xRetia/biu/commit/cee6a35))
+- 播放条展开时滚动容器底部增加占位避免内容遮挡 ([f4faa70](https://github.com/xRetia/biu/commit/f4faa70))
+- 调整导航栏右侧排版：头像前置、图标尺寸统一、分组间距优化 ([f023a65](https://github.com/xRetia/biu/commit/f023a65))
+- 播放栏折叠态封面跟随全局圆角 ([35fa22b](https://github.com/xRetia/biu/commit/35fa22b))
 
 ## v1.16.0
 
@@ -1017,3 +1137,5 @@ Thanks to [@flystar233](https://github.com/flystar233)
 * fix release ci ([de91ca1](https://github.com/wood3n/tune/commit/de91ca1de4a31a882f05932675db15db93c83ccd))
 * fix release ci ([91f5165](https://github.com/wood3n/tune/commit/91f516599c0202fde6230b427024b3763c73a13d))
 * fix release ci ([75e9d69](https://github.com/wood3n/tune/commit/75e9d69abf110a0173f331e6b512a26c4a9f3e54))
+
+> AI生成
