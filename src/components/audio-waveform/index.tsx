@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 
+import { getSharedAnalyser, resumeSharedAnalyser } from "@/common/audio/shared-analyser";
 import { audio as audioElement } from "@/store/play-list";
 
 interface AudioWaveformProps {
@@ -9,14 +10,10 @@ interface AudioWaveformProps {
   barColor?: string;
 }
 
-// Global AudioContext singleton to prevent multiple MediaElementSourceNode creation
-let audioContext: AudioContext | null = null;
-let analyser: AnalyserNode | null = null;
-let source: MediaElementAudioSourceNode | null = null;
-
 /**
  * 音频波形可视化组件
  * 使用 Web Audio API 实现动态频谱效果
+ * 共享 AnalyserNode（与跑马灯节拍检测共用同一实例）
  */
 const AudioWaveform = ({ width = 56, height = 56, barCount = 40, barColor = "currentColor" }: AudioWaveformProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -24,7 +21,7 @@ const AudioWaveform = ({ width = 56, height = 56, barCount = 40, barColor = "cur
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !audioElement) return;
+    if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -37,24 +34,11 @@ const AudioWaveform = ({ width = 56, height = 56, barCount = 40, barColor = "cur
     canvas.width = bitmapW;
     canvas.height = bitmapH;
 
-    // Initialize AudioContext and Analyser if not already done
+    // 使用共享 AnalyserNode（与跑马灯节拍检测共用同一实例）
     const initAudio = () => {
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 512; // Increased for better resolution
-
-        try {
-          // Connect the global audio element to the analyser
-          source = audioContext.createMediaElementSource(audioElement);
-          source.connect(analyser);
-          analyser.connect(audioContext.destination);
-        } catch (error) {
-          console.warn("MediaElementSourceNode already connected or creation failed:", error);
-        }
-      }
-      if (audioContext?.state === "suspended") {
-        audioContext.resume();
+      const shared = getSharedAnalyser();
+      if (shared) {
+        resumeSharedAnalyser();
       }
     };
 
@@ -63,9 +47,7 @@ const AudioWaveform = ({ width = 56, height = 56, barCount = 40, barColor = "cur
 
     // Ensure context resumes on play
     const handlePlay = () => {
-      if (audioContext?.state === "suspended") {
-        audioContext.resume();
-      }
+      resumeSharedAnalyser();
       if (!animationIdRef.current) {
         render();
       }
@@ -79,11 +61,13 @@ const AudioWaveform = ({ width = 56, height = 56, barCount = 40, barColor = "cur
     };
 
     const draw = () => {
-      if (!analyser || !ctx) return;
+      const shared = getSharedAnalyser();
+      const analyserNode = shared?.analyser;
+      if (!analyserNode || !ctx) return;
 
-      const bufferLength = analyser.frequencyBinCount;
+      const bufferLength = analyserNode.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
-      analyser.getByteFrequencyData(dataArray);
+      analyserNode.getByteFrequencyData(dataArray);
 
       ctx.clearRect(0, 0, bitmapW, bitmapH);
 
