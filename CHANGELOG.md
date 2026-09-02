@@ -3,10 +3,10 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: 'b576661a-5c0f-41ea-9ea9-16f5a4907f24'
-  PropagateID: 'b576661a-5c0f-41ea-9ea9-16f5a4907f24'
-  ReservedCode1: '505ba44b-fb60-4a14-93bf-527018219e64'
-  ReservedCode2: '505ba44b-fb60-4a14-93bf-527018219e64'
+  ProduceID: '300f392e-fc4d-4473-acfc-983cae6cd5f4'
+  PropagateID: '300f392e-fc4d-4473-acfc-983cae6cd5f4'
+  ReservedCode1: 'aee88850-8120-4d5b-aa13-6acd7141d548'
+  ReservedCode2: 'aee88850-8120-4d5b-aa13-6acd7141d548'
 ---
 
 # Changelog
@@ -17,13 +17,13 @@ AIGC:
 
 ### 🚀 新功能
 
-- 主窗口与迷你播放器新增七彩跑马灯光带，沿窗口四边循环流动（[05dff63](https://github.com/xRetia/biu/commit/05dff63))
-- 光带随音乐节拍律动：实时检测 BPM，鼓点瞬间灯块放大发光，速度随歌曲快慢自动调整（[4a4a846](https://github.com/xRetia/biu/commit/4a4a846))
-- 设置中可开关跑马灯特效，默认关闭（[05dff63](https://github.com/xRetia/biu/commit/05dff63))
+- 主窗口与迷你播放器新增七彩跑马灯光带，沿窗口四边循环流动 ([05dff63](https://github.com/xRetia/biu/commit/05dff63))
+- 光带随音乐节拍律动：实时检测 BPM，鼓点瞬间灯块放大发光，速度随歌曲快慢自动调整 ([4a4a846](https://github.com/xRetia/biu/commit/4a4a846))
+- 设置中可开关跑马灯特效，默认关闭 ([05dff63](https://github.com/xRetia/biu/commit/05dff63))
 
 ### 🩹 修复问题
 
-- 迷你播放器背景遮罩跟随主题色，封面缺失时显示占位图（[53f447a](https://github.com/xRetia/biu/commit/53f447a))
+- 迷你播放器背景遮罩跟随主题色，封面缺失时显示占位图 ([53f447a](https://github.com/xRetia/biu/commit/53f447a))
 
 ## v2.2.0-xretia
 
