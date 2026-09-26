@@ -3,13 +3,33 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: '300f392e-fc4d-4473-acfc-983cae6cd5f4'
-  PropagateID: '300f392e-fc4d-4473-acfc-983cae6cd5f4'
-  ReservedCode1: 'aee88850-8120-4d5b-aa13-6acd7141d548'
-  ReservedCode2: 'aee88850-8120-4d5b-aa13-6acd7141d548'
+  ProduceID: '9b215183-aea6-4568-96cd-e54144bca130'
+  PropagateID: '9b215183-aea6-4568-96cd-e54144bca130'
+  ReservedCode1: '5137526c-f7b4-4b60-ac4f-33a1463c3227'
+  ReservedCode2: '5137526c-f7b4-4b60-ac4f-33a1463c3227'
 ---
 
 # Changelog
+
+## v2.3.2-xretia
+
+[compare changes](https://github.com/xRetia/biu/compare/v2.3.1-xretia...v2.3.2-xretia)
+
+### 🩹 修复问题
+
+- 假名注音：非日语歌词自动禁用开关并提示「仅日语歌词可开启」，避免无效 IPC 调用 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
+- Marquee 滚动：动画时长按文字宽度动态计算（40px/s 基准），内容切换时强制重启动画 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
+- 播放卡顿：`ontimeupdate` 新增 stall 检测，`ended` 未触发时兜底切歌或续播 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
+- 禁用态按钮 tooltip 不显示：用 span 包裹解决 `pointer-events: none` 导致的 hover 失效 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
+- 音量滑块百分比文本宽度跳动：固定宽度 `w-8` + `tabular-nums` 消除布局抖动 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
+- 按钮组 tooltip 缺失：字体大小、歌词偏移、歌词搜索按钮补全 tooltip 并统一 `placement="left"` ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
+- 全屏播放器歌词区右侧间距不足导致按钮重叠：加大右内边距，按钮位置统一调整 ([778f95c](https://github.com/xRetia/biu/commit/778f95c))
+- 频谱条颜色默认值 `currentColor` 在深色背景下不可见，改为 `#ffffff`
+
+### 🎨 UI 调整
+
+- 全屏播放器歌词区右侧内边距从 `px-12` 改为 `pl-12 pr-[130px]`，右下角按钮位置调整为 `right-[50px] bottom-[50px]` ([778f95c](https://github.com/xRetia/biu/commit/778f95c))
+- 频谱条颜色默认值从 `currentColor` 改为白色 `#ffffff`，设置面板颜色校验逻辑同步更新
 
 ## v2.3.1-xretia
 

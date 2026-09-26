@@ -3,10 +3,10 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: '0d71508d-46a7-43f9-b204-cb8dd6f165bd'
-  PropagateID: '0d71508d-46a7-43f9-b204-cb8dd6f165bd'
-  ReservedCode1: '6355c139-6149-4a4d-b1db-3073c7dc844f'
-  ReservedCode2: '6355c139-6149-4a4d-b1db-3073c7dc844f'
+  ProduceID: '49a432ed-b003-4e65-817b-4788bb704747'
+  PropagateID: '49a432ed-b003-4e65-817b-4788bb704747'
+  ReservedCode1: 'faee19f3-1cb1-4846-a1cd-8c01abf1a8ef'
+  ReservedCode2: 'faee19f3-1cb1-4846-a1cd-8c01abf1a8ef'
 ---
 
 # AGENTS.md
@@ -197,6 +197,44 @@ pnpm knip             # 检查未使用的代码
 - 提取 `handleSongEnd(isStall: boolean)` 统一处理 `onended` 和 stall 兜底逻辑
 - 单曲循环模式 stall 兜底：手动重置 `currentTime = 0` 并续播
 - 切歌时在 `subscribe` 回调中重置 stall 检测状态
+
+#### 4. 禁用态按钮 tooltip 不显示 (`src/components/icon-button/index.tsx`)
+
+**问题**: IconButton 禁用后 `pointer-events: none` 导致 tooltip 无法 hover 触发。
+
+**修复**: 用 `<span>` 包裹按钮承载 tooltip，span 不设 `pointer-events: none`，使 tooltip 在禁用态也可正常显示。
+
+#### 5. 音量滑块百分比文本宽度跳动 (`src/components/lyrics/font-size-control.tsx`)
+
+**问题**: 音量百分比文本宽度随数字位数变化（如 "100%" vs "5%"），导致滑块布局抖动。
+
+**修复**: 百分比文本添加固定宽度 `w-8` + `tabular-nums`，数字等宽且固定容器宽度。
+
+#### 6. 按钮组 tooltip 缺失 (`src/components/lyrics/font-size-control.tsx`, `src/components/lyrics/offset-control.tsx`, `src/components/lyrics/utility-controls.tsx`)
+
+**问题**: 字体大小、歌词偏移、歌词搜索按钮缺少 tooltip，用户无法了解按钮功能。
+
+**修复**: 为上述按钮补全 tooltip 内容，统一 `placement="left"`。
+
+### 2026-09-26: 全屏播放器布局与频谱颜色调整
+
+#### 1. 歌词区右侧间距与按钮位置 (`src/components/full-screen-player/index.tsx`, `src/components/lyrics/index.tsx`)
+
+**问题**: 全屏播放器歌词区右侧内边距不足，歌词文本与右下角控制按钮重叠。
+
+**修复**:
+- 歌词容器右侧内边距从 `px-12` 改为 `pl-12 pr-[130px]`，为按钮组预留空间
+- 歌词模式右下角按钮从 `right-5 bottom-5` 调整到 `right-[50px] bottom-[50px]`
+- 无歌词模式按钮从 `mr-6 mb-6` 调整到 `mr-[2px] mb-[50px]`，保持与歌词模式一致
+
+#### 2. 频谱条颜色默认值 (`src/store/full-screen-player-settings.ts`, `src/components/full-screen-player/settings-panel.tsx`)
+
+**问题**: 频谱条颜色默认值 `"currentColor"` 继承父元素文字色，在深色背景或无显式文字色时不可见。
+
+**修复**:
+- `defaultSettings.spectrumColor` 从 `"currentColor"` 改为 `"#ffffff"`
+- 设置面板 `sanitizeSpectrumColor` 校验逻辑同步更新：非法值回退为 `"#ffffff"`，清理旧的 `"currentColor"` 持久化值
+- 仅改默认值，用户自定义选择不受影响
 
 ## 开发注意事项
 

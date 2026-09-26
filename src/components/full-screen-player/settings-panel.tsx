@@ -92,7 +92,7 @@ const FullScreenPlayerSettingsPanel = () => {
   useEffect(() => {
     if (!values || typeof values !== "object") return;
     const sanitizeLyricsColor = (v?: string) => (isHex(v) ? v! : "#ffffff");
-    const sanitizeSpectrumColor = (v?: string) => (v === "currentColor" || isHex(v) ? v! : "currentColor");
+    const sanitizeSpectrumColor = (v?: string) => (isHex(v) ? v! : "#ffffff");
     const sanitizeBackgroundColor = (v?: string) => (isHex(v) ? v! : "#ffffff");
     const id = window.setTimeout(() => {
       update({
