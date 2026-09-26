@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
-import { Popover, PopoverContent, PopoverTrigger, Slider } from "@heroui/react";
+import { Popover, PopoverContent, Slider, Tooltip } from "@heroui/react";
 import { RiFontSize } from "@remixicon/react";
 
 import IconButton from "../icon-button";
@@ -15,6 +15,8 @@ interface FontSizeControlProps {
 
 const FontSizeControl = ({ value, min = 12, max = 48, onChange, onOpenChange }: FontSizeControlProps) => {
   const [open, setOpen] = useState(false);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const step = 1;
 
   const handleOpenChange = useCallback(
@@ -27,7 +29,8 @@ const FontSizeControl = ({ value, min = 12, max = 48, onChange, onOpenChange }: 
 
   return (
     <Popover
-      placement="right"
+      triggerRef={triggerRef}
+      placement="left"
       showArrow={false}
       shouldCloseOnBlur={false}
       disableAnimation
@@ -35,17 +38,25 @@ const FontSizeControl = ({ value, min = 12, max = 48, onChange, onOpenChange }: 
       isOpen={open}
       onOpenChange={handleOpenChange}
     >
-      <PopoverTrigger>
+      <Tooltip
+        content="调整字体大小"
+        placement="left"
+        closeDelay={0}
+        isOpen={tooltipOpen && !open}
+        onOpenChange={setTooltipOpen}
+      >
         <IconButton
+          ref={triggerRef}
           size="sm"
           variant="light"
           aria-label="调整字体大小"
           className="bg-foreground/20 text-foreground hover:bg-foreground/30 min-w-0 rounded-full text-sm font-semibold"
+          onPress={() => handleOpenChange(true)}
         >
           <RiFontSize size={16} />
         </IconButton>
-      </PopoverTrigger>
-      <PopoverContent className="px-3 py-2">
+      </Tooltip>
+      <PopoverContent className="border border-white/12 bg-black/25 px-3 py-2 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)] backdrop-blur-2xl backdrop-saturate-150">
         <div className="flex flex-col items-center gap-2">
           <Slider
             aria-label="调整字体大小"
@@ -60,10 +71,10 @@ const FontSizeControl = ({ value, min = 12, max = 48, onChange, onOpenChange }: 
             className="h-28"
             classNames={{
               track: "w-1",
-              thumb: "after:hidden",
+              thumb: "after:hidden data-[hover=true]:bg-primary data-[hover=true]:scale-100",
             }}
           />
-          <span className="text-foreground/60 text-[10px] font-bold whitespace-nowrap">{Math.round(value)}px</span>
+          <span className="text-[10px] font-bold whitespace-nowrap text-white/60">{Math.round(value)}px</span>
         </div>
       </PopoverContent>
     </Popover>

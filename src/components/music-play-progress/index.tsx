@@ -22,7 +22,7 @@ const MusicPlayProgress = memo(({ isDisabled, className, trackClassName }: Props
   const showThumb = !isDisabled && hovered;
 
   return (
-    <div className={twMerge("flex w-3/4 items-center space-x-2", className)}>
+    <div className={twMerge("flex w-full items-center space-x-2", className)}>
       <div className="flex justify-center text-sm whitespace-nowrap opacity-70">
         {currentTime ? formatDuration(currentTime) : "-:--"}
       </div>
@@ -35,13 +35,13 @@ const MusicPlayProgress = memo(({ isDisabled, className, trackClassName }: Props
         onChange={v => seek(v as number)}
         isDisabled={isDisabled}
         size="sm"
-        color={showThumb ? "primary" : "foreground"}
+        color="primary"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         className="flex-1"
         classNames={{
           track: twMerge("h-[4px] cursor-pointer", trackClassName),
-          thumb: "w-4 h-4 bg-primary after:hidden",
+          thumb: "w-4 h-4 bg-primary after:hidden shadow-none",
         }}
       />
       <span className="flex justify-center text-sm whitespace-nowrap opacity-70">

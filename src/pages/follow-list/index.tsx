@@ -212,8 +212,8 @@ const FollowList = () => {
                 </Tooltip>
               </div>
             </div>
-            <ScrollContainer className="h-full min-h-0 w-full flex-1 px-2">
-              <div className="flex min-h-0 flex-1 flex-col">
+            <ScrollContainer className="h-full min-h-0 w-full flex-1 px-2" topSpacerHeight={32}>
+              <div className="flex min-h-0 flex-1 flex-col gap-2">
                 <Button
                   fullWidth
                   radius="md"

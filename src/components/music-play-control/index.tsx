@@ -1,6 +1,6 @@
 import React from "react";
 
-import { RiPauseCircleFill, RiPlayCircleFill, RiSkipBackFill, RiSkipForwardFill } from "@remixicon/react";
+import { RiPauseFill, RiPlayFill, RiSkipBackFill, RiSkipForwardFill } from "@remixicon/react";
 
 import IconButton from "@/components/icon-button";
 import { usePlayList } from "@/store/play-list";
@@ -16,15 +16,22 @@ const MusicPlayControl = () => {
   const isSingle = list.length === 1;
 
   return (
-    <div className="flex items-center justify-center space-x-6">
-      <IconButton radius="md" onPress={prev} isDisabled={isEmptyPlayList || isSingle}>
-        <RiSkipBackFill size={22} />
+    <div className="flex items-center justify-center gap-5">
+      <IconButton radius="full" onPress={prev} isDisabled={isEmptyPlayList || isSingle} className="size-8 min-w-8">
+        <RiSkipBackFill size={18} />
       </IconButton>
-      <IconButton isDisabled={isEmptyPlayList} radius="full" onPress={togglePlay} className="size-12 min-w-12">
-        {isPlaying ? <RiPauseCircleFill size={48} /> : <RiPlayCircleFill size={48} />}
+      <IconButton
+        isDisabled={isEmptyPlayList}
+        radius="full"
+        onPress={togglePlay}
+        variant="solid"
+        color="primary"
+        className="size-10 min-w-10 text-white"
+      >
+        {isPlaying ? <RiPauseFill size={20} className="text-white" /> : <RiPlayFill size={20} className="text-white" />}
       </IconButton>
-      <IconButton radius="md" onPress={next} isDisabled={isEmptyPlayList || isSingle}>
-        <RiSkipForwardFill size={22} />
+      <IconButton radius="full" onPress={next} isDisabled={isEmptyPlayList || isSingle} className="size-8 min-w-8">
+        <RiSkipForwardFill size={18} />
       </IconButton>
     </div>
   );

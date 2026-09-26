@@ -44,6 +44,8 @@ declare global {
     getNeteaseLyrics: (params: GetLyricsByNeteaseParams) => Promise<GetLyricsByNeteaseResponse>;
     /** 在 LrcLib 搜索歌曲/歌词 */
     searchLrclibLyrics: (params: SearchSongByLrclibParams) => Promise<SearchSongByLrclibResponse[]>;
+    /** 为日文歌词添加假名注音（返回带 ruby 标记的 HTML 片段） */
+    addFurigana: (text: string) => Promise<string>;
     /** 获取当前应用平台：macos | windows | linux */
     getPlatform: () => AppPlatForm;
     /** 更新网络代理设置 */

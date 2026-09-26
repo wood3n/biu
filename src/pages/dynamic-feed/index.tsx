@@ -139,7 +139,7 @@ const DynamicFeedPage = () => {
       <AuthorList selectedAuthorMid={selectedAuthorMid} onSelect={handleSelectAuthor} />
 
       <div className="flex min-w-0 flex-1">
-        <ScrollContainer ref={scrollRef} className="h-full w-full px-4">
+        <ScrollContainer ref={scrollRef} className="h-full w-full px-4" topSpacerHeight={76}>
           <div
             className="relative w-full px-4 py-4"
             style={{

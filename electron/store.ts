@@ -26,6 +26,22 @@ export const userStore = new Store<UserInfo>({
   encryptionKey: StoreNameMap.UserLoginInfo,
 });
 
+export interface BBPAccountInfo {
+  token?: string;
+  account?: {
+    id: string;
+    username: string;
+    name: string;
+    face: string | null;
+  };
+}
+
+export const bbpTokenStore = new Store<BBPAccountInfo>({
+  name: StoreNameMap.BBPAccount,
+  cwd: getUserDataPath(),
+  encryptionKey: StoreNameMap.BBPAccount,
+});
+
 export const mediaDownloadsStore = new Store<Record<string, FullMediaDownloadTask>>({
   name: StoreNameMap.MediaDownloads,
   cwd: getUserDataPath(),

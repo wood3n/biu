@@ -39,8 +39,9 @@ const SortableMenuItem = ({ id, disabled, contextMenuItems, onContextMenuAction,
       touchAction: disabled ? undefined : "none",
       display: "flex",
       alignItems: "center",
+      ...(itemProps.collapsed ? { width: 40, height: 40, minWidth: 40, maxWidth: 40, margin: "0 auto" } : {}),
     } as CSSProperties;
-  }, [transform, transition, isDragging, disabled]);
+  }, [transform, transition, isDragging, disabled, itemProps.collapsed]);
 
   const itemContent = <MenuItem {...itemProps} dndProps={dragProps} />;
 

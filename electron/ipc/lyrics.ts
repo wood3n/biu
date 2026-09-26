@@ -8,6 +8,7 @@ import {
   type SearchSongByNeteaseParams,
 } from "./api/netease-lyric";
 import { channel } from "./channel";
+import { addFurigana } from "./furigana";
 
 export function registerLyricsHandlers() {
   ipcMain.handle(channel.lyrics.searchNeteaseSongs, async (_, params: SearchSongByNeteaseParams) => {
@@ -20,5 +21,9 @@ export function registerLyricsHandlers() {
 
   ipcMain.handle(channel.lyrics.searchLrclib, async (_, params: SeachSongByLrclibParams) => {
     return getLyricsByLrclib(params);
+  });
+
+  ipcMain.handle(channel.lyrics.addFurigana, async (_, text: string) => {
+    return addFurigana(text);
   });
 }

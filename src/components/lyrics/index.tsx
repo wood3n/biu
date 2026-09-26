@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { addToast, useDisclosure } from "@heroui/react";
-import { RiTBoxLine } from "@remixicon/react";
+import { RiCharacterRecognitionLine, RiTBoxLine, RiTranslate } from "@remixicon/react";
 import clsx from "classnames";
 import { debounce } from "es-toolkit";
 
@@ -9,13 +9,15 @@ import type { WebPlayerParams } from "@/service/web-player";
 
 import { usePlayList } from "@/store/play-list";
 import { usePlayProgress } from "@/store/play-progress";
+import { useSettings } from "@/store/settings";
 import { StoreNameMap } from "@shared/store";
 
 import IconButton from "../icon-button";
 import LyricsSearchModal from "../lyrics-search-modal";
 import FontSizeControl from "./font-size-control";
-import { getLyricsByBili } from "./get-lyrics";
+import { getLyricsAuto } from "./get-lyrics";
 import OffsetControl from "./offset-control";
+import UtilityControls from "./utility-controls";
 
 type LyricLine = {
   time: number; // milliseconds
@@ -31,7 +33,50 @@ const timeTagPattern = /\[(\d{1,2}):(\d{1,2})(?:\.(\d{1,3}))?\]/g;
 const DEFAULT_FONT_SIZE = 20;
 const DEFAULT_OFFSET = 0;
 
-const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: boolean; showControls?: boolean }) => {
+/** 检测字符是否为假名（平假名 / 片假名 / 半角片假名） */
+const isKana = (char: string): boolean => {
+  const code = char.codePointAt(0);
+  if (code === undefined) return false;
+  // 平假名 U+3040-U+309F
+  if (code >= 0x3040 && code <= 0x309f) return true;
+  // 片假名 U+30A0-U+30FF
+  if (code >= 0x30a0 && code <= 0x30ff) return true;
+  // 半角片假名 U+FF65-U+FF9F
+  if (code >= 0xff65 && code <= 0xff9f) return true;
+  return false;
+};
+
+/** 判断歌词是否为日语：假名占比 ≥ 15% 视为日语 */
+const isJapaneseLyrics = (lyrics: LyricLine[]): boolean => {
+  if (!lyrics.length) return false;
+
+  let kanaCount = 0;
+  let totalCount = 0;
+
+  for (const line of lyrics) {
+    for (const char of line.text) {
+      if (/\s/.test(char)) continue;
+      totalCount++;
+      if (isKana(char)) kanaCount++;
+    }
+  }
+
+  if (totalCount === 0) return false;
+  return kanaCount / totalCount >= 0.15;
+};
+
+const Lyrics = ({
+  color,
+  centered,
+  showControls,
+  onOpenComments,
+}: {
+  color?: string;
+  centered?: boolean;
+  showControls?: boolean;
+  /** 打开评论面板（仅在线视频曲目提供） */
+  onOpenComments?: () => void;
+}) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rafIdRef = useRef<number | null>(null);
   const lineRefs = useRef<Record<number, HTMLDivElement | null>>({});
@@ -41,9 +86,19 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
   const [translatedLyrics, setTranslatedLyrics] = useState<LyricLine[]>([]);
   const [offset, setOffset] = useState<number>(DEFAULT_OFFSET);
   const [fontSize, setFontSize] = useState<number>(DEFAULT_FONT_SIZE);
+  const showTranslation = useSettings(s => s.showLyricsTranslation);
+  const showFurigana = useSettings(s => s.showLyricsFurigana);
+  const updateSettings = useSettings(s => s.update);
   const [isLoading, setIsLoading] = useState(false);
   const { currentTime } = usePlayProgress();
   const currentMs = currentTime * 1000 + offset;
+
+  // 注音缓存：歌词原文 -> ruby HTML 片段
+  const furiganaMapRef = useRef<Record<string, string>>({});
+  const [furiganaMap, setFuriganaMap] = useState<Record<string, string>>({});
+
+  /** 当前歌词是否为日语（假名占比 ≥ 15%） */
+  const isJapanese = useMemo(() => isJapaneseLyrics(lyrics), [lyrics]);
 
   const {
     isOpen: isSearchOpen,
@@ -95,6 +150,9 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
     let canceled = false;
     setOffset(DEFAULT_OFFSET);
     setFontSize(DEFAULT_FONT_SIZE);
+    // 切歌时清空注音缓存
+    furiganaMapRef.current = {};
+    setFuriganaMap({});
 
     const playItem = usePlayList.getState().getPlayItem();
     const fetchLyrics = async () => {
@@ -139,18 +197,19 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
           params.aid = aidAsNumber;
         }
 
-        const body = await getLyricsByBili(params);
+        const keyword = playItem.pageTitle || playItem.title;
+        const result = await getLyricsAuto(params, keyword, playItem.bvid, playItem.cid);
 
         if (canceled) return;
 
-        if (!body?.length) {
+        if (!result?.lyrics.length) {
           setLyrics([]);
           setTranslatedLyrics([]);
           return;
         }
 
-        setLyrics(body);
-        setTranslatedLyrics([]);
+        setLyrics(result.lyrics);
+        setTranslatedLyrics(result.tLyrics);
       } catch {
         if (canceled) return;
         setLyrics([]);
@@ -238,6 +297,43 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
     [offset, persistLyricsCache, playId],
   );
 
+  const handleToggleTranslation = useCallback(() => {
+    updateSettings({ showLyricsTranslation: !showTranslation });
+  }, [showTranslation, updateSettings]);
+
+  const handleToggleFurigana = useCallback(() => {
+    if (!isJapanese) return;
+    updateSettings({ showLyricsFurigana: !showFurigana });
+  }, [isJapanese, showFurigana, updateSettings]);
+
+  // 非日语歌词时自动关闭假名注音
+  useEffect(() => {
+    if (!isJapanese && showFurigana) {
+      updateSettings({ showLyricsFurigana: false });
+    }
+  }, [isJapanese, showFurigana, updateSettings]);
+
+  // 注音开启后，歌词加载完成或切歌时自动补齐注音
+  useEffect(() => {
+    if (!showFurigana || !lyrics.length || !isJapanese) return;
+
+    const pending = lyrics.map(line => line.text).filter(text => !furiganaMapRef.current[text]);
+    if (!pending.length) return;
+
+    pending.forEach(text => {
+      window.electron
+        .addFurigana(text)
+        .then(html => {
+          furiganaMapRef.current[text] = html;
+          setFuriganaMap({ ...furiganaMapRef.current });
+        })
+        .catch(() => {
+          furiganaMapRef.current[text] = text;
+          setFuriganaMap({ ...furiganaMapRef.current });
+        });
+    });
+  }, [lyrics, showFurigana, isJapanese]);
+
   const updateCenterPadding = useCallback(() => {
     if (activeIndex < 0) {
       setCenterPadding(0);
@@ -317,9 +413,10 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
 
   const renderLine = (line: LyricLine, index: number) => {
     const isActive = index === activeIndex;
-    const translation = translationMap.get(line.time);
+    const translation = showTranslation ? translationMap.get(line.time) : undefined;
     const activeWeight = isActive ? "font-extrabold" : "font-normal";
     const activeShadow = isActive ? activeTextBase : "";
+    const furiganaHtml = showFurigana ? furiganaMap[line.text] : undefined;
 
     return (
       <div
@@ -338,7 +435,14 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
           className={clsx("leading-snug break-words whitespace-pre-wrap", activeWeight, activeShadow)}
           style={{ color: color || undefined }}
         >
-          {line.text}
+          {furiganaHtml ? (
+            <span
+              dangerouslySetInnerHTML={{ __html: furiganaHtml }}
+              className="[&_rt]:text-[0.55em] [&_rt]:font-normal [&_rt]:text-white/60"
+            />
+          ) : (
+            line.text
+          )}
         </div>
         {translation ? (
           <div className="mt-1 text-sm break-words whitespace-pre-wrap text-white/80">{translation}</div>
@@ -378,17 +482,56 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
         </div>
 
         {showControls && (
-          <div className="text-foreground/80 pointer-events-none absolute right-6 bottom-6 flex flex-col items-center space-y-3 text-sm transition-opacity duration-200">
-            <div className="pointer-events-auto">
+          <div className="text-foreground/80 pointer-events-none fixed right-[50px] bottom-[50px] z-50 flex flex-col items-center text-sm transition-opacity duration-200">
+            {/* 第一组：查看评论 + 音量调节（常驻功能） */}
+            <UtilityControls onOpenComments={onOpenComments} />
+
+            {/* 第二组：歌词显示选项 */}
+            <div className="pointer-events-auto mt-5 flex flex-col items-center gap-3">
+              <IconButton
+                type="button"
+                aria-label={showTranslation ? "隐藏歌词翻译" : "显示歌词翻译"}
+                tooltip={showTranslation ? "隐藏翻译" : "显示翻译"}
+                tooltipProps={{ placement: "left" }}
+                className={clsx(
+                  "min-w-0 rounded-full text-xs font-semibold",
+                  showTranslation
+                    ? "bg-foreground/20 text-foreground hover:bg-foreground/30"
+                    : "bg-foreground/10 text-foreground/50 hover:bg-foreground/20",
+                )}
+                onPress={handleToggleTranslation}
+              >
+                <RiTranslate size={16} />
+              </IconButton>
+              <IconButton
+                type="button"
+                isDisabled={!isJapanese}
+                aria-label={showFurigana ? "隐藏汉字假名标注" : "显示汉字假名标注"}
+                tooltip={isJapanese ? (showFurigana ? "关闭假名注音" : "开启假名注音") : "仅日语歌词可开启"}
+                tooltipProps={{ placement: "left" }}
+                className={clsx(
+                  "min-w-0 rounded-full text-xs font-semibold",
+                  !isJapanese
+                    ? "bg-foreground/5 text-foreground/30 cursor-not-allowed"
+                    : showFurigana
+                      ? "bg-foreground/20 text-foreground hover:bg-foreground/30"
+                      : "bg-foreground/10 text-foreground/50 hover:bg-foreground/20",
+                )}
+                onPress={handleToggleFurigana}
+              >
+                <RiCharacterRecognitionLine size={16} />
+              </IconButton>
+            </div>
+
+            {/* 第三组：歌词调整工具 */}
+            <div className="pointer-events-auto mt-5 flex flex-col items-center gap-3">
               <FontSizeControl value={fontSize} onChange={handleFontSizeChange} onOpenChange={() => {}} />
-            </div>
-            <div className="pointer-events-auto">
               <OffsetControl value={offset} onChange={handleOffsetChange} onOpenChange={() => {}} />
-            </div>
-            <div className="pointer-events-auto">
               <IconButton
                 type="button"
                 onPress={onOpenSearch}
+                tooltip="歌词搜索"
+                tooltipProps={{ placement: "left" }}
                 className="bg-foreground/20 text-foreground hover:bg-foreground/30 min-w-0 rounded-full text-xs font-semibold"
               >
                 <RiTBoxLine size={16} />

@@ -1,3 +1,7 @@
+<p align="right">
+  <img src="./screenshots/ta-logo.svg" alt="TeleAgent" width="120" />
+</p>
+
 <h1 align="center">Biu 音乐播放器</h1>
 <p align="center">
   <img src="./screenshots/logo.svg" alt="Biu logo" width="120" />
@@ -9,8 +13,8 @@
   非官方项目，与哔哩哔哩无任何官方关联或背书
 </p>
 <p align="center">
-  <a href="https://github.com/wood3n/biu/releases">
-    <img src="https://badgen.net/github/tag/wood3n/biu?label=最新版本&color=blueviolet" alt="Latest Version" />
+  <a href="https://github.com/xRetia/biu/releases">
+    <img src="https://badgen.net/github/tag/xRetia/biu?label=最新版本&color=blueviolet" alt="Latest Version" />
   </a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-orange.svg" alt="License" /></a>
 </p>
@@ -18,27 +22,49 @@
 <table>
   <tr>
     <td width="50%" align="center">
-      <img src="./screenshots/home.png" alt="home" width="100%" />
+      <img src="./screenshots/home.png" alt="首页推荐" width="100%" />
     </td>
     <td width="50%" align="center">
-      <img src="./screenshots/main.png" alt="main" width="100%" />
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <img src="./screenshots/download.png" alt="download" width="100%" />
-    </td>
-    <td width="50%" align="center">
-      <img src="./screenshots/fullscreen.jpg" alt="fullscreen" width="100%" />
+      <img src="./screenshots/search.png" alt="搜索" width="100%" />
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
-      <img src="./screenshots/playlist.png" alt="playlist" width="100%" />
+      <img src="./screenshots/player.png" alt="播放器与歌词" width="100%" />
     </td>
     <td width="50%" align="center">
-      <p> mini 播放器</p>
-      <img src="./screenshots/mini.jpg" alt="mini" width="100%" />
+      <img src="./screenshots/player-comment.png" alt="评论面板" width="100%" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./screenshots/fullscreen.png" alt="全屏歌词" width="100%" />
+    </td>
+    <td width="50%" align="center">
+      <img src="./screenshots/bbp-favorite.png" alt="BBPlayer 共享歌单" width="100%" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./screenshots/download.png" alt="下载管理" width="100%" />
+    </td>
+    <td width="50%" align="center">
+      <img src="./screenshots/space.png" alt="个人空间" width="100%" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./screenshots/miniplayer.png" alt="迷你播放器" width="100%" />
+      <br />
+      <sub>迷你播放器</sub>
+    </td>
+    <td width="50%" align="left">
+      <h4>迷你播放器功能</h4>
+      <ul>
+        <li>🎵 <b>动态歌词</b>：实时显示当前歌词行，文字溢出时自动滚动</li>
+        <li>🏷️ <b>悬停显示歌名</b>：鼠标放在上一曲 / 播放暂停 / 下一曲按钮上时，切换显示「歌名 - 歌手」</li>
+        <li>🪟 <b>Win11 亚克力毛玻璃</b>：Windows 11 系统级 Acrylic 背景模糊，半透明质感</li>
+      </ul>
     </td>
   </tr>
 </table>
@@ -46,16 +72,85 @@
 ---
 
 ## ✨ 特色功能
-- 🎼 支持登录 Bilibili 并获取收藏夹、稍后再看、历史记录等信息
+
+### 🌟 亮点功能
+
+- **かな 日文歌词假名标注**：日文歌词自动标注假名注音（振假名），支持开关切换，方便学唱与阅读
+- **🌐 歌词翻译可调**：歌词翻译支持开关、字体大小调节、时间偏移微调，满足不同阅读习惯
+- **🔍 歌词自动搜索优化**：智能匹配歌词来源，自动搜索准确率与命中率大幅提升，减少手动查找
+- **🪟 UI 重构与毛玻璃特效**：全新布局设计，全局毛玻璃（Glassmorphism）风格，侧边栏、播放列表、右键菜单、弹窗面板均采用主题感知毛玻璃背景
+- **💬 评论查看**：全屏播放器内直接浏览 B 站评论，支持楼中楼展开、图片点击放大、表情显示，还可一键跳转 B 站
+- **📱 BBPlayer 收藏夹兼容**：支持创建 BBPlayer 共享歌单，与手机端 BBPlayer 收藏夹双向兼容，云端同步
+
+### 账号与登录
+- 🔐 支持密码登录、短信登录，全局接入极验风控校验
+- 📋 登录后可获取收藏夹、稍后再看、历史记录、用户动态等信息
+- 👍 支持点赞按钮和一键三连功能
+
+### 音频播放
 - 🎧 高品质音频播放，优先拉取更高码率音频流（如无损 Flac，192K/Hi-Res）
-- 🔥 支持视频文件以及提取视频中的音频下载；支持收藏夹视频批量下载
-- 🧩 轻量界面，内置浅色和深色主题，同时可自定义部分主题样式，细腻的滚动与动效体验
-- 💿 系统托盘与最小化隐藏，便捷控制播放
-- 🍃 支持 mini 播放器模式，占用系统资源少，同时保留主窗口功能
-- ♻️ 安装包支持自动检测更新，始终保持最新体验
+- 🎵 支持音频质量偏好设置
+- 📊 音频频谱波形可视化显示
+- ♻️ 完善自动播放与优化自动搜索歌词逻辑，智能匹配准确率大幅提升
+- 🔇 默认支持鼠标滚轮调整音量
+
+### 下载功能
+- 🔥 支持视频文件以及提取视频中的音频下载
+- 📁 支持收藏夹视频批量下载
+- ✂️ 下载功能支持断点续传
+- 🎬 内置精简版 ffmpeg，无需额外安装即可提取音频；同时支持自定义 ffmpeg 系统路径设置
+
+### 歌词功能
+- 📜 全屏播放器歌词显示，逐行聚焦滚动，当前播放行高亮放大
+- かな 日文歌词假名标注（振假名），支持开关切换，方便学唱
+- 🌐 歌词翻译支持开关、字体大小调节、时间偏移微调
+- 🔤 深色毛玻璃歌词面板风格，沉浸式阅读体验
+- 🔍 歌词自动搜索优化，智能匹配准确率大幅提升
+
+### 播放器界面
+- 🖥️ 全屏播放组件，全新布局设计，左右分栏（封面+歌词），沉浸式体验
+- 🎛️ 全屏播放器样式设置面板（Modal 居中弹窗，分区布局，深色毛玻璃胶囊风格）
+- 📑 播放列表与分集列表改用整行右键菜单（移除三点按钮），支持播放列表内搜索
+- 📜 文本无缝滚动（Marquee）：正在播放项常驻滚动，其余项 hover 滚动；播放栏标题常驻滚动
+- 📂 播放栏折叠功能：折叠/展开改为水平拉伸弹回动画，不影响播放进度
+- 🍃 迷你播放器模式，占用系统资源少，同时保留主窗口功能
+  - 🎵 动态歌词：迷你窗口实时显示当前歌词行，溢出文字自动滚动
+  - 🏷️ 悬停显示歌名：鼠标放在上一曲/播放暂停/下一曲按钮上时，切换显示「歌名 - 歌手」
+  - 🪟 Win11 亚克力毛玻璃：Windows 11 系统级 Acrylic 背景模糊，半透明质感
+- 📻 私人 FM 功能
+
+### UI / 视觉体验
+- 🪟 全局毛玻璃（Glassmorphism）风格：全新布局重构，侧边栏、播放列表、右键菜单、弹窗面板、搜索下拉、播放控制栏等均采用主题感知毛玻璃背景，深色模式下采用深色胶囊风格
+- 🎨 UI 精细调校：间距/对齐/配色精确到像素，三色高亮主题色（#F56EE2 / #2C95FF / #01E3F8），控件 hover/active 状态统一处理
+- 🌓 内置浅色和深色主题，支持跟随系统，可自定义部分主题样式
+- 📋 支持 compact 紧凑模式 UI，优化页面列表显示
+- ⬆️ 返回顶部按钮：毛玻璃 + 出场动画，全局可用
+- 🪧 播放列表：主界面与全屏播放器均采用毛玻璃背景 + 正在播放绿色强调色
+- 📐 avatar 尺寸自适应
+
+### 侧边栏与收藏夹
+- 🗂️ 侧边菜单支持拖拽排序、可折叠收缩，宽度支持拖拽修改
+- 📁 收藏夹支持分组折叠、右键菜单、封面图设置、批量播放全部
+- 🗂️ 收藏侧边栏专门优化，分组标题换行修复
+- 📱 BBPlayer 共享歌单：支持创建 BBPlayer 共享歌单，与手机端 BBPlayer 收藏夹双向兼容，云端同步共享
+
+### 内容浏览
+- 🎵 每日推荐音乐，支持音乐/鬼畜分区显示
+- 📰 顶部动态页面，补充动态更新提示
+- 🎥 查看视频动态功能，分集视频支持搜索
+- 👤 个人中心与资料页，歌手资料页
+- 💿 本地音乐页面
+
+### 系统集成
+- ⌨️ 系统全局快捷键功能，支持快捷键控制播放
+- 🔔 系统托盘与最小化隐藏，便捷控制播放
+- 🍎 macOS Dock 右键菜单支持
+- 🌐 代理设置功能
+- ♻️ 安装包支持自动检测更新，可手动检查更新
+- 🛡️ 错误边界与反馈机制
 
 ## 下载和使用
-- 下载页面：[GitHub Releases](https://github.com/wood3n/biu/releases/latest)
+- 下载页面：[GitHub Releases](https://github.com/xRetia/biu/releases/latest)
 - 快速选择：
   - <img alt="Windows" src="https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white" /> 优先选安装包 `win-setup`；需要免安装/无管理员权限选 `win-portable`
   - <img alt="macOS" src="https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white" /> 优先选 `dmg`；需要脚本/自动化分发可选 `zip`
@@ -255,6 +350,15 @@
 
 ---
 
+<p align="center">
+  <img src="./screenshots/ta-logo.svg" alt="TeleAgent" width="200" />
+</p>
+<p align="center">
+  xRetia 二次修改版由 TeleAgent 星辰超级智能体创作
+</p>
+
+---
+
 如果你喜欢这个项目，欢迎 ⭐️ Star 支持！也欢迎提出 Issue 交流与反馈 🙌
 
 ## 🙏 鸣谢
@@ -285,10 +389,12 @@
 
 ## ♥️ Contributors
 
-<a href="https://github.com/wood3n/biu/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=wood3n/biu" />
+<a href="https://github.com/xRetia/biu/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=xRetia/biu" />
 </a>
 
 ## 🌟 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=wood3n/biu&type=date&legend=top-left)](https://www.star-history.com/#wood3n/biu&type=date&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=xRetia/biu&type=date&legend=top-left)](https://www.star-history.com/#xRetia/biu&type=date&legend=top-left)
+
+> AI生成

@@ -22,9 +22,9 @@ const MenuGroup = ({ title, titleExtra, items, collapsed, className, renderItem 
       )}
       <div
         className={clx(
-          "flex flex-col items-stretch",
+          "flex flex-col gap-1.5",
           {
-            "px-2": collapsed,
+            "items-center": collapsed,
           },
           className,
         )}

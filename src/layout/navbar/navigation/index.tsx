@@ -14,11 +14,11 @@ const Navigation: React.FC = () => {
   return (
     <Button
       isIconOnly
-      variant="flat"
+      variant="light"
       radius="md"
       isDisabled={!canGoBack}
       onPress={() => navigate(-1)}
-      className="w-8 min-w-8"
+      className="bg-default-400/20 hover:bg-default-400/30 dark:bg-default-500/20 dark:hover:bg-default-500/30 h-[41.5px] min-h-[41.5px] w-[41.5px] min-w-[41.5px] translate-y-[0.5px]"
     >
       <RiArrowLeftSLine size={20} />
     </Button>

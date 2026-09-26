@@ -97,6 +97,7 @@ const Favorites = ({ getScrollElement }: Props) => {
         <GridCard
           title={item.title}
           cover={item.cover}
+          type={CollectionType.Favorite}
           createTime={item.ctime}
           mediaCount={item.media_count}
           onPress={() => navigate(`/collection/${item.id}?type=${CollectionType.Favorite}`)}

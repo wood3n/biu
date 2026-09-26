@@ -57,10 +57,28 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract release notes from CHANGELOG.md
+        run: |
+          awk -v version="${{ github.ref_name }}" '
+            $0 == "## " version { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+
+          if [ ! -s release-notes.md ]; then
+            echo "::error::No CHANGELOG.md section found for ${{ github.ref_name }}. Please add a '## ${{ github.ref_name }}' section to CHANGELOG.md before tagging."
+            exit 1
+          fi
+
       - name: Publish release (remove draft)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release edit "${{ github.ref_name }}" --draft=false --repo "${{ github.repository }}"
+        run: |
+          gh release edit "${{ github.ref_name }}" --notes-file release-notes.md --repo "${{ github.repository }}"
+          gh release edit "${{ github.ref_name }}" --draft=false --repo "${{ github.repository }}"
       - name: Mark as stable
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -3,11 +3,13 @@ import { useNavigate, useParams } from "react-router";
 
 import { Dropdown, DropdownTrigger, Button, DropdownMenu, DropdownItem, useDisclosure } from "@heroui/react";
 import { RiDeleteBinLine, RiEraserLine, RiFileMusicLine, RiFileVideoLine, RiMoreLine } from "@remixicon/react";
+import { twMerge } from "tailwind-merge";
 
 import { CollectionType } from "@/common/constants/collection";
+import { glassMenuClassName } from "@/common/constants/glass";
 import { isDefaultFav } from "@/common/utils/fav";
 import { postFavFolderDel } from "@/service/fav-folder-del";
-import { useFavoritesStore } from "@/store/favorite";
+import { getItemKey, useFavoritesStore } from "@/store/favorite";
 import { useModalStore } from "@/store/modal";
 
 import DownloadSelectModal from "../download-select-modal";
@@ -88,7 +90,7 @@ const Menu = ({ type, isCreatedBySelf, mediaCount, attr, onClearInvalid }: MenuP
             });
 
             if (res.code === 0 && res.data === 0) {
-              useFavoritesStore.getState().rmCreatedFavorite(Number(id));
+              useFavoritesStore.getState().rmCreatedFavorite(getItemKey({ id: Number(id) }));
               navigate("/empty");
             }
 
@@ -107,7 +109,7 @@ const Menu = ({ type, isCreatedBySelf, mediaCount, attr, onClearInvalid }: MenuP
         shouldBlockScroll={false}
         trigger="press"
         classNames={{
-          content: "min-w-[120px]",
+          content: twMerge(glassMenuClassName, "min-w-[120px]"),
         }}
       >
         <DropdownTrigger>
@@ -115,7 +117,7 @@ const Menu = ({ type, isCreatedBySelf, mediaCount, attr, onClearInvalid }: MenuP
             <RiMoreLine />
           </Button>
         </DropdownTrigger>
-        <DropdownMenu aria-label="收藏夹操作" items={menus.filter(item => item.show)}>
+        <DropdownMenu aria-label="收藏夹操作" variant="flat" items={menus.filter(item => item.show)}>
           {item => (
             <DropdownItem
               key={item.key}

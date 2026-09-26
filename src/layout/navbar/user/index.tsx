@@ -21,7 +21,10 @@ import {
 } from "@remixicon/react";
 import { twMerge } from "tailwind-merge";
 
+import nofaceImg from "@/assets/images/noface.jpg";
+import { glassMenuClassName } from "@/common/constants/glass";
 import { postPassportLoginExit } from "@/service/passport-login-exit";
+import { useBBPTokenStore } from "@/store/bbp-token";
 import { useFavoritesStore } from "@/store/favorite";
 import { useModalStore } from "@/store/modal";
 import { usePlayList } from "@/store/play-list";
@@ -63,6 +66,7 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
     if (res?.code === 0) {
       clearToken();
       clearUser();
+      useBBPTokenStore.getState().clear();
       updateSettings({
         hiddenMenuKeys: [],
       });
@@ -117,6 +121,9 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
           if (mid) {
             await useFavoritesStore.getState().updateCreatedFavorites(mid);
             await useFavoritesStore.getState().updateCollectedFavorites(mid);
+          } else if (useBBPTokenStore.getState().token) {
+            await useFavoritesStore.getState().updateCreatedFavorites("");
+            await useFavoritesStore.getState().updateCollectedFavorites("");
           }
           addToast({
             title: "数据刷新成功",
@@ -135,7 +142,7 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
       label: "问题反馈",
       startContent: <RiFeedbackLine size={18} />,
       endContent: <RiExternalLinkLine size={18} />,
-      onPress: () => window.electron.openExternal("https://github.com/wood3n/biu/issues"),
+      onPress: () => window.electron.openExternal("https://github.com/xRetia/biu/issues"),
     },
     {
       key: "logout",
@@ -161,22 +168,22 @@ const UserCard = ({ onDropdownOpenChange }: UserCardProps) => {
     <>
       <Dropdown
         shouldBlockScroll={false}
+        disableAnimation
         triggerScaleOnOpen={false}
         radius="md"
         classNames={{
-          content: "min-w-[140px]",
+          content: twMerge(glassMenuClassName, "min-w-[160px]"),
         }}
         onOpenChange={onDropdownOpenChange}
       >
         <DropdownTrigger>
           <Avatar
-            isBordered
             showFallback
             size="sm"
             as="button"
             type="button"
-            className="mr-4 cursor-pointer transition-transform hover:scale-105"
-            src={user?.face}
+            classNames={{ base: "mr-4 size-8 min-w-8 cursor-pointer transition-transform hover:scale-105" }}
+            src={user?.face || nofaceImg}
           />
         </DropdownTrigger>
         <DropdownMenu aria-label="用户操作" variant="flat" items={dropdownItems}>

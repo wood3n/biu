@@ -172,57 +172,54 @@ const CodeLogin = ({ onClose, updateUserData }: Props) => {
           },
         }}
         render={({ field }) => (
-          <Input
-            {...field}
-            ref={e => {
-              field.ref(e);
-              phoneRef.current = e;
-            }}
-            name="phone"
-            type="tel"
-            placeholder="请输入手机号"
-            variant="bordered"
-            isClearable
-            autoComplete="tel"
-            isInvalid={!!errors.phone}
-            errorMessage={errors.phone?.message}
-            classNames={{
-              inputWrapper: "pl-0",
-            }}
-            startContent={
-              <Select
-                variant="bordered"
-                disallowEmptySelection
-                disableAnimation
-                items={countryList || []}
-                className="w-[140px]"
-                popoverProps={{
-                  portalContainer: document.body,
-                  placement: "bottom-start",
-                  style: {
-                    width: "auto",
-                  },
-                }}
-                classNames={{
-                  popoverContent: "w-auto",
-                  listbox: "w-max",
-                  listboxWrapper: "w-auto",
-                  trigger: "border-none",
-                }}
-                selectedKeys={[countryId]}
-                onChange={e => {
-                  setCountryId(e.target.value);
-                }}
-                aria-label="选择国家/地区"
-              >
-                {country => (
-                  <SelectItem key={country.id} textValue={`+${country.country_id}`}>
-                    {country.cname}(+{country.country_id})
-                  </SelectItem>
-                )}
-              </Select>
-            }
-          />
+          <div className="flex items-start gap-2">
+            <Select
+              variant="bordered"
+              disallowEmptySelection
+              disableAnimation
+              items={countryList || []}
+              className="w-[35%] shrink-0"
+              popoverProps={{
+                portalContainer: document.body,
+                placement: "bottom-start",
+                style: {
+                  width: "auto",
+                },
+              }}
+              classNames={{
+                popoverContent: "w-auto",
+                listbox: "w-max",
+                listboxWrapper: "w-auto",
+              }}
+              selectedKeys={[countryId]}
+              onChange={e => {
+                setCountryId(e.target.value);
+              }}
+              aria-label="选择国家/地区"
+            >
+              {country => (
+                <SelectItem key={country.id} textValue={`+${country.country_id}`}>
+                  {country.cname}(+{country.country_id})
+                </SelectItem>
+              )}
+            </Select>
+            <Input
+              {...field}
+              ref={e => {
+                field.ref(e);
+                phoneRef.current = e;
+              }}
+              className="flex-1"
+              name="phone"
+              type="tel"
+              placeholder="请输入手机号"
+              variant="bordered"
+              isClearable
+              autoComplete="tel"
+              isInvalid={!!errors.phone}
+              errorMessage={errors.phone?.message}
+            />
+          </div>
         )}
       />
 
