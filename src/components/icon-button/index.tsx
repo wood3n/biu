@@ -28,7 +28,14 @@ const IconButton = ({ tooltip, tooltipProps, children, className, variant = "lig
   if (tooltip) {
     return (
       <Tooltip closeDelay={0} content={tooltip} {...tooltipProps}>
-        {button}
+        {/* 禁用态按钮自带 pointer-events-none，需用 span 包裹让 Tooltip 仍可触发（如"仅日语歌词可开启"提示） */}
+        {props.isDisabled ? (
+          <span className="inline-flex" tabIndex={-1}>
+            {button}
+          </span>
+        ) : (
+          button
+        )}
       </Tooltip>
     );
   }

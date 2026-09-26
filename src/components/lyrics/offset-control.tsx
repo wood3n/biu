@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
-import { Popover, PopoverContent, PopoverTrigger, Slider } from "@heroui/react";
+import { Popover, PopoverContent, Slider, Tooltip } from "@heroui/react";
 import { RiTimeLine } from "@remixicon/react";
 
 import IconButton from "../icon-button";
@@ -17,6 +17,8 @@ const formatLabel = (ms: number) => (ms >= 0 ? `+${ms}` : `${ms}`);
 
 const OffsetControl = ({ value, min = -5000, max = 5000, onChange, onOpenChange }: OffsetControlProps) => {
   const [open, setOpen] = useState(false);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const step = 50;
 
   const handleOpenChange = useCallback(
@@ -29,6 +31,7 @@ const OffsetControl = ({ value, min = -5000, max = 5000, onChange, onOpenChange 
 
   return (
     <Popover
+      triggerRef={triggerRef}
       placement="left"
       showArrow={false}
       shouldCloseOnBlur={false}
@@ -37,16 +40,24 @@ const OffsetControl = ({ value, min = -5000, max = 5000, onChange, onOpenChange 
       isOpen={open}
       onOpenChange={handleOpenChange}
     >
-      <PopoverTrigger>
+      <Tooltip
+        content="调整歌词偏移"
+        placement="left"
+        closeDelay={0}
+        isOpen={tooltipOpen && !open}
+        onOpenChange={setTooltipOpen}
+      >
         <IconButton
+          ref={triggerRef}
           size="sm"
           variant="light"
           aria-label="调整歌词偏移"
           className="bg-foreground/20 text-foreground hover:bg-foreground/30 min-w-0 rounded-full text-xs font-semibold"
+          onPress={() => handleOpenChange(true)}
         >
           <RiTimeLine size={16} />
         </IconButton>
-      </PopoverTrigger>
+      </Tooltip>
       <PopoverContent className="border border-white/12 bg-black/25 px-3 py-2 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)] backdrop-blur-2xl backdrop-saturate-150">
         <div className="flex flex-col items-center gap-2">
           <Slider

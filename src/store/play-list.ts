@@ -207,6 +207,11 @@ const createAudio = (): HTMLAudioElement => {
 
 export const audio = createAudio();
 
+// Stall 检测：长时间播放后 ended 事件可能不触发，用 timeupdate 兜底
+let _stallLastTime = 0;
+let _stallCount = 0;
+let _stallTriggered = false;
+
 const updatePlaybackState = () => {
   if ("mediaSession" in navigator) {
     navigator.mediaSession.playbackState = audio.paused ? "paused" : "playing";
@@ -387,6 +392,37 @@ export const usePlayList = create<State & Action>()(
               }
             };
 
+            // 统一处理播放结束逻辑（onended 和 stall 兜底共用）
+            const handleSongEnd = (isStall: boolean) => {
+              // 单曲循环模式：
+              // - onended 不触发（audio.loop=true 由浏览器处理），直接返回
+              // - stall 兜底：浏览器原生循环失败，手动重置并续播
+              if (get().playMode === PlayMode.Single) {
+                if (isStall) {
+                  audio.currentTime = 0;
+                  void playAudioSafely();
+                }
+                return;
+              }
+
+              const playItem = get().getPlayItem?.();
+              if (shouldReportPlayRecord(playItem)) {
+                void reportHeartbeat(playItem, audio.duration, audio.duration, 4);
+                endPlayReport();
+              }
+
+              const currentIndex = get().list.findIndex(item => item.id === get().playId);
+              // 顺序播放模式 + 已到列表最后一首 → 停止播放
+              if (get().playMode === PlayMode.Sequence && currentIndex === get().list.length - 1) {
+                audio.currentTime = 0;
+                audio.pause();
+                return;
+              }
+
+              // 其他情况：自动切下一首
+              get().next();
+            };
+
             audio.ontimeupdate = () => {
               const currentTime = Math.round(audio.currentTime * 100) / 100;
               usePlayProgress.getState().setCurrentTime(currentTime);
@@ -394,6 +430,26 @@ export const usePlayList = create<State & Action>()(
               if (shouldReportPlayRecord(playItem)) {
                 void reportHeartbeat(playItem, currentTime, audio.duration, 0);
               }
+
+              // Stall 检测：音频接近末尾但 currentTime 不再推进时，兜底触发切歌
+              const dur = audio.duration;
+              if (!Number.isNaN(dur) && dur > 0 && dur !== Infinity && !audio.paused && !_stallTriggered) {
+                if (audio.currentTime >= dur - 1) {
+                  if (Math.abs(audio.currentTime - _stallLastTime) < 0.01) {
+                    _stallCount++;
+                    if (_stallCount >= 3) {
+                      _stallTriggered = true;
+                      _stallCount = 0;
+                      handleSongEnd(true);
+                    }
+                  } else {
+                    _stallCount = 0;
+                  }
+                } else {
+                  _stallCount = 0;
+                }
+              }
+              _stallLastTime = audio.currentTime;
             };
 
             audio.onseeked = () => {
@@ -425,24 +481,11 @@ export const usePlayList = create<State & Action>()(
             };
 
             audio.onended = () => {
+              // 单曲播放模式：依赖 audio.loop=true，不会触发 ended
               if (get().playMode === PlayMode.Single) {
                 return;
               }
-
-              const playItem = get().getPlayItem?.();
-              if (shouldReportPlayRecord(playItem)) {
-                void reportHeartbeat(playItem, audio.duration, audio.duration, 4);
-                endPlayReport();
-              }
-
-              const currentIndex = get().list.findIndex(item => item.id === get().playId);
-              if (get().playMode === PlayMode.Sequence && currentIndex === get().list.length - 1) {
-                audio.currentTime = 0;
-                audio.pause();
-                return;
-              }
-
-              get().next();
+              handleSongEnd(false);
             };
 
             if ("mediaSession" in navigator) {
@@ -1042,6 +1085,10 @@ function resetAudioAndPlay(url: string) {
 // 切换歌曲时，更新当前播放的歌曲信息
 usePlayList.subscribe(async (state, prevState) => {
   if (state.playId !== prevState.playId) {
+    // 切歌时重置 stall 检测状态
+    _stallLastTime = 0;
+    _stallCount = 0;
+    _stallTriggered = false;
     if (!state.playId) {
       const prevPlayItem = prevState.list.find(item => item.id === prevState.playId);
       if (shouldReportPlayRecord(prevPlayItem)) {

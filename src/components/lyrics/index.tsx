@@ -33,6 +33,38 @@ const timeTagPattern = /\[(\d{1,2}):(\d{1,2})(?:\.(\d{1,3}))?\]/g;
 const DEFAULT_FONT_SIZE = 20;
 const DEFAULT_OFFSET = 0;
 
+/** 检测字符是否为假名（平假名 / 片假名 / 半角片假名） */
+const isKana = (char: string): boolean => {
+  const code = char.codePointAt(0);
+  if (code === undefined) return false;
+  // 平假名 U+3040-U+309F
+  if (code >= 0x3040 && code <= 0x309f) return true;
+  // 片假名 U+30A0-U+30FF
+  if (code >= 0x30a0 && code <= 0x30ff) return true;
+  // 半角片假名 U+FF65-U+FF9F
+  if (code >= 0xff65 && code <= 0xff9f) return true;
+  return false;
+};
+
+/** 判断歌词是否为日语：假名占比 ≥ 15% 视为日语 */
+const isJapaneseLyrics = (lyrics: LyricLine[]): boolean => {
+  if (!lyrics.length) return false;
+
+  let kanaCount = 0;
+  let totalCount = 0;
+
+  for (const line of lyrics) {
+    for (const char of line.text) {
+      if (/\s/.test(char)) continue;
+      totalCount++;
+      if (isKana(char)) kanaCount++;
+    }
+  }
+
+  if (totalCount === 0) return false;
+  return kanaCount / totalCount >= 0.15;
+};
+
 const Lyrics = ({
   color,
   centered,
@@ -64,6 +96,9 @@ const Lyrics = ({
   // 注音缓存：歌词原文 -> ruby HTML 片段
   const furiganaMapRef = useRef<Record<string, string>>({});
   const [furiganaMap, setFuriganaMap] = useState<Record<string, string>>({});
+
+  /** 当前歌词是否为日语（假名占比 ≥ 15%） */
+  const isJapanese = useMemo(() => isJapaneseLyrics(lyrics), [lyrics]);
 
   const {
     isOpen: isSearchOpen,
@@ -267,12 +302,20 @@ const Lyrics = ({
   }, [showTranslation, updateSettings]);
 
   const handleToggleFurigana = useCallback(() => {
+    if (!isJapanese) return;
     updateSettings({ showLyricsFurigana: !showFurigana });
-  }, [showFurigana, updateSettings]);
+  }, [isJapanese, showFurigana, updateSettings]);
+
+  // 非日语歌词时自动关闭假名注音
+  useEffect(() => {
+    if (!isJapanese && showFurigana) {
+      updateSettings({ showLyricsFurigana: false });
+    }
+  }, [isJapanese, showFurigana, updateSettings]);
 
   // 注音开启后，歌词加载完成或切歌时自动补齐注音
   useEffect(() => {
-    if (!showFurigana || !lyrics.length) return;
+    if (!showFurigana || !lyrics.length || !isJapanese) return;
 
     const pending = lyrics.map(line => line.text).filter(text => !furiganaMapRef.current[text]);
     if (!pending.length) return;
@@ -289,7 +332,7 @@ const Lyrics = ({
           setFuriganaMap({ ...furiganaMapRef.current });
         });
     });
-  }, [lyrics, showFurigana]);
+  }, [lyrics, showFurigana, isJapanese]);
 
   const updateCenterPadding = useCallback(() => {
     if (activeIndex < 0) {
@@ -439,7 +482,7 @@ const Lyrics = ({
         </div>
 
         {showControls && (
-          <div className="text-foreground/80 pointer-events-none absolute right-6 bottom-6 flex flex-col items-center text-sm transition-opacity duration-200">
+          <div className="text-foreground/80 pointer-events-none fixed right-5 bottom-5 z-50 flex flex-col items-center text-sm transition-opacity duration-200">
             {/* 第一组：查看评论 + 音量调节（常驻功能） */}
             <UtilityControls onOpenComments={onOpenComments} />
 
@@ -449,6 +492,7 @@ const Lyrics = ({
                 type="button"
                 aria-label={showTranslation ? "隐藏歌词翻译" : "显示歌词翻译"}
                 tooltip={showTranslation ? "隐藏翻译" : "显示翻译"}
+                tooltipProps={{ placement: "left" }}
                 className={clsx(
                   "min-w-0 rounded-full text-xs font-semibold",
                   showTranslation
@@ -461,13 +505,17 @@ const Lyrics = ({
               </IconButton>
               <IconButton
                 type="button"
+                isDisabled={!isJapanese}
                 aria-label={showFurigana ? "隐藏汉字假名标注" : "显示汉字假名标注"}
-                tooltip={showFurigana ? "关闭假名注音" : "开启假名注音"}
+                tooltip={isJapanese ? (showFurigana ? "关闭假名注音" : "开启假名注音") : "仅日语歌词可开启"}
+                tooltipProps={{ placement: "left" }}
                 className={clsx(
                   "min-w-0 rounded-full text-xs font-semibold",
-                  showFurigana
-                    ? "bg-foreground/20 text-foreground hover:bg-foreground/30"
-                    : "bg-foreground/10 text-foreground/50 hover:bg-foreground/20",
+                  !isJapanese
+                    ? "bg-foreground/5 text-foreground/30 cursor-not-allowed"
+                    : showFurigana
+                      ? "bg-foreground/20 text-foreground hover:bg-foreground/30"
+                      : "bg-foreground/10 text-foreground/50 hover:bg-foreground/20",
                 )}
                 onPress={handleToggleFurigana}
               >
@@ -482,6 +530,8 @@ const Lyrics = ({
               <IconButton
                 type="button"
                 onPress={onOpenSearch}
+                tooltip="歌词搜索"
+                tooltipProps={{ placement: "left" }}
                 className="bg-foreground/20 text-foreground hover:bg-foreground/30 min-w-0 rounded-full text-xs font-semibold"
               >
                 <RiTBoxLine size={16} />

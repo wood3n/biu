@@ -89,7 +89,7 @@ const VolumeControl = () => {
                 thumb: "after:hidden data-[hover=true]:bg-primary data-[hover=true]:scale-100",
               }}
             />
-            <span className="text-[10px] font-bold whitespace-nowrap text-white/60">
+            <span className="w-8 text-center text-[10px] font-bold whitespace-nowrap text-white/60 tabular-nums">
               {Math.round(effectiveVolume * 100)}%
             </span>
           </div>
@@ -113,6 +113,7 @@ const UtilityControls = ({ onOpenComments }: UtilityControlsProps) => {
           type="button"
           aria-label="查看评论"
           tooltip="查看评论"
+          tooltipProps={{ placement: "left" }}
           className="bg-foreground/10 text-foreground/50 hover:bg-foreground/20 hover:text-foreground min-w-0 rounded-full text-xs font-semibold"
           onPress={onOpenComments}
         >
