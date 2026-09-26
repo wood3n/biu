@@ -482,7 +482,7 @@ const Lyrics = ({
         </div>
 
         {showControls && (
-          <div className="text-foreground/80 pointer-events-none fixed right-5 bottom-5 z-50 flex flex-col items-center text-sm transition-opacity duration-200">
+          <div className="text-foreground/80 pointer-events-none fixed right-[50px] bottom-[50px] z-50 flex flex-col items-center text-sm transition-opacity duration-200">
             {/* 第一组：查看评论 + 音量调节（常驻功能） */}
             <UtilityControls onOpenComments={onOpenComments} />
 

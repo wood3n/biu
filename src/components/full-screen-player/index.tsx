@@ -361,7 +361,7 @@ const FullScreenPlayer = () => {
                 {!isLocal && showLyrics && (
                   <div
                     className={clsx(
-                      "h-full w-full overflow-hidden px-12 py-24",
+                      "h-full w-full overflow-hidden py-24 pr-[130px] pl-12",
                       !showCover ? "flex items-center justify-center" : "",
                     )}
                   >
@@ -378,7 +378,7 @@ const FullScreenPlayer = () => {
               {/* 歌词未显示或本地曲目时：常驻工具组（评论 + 音量）仍显示 */}
               {isUiVisible && (!showLyrics || isLocal) && (
                 <div className="pointer-events-none absolute inset-0 z-20 flex items-end justify-end px-12 py-24">
-                  <div className="pointer-events-auto mr-6 mb-6">
+                  <div className="pointer-events-auto mr-[2px] mb-[50px]">
                     <UtilityControls onOpenComments={playItem.type === "mv" ? openComments : undefined} />
                   </div>
                 </div>
