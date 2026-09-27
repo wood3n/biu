@@ -221,6 +221,12 @@ const resetStallState = () => {
   _stallTriggered = false;
 };
 
+/** 刷新 stall 追踪时间戳（不重置 _stallTriggered） */
+const touchStallTracking = () => {
+  _stallLastTime = audio.currentTime;
+  _stallLastChangeTs = Date.now();
+};
+
 const stopStallDetection = () => {
   if (_stallCheckInterval) {
     clearInterval(_stallCheckInterval);
@@ -410,12 +416,19 @@ export const usePlayList = create<State & Action>()(
 
             // 统一处理播放结束逻辑（onended 和 stall 兜底共用）
             const handleSongEnd = (isStall: boolean) => {
+              // stall 兜底进入时先重置检测状态，避免后续定时器跳过
+              if (isStall) {
+                _stallTriggered = false;
+              }
+
               // 单曲循环模式：
               // - onended 不触发（audio.loop=true 由浏览器处理），直接返回
               // - stall 兜底：浏览器原生循环失败，手动重置并续播
               if (get().playMode === PlayMode.Single) {
                 if (isStall) {
                   audio.currentTime = 0;
+                  // 重置追踪，让续播后 stall 能重新检测
+                  touchStallTracking();
                   void playAudioSafely();
                 }
                 return;
@@ -448,8 +461,17 @@ export const usePlayList = create<State & Action>()(
               }
 
               // timeupdate 触发说明 currentTime 在变化，更新 stall 追踪时间戳
-              _stallLastTime = audio.currentTime;
-              _stallLastChangeTs = Date.now();
+              touchStallTracking();
+            };
+
+            // 缓冲等待时重置追踪，避免缓冲期间误判 stall
+            audio.onwaiting = () => {
+              touchStallTracking();
+            };
+
+            // 缓冲结束恢复播放时重置追踪
+            audio.onplaying = () => {
+              touchStallTracking();
             };
 
             audio.onseeked = () => {
@@ -462,6 +484,8 @@ export const usePlayList = create<State & Action>()(
 
             audio.onplay = () => {
               set({ isPlaying: true });
+              // 恢复播放时重置 stall 追踪，避免长暂停后恢复被误判为 stall
+              touchStallTracking();
               updatePlaybackState();
               updatePositionState();
               const playItem = get().getPlayItem?.();
@@ -526,8 +550,26 @@ export const usePlayList = create<State & Action>()(
                     _stallTriggered = true;
                     void refreshCurrentAudioSource().then(refreshed => {
                       if (refreshed) {
-                        audio.currentTime = currentTime;
-                        void playAudioSafely();
+                        // 换了新 src 后需等 metadata 加载才能 seek
+                        const seekAndPlay = () => {
+                          try {
+                            audio.currentTime = currentTime;
+                          } catch {
+                            // metadata 尚未就绪，忽略
+                          }
+                          void playAudioSafely();
+                          touchStallTracking();
+                        };
+                        if (audio.readyState >= 1) {
+                          seekAndPlay();
+                        } else {
+                          audio.addEventListener("loadedmetadata", seekAndPlay, { once: true });
+                        }
+                      } else {
+                        // 刷新链接失败 → 跳到下一首，避免永久卡死
+                        log.error("Stall 检测：刷新链接失败，跳到下一首", { currentTime });
+                        _stallTriggered = false;
+                        handleSongEnd(true);
                       }
                     });
                     return;
