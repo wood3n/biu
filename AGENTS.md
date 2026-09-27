@@ -3,10 +3,10 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: '49a432ed-b003-4e65-817b-4788bb704747'
-  PropagateID: '49a432ed-b003-4e65-817b-4788bb704747'
-  ReservedCode1: 'faee19f3-1cb1-4846-a1cd-8c01abf1a8ef'
-  ReservedCode2: 'faee19f3-1cb1-4846-a1cd-8c01abf1a8ef'
+  ProduceID: 'bbda53df-732e-4e82-8db1-8c0e0501b894'
+  PropagateID: 'bbda53df-732e-4e82-8db1-8c0e0501b894'
+  ReservedCode1: 'e0b4e395-8f00-423e-92e7-1f12a0e76b19'
+  ReservedCode2: 'e0b4e395-8f00-423e-92e7-1f12a0e76b19'
 ---
 
 # AGENTS.md
@@ -236,7 +236,36 @@ pnpm knip             # 检查未使用的代码
 - 设置面板 `sanitizeSpectrumColor` 校验逻辑同步更新：非法值回退为 `"#ffffff"`，清理旧的 `"currentColor"` 持久化值
 - 仅改默认值，用户自定义选择不受影响
 
-## 开发注意事项
+### 2026-09-27: 全屏播放器按钮位置、小窗歌词偏移、偏移控件优化
+
+#### 1. 全屏播放器右下角按钮上移 (`src/components/lyrics/index.tsx`, `src/components/full-screen-player/index.tsx`)
+
+**问题**: 全屏播放器右下角按钮组过于贴近底部，与进度条/频谱条视觉重叠。
+
+**修复**:
+- 歌词模式按钮组从 `bottom-[50px]` 上移至 `bottom-[75px]`
+- 歌词隐藏/本地歌曲时常驻工具组从 `mb-[50px]` 同步上移至 `mb-[75px]`
+
+#### 2. 小窗模式歌词偏移不生效 (`src/pages/mini-player/index.tsx`, `src/common/utils/mini-player.ts`, `src/components/lyrics/index.tsx`)
+
+**问题**: 全屏播放器调整歌词偏移后，切换到小窗模式歌词行未应用偏移，歌词与音频不同步。
+
+**根因**: 小窗 `loadLyrics` 只读取缓存中的歌词文本，忽略了 `offset` 字段；计算当前歌词行时也未加偏移。
+
+**修复**:
+- 小窗 `loadLyrics` 读取缓存的 `offset` 字段并存储到 `lyricOffset` state
+- `activeLyricIndex` 计算时加上 `lyricOffset`（`currentMs = displayTime * 1000 + lyricOffset`）
+- 新增 `postLyricsOffset()` 广播函数，主窗口调整偏移时通过 BroadcastChannel 实时同步给小窗
+- 小窗 `bcRef.onmessage` 新增 `lyricsOffset` 消息类型处理
+
+#### 3. 歌词偏移控件固定宽度 + 滚轮调节 (`src/components/lyrics/offset-control.tsx`)
+
+**问题**: 偏移数值标签宽度随位数变化（如 `+5000 ms` vs `0 ms`），导致弹窗布局抖动；不支持鼠标滚轮快捷调节。
+
+**修复**:
+- 标签添加固定宽度 `w-16`（64px）+ `tabular-nums` 等宽数字
+- 外层包裹 `wrapperRef`，监听 `wheel` 事件以 50ms 步进调节偏移，阻止页面滚动
+- 行为与音量控件（`utility-controls.tsx` 中的 `VolumeControl`）完全一致
 
 1. **不要在渲染进程直接访问 Node API** — 通过 `window.electron.*` IPC 调用
 2. **新增 IPC 通道** — 在 `electron/ipc/channel.ts` 定义，`electron/ipc/` 下注册处理器，`preload.ts` 暴露，`shared/types/renderer.d.ts` 声明类型

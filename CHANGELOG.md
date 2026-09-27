@@ -3,17 +3,17 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: '9b215183-aea6-4568-96cd-e54144bca130'
-  PropagateID: '9b215183-aea6-4568-96cd-e54144bca130'
-  ReservedCode1: '5137526c-f7b4-4b60-ac4f-33a1463c3227'
-  ReservedCode2: '5137526c-f7b4-4b60-ac4f-33a1463c3227'
+  ProduceID: '8d6296ee-dd97-4a17-8b7f-ba0d1c7cb550'
+  PropagateID: '8d6296ee-dd97-4a17-8b7f-ba0d1c7cb550'
+  ReservedCode1: '9d2d847b-8e14-4ecb-a549-9cfd3e5e2cb6'
+  ReservedCode2: '9d2d847b-8e14-4ecb-a549-9cfd3e5e2cb6'
 ---
 
 # Changelog
 
-## v2.3.2-xretia
+## v2.3.3-xretia
 
-[compare changes](https://github.com/xRetia/biu/compare/v2.3.1-xretia...v2.3.2-xretia)
+[compare changes](https://github.com/xRetia/biu/compare/v2.3.1-xretia...v2.3.3-xretia)
 
 ### 🩹 修复问题
 
@@ -25,11 +25,15 @@ AIGC:
 - 按钮组 tooltip 缺失：字体大小、歌词偏移、歌词搜索按钮补全 tooltip 并统一 `placement="left"` ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
 - 全屏播放器歌词区右侧间距不足导致按钮重叠：加大右内边距，按钮位置统一调整 ([778f95c](https://github.com/xRetia/biu/commit/778f95c))
 - 频谱条颜色默认值 `currentColor` 在深色背景下不可见，改为 `#ffffff`
+- 小窗模式歌词未应用偏移设置：小窗加载歌词时读取缓存 offset，主窗口调整偏移后通过 BroadcastChannel 实时同步
+- 歌词偏移控件标签宽度随数值变化跳动：固定宽度 `w-16` + `tabular-nums` 消除布局抖动
 
 ### 🎨 UI 调整
 
 - 全屏播放器歌词区右侧内边距从 `px-12` 改为 `pl-12 pr-[130px]`，右下角按钮位置调整为 `right-[50px] bottom-[50px]` ([778f95c](https://github.com/xRetia/biu/commit/778f95c))
 - 频谱条颜色默认值从 `currentColor` 改为白色 `#ffffff`，设置面板颜色校验逻辑同步更新
+- 全屏播放器右下角按钮组从 `bottom-50px` 上移至 `bottom-75px`，歌词隐藏/本地歌曲时常驻工具组同步上移
+- 歌词偏移控件支持鼠标滚轮快捷调节（步进 50ms），与音量控件行为一致
 
 ## v2.3.1-xretia
 
