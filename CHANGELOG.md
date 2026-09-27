@@ -3,10 +3,10 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: '8d6296ee-dd97-4a17-8b7f-ba0d1c7cb550'
-  PropagateID: '8d6296ee-dd97-4a17-8b7f-ba0d1c7cb550'
-  ReservedCode1: '9d2d847b-8e14-4ecb-a549-9cfd3e5e2cb6'
-  ReservedCode2: '9d2d847b-8e14-4ecb-a549-9cfd3e5e2cb6'
+  ProduceID: '14c32dd9-5d89-4b42-a848-edd6f4ab06a6'
+  PropagateID: '14c32dd9-5d89-4b42-a848-edd6f4ab06a6'
+  ReservedCode1: '9a2004af-2ef5-4c59-9107-b91a1acf629a'
+  ReservedCode2: '9a2004af-2ef5-4c59-9107-b91a1acf629a'
 ---
 
 # Changelog
@@ -17,23 +17,20 @@ AIGC:
 
 ### 🩹 修复问题
 
-- 假名注音：非日语歌词自动禁用开关并提示「仅日语歌词可开启」，避免无效 IPC 调用 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
-- Marquee 滚动：动画时长按文字宽度动态计算（40px/s 基准），内容切换时强制重启动画 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
-- 播放卡顿：`ontimeupdate` 新增 stall 检测，`ended` 未触发时兜底切歌或续播 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
-- 禁用态按钮 tooltip 不显示：用 span 包裹解决 `pointer-events: none` 导致的 hover 失效 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
-- 音量滑块百分比文本宽度跳动：固定宽度 `w-8` + `tabular-nums` 消除布局抖动 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
-- 按钮组 tooltip 缺失：字体大小、歌词偏移、歌词搜索按钮补全 tooltip 并统一 `placement="left"` ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
-- 全屏播放器歌词区右侧间距不足导致按钮重叠：加大右内边距，按钮位置统一调整 ([778f95c](https://github.com/xRetia/biu/commit/778f95c))
-- 频谱条颜色默认值 `currentColor` 在深色背景下不可见，改为 `#ffffff`
-- 小窗模式歌词未应用偏移设置：小窗加载歌词时读取缓存 offset，主窗口调整偏移后通过 BroadcastChannel 实时同步
-- 歌词偏移控件标签宽度随数值变化跳动：固定宽度 `w-16` + `tabular-nums` 消除布局抖动
+- **播放卡死不切歌**：长时间播放后歌曲可能卡在最后一秒不动、状态显示正在播放但实际已停止，现已修复。改为独立定时器检测，即使浏览器播放事件完全失效也能自动切歌或恢复播放
+- **小窗歌词不同步**：全屏播放器调整歌词偏移后，切换到小窗模式歌词偏移不生效，现已修复
+- **非日语歌词假名注音无效**：非日语歌词开启假名注音无效果，现在自动禁用并提示「仅日语歌词可开启」
+- **长标题滚动过快**：歌名较长时跑马灯滚动速度过快，现按文字长度自动调节
+- **禁用按钮悬停无提示**：按钮禁用后鼠标悬停看不到说明文字，现已修复
+- **频谱条深色背景不可见**：频谱条默认颜色在深色背景上看不到，改为白色
+- **歌词偏移数值宽度跳动**：调整歌词偏移时数值文字宽度变化导致面板抖动，已固定宽度
 
-### 🎨 UI 调整
+### 🎨 界面调整
 
-- 全屏播放器歌词区右侧内边距从 `px-12` 改为 `pl-12 pr-[130px]`，右下角按钮位置调整为 `right-[50px] bottom-[50px]` ([778f95c](https://github.com/xRetia/biu/commit/778f95c))
-- 频谱条颜色默认值从 `currentColor` 改为白色 `#ffffff`，设置面板颜色校验逻辑同步更新
-- 全屏播放器右下角按钮组从 `bottom-50px` 上移至 `bottom-75px`，歌词隐藏/本地歌曲时常驻工具组同步上移
-- 歌词偏移控件支持鼠标滚轮快捷调节（步进 50ms），与音量控件行为一致
+- 全屏播放器右下角按钮组上移，避免与进度条视觉重叠
+- 歌词偏移控件支持鼠标滚轮快捷调节，与音量控件操作方式一致
+- 歌词区右侧间距加大，按钮位置统一调整避免重叠
+- 音量百分比、歌词偏移数值使用等宽数字，消除布局抖动
 
 ## v2.3.1-xretia
 
