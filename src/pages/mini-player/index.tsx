@@ -188,6 +188,7 @@ const MiniPlayer = () => {
     })),
   );
   const lyrics = usePlayState(s => s.lyrics);
+  const [lyricOffset, setLyricOffset] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const seekingTimeRef = useRef<number>(0);
   const isSeekingRef = useRef<boolean>(false);
@@ -229,18 +230,21 @@ const MiniPlayer = () => {
 
     try {
       const store = await window.electron.getStore(StoreNameMap.LyricsCache);
-      const cached = store?.[key]?.lyrics;
-      let lines = parseLrcToLines(cached);
+      const cached = store?.[key];
+      const lines = parseLrcToLines(cached?.lyrics);
+      // 应用歌词缓存里保存的偏移（切歌时重置为缓存值/0）
+      setLyricOffset(typeof cached?.offset === "number" ? cached.offset : 0);
 
-      if (!lines.length) {
+      let nextLines = lines;
+      if (!nextLines.length) {
         const params: WebPlayerParams = { cid: Number(cid) };
         if (bvid) params.bvid = bvid;
         const result = await getLyricsAuto(params, songTitle || "", bvid, cid);
-        if (result?.lyrics.length) lines = result.lyrics;
+        if (result?.lyrics.length) nextLines = result.lyrics;
       }
 
-      if (lines.length) {
-        usePlayState.getState().update({ ...usePlayState.getState(), lyrics: lines });
+      if (nextLines.length) {
+        usePlayState.getState().update({ ...usePlayState.getState(), lyrics: nextLines });
       }
     } catch {
       // 静默失败
@@ -254,8 +258,15 @@ const MiniPlayer = () => {
     postMessage("init");
 
     bcRef.current.onmessage = ev => {
-      const { from, state } = ev.data || {};
-      if (from !== "main" || !state) return;
+      const { from, type, offset, state } = ev.data || {};
+      if (from !== "main") return;
+
+      // 0. 歌词偏移实时同步：主窗口调整歌词偏移时同步应用
+      if (type === "lyricsOffset" && typeof offset === "number") {
+        setLyricOffset(offset);
+        return;
+      }
+      if (!state) return;
 
       // 1. 拖动进度条时跳过主窗口推送的 currentTime，避免覆盖用户拖动位置
       if (typeof state.currentTime === "number" && !isSeekingRef.current) {
@@ -323,15 +334,15 @@ const MiniPlayer = () => {
 
   const displayTime = isSeeking ? seekingTimeRef.current : currentTime;
 
-  // 倒序找最后一个 time <= 当前进度的歌词行
+  // 倒序找最后一个 time <= 当前进度 + 偏移 的歌词行
   const activeLyricIndex = useMemo(() => {
     if (!lyrics.length) return -1;
-    const currentMs = displayTime * 1000;
+    const currentMs = displayTime * 1000 + lyricOffset;
     for (let i = lyrics.length - 1; i >= 0; i -= 1) {
       if (currentMs >= lyrics[i].time) return i;
     }
     return 0;
-  }, [displayTime, lyrics]);
+  }, [displayTime, lyrics, lyricOffset]);
 
   return (
     <div className="window-drag flex h-screen w-screen overflow-hidden select-none">

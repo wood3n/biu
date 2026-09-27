@@ -378,7 +378,7 @@ const FullScreenPlayer = () => {
               {/* 歌词未显示或本地曲目时：常驻工具组（评论 + 音量）仍显示 */}
               {isUiVisible && (!showLyrics || isLocal) && (
                 <div className="pointer-events-none absolute inset-0 z-20 flex items-end justify-end px-12 py-24">
-                  <div className="pointer-events-auto mr-[2px] mb-[50px]">
+                  <div className="pointer-events-auto mr-[2px] mb-[75px]">
                     <UtilityControls onOpenComments={playItem.type === "mv" ? openComments : undefined} />
                   </div>
                 </div>

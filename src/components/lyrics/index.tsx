@@ -7,6 +7,7 @@ import { debounce } from "es-toolkit";
 
 import type { WebPlayerParams } from "@/service/web-player";
 
+import { postLyricsOffset } from "@/common/utils/mini-player";
 import { usePlayList } from "@/store/play-list";
 import { usePlayProgress } from "@/store/play-progress";
 import { useSettings } from "@/store/settings";
@@ -277,6 +278,8 @@ const Lyrics = ({
       const cid = playItem?.cid ? Number(playItem.cid) : undefined;
       if (!playItem?.bvid || cid === undefined || Number.isNaN(cid)) return;
 
+      // 实时同步偏移给小窗模式歌词（无小窗时静默忽略）
+      postLyricsOffset(next);
       persistLyricsCache(playItem, next, fontSize);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -482,7 +485,7 @@ const Lyrics = ({
         </div>
 
         {showControls && (
-          <div className="text-foreground/80 pointer-events-none fixed right-[50px] bottom-[50px] z-50 flex flex-col items-center text-sm transition-opacity duration-200">
+          <div className="text-foreground/80 pointer-events-none fixed right-[50px] bottom-[75px] z-50 flex flex-col items-center text-sm transition-opacity duration-200">
             {/* 第一组：查看评论 + 音量调节（常驻功能） */}
             <UtilityControls onOpenComments={onOpenComments} />
 

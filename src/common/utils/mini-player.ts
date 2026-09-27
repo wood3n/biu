@@ -182,6 +182,25 @@ function stopMiniPlayerMainSync() {
 }
 
 /**
+ * 主窗口调整歌词偏移后，实时同步给 mini 播放器（小窗歌词需应用同一偏移）。
+ * 临时创建通道发送后立即关闭；无监听方时静默失败。
+ */
+export function postLyricsOffset(offset: number) {
+  try {
+    const channel = new BroadcastChannel("play-list-store-sync-channel");
+    channel.postMessage({
+      from: "main",
+      type: "lyricsOffset",
+      offset,
+      ts: Date.now(),
+    });
+    channel.close();
+  } catch {
+    // 广播不可用时静默忽略
+  }
+}
+
+/**
  * 切换mini/完整播放模式
  */
 export async function toggleMiniMode() {
