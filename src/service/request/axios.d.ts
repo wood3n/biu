@@ -17,5 +17,6 @@ declare module 'axios' {
     useWbi?: boolean;
     useCSRF?: boolean;
     skipRefreshCheck?: boolean;
+    skipAuth?: boolean;
   }
 }

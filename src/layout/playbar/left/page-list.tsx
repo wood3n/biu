@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 
-import { Input, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@heroui/react";
+import { Button, Input, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@heroui/react";
 import { RiListRadio, RiSearchLine } from "@remixicon/react";
+import { twMerge } from "tailwind-merge";
 
-import IconButton from "@/components/icon-button";
+import { glassMenuClassName } from "@/common/constants/glass";
 import MusicPageList from "@/components/music-page-list";
 
 const PageListDrawer = () => {
@@ -21,24 +22,34 @@ const PageListDrawer = () => {
       onOpenChange={onOpenChange}
     >
       <PopoverTrigger>
-        <IconButton onPress={onOpen}>
+        <Button
+          isIconOnly
+          variant="light"
+          radius="md"
+          size="sm"
+          title="分集"
+          onPress={onOpen}
+          className="hover:text-primary !px-0 text-inherit hover:!bg-transparent"
+        >
           <RiListRadio size={18} />
-        </IconButton>
+        </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="bg-content2 w-auto min-w-[500px] overflow-hidden p-0"
+        className={twMerge(glassMenuClassName, "w-auto min-w-[500px] overflow-hidden p-0")}
         style={{ maxWidth: "min(500px, 90vw)" }}
       >
-        <div className="border-b-content2 flex w-full flex-row items-center justify-between space-x-2 border-b px-4 py-3">
+        <div className="border-default-300/40 dark:border-default-100/10 flex w-full flex-row items-center justify-between space-x-2 border-b px-4 py-3">
           <h3>分集</h3>
           <Input
             classNames={{
               base: "max-w-48 h-8",
               mainWrapper: "h-full",
               input: "text-small",
-              inputWrapper: "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
+              inputWrapper:
+                "h-full font-normal text-default-500 bg-default-300/55! hover:bg-default-300/55! data-[hover=true]:bg-default-300/55! group-data-[focus=true]:bg-default-300/55! dark:bg-default-100/15! dark:hover:bg-default-100/15! dark:data-[hover=true]:bg-default-100/15! dark:group-data-[focus=true]:bg-default-100/15!",
             }}
             placeholder="搜索分集"
+            radius="md"
             size="sm"
             startContent={<RiSearchLine size={14} />}
             type="search"

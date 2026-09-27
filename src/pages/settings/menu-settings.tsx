@@ -3,7 +3,7 @@ import { type Control, Controller } from "react-hook-form";
 
 import { DefaultMenuList } from "@/common/constants/menus";
 import SelectAllCheckboxGroup from "@/components/select-all-checkbox-group";
-import { useFavoritesStore } from "@/store/favorite";
+import { getItemKey, useFavoritesStore } from "@/store/favorite";
 import { useUser } from "@/store/user";
 
 interface MenuSettingsProps {
@@ -64,7 +64,7 @@ const MenuSettings: React.FC<MenuSettingsProps> = ({ control }) => {
                   control={control}
                   name="hiddenMenuKeys"
                   render={({ field }) => {
-                    const groupKeys = (createdFavorites ?? []).map(i => String(i.id));
+                    const groupKeys = (createdFavorites ?? []).map(i => getItemKey(i));
                     const selectedKeys = groupKeys.filter(k => !field.value.includes(k));
 
                     const handleSelectionChange = (newSelectedKeys: string[]) => {
@@ -74,7 +74,7 @@ const MenuSettings: React.FC<MenuSettingsProps> = ({ control }) => {
                       field.onChange(nextHidden);
                     };
 
-                    const ownFolderMap = new Map((createdFavorites ?? []).map(i => [String(i.id), i.title]));
+                    const ownFolderMap = new Map((createdFavorites ?? []).map(i => [getItemKey(i), i.title]));
                     const items = groupKeys.map(key => ({
                       value: key,
                       label: ownFolderMap.get(key) || key,
@@ -101,7 +101,7 @@ const MenuSettings: React.FC<MenuSettingsProps> = ({ control }) => {
                   control={control}
                   name="hiddenMenuKeys"
                   render={({ field }) => {
-                    const groupKeys = (collectedFavorites ?? []).map(i => String(i.id));
+                    const groupKeys = (collectedFavorites ?? []).map(i => getItemKey(i));
                     const selectedKeys = groupKeys.filter(k => !field.value.includes(k));
 
                     const handleSelectionChange = (newSelectedKeys: string[]) => {
@@ -111,7 +111,7 @@ const MenuSettings: React.FC<MenuSettingsProps> = ({ control }) => {
                       field.onChange(nextHidden);
                     };
 
-                    const collectedFolderMap = new Map((collectedFavorites ?? []).map(i => [String(i.id), i.title]));
+                    const collectedFolderMap = new Map((collectedFavorites ?? []).map(i => [getItemKey(i), i.title]));
                     const items = groupKeys.map(key => ({
                       value: key,
                       label: collectedFolderMap.get(key) || key,

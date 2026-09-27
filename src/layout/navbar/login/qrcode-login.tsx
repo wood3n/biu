@@ -57,13 +57,19 @@ const QrcodeLogin = ({ onClose, updateUserData }: QrcodeLoginProps) => {
   return (
     <div className="flex flex-col items-center p-6">
       <div className="mb-4 text-lg font-medium">扫码登录</div>
-      <div className="border-divider relative flex h-40 w-40 items-center justify-center overflow-hidden rounded-lg border">
+      <div className="relative flex h-40 w-40 items-center justify-center overflow-hidden rounded-lg">
         {genLoading || !qrcodeData?.url ? (
           <Skeleton className="rounded-lg">
             <div className="bg-default-300 h-[144px] w-[144px] rounded-lg" />
           </Skeleton>
         ) : (
-          <QRCodeCanvas value={qrcodeData?.url} size={144} className="rounded-md" />
+          <QRCodeCanvas
+            value={qrcodeData?.url}
+            size={144}
+            bgColor="transparent"
+            fgColor="currentColor"
+            className="text-foreground rounded-md"
+          />
         )}
         <div
           className={clx(

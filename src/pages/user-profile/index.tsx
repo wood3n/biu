@@ -135,7 +135,11 @@ const UserProfile = () => {
         <div className="p-4">
           <Tabs
             radius="md"
-            classNames={{ cursor: "rounded-medium", panel: "px-0 py-4" }}
+            classNames={{
+              cursor: "rounded-medium",
+              panel: "px-0 py-4",
+              tabList: "bg-default-200/80 dark:bg-default-100/10",
+            }}
             aria-label="个人资料栏目"
             variant="solid"
           >

@@ -60,3 +60,174 @@ html, body, #root {
 
   padding: 0;
 }
+
+/* 收起态侧边栏：让 OverlayScrollbars viewport 内容垂直居中 */
+.side-collapsed-center [data-overlayscrollbars-viewport] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 播放栏悬浮、毛玻璃导航栏悬浮：主内容区滚动容器的顶部/底部留空间
+ * 由 ScrollContainer 组件内 JS spacer（64px / 104px）统一实现，
+ * 不再走 CSS padding（OverlayScrollbars 会对 viewport 写入内联 padding 覆盖它） */
+
+/* 播放栏折叠态：底部留少量空间给折叠小卡片 */
+.playbar-collapsed [data-overlayscrollbars-viewport] {
+  padding-bottom: 72px;
+}
+
+/* stylelint-disable no-descending-specificity --
+ * base/hover/覆盖组按「折叠→展开」语义排列，特定性存在降序，
+ * no-descending-specificity 保守误报，属历史遗留，此处统一忽略。
+ * 输入选择控件背景统一为半透明灰，与 tabList 一致，暗色下不过亮 */
+[data-slot="input-wrapper"],
+[data-slot="trigger"]:not(button),
+button[data-slot="trigger"][aria-expanded="true"] {
+  background-color: hsl(var(--heroui-default-200) / 80%);
+}
+
+[data-slot="input-wrapper"]:hover,
+[data-slot="trigger"]:not(button):hover,
+button[data-slot="trigger"][aria-expanded="true"]:hover {
+  background-color: hsl(var(--heroui-default-300) / 80%);
+}
+
+.dark [data-slot="input-wrapper"],
+.dark [data-slot="trigger"]:not(button),
+.dark button[data-slot="trigger"][aria-expanded="true"] {
+  background-color: hsl(var(--heroui-default-100) / 10%);
+}
+
+.dark [data-slot="input-wrapper"]:hover,
+.dark [data-slot="trigger"]:not(button):hover,
+.dark button[data-slot="trigger"][aria-expanded="true"]:hover {
+  background-color: hsl(var(--heroui-default-200) / 15%);
+}
+
+/* Dropdown/Popover 展开时 trigger 按钮的灰色背景，
+   覆盖 Button 组件的 hover:!bg-transparent */
+button[data-slot="trigger"][aria-expanded="true"],
+button[data-slot="trigger"][aria-expanded="true"]:hover {
+  background-color: hsl(var(--heroui-default-200) / 80%) !important;
+}
+
+.dark button[data-slot="trigger"][aria-expanded="true"],
+.dark button[data-slot="trigger"][aria-expanded="true"]:hover {
+  background-color: hsl(var(--heroui-default-100) / 10%) !important;
+}
+
+/* Select 的 trigger 是 button[data-slot="trigger"] 且带 aria-haspopup="listbox"，
+   折叠态即需要半透明灰底；展开态（aria-expanded="true"）由上方规则覆盖，
+   与 Popover/Dropdown 菜单按钮（aria-haspopup="dialog"）仅展开态有灰底区分 */
+button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"]),
+button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"]):hover {
+  background-color: hsl(var(--heroui-default-200) / 80%);
+}
+
+.dark button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"]),
+.dark button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"]):hover {
+  background-color: hsl(var(--heroui-default-100) / 10%);
+}
+/* stylelint-enable no-descending-specificity */
+
+/* 毛玻璃菜单：菜单项 hover/focus 背景改为半透明，不遮挡毛玻璃
+   注意：HeroUI 菜单项在鼠标 hover 后会保留 data-focus=true（键盘焦点残留），
+   因此这里只用 data-hover=true 作为高亮条件；键盘聚焦（data-focus-visible=true）
+   单独用 outline 表示，避免鼠标移开后高亮块残留。
+   :not([data-slot]) 只命中菜单项（li，无 data-slot），
+   排除 Input/Select 等控件的 base 层（矩形无圆角，hover 会露直角） */
+.glass-menu [data-hover="true"]:not([data-slot]) {
+  background-color: hsl(var(--heroui-foreground) / 15%);
+}
+
+.glass-menu [data-focus-visible="true"]:not([data-slot]) {
+  outline: 2px solid hsl(var(--heroui-primary) / 60%);
+  outline-offset: 2px;
+}
+
+/* Toast 毛玻璃：保留各色背景色，降低不透明度让 backdrop-blur 穿透生效 */
+
+/* HeroUI flat 变体各色背景改为半透明（亮色） */
+[data-toast].bg-success-50 {
+  background-color: hsl(var(--heroui-success-50) / 70%) !important;
+}
+
+[data-toast].bg-danger-50 {
+  background-color: hsl(var(--heroui-danger-50) / 70%) !important;
+}
+
+[data-toast].bg-warning-50 {
+  background-color: hsl(var(--heroui-warning-50) / 70%) !important;
+}
+
+[data-toast].bg-primary-50 {
+  background-color: hsl(var(--heroui-primary-50) / 70%) !important;
+}
+
+[data-toast].bg-secondary-50 {
+  background-color: hsl(var(--heroui-secondary-50) / 70%) !important;
+}
+
+[data-toast].bg-content1 {
+  background-color: hsl(var(--heroui-content1) / 70%) !important;
+}
+
+.dark [data-toast].bg-content1 {
+  background-color: hsl(var(--heroui-content1) / 70%) !important;
+}
+
+.dark [data-toast] {
+  background-color: hsl(var(--heroui-content1) / 70%) !important;
+}
+
+.dark [data-toast].bg-success-50,
+.dark [data-toast][class*="bg-success"] {
+  background-color: hsl(var(--heroui-success) / 15%) !important;
+}
+
+.dark [data-toast].bg-danger-50,
+.dark [data-toast][class*="bg-danger"] {
+  background-color: hsl(var(--heroui-danger) / 15%) !important;
+}
+
+.dark [data-toast].bg-warning-50,
+.dark [data-toast][class*="bg-warning"] {
+  background-color: hsl(var(--heroui-warning) / 15%) !important;
+}
+
+.dark [data-toast].bg-primary-50,
+.dark [data-toast][class*="bg-primary"] {
+  background-color: hsl(var(--heroui-primary) / 15%) !important;
+}
+
+.dark [data-toast].bg-secondary-50,
+.dark [data-toast][class*="bg-secondary"] {
+  background-color: hsl(var(--heroui-secondary) / 15%) !important;
+}
+
+/* 文字溢出滚动（marquee）：无缝循环。
+ * 轨道内渲染双份文字，translateX(-50%) 恰好位移一份文字宽度，
+ * 第一份滚出后第二份无缝衔接，无空白间隙、无跳变 */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* mini 播放器单行滚动文字：纯 CSS 无缝 marquee
+ * 容器 overflow-hidden，内容 whitespace-nowrap + 双份渲染，
+ * translateX(-50%) 位移一份宽度后重置 */
+@keyframes marquee {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}

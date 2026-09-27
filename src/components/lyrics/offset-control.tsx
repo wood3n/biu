@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Popover, PopoverContent, PopoverTrigger, Slider } from "@heroui/react";
+import { Popover, PopoverContent, Slider, Tooltip } from "@heroui/react";
 import { RiTimeLine } from "@remixicon/react";
 
 import IconButton from "../icon-button";
@@ -17,6 +17,9 @@ const formatLabel = (ms: number) => (ms >= 0 ? `+${ms}` : `${ms}`);
 
 const OffsetControl = ({ value, min = -5000, max = 5000, onChange, onOpenChange }: OffsetControlProps) => {
   const [open, setOpen] = useState(false);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const step = 50;
 
   const handleOpenChange = useCallback(
@@ -27,48 +30,76 @@ const OffsetControl = ({ value, min = -5000, max = 5000, onChange, onOpenChange 
     [onOpenChange],
   );
 
+  // 鼠标滚轮快捷调节偏移（步进 50ms，阻止页面滚动）
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    const handleWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      const delta = event.deltaY > 0 ? -step : step;
+      onChange(Math.max(min, Math.min(max, value + delta)));
+    };
+
+    wrapper.addEventListener("wheel", handleWheel, { passive: false });
+    return () => wrapper.removeEventListener("wheel", handleWheel);
+  }, [value, min, max, onChange]);
+
   return (
-    <Popover
-      placement="right"
-      showArrow={false}
-      shouldCloseOnBlur={false}
-      disableAnimation
-      offset={8}
-      isOpen={open}
-      onOpenChange={handleOpenChange}
-    >
-      <PopoverTrigger>
-        <IconButton
-          size="sm"
-          variant="light"
-          aria-label="调整歌词偏移"
-          className="bg-foreground/20 text-foreground hover:bg-foreground/30 min-w-0 rounded-full text-xs font-semibold"
+    <div ref={wrapperRef}>
+      <Popover
+        triggerRef={triggerRef}
+        placement="left"
+        showArrow={false}
+        shouldCloseOnBlur={false}
+        disableAnimation
+        offset={8}
+        isOpen={open}
+        onOpenChange={handleOpenChange}
+      >
+        <Tooltip
+          content="调整歌词偏移"
+          placement="left"
+          closeDelay={0}
+          isOpen={tooltipOpen && !open}
+          onOpenChange={setTooltipOpen}
         >
-          <RiTimeLine size={16} />
-        </IconButton>
-      </PopoverTrigger>
-      <PopoverContent className="px-3 py-2">
-        <div className="flex flex-col items-center gap-2">
-          <Slider
-            aria-label="调整歌词偏移"
-            minValue={min}
-            maxValue={max}
-            step={step}
-            value={value}
-            onChange={v => onChange(v as number)}
+          <IconButton
+            ref={triggerRef}
             size="sm"
-            color="primary"
-            orientation="vertical"
-            className="h-32"
-            classNames={{
-              track: "w-1",
-              thumb: "after:hidden",
-            }}
-          />
-          <span className="text-foreground/60 text-[10px] font-bold whitespace-nowrap">{formatLabel(value)} ms</span>
-        </div>
-      </PopoverContent>
-    </Popover>
+            variant="light"
+            aria-label="调整歌词偏移"
+            className="bg-foreground/20 text-foreground hover:bg-foreground/30 min-w-0 rounded-full text-xs font-semibold"
+            onPress={() => handleOpenChange(true)}
+          >
+            <RiTimeLine size={16} />
+          </IconButton>
+        </Tooltip>
+        <PopoverContent className="border border-white/12 bg-black/25 px-3 py-2 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)] backdrop-blur-2xl backdrop-saturate-150">
+          <div className="flex flex-col items-center gap-2">
+            <Slider
+              aria-label="调整歌词偏移"
+              minValue={min}
+              maxValue={max}
+              step={step}
+              value={value}
+              onChange={v => onChange(v as number)}
+              size="sm"
+              color="primary"
+              orientation="vertical"
+              className="h-32"
+              classNames={{
+                track: "w-1",
+                thumb: "after:hidden data-[hover=true]:bg-primary data-[hover=true]:scale-100",
+              }}
+            />
+            <span className="w-16 text-center text-[10px] font-bold whitespace-nowrap text-white/60 tabular-nums">
+              {formatLabel(value)} ms
+            </span>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 };
 

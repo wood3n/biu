@@ -44,17 +44,19 @@ const WindowAction = () => {
       {!isFullScreen && (
         <>
           <IconButton title="切换到迷你播放器" onPress={toggleMiniMode}>
-            <RiPictureInPicture2Line size={16} />
+            <RiPictureInPicture2Line size={18} />
           </IconButton>
-          <IconButton onPress={handleMinimize}>
-            <RiSubtractLine size={18} />
-          </IconButton>
-          <IconButton onPress={handleMaximize}>
-            {isMaximized ? <RiFullscreenExitLine size={14} /> : <RiFullscreenLine size={14} />}
-          </IconButton>
-          <IconButton onPress={handleClose}>
-            <RiCloseLine size={18} />
-          </IconButton>
+          <div className="ml-4 flex items-center justify-center">
+            <IconButton onPress={handleMinimize}>
+              <RiSubtractLine size={18} />
+            </IconButton>
+            <IconButton onPress={handleMaximize}>
+              {isMaximized ? <RiFullscreenExitLine size={18} /> : <RiFullscreenLine size={18} />}
+            </IconButton>
+            <IconButton onPress={handleClose} className="mr-2">
+              <RiCloseLine size={18} />
+            </IconButton>
+          </div>
         </>
       )}
     </div>

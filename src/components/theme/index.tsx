@@ -73,6 +73,7 @@ const Theme = ({ children }: Props) => {
 
     if (_primaryColor) {
       rootStyle.setProperty("--heroui-primary", hexToHsl(_primaryColor));
+      rootStyle.setProperty("--heroui-primary-foreground", hexToHsl("#ffffff"));
     }
     if (_backgroundColor) {
       rootStyle.setProperty("--heroui-background", hexToHsl(_backgroundColor));

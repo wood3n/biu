@@ -24,6 +24,7 @@ export default function SearchHeader({ sortKey, onSortChange }: SearchHeaderProp
         variant="light"
         radius="md"
         classNames={{
+          tabList: "bg-default-200/80 dark:bg-default-100/10",
           cursor: "rounded-medium",
         }}
         className="-ml-1"
