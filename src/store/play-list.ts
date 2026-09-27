@@ -207,10 +207,26 @@ const createAudio = (): HTMLAudioElement => {
 
 export const audio = createAudio();
 
-// Stall 检测：长时间播放后 ended 事件可能不触发，用 timeupdate 兜底
+// Stall 检测：独立于 timeupdate 事件的定时器兜底
+// timeupdate 仅在 currentTime 变化时触发，音频卡死后不再发 timeupdate
+// 因此必须用 setInterval 独立轮询才能检测到真正的卡死
+let _stallCheckInterval: ReturnType<typeof setInterval> | null = null;
 let _stallLastTime = 0;
-let _stallCount = 0;
+let _stallLastChangeTs = 0;
 let _stallTriggered = false;
+
+const resetStallState = () => {
+  _stallLastTime = 0;
+  _stallLastChangeTs = Date.now();
+  _stallTriggered = false;
+};
+
+const stopStallDetection = () => {
+  if (_stallCheckInterval) {
+    clearInterval(_stallCheckInterval);
+    _stallCheckInterval = null;
+  }
+};
 
 const updatePlaybackState = () => {
   if ("mediaSession" in navigator) {
@@ -431,25 +447,9 @@ export const usePlayList = create<State & Action>()(
                 void reportHeartbeat(playItem, currentTime, audio.duration, 0);
               }
 
-              // Stall 检测：音频接近末尾但 currentTime 不再推进时，兜底触发切歌
-              const dur = audio.duration;
-              if (!Number.isNaN(dur) && dur > 0 && dur !== Infinity && !audio.paused && !_stallTriggered) {
-                if (audio.currentTime >= dur - 1) {
-                  if (Math.abs(audio.currentTime - _stallLastTime) < 0.01) {
-                    _stallCount++;
-                    if (_stallCount >= 3) {
-                      _stallTriggered = true;
-                      _stallCount = 0;
-                      handleSongEnd(true);
-                    }
-                  } else {
-                    _stallCount = 0;
-                  }
-                } else {
-                  _stallCount = 0;
-                }
-              }
+              // timeupdate 触发说明 currentTime 在变化，更新 stall 追踪时间戳
               _stallLastTime = audio.currentTime;
+              _stallLastChangeTs = Date.now();
             };
 
             audio.onseeked = () => {
@@ -487,6 +487,58 @@ export const usePlayList = create<State & Action>()(
               }
               handleSongEnd(false);
             };
+
+            // 启动 stall 检测定时器（独立于 timeupdate，3 秒轮询一次）
+            // timeupdate 仅在 currentTime 变化时触发，音频卡死后不再发 timeupdate
+            // 必须用独立定时器才能检测到真正的卡死
+            stopStallDetection();
+            resetStallState();
+            _stallCheckInterval = setInterval(() => {
+              if (audio.paused || _stallTriggered) return;
+
+              const now = Date.now();
+              const currentTime = audio.currentTime;
+              const dur = audio.duration;
+
+              // currentTime 未变化
+              if (Math.abs(currentTime - _stallLastTime) < 0.01) {
+                const stuckMs = now - _stallLastChangeTs;
+                // 卡住超过 5 秒
+                if (stuckMs >= 5000) {
+                  // 接近末尾（2 秒内）→ ended 事件丢失，兜底切歌
+                  if (!Number.isNaN(dur) && dur > 0 && dur !== Infinity && currentTime >= dur - 2) {
+                    _stallTriggered = true;
+                    log.warn("Stall 检测：音频卡在末尾，ended 事件未触发，兜底切歌", {
+                      currentTime,
+                      duration: dur,
+                      stuckMs,
+                    });
+                    handleSongEnd(true);
+                    return;
+                  }
+                  // 中间卡住 → 尝试刷新播放链接恢复
+                  if (!Number.isNaN(dur) && dur > 0 && dur !== Infinity && currentTime < dur - 2) {
+                    log.warn("Stall 检测：播放中途卡死，尝试刷新链接恢复", {
+                      currentTime,
+                      duration: dur,
+                      stuckMs,
+                    });
+                    _stallTriggered = true;
+                    void refreshCurrentAudioSource().then(refreshed => {
+                      if (refreshed) {
+                        audio.currentTime = currentTime;
+                        void playAudioSafely();
+                      }
+                    });
+                    return;
+                  }
+                }
+              } else {
+                // currentTime 变化了，重置追踪
+                _stallLastTime = currentTime;
+                _stallLastChangeTs = now;
+              }
+            }, 3000);
 
             if ("mediaSession" in navigator) {
               navigator.mediaSession.setActionHandler("play", () => get().togglePlay());
@@ -1086,9 +1138,7 @@ function resetAudioAndPlay(url: string) {
 usePlayList.subscribe(async (state, prevState) => {
   if (state.playId !== prevState.playId) {
     // 切歌时重置 stall 检测状态
-    _stallLastTime = 0;
-    _stallCount = 0;
-    _stallTriggered = false;
+    resetStallState();
     if (!state.playId) {
       const prevPlayItem = prevState.list.find(item => item.id === prevState.playId);
       if (shouldReportPlayRecord(prevPlayItem)) {
