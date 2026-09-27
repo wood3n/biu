@@ -3,10 +3,10 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: '14c32dd9-5d89-4b42-a848-edd6f4ab06a6'
-  PropagateID: '14c32dd9-5d89-4b42-a848-edd6f4ab06a6'
-  ReservedCode1: '9a2004af-2ef5-4c59-9107-b91a1acf629a'
-  ReservedCode2: '9a2004af-2ef5-4c59-9107-b91a1acf629a'
+  ProduceID: 'c0abb984-4e84-445f-a57a-380cf106b8d9'
+  PropagateID: 'c0abb984-4e84-445f-a57a-380cf106b8d9'
+  ReservedCode1: '50cf5e0a-c33b-49d8-a416-e014c2a4f9d4'
+  ReservedCode2: '50cf5e0a-c33b-49d8-a416-e014c2a4f9d4'
 ---
 
 # Changelog
@@ -17,20 +17,20 @@ AIGC:
 
 ### 🩹 修复问题
 
-- **播放卡死不切歌**：长时间播放后歌曲可能卡在最后一秒不动、状态显示正在播放但实际已停止，现已修复。改为独立定时器检测，即使浏览器播放事件完全失效也能自动切歌或恢复播放
-- **小窗歌词不同步**：全屏播放器调整歌词偏移后，切换到小窗模式歌词偏移不生效，现已修复
-- **非日语歌词假名注音无效**：非日语歌词开启假名注音无效果，现在自动禁用并提示「仅日语歌词可开启」
-- **长标题滚动过快**：歌名较长时跑马灯滚动速度过快，现按文字长度自动调节
-- **禁用按钮悬停无提示**：按钮禁用后鼠标悬停看不到说明文字，现已修复
-- **频谱条深色背景不可见**：频谱条默认颜色在深色背景上看不到，改为白色
-- **歌词偏移数值宽度跳动**：调整歌词偏移时数值文字宽度变化导致面板抖动，已固定宽度
+- **播放卡死不切歌**：长时间播放后歌曲可能卡在最后一秒不动，状态显示正在播放但实际已停止，改为独立定时器检测，即使浏览器播放事件完全失效也能自动切歌或恢复播放 ([5306f8f](https://github.com/xRetia/biu/commit/5306f8f), [1b6a9f2](https://github.com/xRetia/biu/commit/1b6a9f2))
+- **小窗歌词不同步**：全屏播放器调整歌词偏移后切换到小窗模式，歌词偏移不生效，现已修复 ([faf0638](https://github.com/xRetia/biu/commit/faf0638))
+- **假名注音**：非日语歌词开启假名注音无效果，现在自动禁用并提示「仅日语歌词可开启」 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
+- **跑马灯滚动**：歌名较长时滚动速度过快，现按文字长度自动调节 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
+- **禁用按钮**：按钮禁用后鼠标悬停看不到说明文字，现已修复 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
+- **频谱条颜色**：默认颜色在深色背景上看不到，改为白色 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98))
+- **歌词偏移控件**：调整偏移时数值文字宽度变化导致面板抖动，已固定宽度 ([faf0638](https://github.com/xRetia/biu/commit/faf0638))
 
 ### 🎨 界面调整
 
-- 全屏播放器右下角按钮组上移，避免与进度条视觉重叠
-- 歌词偏移控件支持鼠标滚轮快捷调节，与音量控件操作方式一致
-- 歌词区右侧间距加大，按钮位置统一调整避免重叠
-- 音量百分比、歌词偏移数值使用等宽数字，消除布局抖动
+- 全屏播放器右下角按钮组上移，避免与进度条视觉重叠 ([faf0638](https://github.com/xRetia/biu/commit/faf0638))
+- 歌词偏移控件支持鼠标滚轮快捷调节，与音量控件操作方式一致 ([faf0638](https://github.com/xRetia/biu/commit/faf0638))
+- 歌词区右侧间距加大，按钮位置统一调整避免重叠 ([778f95c](https://github.com/xRetia/biu/commit/778f95c))
+- 音量百分比、歌词偏移数值使用等宽数字，消除布局抖动 ([0f09a98](https://github.com/xRetia/biu/commit/0f09a98), [faf0638](https://github.com/xRetia/biu/commit/faf0638))
 
 ## v2.3.1-xretia
 
