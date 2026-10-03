@@ -27,21 +27,40 @@ type WorkerResponse =
 
 // kuroshiro 及其 kuromoji 分析器是 CommonJS 模块，通过 createRequire 在 ESM worker 中加载
 let kuroshiroInstance: KuroshiroInstance | null = null;
+let initPromise: Promise<KuroshiroInstance> | null = null;
 
-async function getKuroshiro(): Promise<KuroshiroInstance> {
-  if (kuroshiroInstance) return kuroshiroInstance;
+/**
+ * 惰性初始化 kuroshiro 单例。
+ *
+ * 关键：必须用 initPromise 锁住初始化。歌词逐行触发 convert 请求，
+ * 首次大量并发请求若各自进入初始化分支，会并发加载多份 ~370MB 词典，
+ * 直接把 worker 内存撑爆（实测曾达 4.7GB）。
+ * 并发调用共享同一个 initPromise，词典只加载一次。
+ */
+function getKuroshiro(): Promise<KuroshiroInstance> {
+  if (kuroshiroInstance) return Promise.resolve(kuroshiroInstance);
 
-  const KuroshiroModule = require("kuroshiro") as any;
-  const Kuroshiro = KuroshiroModule?.default ?? KuroshiroModule;
+  if (!initPromise) {
+    initPromise = (async () => {
+      const KuroshiroModule = require("kuroshiro") as any;
+      const Kuroshiro = KuroshiroModule?.default ?? KuroshiroModule;
 
-  const KuromojiModule = require("kuroshiro-analyzer-kuromoji") as any;
-  const KuromojiAnalyzer = KuromojiModule?.default ?? KuromojiModule;
+      const KuromojiModule = require("kuroshiro-analyzer-kuromoji") as any;
+      const KuromojiAnalyzer = KuromojiModule?.default ?? KuromojiModule;
 
-  const instance = new Kuroshiro();
-  // 首次调用需加载词典（数 MB 数据文件），随后在子进程内复用
-  await instance.init(new KuromojiAnalyzer());
-  kuroshiroInstance = instance;
-  return instance;
+      const instance = new Kuroshiro();
+      // 首次调用需加载词典（数 MB 数据文件），随后在子进程内复用
+      await instance.init(new KuromojiAnalyzer());
+      kuroshiroInstance = instance;
+      return instance;
+    })().catch((err: unknown) => {
+      // 初始化失败允许后续请求重试
+      initPromise = null;
+      throw err;
+    });
+  }
+
+  return initPromise;
 }
 
 const parentPort = (process as any).parentPort;

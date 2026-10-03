@@ -89,7 +89,7 @@ function ensureWorker(): Promise<void> {
   workerReady ??= new Promise<void>((resolve, reject) => {
     let settled = false;
 
-    worker = utilityProcess.fork(path.join(__dirname, "../furigana-worker.mjs"), [], {
+    worker = utilityProcess.fork(path.join(__dirname, "furigana-worker.mjs"), [], {
       serviceName: "biu-furigana",
     });
 
