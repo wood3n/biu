@@ -30,6 +30,10 @@ export const pluginElectron = (): RsbuildPlugin => ({
     });
 
     api.onAfterBuild(async () => {
+      if (process.env.SKIP_ELECTRON_BUILDER === "1") {
+        logger.info("[electron] SKIP_ELECTRON_BUILDER=1, skipping electron-builder packaging");
+        return;
+      }
       await buildElectron();
     });
   },
