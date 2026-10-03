@@ -34,6 +34,7 @@ const createMiniPlayer = () => {
       contextIsolation: true,
       nodeIntegration: false,
       devTools: isDev,
+      spellcheck: false,
     },
   });
 
