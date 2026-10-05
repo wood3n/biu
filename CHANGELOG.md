@@ -11,6 +11,26 @@ AIGC:
 
 # Changelog
 
+## v2.4.0-xretia
+
+[compare changes](https://github.com/xRetia/biu/compare/v2.3.3-xretia...v2.4.0-xretia)
+
+### 🚀 新功能
+
+- **假名注音内存优化**：kuromoji 词典移入 utilityProcess 子进程，按需加载、空闲 10 分钟自动释放，用过注音后主进程不再永久膨胀约 190MB，词典内存用完即归还系统 ([608316f](https://github.com/xRetia/biu/commit/608316f), [1f36c76](https://github.com/xRetia/biu/commit/1f36c76))
+- 新增内存优化测试报告 `docs/memory-optimization.md`，记录基线分析、方案与实测数据 ([a089cb5](https://github.com/xRetia/biu/commit/a089cb5))
+
+### 🔥 功能优化
+
+- 主窗口与迷你播放器关闭拼写检查，减少 Hunspell 引擎常驻内存 ([608316f](https://github.com/xRetia/biu/commit/608316f), [df279eb](https://github.com/xRetia/biu/commit/df279eb))
+- 构建支持通过 `SKIP_ELECTRON_BUILDER=1` 跳过打包步骤，便于快速构建验证 ([3d14fa6](https://github.com/xRetia/biu/commit/3d14fa6))
+
+### 🩹 修复问题
+
+- **假名注音开关无法记住偏好**：切歌瞬间歌词尚未加载，`isJapanese` 为 false 时强制把 `showLyricsFurigana` 持久化为 false，导致用户每次切歌后都需要重新开启假名注音。改为显示层守卫，偏好保持不变，切回日语歌词时自动恢复注音 ([d6eb99e](https://github.com/xRetia/biu/commit/d6eb99e))
+- **假名注音子进程启动即退出**：打包后 `__dirname` 变为产物目录，`../furigana-worker.mjs` 相对路径解析到项目根目录导致 fork 失败，已修正为同目录引用 ([1f36c76](https://github.com/xRetia/biu/commit/1f36c76))
+- **并发注音内存爆炸**：歌词逐行并发触发请求时子进程各自并发加载多份约 370MB 词典（实测 91 个并发请求把子进程撑到 4.7GB 并全部超时），加回 initPromise 初始化单例锁，并发请求共享一次词典加载 ([1f36c76](https://github.com/xRetia/biu/commit/1f36c76))
+
 ## v2.3.3-xretia
 
 [compare changes](https://github.com/xRetia/biu/compare/v2.3.1-xretia...v2.3.3-xretia)
