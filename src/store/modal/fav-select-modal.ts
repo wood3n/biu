@@ -2,12 +2,16 @@ import type { ReactNode } from "react";
 
 import type { StateCreator } from "zustand";
 
+import type { PlayData } from "@/store/play-list";
+
 export interface FavSelectModalData {
   /** 资源id */
   rid: string | number;
   /** 2:视频稿件 12:音频 21:视频合集 24:电影/纪录片等 */
   type?: number;
   title?: ReactNode;
+  /** 当前播放项完整数据，用于添加到 BBPlayer 共享歌单 */
+  playData?: PlayData;
   /** 选择收藏夹后的回调函数, selectedFolderIds 为选中的收藏夹id数组 */
   onSuccess?: (selectedFolderIds: number[]) => void;
 }

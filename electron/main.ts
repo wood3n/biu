@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { applyProxySettings } from "./ipc/app";
 import { channel } from "./ipc/channel";
 import { quitAndSaveTasks } from "./ipc/download";
+import { destroyFuriganaWorker } from "./ipc/furigana";
 import { registerIpcHandlers } from "./ipc/index";
 import { destroyMiniPlayer } from "./mini-player";
 import { injectAuthCookie } from "./network/cookie";
@@ -59,6 +60,8 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       devTools: isDev,
+      // 音乐播放器无富文本输入场景，关闭拼写检查可省下 Hunspell 词典引擎的常驻内存
+      spellcheck: false,
     },
   });
 
@@ -179,6 +182,12 @@ if (!gotTheLock) {
       quitAndSaveTasks();
     } catch (err) {
       log.error("[main] quitAndSaveTasks failed:", err);
+    }
+
+    try {
+      destroyFuriganaWorker();
+    } catch (err) {
+      log.warn("[main] destroyFuriganaWorker failed:", err);
     }
 
     try {

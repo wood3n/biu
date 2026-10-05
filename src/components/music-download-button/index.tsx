@@ -86,7 +86,13 @@ const MusicDownloadButton = () => {
 
   if (playItem?.sid) {
     return (
-      <AsyncButton isIconOnly size="sm" variant="light" className="hover:text-primary" onPress={downloadAudio}>
+      <AsyncButton
+        isIconOnly
+        size="sm"
+        variant="light"
+        className="hover:text-primary hover:!bg-transparent"
+        onPress={downloadAudio}
+      >
         <RiDownload2Fill size={18} />
       </AsyncButton>
     );

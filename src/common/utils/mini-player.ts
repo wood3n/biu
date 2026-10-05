@@ -13,6 +13,9 @@ export interface MiniPlayerMainStateSnapshot {
   isPlaying: boolean;
   title?: string;
   cover?: string;
+  ownerName?: string;
+  bvid?: string;
+  cid?: string;
   currentTime: number;
   duration: number;
   playMode?: PlayMode;
@@ -56,6 +59,9 @@ function getMainStateSnapshot(): MiniPlayerMainStateSnapshot {
     isSingle: list.length === 1,
     title: playItem?.pageTitle || playItem?.title,
     cover: playItem?.pageCover || playItem?.cover,
+    ownerName: playItem?.ownerName,
+    bvid: playItem?.bvid,
+    cid: playItem?.cid,
     playId,
     isPlaying,
     currentTime: Number(currentTime ?? 0),
@@ -173,6 +179,25 @@ function stopMiniPlayerMainSync() {
   bc?.close();
   bc = null;
   isBroadcasting = false;
+}
+
+/**
+ * 主窗口调整歌词偏移后，实时同步给 mini 播放器（小窗歌词需应用同一偏移）。
+ * 临时创建通道发送后立即关闭；无监听方时静默失败。
+ */
+export function postLyricsOffset(offset: number) {
+  try {
+    const channel = new BroadcastChannel("play-list-store-sync-channel");
+    channel.postMessage({
+      from: "main",
+      type: "lyricsOffset",
+      offset,
+      ts: Date.now(),
+    });
+    channel.close();
+  } catch {
+    // 广播不可用时静默忽略
+  }
 }
 
 /**

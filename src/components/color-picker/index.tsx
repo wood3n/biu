@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 
 import { Input, Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
+import { twMerge } from "tailwind-merge";
+
+import { glassMenuClassName } from "@/common/constants/glass";
 
 export interface ColorPickerProps {
   /** 颜色选择器预设颜色 */
@@ -38,7 +41,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ presets, value, onChange, chi
   return (
     <Popover radius="md" placement="bottom-start" offset={8} isOpen={isOpen} onOpenChange={onOpenChange}>
       <PopoverTrigger>{children}</PopoverTrigger>
-      <PopoverContent className="bg-content2 w-64 p-2">
+      <PopoverContent className={twMerge(glassMenuClassName, "w-64 p-2")}>
         <HexColorPicker color={value} onChange={handleChange} style={{ width: "100%" }} />
         {Boolean(presets) && (
           <div className="mt-2 flex w-full flex-wrap gap-2">

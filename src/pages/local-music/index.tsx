@@ -194,12 +194,7 @@ const LocalMusicPage = () => {
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {Boolean(list.length) && (
-            <Button
-              color="primary"
-              className="dark:text-black"
-              startContent={<RiPlayFill size={18} />}
-              onPress={playAll}
-            >
+            <Button color="primary" className="text-white" startContent={<RiPlayFill size={18} />} onPress={playAll}>
               播放全部
             </Button>
           )}

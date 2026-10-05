@@ -22,7 +22,7 @@ const defaultSettings: FullScreenPlayerSettingsState = {
   showCover: true,
   showBlurredBackground: true,
   backgroundColor: undefined,
-  spectrumColor: "currentColor",
+  spectrumColor: "#ffffff",
   lyricsColor: "#ffffff",
 };
 

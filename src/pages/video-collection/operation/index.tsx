@@ -1,4 +1,4 @@
-import { RiPlayFill, RiPlayListAddLine } from "@remixicon/react";
+import { RiPlayFill, RiPlayListAddLine, RiRefreshLine } from "@remixicon/react";
 
 import { CollectionType } from "@/common/constants/collection";
 import AsyncButton from "@/components/async-button";
@@ -12,6 +12,8 @@ interface Props extends FavToggleProps, SearchProps, MenuProps {
   loading?: boolean;
   onPlayAll: () => void;
   onAddToPlayList: () => void;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }
 
 const Operations = ({
@@ -28,17 +30,14 @@ const Operations = ({
   onToggleFavorite,
   onPlayAll,
   onAddToPlayList,
+  onRefresh,
+  refreshing,
   onClearInvalid,
 }: Props) => {
   return (
     <div className="mb-4 flex items-center justify-between">
       <div className="flex items-center space-x-2">
-        <AsyncButton
-          color="primary"
-          startContent={<RiPlayFill size={22} />}
-          onPress={onPlayAll}
-          className="dark:text-black"
-        >
+        <AsyncButton color="primary" startContent={<RiPlayFill size={22} />} onPress={onPlayAll} className="text-white">
           播放全部
         </AsyncButton>
         <IconButton size="md" variant="flat" tooltip="添加到播放列表" onPress={onAddToPlayList}>
@@ -46,6 +45,11 @@ const Operations = ({
         </IconButton>
         {!loading && type !== CollectionType.VideoSeries && isCreatedBySelf !== true && (
           <FavToggle isFavorite={isFavorite} onToggleFavorite={onToggleFavorite} />
+        )}
+        {onRefresh && (
+          <IconButton size="md" variant="flat" tooltip="刷新" onPress={onRefresh} isDisabled={refreshing}>
+            <RiRefreshLine size={18} className={refreshing ? "animate-spin" : undefined} />
+          </IconButton>
         )}
         <Menu
           type={type}

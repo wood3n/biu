@@ -5,6 +5,16 @@ import { Avatar, Button, Link as HeroLink, Tooltip } from "@heroui/react";
 import clx from "classnames";
 import { twMerge } from "tailwind-merge";
 
+/** 根据字符串生成稳定的随机色（HSL） */
+const getStableColor = (seed: string) => {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const h = Math.abs(hash) % 360;
+  return `hsl(${h}, 55%, 45%)`;
+};
+
 export interface MenuItemProps {
   /** 菜单项标签 */
   title: string;
@@ -16,6 +26,8 @@ export interface MenuItemProps {
   icon?: React.ComponentType<{ size?: number | string; className?: string }>;
   /** 封面 */
   cover?: string;
+  /** 封面为非B站图床，直接使用原始 URL（不加 .avif 后缀），收起态用随机色+白字头像 */
+  coverBadge?: boolean;
   /** 激活状态图标 */
   activeIcon?: React.ComponentType<{ size?: number | string; className?: string }>;
   className?: string;
@@ -30,6 +42,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
   title,
   href,
   cover,
+  coverBadge,
   icon: Icon,
   activeIcon: ActiveIcon,
   className,
@@ -52,22 +65,61 @@ const MenuItem: React.FC<MenuItemProps> = ({
         <Icon size={18} />
       ) : undefined;
 
+    // 收起态：直接放大图标，不套 Avatar 圆角容器，只保留选中底色
+    if (collapsed) {
+      if (isActive && ActiveIcon) {
+        return <ActiveIcon size={24} className="text-primary" />;
+      }
+      if (Icon) {
+        return <Icon size={24} />;
+      }
+      // 收藏夹封面：有图用图，无图用随机色+白字（BBPlayer 歌单 + B站收藏夹统一）
+      {
+        const bgColor = getStableColor(title);
+        const src = cover ? (coverBadge ? cover : `${cover}@672w_378h_1c.avif`) : undefined;
+        return (
+          <Avatar
+            name={title}
+            src={src}
+            showFallback
+            radius="none"
+            alt={title}
+            className="size-8 flex-none"
+            classNames={{
+              img: "object-cover",
+              name: "text-white text-sm font-medium",
+            }}
+            style={{ backgroundColor: bgColor, borderRadius: "calc(var(--heroui-radius-medium) * 0.75)" }}
+          />
+        );
+      }
+    }
+
     if (!collapsed && icon) {
       return icon;
     }
 
-    return (
-      <Avatar
-        name={title}
-        src={cover ? `${cover}@672w_378h_1c.avif` : undefined}
-        showFallback
-        radius="md"
-        fallback={icon}
-        alt={title}
-        className="h-10 w-10 flex-none"
-      />
-    );
-  }, [cover, isActive, Icon, ActiveIcon, title, collapsed]);
+    // 展开态：收藏夹封面，有图用图，无图用随机色+白字
+    {
+      const bgColor = getStableColor(title);
+      const src = cover ? (coverBadge ? cover : `${cover}@672w_378h_1c.avif`) : undefined;
+      return (
+        <Avatar
+          name={title}
+          src={src}
+          showFallback
+          radius="none"
+          fallback={icon}
+          alt={title}
+          className="size-5 flex-none"
+          classNames={{
+            name: "text-white text-xs font-medium",
+          }}
+          style={{ backgroundColor: bgColor, borderRadius: "calc(var(--heroui-radius-medium) * 0.375)" }}
+        />
+      );
+    }
+  }, [cover, coverBadge, isActive, Icon, ActiveIcon, title, collapsed]);
 
   const { className: dndClassName, ...dndRest } = (dndProps ?? {}) as {
     className?: string;
@@ -79,14 +131,18 @@ const MenuItem: React.FC<MenuItemProps> = ({
         <Button
           as={href ? HeroLink : "button"}
           href={href}
-          fullWidth
           variant={isActive ? "flat" : "light"}
           color={isActive ? "primary" : "default"}
           onPress={onPress}
-          className={clx("w-full min-w-0 justify-center rounded-md px-0 py-1", className, dndClassName, {
-            "h-auto": collapsed,
-            "text-primary": isActive,
-          })}
+          className={clx(
+            "rounded-medium flex flex-none items-center justify-center px-0 py-0",
+            className,
+            dndClassName,
+            {
+              "text-primary": isActive,
+            },
+          )}
+          style={{ width: 40, height: 40, minWidth: 40, maxWidth: 40 }}
           {...(dndRest as any)}
         >
           {iconContent}
@@ -101,11 +157,12 @@ const MenuItem: React.FC<MenuItemProps> = ({
       href={href}
       fullWidth
       disableRipple
+      radius="md"
       variant={isActive ? "flat" : "light"}
       color={isActive ? "primary" : "default"}
       onPress={onPress}
       startContent={iconContent}
-      className={twMerge("justify-start px-2 text-inherit", className, dndClassName)}
+      className={twMerge("h-9 justify-start px-2 text-inherit", className, dndClassName)}
       {...(dndRest as any)}
     >
       <span className="pointer-events-none truncate">{title}</span>

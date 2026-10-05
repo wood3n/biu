@@ -15,11 +15,12 @@ import { postFavFolderUnfav } from "@/service/fav-folder-unfav";
 import { getFavResourceList, type FavMedia } from "@/service/fav-resource";
 import { postFavResourceBatchDel } from "@/service/fav-resource-batch-del";
 import { postFavResourceClean } from "@/service/fav-resource-clean";
-import { useFavFolderItemsStore } from "@/store/fav-folder-items";
-import { useFavoritesStore } from "@/store/favorite";
+import { getWebInterfaceView } from "@/service/web-interface-view";
+import { useFavFolderItemsStore, getFavFolderCache, saveFavFolderCache } from "@/store/fav-folder-items";
+import { getItemKey, useFavoritesStore } from "@/store/favorite";
 import { useModalStore } from "@/store/modal";
 import { useMusicFavStore } from "@/store/music-fav";
-import { isSame, usePlayList } from "@/store/play-list";
+import { isSame, usePlayList, type PlayData } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 import { useUser } from "@/store/user";
 
@@ -27,6 +28,24 @@ import Header from "../header";
 import Operations from "../operation";
 import FavoriteGridList from "./grid-list";
 import FavoriteList from "./list";
+
+/** 刷新图标最短旋转时长（ms），快速请求时避免图标一闪而过 */
+const MIN_SPIN_MS = 1000;
+
+const delay = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+/** 执行加载并保证至少耗时 MIN_SPIN_MS（无论成败），失败时原样抛出 */
+const loadWithMinSpin = async <T,>(load: () => Promise<T>): Promise<T> => {
+  const startedAt = Date.now();
+  try {
+    return await load();
+  } finally {
+    const remaining = MIN_SPIN_MS - (Date.now() - startedAt);
+    if (remaining > 0) {
+      await delay(remaining);
+    }
+  }
+};
 
 /** 收藏夹详情 TODO:加上创建的视频合集 */
 const Favorites = () => {
@@ -122,7 +141,7 @@ const Favorites = () => {
     async (targetPage: number, keywordValue = keyword, orderValue = order) => {
       setListLoading(true);
       try {
-        const pageData = await fetchPageData(targetPage, keywordValue, orderValue);
+        const pageData = await loadWithMinSpin(() => fetchPageData(targetPage, keywordValue, orderValue));
         if (!pageData) {
           setHasMore(false);
           return;
@@ -131,6 +150,10 @@ const Favorites = () => {
         setHasMore(pageData.hasMore);
         if (targetPage === 1) {
           setItems(pageData.medias);
+          // 默认排序（最近收藏）首页落缓存，供下次启动秒开
+          if (!keywordValue && orderValue === "mtime") {
+            saveFavFolderCache(favFolderId!, pageData.medias, pageData.hasMore);
+          }
         } else {
           appendItems(pageData.medias);
         }
@@ -144,10 +167,10 @@ const Favorites = () => {
         setListLoading(false);
       }
     },
-    [appendItems, fetchPageData, keyword, order, setItems],
+    [appendItems, fetchPageData, keyword, order, setItems, favFolderId],
   );
 
-  // 初次或收藏夹变化时加载数据
+  // 初次或收藏夹变化时加载数据：先读本地缓存立即渲染，再后台静默刷新服务器
   useEffect(() => {
     const defaultKeyword = "";
     const defaultOrder = "mtime";
@@ -155,6 +178,13 @@ const Favorites = () => {
     setKeyword(defaultKeyword);
     setOrder(defaultOrder);
     clearItems();
+    if (favFolderId) {
+      const cached = getFavFolderCache(favFolderId);
+      if (cached?.medias.length) {
+        setItems(cached.medias);
+        setHasMore(cached.hasMore);
+      }
+    }
     void loadPage(1, defaultKeyword, defaultOrder);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clearItems, favFolderId]);
@@ -165,6 +195,12 @@ const Favorites = () => {
       loadPage(pageRef.current);
     }
   }, [listLoading, hasMore, loadPage]);
+
+  const handleRefresh = useCallback(() => {
+    pageRef.current = 1;
+    clearItems();
+    loadPage(1);
+  }, [clearItems, loadPage]);
 
   const handleRemoveItem = useCallback(
     (id: number) => {
@@ -267,7 +303,7 @@ const Favorites = () => {
       });
 
       if (res.code === 0) {
-        rmCollectedFavorite(Number(favFolderId));
+        rmCollectedFavorite(getItemKey({ id: Number(favFolderId) }));
         await new Promise(resolve =>
           setTimeout(() => {
             refreshInfo();
@@ -289,6 +325,7 @@ const Favorites = () => {
           cover: favInfo?.cover,
           type: CollectionType.Favorite,
           mid: favInfo?.upper?.mid,
+          source: "bilibili",
         });
         await new Promise(resolve =>
           setTimeout(() => {
@@ -316,16 +353,39 @@ const Favorites = () => {
     async (key: string, item: FavMedia) => {
       switch (key) {
         case "favorite":
-          useModalStore.getState().onOpenFavSelectModal({
-            rid: item.id,
-            type: item.type,
-            title: item.title,
-            onSuccess: selectedIds => {
-              if (isCreatedBySelf && !selectedIds.includes(Number(favFolderId))) {
-                handleRemoveItem(item.id);
+          void (async () => {
+            // 构造 playData：B站视频（type 2）可移入 BBPlayer 歌单，需要额外获取 cid；音频无 bvid 不支持
+            let playData: PlayData | undefined;
+            if (item.type === 2 && item.bvid) {
+              try {
+                const view = await getWebInterfaceView({ bvid: item.bvid });
+                const firstPage = view?.data?.pages?.[0];
+                playData = {
+                  id: String(item.id),
+                  type: "mv",
+                  bvid: item.bvid,
+                  cid: firstPage ? String(firstPage.cid) : undefined,
+                  title: item.title,
+                  cover: item.cover,
+                  ownerName: item.upper?.name,
+                  duration: item.duration,
+                };
+              } catch {
+                // 获取 cid 失败则仅走 B站收藏夹流程
               }
-            },
-          });
+            }
+            useModalStore.getState().onOpenFavSelectModal({
+              rid: item.id,
+              type: item.type,
+              title: item.title,
+              playData,
+              onSuccess: selectedIds => {
+                if (isCreatedBySelf && !selectedIds.includes(Number(favFolderId))) {
+                  handleRemoveItem(item.id);
+                }
+              },
+            });
+          })();
           break;
         case "cancelFavorite":
           useModalStore.getState().onOpenConfirmModal({
@@ -463,6 +523,8 @@ const Favorites = () => {
         onToggleFavorite={toggleFavorite}
         onPlayAll={onPlayAll}
         onAddToPlayList={addAllMedia}
+        onRefresh={handleRefresh}
+        refreshing={listLoading}
         onClearInvalid={clearInvalid}
       />
 

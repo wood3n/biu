@@ -240,7 +240,7 @@ const VideoPost: React.FC<VideoPostProps> = ({ getScrollElement }) => {
             startContent={<RiPlayFill size={18} />}
             isDisabled={initialLoading || items.length === 0}
             onPress={handlePlayAll}
-            className="dark:text-black"
+            className="text-white"
           >
             播放
           </AsyncButton>

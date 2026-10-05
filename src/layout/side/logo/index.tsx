@@ -28,13 +28,23 @@ const Logo = ({ isCollapsed }: LogoProps) => {
     <>
       <div
         className={twMerge(
-          "window-drag text-primary relative flex flex-none items-center py-3 pr-3 pl-4",
+          "window-drag text-primary relative flex flex-none items-center justify-center py-3",
+          isCollapsed ? "px-0" : "pr-3 pl-4",
           isMac && !isFullScreen && "pt-8",
         )}
       >
-        <div className="window-no-drag flex flex-1 items-center space-x-2">
+        <div
+          className={twMerge("window-no-drag flex items-center", isCollapsed ? "justify-center" : "flex-1 space-x-2")}
+        >
           <LogoIcon className="h-10 w-10" />
-          {!isCollapsed && <span className="text-2xl leading-none font-bold">Biu</span>}
+          {!isCollapsed && (
+            <span
+              className="text-lg leading-none font-bold tracking-tight"
+              style={{ fontFamily: '"Microsoft YaHei Light", "微软雅黑 Light", "Microsoft YaHei", sans-serif' }}
+            >
+              BIUMUSIC
+            </span>
+          )}
         </div>
       </div>
     </>

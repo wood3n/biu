@@ -40,6 +40,7 @@ export default function SearchHeader({
         variant="light"
         radius="md"
         classNames={{
+          tabList: "bg-default-200/80 dark:bg-default-100/10 shadow-xs",
           cursor: "rounded-medium",
         }}
         className="-ml-1"
@@ -54,11 +55,10 @@ export default function SearchHeader({
       <div className="flex items-center gap-4">
         <AsyncButton
           color="primary"
-          size="sm"
           startContent={<RiPlayFill size={18} />}
           isDisabled={playAllDisabled}
           onPress={onPlayAll}
-          className="dark:text-black"
+          className="text-white"
         >
           全部播放
         </AsyncButton>

@@ -11,11 +11,12 @@ import "./index.css";
 interface Props {
   src: string | null;
   isOpen: boolean;
+  aspect: number;
   onClose: () => void;
   onUploaded: (url: string) => void;
 }
 
-const CropModal = ({ src, isOpen, onClose, onUploaded }: Props) => {
+const CropModal = ({ src, isOpen, aspect, onClose, onUploaded }: Props) => {
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -116,10 +117,10 @@ const CropModal = ({ src, isOpen, onClose, onUploaded }: Props) => {
         <ModalHeader className="py-3">裁剪封面</ModalHeader>
         <ModalBody className="items-center">
           {src && (
-            <div className="flex items-center justify-center" style={{ width: 322, height: 202 }}>
+            <div className="flex items-center justify-center" style={{ width: 322, height: Math.round(322 / aspect) }}>
               <ReactCrop
                 crop={crop}
-                aspect={16 / 9}
+                aspect={aspect}
                 onChange={(_, percentCrop) => {
                   setCrop(percentCrop);
                 }}
