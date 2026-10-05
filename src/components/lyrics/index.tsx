@@ -309,12 +309,11 @@ const Lyrics = ({
     updateSettings({ showLyricsFurigana: !showFurigana });
   }, [isJapanese, showFurigana, updateSettings]);
 
-  // 非日语歌词时自动关闭假名注音
-  useEffect(() => {
-    if (!isJapanese && showFurigana) {
-      updateSettings({ showLyricsFurigana: false });
-    }
-  }, [isJapanese, showFurigana, updateSettings]);
+  // 注意：不要在非日语歌词时把 showLyricsFurigana 写回 false。
+  // 切歌瞬间 lyrics 尚未加载，isJapanese 一定为 false，若在此处持久化关闭，
+  // 用户开启的假名注音偏好在每次切歌后都会丢失（表现为"每次都要重新开启"）。
+  // 非日语场景通过按钮禁用 + 显示层守卫来处理，偏好保持不变，
+  // 切回日语歌词时自动恢复注音。
 
   // 注音开启后，歌词加载完成或切歌时自动补齐注音
   useEffect(() => {
@@ -419,7 +418,8 @@ const Lyrics = ({
     const translation = showTranslation ? translationMap.get(line.time) : undefined;
     const activeWeight = isActive ? "font-extrabold" : "font-normal";
     const activeShadow = isActive ? activeTextBase : "";
-    const furiganaHtml = showFurigana ? furiganaMap[line.text] : undefined;
+    // 显示层守卫：偏好开启且当前歌词为日语时才应用注音，非日语歌词保持原文
+    const furiganaHtml = showFurigana && isJapanese ? furiganaMap[line.text] : undefined;
 
     return (
       <div
