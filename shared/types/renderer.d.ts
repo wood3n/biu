@@ -80,6 +80,30 @@ declare global {
     quitAndInstall: () => Promise<void>;
     /** 切换 mini/主窗口 */
     toggleMiniPlayer: () => Promise<void>;
+    /** 切换桌面歌词窗口，返回切换后是否显示 */
+    toggleDesktopLyrics: () => Promise<boolean>;
+    /** 关闭桌面歌词窗口 */
+    closeDesktopLyrics: () => void;
+    /** 桌面歌词窗口当前是否显示 */
+    isDesktopLyricsOpen: () => Promise<boolean>;
+    /** 从桌面歌词窗口唤起并聚焦主窗口 */
+    focusMainWindow: () => void;
+    /** 设置桌面歌词锁定（鼠标穿透）状态 */
+    setDesktopLyricsLocked: (locked: boolean) => void;
+    /** 更新桌面歌词样式设置 */
+    updateDesktopLyricsStyle: (style: Partial<DesktopLyricsStyle>) => Promise<DesktopLyricsSettings>;
+    /** 获取桌面歌词设置 */
+    getDesktopLyricsSettings: () => Promise<DesktopLyricsSettings | undefined>;
+    /** 监听桌面歌词窗口显示状态变化 */
+    onDesktopLyricsVisibilityChange: (cb: (visible: boolean) => void) => VoidFunction;
+    /** 监听桌面歌词锁定状态变化 */
+    onDesktopLyricsLockChange: (cb: (locked: boolean) => void) => VoidFunction;
+    /** 监听鼠标是否停留在桌面歌词窗口上 */
+    onDesktopLyricsHoverChange: (cb: (hovered: boolean) => void) => VoidFunction;
+    /** 读取桌面歌词窗口位置与大小 */
+    getDesktopLyricsBounds: () => Promise<{ height: number; width: number; x: number; y: number } | undefined>;
+    /** 设置桌面歌词窗口位置与大小（拖拽边缘改变大小） */
+    setDesktopLyricsBounds: (bounds: { height?: number; width?: number; x?: number; y?: number }) => void;
     /** 最小化窗口 */
     minimizeWindow: () => void;
     /** 最大化/还原窗口 */

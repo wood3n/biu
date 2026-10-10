@@ -8,6 +8,7 @@ import { applyProxySettings } from "./ipc/app";
 import { channel } from "./ipc/channel";
 import { quitAndSaveTasks } from "./ipc/download";
 import { registerIpcHandlers } from "./ipc/index";
+import { createDesktopLyrics, destroyDesktopLyrics, getDesktopLyricsSettings } from "./lyrics-window";
 import { destroyMiniPlayer } from "./mini-player";
 import { injectAuthCookie } from "./network/cookie";
 import { installWebRequestInterceptors } from "./network/interceptor";
@@ -122,6 +123,9 @@ function createWindow() {
     } else if (closeWindowOption === "exit") {
       if ((app as any).quitting) {
         mainWindow = null;
+      } else {
+        // 退出应用时一并关闭桌面歌词窗口，避免只剩歌词窗口导致进程驻留
+        destroyDesktopLyrics();
       }
     }
   });
@@ -144,6 +148,15 @@ if (!gotTheLock) {
 
     createWindow();
     injectAuthCookie();
+
+    // 恢复上次退出时处于显示状态的桌面歌词窗口
+    try {
+      if (getDesktopLyricsSettings().visible) {
+        createDesktopLyrics();
+      }
+    } catch (error) {
+      log.error("[main] Failed to restore desktop lyrics window:", error);
+    }
 
     installWebRequestInterceptors();
 
@@ -188,6 +201,8 @@ if (!gotTheLock) {
     }
 
     destroyMiniPlayer();
+
+    destroyDesktopLyrics();
 
     stopCheckForUpdates();
     autoUpdater.removeAllListeners();

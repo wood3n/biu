@@ -8,6 +8,7 @@ import ScrollContainer from "@/components/scroll-container";
 import { useAppUpdateStore } from "@/store/app-update";
 import { useSettings } from "@/store/settings";
 
+import DesktopLyricsSettings from "./desktop-lyrics-settings";
 import MenuSettings from "./menu-settings";
 import ProxySettings from "./proxy-settings";
 import ShortcutSettingsPage from "./shortcut-settings";
@@ -127,6 +128,9 @@ const SettingsPage = () => {
             </Tab>
             <Tab key="menu" title="菜单设置">
               <MenuSettings control={system.control} />
+            </Tab>
+            <Tab key="desktop-lyrics" title="桌面歌词">
+              <DesktopLyricsSettings />
             </Tab>
             <Tab key="shortcut" title="快捷键设置">
               <ShortcutSettingsPage />

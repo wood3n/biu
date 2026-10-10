@@ -113,6 +113,9 @@ const LyricsSearchModal = ({ isOpen, onOpenChange, onLyricsAdopted }: Props) => 
 
       const nextLyrics: MusicLyrics = {
         lyrics: lyricsText,
+        // 手动选择后标记来源，并清除自动匹配信息
+        matchLabel: undefined,
+        source: "manual",
         tLyrics: tLyricsText,
       };
 
