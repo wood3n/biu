@@ -124,8 +124,9 @@ function createWindow() {
       if ((app as any).quitting) {
         mainWindow = null;
       } else {
-        // 退出应用时一并关闭桌面歌词窗口，避免只剩歌词窗口导致进程驻留
-        destroyDesktopLyrics();
+        // 退出应用时一并关闭桌面歌词窗口，避免只剩歌词窗口导致进程驻留；
+        // 这条路径同样属于"退出应用"，保留 visible 以便下次启动恢复
+        destroyDesktopLyrics({ keepVisibleState: true });
       }
     }
   });

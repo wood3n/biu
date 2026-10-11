@@ -37,6 +37,8 @@ let persistTimer: NodeJS.Timeout | null = null;
 let hoverTimer: NodeJS.Timeout | null = null;
 let lastHovered: boolean | undefined;
 let ignoreMouseActive: boolean | undefined;
+/** destroy() 触发的 closed 回调是否要保留 visible（应用退出时为 true，用户主动关闭为 false） */
+let preserveVisibleOnClose = false;
 
 export function getDesktopLyricsSettings(): DesktopLyricsSettings {
   const stored = desktopLyricsStore.store;
@@ -298,7 +300,13 @@ export function createDesktopLyrics() {
   lyricsWindow.on("closed", () => {
     lyricsWindow = null;
     stopHoverTracking();
-    desktopLyricsStore.set("visible", false);
+
+    // 应用退出时保留 visible（下次启动恢复），只有用户主动关闭歌词窗口才记成不显示
+    if (!preserveVisibleOnClose) {
+      desktopLyricsStore.set("visible", false);
+    }
+
+    preserveVisibleOnClose = false;
     broadcastVisibility(false);
   });
 
@@ -319,6 +327,8 @@ export function createDesktopLyrics() {
  * 这样下次启动才能自动恢复；用户主动关闭窗口时才记成不显示。
  */
 export function destroyDesktopLyrics(options?: { keepVisibleState?: boolean }) {
+  preserveVisibleOnClose = Boolean(options?.keepVisibleState);
+
   if (persistTimer) {
     clearTimeout(persistTimer);
     persistTimer = null;
