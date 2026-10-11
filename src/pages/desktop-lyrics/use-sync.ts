@@ -26,6 +26,8 @@ export const useDesktopLyricsSync = () => {
   const [snapshot, setSnapshot] = useState<DesktopLyricsSnapshot>(emptySnapshot);
   /** 主界面歌词更新后自增，用于触发歌词缓存重读 */
   const [lyricsRevision, setLyricsRevision] = useState(0);
+  /** 主界面调整的歌词偏移（带曲目 key 与非自增序号，便于只应用一次） */
+  const [syncedOffset, setSyncedOffset] = useState<{ nonce: number; offset: number; trackKey: string } | null>(null);
 
   useEffect(() => {
     const channel = createDesktopLyricsChannel();
@@ -47,6 +49,16 @@ export const useDesktopLyricsSync = () => {
 
       if (message.event === "lyricsUpdated") {
         setLyricsRevision(revision => revision + 1);
+
+        return;
+      }
+
+      if (message.event === "offsetChanged") {
+        const { offset, trackKey } = message;
+
+        if (typeof offset === "number" && Number.isFinite(offset) && trackKey) {
+          setSyncedOffset({ nonce: Date.now(), offset, trackKey });
+        }
 
         return;
       }
@@ -76,5 +88,14 @@ export const useDesktopLyricsSync = () => {
     });
   }, []);
 
-  return { lyricsRevision, sendCommand, snapshot };
+  /** 把桌面歌词窗口里的偏移调整同步给主界面歌词面板 */
+  const sendOffset = useCallback((trackKey: string, offset: number) => {
+    channelRef.current?.postMessage({
+      data: { offset, trackKey, type: "offsetChanged" },
+      from: "lyrics",
+      ts: Date.now(),
+    });
+  }, []);
+
+  return { lyricsRevision, sendCommand, sendOffset, snapshot, syncedOffset };
 };

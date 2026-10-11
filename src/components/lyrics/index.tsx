@@ -8,7 +8,7 @@ import { debounce } from "es-toolkit";
 import type { LyricsMatchResult } from "@/common/utils/lyric-match";
 import type { WebPlayerParams } from "@/service/web-player";
 
-import { notifyLyricsUpdated } from "@/common/utils/desktop-lyrics";
+import { notifyLyricsOffsetChanged, notifyLyricsUpdated, onLyricsOffsetSynced } from "@/common/utils/desktop-lyrics";
 import { matchLyricsFromPlatforms } from "@/common/utils/lyric-match";
 import { usePlayList } from "@/store/play-list";
 import { usePlayProgress } from "@/store/play-progress";
@@ -263,6 +263,8 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
       if (!playItem?.bvid || cid === undefined || Number.isNaN(cid)) return;
 
       persistLyricsCache(playItem, next, fontSize);
+      // 同步给桌面歌词窗口，避免两边偏移不一致
+      notifyLyricsOffsetChanged(`${playItem.bvid}-${playItem.cid}`, next);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [fontSize, persistLyricsCache, playId],
@@ -281,6 +283,19 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [offset, persistLyricsCache, playId],
   );
+
+  /** 桌面歌词窗口里调了偏移时，主界面歌词面板跟着同步 */
+  useEffect(() => {
+    return onLyricsOffsetSynced(({ offset: syncedOffset, trackKey }) => {
+      const playItem = usePlayList.getState().getPlayItem();
+      const key = playItem?.bvid && playItem?.cid ? `${playItem.bvid}-${playItem.cid}` : "";
+
+      // 只接受当前曲目的偏移，避免切歌后串台
+      if (!key || key !== trackKey) return;
+
+      setOffset(syncedOffset);
+    });
+  }, []);
 
   const updateCenterPadding = useCallback(() => {
     if (activeIndex < 0) {

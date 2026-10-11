@@ -8,7 +8,14 @@ import { usePlayProgress } from "@/store/play-progress";
 
 export const DESKTOP_LYRICS_CHANNEL = "desktop-lyrics-sync-channel";
 
-export type DesktopLyricsCommandType = "init" | "next" | "openLyricsSearch" | "prev" | "seek" | "togglePlay";
+export type DesktopLyricsCommandType =
+  | "init"
+  | "next"
+  | "offsetChanged"
+  | "openLyricsSearch"
+  | "prev"
+  | "seek"
+  | "togglePlay";
 
 /** 主窗口推送给桌面歌词窗口的播放状态 */
 export interface DesktopLyricsSnapshot {
@@ -39,7 +46,11 @@ export interface DesktopLyricsSnapshot {
 
 export interface DesktopLyricsMessageFromLyrics {
   data?: {
+    /** 歌词偏移调整（桌面歌词窗口 -> 主界面） */
+    offset?: number;
     state?: { currentTime?: number };
+    /** 该偏移对应的曲目 key（`bvid-cid`） */
+    trackKey?: string;
     type: DesktopLyricsCommandType;
   };
   from: "lyrics";
@@ -47,10 +58,13 @@ export interface DesktopLyricsMessageFromLyrics {
 }
 
 export interface DesktopLyricsMessageFromMain {
-  /** 事件类型：state = 播放状态同步，lyricsUpdated = 主界面歌词已更新 */
-  event?: "lyricsUpdated" | "state";
+  /** 事件类型：state = 播放状态同步，lyricsUpdated = 主界面歌词已更新，offsetChanged = 歌词偏移同步 */
+  event?: "lyricsUpdated" | "offsetChanged" | "state";
   from: "main";
+  /** 歌词偏移调整（主界面 -> 桌面歌词窗口） */
+  offset?: number;
   state?: DesktopLyricsSnapshot;
+  trackKey?: string;
   ts: number;
 }
 
@@ -120,6 +134,37 @@ export function notifyLyricsUpdated() {
   handle.channel.postMessage(message);
 }
 
+type LyricsOffsetListener = (payload: { offset: number; trackKey: string }) => void;
+
+const offsetListeners = new Set<LyricsOffsetListener>();
+
+/** 主界面：监听桌面歌词窗口里的偏移调整 */
+export function onLyricsOffsetSynced(listener: LyricsOffsetListener) {
+  offsetListeners.add(listener);
+
+  return () => {
+    offsetListeners.delete(listener);
+  };
+}
+
+/**
+ * 主界面：把歌词偏移调整同步给桌面歌词窗口。
+ * 广播通道还没建立时（例如桌面歌词没开）直接忽略，值已经写进歌词缓存了。
+ */
+export function notifyLyricsOffsetChanged(trackKey: string, offset: number) {
+  if (!handle || !trackKey) return;
+
+  const message: DesktopLyricsMessageFromMain = {
+    event: "offsetChanged",
+    from: "main",
+    offset,
+    trackKey,
+    ts: Date.now(),
+  };
+
+  handle.channel.postMessage(message);
+}
+
 function handleCommand(message: DesktopLyricsMessageFromLyrics, channel: BroadcastChannel) {
   const data = message.data;
   if (!data) return;
@@ -127,6 +172,14 @@ function handleCommand(message: DesktopLyricsMessageFromLyrics, channel: Broadca
   switch (data.type) {
     case "init": {
       postSnapshot(channel);
+      break;
+    }
+    case "offsetChanged": {
+      // 桌面歌词窗口调了偏移，主界面歌词面板跟着走
+      const { offset, trackKey } = data;
+      if (typeof offset === "number" && Number.isFinite(offset) && trackKey) {
+        offsetListeners.forEach(listener => listener({ offset, trackKey }));
+      }
       break;
     }
     case "seek": {

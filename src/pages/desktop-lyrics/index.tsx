@@ -72,7 +72,7 @@ const clamp = (value: number, min: number, max: number) => Math.min(max, Math.ma
 const DesktopLyrics = () => {
   useStyle();
 
-  const { lyricsRevision, sendCommand, snapshot } = useDesktopLyricsSync();
+  const { lyricsRevision, sendCommand, sendOffset, snapshot, syncedOffset } = useDesktopLyricsSync();
   const { currentTime, hasTrack, isPlaying } = snapshot;
   const [settings, setSettings] = useState<DesktopLyricsSettings>(defaultDesktopLyricsSettings);
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
@@ -302,9 +302,19 @@ const DesktopLyrics = () => {
       const value = clamp(next, -OFFSET_LIMIT, OFFSET_LIMIT);
       setOffset(value);
       void persistOffset(trackKey, value);
+      // 同步给主界面歌词面板，避免两边偏移不一致
+      sendOffset(trackKey, value);
     },
-    [persistOffset, trackKey],
+    [persistOffset, sendOffset, trackKey],
   );
+
+  // 主界面歌词面板调整了偏移时跟着同步
+  useEffect(() => {
+    if (!syncedOffset) return;
+    if (syncedOffset.trackKey !== trackKey) return;
+
+    setOffset(clamp(syncedOffset.offset, -OFFSET_LIMIT, OFFSET_LIMIT));
+  }, [syncedOffset, trackKey]);
 
   /** 换一个：跳过当前候选，继续找下一首同名歌曲的歌词 */
   const rematch = useCallback(async () => {
