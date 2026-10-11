@@ -1,5 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 
+import { StoreNameMap } from "@shared/store";
+
 import { channel } from "./ipc/channel";
 
 let playerPrevHandler: ((_: Electron.IpcRendererEvent) => void) | null = null;
@@ -177,6 +179,68 @@ const api: ElectronAPI = {
   quitAndInstall: () => ipcRenderer.invoke(channel.app.quitAndInstall),
   // 切换 mini/主窗口
   toggleMiniPlayer: () => ipcRenderer.invoke(channel.window.toggleMini),
+  // 切换桌面歌词窗口，返回切换后是否显示
+  toggleDesktopLyrics: () => ipcRenderer.invoke(channel.window.toggleLyrics),
+  // 关闭桌面歌词窗口
+  closeDesktopLyrics: () => ipcRenderer.send(channel.window.closeLyrics),
+  // 桌面歌词窗口当前是否显示
+  isDesktopLyricsOpen: () => ipcRenderer.invoke(channel.window.isLyricsOpen),
+  // 从桌面歌词窗口唤起并聚焦主窗口
+  focusMainWindow: () => ipcRenderer.send(channel.window.focusMain),
+  // 设置桌面歌词锁定（鼠标穿透）状态
+  setDesktopLyricsLocked: (locked: boolean) => ipcRenderer.send(channel.window.setLyricsLocked, locked),
+  // 更新桌面歌词样式
+  updateDesktopLyricsStyle: (style: Partial<DesktopLyricsStyle>) =>
+    ipcRenderer.invoke(channel.window.updateLyricsStyle, style),
+  // 获取桌面歌词设置
+  getDesktopLyricsSettings: () => ipcRenderer.invoke(channel.store.get, StoreNameMap.DesktopLyrics),
+  // 监听桌面歌词窗口显示状态变化
+  onDesktopLyricsVisibilityChange: (cb: (visible: boolean) => void) => {
+    const handler = (_: Electron.IpcRendererEvent, visible: boolean) => {
+      try {
+        cb(visible);
+      } catch (error) {
+        console.error("[preload] 桌面歌词显示状态回调失败:", error);
+      }
+    };
+
+    ipcRenderer.on(channel.window.lyricsVisibility, handler);
+
+    return () => ipcRenderer.removeListener(channel.window.lyricsVisibility, handler);
+  },
+  // 监听桌面歌词锁定状态变化
+  onDesktopLyricsLockChange: (cb: (locked: boolean) => void) => {
+    const handler = (_: Electron.IpcRendererEvent, locked: boolean) => {
+      try {
+        cb(locked);
+      } catch (error) {
+        console.error("[preload] 桌面歌词锁定状态回调失败:", error);
+      }
+    };
+
+    ipcRenderer.on(channel.window.lyricsLockChange, handler);
+
+    return () => ipcRenderer.removeListener(channel.window.lyricsLockChange, handler);
+  },
+  // 鼠标是否停留在桌面歌词窗口上（主进程轮询光标位置，避开拖拽区域吞事件的问题）
+  onDesktopLyricsHoverChange: (cb: (hovered: boolean) => void) => {
+    const handler = (_: Electron.IpcRendererEvent, hovered: boolean) => {
+      try {
+        cb(Boolean(hovered));
+      } catch (error) {
+        console.error("[preload] 桌面歌词 hover 回调失败:", error);
+      }
+    };
+
+    ipcRenderer.on(channel.window.lyricsHoverChange, handler);
+
+    return () => ipcRenderer.removeListener(channel.window.lyricsHoverChange, handler);
+  },
+  // 读取桌面歌词窗口位置与大小（拖拽手柄用）
+  getDesktopLyricsBounds: () => ipcRenderer.invoke(channel.window.getLyricsBounds),
+  // 设置桌面歌词窗口位置与大小
+  setDesktopLyricsBounds: (bounds: Partial<Electron.Rectangle>) =>
+    ipcRenderer.send(channel.window.setLyricsBounds, bounds),
   // 最小化窗口
   minimizeWindow: () => ipcRenderer.send(channel.window.minimize),
   // 最大化/还原窗口

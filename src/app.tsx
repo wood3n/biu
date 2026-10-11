@@ -5,8 +5,10 @@ import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import moment from "moment";
 
 import { getCookitFromBSite } from "./common/utils/cookie";
+import { isMainWindow, startDesktopLyricsBroadcast, stopDesktopLyricsBroadcast } from "./common/utils/desktop-lyrics";
 import { toggleMiniMode } from "./common/utils/mini-player";
 import { mapKeyToElectronAccelerator } from "./common/utils/shortcut";
+import GlobalLyricsSearchModal from "./components/global-lyrics-search-modal";
 import Theme from "./components/theme";
 import routes from "./routes";
 import { useAppUpdateStore } from "./store/app-update";
@@ -28,6 +30,17 @@ export function App() {
 
   useEffect(() => {
     getCookitFromBSite();
+  }, []);
+
+  // 主窗口持续向桌面歌词窗口广播播放状态
+  useEffect(() => {
+    if (!isMainWindow()) return;
+
+    startDesktopLyricsBroadcast();
+
+    return () => {
+      stopDesktopLyricsBroadcast();
+    };
   }, []);
 
   useEffect(() => {
@@ -175,7 +188,10 @@ export function App() {
           },
         }}
       />
-      <Theme>{routeElement}</Theme>
+      <Theme>
+        {routeElement}
+        {isMainWindow() ? <GlobalLyricsSearchModal /> : null}
+      </Theme>
     </HeroUIProvider>
   );
 }

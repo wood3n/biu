@@ -130,4 +130,13 @@ interface MusicLyrics {
   offset?: number;
   lyrics?: string;
   tLyrics?: string;
+  /** 歌词来源 */
+  source?: LyricsSource;
+  /** 匹配置信度：strong / medium / weak */
+  confidence?: "medium" | "strong" | "weak";
+  /** 匹配到的歌曲信息，用于界面展示，例如 "晴天 - 周杰伦" */
+  matchLabel?: string;
 }
+
+/** 歌词来源：平台匹配 / B 站字幕 / 手动选择 */
+type LyricsSource = "bilibili" | "lrclib" | "manual" | "netease";

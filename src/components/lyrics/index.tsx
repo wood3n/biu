@@ -5,8 +5,11 @@ import { RiTBoxLine } from "@remixicon/react";
 import clsx from "classnames";
 import { debounce } from "es-toolkit";
 
+import type { LyricsMatchResult } from "@/common/utils/lyric-match";
 import type { WebPlayerParams } from "@/service/web-player";
 
+import { notifyLyricsOffsetChanged, notifyLyricsUpdated, onLyricsOffsetSynced } from "@/common/utils/desktop-lyrics";
+import { matchLyricsFromPlatforms } from "@/common/utils/lyric-match";
 import { usePlayList } from "@/store/play-list";
 import { usePlayProgress } from "@/store/play-progress";
 import { StoreNameMap } from "@shared/store";
@@ -91,6 +94,30 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playId]);
 
+  /** 把自动匹配到的平台歌词写入缓存，供桌面歌词窗口复用 */
+  const persistMatchedLyrics = useCallback(async (playItem: PlayItem, matched: LyricsMatchResult) => {
+    try {
+      if (!playItem?.bvid || !playItem?.cid) return;
+
+      const store = await window.electron.getStore(StoreNameMap.LyricsCache);
+      const key = `${playItem.bvid}-${playItem.cid}`;
+      const prev = store?.[key] || {};
+
+      await window.electron.setStore(StoreNameMap.LyricsCache, {
+        ...(store || {}),
+        [key]: {
+          ...prev,
+          lyrics: matched.lyrics,
+          matchLabel: matched.label,
+          source: matched.source,
+          tLyrics: matched.tLyrics,
+        },
+      });
+    } catch {
+      // 忽略缓存写入失败，不影响歌词展示
+    }
+  }, []);
+
   useEffect(() => {
     let canceled = false;
     setOffset(DEFAULT_OFFSET);
@@ -139,6 +166,23 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
           params.aid = aidAsNumber;
         }
 
+        // 优先使用音乐平台歌词（网易云 / LRCLIB），B 站字幕（很多是 ASR）只作兜底
+        const matched = await matchLyricsFromPlatforms({
+          artist: playItem.ownerName,
+          duration: playItem.duration,
+          title: playItem.pageTitle || playItem.title,
+        });
+
+        if (canceled) return;
+
+        if (matched) {
+          setLyrics(parseLrc(matched.lyrics));
+          setTranslatedLyrics(parseLrc(matched.tLyrics));
+          void persistMatchedLyrics(playItem, matched);
+
+          return;
+        }
+
         const body = await getLyricsByBili(params);
 
         if (canceled) return;
@@ -167,7 +211,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
     return () => {
       canceled = true;
     };
-  }, [parseLrc, playId, tryLoadCachedLyrics]);
+  }, [parseLrc, persistMatchedLyrics, playId, tryLoadCachedLyrics]);
 
   const translationMap = useMemo(() => {
     if (!translatedLyrics?.length) return new Map<number, string>();
@@ -219,6 +263,8 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
       if (!playItem?.bvid || cid === undefined || Number.isNaN(cid)) return;
 
       persistLyricsCache(playItem, next, fontSize);
+      // 同步给桌面歌词窗口，避免两边偏移不一致
+      notifyLyricsOffsetChanged(`${playItem.bvid}-${playItem.cid}`, next);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [fontSize, persistLyricsCache, playId],
@@ -237,6 +283,19 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [offset, persistLyricsCache, playId],
   );
+
+  /** 桌面歌词窗口里调了偏移时，主界面歌词面板跟着同步 */
+  useEffect(() => {
+    return onLyricsOffsetSynced(({ offset: syncedOffset, trackKey }) => {
+      const playItem = usePlayList.getState().getPlayItem();
+      const key = playItem?.bvid && playItem?.cid ? `${playItem.bvid}-${playItem.cid}` : "";
+
+      // 只接受当前曲目的偏移，避免切歌后串台
+      if (!key || key !== trackKey) return;
+
+      setOffset(syncedOffset);
+    });
+  }, []);
 
   const updateCenterPadding = useCallback(() => {
     if (activeIndex < 0) {
@@ -273,6 +332,9 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
         setLyrics(parseLrc(nextLyrics));
         setTranslatedLyrics(nextTLyrics ? parseLrc(nextTLyrics) : []);
       }
+
+      // 通知桌面歌词窗口重新读取歌词缓存
+      notifyLyricsUpdated();
     },
     [onCloseSearch, parseLrc],
   );

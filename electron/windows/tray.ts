@@ -8,7 +8,9 @@ import path from "node:path";
 import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
 
 import { channel } from "../ipc/channel";
+import { setDesktopLyricsLocked, toggleDesktopLyrics } from "../lyrics-window";
 import { destroyMiniPlayer } from "../mini-player";
+import { desktopLyricsStore } from "../store";
 import { IconBase } from "../utils";
 
 interface Props {
@@ -102,6 +104,26 @@ function createTray({ getMainWindow, onExit }: Props) {
     {
       label: "显示/隐藏界面",
       click: toggleMainWindowVisibility,
+    },
+    {
+      label: "显示/隐藏桌面歌词",
+      click: () => {
+        try {
+          toggleDesktopLyrics();
+        } catch (err) {
+          log.error("[tray] toggle desktop lyrics failed:", err);
+        }
+      },
+    },
+    {
+      label: "锁定/解锁桌面歌词（鼠标穿透）",
+      click: () => {
+        try {
+          setDesktopLyricsLocked(!desktopLyricsStore.get("locked"));
+        } catch (err) {
+          log.error("[tray] toggle desktop lyrics lock failed:", err);
+        }
+      },
     },
     {
       type: "separator",
