@@ -1,10 +1,11 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import {
   buildSearchQueries,
   buildTitleCandidates,
   cleanTrackTitle,
   hasTimedLyrics,
+  matchLyricsFromNetease,
   isAcceptableMatch,
   normalizeForCompare,
   rankNeteaseSongs,
@@ -238,5 +239,42 @@ describe("scoreNeteaseSong / rankNeteaseSongs", () => {
 
     expect(score.name).toBe(100);
     expect(isAcceptableMatch(score, song.name, hints)).toBe(true);
+  });
+});
+
+describe("matchLyricsFromNetease「换一个」", () => {
+  const searchResponse = {
+    result: {
+      songs: [
+        { album: { name: "专辑" }, artists: [{ name: "甲" }], duration: 200000, id: 11, name: "长名字歌曲" },
+        { album: { name: "专辑" }, artists: [{ name: "乙" }], duration: 205000, id: 22, name: "长名字歌曲 (Live)" },
+      ],
+    },
+  };
+
+  beforeEach(() => {
+    vi.stubGlobal("window", {
+      electron: {
+        getNeteaseLyrics: async ({ id }: { id: number }) => ({ lrc: { lyric: `[00:01.00]id-${id}` } }),
+        searchNeteaseSongs: async () => searchResponse,
+      },
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  test("默认取排序最高的候选", async () => {
+    const result = await matchLyricsFromNetease({ title: "长名字歌曲" });
+
+    expect(result?.matchName).toBe("长名字歌曲");
+  });
+
+  test("avoidName 会跳过当前展示的那首，不会又换回同一首", async () => {
+    const result = await matchLyricsFromNetease({ title: "长名字歌曲" }, { avoidName: "长名字歌曲" });
+
+    expect(result).not.toBeNull();
+    expect(result?.matchName).not.toBe("长名字歌曲");
   });
 });

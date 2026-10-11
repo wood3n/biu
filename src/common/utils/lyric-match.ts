@@ -470,11 +470,11 @@ async function fetchNeteaseLyrics(id: number) {
 
 /**
  * 从网易云匹配歌词。
- * `skip` 用于"换一个匹配"：跳过前 N 个候选继续找。
+ * `skip` 用于"换一个匹配"：跳过前 N 个候选继续找；`avoidName` 用于避免又返回当前展示的那首。
  */
 export async function matchLyricsFromNetease(
   hints: LyricsMatchHints,
-  options?: { skip?: number },
+  options?: { skip?: number; avoidName?: string },
 ): Promise<LyricsMatchResult | null> {
   const queries = buildSearchQueries(hints);
   if (!queries.length) return null;
@@ -508,12 +508,17 @@ export async function matchLyricsFromNetease(
   ranked.sort((a, b) => b.score.total - a.score.total);
 
   const start = Math.max(0, options?.skip ?? 0);
+  const avoidName = options?.avoidName;
   let tried = 0;
 
   for (let index = start; index < ranked.length && tried < MAX_LYRICS_TRIES; index += 1) {
     tried += 1;
 
     const song = ranked[index].song;
+
+    // 「换一个」时不要又返回当前正在显示的那首（搜索结果的顺序可能变化）
+    if (avoidName && song.name === avoidName) continue;
+
     const id = song.id;
     if (!id) continue;
 
@@ -607,7 +612,7 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<null | 
 /** 依次尝试各音乐平台 */
 export async function matchLyricsFromPlatforms(
   hints: LyricsMatchHints,
-  options?: { skip?: number; timeoutMs?: number },
+  options?: { skip?: number; avoidName?: string; timeoutMs?: number },
 ): Promise<LyricsMatchResult | null> {
   const timeoutMs = options?.timeoutMs ?? DEFAULT_MATCH_TIMEOUT;
 

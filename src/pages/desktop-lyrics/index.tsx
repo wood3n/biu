@@ -85,8 +85,13 @@ const DesktopLyrics = () => {
   const [isHovered, setIsHovered] = useState(false);
   /** 「换一个」时跳过前 N 个候选 */
   const skipRef = useRef(0);
+  /** 当前展示的匹配曲名：「换一个」时避开它，避免又换回同一首 */
+  const matchNameRef = useRef<string | undefined>(undefined);
 
   const trackKey = snapshot.bvid && snapshot.cid ? `${snapshot.bvid}-${snapshot.cid}` : "";
+  /** 录制当前曲目 key：异步结果返回时用来判断是否已经切歌 */
+  const trackKeyRef = useRef(trackKey);
+  trackKeyRef.current = trackKey;
 
   const hints = useMemo<LyricsMatchHints>(
     () => ({
@@ -143,6 +148,7 @@ const DesktopLyrics = () => {
 
   const applyMatch = useCallback(
     (matched: LyricsMatchResult) => {
+      matchNameRef.current = matched.matchName;
       setLyrics(parseLrc(matched.lyrics));
       setTranslatedLyrics(parseLrc(matched.tLyrics));
       setMatchInfo({ confidence: matched.confidence, label: matched.label, source: matched.source });
@@ -165,15 +171,26 @@ const DesktopLyrics = () => {
     let canceled = false;
 
     skipRef.current = 0;
+    matchNameRef.current = undefined;
     setLyrics([]);
     setTranslatedLyrics([]);
     setMatchInfo({});
     setOffset(0);
 
-    if (!snapshot.cid) return;
+    // 没有可用的 cid 时直接结束，但必须把 loading 复位：
+    // 上一首的加载被取消后不会再把 loading 置回 false
+    if (!snapshot.cid) {
+      setIsLoading(false);
+
+      return;
+    }
 
     const cidAsNumber = Number(snapshot.cid);
-    if (Number.isNaN(cidAsNumber)) return;
+    if (Number.isNaN(cidAsNumber)) {
+      setIsLoading(false);
+
+      return;
+    }
 
     const load = async () => {
       setIsLoading(true);
@@ -293,11 +310,19 @@ const DesktopLyrics = () => {
   const rematch = useCallback(async () => {
     if (!snapshot.cid || isLoading) return;
 
+    const startedKey = trackKeyRef.current;
+
     skipRef.current += 1;
     setIsLoading(true);
 
     try {
-      const matched = await matchLyricsFromPlatforms(hints, { skip: skipRef.current });
+      const matched = await matchLyricsFromPlatforms(hints, {
+        avoidName: matchNameRef.current,
+        skip: skipRef.current,
+      });
+
+      // 请求期间切歌了就丢弃结果，否则会把歌词应用到上一首
+      if (startedKey !== trackKeyRef.current) return;
 
       if (matched) {
         applyMatch(matched);
@@ -307,7 +332,9 @@ const DesktopLyrics = () => {
     } catch {
       skipRef.current = 0;
     } finally {
-      setIsLoading(false);
+      if (startedKey === trackKeyRef.current) {
+        setIsLoading(false);
+      }
     }
   }, [applyMatch, hints, isLoading, snapshot.cid]);
 
@@ -357,6 +384,15 @@ const DesktopLyrics = () => {
     event.preventDefault();
     event.stopPropagation();
 
+    // 捕获指针：拖出窗口范围也能继续收到事件
+    const captureTarget = event.currentTarget;
+
+    try {
+      captureTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // 忽略不支持指针捕获的情况
+    }
+
     const startPointer = { x: event.screenX, y: event.screenY };
     let startBounds: { height: number; width: number; x: number; y: number } | undefined;
     let latestPointer = startPointer;
@@ -388,6 +424,12 @@ const DesktopLyrics = () => {
     };
 
     const onPointerUp = () => {
+      try {
+        captureTarget.releasePointerCapture(event.pointerId);
+      } catch {
+        // 指针已释放时忽略
+      }
+
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", onPointerUp);

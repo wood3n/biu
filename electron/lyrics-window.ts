@@ -19,6 +19,11 @@ const MIN_VISIBLE_SIZE = 60;
 /** 允许拖拽调整的最小窗口尺寸 */
 const MIN_WIDTH = 360;
 const MIN_HEIGHT = 96;
+/** 样式取值范围（与渲染层保持一致） */
+const FONT_SIZE_MIN = 20;
+const FONT_SIZE_MAX = 96;
+const OPACITY_MIN = 0.3;
+const OPACITY_MAX = 1;
 /** 锁定时右上角"解锁"按钮的判定区域（与渲染层的按钮尺寸对应，比按钮略大一点更好点） */
 const UNLOCK_BUTTON_WIDTH = 84;
 const UNLOCK_BUTTON_HEIGHT = 38;
@@ -187,14 +192,15 @@ export function setDesktopLyricsBounds(next: Partial<Rectangle>) {
   if (!lyricsWindow || lyricsWindow.isDestroyed()) return;
 
   const current = lyricsWindow.getBounds();
-  const width = Math.max(MIN_WIDTH, Math.round(next.width ?? current.width));
-  const height = Math.max(MIN_HEIGHT, Math.round(next.height ?? current.height));
+  // 渲染层传来的值不可全信：非有限数字会让 Math.round 得到 NaN，进而让 setBounds 抛错
+  const finite = (value: unknown, fallback: number) =>
+    typeof value === "number" && Number.isFinite(value) ? value : fallback;
 
   lyricsWindow.setBounds({
-    x: Math.round(next.x ?? current.x),
-    y: Math.round(next.y ?? current.y),
-    width,
-    height,
+    x: Math.round(finite(next?.x, current.x)),
+    y: Math.round(finite(next?.y, current.y)),
+    width: Math.max(MIN_WIDTH, Math.round(finite(next?.width, current.width))),
+    height: Math.max(MIN_HEIGHT, Math.round(finite(next?.height, current.height))),
   });
   schedulePersistBounds();
 }
@@ -307,10 +313,22 @@ export function createDesktopLyrics() {
   return lyricsWindow;
 }
 
-export function destroyDesktopLyrics() {
+/**
+ * 销毁歌词窗口
+ * `keepVisibleState` 用于应用退出：退出时窗口还开着的话要保留 `visible`，
+ * 这样下次启动才能自动恢复；用户主动关闭窗口时才记成不显示。
+ */
+export function destroyDesktopLyrics(options?: { keepVisibleState?: boolean }) {
   if (persistTimer) {
     clearTimeout(persistTimer);
     persistTimer = null;
+
+    // 刚拖完窗口就关闭时，位置还没落盘，这里补写一次
+    try {
+      persistBounds();
+    } catch (error) {
+      log.warn("[lyrics-window] persist bounds before destroy failed:", error);
+    }
   }
 
   stopHoverTracking();
@@ -320,7 +338,11 @@ export function destroyDesktopLyrics() {
   }
 
   lyricsWindow = null;
-  desktopLyricsStore.set("visible", false);
+
+  if (!options?.keepVisibleState) {
+    desktopLyricsStore.set("visible", false);
+  }
+
   broadcastVisibility(false);
 }
 
@@ -362,15 +384,32 @@ export function setDesktopLyricsLocked(locked: boolean) {
   return next;
 }
 
-/** 仅更新渲染进程可修改的样式设置 */
+/** 仅更新渲染进程可修改的样式设置（主进程侧再校验一次类型与取值范围） */
 export function updateDesktopLyricsStyle(style: Partial<DesktopLyricsStyle>) {
   const allowedKeys: (keyof DesktopLyricsStyle)[] = ["background", "fontSize", "opacity", "showTranslation"];
 
   allowedKeys.forEach(key => {
     const value = style?.[key];
+
     if (value === undefined) return;
 
-    desktopLyricsStore.set(key, value);
+    if (key === "background" || key === "showTranslation") {
+      if (typeof value !== "boolean") return;
+
+      desktopLyricsStore.set(key, value);
+
+      return;
+    }
+
+    if (typeof value !== "number" || !Number.isFinite(value)) return;
+
+    if (key === "fontSize") {
+      desktopLyricsStore.set(key, Math.min(FONT_SIZE_MAX, Math.max(FONT_SIZE_MIN, Math.round(value))));
+
+      return;
+    }
+
+    desktopLyricsStore.set(key, Math.min(OPACITY_MAX, Math.max(OPACITY_MIN, value)));
   });
 
   return getDesktopLyricsSettings();

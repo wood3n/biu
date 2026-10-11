@@ -202,7 +202,8 @@ if (!gotTheLock) {
 
     destroyMiniPlayer();
 
-    destroyDesktopLyrics();
+    // 退出时保留 visible：下次启动才能按上次状态恢复桌面歌词窗口
+    destroyDesktopLyrics({ keepVisibleState: true });
 
     stopCheckForUpdates();
     autoUpdater.removeAllListeners();
