@@ -90,4 +90,17 @@ export const channel = {
     isFullScreen: "window:is-full-screen",
     toggleDevTools: "window:toggle-dev-tools",
   },
+  desktopLyrics: {
+    /** 主窗口 -> 主进程：同步状态与内容 */
+    sync: "desktop-lyrics:sync",
+    /** 主进程 -> 桌面歌词窗口：推送展示内容 */
+    content: "desktop-lyrics:content",
+    /** 桌面歌词窗口/托盘 -> 主进程 -> 主窗口：请求切换显示 */
+    toggleRequested: "desktop-lyrics:toggle-requested",
+    /** 桌面歌词窗口/托盘 -> 主进程 -> 主窗口：请求切换锁定 */
+    lockToggleRequested: "desktop-lyrics:lock-toggle-requested",
+    requestToggle: "desktop-lyrics:request-toggle",
+    requestToggleLock: "desktop-lyrics:request-toggle-lock",
+    getContent: "desktop-lyrics:get-content",
+  },
 };

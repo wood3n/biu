@@ -4,6 +4,7 @@ import log from "electron-log";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { createDesktopLyricsWindow, destroyDesktopLyricsWindow } from "./desktop-lyrics";
 import { applyProxySettings } from "./ipc/app";
 import { channel } from "./ipc/channel";
 import { quitAndSaveTasks } from "./ipc/download";
@@ -145,6 +146,15 @@ if (!gotTheLock) {
     createWindow();
     injectAuthCookie();
 
+    // 如果上次退出时开启了桌面歌词，启动后自动恢复悬浮歌词窗口
+    try {
+      if (appSettingsStore.get("appSettings")?.showDesktopLyrics) {
+        createDesktopLyricsWindow();
+      }
+    } catch (error) {
+      log.error("[main] Failed to create desktop lyrics window on startup:", error);
+    }
+
     installWebRequestInterceptors();
 
     registerIpcHandlers({
@@ -160,6 +170,10 @@ if (!gotTheLock) {
     if (process.platform !== "darwin") {
       createTray({
         getMainWindow: () => mainWindow,
+        initialDesktopLyricsState: {
+          enabled: Boolean(appSettingsStore.get("appSettings")?.showDesktopLyrics),
+          locked: appSettingsStore.get("appSettings")?.desktopLyricsLocked ?? true,
+        },
         onExit: () => {
           (app as any).quitting = true;
           app.quit();
@@ -188,6 +202,8 @@ if (!gotTheLock) {
     }
 
     destroyMiniPlayer();
+
+    destroyDesktopLyricsWindow();
 
     stopCheckForUpdates();
     autoUpdater.removeAllListeners();

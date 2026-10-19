@@ -177,6 +177,42 @@ const api: ElectronAPI = {
   quitAndInstall: () => ipcRenderer.invoke(channel.app.quitAndInstall),
   // 切换 mini/主窗口
   toggleMiniPlayer: () => ipcRenderer.invoke(channel.window.toggleMini),
+  // 同步桌面歌词状态与展示内容（主窗口 -> 主进程 -> 桌面歌词窗口）
+  syncDesktopLyrics: payload => ipcRenderer.send(channel.desktopLyrics.sync, payload),
+  // 桌面歌词窗口：订阅展示内容
+  onDesktopLyricsContent: cb => {
+    const handler = (_: Electron.IpcRendererEvent, payload: DesktopLyricsPayload) => {
+      try {
+        cb(payload);
+      } catch (error) {
+        console.error("[preload] desktop lyrics content callback failed:", error);
+      }
+    };
+
+    ipcRenderer.on(channel.desktopLyrics.content, handler);
+
+    return () => ipcRenderer.removeListener(channel.desktopLyrics.content, handler);
+  },
+  // 桌面歌词窗口：主动获取当前展示内容
+  getDesktopLyricsContent: () => ipcRenderer.invoke(channel.desktopLyrics.getContent),
+  // 主窗口：订阅“显示/隐藏桌面歌词”请求
+  onDesktopLyricsToggleRequested: cb => {
+    const handler = () => cb();
+    ipcRenderer.on(channel.desktopLyrics.toggleRequested, handler);
+
+    return () => ipcRenderer.removeListener(channel.desktopLyrics.toggleRequested, handler);
+  },
+  // 主窗口：订阅“锁定/解锁桌面歌词”请求
+  onDesktopLyricsLockToggleRequested: cb => {
+    const handler = () => cb();
+    ipcRenderer.on(channel.desktopLyrics.lockToggleRequested, handler);
+
+    return () => ipcRenderer.removeListener(channel.desktopLyrics.lockToggleRequested, handler);
+  },
+  // 请求切换桌面歌词显示状态（桌面歌词窗口按钮使用）
+  requestDesktopLyricsToggle: () => ipcRenderer.send(channel.desktopLyrics.requestToggle),
+  // 请求切换桌面歌词锁定状态（桌面歌词窗口按钮使用）
+  requestDesktopLyricsToggleLock: () => ipcRenderer.send(channel.desktopLyrics.requestToggleLock),
   // 最小化窗口
   minimizeWindow: () => ipcRenderer.send(channel.window.minimize),
   // 最大化/还原窗口

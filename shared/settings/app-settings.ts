@@ -28,4 +28,9 @@ export const defaultAppSettings: AppSettings = {
   },
   reportPlayHistory: true,
   localMusicDirs: [],
+  showTopLyrics: true,
+  showTopLyricsTranslation: true,
+  showDesktopLyrics: false,
+  desktopLyricsLocked: true,
+  desktopLyricsFontSize: 32,
 };

@@ -38,4 +38,14 @@ interface AppSettings {
   reportPlayHistory: boolean;
   /** 本地音乐目录列表 */
   localMusicDirs: string[];
+  /** 是否在主窗口顶部显示歌词栏 */
+  showTopLyrics: boolean;
+  /** 顶部歌词栏是否显示翻译歌词 */
+  showTopLyricsTranslation: boolean;
+  /** 是否显示桌面悬浮歌词窗口 */
+  showDesktopLyrics: boolean;
+  /** 桌面歌词是否锁定（鼠标穿透，不可拖动/点击） */
+  desktopLyricsLocked: boolean;
+  /** 桌面歌词字号（px） */
+  desktopLyricsFontSize: number;
 }

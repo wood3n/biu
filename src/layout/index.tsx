@@ -16,6 +16,7 @@ import { useUser } from "@/store/user";
 
 import Navbar from "./navbar";
 import SideNav from "./side";
+import TopLyrics from "./top-lyrics";
 
 const Layout = () => {
   const updateUser = useUser(state => state.updateUser);
@@ -40,6 +41,7 @@ const Layout = () => {
             <div className="h-16 flex-none">
               <Navbar />
             </div>
+            <TopLyrics />
             <div className="min-h-0 flex-1 overflow-hidden">
               <Outlet />
             </div>
