@@ -21,7 +21,6 @@ type PlayItem = ReturnType<ReturnType<typeof usePlayList.getState>["getPlayItem"
 const activeTextBase = "text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.35)]";
 
 const DEFAULT_FONT_SIZE = 20;
-const DEFAULT_OFFSET = 0;
 
 const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: boolean; showControls?: boolean }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -29,15 +28,15 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
   const lineRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const [centerPadding, setCenterPadding] = useState(0);
   const playId = usePlayList(s => s.playId);
-  const { lyrics, translatedLyrics, isLoading, isLoaded } = useLyricsStore(
+  const { lyrics, translatedLyrics, offset, isLoading, isLoaded } = useLyricsStore(
     useShallow(s => ({
       lyrics: s.lyrics,
       translatedLyrics: s.translatedLyrics,
+      offset: s.offset,
       isLoading: s.isLoading,
       isLoaded: s.isLoaded,
     })),
   );
-  const [offset, setOffset] = useState<number>(DEFAULT_OFFSET);
   const [fontSize, setFontSize] = useState<number>(DEFAULT_FONT_SIZE);
   const currentTime = usePlayProgress(s => s.currentTime);
   const currentMs = currentTime * 1000 + offset;
@@ -51,7 +50,6 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
 
   useEffect(() => {
     let canceled = false;
-    setOffset(DEFAULT_OFFSET);
     setFontSize(DEFAULT_FONT_SIZE);
 
     const restoreLyricSettings = async () => {
@@ -64,7 +62,6 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
         const cached = store?.[cacheKey];
         if (canceled || !cached) return;
 
-        setOffset(typeof cached.offset === "number" ? cached.offset : DEFAULT_OFFSET);
         setFontSize(typeof cached.fontSize === "number" ? cached.fontSize : DEFAULT_FONT_SIZE);
       } catch {
         // 缓存读取失败时使用默认值
@@ -72,7 +69,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
     };
 
     void restoreLyricSettings();
-    // 歌词内容由全局 store 统一加载，顶部歌词栏与全屏播放器共用
+    // 歌词内容与偏移量由全局 store 统一加载，顶部歌词栏与全屏播放器共用
     void useLyricsStore.getState().load();
 
     return () => {
@@ -119,9 +116,10 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
     [],
   );
 
+  /** 调整歌词偏移量：写入共享 store，让顶部歌词栏/桌面歌词同步生效，并持久化到缓存 */
   const handleOffsetChange = useCallback(
     (next: number) => {
-      setOffset(next);
+      useLyricsStore.getState().setOffset(next);
 
       const playItem = usePlayList.getState().getPlayItem();
       const cid = playItem?.cid ? Number(playItem.cid) : undefined;
@@ -133,6 +131,7 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
     [fontSize, persistLyricsCache, playId],
   );
 
+  /** 调整全屏播放器歌词字号（仅影响全屏播放器，持久化到缓存） */
   const handleFontSizeChange = useCallback(
     (next: number) => {
       setFontSize(next);
@@ -141,10 +140,10 @@ const Lyrics = ({ color, centered, showControls }: { color?: string; centered?: 
       const cid = playItem?.cid ? Number(playItem.cid) : undefined;
       if (!playItem?.bvid || cid === undefined || Number.isNaN(cid)) return;
 
-      persistLyricsCache(playItem, offset, next);
+      persistLyricsCache(playItem, useLyricsStore.getState().offset, next);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [offset, persistLyricsCache, playId],
+    [persistLyricsCache, playId],
   );
 
   const updateCenterPadding = useCallback(() => {

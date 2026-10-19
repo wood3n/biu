@@ -6,6 +6,12 @@ import { applyDesktopLyricsPayload, getLastDesktopLyricsPayload } from "../deskt
 import { updateDesktopLyricsState } from "../windows/tray";
 import { channel } from "./channel";
 
+/**
+ * 注册桌面歌词相关 IPC：
+ * - 主窗口 -> 主进程：同步内容快照/开关状态
+ * - 桌面歌词窗口 -> 主进程：初始化拉取内容
+ * - 桌面歌词窗口按钮 -> 主窗口渲染进程：请求切换显示/锁定（设置数据源在主窗口）
+ */
 export function registerDesktopLyricsHandlers({ getMainWindow }: { getMainWindow: () => BrowserWindow | null }) {
   // 主窗口同步桌面歌词状态与内容
   ipcMain.on(channel.desktopLyrics.sync, (_, payload: DesktopLyricsPayload) => {
@@ -22,6 +28,7 @@ export function registerDesktopLyricsHandlers({ getMainWindow }: { getMainWindow
   ipcMain.handle(channel.desktopLyrics.getContent, () => getLastDesktopLyricsPayload());
 
   // 浮窗按钮 -> 主窗口渲染进程（主窗口是设置状态的数据源）
+  /** 把请求转发给主窗口渲染进程处理 */
   const forwardToMainWindow = (targetChannel: string) => {
     const win = getMainWindow?.();
     if (!win || win.isDestroyed()) return;

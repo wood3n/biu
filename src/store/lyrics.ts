@@ -68,6 +68,8 @@ export function getActiveLyricIndex(lyrics: LyricLine[], currentMs: number) {
 interface LyricsState {
   /** 当前歌词对应的缓存 key */
   cacheKey: null | string;
+  /** 当前歌曲的歌词偏移量（毫秒），与缓存保持一致，供所有歌词视图共用 */
+  offset: number;
   /** 原文歌词 */
   lyrics: LyricLine[];
   /** 翻译歌词 */
@@ -80,11 +82,14 @@ interface LyricsState {
   load: () => Promise<void>;
   /** 使用用户手动选择/搜索到的歌词 */
   applyLyrics: (lyricsText?: string, tLyricsText?: string) => void;
+  /** 更新当前歌曲的歌词偏移量 */
+  setOffset: (offset: number) => void;
   reset: () => void;
 }
 
 let requestSeq = 0;
 
+/** 读取指定歌曲的歌词缓存（包含手动调整的偏移量、字号等） */
 const readCachedLyrics = async (cacheKey: string): Promise<MusicLyrics | null> => {
   try {
     const cache = await window.electron?.getStore(StoreNameMap.LyricsCache);
@@ -96,15 +101,18 @@ const readCachedLyrics = async (cacheKey: string): Promise<MusicLyrics | null> =
 
 export const useLyricsStore = create<LyricsState>((set, get) => ({
   cacheKey: null,
+  offset: 0,
   lyrics: [],
   translatedLyrics: [],
   isLoading: false,
   isLoaded: false,
   reset: () => {
     requestSeq += 1;
-    set({ cacheKey: null, lyrics: [], translatedLyrics: [], isLoading: false, isLoaded: false });
+    set({ cacheKey: null, offset: 0, lyrics: [], translatedLyrics: [], isLoading: false, isLoaded: false });
   },
   applyLyrics: (lyricsText, tLyricsText) => {
+    // 手动采用歌词后，之前仍在途的网络请求必须失效，避免旧歌词覆盖用户的选择
+    requestSeq += 1;
     set({
       lyrics: parseLrc(lyricsText),
       translatedLyrics: parseLrc(tLyricsText),
@@ -112,12 +120,15 @@ export const useLyricsStore = create<LyricsState>((set, get) => ({
       isLoaded: true,
     });
   },
+  setOffset: offset => set({ offset }),
   load: async () => {
     const playItem = usePlayList.getState().getPlayItem();
     const cacheKey = getLyricsCacheKey(playItem?.bvid, playItem?.cid);
 
     if (!cacheKey) {
-      set({ cacheKey: null, lyrics: [], translatedLyrics: [], isLoading: false, isLoaded: true });
+      // 切到没有歌词来源的歌曲时，让之前仍在途的请求失效
+      requestSeq += 1;
+      set({ cacheKey: null, offset: 0, lyrics: [], translatedLyrics: [], isLoading: false, isLoaded: true });
       return;
     }
 
@@ -127,15 +138,18 @@ export const useLyricsStore = create<LyricsState>((set, get) => ({
     }
 
     const seq = ++requestSeq;
-    set({ cacheKey, lyrics: [], translatedLyrics: [], isLoading: true, isLoaded: false });
+    set({ cacheKey, offset: 0, lyrics: [], translatedLyrics: [], isLoading: true, isLoaded: false });
 
     try {
       // 优先使用手动搜索/调整过偏移的缓存歌词
       const cached = await readCachedLyrics(cacheKey);
       if (seq !== requestSeq) return;
 
+      const cachedOffset = typeof cached?.offset === "number" ? cached.offset : 0;
+
       if (cached?.lyrics || cached?.tLyrics) {
         set({
+          offset: cachedOffset,
           lyrics: parseLrc(cached.lyrics),
           translatedLyrics: parseLrc(cached.tLyrics),
           isLoading: false,

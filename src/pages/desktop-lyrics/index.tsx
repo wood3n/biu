@@ -43,7 +43,6 @@ const DesktopLyrics = () => {
   useTransparentWindowStyle();
 
   const [payload, setPayload] = useState<DesktopLyricsPayload | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     const offContent = window.electron.onDesktopLyricsContent(nextPayload => {
@@ -64,17 +63,16 @@ const DesktopLyrics = () => {
   const fontSize = payload?.fontSize ?? 32;
   const translationFontSize = Math.max(14, Math.round(fontSize * 0.55));
   const isInteractive = !locked;
-  const showControls = isInteractive && isHovered;
+  // 解锁后窗口可交互，常驻显示操作按钮：窗口本身是 drag 区域，拖拽区不会派发 hover 事件
+  const showControls = isInteractive;
 
   return (
     <div
       className="window-drag relative flex h-screen w-screen flex-col items-center justify-center overflow-hidden select-none"
       style={{
-        background: showControls ? "rgba(0, 0, 0, 0.18)" : "transparent",
+        background: isInteractive ? "rgba(0, 0, 0, 0.18)" : "transparent",
         transition: "background 150ms ease",
       }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       {payload?.text ? (
         <AnimatePresence mode="wait" initial={false}>

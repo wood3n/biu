@@ -25,6 +25,7 @@ let lastPayload: DesktopLyricsPayload | null = null;
 let isContentReady = false;
 let saveBoundsTimer: NodeJS.Timeout | null = null;
 
+/** 计算默认窗口位置：主屏工作区底部居中 */
 const getDefaultBounds = (): DesktopLyricsBounds => {
   const { workArea } = screen.getPrimaryDisplay();
   const width = Math.min(DEFAULT_WIDTH, Math.max(MIN_WIDTH, workArea.width - 80));
@@ -49,6 +50,7 @@ const isBoundsVisible = (bounds: DesktopLyricsBounds) => {
   });
 };
 
+/** 读取上次保存的位置；位置已不可见（如拔掉副屏）时回退到默认位置 */
 const getInitialBounds = (): DesktopLyricsBounds => {
   const saved = desktopLyricsStore.get("bounds");
 
@@ -64,6 +66,7 @@ const getInitialBounds = (): DesktopLyricsBounds => {
   return getDefaultBounds();
 };
 
+/** 把当前窗口位置写入本地存储 */
 const persistBounds = () => {
   if (!desktopLyricsWindow || desktopLyricsWindow.isDestroyed()) return;
 
@@ -74,6 +77,7 @@ const persistBounds = () => {
   }
 };
 
+/** 拖动/缩放时防抖保存位置，避免频繁写盘 */
 const persistBoundsDebounced = () => {
   if (saveBoundsTimer) {
     clearTimeout(saveBoundsTimer);
@@ -94,6 +98,7 @@ const ensureBoundsVisible = () => {
   }
 };
 
+/** 应用锁定状态：锁定后鼠标穿透窗口，不影响桌面其他操作 */
 const applyLockedState = (locked: boolean) => {
   if (!desktopLyricsWindow || desktopLyricsWindow.isDestroyed()) return;
 
@@ -104,6 +109,7 @@ const applyLockedState = (locked: boolean) => {
   }
 };
 
+/** 把最近一次内容快照发送给桌面歌词窗口 */
 const sendContentToWindow = () => {
   if (!desktopLyricsWindow || desktopLyricsWindow.isDestroyed() || !isContentReady) return;
 
@@ -114,6 +120,11 @@ const sendContentToWindow = () => {
   }
 };
 
+/**
+ * 根据内容快照控制窗口显示：
+ * - 有歌词且页面已加载时显示窗口（暂停时保持显示）
+ * - 无歌词/未启用时隐藏窗口
+ */
 const applyVisibility = () => {
   if (!desktopLyricsWindow || desktopLyricsWindow.isDestroyed()) return;
 
@@ -132,6 +143,7 @@ const applyVisibility = () => {
   }
 };
 
+/** 创建桌面歌词窗口（透明、无边框、置顶、不占任务栏） */
 const createDesktopLyricsWindow = () => {
   if (desktopLyricsWindow && !desktopLyricsWindow.isDestroyed()) {
     return desktopLyricsWindow;
@@ -216,6 +228,7 @@ const createDesktopLyricsWindow = () => {
   return desktopLyricsWindow;
 };
 
+/** 销毁桌面歌词窗口并清理保存位置的定时器 */
 const destroyDesktopLyricsWindow = () => {
   if (saveBoundsTimer) {
     clearTimeout(saveBoundsTimer);
@@ -253,6 +266,7 @@ export const applyDesktopLyricsPayload = (payload: DesktopLyricsPayload) => {
   applyVisibility();
 };
 
+/** 获取最近一次同步的内容快照（页面重载后用于补发） */
 export const getLastDesktopLyricsPayload = () => lastPayload;
 
 /** 把窗口重置回默认位置（主屏底部居中） */

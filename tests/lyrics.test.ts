@@ -174,4 +174,76 @@ describe("useLyricsStore", () => {
     expect(state.translatedLyrics).toEqual([{ time: 1000, text: "你好" }]);
     expect(state.isLoaded).toBe(true);
   });
+
+  test("applies cached offset when loading lyrics", async () => {
+    getElectronStoreMock().mockResolvedValue({
+      "BV1xx-100": { lyrics: "[00:01.00]cached line", offset: 1200 },
+    });
+    setPlayItem(createPlayItem());
+
+    await useLyricsStore.getState().load();
+
+    expect(useLyricsStore.getState().offset).toBe(1200);
+  });
+
+  test("resets offset when loading another song without cached offset", async () => {
+    getElectronStoreMock().mockResolvedValue({
+      "BV1xx-100": { lyrics: "[00:01.00]first", offset: 800 },
+    });
+    setPlayItem(createPlayItem());
+    await useLyricsStore.getState().load();
+    expect(useLyricsStore.getState().offset).toBe(800);
+
+    getElectronStoreMock().mockResolvedValue({ "BV2xx-200": { lyrics: "[00:01.00]second" } });
+    setPlayItem(createPlayItem({ bvid: "BV2xx", cid: "200" }));
+    await useLyricsStore.getState().load();
+
+    expect(useLyricsStore.getState().offset).toBe(0);
+  });
+
+  test("updates offset through setOffset", () => {
+    useLyricsStore.getState().setOffset(1500);
+
+    expect(useLyricsStore.getState().offset).toBe(1500);
+  });
+
+  test("applyLyrics invalidates an in-flight load", async () => {
+    let resolveLoad: (value: LyricLine[]) => void = () => {};
+    vi.mocked(getLyricsByBili).mockImplementationOnce(
+      () =>
+        new Promise<LyricLine[]>(resolve => {
+          resolveLoad = resolve;
+        }),
+    );
+    setPlayItem(createPlayItem());
+    const pending = useLyricsStore.getState().load();
+    await flushPromises();
+
+    useLyricsStore.getState().applyLyrics("[00:02.00]adopted", "[00:02.00]采用");
+    resolveLoad([{ time: 0, text: "late network" }]);
+    await pending;
+
+    expect(useLyricsStore.getState().lyrics).toEqual([{ time: 2000, text: "adopted" }]);
+  });
+
+  test("switching to an item without lyrics invalidates an in-flight load", async () => {
+    let resolveLoad: (value: LyricLine[]) => void = () => {};
+    vi.mocked(getLyricsByBili).mockImplementationOnce(
+      () =>
+        new Promise<LyricLine[]>(resolve => {
+          resolveLoad = resolve;
+        }),
+    );
+    setPlayItem(createPlayItem());
+    const pending = useLyricsStore.getState().load();
+    await flushPromises();
+
+    setPlayItem(createPlayItem({ bvid: undefined, cid: undefined }));
+    await useLyricsStore.getState().load();
+
+    resolveLoad([{ time: 0, text: "late network" }]);
+    await pending;
+
+    expect(useLyricsStore.getState().lyrics).toEqual([]);
+  });
 });

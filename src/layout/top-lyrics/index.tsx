@@ -25,10 +25,11 @@ const TopLyrics = () => {
   const openFullScreenPlayer = useModalStore(s => s.openFullScreenPlayer);
   const playId = usePlayList(s => s.playId);
   const playItem = usePlayList(s => s.list.find(item => item.id === s.playId));
-  const { lyrics, translatedLyrics, isLoading, isLoaded } = useLyricsStore(
+  const { lyrics, translatedLyrics, offset, isLoading, isLoaded } = useLyricsStore(
     useShallow(s => ({
       lyrics: s.lyrics,
       translatedLyrics: s.translatedLyrics,
+      offset: s.offset,
       isLoading: s.isLoading,
       isLoaded: s.isLoaded,
     })),
@@ -48,7 +49,7 @@ const TopLyrics = () => {
     return map;
   }, [translatedLyrics]);
 
-  const activeIndex = getActiveLyricIndex(lyrics, currentTime * 1000);
+  const activeIndex = getActiveLyricIndex(lyrics, currentTime * 1000 + offset);
   // 还没唱到第一句时，把第一句当作「即将播放」的内容显示
   const index = activeIndex >= 0 ? activeIndex : lyrics.length ? 0 : -1;
   const line = index >= 0 ? lyrics[index] : undefined;

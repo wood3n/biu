@@ -11,6 +11,7 @@ function isSubWindow() {
   return hash.includes("mini-player") || hash.includes("desktop-lyrics");
 }
 
+/** 按歌词时间查找翻译文本 */
 const getTranslationByTime = (time?: number) => {
   if (typeof time !== "number") return undefined;
 
@@ -18,6 +19,7 @@ const getTranslationByTime = (time?: number) => {
   return translatedLyrics.find(item => item.time === time)?.text;
 };
 
+/** 从播放列表中查找当前播放项 */
 const findPlayItem = (playId?: string): PlayData | undefined => {
   const { list } = usePlayList.getState();
   return list.find(item => item.id === playId);
@@ -33,10 +35,10 @@ function computeDesktopLyricsPayload(): DesktopLyricsPayload {
   const settings = useSettings.getState();
   const { playId, isPlaying } = usePlayList.getState();
   const playItem = findPlayItem(playId);
-  const { lyrics } = useLyricsStore.getState();
+  const { lyrics, offset } = useLyricsStore.getState();
   const currentTime = usePlayProgress.getState().currentTime;
 
-  const activeIndex = getActiveLyricIndex(lyrics, currentTime * 1000);
+  const activeIndex = getActiveLyricIndex(lyrics, currentTime * 1000 + offset);
   // 还没唱到第一句时展示第一句（与顶部歌词栏保持一致）
   const index = activeIndex >= 0 ? activeIndex : lyrics.length ? 0 : -1;
   const line = index >= 0 ? lyrics[index] : undefined;
@@ -57,6 +59,7 @@ function computeDesktopLyricsPayload(): DesktopLyricsPayload {
 let isSyncStarted = false;
 let lastSerialized = "";
 
+/** 计算内容快照，并在内容变化时同步给主进程（相同内容不重复发送） */
 function syncPayload() {
   if (!window.electron?.syncDesktopLyrics) return;
 
@@ -83,8 +86,17 @@ export function startDesktopLyricsSync() {
   isSyncStarted = true;
   syncPayload();
 
+  // 主窗口可能没有开启顶部歌词栏/全屏播放器，桌面歌词开启时需要主动触发歌词加载
+  if (useSettings.getState().showDesktopLyrics) {
+    void useLyricsStore.getState().load();
+  }
+
   const unsubscribers = [
     usePlayList.subscribe((state, prevState) => {
+      if (state.playId !== prevState.playId && useSettings.getState().showDesktopLyrics) {
+        // 桌面歌词单独开启时（顶部歌词栏关闭）也能在切歌后加载新歌词
+        void useLyricsStore.getState().load();
+      }
       if (state.playId !== prevState.playId || state.isPlaying !== prevState.isPlaying) {
         syncPayload();
       }
@@ -98,14 +110,21 @@ export function startDesktopLyricsSync() {
       if (
         state.lyrics !== prevState.lyrics ||
         state.translatedLyrics !== prevState.translatedLyrics ||
+        state.offset !== prevState.offset ||
         state.isLoaded !== prevState.isLoaded
       ) {
         syncPayload();
       }
     }),
     useSettings.subscribe((state, prevState) => {
+      if (state.showDesktopLyrics !== prevState.showDesktopLyrics) {
+        if (state.showDesktopLyrics) {
+          void useLyricsStore.getState().load();
+        }
+        syncPayload();
+        return;
+      }
       if (
-        state.showDesktopLyrics !== prevState.showDesktopLyrics ||
         state.desktopLyricsLocked !== prevState.desktopLyricsLocked ||
         state.desktopLyricsFontSize !== prevState.desktopLyricsFontSize
       ) {
