@@ -259,4 +259,24 @@ describe("useLyricsStore", () => {
     expect(useLyricsStore.getState().offset).toBe(900);
     expect(useLyricsStore.getState().lyrics).toEqual([{ time: 1000, text: "online line" }]);
   });
+
+  test("does not overwrite offset adjusted while loading", async () => {
+    let resolveStore: (value: unknown) => void = () => {};
+    (window as any).electron.getStore = vi.fn(
+      () =>
+        new Promise(resolve => {
+          resolveStore = resolve;
+        }),
+    );
+    setPlayItem(createPlayItem());
+    const pending = useLyricsStore.getState().load();
+    await flushPromises();
+
+    useLyricsStore.getState().setOffset(2500);
+    resolveStore({ "BV1xx-100": { lyrics: "[00:01.00]cached", offset: 800 } });
+    await pending;
+
+    expect(useLyricsStore.getState().offset).toBe(2500);
+    expect(useLyricsStore.getState().lyrics).toEqual([{ time: 1000, text: "cached" }]);
+  });
 });

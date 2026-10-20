@@ -88,6 +88,8 @@ interface LyricsState {
 }
 
 let requestSeq = 0;
+/** 用户手动调整偏移量的版本号：异步加载回来时若用户已调整，不要用旧缓存覆盖 */
+let offsetRevision = 0;
 
 /** 读取指定歌曲的歌词缓存（包含手动调整的偏移量、字号等） */
 const readCachedLyrics = async (cacheKey: string): Promise<MusicLyrics | null> => {
@@ -120,7 +122,10 @@ export const useLyricsStore = create<LyricsState>((set, get) => ({
       isLoaded: true,
     });
   },
-  setOffset: offset => set({ offset }),
+  setOffset: offset => {
+    offsetRevision += 1;
+    set({ offset });
+  },
   load: async () => {
     const playItem = usePlayList.getState().getPlayItem();
     const cacheKey = getLyricsCacheKey(playItem?.bvid, playItem?.cid);
@@ -138,6 +143,7 @@ export const useLyricsStore = create<LyricsState>((set, get) => ({
     }
 
     const seq = ++requestSeq;
+    const offsetRevisionAtRead = offsetRevision;
     set({ cacheKey, offset: 0, lyrics: [], translatedLyrics: [], isLoading: true, isLoaded: false });
 
     try {
@@ -147,8 +153,11 @@ export const useLyricsStore = create<LyricsState>((set, get) => ({
 
       const cachedOffset = typeof cached?.offset === "number" ? cached.offset : 0;
       // 用户可能只调整过偏移量（缓存里还没有歌词正文），偏移量需要先恢复，
-      // 这样无论歌词来自缓存还是网络，都能沿用用户之前的调整
-      set({ offset: cachedOffset });
+      // 这样无论歌词来自缓存还是网络，都能沿用用户之前的调整；
+      // 若读取缓存期间用户又调整了偏移量，则以用户最新调整为准
+      if (offsetRevision === offsetRevisionAtRead) {
+        set({ offset: cachedOffset });
+      }
 
       if (cached?.lyrics || cached?.tLyrics) {
         set({
