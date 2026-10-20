@@ -170,6 +170,83 @@ export const SystemSettingsTab = ({
         </div>
       </div>
 
+      {/* 顶部歌词栏 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">顶部歌词栏</div>
+          <div className="text-sm text-zinc-500">在主窗口顶部常驻显示当前播放的歌词</div>
+        </div>
+        <Controller
+          control={control}
+          name="showTopLyrics"
+          render={({ field }) => <Switch disableAnimation isSelected={field.value} onValueChange={field.onChange} />}
+        />
+      </div>
+      {/* 顶部歌词栏翻译 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">顶部歌词翻译</div>
+          <div className="text-sm text-zinc-500">顶部歌词栏同时显示翻译歌词（如有）</div>
+        </div>
+        <Controller
+          control={control}
+          name="showTopLyricsTranslation"
+          render={({ field }) => <Switch disableAnimation isSelected={field.value} onValueChange={field.onChange} />}
+        />
+      </div>
+
+      {/* 桌面歌词 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">桌面歌词</div>
+          <div className="text-sm text-zinc-500">在桌面显示置顶的悬浮歌词（系统托盘菜单也可开关）</div>
+        </div>
+        <Controller
+          control={control}
+          name="showDesktopLyrics"
+          render={({ field }) => <Switch disableAnimation isSelected={field.value} onValueChange={field.onChange} />}
+        />
+      </div>
+      {/* 桌面歌词锁定 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">锁定桌面歌词</div>
+          <div className="text-sm text-zinc-500">锁定后鼠标可穿透歌词窗口；取消后可拖动窗口、使用悬浮按钮</div>
+        </div>
+        <Controller
+          control={control}
+          name="desktopLyricsLocked"
+          render={({ field }) => <Switch disableAnimation isSelected={field.value} onValueChange={field.onChange} />}
+        />
+      </div>
+      {/* 桌面歌词字号 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">桌面歌词字号</div>
+          <div className="text-sm text-zinc-500">调整桌面悬浮歌词的文字大小</div>
+        </div>
+        <div className="w-[300px]">
+          <Controller
+            control={control}
+            name="desktopLyricsFontSize"
+            render={({ field }) => (
+              <Slider
+                showTooltip={false}
+                size="sm"
+                endContent={<span>{field.value}px</span>}
+                aria-label="桌面歌词字号"
+                value={field.value}
+                onChange={v => field.onChange(Number(v))}
+                minValue={16}
+                maxValue={56}
+                step={1}
+                classNames={{ thumb: "after:hidden" }}
+              />
+            )}
+          />
+        </div>
+      </div>
+
       {/* 页面切换动画 FIXME:暂时移除，该功能会导致页面切换时重复渲染，数据请求double */}
       {/* <div className="flex w-full items-center justify-between">
         <div className="mr-6 space-y-1">

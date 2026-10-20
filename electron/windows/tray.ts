@@ -7,6 +7,7 @@ import path from "node:path";
 
 import { ELECTRON_ICON_BASE_PATH } from "@shared/path";
 
+import { resetDesktopLyricsPosition } from "../desktop-lyrics";
 import { channel } from "../ipc/channel";
 import { destroyMiniPlayer } from "../mini-player";
 import { IconBase } from "../utils";
@@ -14,17 +15,29 @@ import { IconBase } from "../utils";
 interface Props {
   getMainWindow: () => BrowserWindow | null;
   onExit: () => void;
+  /** 托盘创建时的桌面歌词开关状态（用于菜单勾选） */
+  initialDesktopLyricsState?: DesktopLyricsWindowState;
 }
 
 /**
  * Windows、Linux 系统托盘
  * - 左键：显示/隐藏主窗口
- * - 右键：弹出上下文菜单（显示/隐藏、退出）
+ * - 右键：弹出上下文菜单（显示/隐藏、桌面歌词、退出）
  * 通过传入 getMainWindow 和 onExit 回调与主进程解耦，便于复用与测试。
  */
 let tray: Tray | null = null;
+let desktopLyricsState: DesktopLyricsWindowState = { enabled: false, locked: true };
+let rebuildTrayMenu: (() => void) | null = null;
 
-function createTray({ getMainWindow, onExit }: Props) {
+/** 主进程收到桌面歌词状态同步后更新托盘菜单勾选状态 */
+function updateDesktopLyricsState(state: DesktopLyricsWindowState) {
+  if (desktopLyricsState.enabled === state.enabled && desktopLyricsState.locked === state.locked) return;
+
+  desktopLyricsState = { enabled: state.enabled, locked: state.locked };
+  rebuildTrayMenu?.();
+}
+
+function createTray({ getMainWindow, onExit, initialDesktopLyricsState }: Props) {
   // 若已存在旧实例，先销毁避免重复创建
   if (tray) {
     try {
@@ -52,6 +65,10 @@ function createTray({ getMainWindow, onExit }: Props) {
 
   tray = new Tray(icon);
   tray.setToolTip("Biu");
+
+  if (initialDesktopLyricsState) {
+    desktopLyricsState = { ...initialDesktopLyricsState };
+  }
 
   const sendPlayerCommand = (channel: string, errorContext: string) => {
     return () => {
@@ -86,7 +103,7 @@ function createTray({ getMainWindow, onExit }: Props) {
     }
   };
 
-  const menuTemplate: MenuItemConstructorOptions[] = [
+  const getMenuTemplate = (): MenuItemConstructorOptions[] => [
     {
       label: "播放/暂停",
       click: sendPlayerCommand(channel.player.toggle, "toggle play"),
@@ -102,6 +119,31 @@ function createTray({ getMainWindow, onExit }: Props) {
     {
       label: "显示/隐藏界面",
       click: toggleMainWindowVisibility,
+    },
+    {
+      type: "separator",
+    },
+    {
+      label: "桌面歌词",
+      type: "checkbox",
+      checked: desktopLyricsState.enabled,
+      click: sendPlayerCommand(channel.desktopLyrics.toggleRequested, "toggle desktop lyrics"),
+    },
+    {
+      label: "锁定桌面歌词（鼠标穿透）",
+      type: "checkbox",
+      checked: desktopLyricsState.locked,
+      click: sendPlayerCommand(channel.desktopLyrics.lockToggleRequested, "toggle desktop lyrics lock"),
+    },
+    {
+      label: "重置桌面歌词位置",
+      click: () => {
+        try {
+          resetDesktopLyricsPosition();
+        } catch (err) {
+          log.error("[tray] reset desktop lyrics position failed:", err);
+        }
+      },
     },
     {
       type: "separator",
@@ -134,8 +176,13 @@ function createTray({ getMainWindow, onExit }: Props) {
 
   // Linux 下必须使用 setContextMenu 才能正常弹出菜单（尤其是 Wayland/AppIndicator 环境）
   // Windows/macOS 也推荐使用 setContextMenu，系统会自动处理右键行为
-  const menu = Menu.buildFromTemplate(menuTemplate);
-  tray.setContextMenu(menu);
+  const buildMenu = () => {
+    if (!tray) return;
+    tray.setContextMenu(Menu.buildFromTemplate(getMenuTemplate()));
+  };
+
+  rebuildTrayMenu = buildMenu;
+  buildMenu();
 
   // 左键单击：显示主窗口；若迷你窗口已显示，则关闭它
   tray.on("click", () => {
@@ -164,6 +211,8 @@ function destroyTray() {
     }
     tray = null;
   }
+
+  rebuildTrayMenu = null;
 }
 
-export { createTray, destroyTray };
+export { createTray, destroyTray, updateDesktopLyricsState };

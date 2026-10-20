@@ -44,3 +44,14 @@ export const lyricsCacheStore = new Store<Record<string, MusicLyrics>>({
   cwd: getUserDataPath(),
   defaults: {},
 });
+
+interface DesktopLyricsStoreData {
+  /** 桌面歌词窗口位置尺寸 */
+  bounds?: DesktopLyricsBounds;
+}
+
+export const desktopLyricsStore = new Store<DesktopLyricsStoreData>({
+  name: "desktop-lyrics",
+  cwd: getUserDataPath(),
+  defaults: {},
+});

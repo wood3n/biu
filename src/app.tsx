@@ -5,6 +5,7 @@ import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import moment from "moment";
 
 import { getCookitFromBSite } from "./common/utils/cookie";
+import { startDesktopLyricsSync } from "./common/utils/desktop-lyrics";
 import { toggleMiniMode } from "./common/utils/mini-player";
 import { mapKeyToElectronAccelerator } from "./common/utils/shortcut";
 import Theme from "./components/theme";
@@ -29,6 +30,9 @@ export function App() {
   useEffect(() => {
     getCookitFromBSite();
   }, []);
+
+  // 主窗口 -> 桌面歌词窗口的状态同步（子窗口调用会自动跳过）
+  useEffect(() => startDesktopLyricsSync(), []);
 
   useEffect(() => {
     if (window.electron && window.electron.navigate) {

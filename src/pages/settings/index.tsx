@@ -32,6 +32,11 @@ const useSystemSettingsForm = () => {
     showSearchHistory,
     proxySettings,
     reportPlayHistory,
+    showTopLyrics,
+    showTopLyricsTranslation,
+    showDesktopLyrics,
+    desktopLyricsLocked,
+    desktopLyricsFontSize,
   } = useSettings(
     useShallow(s => ({
       fontFamily: s.fontFamily,
@@ -50,6 +55,11 @@ const useSystemSettingsForm = () => {
       showSearchHistory: s.showSearchHistory,
       proxySettings: s.proxySettings,
       reportPlayHistory: s.reportPlayHistory,
+      showTopLyrics: s.showTopLyrics,
+      showTopLyricsTranslation: s.showTopLyricsTranslation,
+      showDesktopLyrics: s.showDesktopLyrics,
+      desktopLyricsLocked: s.desktopLyricsLocked,
+      desktopLyricsFontSize: s.desktopLyricsFontSize,
     })),
   );
   const updateSettings = useSettings(s => s.update);
@@ -84,6 +94,11 @@ const useSystemSettingsForm = () => {
         password: "",
       },
       reportPlayHistory,
+      showTopLyrics,
+      showTopLyricsTranslation,
+      showDesktopLyrics,
+      desktopLyricsLocked,
+      desktopLyricsFontSize,
     },
   });
 
