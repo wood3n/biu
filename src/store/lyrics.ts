@@ -146,10 +146,12 @@ export const useLyricsStore = create<LyricsState>((set, get) => ({
       if (seq !== requestSeq) return;
 
       const cachedOffset = typeof cached?.offset === "number" ? cached.offset : 0;
+      // 用户可能只调整过偏移量（缓存里还没有歌词正文），偏移量需要先恢复，
+      // 这样无论歌词来自缓存还是网络，都能沿用用户之前的调整
+      set({ offset: cachedOffset });
 
       if (cached?.lyrics || cached?.tLyrics) {
         set({
-          offset: cachedOffset,
           lyrics: parseLrc(cached.lyrics),
           translatedLyrics: parseLrc(cached.tLyrics),
           isLoading: false,

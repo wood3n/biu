@@ -246,4 +246,17 @@ describe("useLyricsStore", () => {
 
     expect(useLyricsStore.getState().lyrics).toEqual([]);
   });
+
+  test("restores cached offset even when lyrics come from the network", async () => {
+    getElectronStoreMock().mockResolvedValue({
+      "BV1xx-100": { offset: 900 },
+    });
+    vi.mocked(getLyricsByBili).mockResolvedValue([{ time: 1000, text: "online line" }]);
+    setPlayItem(createPlayItem());
+
+    await useLyricsStore.getState().load();
+
+    expect(useLyricsStore.getState().offset).toBe(900);
+    expect(useLyricsStore.getState().lyrics).toEqual([{ time: 1000, text: "online line" }]);
+  });
 });
