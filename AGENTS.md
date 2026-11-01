@@ -608,6 +608,30 @@ props 换掉 `block/gap/armBlocks` 这套像素块参数，改成 `thickness / b
 - 质量门：eslint 0 error、prettier 干净、tsc 125 → 125（改动文件零报错）、vitest 11 → 19（新增 8 条走线几何测试）
 - **待用户实测**：GPU% 在这台无显卡 VM 上没意义。旧版另有一笔本处测不到的开销 —— 200 多个合成图层 + 每块三层阴影的光栅化，在真 GPU 上才是大头
 
+### 2026-11-02（第十二阶段）: 歌词条短歌词居中、工具条握手、跑马灯改比例位移
+
+三个都在 `src/pages/desktop-lyrics/index.tsx` + `src/app.css` + `electron/desktop-lyrics.ts`。
+
+#### 1. 工具条出现时短歌词不居中（`da450d1`）
+
+**根因**：药丸是 `w-fit`，宽度取最宽的那个孩子 —— 工具条一出现就把整条撑到 440px，而歌词行是 `w-full`、文字默认左对齐，几个字的歌词就贴在这大条的左边。长句本来比工具条还宽，所以一直看不出来。
+**修法**：行改 `flex`，按溢出量选对齐 —— `overflowW > 0` 时 `justify-start`（跑马灯起点必须顶到左边），否则 `justify-center`。
+**量法**：用真实光标命中让工具条出现，再用 `Range.selectNodeContents` 取字形**墨迹盒**（`getBoundingClientRect` 量到的是撑满的 block，不是字），与窗口中心比：同一句压到 18px 时偏 `-86.3px` → 修复后 `0`。
+
+#### 2. 页面重载后工具条叫不出来（`516ab24`）
+
+`pollHit` 是「值变了才发」。重载后渲染层的 hover 归零，主进程却还留着上一次的 `true` —— 光标不再移动就永远收不到那条 `true`，实测必现（我自己踩了两次才发现是它）。
+**先试错了**：在 `did-finish-load` 里重置状态再主动推 —— **不行**，那会儿渲染层的监听还没装上，照样错过，已撤掉。
+**最终**：改成握手，渲染层每次上报命中矩形，主进程顺手回推当前命中结果（`setDesktopLyricsHitRect` 末尾）。光标停在歌词上不动、重载页面，工具条直接回来。
+
+#### 3. 跑马灯不再循环跑，位移改由已唱比例给（`cada19c`）
+
+**根因**：旧做法是「静止 1.5s → 起一条 `infinite` 的 `marquee-scroll`（渲染两份文案做无缝循环）」，时长按 `文字宽度 / 固定速度` 算，和真实演唱进度无关 —— 所以会「已唱都走完了，跑马灯还没开始走」，或者反过来提前滚完。
+**修法**：位移直接由已唱比例换算 —— `writeProgress` 把同一个 frac 同时写进上色层（`--lyric-active-frac`）和滚动层（`--lyric-scroll-frac`），CSS 里 `transform: translateX(calc(-1 * var(--lyric-overflow-w) * var(--lyric-scroll-frac)))`。同源于同一个时钟，必然同起同止；只渲染一份文案，`animationName` 为 `none`。`LYRICS_PX_PER_SECOND / LYRICS_MIN_DURATION / LYRICS_SCROLL_DELAY` 与双份文案的 `className/ariaHidden` 一并删掉。
+**验证**：给行注入 `max-width: 320px` 逼出溢出（走组件自己的 `ResizeObserver` + 探针测量，比改用户设置可靠）：`--lyric-overflow-w = 410px = 666 - (320-64)`；frac 0/0.5/1 → 位移 0/-205/-410；到尾端最后一个字落在 `518.0px`，可写区右边界 `518.5px` —— 正好停在右侧渐隐区之前。
+
+**测歌词条的固定手法**：主窗口和歌词条是两套 webContents，`/json/list` 里两个 target 的 url 只差 hash，用 `includes` 匹配会连错（我这样量错过一次）—— 要先按 `url ===` 精确匹配。窗口尺寸可用 `Emulation.setDeviceMetricsOverride` 撑成 1600×900，但**改完 `electron/` 会重启 Electron、端口每次都变**，要重读 `DevToolsActivePort`。
+
 
 1. **不要在渲染进程直接访问 Node API** — 通过 `window.electron.*` IPC 调用
 2. **新增 IPC 通道** — 在 `electron/ipc/channel.ts` 定义，`electron/ipc/` 下注册处理器，`preload.ts` 暴露，`shared/types/renderer.d.ts` 声明类型
