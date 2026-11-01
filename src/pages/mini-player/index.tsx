@@ -357,12 +357,10 @@ const MiniPlayer = () => {
 
   return (
     <div className="window-drag h-screen w-screen overflow-hidden select-none">
-      {/* 七彩跑马灯光带：贴着面板周长游走 */}
+      {/* 光带贴着面板边缘游走 */}
       <MarqueeLights
         mode="listen"
-        block={8}
-        gap={2}
-        thickness={2}
+        thickness={3}
         bandCount={2}
         radius={PANEL_RADIUS}
         zIndex={60}
@@ -399,7 +397,7 @@ const MiniPlayer = () => {
             >
               {playModeIcon}
             </Button>
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-1.5">
               <Button
                 isDisabled={!title || isSingle}
                 isIconOnly
