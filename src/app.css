@@ -440,6 +440,14 @@ button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"])
   );
 }
 
+/* 位移由「已唱比例」直接换算，和上色层读同一个 frac：
+   两者同源于同一时钟，不可能「已唱都走完了，跑马灯还没开始走」；
+   也不做无限循环 —— 到尾端正好把最后一个字停在右侧渐隐区之前。 */
+.desktop-lyrics-track {
+  transform: translateX(calc(-1 * var(--lyric-overflow-w, 0px) * var(--lyric-scroll-frac, 0)));
+  will-change: transform;
+}
+
 .desktop-lyrics-toolbar {
   border-radius: 9999px;
   background-color: rgb(18 18 22 / 62%);

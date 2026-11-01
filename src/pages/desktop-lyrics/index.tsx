@@ -67,13 +67,6 @@ const ToolbarButton = ({
   </button>
 );
 
-/** 滚动基准速度（像素/秒）：时长按文字宽度换算，写死秒数会让长句飞过去 */
-const LYRICS_PX_PER_SECOND = 40;
-/** 一圈的时长下限（秒） */
-const LYRICS_MIN_DURATION = 8;
-/** 溢出后先静止展示句首的时间（ms），别一上来就滚走开头 */
-const LYRICS_SCROLL_DELAY = 1500;
-
 /**
  * 量出一行歌词的真实宽度。容器会被窗口宽度夹住并裁掉溢出，
  * 读不到完整文字宽度，所以用同样式的不透明探针元素单独测。
@@ -110,8 +103,6 @@ const LyricLineCopy = ({
   activeColor,
   current,
   textWidth,
-  className,
-  ariaHidden,
 }: {
   text: string;
   fontSize: number;
@@ -120,15 +111,12 @@ const LyricLineCopy = ({
   activeColor: string;
   current: boolean;
   textWidth: number;
-  className?: string;
-  /** 滚动时衔接用的第二份只是视觉复制，读屏不必再念一遍 */
-  ariaHidden?: boolean;
 }) => {
   const fontStyle = { fontSize, fontFamily };
 
   if (!current) {
     return (
-      <div className={clx("relative", className)} aria-hidden={ariaHidden || undefined}>
+      <div className="relative">
         <span className="desktop-lyrics-text block whitespace-nowrap" style={{ ...fontStyle, color }}>
           {text}
         </span>
@@ -144,7 +132,7 @@ const LyricLineCopy = ({
   } as React.CSSProperties;
 
   return (
-    <div className={clx("relative", className)} aria-hidden={ariaHidden || undefined}>
+    <div className="relative">
       <span className="desktop-lyrics-text desktop-lyrics-text--halo block whitespace-nowrap" style={fontStyle}>
         {text}
       </span>
@@ -176,9 +164,9 @@ const LyricLineView = ({
   current: boolean;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isOverflow, setIsOverflow] = useState(false);
-  const [canScroll, setCanScroll] = useState(false);
   const [textWidth, setTextWidth] = useState(0);
+  /** 文字比可写区宽出多少（px）：这就是拖尾最多要走的距离，也是要不要左对齐的判据 */
+  const [overflowW, setOverflowW] = useState(0);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -186,9 +174,9 @@ const LyricLineView = ({
 
     const measure = () => {
       const width = measureLyricWidth(container, text, fontSize, fontFamily);
-      setTextWidth(width);
       // clientWidth 含左右留白，可写的文字宽度要把它扣掉
-      setIsOverflow(width > container.clientWidth - SHADOW_GUTTER * 2 + 1);
+      setTextWidth(width);
+      setOverflowW(Math.max(0, width - (container.clientWidth - SHADOW_GUTTER * 2)));
     };
 
     measure();
@@ -198,20 +186,7 @@ const LyricLineView = ({
     return () => ro.disconnect();
   }, [text, fontSize, fontFamily]);
 
-  // 换行或字号变化后重新计时，先看清句首再起滚动
-  useEffect(() => {
-    if (!isOverflow) {
-      setCanScroll(false);
-      return;
-    }
-    setCanScroll(false);
-    const timer = setTimeout(() => setCanScroll(true), LYRICS_SCROLL_DELAY);
-    return () => clearTimeout(timer);
-  }, [text, fontSize, isOverflow]);
-
   const copyProps = { text, fontSize, fontFamily, color, activeColor, current, textWidth };
-  const isScrolling = isOverflow && canScroll;
-  const duration = Math.max(LYRICS_MIN_DURATION, textWidth / LYRICS_PX_PER_SECOND);
 
   return (
     <div
@@ -222,23 +197,19 @@ const LyricLineView = ({
       className={clx(
         "desktop-lyrics-row relative flex w-full overflow-x-clip overflow-y-visible px-8",
         // 药丸是 w-fit，工具条一出现就把整条撑宽（它比短歌词宽得多），行不自己居中的话
-        // 几个字的歌词会贴在这大条的左边。滚动时反过来必须顶到左边，跑马灯起点才对
-        isScrolling ? "justify-start" : "justify-center",
+        // 几个字的歌词会贴在这大条的左边。要滚起来时反过来必须顶到左边
+        overflowW > 0 ? "justify-start" : "justify-center",
+        current && "desktop-lyrics-row--current",
       )}
     >
-      {isScrolling ? (
-        <div
-          // 换行必须重启动画，否则新句子从上一句的位移中间冒出来
-          key={text}
-          className="flex w-max will-change-transform"
-          style={{ animation: `marquee-scroll ${duration}s linear infinite` }}
-        >
-          <LyricLineCopy {...copyProps} className="flex-none pr-10" />
-          <LyricLineCopy {...copyProps} className="flex-none pr-10" ariaHidden />
-        </div>
-      ) : (
+      {/* 一份文案，位移由已唱比例给（见 app.css .desktop-lyrics-track）：
+          不再渲染两份做无限循环，起点和终点都锁在同一个时钟上 */}
+      <div
+        className="desktop-lyrics-track flex-none"
+        style={{ ["--lyric-overflow-w" as keyof React.CSSProperties]: `${overflowW}px` }}
+      >
         <LyricLineCopy {...copyProps} />
-      )}
+      </div>
     </div>
   );
 };
@@ -303,6 +274,10 @@ const DesktopLyrics = () => {
     document
       .querySelectorAll<HTMLElement>(".desktop-lyrics-text--fill")
       .forEach(el => el.style.setProperty("--lyric-active-frac", value));
+    // 上色和滚动写同一个数：两者同源于这个时钟，短行/长行都不会出现「已唱走完了字还没滚到」
+    document
+      .querySelectorAll<HTMLElement>(".desktop-lyrics-row--current .desktop-lyrics-track")
+      .forEach(el => el.style.setProperty("--lyric-scroll-frac", value));
   };
 
   /** 定位当前行 + 写上色分界；只有换行才惊动 React，逐帧推进只动一个自定义属性 */
