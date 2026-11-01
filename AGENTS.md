@@ -461,6 +461,8 @@ CDP `Page.captureScreenshot` 只有网页层，拍不到系统材质；PowerShel
 
 ### 2026-11-01（第七阶段）: 桌面歌词一行最大宽度 + 横向留白
 
+> 本阶段的「窗口铺满整屏 + 内部裁切框限宽」已被第九阶段整体替换（窗口宽度即一行上限、硬裁切改渐隐遮罩），`widthPercent` 镜像与 `clampDesktopLyricsWidth` 都已删除；设置项本身与三处链路仍然有效。以下是当时的记录。
+
 **问题**: 长歌词一行能撑到 `max-w-[96vw]`，等于占满整屏；而且文字一直顶到裁切框边上，`0 8px 22px` 那层柔光向左右各要约 24px，只有 8px 留白 → 光被裁切框切平（纵向刚修过，横向是同一个毛病的另一半）。
 
 **实现** (`shared/types/app-setting.d.ts`, `shared/settings/app-settings.ts`, `src/store/settings.ts`, `src/common/utils/desktop-lyrics.ts`, `src/pages/desktop-lyrics/index.tsx`, `src/pages/settings/desktop-lyrics-settings.tsx`)：
@@ -497,6 +499,26 @@ CDP `Page.captureScreenshot` 只有网页层，拍不到系统材质；PowerShel
 **验证**: 真 Chromium 里对高频噪点图做新旧 A/B，糊图与频谱肉眼无差别；tsc 基线 125→125（改动文件零报错）、eslint、prettier 干净；节拍检测 A/B 仿真：新实现 30~144fps 下 onset 数量与 ~700ms 窗口稳定，旧的在低帧率下首个 onset 从 1500ms 提前到 500ms。**GPU% 未测**——开发机是无显卡虚拟机，SwiftShader 软栅格把 GPU 开销记成 CPU，此处数字无意义，需在 1660 上复测。若虚化仍高，先看 DevTools → Layers 那层的纹理尺寸：若仍按全屏光栅化说明 Blink 吃进了 scale，就得换成主进程取封面 + canvas 一次性预糊（顺带绕开 hdslb 封面的 `crossOrigin` CORS 不确定性）。
 
 **已知未动**: 跑马灯 `marquee-lights` 用 keyframes 动 `left/top/width/height`（~308 个元素、每帧全视口 layout + paint）与全屏播放器 7 个 `backdrop-blur-2xl` 底板按用户要求「暂时不动」，这是 45% 里剩下的最大一笔。
+
+### 2026-11-01（第九阶段）: 歌词条窗口即歌词栏，断口改渐隐
+
+**问题**: 第七阶段那套「窗口铺满整屏 + 内部裁切框限宽」被用户判死：「最外面的框框还是占满了屏幕宽度，而且你的裁剪会截断阴影」。确实错了两条：① 一条透明横带铺满整屏，桌面点击与鼠标命中判定都被它管着；② 裁切框无论怎么留白，滚动的字经过边界时仍是一条硬切口。
+
+**实现**（`electron/desktop-lyrics.ts`、`electron/ipc/{channel,window}.ts`、`electron/preload.ts`、`shared/types/renderer.d.ts`、`src/common/utils/desktop-lyrics.ts`、`src/pages/desktop-lyrics/index.tsx`、`src/app.css`）：
+- **窗口宽度就是那一行的上限**：`workArea.width × pct / 100 + SHADOW_GUTTER * 2`（留白 32px 与渲染层常量同值，两侧各一份），下限 `MIN_LYRICS_WINDOW_WIDTH = 520`。新 IPC `desktop-lyrics:set-width` → `setDesktopLyricsWidth(percent)`，改宽度时**水平中心不动**（用户拖到哪儿还在哪儿），x 钳回工作区，结果写回 `desktopLyricsStore.bounds`
+- 主窗口控制器 `startDesktopLyricsController()` 的 `apply(enabled, locked, width)` 多带一个宽度参数，订阅里 `desktopLyricsWidth` 变化与开关/锁定同级触发。设置项 `desktopLyricsWidth` 本身沿用第七阶段那条三处链路（类型/默认值/`partialize` + `useSystemSettingsForm`）
+- **`widthPercent` 从 `DesktopLyricsViewSettings` 里删掉**：窗口自己就是上限，渲染层再算一遍只会算出第二个上限。`clampDesktopLyricsWidth()` 一起删，钳制只在主进程 `clampWidthPercent()` 一处
+- **断口用遮罩渐隐，不用硬切**：`.desktop-lyrics-row` 加 `mask-image: linear-gradient(to right, transparent 0, 35% 10px, black 32px, black calc(100% - 32px), 35% calc(100% - 10px), transparent)`。渐隐宽度正好等于留白，字碰不到淡区
+- **遮罩只能盖住本元素的边框盒**（`mask-clip` 没有 `no-clip`），纵向超出的柔光会被它切平 → 同一规则里 `padding-top/bottom: 32px` + `margin-top/bottom: -32px`：盒子上下各撑大 32px 把柔光包进遮罩范围，负 margin 让排版位置不变。于是行容器从 `-mx-8/px-8` 改成 `w-full px-8`，`overflow-x-clip` 保留（遮罩与裁切框同一条边）
+- 行容器不再需要 `maxWidthPx`：外层改成 **flex 布局而不是 `absolute left-1/2`** —— 定位元素的可用宽度按 `容器宽 - left` 算，一条 70% 宽的歌词会被挤到 50% 就起跑马灯。根节点 `flex items-end justify-center`，胶囊 `mb-10 w-fit min-w-0`（`min-w-0` 必须有，否则 `whitespace-nowrap` 的 min-content 顶住不收缩）
+- 窗口高度 230 → 244、底部留白 `mb-6`(24px) → `mb-10`(40px)：`0 8px 22px` 那层柔光向下要铺约 30px，24px 会被窗口下边缘吃掉 6px（透明窗画不到窗外）
+
+**验证**（CDP，端口随重启变化）：
+- 1600 工作区 + 70% → `window.innerWidth = 1184`（=1120+64）；30% → 544 且 735px 的句子起跑马灯（`anim: marquee-scroll`、轨道 1550px = 两份 735 + 两份 40 间隔）；95% → 1584 不越界。截图确认左右两端是渐隐不是硬边
+- 完整链路实测走**设置页滑块**：`#/settings` → 「桌面歌词」tab → 那个 `min=30 max=95` 的原生 `input[type=range]`（HeroUI 的 `aria-label` 不在 input 上，靠 min/max 认）用 `HTMLInputElement` value setter + `input`/`change` 事件驱动到 45 → 歌词条 `innerWidth` 实时变 784，改回 70 → 1184
+- 纵向：`textBottom = 204`、窗口 244 → 字下 40px，柔光 30px 完整留在窗内
+- 悬停工具条：合成一次命中 `mousemove` 让工具条出现（`108..132`，在文字上方不被遮罩区压到），再合成一次窗外移动收回穿透态
+- 质量门：eslint 改动文件 0 error、stylelint 干净、tsc 无新增错误（仓库存量 5 条与本阶段无关）、vitest 11/11
 
 
 1. **不要在渲染进程直接访问 Node API** — 通过 `window.electron.*` IPC 调用
