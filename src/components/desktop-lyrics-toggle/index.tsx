@@ -10,7 +10,7 @@ const DesktopLyricsToggle = () => {
 
   return (
     <IconButton
-      className={clx("min-w-fit text-[13px] leading-none font-medium", { "text-primary": enabled })}
+      className={clx("min-w-fit text-[16px] leading-none font-medium", { "text-primary": enabled })}
       aria-label="桌面歌词"
       aria-pressed={enabled}
       tooltip={enabled ? "关闭桌面歌词" : "开启桌面歌词"}
