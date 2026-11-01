@@ -11,6 +11,28 @@ AIGC:
 
 # Changelog
 
+## v3.0.0-xretia
+
+[compare changes](https://github.com/xRetia/biu/compare/v2.4.0-xretia...v3.0.0-xretia)
+
+### 🚀 新功能
+
+- **桌面歌词**：播放条右侧新增「词」开关，独立置顶透明窗显示当前歌词。8 方向描边 + 双层柔光保证压在任意桌面上都可读，已唱部分按行内进度逐字换色；指针移到歌词上才出现悬停工具条（歌名跑马灯 + 上一曲/播放暂停/下一曲 + 锁定/字号/关闭），默认整体鼠标穿透不挡桌面点击 ([3dfeac1](https://github.com/xRetia/biu/commit/3dfeac1))
+- **桌面歌词设置**单独成 tab：字体、字号、未唱/已唱颜色、单双行、一行最大宽度。双行显示当前句与下一句，两行上下位置由当前句奇偶轮换，换行时高亮只是「跳」到另一行、文字不上下跳动 ([3dfeac1](https://github.com/xRetia/biu/commit/3dfeac1), [e412a73](https://github.com/xRetia/biu/commit/e412a73))
+- **悬浮窗重做**：改用 Windows 系统亚克力材质（DWM 合成，糊的是此刻窗口后面的真实画面），底板可选透明模糊 / 纯色浅 / 纯色深三档跟随主窗口；封面改圆形贴合面板左端半圆，去掉用不到的进度条 ([3dfeac1](https://github.com/xRetia/biu/commit/3dfeac1))
+
+### 🔥 功能优化
+
+- **频谱与背景虚化降 GPU**：频谱柱体合并进单条 Path2D，每帧带阴影的 fill 从约 400 次降到 2 次；封面背景糊图按 1/9 尺寸渲染再放大，着色器像素除以 81，并去掉 `transition: filter` 与 `will-change` ([3dfeac1](https://github.com/xRetia/biu/commit/3dfeac1))
+- **新增「动画帧率上限」设置**（30/60/90/120/144，默认 60）：频谱与节拍特效在 rAF 回调里按时间门控，144Hz 屏上不再把同一帧代码白跑 144 遍 ([3dfeac1](https://github.com/xRetia/biu/commit/3dfeac1))
+
+### 🩹 修复问题
+
+- **长歌词不滚动**：悬浮窗与桌面歌词的跑马灯时长改为按文字真实宽度换算（40px/s，一圈下限 8 秒），换句强制重启动画；桌面歌词先静止 1.5 秒展示句首再起滚动 ([3dfeac1](https://github.com/xRetia/biu/commit/3dfeac1))
+- **桌面歌词投影被方框切平**：已唱换色不再用「克隆一份按进度裁切」，改为描边层 + 上色层两层叠加，任何一层都不被裁切 ([3dfeac1](https://github.com/xRetia/biu/commit/3dfeac1))
+- **桌面歌词一行占满整屏**：窗口宽度就是用户设的一行上限（30~95%）+ 两侧柔光留白，一行两端改硬裁切为遮罩渐隐；窗口下缘留白提高到 40px，字下那圈柔光不再被窗口边缘切掉 ([e412a73](https://github.com/xRetia/biu/commit/e412a73))
+- **播放条「词」字小一圈**：13px 的汉字墨迹高 12px，旁边图标 15.6px，改为 16px 且不加字重 ([a90a7de](https://github.com/xRetia/biu/commit/a90a7de))
+
 ## v2.4.0-xretia
 
 [compare changes](https://github.com/xRetia/biu/compare/v2.3.3-xretia...v2.4.0-xretia)
