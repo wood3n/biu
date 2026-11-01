@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import {
   RiCloseLine,
@@ -16,6 +16,7 @@ import type { DesktopLyricsViewSettings } from "@/common/utils/desktop-lyrics";
 import type { MiniPlayerMainStateSnapshot } from "@/common/utils/mini-player";
 import type { WebPlayerParams } from "@/service/web-player";
 
+import { normalizeAnimationFps } from "@/common/audio/frame-rate";
 import {
   createDesktopLyricsChannel,
   DESKTOP_LYRICS_FONT_SIZE_MAX,
@@ -29,8 +30,11 @@ import { StoreNameMap } from "@shared/store";
 
 import { useTransparentDocument } from "./use-style";
 
-/** 指针命中判定向外扩张的余量，避免字号/文案宽度变化时穿透状态抖动 */
+/** 命中矩形向外扩张的余量：字号/文案宽度变化时不让穿透状态来回抖 */
 const HIT_PADDING = 10;
+
+/** 命中矩形向上多留的一条带子：工具条高 24 + 间距 4，再留点余量。工具条只在命中时出现，判定必须提前把它算进去 */
+const TOOLBAR_RESERVE = 32;
 
 /** 没有下一行时间戳时的兜底行时长（ms），用于逐行进度擦除 */
 const FALLBACK_LINE_DURATION = 4000;
@@ -89,7 +93,10 @@ const measureLyricWidth = (container: HTMLElement, text: string, fontSize: numbe
 
 /**
  * 一行歌词的一份内容：当前句用「已唱色 → 未唱色」两段渐变在行内进度处换色。
- * 分界点用 px 而不是百分比：滚动时这一份的盒子可能比文字本身宽（首尾留白），
+ *
+ * 分界不写进 React：上色层只读 `--lyric-active-frac`（每帧由 rAF 写在节点上）
+ * 与 `--lyric-text-w`（换行/换字号时在这里写一次），逐帧推进既不重排也不重新渲染。
+ * 用 px 而不是百分比换算：滚动时这一份的盒子可能比文字本身宽（首尾留白），
  * 只有按文字真实宽度换算，分界才一直落在正确的字上。
  *
  * 当前句叠两层（描边层 + 上色层），任何一层都不裁切，投影才不会被切平；
@@ -101,7 +108,6 @@ const LyricLineCopy = ({
   fontFamily,
   color,
   activeColor,
-  progress,
   current,
   textWidth,
   className,
@@ -112,8 +118,6 @@ const LyricLineCopy = ({
   fontFamily: string;
   color: string;
   activeColor: string;
-  /** 行内进度，仅当前句用于渐变换色的分界 */
-  progress: number;
   current: boolean;
   textWidth: number;
   className?: string;
@@ -132,19 +136,19 @@ const LyricLineCopy = ({
     );
   }
 
-  const activePx = progress * textWidth;
+  const fillStyle = {
+    ...fontStyle,
+    ["--lyric-color" as keyof React.CSSProperties]: color,
+    ["--lyric-active-color" as keyof React.CSSProperties]: activeColor,
+    ["--lyric-text-w" as keyof React.CSSProperties]: `${textWidth}px`,
+  } as React.CSSProperties;
+
   return (
     <div className={clx("relative", className)} aria-hidden={ariaHidden || undefined}>
       <span className="desktop-lyrics-text desktop-lyrics-text--halo block whitespace-nowrap" style={fontStyle}>
         {text}
       </span>
-      <span
-        className="desktop-lyrics-text desktop-lyrics-text--fill whitespace-nowrap"
-        style={{
-          ...fontStyle,
-          backgroundImage: `linear-gradient(to right, ${activeColor} 0, ${activeColor} ${activePx}px, ${color} ${activePx}px, ${color} 100%)`,
-        }}
-      >
+      <span className="desktop-lyrics-text desktop-lyrics-text--fill whitespace-nowrap" style={fillStyle}>
         {text}
       </span>
     </div>
@@ -162,7 +166,6 @@ const LyricLineView = ({
   fontFamily,
   color,
   activeColor,
-  progress,
   current,
 }: {
   text: string;
@@ -170,8 +173,6 @@ const LyricLineView = ({
   fontFamily: string;
   color: string;
   activeColor: string;
-  /** 行内进度，仅当前句用于渐变换色的分界 */
-  progress: number;
   current: boolean;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -208,7 +209,7 @@ const LyricLineView = ({
     return () => clearTimeout(timer);
   }, [text, fontSize, isOverflow]);
 
-  const copyProps = { text, fontSize, fontFamily, color, activeColor, progress, current, textWidth };
+  const copyProps = { text, fontSize, fontFamily, color, activeColor, current, textWidth };
   const isScrolling = isOverflow && canScroll;
   const duration = Math.max(LYRICS_MIN_DURATION, textWidth / LYRICS_PX_PER_SECOND);
 
@@ -248,6 +249,7 @@ const DesktopLyrics = () => {
       color: s.desktopLyricsColor,
       activeColor: s.desktopLyricsActiveColor,
       lineMode: s.desktopLyricsLineMode,
+      animationFps: normalizeAnimationFps(s.animationFps),
     })),
   );
 
@@ -255,18 +257,93 @@ const DesktopLyrics = () => {
   // 两个窗口各持一份内存 settings，歌词条直接写盘会把主窗口的旧值覆盖回去
   const [local, setLocal] = useState<DesktopLyricsViewSettings | null>(null);
   const view = local ?? persisted;
-  const { fontFamily, fontSize, locked, color, activeColor, lineMode } = view;
+  const { fontFamily, fontSize, locked, color, activeColor, lineMode, animationFps } = view;
 
   const [snapshot, setSnapshot] = useState<MiniPlayerMainStateSnapshot | null>(null);
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
-  const [lyricOffset, setLyricOffset] = useState(0);
+  const [activeLyricIndex, setActiveLyricIndex] = useState(-1);
   const [isPointerInside, setIsPointerInside] = useState(false);
 
   const bcRef = useRef<BroadcastChannel | null>(null);
   const pillRef = useRef<HTMLDivElement | null>(null);
-  const interactiveRef = useRef(false);
   const loadedKeyRef = useRef("");
   const loadingRef = useRef(false);
+  const hitRectKeyRef = useRef("");
+
+  /**
+   * 播放时钟。主窗口那侧的进度来自 audio 的 timeupdate，实测只有 3.5Hz（每 276ms 一次），
+   * 直接照它上色就是一顿一顿的 PPT，而且边界永远落后半拍到一拍。
+   * 所以快照到达时锚定一次，之后本窗口按帧外推：真实时间差 × 倍速。
+   */
+  const clockRef = useRef({ baseMs: 0, anchor: 0, playing: false, rate: 1, durationMs: 0 });
+  const lyricsRef = useRef<LyricLine[]>([]);
+  const offsetRef = useRef(0);
+  const activeIndexRef = useRef(-1);
+  const frameIntervalRef = useRef(1000 / 60);
+
+  useEffect(() => {
+    frameIntervalRef.current = 1000 / animationFps;
+  }, [animationFps]);
+
+  /** 本窗口估算的「此刻」歌词时间（已含偏移） */
+  const estimateLyricsMs = (now: number) => {
+    const clock = clockRef.current;
+    const elapsed = clock.playing ? (now - clock.anchor) * clock.rate : 0;
+    const mediaMs = clock.baseMs + elapsed;
+    return (clock.durationMs > 0 ? Math.min(mediaMs, clock.durationMs) : mediaMs) + offsetRef.current;
+  };
+
+  const writeProgress = (frac: number) => {
+    const value = frac.toFixed(4);
+    document
+      .querySelectorAll<HTMLElement>(".desktop-lyrics-text--fill")
+      .forEach(el => el.style.setProperty("--lyric-active-frac", value));
+  };
+
+  /** 定位当前行 + 写上色分界；只有换行才惊动 React，逐帧推进只动一个自定义属性 */
+  const syncLyricClock = (now: number) => {
+    const lines = lyricsRef.current;
+    const currentMs = estimateLyricsMs(now);
+
+    let index = -1;
+    for (let i = lines.length - 1; i >= 0; i -= 1) {
+      if (currentMs >= lines[i].time) {
+        index = i;
+        break;
+      }
+    }
+
+    if (index !== activeIndexRef.current) {
+      activeIndexRef.current = index;
+      setActiveLyricIndex(index);
+    }
+
+    if (index < 0) {
+      writeProgress(0);
+      return;
+    }
+
+    const start = lines[index].time;
+    const end = lines[index + 1]?.time ?? start + FALLBACK_LINE_DURATION;
+    writeProgress(end <= start ? 1 : Math.min(1, Math.max(0, (currentMs - start) / (end - start))));
+  };
+
+  // 逐帧推进上色边界（帧率取共享的「动画帧率」设置，歌词条那份由主窗口镜像推过来）
+  useEffect(() => {
+    let rafId = 0;
+    let lastAt = 0;
+
+    const tick = () => {
+      rafId = requestAnimationFrame(tick);
+      const now = performance.now();
+      if (now - lastAt < frameIntervalRef.current) return;
+      lastAt = now;
+      syncLyricClock(now);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
 
   const send = (
     type: "close" | "toggleLock" | "fontSize" | "togglePlay" | "prev" | "next",
@@ -291,7 +368,8 @@ const DesktopLyrics = () => {
       const store = await window.electron.getStore(StoreNameMap.LyricsCache);
       const cached = store?.[key];
       const cachedOffset = typeof cached?.offset === "number" ? cached.offset : 0;
-      setLyricOffset(cachedOffset);
+      offsetRef.current = cachedOffset;
+      setLyrics([]);
 
       let lines = parseLrcToLines(cached?.lyrics);
       if (!lines.length) {
@@ -301,9 +379,12 @@ const DesktopLyrics = () => {
         if (result?.lyrics.length) lines = result.lyrics;
       }
 
+      lyricsRef.current = lines;
       setLyrics(lines);
+      syncLyricClock(performance.now());
     } catch {
       // 静默失败：歌词条无歌词时回落到标题
+      lyricsRef.current = [];
     } finally {
       loadingRef.current = false;
     }
@@ -318,7 +399,8 @@ const DesktopLyrics = () => {
       if (from !== "main") return;
 
       if (type === "lyricsOffset" && typeof offset === "number") {
-        setLyricOffset(offset);
+        offsetRef.current = offset;
+        syncLyricClock(performance.now());
         return;
       }
 
@@ -333,6 +415,17 @@ const DesktopLyrics = () => {
       const next = state as MiniPlayerMainStateSnapshot;
       setSnapshot(next);
 
+      // 重新锚定时钟：进度、倍速、时长、播放状态都以主窗口这一包为准
+      const now = performance.now();
+      clockRef.current = {
+        baseMs: (next.currentTime ?? 0) * 1000,
+        anchor: now,
+        playing: Boolean(next.isPlaying),
+        rate: next.rate > 0 ? next.rate : 1,
+        durationMs: (next.duration ?? 0) * 1000,
+      };
+      syncLyricClock(now);
+
       if (next.bvid && next.cid) {
         const key = `${next.bvid}-${next.cid}`;
         if (loadedKeyRef.current !== key && !loadingRef.current) {
@@ -340,6 +433,7 @@ const DesktopLyrics = () => {
         }
       } else if (loadedKeyRef.current) {
         loadedKeyRef.current = "";
+        lyricsRef.current = [];
         setLyrics([]);
       }
     };
@@ -352,66 +446,45 @@ const DesktopLyrics = () => {
     };
   }, []);
 
-  // 未锁定时窗口默认整体鼠标穿透（只转发 mousemove）：
-  // 指针进入歌词胶囊才临时恢复可交互，离开后立刻穿透回去，
-  // 这样这条横跨屏幕的窗口不会挡住桌面与任务栏点击。
+  /**
+   * 命中矩形交给主进程：穿透中的窗口收不到任何鼠标事件（Windows 的 forward 实测为 0 个），
+   * 所以「指针在不在字上」只能由主进程拿真实光标位置来判，判中了才取消穿透并回推 hover。
+   * 矩形按歌词真实排版算，外面再包一圈余量，上方多留一条工具带的宽度。
+   */
+  const reportHitRect = () => {
+    const pill = pillRef.current;
+    if (!pill) return;
+
+    const rect = pill.getBoundingClientRect();
+    const next = {
+      x: Math.round(rect.left - HIT_PADDING),
+      y: Math.round(rect.top - HIT_PADDING - TOOLBAR_RESERVE),
+      width: Math.round(rect.width + HIT_PADDING * 2),
+      height: Math.round(rect.height + HIT_PADDING * 2 + TOOLBAR_RESERVE),
+    };
+    const key = `${next.x}|${next.y}|${next.width}|${next.height}`;
+    if (key === hitRectKeyRef.current) return;
+
+    hitRectKeyRef.current = key;
+    void window.electron.setDesktopLyricsHitRect?.(next);
+  };
+
+  // 每次提交后：先把上色分界落到新节点上（换行时别让上一句的分界闪一帧），再看命中矩形要不要报
+  useLayoutEffect(() => {
+    syncLyricClock(performance.now());
+    reportHitRect();
+  });
+
   useEffect(() => {
     if (locked) {
-      if (interactiveRef.current) {
-        interactiveRef.current = false;
-        void window.electron.setDesktopLyricsInteractive(false);
-      }
       setIsPointerInside(false);
       return;
     }
-
-    const handleMouseMove = (event: MouseEvent) => {
-      const pill = pillRef.current;
-      if (!pill) return;
-
-      const rect = pill.getBoundingClientRect();
-      const inside =
-        event.clientX >= rect.left - HIT_PADDING &&
-        event.clientX <= rect.right + HIT_PADDING &&
-        event.clientY >= rect.top - HIT_PADDING &&
-        event.clientY <= rect.bottom + HIT_PADDING;
-
-      if (inside === interactiveRef.current) return;
-
-      interactiveRef.current = inside;
-      setIsPointerInside(inside);
-      void window.electron.setDesktopLyricsInteractive(inside);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
+    return window.electron.onDesktopLyricsHit?.(hit => setIsPointerInside(hit));
   }, [locked]);
 
   const title = snapshot?.title;
-  const currentMs = (snapshot?.currentTime ?? 0) * 1000 + lyricOffset;
-
-  // 倒序找最后一个 time <= 当前进度 + 偏移 的歌词行
-  const activeLyricIndex = useMemo(() => {
-    if (!lyrics.length) return -1;
-    for (let i = lyrics.length - 1; i >= 0; i -= 1) {
-      if (currentMs >= lyrics[i].time) return i;
-    }
-    return -1;
-  }, [currentMs, lyrics]);
-
-  // 当前行内的播放进度，用于逐字擦除上色
-  const lineProgress = useMemo(() => {
-    if (activeLyricIndex < 0) return 0;
-    const start = lyrics[activeLyricIndex].time;
-    const end = lyrics[activeLyricIndex + 1]?.time ?? start + FALLBACK_LINE_DURATION;
-    if (end <= start) return 1;
-    return Math.min(1, Math.max(0, (currentMs - start) / (end - start)));
-  }, [activeLyricIndex, currentMs, lyrics]);
-
-  const activeLine = activeLyricIndex >= 0 ? lyrics[activeLyricIndex].text.trim() : "";
+  const activeLine = activeLyricIndex >= 0 ? (lyrics[activeLyricIndex]?.text.trim() ?? "") : "";
   const nextLine = activeLyricIndex >= 0 ? (lyrics[activeLyricIndex + 1]?.text.trim() ?? "") : "";
   const text = activeLine || title || "";
   const isPlaying = snapshot?.isPlaying ?? false;
@@ -450,7 +523,10 @@ const DesktopLyrics = () => {
         )}
       >
         {!locked && isPointerInside && (
-          <div className="desktop-lyrics-toolbar window-no-drag flex items-center gap-0.5 px-2">
+          // relative z-10：.desktop-lyrics-row 用 margin-top:-32px 把投影纳进遮罩盒子里，
+          // 于是每一行的盒子会向上盖住工具条这一条（实测点击落在 row 上而不是按钮上）。
+          // 工具条必须显式抬一层，才打得中按钮。
+          <div className="desktop-lyrics-toolbar window-no-drag relative z-10 flex items-center gap-0.5 px-2">
             {/* 歌名不缩写，超长交给跑马灯；220px 是标题区上限，再宽会把按钮推出可视区 */}
             <div className="max-w-[220px] min-w-0 shrink-0 overflow-hidden px-1">
               <MarqueeText active className="text-[12px] leading-none font-semibold text-white/85" title={titleLabel}>
@@ -516,7 +592,6 @@ const DesktopLyrics = () => {
             fontFamily={fontFamily}
             color={color}
             activeColor={activeColor}
-            progress={lineProgress}
             current={row.current}
           />
         ))}

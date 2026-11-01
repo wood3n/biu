@@ -184,8 +184,14 @@ const api: ElectronAPI = {
   setDesktopLyricsLocked: locked => ipcRenderer.invoke(channel.desktopLyrics.setLocked, locked),
   // 桌面歌词一行最大宽度（屏幕宽度百分比）：改的是窗口自身宽度
   setDesktopLyricsWidth: percent => ipcRenderer.invoke(channel.desktopLyrics.setWidth, percent),
-  // 指针是否落在歌词胶囊上：未锁定时临时取消鼠标穿透
-  setDesktopLyricsInteractive: interactive => ipcRenderer.invoke(channel.desktopLyrics.setInteractive, interactive),
+  // 命中矩形上报：主进程轮询真实光标，只有落在矩形内才取消鼠标穿透
+  setDesktopLyricsHitRect: rect => ipcRenderer.invoke(channel.desktopLyrics.setHitRect, rect),
+  // 主进程轮询结果的回调（命中时工具条才出现，歌词才可点/可拖）
+  onDesktopLyricsHit: cb => {
+    const handler = (_: unknown, hit: boolean) => cb(hit);
+    ipcRenderer.on(channel.desktopLyrics.hit, handler);
+    return () => ipcRenderer.removeListener(channel.desktopLyrics.hit, handler);
+  },
   // 悬浮窗底板：把模式报给主进程，由窗口材质/窗口底色承担（跟随主窗口设置页）
   setMiniPlayerBackdrop: (mode: MiniPlayerBackdrop) => ipcRenderer.invoke(channel.miniPlayer.setBackdrop, mode),
   // 最小化窗口

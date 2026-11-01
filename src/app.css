@@ -405,6 +405,17 @@ button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"])
   -webkit-text-fill-color: transparent;
   -webkit-background-clip: text;
   background-clip: text;
+
+  /* 分界 = 行内进度 × 文字真实宽度。两个变量分工不同：
+     --lyric-text-w 换行/换字号时由 React 写一次，
+     --lyric-active-frac 每帧由 rAF 直接写在节点上，逐帧推进不经过 React、也不重排。 */
+  background-image: linear-gradient(
+    to right,
+    var(--lyric-active-color) 0,
+    var(--lyric-active-color) calc(var(--lyric-active-frac, 0) * var(--lyric-text-w, 0px)),
+    var(--lyric-color) calc(var(--lyric-active-frac, 0) * var(--lyric-text-w, 0px)),
+    var(--lyric-color) 100%
+  );
 }
 
 /* 一行的横向裁切框：窗口宽度就是用户设的「一行最多占多少屏幕」，

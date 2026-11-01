@@ -14,6 +14,14 @@ declare global {
     createdTime?: number;
   }
 
+  /** 桌面歌词命中矩形：窗口内 CSS px，主进程据此决定何时取消鼠标穿透 */
+  interface DesktopLyricsHitRect {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }
+
   interface ElectronAPI {
     /** 获取指定name的存储值 */
     getStore: <N extends StoreName>(name: N) => Promise<StoreDataMap[N] | undefined>;
@@ -89,8 +97,10 @@ declare global {
     setDesktopLyricsLocked: (locked: boolean) => Promise<void>;
     /** 桌面歌词一行最大宽度（占屏幕工作区的百分比），改的是窗口宽度 */
     setDesktopLyricsWidth: (percent: number) => Promise<void>;
-    /** 指针是否落在歌词胶囊上（未锁定时用于临时取消鼠标穿透） */
-    setDesktopLyricsInteractive: (interactive: boolean) => Promise<void>;
+    /** 上报命中矩形（null 撤回），主进程只在指针落在矩形内时才取消穿透 */
+    setDesktopLyricsHitRect: (rect: DesktopLyricsHitRect | null) => Promise<void>;
+    /** 主进程轮询真实光标后回报：指针是否正落在歌词命中区（命中时工具条才出现） */
+    onDesktopLyricsHit: (cb: (hit: boolean) => void) => VoidFunction;
     /** 最小化窗口 */
     minimizeWindow: () => void;
     /** 最大化/还原窗口 */

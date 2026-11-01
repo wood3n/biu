@@ -3,6 +3,7 @@ import isDev from "electron-is-dev";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { channel } from "./ipc/channel";
 import { appSettingsStore, desktopLyricsStore } from "./store";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -36,7 +37,13 @@ const lyricsWindowWidth = () => {
 
 let desktopLyrics: BrowserWindow | null = null;
 
-/** 渲染层上报：指针当前是否正落在歌词胶囊上 */
+/**
+ * 命中矩形只覆盖「那一行字 + 上方的工具条预留带」，不是整个窗口：
+ * 取消穿透的时段越长、区域越大，桌面上被这条窗口吃掉的点击就越多。
+ */
+let hitRect: DesktopLyricsHitRect | null = null;
+
+/** 指针当前是否落在命中矩形内（决定窗口是否取消鼠标穿透） */
 let isPointerOnLyrics = false;
 
 /**
@@ -51,21 +58,74 @@ const getLyricsWindow = () => {
 };
 
 /**
+ * 命中判定只能放在主进程：`setIgnoreMouseEvents(true, { forward: true })` 名义上会把
+ * mousemove 转发给穿透中的窗口，但实测 Electron 38 + Windows 一个事件都收不到
+ * （focusable 改成 true 同样是 0），渲染层于是永远进不了命中态，工具条永远不会出现也永远点不到。
+ * 改成轮询真实光标位置与渲染层上报的命中矩形比较，命中才取消穿透，并把结果发回渲染层。
+ * 只读 GetCursorPos，60ms 一次，代价可以忽略。
+ */
+const HIT_POLL_MS = 60;
+let hitPollTimer: NodeJS.Timeout | null = null;
+
+const isPointerInsideLyrics = () => {
+  const win = getLyricsWindow();
+  if (!win || !hitRect) return false;
+
+  const cursor = screen.getCursorScreenPoint();
+  const bounds = win.getBounds();
+  const localX = cursor.x - bounds.x;
+  const localY = cursor.y - bounds.y;
+
+  return (
+    localX >= hitRect.x &&
+    localX <= hitRect.x + hitRect.width &&
+    localY >= hitRect.y &&
+    localY <= hitRect.y + hitRect.height
+  );
+};
+
+/**
  * 鼠标穿透策略：
  * - 锁定：整条永久穿透，歌词条完全不接收鼠标事件；
- * - 未锁定：默认穿透并转发 mousemove，指针进入歌词胶囊时临时取消穿透，
- *   于是整条覆盖带不挡住桌面与任务栏点击，歌词本身仍可拖动、可点工具按钮。
+ * - 未锁定：指针不在命中矩形内时穿透，命中才取消穿透，
+ *   于是这条窗口既不挡住桌面与任务栏点击，歌词本身又可拖动、工具条可点。
  */
 const applyMouseMode = () => {
   const win = getLyricsWindow();
   if (!win) return;
 
-  if (isLocked) {
-    win.setIgnoreMouseEvents(true);
+  win.setIgnoreMouseEvents(isLocked || !isPointerOnLyrics);
+};
+
+function pollHit() {
+  const inside = isPointerInsideLyrics();
+  if (inside === isPointerOnLyrics) return;
+
+  isPointerOnLyrics = inside;
+  applyMouseMode();
+  getLyricsWindow()?.webContents.send(channel.desktopLyrics.hit, inside);
+}
+
+function syncHitPolling() {
+  const shouldPoll = Boolean(getLyricsWindow()) && !isLocked;
+
+  if (shouldPoll && !hitPollTimer) {
+    hitPollTimer = setInterval(pollHit, HIT_POLL_MS);
     return;
   }
 
-  win.setIgnoreMouseEvents(!isPointerOnLyrics, { forward: true });
+  if (!shouldPoll && hitPollTimer) {
+    clearInterval(hitPollTimer);
+    hitPollTimer = null;
+  }
+}
+
+/** 渲染层上报命中矩形（null 表示撤回，此时整条保持穿透） */
+const setDesktopLyricsHitRect = (rect: DesktopLyricsHitRect | null) => {
+  hitRect =
+    rect && Number.isFinite(rect.x) && Number.isFinite(rect.y) && rect.width > 0 && rect.height > 0
+      ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+      : null;
 };
 
 const createDesktopLyrics = () => {
@@ -77,6 +137,8 @@ const createDesktopLyrics = () => {
   const settings = appSettingsStore.get("appSettings");
   isLocked = Boolean(settings?.desktopLyricsLocked);
   widthPercent = clampWidthPercent(settings?.desktopLyricsWidth);
+  hitRect = null;
+  isPointerOnLyrics = false;
 
   const width = lyricsWindowWidth();
 
@@ -148,11 +210,14 @@ const createDesktopLyrics = () => {
     if (saveTimer) clearTimeout(saveTimer);
     desktopLyrics = null;
     isPointerOnLyrics = false;
+    hitRect = null;
+    syncHitPolling();
   });
 
   win.once("ready-to-show", () => {
     win.show();
     applyMouseMode();
+    syncHitPolling();
   });
 
   const indexPath = path.resolve(__dirname, "../dist/web/index.html");
@@ -166,6 +231,8 @@ const destroyDesktopLyrics = () => {
   }
   desktopLyrics = null;
   isPointerOnLyrics = false;
+  hitRect = null;
+  syncHitPolling();
 };
 
 const setDesktopLyricsVisible = (visible: boolean) => {
@@ -178,7 +245,11 @@ const setDesktopLyricsVisible = (visible: boolean) => {
 
 const setDesktopLyricsLocked = (locked: boolean) => {
   isLocked = locked;
+  if (locked) {
+    isPointerOnLyrics = false;
+  }
   applyMouseMode();
+  syncHitPolling();
 };
 
 function clampWidthPercent(value: number | undefined) {
@@ -210,11 +281,6 @@ const setDesktopLyricsWidth = (percent: number) => {
   desktopLyricsStore.set("bounds", { x, y: currentY });
 };
 
-const setDesktopLyricsInteractive = (interactive: boolean) => {
-  isPointerOnLyrics = interactive;
-  applyMouseMode();
-};
-
 /** 启动时按上次的开关恢复歌词条 */
 const restoreDesktopLyrics = () => {
   if (appSettingsStore.get("appSettings")?.desktopLyricsEnabled) {
@@ -227,6 +293,6 @@ export {
   setDesktopLyricsVisible,
   setDesktopLyricsLocked,
   setDesktopLyricsWidth,
-  setDesktopLyricsInteractive,
+  setDesktopLyricsHitRect,
   restoreDesktopLyrics,
 };

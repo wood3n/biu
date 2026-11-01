@@ -1,7 +1,7 @@
 import { BrowserWindow, ipcMain } from "electron";
 
 import {
-  setDesktopLyricsInteractive,
+  setDesktopLyricsHitRect,
   setDesktopLyricsLocked,
   setDesktopLyricsVisible,
   setDesktopLyricsWidth,
@@ -70,8 +70,9 @@ export function registerWindowHandlers({ getMainWindow }) {
     setDesktopLyricsWidth(percent);
   });
 
-  ipcMain.handle(channel.desktopLyrics.setInteractive, (_, interactive: boolean) => {
-    setDesktopLyricsInteractive(interactive);
+  // 命中矩形：主进程据此决定这条窗口什么时候取消鼠标穿透（详见 electron/desktop-lyrics.ts）
+  ipcMain.handle(channel.desktopLyrics.setHitRect, (_, rect: DesktopLyricsHitRect | null) => {
+    setDesktopLyricsHitRect(rect);
   });
 
   ipcMain.on(channel.window.toggleDevTools, event => {

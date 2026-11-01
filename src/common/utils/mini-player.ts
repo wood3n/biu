@@ -19,6 +19,8 @@ export interface MiniPlayerMainStateSnapshot {
   cid?: string;
   currentTime: number;
   duration: number;
+  /** 倍速：覆盖窗在两次进度推送之间外推进度时要按它换算 */
+  rate: number;
   playMode?: PlayMode;
   playId?: string;
 }
@@ -77,7 +79,7 @@ export function createBroadcastChannel() {
 }
 
 export function getMainStateSnapshot(): MiniPlayerMainStateSnapshot {
-  const { list, isPlaying, playMode, duration, playId, getPlayItem } = usePlayList.getState();
+  const { list, isPlaying, playMode, duration, playId, rate, getPlayItem } = usePlayList.getState();
   const currentTime = usePlayProgress.getState().currentTime;
   const playItem = getPlayItem();
 
@@ -92,6 +94,7 @@ export function getMainStateSnapshot(): MiniPlayerMainStateSnapshot {
     isPlaying,
     currentTime: Number(currentTime ?? 0),
     playMode,
+    rate: Number(rate ?? 1),
     duration: Number(duration ?? 0),
   };
 }

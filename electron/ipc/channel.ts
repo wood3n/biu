@@ -95,7 +95,8 @@ export const channel = {
     setVisible: "desktop-lyrics:set-visible",
     setLocked: "desktop-lyrics:set-locked",
     setWidth: "desktop-lyrics:set-width",
-    setInteractive: "desktop-lyrics:set-interactive",
+    setHitRect: "desktop-lyrics:set-hit-rect",
+    hit: "desktop-lyrics:hit",
   },
   miniPlayer: {
     setBackdrop: "mini-player:set-backdrop",

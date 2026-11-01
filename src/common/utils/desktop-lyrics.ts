@@ -1,5 +1,6 @@
 import { shallow } from "zustand/shallow";
 
+import { normalizeAnimationFps } from "@/common/audio/frame-rate";
 import { usePlayList } from "@/store/play-list";
 import { usePlayProgress } from "@/store/play-progress";
 import { useSettings } from "@/store/settings";
@@ -30,6 +31,8 @@ export interface DesktopLyricsViewSettings {
   color: string;
   activeColor: string;
   lineMode: "single" | "double";
+  /** 上色边界的推进帧率：歌词条自己不写设置，只能靠这包镜像拿到当前档位 */
+  animationFps: number;
 }
 
 /** 歌词条自身不写设置（多窗口各持一份内存 store，写盘会互相覆盖），所有改动都交给主窗口落盘 */
@@ -78,6 +81,7 @@ function pickDesktopLyricsView(state: AppSettings): DesktopLyricsViewSettings {
     color: state.desktopLyricsColor,
     activeColor: state.desktopLyricsActiveColor,
     lineMode: state.desktopLyricsLineMode,
+    animationFps: normalizeAnimationFps(state.animationFps),
   };
 }
 
@@ -168,12 +172,14 @@ function startDesktopLyricsMainSync() {
             isPlaying: state.isPlaying,
             playMode: state.playMode,
             duration: state.duration,
+            rate: state.rate,
           },
           {
             playId: prevState.playId,
             isPlaying: prevState.isPlaying,
             playMode: prevState.playMode,
             duration: prevState.duration,
+            rate: prevState.rate,
           },
         )
       ) {
