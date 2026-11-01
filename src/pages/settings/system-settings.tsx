@@ -26,6 +26,8 @@ import {
   RiSunLine,
 } from "@remixicon/react";
 
+import { ANIMATION_FPS_OPTIONS } from "@/common/audio/frame-rate";
+import { MINI_PLAYER_BACKDROPS } from "@/common/utils/mini-player";
 import FontSelect from "@/components/font-select";
 import UpdateCheckButton from "@/components/update-check-button";
 
@@ -242,6 +244,34 @@ export const SystemSettingsTab = ({
           render={({ field }) => <Switch disableAnimation isSelected={field.value} onValueChange={field.onChange} />}
         />
       </div>
+      {/* 动画帧率上限 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">动画帧率上限</div>
+          <div className="text-sm text-zinc-500">限制视觉特效帧率，降低 GPU 使用率</div>
+        </div>
+        <div className="w-[180px]">
+          <Controller
+            control={control}
+            name="animationFps"
+            render={({ field }) => (
+              <Select
+                disallowEmptySelection
+                aria-label="动画帧率上限"
+                selectedKeys={new Set([String(field.value)])}
+                onSelectionChange={keys => {
+                  const value = Array.from(keys)[0];
+                  if (value !== undefined) field.onChange(Number(value));
+                }}
+              >
+                {ANIMATION_FPS_OPTIONS.map(fps => (
+                  <SelectItem key={String(fps)}>{`${fps} FPS`}</SelectItem>
+                ))}
+              </Select>
+            )}
+          />
+        </div>
+      </div>
       <Divider />
       <h2>播放</h2>
       {/* 音质选择 */}
@@ -304,7 +334,34 @@ export const SystemSettingsTab = ({
           render={({ field }) => <Switch disableAnimation isSelected={field.value} onValueChange={field.onChange} />}
         />
       </div>
-
+      {/* 悬浮窗底板 */}
+      <div className="flex w-full items-center justify-between">
+        <div className="mr-6 space-y-1">
+          <div className="text-medium font-medium">悬浮窗底板</div>
+          <div className="text-sm text-zinc-500">
+            系统亚克力由 Windows 实时模糊窗口后的桌面，想彻底遮住背后内容可选纯色底板
+          </div>
+        </div>
+        <Controller
+          control={control}
+          name="miniPlayerBackdrop"
+          render={({ field }) => (
+            <Tabs
+              aria-label="悬浮窗底板"
+              classNames={{
+                cursor: "rounded-medium",
+                tabList: "bg-default-200/80 dark:bg-default-100/10",
+              }}
+              selectedKey={field.value}
+              onSelectionChange={key => field.onChange(key)}
+            >
+              {MINI_PLAYER_BACKDROPS.map(item => (
+                <Tab key={item.value} title={item.label} />
+              ))}
+            </Tabs>
+          )}
+        />
+      </div>
       <Divider />
       <h2>下载</h2>
       <div className="flex w-full items-center justify-between">

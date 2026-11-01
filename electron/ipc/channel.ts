@@ -91,4 +91,12 @@ export const channel = {
     isFullScreen: "window:is-full-screen",
     toggleDevTools: "window:toggle-dev-tools",
   },
+  desktopLyrics: {
+    setVisible: "desktop-lyrics:set-visible",
+    setLocked: "desktop-lyrics:set-locked",
+    setInteractive: "desktop-lyrics:set-interactive",
+  },
+  miniPlayer: {
+    setBackdrop: "mini-player:set-backdrop",
+  },
 };

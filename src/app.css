@@ -1,9 +1,9 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
-@plugin './hero.ts';
+@plugin "./hero.ts";
 @plugin "@tailwindcss/typography";
 
-@source '../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+@source "../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -33,7 +33,9 @@
   text-autospace: normal;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   overflow: hidden;
 }
@@ -47,9 +49,10 @@ html, body, #root {
   display: none;
 }
 
-.suggest_high_light,.keyword {
+.suggest_high_light,
+.keyword {
   font-style: normal;
-  color: #F54180;
+  color: #f54180;
 }
 
 .os-scrollbar {
@@ -230,4 +233,186 @@ button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"])
   to {
     transform: translateX(-100%);
   }
+}
+
+/* ============================================================
+ * 悬浮窗面板：底板铺满整个窗口，窗口本身就是面板
+ *
+ * 底板模式由主进程落到窗口上：acrylic 用 DWM 系统材质（糊的是「此刻」窗口后面的真实
+ * 画面，天然实时、我们这边零开销），light/dark 把窗口底色设成实色。
+ * 系统材质只能按窗口矩形（带 Win11 默认圆角）整块绘制，所以 CSS 不再往材质里嵌一颗胶囊
+ * —— 那等于在矩形上贴了颗药丸。这里只补一层色调，保证歌词压在任何桌面上都可读。
+ * 轮廓交给系统窗口阴影：CSS 外投影画不出窗口边界，只会在四角留脏影。
+ * ============================================================ */
+
+.mini-panel {
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  color: hsl(var(--heroui-foreground));
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 8%);
+  transition: background-color 220ms ease-out;
+}
+
+/* 系统亚克力：材质已经糊好桌面，CSS 只叠很薄一层色调压住文字对比度 */
+.mini-panel--acrylic {
+  background-color: rgb(255 255 255 / 20%);
+}
+
+.dark .mini-panel--acrylic {
+  background-color: rgb(16 16 20 / 46%);
+}
+
+/* 悬停时底板稍微提亮，提示这颗面板是可以操作的对象 */
+.mini-panel--acrylic:hover {
+  background-color: rgb(255 255 255 / 30%);
+}
+
+.dark .mini-panel--acrylic:hover {
+  background-color: rgb(16 16 20 / 56%);
+}
+
+/* 纯色底板：不透明实心，深浅两色各自把 --heroui-foreground 钉死，否则跟全局主题走
+   会出现「深底配深字 / 浅底配浅字」（这条链上必须有人消费这个变量，见 .mini-panel 的 color） */
+.mini-panel--light {
+  --heroui-foreground: 240 6% 12%;
+
+  background-color: #fafafc;
+}
+
+.mini-panel--dark {
+  --heroui-foreground: 240 12% 96%;
+
+  background-color: #1a1a1e;
+}
+
+/* 封面：面板是圆角矩形，封面跟着做圆角方块，不再强行切成正圆 */
+.mini-cover {
+  border-radius: 12px;
+  outline: 1px solid rgb(255 255 255 / 40%);
+  outline-offset: -1px;
+  box-shadow:
+    0 2px 6px -2px rgb(0 0 0 / 30%),
+    inset 0 0 0 1px rgb(0 0 0 / 8%);
+}
+
+.dark .mini-cover {
+  outline-color: rgb(255 255 255 / 16%);
+}
+
+/* 主控播放键：与底板同材质的浅色圆片（比实心强调色更贴近玻璃质感） */
+.mini-key {
+  border-radius: 9999px;
+  background-color: rgb(255 255 255 / 58%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 80%),
+    inset 0 0 0 1px rgb(255 255 255 / 40%);
+  transition: background-color 160ms ease-out;
+}
+
+.mini-key:hover {
+  background-color: rgb(255 255 255 / 76%);
+}
+
+.dark .mini-key {
+  background-color: rgb(255 255 255 / 14%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 22%),
+    inset 0 0 0 1px rgb(255 255 255 / 12%);
+}
+
+.dark .mini-key:hover {
+  background-color: rgb(255 255 255 / 24%);
+}
+
+/* 纯色底板的文字色由底板决定，主控键也得跟着底板的深浅走，而不是全局主题：
+   浅色底板 + 暗色主题时，默认那层暗磨砂片会整块融进底板里看不见。
+   多带一个 .mini-panel 是为了压过上面 .dark .mini-key:hover */
+.mini-panel.mini-panel--light .mini-key {
+  background-color: rgb(255 255 255 / 74%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 92%),
+    inset 0 0 0 1px rgb(255 255 255 / 60%);
+}
+
+.mini-panel.mini-panel--dark .mini-key {
+  background-color: rgb(255 255 255 / 16%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 24%),
+    inset 0 0 0 1px rgb(255 255 255 / 12%);
+}
+
+.mini-panel.mini-panel--light .mini-key:hover {
+  background-color: rgb(255 255 255 / 92%);
+}
+
+.mini-panel.mini-panel--dark .mini-key:hover {
+  background-color: rgb(255 255 255 / 26%);
+}
+
+/* 歌词换行：自下而上淡入 */
+@keyframes lyric-rise {
+  from {
+    opacity: 0;
+    transform: translateY(55%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+ * 桌面歌词：窗口整体透明且默认鼠标穿透，文字靠描边+投影保证
+ * 在任何桌面背景（含纯白壁纸）上都可读。
+ * ============================================================ */
+
+.desktop-lyrics-text {
+  color: rgb(255 255 255 / 94%);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.5px;
+  text-shadow:
+    -1px -1px 0 rgb(0 0 0 / 45%),
+    0 -1px 0 rgb(0 0 0 / 45%),
+    1px -1px 0 rgb(0 0 0 / 45%),
+    -1px 0 0 rgb(0 0 0 / 45%),
+    1px 0 0 rgb(0 0 0 / 45%),
+    -1px 1px 0 rgb(0 0 0 / 45%),
+    0 1px 0 rgb(0 0 0 / 45%),
+    1px 1px 0 rgb(0 0 0 / 45%),
+    0 2px 6px rgb(0 0 0 / 32%),
+    0 8px 22px rgb(0 0 0 / 30%);
+}
+
+/* 已唱/未唱分色用「两层叠加」而不是「裁切窗 + 克隆」：
+   裁切窗是 overflow-hidden 的矩形，会把已唱那半边字周围一圈柔光一起切平。
+   底层只出描边和柔光（文字本体透明、不参与换色），上层按字形裁切渐变上色且不画投影，
+   两层都不被裁切，所以整圈投影始终完整。
+   注意：单层「透明填充 + background-clip: text」会被自己的 text-shadow 盖掉
+   （投影画在背景之上、填充之下），所以描边和上色必须分成两层。 */
+.desktop-lyrics-text--halo {
+  color: transparent;
+}
+
+.desktop-lyrics-text--fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  text-shadow: none;
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+
+.desktop-lyrics-toolbar {
+  border-radius: 9999px;
+  background-color: rgb(18 18 22 / 62%);
+  outline: 1px solid rgb(255 255 255 / 14%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 18%),
+    0 8px 20px -8px rgb(0 0 0 / 60%);
 }

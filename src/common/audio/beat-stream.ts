@@ -2,6 +2,7 @@ import { usePlayList } from "@/store/play-list";
 import { useSettings } from "@/store/settings";
 
 import { BeatDetector } from "./beat-detector";
+import { getFrameIntervalMs } from "./frame-rate";
 import { getSharedAnalyser, resumeSharedAnalyser } from "./shared-analyser";
 
 export type { BeatInfo } from "./beat-detector";
@@ -59,11 +60,16 @@ export function startBeatBroadcast(): { stop: () => void; onBeat: (cb: BeatCallb
     detector = new BeatDetector(shared.analyser);
   }
 
+  let lastTickAt = 0;
+
   const tick = () => {
-    if (!detector) {
-      rafId = requestAnimationFrame(tick);
-      return;
-    }
+    rafId = requestAnimationFrame(tick);
+
+    if (!detector) return;
+
+    const now = performance.now();
+    if (now - lastTickAt < getFrameIntervalMs()) return;
+    lastTickAt = now;
 
     resumeSharedAnalyser();
 
@@ -89,8 +95,6 @@ export function startBeatBroadcast(): { stop: () => void; onBeat: (cb: BeatCallb
         // channel 已关闭或不可用
       }
     }
-
-    rafId = requestAnimationFrame(tick);
   };
 
   rafId = requestAnimationFrame(tick);

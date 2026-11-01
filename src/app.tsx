@@ -5,6 +5,7 @@ import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import moment from "moment";
 
 import { getCookitFromBSite } from "./common/utils/cookie";
+import { startDesktopLyricsController } from "./common/utils/desktop-lyrics";
 import { toggleMiniMode } from "./common/utils/mini-player";
 import { mapKeyToElectronAccelerator } from "./common/utils/shortcut";
 import Theme from "./components/theme";
@@ -36,6 +37,11 @@ export function App() {
       return removeListener;
     }
   }, [navigate]);
+
+  // 桌面歌词：设置项驱动歌词条窗口的可见性、鼠标穿透与状态广播
+  useEffect(() => {
+    return startDesktopLyricsController();
+  }, []);
 
   // 订阅来自主进程的任务栏缩略按钮命令
   useEffect(() => {

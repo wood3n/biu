@@ -60,3 +60,10 @@ export const lyricsCacheStore = new Store<Record<string, MusicLyrics>>({
   cwd: getUserDataPath(),
   defaults: {},
 });
+
+/** 桌面歌词窗口位置（仅主进程读写，不经 store IPC 暴露给渲染层） */
+export const desktopLyricsStore = new Store<{ bounds?: { x: number; y: number } }>({
+  name: StoreNameMap.DesktopLyrics,
+  cwd: getUserDataPath(),
+  defaults: {},
+});

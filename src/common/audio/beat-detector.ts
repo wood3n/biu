@@ -13,7 +13,7 @@ export interface BeatInfo {
 
 export type BeatPollInfo = Omit<BeatInfo, "beatAt">;
 
-const HISTORY_SIZE = 43; // ≈ 0.7s @ 60fps
+const HISTORY_MS = 700; // 能量基线回看窗口（按时间而非帧数，帧率可调后窗口才不会漂移）
 const BASS_BINS = 10; // bin 0-10，覆盖 kick 鼓
 const INTERVAL_BUFFER_SIZE = 24;
 const MIN_INTERVAL_MS = 250; // 30 BPM 上限 → 2000ms，但太慢不实用，取 250ms
@@ -37,6 +37,9 @@ export class BeatDetector {
 
   // 低频能量滑动历史
   private readonly energyHistory: number[] = [];
+
+  // 与 energyHistory 一一对应的采样时刻，用于按时间裁剪窗口
+  private readonly timeHistory: number[] = [];
 
   // onset 间隔环形缓冲
   private readonly intervals: number[] = [];
@@ -79,12 +82,15 @@ export class BeatDetector {
 
     // 更新能量滑动历史
     this.energyHistory.push(bassEnergy);
-    if (this.energyHistory.length > HISTORY_SIZE) {
+    this.timeHistory.push(now);
+    // 比较 timeHistory[1]：留一个越界样本，窗口跨度才可能真正覆盖到 HISTORY_MS
+    while (this.timeHistory.length > 1 && now - this.timeHistory[1] > HISTORY_MS) {
       this.energyHistory.shift();
+      this.timeHistory.shift();
     }
 
-    // 历史不足时无法判断 onset
-    if (this.energyHistory.length < HISTORY_SIZE) {
+    // 历史跨度不足一个窗口时无法判断 onset
+    if (now - this.timeHistory[0] < HISTORY_MS) {
       return null;
     }
 
@@ -167,6 +173,7 @@ export class BeatDetector {
 
   reset(): void {
     this.energyHistory.length = 0;
+    this.timeHistory.length = 0;
     this.intervals.length = 0;
     this.lastOnsetTime = 0;
     this.lastBeatTime = 0;

@@ -2,6 +2,7 @@ declare global {
   type AppPlatForm = "macos" | "windows" | "linux";
 
   type StoreName = keyof StoreDataMap;
+
   interface LocalMusicItem {
     id: string;
     path: string;
@@ -82,6 +83,12 @@ declare global {
     quitAndInstall: () => Promise<void>;
     /** 切换 mini/主窗口 */
     toggleMiniPlayer: () => Promise<void>;
+    /** 显示/隐藏桌面歌词窗口 */
+    setDesktopLyricsVisible: (visible: boolean) => Promise<void>;
+    /** 桌面歌词锁定开关（锁定后整条鼠标穿透） */
+    setDesktopLyricsLocked: (locked: boolean) => Promise<void>;
+    /** 指针是否落在歌词胶囊上（未锁定时用于临时取消鼠标穿透） */
+    setDesktopLyricsInteractive: (interactive: boolean) => Promise<void>;
     /** 最小化窗口 */
     minimizeWindow: () => void;
     /** 最大化/还原窗口 */
@@ -120,6 +127,8 @@ declare global {
     scanLocalMusic: (dirs: string[]) => Promise<LocalMusicItem[]>;
     /** 删除本地音乐文件 */
     deleteLocalMusicFile: (filePath: string) => Promise<boolean>;
+    /** 悬浮窗底板模式：acrylic 走系统材质，light/dark 用窗口实色底 */
+    setMiniPlayerBackdrop: (mode: MiniPlayerBackdrop) => Promise<void>;
   }
 
   interface Window {

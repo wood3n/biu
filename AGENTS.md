@@ -162,6 +162,13 @@ pnpm knip             # 检查未使用的代码
 - 通过 `BroadcastChannel("play-list-store-sync-channel")` 与主窗口同步状态
 - 不直接操作 audio 元素，所有播放控制通过 BroadcastChannel 转发给主窗口
 
+### 桌面歌词
+
+- 窗口：`electron/desktop-lyrics.ts`，1024×132 无边框置顶透明窗，默认整体鼠标穿透
+- 状态：走独立通道 `BroadcastChannel("desktop-lyrics-sync-channel")`，不与小窗共用，避免同一状态被推送两次
+- 归属：主窗口是设置的唯一写入方（多窗口各持一份内存 settings，歌词条直接写盘会互相覆盖）；歌词条只发命令 + 乐观更新本地 UI
+- 控制器：`startDesktopLyricsController()`（`src/common/utils/desktop-lyrics.ts`）在主窗口按 `desktopLyricsEnabled/Locked` 驱动窗口创建、销毁与穿透切换
+
 ## 修改记录
 
 ### 2026-09-26: 三项 Bug 修复
@@ -266,6 +273,191 @@ pnpm knip             # 检查未使用的代码
 - 标签添加固定宽度 `w-16`（64px）+ `tabular-nums` 等宽数字
 - 外层包裹 `wrapperRef`，监听 `wheel` 事件以 50ms 步进调节偏移，阻止页面滚动
 - 行为与音量控件（`utility-controls.tsx` 中的 `VolumeControl`）完全一致
+
+### 2026-11-01: 悬浮窗胶囊化重设计 + 桌面歌词
+
+#### 1. 悬浮窗播放器改为纯 CSS 胶囊 (`electron/mini-player.ts`, `src/pages/mini-player/index.tsx`, `src/app.css`)
+
+**需求**: 悬浮窗重做成「胶囊」，参考 macOS 液态玻璃质感。
+
+**踩过的坑**: 初版用 `backgroundMaterial: "acrylic"` 当玻璃底板 + CSS 画胶囊。Win11 的系统材质只能按窗口矩形**整块**绘制，裁不进胶囊轮廓，四角会残留一块材质和投影，桌面上看就是一圈脏影。
+
+**最终实现**:
+- 彻底不用系统亚克力：`transparent: true` 逐像素透明，窗口 340×80，胶囊外接矩形 = 窗口矩形，四角完全透明
+- 立体感全部由**内阴影**承担（`.capsule-glass`）：上缘高光 + 下缘厚度暗部 + 内圈亮边 + 最外 1px 暗 rim；**禁止任何外投影**，外投影必然落在四角透明区
+- 当时没有真实桌面模糊，底色不透明度相应提高（浅色 68%、深色 74%）保证歌词可读（后续阶段用一次性桌面快照补上模糊，见「悬浮窗假模糊」）
+- 布局沿用原版上下结构：左侧封面 48，右列上行歌词、下行控件（播放模式 / 上一首·播放·下一首 / 返回主界面），底部 `inset-x-5` 贴边进度条避开圆弧
+- `.capsule-btn`：主控播放键用与底板同材质的浅色磨砂圆片（而非实心强调色）；刻意不复用 `glassBtn`，其 `bg-transparent!` 会盖掉磨砂底
+
+#### 2. 桌面歌词窗口与「词」开关 (`electron/desktop-lyrics.ts`, `src/pages/desktop-lyrics/`, `src/components/desktop-lyrics-toggle/`, `src/layout/playbar/right/index.tsx`)
+
+**需求**: 播放栏右侧按钮区、循环播放按钮的右边，加一个内容为「词」的桌面歌词开关。
+
+**实现**:
+- 新窗口 1024×132、无边框置顶、`skipTaskbar`，高度需容纳字号上限（60px×1.3 行高）+ 悬停工具条 + 内边距（双行上线后提高到 210）
+- 歌词渲染：8 方向 1px 描边 + 双层柔光阴影，保证压在任意桌面上可读；已唱部分按行进度克隆裁切上色
+- 鼠标穿透：默认整体 `setIgnoreMouseEvents(true, { forward: true })`，渲染层对歌词胶囊做 mousemove 命中判定，命中才 `setDesktopLyricsInteractive(true)`，避免这条横跨屏幕的窗口挡住桌面点击
+- 悬停工具条支持锁定/字号 A-/A+/关闭；开机恢复的歌词条可能早于主窗口水合就 mount，错过自己发的 `init`，故同步启动时主动补推一次 state + settings
+- 设置页新增桌面歌词开关、锁定开关、字号滑块三项
+
+#### 3. 歌词偏移双通道同步 (`src/components/lyrics/index.tsx`)
+
+**问题**: 主界面调整歌词偏移后，只有小窗跟随，桌面歌词不生效。
+
+**修复**: 偏移更新时同时调用 `postLyricsOffset()`（小窗）与 `postDesktopLyricsOffset()`（歌词条），无对应窗口时静默忽略。
+
+### 2026-11-01（第二阶段）: 桌面歌词设置项 + 悬浮窗假模糊
+
+#### 1. 桌面歌词外观设置 (`src/pages/settings/system-settings.tsx`, `src/pages/desktop-lyrics/index.tsx`, `electron/desktop-lyrics.ts`)
+
+**需求**: 字体、字号、字色、单/双行都要能改；双行不是「当前句 + 上一句」。
+
+**实现**:
+- 新增设置项 `desktopLyricsFontFamily` / `desktopLyricsColor`（未唱）/ `desktopLyricsActiveColor`（已唱）/ `desktopLyricsLineMode`，全部走「类型 → 默认值 → `partialize`」三处链路
+- 设置的写入方只有主窗口：歌词条自带一份内存 settings，多窗口各写盘会互相覆盖，所以歌词条只发命令 + 乐观更新本地 UI，主窗口把视图设置镜像推回来
+- 双行语义：显示**当前句 + 下一句**，两行的上下位置由当前句序号的奇偶决定 —— 换行时高亮只是从一行「跳」到另一行，下一句原地变成当前句，文字不会上下跳动
+- 窗口高度 132 → 210，容纳双行字号上限（60px×1.3×2）+ 悬停工具条
+
+#### 2. 悬浮窗假模糊：一次性桌面快照 (`electron/ipc/backdrop.ts`, `src/pages/mini-player/use-backdrop.ts`, `src/app.css`)
+
+**为什么要自己做**: Win11 不给第三方窗口「任意形状 + 真实桌面模糊」。`backgroundMaterial`（Mica/Acrylic）只能按窗口矩形整块绘制，裁不进胶囊轮廓；`DwmEnableBlurBehindWindow` 自 Windows 8 起官方失效；DirectComposition 的高斯模糊要写 native addon。剩下的路子只有自己把桌面画面取回来画。
+
+**实现**（关键：只抓一张，不持续抓屏）:
+- 主进程 `desktopCapturer.getSources({ types: ["screen"] })` → `nativeImage.crop()` → `toJPEG(60)` → dataURL，附带 `display`/`window`/`frame`/`region`（DIP，`region` 以窗口原点为基准，贴屏幕边缘时裁到画面内）
+- 渲染层 500ms 轮询 `getBackdropGeometry()`（只 getBounds，很便宜），位移 > 48px 或尺寸/显示器变了才重抓，且 320ms 去抖 —— 拖动窗口时不会每帧抓全屏
+- 采样框 = 窗口 + 四周 140px，整体**缩进**画布：窗口自己只映射到画布正中一块；那块拍进来的正是我们自己，抠掉会在正中留一条没被模糊的缝，留着又等于拿自己的像素当输入，所以用**外圈均色填平**（`ringAverageColor`），底板完全不依赖自己
+- `BACKDROP_INK = 0.75` 让胶囊底色叠上来，才有磨砂玻璃的奶白感并保证文字可读；模糊是 CSS `blur(30px)`，走合成器，所以没显卡的虚拟机同样生效
+- 画布比窗口外扩 28px：`blur` 会在图层边缘吃掉一圈透明度，外扩那圈被父层 `overflow-hidden` 裁掉，胶囊本体边缘才不会糊出毛边
+- 设置页新增 `miniPlayerBlur` 开关（第三阶段已换成 `miniPlayerBackdrop` 三态）；抓屏不可用时底板留空，静默回落到纯 CSS 玻璃
+- 封面改成圆形（`.capsule-cover`）：胶囊左端本来就是半径 = 窗高/2 的半圆，方封面压在半圆里很别扭
+
+**踩过的坑**:
+- `nativeImage.crop()` **返回新图、不改原图**，漏接返回值就会把整块屏幕画进底板
+- `img.decode()` 要等一次渲染时机，窗口不在前台时可能永远不 resolve，导致底板一次都不画 → 改用 `onload`/`onerror`
+- canvas 是 replaced element，`position:absolute; inset:-28px` 不会把它拉伸，必须显式 `width/height: calc(100% + 56px)`
+- `desktopCapturer.getSourcesSync` 在 Electron 38 不存在，handler 只能 async
+
+#### 3. 验证方式
+
+透明窗口的实际像素只能用 CDP 看：`%APPDATA%/biu-dev/DevToolsActivePort` 拿端口 → `/json/list` 找 `#mini-player` target → `Runtime.evaluate` 读画布（不透明覆盖率、亮度离散度、四角取样）+ `Page.captureScreenshot` 出图。GDI 截屏抓不到 Electron 的渲染面。
+
+### 2026-11-01（第三阶段）: 悬浮窗去进度条 + 外投影 + 底板三态
+
+#### 1. 去掉胶囊底部进度条 (`src/pages/mini-player/index.tsx`, `src/common/utils/mini-player.ts`)
+
+**需求**: 悬浮窗用不到拖动进度，进度条白占一条还压着圆弧。
+
+**实现**: 删掉 `Slider` 与整套 seek 机制（`seekingTimeRef`/`isSeekingRef`/`isSeeking`/`handleSeek*`），歌词行定位直接用主窗口推来的 `currentTime`；同步通道的小窗命令联合类型去掉 `seek`。
+
+#### 2. 外投影要求窗口比胶囊大一圈 (`electron/mini-player.ts`, `src/app.css`)
+
+**需求**: 完全没投影时，胶囊和桌面内容分不开。
+
+**关键**: 第一阶段「禁止外投影」的原因是投影会被窗口矩形裁掉，在四角留下脏影 —— 不是投影本身不好。解法是把窗口放大：`CAPSULE_WIDTH/HEIGHT = 340/80` + `SHADOW_MARGIN = 14` → 窗口 368×108，胶囊在页面里居中，投影终于有地方铺开。
+- `.capsule-glass` 追加两层很淡的外投影（`0 1px 2px / 14%`、`0 6px 16px -6px / 28%`，深色主题各加重一档），立体感仍以内阴影为主
+- 渲染层根节点只留 `window-drag`（四周透明边距也能拖着走），`capsule-host` + hover 判定移到居中的胶囊本体上，`.capsule-host:hover .capsule-glass*` 这组规则要求 host 是祖先，不能把两个类合到同一元素
+- `MarqueeLights` 新增 `inset` 属性：光带层 `position:fixed` 按 `inset` 内缩、周长按 `innerWidth - inset*2` 计算，小窗传 `SHADOW_MARGIN`，光带才贴着胶囊而不是窗口矩形跑
+- 假模糊的几何不用改：`geo.window` 变成 368×108 后，被填平的「自己那块」变成整个窗口矩形 —— 反而更保守，画进底板的每一像素都来自窗口之外
+
+#### 3. 底板三态：透明模糊 / 纯色浅 / 纯色深 (`shared/types/app-setting.d.ts`, `src/pages/mini-player/index.tsx`, `src/pages/settings/system-settings.tsx`)
+
+**需求**: 低配机器抓屏 + 模糊太贵，要能换成纯色底板；黑色不能是纯黑。
+
+**实现**:
+- `miniPlayerBlur: boolean` 升级为 `miniPlayerBackdrop: "blur" | "light" | "dark"`，`MINI_PLAYER_BACKDROPS` 一份数组同时当「小窗按钮轮换顺序」「设置页选项」「主窗口合法值校验」用
+- 小窗左侧按钮组加一个轮换按钮（水滴/太阳/月亮图标），乐观更新本地镜像 + `setBackdrop` 命令回传主窗口，主窗口才是写盘的那一方
+- 纯色底板各自钉死 `--heroui-foreground`（浅底 `240 6% 12%`、深底 `240 12% 96%`）：底板颜色和全局主题无关，跟着主题走会出现「深底配深字」
+- `.capsule-glass--light/--dark` 的 `.capsule-btn` 覆写要带 `.capsule-host` 前缀才压得过 `.dark .capsule-btn:hover`（stylelint 的 `no-descending-specificity` 会拦），并且「两组 base 在前、两组 hover 在后」排列
+- 视图设置镜像扩到 `{ backdrop, marquee }`：小窗自己那份 `useSettings` 只在启动时读盘，主窗口改了「七彩跑马灯」小窗不会跟着开关，所以把 `marqueeEnabled` 也推过去，`MarqueeLights` 新增 `enabled` 覆写属性
+
+**验证补充**: 改完 `electron/` 会重启 Electron、DevTools 端口每次都变，要重新读 `DevToolsActivePort`；主窗口热更新后 `startMiniPlayerMainSync` 的闭包还是旧模块（`pickMiniPlayerView` 少了 `marquee`），必须 reload 主窗口再点两次「迷你」重启同步，才能测推送。
+
+### 2026-11-01（第四阶段）: 悬浮窗退回 DWM 系统亚克力，面板满幅
+
+#### 1. 为什么放弃一次性快照假模糊
+
+用户判定：拍一张静态快照「不是实时渲染」，不可接受；并授权「退回 DWM 渲染模式、改成直角、重新设计 UI」。系统材质（`backgroundMaterial: "acrylic"`）糊的是「此刻」窗口后面的真实画面，由 DWM 合成，天然实时且渲染侧零开销 —— 代价是它只能按**窗口矩形（带 Win11 默认圆角）整块**绘制。
+
+**关键结论**: 之前「矩形材质里嵌一颗 CSS 胶囊」之所以难看，正是这个约束的直接后果。要么接受胶囊被材质垫成矩形，要么让**面板等于窗口**。第四阶段选了后者：340×80 圆角矩形面板，材质即底板。
+
+#### 2. 实现 (`electron/mini-player.ts`, `electron/ipc/window.ts`, `src/pages/mini-player/index.tsx`, `src/app.css`)
+
+- 窗口：`width/height = 340/80`（去掉 `SHADOW_MARGIN`）、`transparent: false`、`backgroundColor: "#00000000"`、`backgroundMaterial: "acrylic"`、`hasShadow: true`（投影交给系统，按窗口形状含圆角裁切，不会在面板里留脏边）、`roundedCorners: true`
+- `applyMiniPlayerBackdrop(mode)`：`acrylic` → 材质 acrylic + 页面透明底；`light`/`dark` → `setBackgroundMaterial("none")` + 窗口实色底 `#FAFAFC` / `#1A1A1E`。创建时先读 `appSettingsStore.get("appSettings.miniPlayerBackdrop")`，避免开机闪一下亚克力
+- 非 Windows 没有 DWM 材质 → `transparent: true`，底板交回 CSS 色调
+- IPC `mini-player:set-backdrop`（`channel.miniPlayer.setBackdrop` → `electron/ipc/window.ts` → preload `setMiniPlayerBackdrop` → `shared/types/renderer.d.ts`）。**为什么渲染层来报**：electron-store v10 没有 `onDidChange`，主进程观察不到设置写入，所以由小窗在模式变化时 `useEffect` 报一次
+- 底板模式**只由主窗口设置页决定**（用户要求去掉小窗上的切换按钮）：删掉 `setBackdrop` 广播命令、`nextMiniPlayerBackdrop` 与图标轮换，`MINI_PLAYER_BACKDROPS` 只服务设置页 Tabs
+- 设置值 `"blur"` → `"acrylic"`，`normalizeMiniPlayerBackdrop()` 兼容磁盘上仍为 `blur` 的旧值（否则查不到样式类，底板会整个消失）
+- CSS 整段重写：`.capsule-*` → `.mini-panel` / `.mini-cover` / `.mini-key`，去掉内阴影高光层与画布层，只留「色调叠层 + 1px 内 rim」；`color: hsl(var(--heroui-foreground))` 保留（纯色模式靠它钉文字色）
+- 一次性快照链路整体删除：`electron/ipc/backdrop.ts`、`src/pages/mini-player/use-backdrop.ts`、`channel.backdrop.*`、preload `getBackdropGeometry`/`getBackdropSnapshot`、`BackdropGeometry`/`BackdropSnapshot` 类型；`MarqueeLights` 去掉 `inset` 属性（窗口即面板，光带直接贴着视口周长）
+
+#### 3. 踩过的坑：置顶材质窗被判定「不可见」而不出帧
+
+`transparent: false` + 系统材质时，Chromium 的原生遮挡计算会把这个无边框置顶窗判成全被遮住，`document.visibilityState === "hidden"`，渲染进程于是**停止出帧**：桌面上只剩一块纯色面板（材质/底色在，文字和按钮全无），reload 之后尤其明显。
+**修法**: `app.commandLine.appendSwitch("disable-features", "CalculateNativeWinOcclusion")`（`electron/main.ts`，仅 win32，需在 app ready 之前）。改完 `visibilityState` 回到 `visible`，GDI 截屏里歌词与按钮都正常。
+
+#### 4. 验证方式补充：GDI 截屏能抓到 DWM 材质，CDP 不能
+
+CDP `Page.captureScreenshot` 只有网页层，拍不到系统材质；PowerShell + `System.Drawing.Graphics.CopyFromScreen` 抓的是 DWM 合成后的桌面，**包含材质**。据此做了实时性判定：用 `user32!MoveWindow` 把面板挪到任务栏上方（任务栏实测 `rgb(195,209,227)`），面板底板从中性灰 `rgb(223,223,223)` 变成带蓝 `rgb(216,220,227)` —— 材质确实在跟着身后的画面变。局部方差只有 1.4 不代表静态：Win11 亚克力模糊半径极大、白色调又厚，糊完基本不留局部细节，判定要看色相是否跟随，不能看方差。纯色深实测底板 `rgb(26,26,30)`、方差 0。
+
+### 2026-11-01（第五阶段）: 长歌词跑马灯 + 桌面歌词设置独立 tab + 工具条播放控制
+
+#### 1. 两个覆盖窗的长歌词都不滚动，各自修复
+
+**问题**: 悬浮窗和桌面歌词都是「一行装不下就直接裁掉」。悬浮窗那份有独立 `MarqueeText`，但动画时长写死 8 秒；桌面歌词根本没有滚动。
+
+**悬浮窗** (`src/pages/mini-player/index.tsx`)：
+- 时长改按文字宽度换算：`Math.max(6, textWidth / 40)`，与主界面 `src/components/marquee-text` 同一套基准，滚动实测 `-42.2px/s`（旧写死 8s 时同样文字要 -70px/s）
+- 轨道 `key={text}`，换句强制重启动画
+- **踩过的坑**: 第一版把 `scrollKey` 自增写在滚动延迟的 effect 里，`key` 一变轨道就重挂载，`ResizeObserver` 和 `ref` 观察的那批节点脱离文档，`scrollWidth` 读到 0 → 溢出判定在 true/false 间来回翻 → 每次翻都重跑 effect、重起 1 秒延迟，动画永远不起来（表现是「轨道渲染了但 `style` 为空、位置不动」）。
+  **最终做法**: 测量不依赖分支内的节点，改用一次性探针（`position:absolute;visibility:hidden;white-space:nowrap` 复制同样 className 量 `offsetWidth`），`ResizeObserver` 只盯容器；容器 div 在两个分支间保持同一元素，ref 与观察者才不会飘。
+
+**桌面歌词** (`src/pages/desktop-lyrics/index.tsx`)：
+- 溢出时同样渲染两份同内容 + `marquee-scroll`（`translateX(-50%)` 正好位移一份，含 `pr-10` 间隔所以无缝），时长 `Math.max(8, textWidth / 40)`，实测 735px 的句子 → `18.375s`、`-42.5px/s`
+- 先静止 1.5 秒展示句首再起滚动，换句/换字号重新计时
+- **已唱高亮的裁切从百分比改成 px**：`width: progress * textWidth px`。原来 `progress * 100%` 是相对容器宽，句子比容器宽时高亮边界会算短；滚动起来后底图在动、裁切窗口不动，只有按文字真实宽度定位，分界才一直落在正确的字上。（这层「裁切窗」后来整体换掉，见第六阶段）
+
+#### 2. 桌面歌词设置单独开 tab (`src/pages/settings/desktop-lyrics-settings.tsx`, `src/pages/settings/index.tsx`)
+
+原先 7 项（开关/锁定/行数/字体/字号/未唱色/已唱色）混在「常规设置」里，现在整体搬到新的「桌面歌词」Tab，分「显示」「外观」两组；`useSystemSettingsForm` 仍然统一持有这些字段，新 tab 只接 `control`，落盘链路不变。`system-settings.tsx` 里随行的 `DESKTOP_LYRICS_*`、`defaultAppSettings`、`ColorItem` 导入一起清掉。
+
+#### 3. 文字投影被方框切掉 (`src/pages/desktop-lyrics/index.tsx`, `electron/desktop-lyrics.ts`)
+
+**根因**: 行容器是 `overflow-hidden`（跑马灯需要它横向裁切），而 `.desktop-lyrics-text` 的 8 方向描边 + `0 2px 6px` / `0 8px 22px` 双层柔光要向外铺约 30px，于是上下被同一层方框切成一条直线。
+
+**修法**: 单向裁切 —— `overflow-x-clip overflow-y-visible`（`clip` 与 `visible` 是允许的组合，不会像 `hidden` 那样把另一轴强制变成 `auto`），横向仍然裁切，纵向的投影完整留下来。再配 `-mx-2 px-2`：静态行宽等于文字宽，左右各留 8px 给描边，负 margin 把裁切框撑出去、padding 把文字拉回原位，视觉位置不变。
+底部仍受窗口边缘裁切（透明窗画不到窗外），所以歌词条上移到 `bottom-6`（24px）并把窗口高度 210 → 230，容纳双行 60px 上限 + 悬停工具条 + 投影留白。
+
+#### 4. 悬停工具条补播放控制与歌名
+
+`src/pages/desktop-lyrics/index.tsx` 工具条顺序改为：歌名 ｜ 上一曲·播放/暂停·下一曲 ｜ 锁定·A-·A+·关闭。
+- 歌名不缩写，复用主界面的 `MarqueeText`（`active` 常滚）+ `max-w-[220px]` 外壳，超长自动滚动
+- 播放状态直接读主窗口推来的 `MiniPlayerMainStateSnapshot.isPlaying`
+- 新增命令 `togglePlay/prev/next`（`src/common/utils/desktop-lyrics.ts` 的 `DesktopLyricsCommand`），主窗口侧转给 `usePlayList` —— 歌词条自己没有 audio 元素，控制必须由主窗口执行
+- 主进程改动会重启 Electron、`DevToolsActivePort` 每次都变，测之前要重新读端口
+
+#### 5. 覆盖窗的验证手法
+
+- 歌词条默认整体鼠标穿透，工具条只在指针命中时出现：用 `window.dispatchEvent(new MouseEvent("mousemove", {clientX, clientY}))` 合成一次真实命中判定即可让工具条渲染出来，再点按钮；`button.click()` 走的就是 IPC 命令链路（实测 `播放 → 暂停 → 播放` 往返成功）
+- 溢出分支用注入 CSS 规则压缩容器（`div[class~="overflow-hidden"]:not(.mini-panel):not(.mini-cover){max-width:110px!important}`），比改元素内联样式可靠：分支切换会重建节点，内联样式会丢，导致溢出判定抖动
+- 小窗无播放内容时，从另一个渲染上下文（歌词条）往 `play-list-store-sync-channel` 广播一条 `from:"main"` 的 state，即可喂进长标题测跑马灯 —— BroadcastChannel 不会把消息投递回发送方自己，所以必须换上下文发
+- 质量门：eslint 全仓 0 error、stylelint 干净、tsc 对改动文件干净、vitest 11/11
+
+
+### 2026-11-01（第六阶段）: 已唱换色彻底去掉裁切
+
+**问题**: 用户反馈「白色部分阴影正常，已唱绿色部分的阴影不正常」——第五阶段那个「克隆一份按进度裁切」的高亮层，本身就是一个 `overflow-hidden` 的矩形窗，字周围一圈柔光被这个窗的右边界切平，等于把第 3 节刚修掉的毛病从行容器搬到了高亮层。
+
+**第一版改法（错的，记下以免重犯）**: 单层文字 + `background-image: linear-gradient(两段实色)` + `background-clip: text` + `-webkit-text-fill-color: transparent`。
+**踩的坑**: 这样字会整个变成黑色。绘制顺序是「背景 → text-shadow → 文字填充」，填充透明后，`.desktop-lyrics-text` 那 8 方向 1px 黑描边（本质是 8 个字形副本）就糊在渐变背景上面，把渐变完全盖掉。CDP 截图实测：字身 luma 0~1，绿/白一个像素都不剩。
+
+**最终实现** (`src/pages/desktop-lyrics/index.tsx` 的 `LyricLineCopy`、`src/app.css`)：当前句渲染**两层同样的文字**，谁都不被裁切：
+- 底层 `.desktop-lyrics-text--halo`：`color: transparent`，只负责描边 + 双层柔光（`text-shadow` 的每一层都自带颜色，所以填充透明不影响投影）
+- 上层 `.desktop-lyrics-text--fill`：`position:absolute; top:0; left:0` + `text-shadow:none` + `background-clip:text` + `-webkit-text-fill-color:transparent`，只负责按字形上渐变颜色，正好盖住底层的黑色字身
+- 分界仍是 px：`progress * textWidth`，`textWidth` 由已有的探针量出；绝对定位层与静态层同起点同字体同字号，字形逐像素重合
+- 非当前句整行一个颜色，保持单层不变
+
+**验证**: 注入与组件同 DOM 的样例行（灰底 `rgb(120,120,120)`、44px、进度固定 50%），CDP 截图后按列统计：左半 `green=3098 dark=3927`、右半 `white=2742 dark=3054`，两半的暗色描边/柔光像素量级一致，跨接缝的逐列最暗值连续（18~45）没有跳回背景 120 的断口。真实播放态复查（`心は誰にも見えないのだから，`，735px 行、分界 200.655px）截图肉眼确认绿/白两半投影都完整。
 
 1. **不要在渲染进程直接访问 Node API** — 通过 `window.electron.*` IPC 调用
 2. **新增 IPC 通道** — 在 `electron/ipc/channel.ts` 定义，`electron/ipc/` 下注册处理器，`preload.ts` 暴露，`shared/types/renderer.d.ts` 声明类型

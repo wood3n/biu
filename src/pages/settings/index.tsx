@@ -4,10 +4,12 @@ import { useForm } from "react-hook-form";
 import { Tab, Tabs } from "@heroui/react";
 import { useShallow } from "zustand/react/shallow";
 
+import { normalizeAnimationFps } from "@/common/audio/frame-rate";
 import ScrollContainer from "@/components/scroll-container";
 import { useAppUpdateStore } from "@/store/app-update";
 import { useSettings } from "@/store/settings";
 
+import { DesktopLyricsSettingsTab } from "./desktop-lyrics-settings";
 import MenuSettings from "./menu-settings";
 import ProxySettings from "./proxy-settings";
 import ShortcutSettingsPage from "./shortcut-settings";
@@ -34,6 +36,16 @@ const useSystemSettingsForm = () => {
     reportPlayHistory,
     sideMenuCollapsedCenter,
     marqueeEnabled,
+    animationFps,
+    desktopLyricsEnabled,
+    desktopLyricsLocked,
+    desktopLyricsFontSize,
+    desktopLyricsFontFamily,
+    desktopLyricsColor,
+    desktopLyricsActiveColor,
+    desktopLyricsLineMode,
+    desktopLyricsWidth,
+    miniPlayerBackdrop,
   } = useSettings(
     useShallow(s => ({
       fontFamily: s.fontFamily,
@@ -54,6 +66,16 @@ const useSystemSettingsForm = () => {
       reportPlayHistory: s.reportPlayHistory,
       sideMenuCollapsedCenter: s.sideMenuCollapsedCenter,
       marqueeEnabled: s.marqueeEnabled,
+      animationFps: s.animationFps,
+      desktopLyricsEnabled: s.desktopLyricsEnabled,
+      desktopLyricsLocked: s.desktopLyricsLocked,
+      desktopLyricsFontSize: s.desktopLyricsFontSize,
+      desktopLyricsFontFamily: s.desktopLyricsFontFamily,
+      desktopLyricsColor: s.desktopLyricsColor,
+      desktopLyricsActiveColor: s.desktopLyricsActiveColor,
+      desktopLyricsLineMode: s.desktopLyricsLineMode,
+      desktopLyricsWidth: s.desktopLyricsWidth,
+      miniPlayerBackdrop: s.miniPlayerBackdrop,
     })),
   );
   const updateSettings = useSettings(s => s.update);
@@ -90,6 +112,16 @@ const useSystemSettingsForm = () => {
       reportPlayHistory,
       sideMenuCollapsedCenter,
       marqueeEnabled,
+      animationFps: normalizeAnimationFps(animationFps),
+      desktopLyricsEnabled,
+      desktopLyricsLocked,
+      desktopLyricsFontSize,
+      desktopLyricsFontFamily,
+      desktopLyricsColor,
+      desktopLyricsActiveColor,
+      desktopLyricsLineMode,
+      desktopLyricsWidth,
+      miniPlayerBackdrop,
     },
   });
 
@@ -137,6 +169,9 @@ const SettingsPage = () => {
           >
             <Tab key="system" title="常规设置">
               <SystemSettingsTab {...system} />
+            </Tab>
+            <Tab key="desktopLyrics" title="桌面歌词">
+              <DesktopLyricsSettingsTab control={system.control} />
             </Tab>
             <Tab key="menu" title="菜单设置">
               <MenuSettings control={system.control} />

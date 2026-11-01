@@ -1,6 +1,7 @@
 import { BrowserWindow, ipcMain } from "electron";
 
-import { createMiniPlayer, destroyMiniPlayer, miniPlayer } from "../mini-player";
+import { setDesktopLyricsInteractive, setDesktopLyricsLocked, setDesktopLyricsVisible } from "../desktop-lyrics";
+import { applyMiniPlayerBackdrop, createMiniPlayer, destroyMiniPlayer, miniPlayer } from "../mini-player";
 import { channel } from "./channel";
 
 export function registerWindowHandlers({ getMainWindow }) {
@@ -44,6 +45,23 @@ export function registerWindowHandlers({ getMainWindow }) {
       mainWindow?.hide();
       createMiniPlayer();
     }
+  });
+
+  // 悬浮窗底板：材质与窗口底色只能在主进程设，渲染层（含小窗自己）报模式过来
+  ipcMain.handle(channel.miniPlayer.setBackdrop, (_, mode: MiniPlayerBackdrop) => {
+    applyMiniPlayerBackdrop(mode);
+  });
+
+  ipcMain.handle(channel.desktopLyrics.setVisible, (_, visible: boolean) => {
+    setDesktopLyricsVisible(visible);
+  });
+
+  ipcMain.handle(channel.desktopLyrics.setLocked, (_, locked: boolean) => {
+    setDesktopLyricsLocked(locked);
+  });
+
+  ipcMain.handle(channel.desktopLyrics.setInteractive, (_, interactive: boolean) => {
+    setDesktopLyricsInteractive(interactive);
   });
 
   ipcMain.on(channel.window.toggleDevTools, event => {

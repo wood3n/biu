@@ -5,4 +5,5 @@ export enum StoreNameMap {
   ShortcutSettings = "shortcut-settings",
   LyricsCache = "lyrics-cache",
   BBPAccount = "bbp-account",
+  DesktopLyrics = "desktop-lyrics",
 }

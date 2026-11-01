@@ -7,6 +7,7 @@ import { debounce } from "es-toolkit";
 
 import type { WebPlayerParams } from "@/service/web-player";
 
+import { postDesktopLyricsOffset } from "@/common/utils/desktop-lyrics";
 import { postLyricsOffset } from "@/common/utils/mini-player";
 import { usePlayList } from "@/store/play-list";
 import { usePlayProgress } from "@/store/play-progress";
@@ -278,8 +279,9 @@ const Lyrics = ({
       const cid = playItem?.cid ? Number(playItem.cid) : undefined;
       if (!playItem?.bvid || cid === undefined || Number.isNaN(cid)) return;
 
-      // 实时同步偏移给小窗模式歌词（无小窗时静默忽略）
+      // 实时同步偏移给小窗模式与桌面歌词（无对应窗口时静默忽略）
       postLyricsOffset(next);
+      postDesktopLyricsOffset(next);
       persistLyricsCache(playItem, next, fontSize);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

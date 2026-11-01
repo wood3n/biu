@@ -4,6 +4,7 @@ import log from "electron-log";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { destroyDesktopLyrics, restoreDesktopLyrics } from "./desktop-lyrics";
 import { applyProxySettings } from "./ipc/app";
 import { channel } from "./ipc/channel";
 import { quitAndSaveTasks } from "./ipc/download";
@@ -23,6 +24,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 log.initialize();
+
+// Windows 的原生遮挡计算会把「无边框 + 系统材质」的置顶小窗判成全被遮住，
+// 渲染进程于是停止出帧，面板只剩一块纯色空白（材质还在，内容没了）。关掉该计算，小窗才持续重绘。
+if (process.platform === "win32") {
+  app.commandLine.appendSwitch("disable-features", "CalculateNativeWinOcclusion");
+}
 
 if (isDev) {
   // 为 chrome-devtools-mcp 开启远程调试端口
@@ -160,6 +167,9 @@ if (!gotTheLock) {
 
     registerAllShortcuts(() => mainWindow);
 
+    // 上次退出前开着桌面歌词则恢复窗口
+    restoreDesktopLyrics();
+
     if (process.platform !== "darwin") {
       createTray({
         getMainWindow: () => mainWindow,
@@ -195,6 +205,8 @@ if (!gotTheLock) {
     } catch (err) {
       log.warn("[main] destroyTray failed:", err);
     }
+
+    destroyDesktopLyrics();
 
     destroyMiniPlayer();
 

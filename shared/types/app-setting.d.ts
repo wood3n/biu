@@ -4,6 +4,9 @@ type PageTransition = "none" | "fade" | "slide" | "scale" | "slideUp";
 
 type ProxyType = "none" | "http" | "socks4" | "socks5";
 
+/** 悬浮窗底板样式，顺序即设置页 Tab 顺序 */
+type MiniPlayerBackdrop = "acrylic" | "light" | "dark";
+
 interface ProxySettings {
   type: ProxyType;
   host?: string;
@@ -48,4 +51,24 @@ interface AppSettings {
   sideMenuCollapsedCenter: boolean;
   /** 窗口七彩跑马灯开关（BPM 联动） */
   marqueeEnabled: boolean;
+  /** 频谱与节拍检测每秒最多重绘多少次（rAF 按刷新率发帧，此处做上限门控） */
+  animationFps: number;
+  /** 桌面歌词开关 */
+  desktopLyricsEnabled: boolean;
+  /** 桌面歌词锁定：锁定后整条鼠标穿透，不可拖动 */
+  desktopLyricsLocked: boolean;
+  /** 桌面歌词字号（px） */
+  desktopLyricsFontSize: number;
+  /** 桌面歌词字体（CSS font-family 值，"system-ui" 为系统默认） */
+  desktopLyricsFontFamily: string;
+  /** 桌面歌词未唱部分文字颜色 */
+  desktopLyricsColor: string;
+  /** 桌面歌词已唱部分文字颜色 */
+  desktopLyricsActiveColor: string;
+  /** 桌面歌词行数：单行只显示当前句，双行同时显示当前句与下一句并上下轮换所在行 */
+  desktopLyricsLineMode: "single" | "double";
+  /** 桌面歌词一行最多占多少屏幕宽度（百分比）。超出即起跑马灯，不写死成整屏宽 */
+  desktopLyricsWidth: number;
+  /** 悬浮窗底板：acrylic=系统亚克力（DWM 实时糊桌面），light/dark=纯色实心面板 */
+  miniPlayerBackdrop: MiniPlayerBackdrop;
 }

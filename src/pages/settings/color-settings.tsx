@@ -8,7 +8,7 @@ import { isHex } from "@/common/utils/color";
 import ColorPicker from "@/components/color-picker";
 import { useTheme } from "@/components/theme/use-theme";
 
-const ColorItem = ({
+export const ColorItem = ({
   label,
   value,
   onChange,

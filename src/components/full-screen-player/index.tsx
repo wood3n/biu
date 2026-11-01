@@ -30,6 +30,16 @@ import FullScreenPlayerSettingsPanel from "./settings-panel";
 
 const platform = window.electron.getPlatform();
 
+/**
+ * 背景糊图的降采样倍率。
+ * filter: blur 在合成里是 render pass 上的着色器，按元素自身尺寸每帧重跑，全屏尺寸下就是每帧一遍整屏高斯。
+ * 先把元素缩到 1/BG_SHRINK 再放大回去，缩样本身已等效大半径模糊，着色器只需处理 1/81 的像素。
+ */
+const BG_SHRINK = 9;
+
+/** 糊图外扩，避免模糊后的透明边缘露出来 */
+const BG_OVERSCAN = 1.15;
+
 const FullScreenPlayer = () => {
   const isOpen = useModalStore(s => s.isFullScreenPlayerOpen);
   const close = useModalStore(s => s.closeFullScreenPlayer);
@@ -244,13 +254,15 @@ const FullScreenPlayer = () => {
                   >
                     {bgLayerA.coverSrc && (
                       <div
-                        className="absolute inset-0 scale-[1.15] bg-cover bg-center"
+                        className="absolute top-0 left-0 bg-cover bg-center"
                         style={{
+                          width: `${100 / BG_SHRINK}%`,
+                          height: `${100 / BG_SHRINK}%`,
+                          transform: `scale(${BG_SHRINK * BG_OVERSCAN})`,
+                          transformOrigin: "top left",
                           backgroundImage: `url(${bgLayerA.coverSrc})`,
-                          filter: `blur(${effectsProfile.blurPx}px)`,
+                          filter: `blur(${(effectsProfile.blurPx / BG_SHRINK).toFixed(2)}px)`,
                           opacity: 0.92,
-                          willChange: "transform, filter, opacity",
-                          transition: `filter ${effectsProfile.transitionMs}ms ease, opacity ${effectsProfile.transitionMs}ms ease`,
                         }}
                       />
                     )}
@@ -272,13 +284,15 @@ const FullScreenPlayer = () => {
                   >
                     {bgLayerB.coverSrc && (
                       <div
-                        className="absolute inset-0 scale-[1.15] bg-cover bg-center"
+                        className="absolute top-0 left-0 bg-cover bg-center"
                         style={{
+                          width: `${100 / BG_SHRINK}%`,
+                          height: `${100 / BG_SHRINK}%`,
+                          transform: `scale(${BG_SHRINK * BG_OVERSCAN})`,
+                          transformOrigin: "top left",
                           backgroundImage: `url(${bgLayerB.coverSrc})`,
-                          filter: `blur(${effectsProfile.blurPx}px)`,
+                          filter: `blur(${(effectsProfile.blurPx / BG_SHRINK).toFixed(2)}px)`,
                           opacity: 0.92,
-                          willChange: "transform, filter, opacity",
-                          transition: `filter ${effectsProfile.transitionMs}ms ease, opacity ${effectsProfile.transitionMs}ms ease`,
                         }}
                       />
                     )}

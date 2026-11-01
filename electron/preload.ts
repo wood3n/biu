@@ -178,6 +178,14 @@ const api: ElectronAPI = {
   quitAndInstall: () => ipcRenderer.invoke(channel.app.quitAndInstall),
   // 切换 mini/主窗口
   toggleMiniPlayer: () => ipcRenderer.invoke(channel.window.toggleMini),
+  // 显示/隐藏桌面歌词窗口
+  setDesktopLyricsVisible: visible => ipcRenderer.invoke(channel.desktopLyrics.setVisible, visible),
+  // 桌面歌词锁定：锁定后整条鼠标穿透
+  setDesktopLyricsLocked: locked => ipcRenderer.invoke(channel.desktopLyrics.setLocked, locked),
+  // 指针是否落在歌词胶囊上：未锁定时临时取消鼠标穿透
+  setDesktopLyricsInteractive: interactive => ipcRenderer.invoke(channel.desktopLyrics.setInteractive, interactive),
+  // 悬浮窗底板：把模式报给主进程，由窗口材质/窗口底色承担（跟随主窗口设置页）
+  setMiniPlayerBackdrop: (mode: MiniPlayerBackdrop) => ipcRenderer.invoke(channel.miniPlayer.setBackdrop, mode),
   // 最小化窗口
   minimizeWindow: () => ipcRenderer.send(channel.window.minimize),
   // 最大化/还原窗口

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 
+import { getFrameIntervalMs } from "@/common/audio/frame-rate";
 import { getSharedAnalyser, resumeSharedAnalyser } from "@/common/audio/shared-analyser";
 import { audio as audioElement } from "@/store/play-list";
 
@@ -60,14 +61,27 @@ const AudioWaveform = ({ width = 56, height = 56, barCount = 40, barColor = "cur
       }
     };
 
+    // shadowBlur 是按 fill 生效的：逐根柱子设阴影等于每帧跑几百遍离屏高斯。
+    // 柱体合并成一条 path、顶部亮点合并成另一条，一整帧只做两次带阴影的 fill
+    const fireGradient = ctx.createLinearGradient(0, height, 0, 0);
+    fireGradient.addColorStop(0, "#ff4500");
+    fireGradient.addColorStop(0.3, "#ff8c00");
+    fireGradient.addColorStop(0.6, "#ffd700");
+    fireGradient.addColorStop(1, "#ffffe0");
+    const useCustomColor = barColor !== "currentColor";
+
+    let freqData: Uint8Array<ArrayBuffer> | null = null;
+
     const draw = () => {
       const shared = getSharedAnalyser();
       const analyserNode = shared?.analyser;
-      if (!analyserNode || !ctx) return;
+      if (!analyserNode) return;
 
       const bufferLength = analyserNode.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-      analyserNode.getByteFrequencyData(dataArray);
+      if (!freqData || freqData.length !== bufferLength) {
+        freqData = new Uint8Array(bufferLength);
+      }
+      analyserNode.getByteFrequencyData(freqData);
 
       ctx.clearRect(0, 0, bitmapW, bitmapH);
 
@@ -77,19 +91,13 @@ const AudioWaveform = ({ width = 56, height = 56, barCount = 40, barColor = "cur
 
       const usefulBufferLength = Math.floor(bufferLength * 0.6);
 
-      // 火焰渐变色：底部深红橙 → 中部亮橙黄 → 顶部白黄
-      const fireGradient = ctx.createLinearGradient(0, height, 0, 0);
-      fireGradient.addColorStop(0, "#ff4500");
-      fireGradient.addColorStop(0.3, "#ff8c00");
-      fireGradient.addColorStop(0.6, "#ffd700");
-      fireGradient.addColorStop(1, "#ffffe0");
-
-      // 解析用户自定义颜色（若非 currentColor 则覆盖火焰色）
-      const useCustomColor = barColor !== "currentColor";
+      const bars = new Path2D();
+      const tips = new Path2D();
+      let hasTip = false;
 
       for (let i = 0; i < barCount; i++) {
         const dataIndex = Math.floor((i / barCount) * usefulBufferLength);
-        let value = dataArray[dataIndex];
+        let value = freqData[dataIndex];
 
         const boost = 1 + i / barCount;
         value = Math.min(255, value * boost);
@@ -99,39 +107,37 @@ const AudioWaveform = ({ width = 56, height = 56, barCount = 40, barColor = "cur
         const x = i * computedBarWidth + shadowPad;
         const y = height - barHeight + shadowPad;
 
-        // 发光效果
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = useCustomColor ? barColor : "#ff6600";
+        bars.roundRect(x, y, barWidth, barHeight, 2);
 
-        if (useCustomColor) {
-          ctx.fillStyle = barColor;
-        } else {
-          ctx.fillStyle = fireGradient;
-        }
-
-        ctx.beginPath();
-        if (ctx.roundRect) {
-          ctx.roundRect(x, y, barWidth, barHeight, 2);
-        } else {
-          ctx.fillRect(x, y, barWidth, barHeight);
-        }
-        ctx.fill();
-
-        // 顶部亮点
         if (!useCustomColor && barHeight > 6) {
-          ctx.shadowBlur = 4;
-          ctx.fillStyle = "rgba(255, 255, 224, 0.8)";
-          ctx.beginPath();
-          ctx.roundRect(x, y, barWidth, 3, 1.5);
-          ctx.fill();
+          tips.roundRect(x, y, barWidth, 3, 1.5);
+          hasTip = true;
         }
+      }
+
+      ctx.shadowColor = useCustomColor ? barColor : "#ff6600";
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = useCustomColor ? barColor : fireGradient;
+      ctx.fill(bars);
+
+      if (hasTip) {
+        ctx.shadowBlur = 4;
+        ctx.fillStyle = "rgba(255, 255, 224, 0.8)";
+        ctx.fill(tips);
       }
       ctx.shadowBlur = 0;
     };
 
+    let lastDrawAt = 0;
+
     const render = () => {
-      draw();
       animationIdRef.current = requestAnimationFrame(render);
+
+      const now = performance.now();
+      if (now - lastDrawAt < getFrameIntervalMs()) return;
+      lastDrawAt = now;
+
+      draw();
     };
 
     audioElement.addEventListener("play", handlePlay);

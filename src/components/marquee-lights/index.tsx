@@ -50,6 +50,8 @@ interface MarqueeLightsProps {
   radius?: number;
   /** 播放状态覆盖：迷你窗口用自身 store，主窗口用全局 store */
   isPlaying?: boolean;
+  /** 开关覆盖：迷你窗口的设置由主窗口下发，本地那份要等重启才更新，故直接收推送 */
+  enabled?: boolean;
 }
 
 /**
@@ -163,12 +165,14 @@ const MarqueeLights = memo(
     zIndex = 9998,
     radius: radiusProp,
     isPlaying: isPlayingProp,
+    enabled: enabledProp,
   }: MarqueeLightsProps) => {
-    const marqueeEnabled = useSettings(s => s.marqueeEnabled);
+    const marqueeEnabledFromSettings = useSettings(s => s.marqueeEnabled);
     const globalRadius = useSettings(s => s.borderRadius);
     const globalPlaying = usePlayList(s => s.isPlaying);
     const playId = usePlayList(s => s.playId);
 
+    const marqueeEnabled = enabledProp ?? marqueeEnabledFromSettings;
     const isPlaying = isPlayingProp ?? globalPlaying;
     const radius = radiusProp ?? globalRadius;
 
@@ -192,6 +196,7 @@ const MarqueeLights = memo(
       };
     }, []);
 
+    // 光带跑在视口（即窗口内容区）周长上
     const { w, h } = winSize;
     const slot = block + gap;
 
