@@ -219,7 +219,12 @@ const LyricLineView = ({
       // 窗口宽度 = 用户设的一行上限 + 两侧留白，所以这里的裁切框正好铺满窗口。
       // 只横向裁切：overflow-y 保持 visible，否则字下那圈柔光投影会被这一层方框切平。
       // 断口由 .desktop-lyrics-row 的遮罩渐隐，不是一条硬边（纵向留白也在那条规则里）。
-      className="desktop-lyrics-row relative w-full overflow-x-clip overflow-y-visible px-8"
+      className={clx(
+        "desktop-lyrics-row relative flex w-full overflow-x-clip overflow-y-visible px-8",
+        // 药丸是 w-fit，工具条一出现就把整条撑宽（它比短歌词宽得多），行不自己居中的话
+        // 几个字的歌词会贴在这大条的左边。滚动时反过来必须顶到左边，跑马灯起点才对
+        isScrolling ? "justify-start" : "justify-center",
+      )}
     >
       {isScrolling ? (
         <div
