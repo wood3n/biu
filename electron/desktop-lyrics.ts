@@ -120,12 +120,24 @@ function syncHitPolling() {
   }
 }
 
-/** 渲染层上报命中矩形（null 表示撤回，此时整条保持穿透） */
+/**
+ * 渲染层上报命中矩形（null 表示撤回，此时整条保持穿透）。
+ *
+ * 收到矩形就顺手把当前命中结果回推一次，等于「页面报矩形 → 主进程答状态」的握手：
+ * pollHit 是「值变了才发」，页面重载后渲染层的 hover 归零、主进程却还留着上一次的 true，
+ * 光标不再移动就永远收不到那条 true，工具条再也不出现（实测重载后必现）。
+ * 在 did-finish-load 时机主动推也不行 —— 那会儿渲染层的监听还没装上，照样错过。
+ */
 const setDesktopLyricsHitRect = (rect: DesktopLyricsHitRect | null) => {
   hitRect =
     rect && Number.isFinite(rect.x) && Number.isFinite(rect.y) && rect.width > 0 && rect.height > 0
       ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
       : null;
+
+  const inside = isPointerInsideLyrics();
+  isPointerOnLyrics = inside;
+  applyMouseMode();
+  getLyricsWindow()?.webContents.send(channel.desktopLyrics.hit, inside);
 };
 
 const createDesktopLyrics = () => {
