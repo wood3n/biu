@@ -64,6 +64,8 @@ export async function buildElectron() {
         extraResources: [{ from: "electron/ffmpeg/ffmpeg-mac-${arch}", to: "electron/ffmpeg/ffmpeg-mac-${arch}" }],
       },
       linux: {
+        // Use default gzip for AppImage; null preserves deb/rpm compression defaults.
+        compression: null,
         target: [
           { target: "AppImage", arch: ["x64", "arm64"] },
           { target: "deb", arch: ["x64", "arm64"] },
