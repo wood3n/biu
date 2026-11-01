@@ -4,6 +4,7 @@ import { Outlet, useLocation } from "react-router";
 
 import log from "electron-log/renderer";
 
+import { useFullScreenCovered } from "@/common/hooks/use-full-screen-covered";
 import ConfirmModal from "@/components/confirm-modal";
 import Fallback from "@/components/error-fallback";
 import FavoritesSelectModal from "@/components/favorites-select-modal";
@@ -26,6 +27,7 @@ const Layout = () => {
   const location = useLocation();
   const playbarCollapsed = useSettings(s => s.playbarCollapsed);
   const init = usePlayList(s => s.init);
+  const fullScreenCovered = useFullScreenCovered();
 
   useEffect(() => {
     updateUser();
@@ -42,7 +44,8 @@ const Layout = () => {
     >
       <div className="flex h-full flex-col">
         <MarqueeLights />
-        <div className="flex min-h-0 w-full flex-1">
+        {/* 全屏播放器把这里整个盖住了：动画结束后整棵子树不再参与绘制（含导航栏/播放栏两层 backdrop-blur） */}
+        <div className={`flex min-h-0 w-full flex-1 ${fullScreenCovered ? "invisible" : ""}`}>
           <SideNav />
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
             {/* 毛玻璃导航栏：absolute 悬浮于内容之上，内容可滚动穿过其下方 */}

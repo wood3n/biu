@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Drawer, DrawerBody, DrawerContent, Image, Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/react";
-import { RiArrowDownSLine, RiArrowLeftSLine, RiArrowRightSLine, RiSettings3Line } from "@remixicon/react";
+import { RiArrowDownSLine, RiArrowLeftSLine, RiArrowRightSLine, RiCloseLine, RiSettings3Line } from "@remixicon/react";
 import { useClickAway } from "ahooks";
 import clsx from "classnames";
 import { readableColor } from "color2k";
@@ -449,7 +449,9 @@ const FullScreenPlayer = () => {
               <PageList
                 ref={pageListRef}
                 className={`absolute top-1/2 right-0 z-30 -translate-y-1/2 rounded-r-none transition-all duration-300 ease-out ${
-                  isPageListOpen ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-full opacity-0"
+                  isPageListOpen
+                    ? "translate-x-0 opacity-100"
+                    : "pointer-events-none invisible translate-x-full opacity-0"
                 }`}
                 style={{
                   width: 280,
@@ -480,7 +482,9 @@ const FullScreenPlayer = () => {
               <PlayList
                 ref={playListRef}
                 className={`absolute top-1/2 left-0 z-30 -translate-y-1/2 rounded-l-none transition-all duration-300 ease-out ${
-                  isPlayListOpen ? "translate-x-0 opacity-100" : "pointer-events-none -translate-x-full opacity-0"
+                  isPlayListOpen
+                    ? "translate-x-0 opacity-100"
+                    : "pointer-events-none invisible -translate-x-full opacity-0"
                 }`}
                 style={{
                   width: 320,
@@ -493,7 +497,9 @@ const FullScreenPlayer = () => {
               <CommentPanel
                 ref={commentRef}
                 className={`window-no-drag absolute inset-x-0 bottom-0 z-50 transition-all duration-300 ease-out ${
-                  isCommentOpen ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-full opacity-0"
+                  isCommentOpen
+                    ? "translate-y-0 opacity-100"
+                    : "pointer-events-none invisible translate-y-full opacity-0"
                 }`}
                 style={{
                   height: "min(80vh, 700px)",
@@ -520,8 +526,18 @@ const FullScreenPlayer = () => {
                 }}
               >
                 <ModalContent>
-                  <ModalHeader>
+                  <ModalHeader className="flex-row justify-between gap-4 text-left">
                     <h2 className="text-lg font-semibold">播放器设置</h2>
+                    {/* 与播放器内其他玻璃胶囊同一套材质，避免用 HeroUI 默认那个纯黑 X */}
+                    <IconButton
+                      title="关闭"
+                      tooltip="关闭"
+                      aria-label="关闭播放器设置"
+                      className="size-8 min-w-8 rounded-full border border-white/12! bg-white/10! text-white/80 hover:bg-white/20! hover:text-white!"
+                      onPress={() => setIsSettingsOpen(false)}
+                    >
+                      <RiCloseLine size={18} />
+                    </IconButton>
                   </ModalHeader>
                   <ModalBody>
                     <FullScreenPlayerSettingsPanel />
