@@ -9,11 +9,30 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * 歌词条窗口高度：需容纳双行模式下的两行字号上限（60px × 1.3 行高 × 2）+ 悬停工具条（24px + 间距）
- * + 内边距，再加底部留白（歌词下缘的柔光投影需要绘制空间，贴窗口边会被切掉）。
- * 高度只影响透明区域，默认整体鼠标穿透，不会挡住桌面点击。
+ * 歌词条窗口高度：需容纳双行模式下的两行字号上限（60px × 1.3 行高 × 2）+ 悬停工具条（28px + 间距）
+ * + 内边距，再加底部留白 40px —— 字下那圈柔光是 `0 8px 22px`，要向下铺约 30px，
+ * 留白不足会被窗口下边缘切掉（透明窗画不到窗外）。
  */
-const LYRICS_WINDOW_HEIGHT = 230;
+const LYRICS_WINDOW_HEIGHT = 244;
+
+/**
+ * 窗口宽度 = 屏幕工作区 × 用户设的百分比。刻意不再铺满整屏：
+ * 铺满时那圈透明区既在桌面上留下一条看不见的横带，文字又只能靠内部裁切框限宽，
+ * 裁切框必然切到滚动中的字与投影。窗口即歌词栏，留白才有的可谈。
+ */
+const MIN_LYRICS_WINDOW_WIDTH = 520;
+/** 与渲染层 SHADOW_GUTTER 一致：窗口两侧各留出描边+柔光的绘制空间 */
+const SHADOW_GUTTER = 32;
+
+let widthPercent = 70;
+
+const lyricsWindowWidth = () => {
+  const { workArea } = screen.getPrimaryDisplay();
+  return Math.max(
+    MIN_LYRICS_WINDOW_WIDTH,
+    Math.min(workArea.width, Math.round((workArea.width * widthPercent) / 100) + SHADOW_GUTTER * 2),
+  );
+};
 
 let desktopLyrics: BrowserWindow | null = null;
 
@@ -53,13 +72,19 @@ const createDesktopLyrics = () => {
   if (getLyricsWindow()) return;
 
   const { workArea } = screen.getPrimaryDisplay();
-  const width = workArea.width;
   const saved = desktopLyricsStore.get("bounds");
 
-  isLocked = Boolean(appSettingsStore.get("appSettings")?.desktopLyricsLocked);
+  const settings = appSettingsStore.get("appSettings");
+  isLocked = Boolean(settings?.desktopLyricsLocked);
+  widthPercent = clampWidthPercent(settings?.desktopLyricsWidth);
+
+  const width = lyricsWindowWidth();
 
   // 显示器变化后保存的坐标可能落到屏幕外，钳回工作区
-  const x = Math.min(Math.max(saved?.x ?? workArea.x, workArea.x), workArea.x + workArea.width - width);
+  const x = Math.min(
+    Math.max(saved?.x ?? workArea.x + Math.round((workArea.width - width) / 2), workArea.x),
+    workArea.x + workArea.width - width,
+  );
   const y = Math.min(
     Math.max(saved?.y ?? workArea.y + workArea.height - LYRICS_WINDOW_HEIGHT - 24, workArea.y),
     workArea.y + workArea.height - LYRICS_WINDOW_HEIGHT,
@@ -156,6 +181,35 @@ const setDesktopLyricsLocked = (locked: boolean) => {
   applyMouseMode();
 };
 
+function clampWidthPercent(value: number | undefined) {
+  if (!Number.isFinite(value)) return 70;
+  return Math.min(95, Math.max(30, Math.round((value as number) / 5) * 5));
+}
+
+/**
+ * 宽度设置变化：改窗口宽度，水平中心保持不动（用户拖到哪儿就还在哪儿）。
+ * 窗口即歌词栏，所以这里变宽/变窄直接就是「一行最多吃掉多少屏幕」。
+ */
+const setDesktopLyricsWidth = (percent: number) => {
+  const next = clampWidthPercent(percent);
+  if (next === widthPercent) return;
+
+  widthPercent = next;
+
+  const win = getLyricsWindow();
+  if (!win) return;
+
+  const { workArea } = screen.getPrimaryDisplay();
+  const [currentX, currentY] = win.getPosition();
+  const [oldWidth] = win.getSize();
+  const width = lyricsWindowWidth();
+  const centerX = currentX + oldWidth / 2;
+  const x = Math.min(Math.max(Math.round(centerX - width / 2), workArea.x), workArea.x + workArea.width - width);
+
+  win.setBounds({ x, y: currentY, width, height: LYRICS_WINDOW_HEIGHT });
+  desktopLyricsStore.set("bounds", { x, y: currentY });
+};
+
 const setDesktopLyricsInteractive = (interactive: boolean) => {
   isPointerOnLyrics = interactive;
   applyMouseMode();
@@ -172,6 +226,7 @@ export {
   destroyDesktopLyrics,
   setDesktopLyricsVisible,
   setDesktopLyricsLocked,
+  setDesktopLyricsWidth,
   setDesktopLyricsInteractive,
   restoreDesktopLyrics,
 };

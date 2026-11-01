@@ -21,7 +21,6 @@ import {
   DESKTOP_LYRICS_FONT_SIZE_MAX,
   DESKTOP_LYRICS_FONT_SIZE_MIN,
   DESKTOP_LYRICS_FONT_SIZE_STEP,
-  DESKTOP_LYRICS_WIDTH_DEFAULT,
 } from "@/common/utils/desktop-lyrics";
 import { getLyricsAuto, parseLrcToLines } from "@/components/lyrics/get-lyrics";
 import MarqueeText from "@/components/marquee-text";
@@ -39,6 +38,7 @@ const FALLBACK_LINE_DURATION = 4000;
 /**
  * 裁切框与文字之间的横向留白：`0 8px 22px` 那层柔光向左右各铺约 24px，
  * 留白不足时溢出裁切会把这一圈光切平（和纵向被方框切掉是同一个毛病）。
+ * 主进程把歌词条窗口撑成「一行上限 + 两侧各这一份留白」，遮罩也正好在这段距离里渐隐。
  */
 const SHADOW_GUTTER = 32;
 
@@ -71,8 +71,8 @@ const LYRICS_MIN_DURATION = 8;
 const LYRICS_SCROLL_DELAY = 1500;
 
 /**
- * 量出一行歌词的真实宽度。容器自身被 max-w-[96vw] 夹住且裁掉了溢出，
- * 读不到完整文字宽度，所以用同样式的不探针元素单独测。
+ * 量出一行歌词的真实宽度。容器会被窗口宽度夹住并裁掉溢出，
+ * 读不到完整文字宽度，所以用同样式的不透明探针元素单独测。
  */
 const measureLyricWidth = (container: HTMLElement, text: string, fontSize: number, fontFamily: string) => {
   const probe = document.createElement("span");
@@ -152,7 +152,7 @@ const LyricLineCopy = ({
 };
 
 /**
- * 一行歌词：一行最多占 maxWidthPx（用户可设的屏幕宽度百分比），
+ * 一行歌词：窗口宽度就是用户设的「一行最多占多少屏幕」（+ 两侧留白），
  * 装不下的句子先静止展示句首、再无缝滚动，而不是把整屏宽度占满。
  * 滚动时渲染两份同内容，marquee-scroll 的 translateX(-50%) 正好位移一份，首尾相接无空白。
  */
@@ -164,7 +164,6 @@ const LyricLineView = ({
   activeColor,
   progress,
   current,
-  maxWidthPx,
 }: {
   text: string;
   fontSize: number;
@@ -174,7 +173,6 @@ const LyricLineView = ({
   /** 行内进度，仅当前句用于渐变换色的分界 */
   progress: number;
   current: boolean;
-  maxWidthPx: number;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isOverflow, setIsOverflow] = useState(false);
@@ -197,7 +195,7 @@ const LyricLineView = ({
     const ro = new ResizeObserver(measure);
     ro.observe(container);
     return () => ro.disconnect();
-  }, [text, fontSize, fontFamily, maxWidthPx]);
+  }, [text, fontSize, fontFamily]);
 
   // 换行或字号变化后重新计时，先看清句首再起滚动
   useEffect(() => {
@@ -217,10 +215,10 @@ const LyricLineView = ({
   return (
     <div
       ref={containerRef}
+      // 窗口宽度 = 用户设的一行上限 + 两侧留白，所以这里的裁切框正好铺满窗口。
       // 只横向裁切：overflow-y 保持 visible，否则字下那圈柔光投影会被这一层方框切平。
-      // -mx-8/px-8 给描边和柔光留出横向余量，负 margin 又把文字拉回原来的位置。
-      className="relative -mx-8 overflow-x-clip overflow-y-visible px-8"
-      style={{ maxWidth: maxWidthPx }}
+      // 断口由 .desktop-lyrics-row 的遮罩渐隐，不是一条硬边（纵向留白也在那条规则里）。
+      className="desktop-lyrics-row relative w-full overflow-x-clip overflow-y-visible px-8"
     >
       {isScrolling ? (
         <div
@@ -250,7 +248,6 @@ const DesktopLyrics = () => {
       color: s.desktopLyricsColor,
       activeColor: s.desktopLyricsActiveColor,
       lineMode: s.desktopLyricsLineMode,
-      widthPercent: s.desktopLyricsWidth,
     })),
   );
 
@@ -258,7 +255,7 @@ const DesktopLyrics = () => {
   // 两个窗口各持一份内存 settings，歌词条直接写盘会把主窗口的旧值覆盖回去
   const [local, setLocal] = useState<DesktopLyricsViewSettings | null>(null);
   const view = local ?? persisted;
-  const { fontFamily, fontSize, locked, color, activeColor, lineMode, widthPercent } = view;
+  const { fontFamily, fontSize, locked, color, activeColor, lineMode } = view;
 
   const [snapshot, setSnapshot] = useState<MiniPlayerMainStateSnapshot | null>(null);
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
@@ -396,10 +393,6 @@ const DesktopLyrics = () => {
   const title = snapshot?.title;
   const currentMs = (snapshot?.currentTime ?? 0) * 1000 + lyricOffset;
 
-  // 窗口本身铺满工作区宽度，innerWidth 即屏幕可用宽度；
-  // 主窗口的镜像没到之前（开机恢复）用默认值，避免整屏宽把柔光切掉
-  const maxWidthPx = Math.round((window.innerWidth * (widthPercent ?? DESKTOP_LYRICS_WIDTH_DEFAULT)) / 100);
-
   // 倒序找最后一个 time <= 当前进度 + 偏移 的歌词行
   const activeLyricIndex = useMemo(() => {
     if (!lyrics.length) return -1;
@@ -444,17 +437,20 @@ const DesktopLyrics = () => {
   if (!title) return null;
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden select-none">
+    // flex 而不是 absolute + left-1/2：定位元素算宽度时可用空间只剩半屏，
+    // 一条 70% 宽的歌词会被挤到 50% 就开始滚动；flex 项拿到的可用宽度是整个窗口。
+    <div className="relative flex h-screen w-screen items-end justify-center overflow-hidden select-none">
       <div
         ref={pillRef}
         className={clx(
-          // bottom-6：给文字下那圈柔光投影留出窗口内的绘制空间，贴边会被窗口边缘切掉
-          "absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1 px-4 py-1.5",
+          // mb-10：给文字下那圈柔光投影（约 30px）留出窗口内的绘制空间，贴边会被窗口边缘切掉
+          // w-fit：短歌词时这条只包住字，命中判定不摊满整屏；min-w-0 才允许被裁切框夹住
+          "mb-10 flex w-fit min-w-0 flex-col items-center gap-1",
           !locked && isPointerInside && "window-drag",
         )}
       >
         {!locked && isPointerInside && (
-          <div className="desktop-lyrics-toolbar window-no-drag flex items-center gap-0.5 px-1">
+          <div className="desktop-lyrics-toolbar window-no-drag flex items-center gap-0.5 px-2">
             {/* 歌名不缩写，超长交给跑马灯；220px 是标题区上限，再宽会把按钮推出可视区 */}
             <div className="max-w-[220px] min-w-0 shrink-0 overflow-hidden px-1">
               <MarqueeText active className="text-[12px] leading-none font-semibold text-white/85" title={titleLabel}>
@@ -522,7 +518,6 @@ const DesktopLyrics = () => {
             activeColor={activeColor}
             progress={lineProgress}
             current={row.current}
-            maxWidthPx={maxWidthPx}
           />
         ))}
       </div>

@@ -15,9 +15,9 @@ export const DESKTOP_LYRICS_FONT_SIZE_MIN = 18;
 export const DESKTOP_LYRICS_FONT_SIZE_MAX = 60;
 export const DESKTOP_LYRICS_FONT_SIZE_STEP = 2;
 
-/** 一行歌词最多占多少屏幕宽度（百分比） */
+/** 一行歌词最多占多少屏幕宽度（百分比），由主进程拿去 resize 歌词条窗口 */
 export const DESKTOP_LYRICS_WIDTH_MIN = 30;
-/** 上限不到 100%：裁切框要留在窗口内，否则柔光被窗口边缘切掉 */
+/** 上限不到 100%：留一点缝隙，别让一条透明横带铺满整个工作区 */
 export const DESKTOP_LYRICS_WIDTH_MAX = 95;
 export const DESKTOP_LYRICS_WIDTH_STEP = 5;
 export const DESKTOP_LYRICS_WIDTH_DEFAULT = 70;
@@ -30,7 +30,6 @@ export interface DesktopLyricsViewSettings {
   color: string;
   activeColor: string;
   lineMode: "single" | "double";
-  widthPercent: number;
 }
 
 /** 歌词条自身不写设置（多窗口各持一份内存 store，写盘会互相覆盖），所有改动都交给主窗口落盘 */
@@ -70,7 +69,7 @@ function postToLyrics(message: Omit<MessageFromMain, "ts">) {
   bc?.postMessage({ ...message, ts: Date.now() } satisfies MessageFromMain);
 }
 
-/** 取当前桌面歌词渲染设置（字号/宽度做边界收敛，防旧持久化值越界） */
+/** 取当前桌面歌词渲染设置（字号做边界收敛，防旧持久化值越界） */
 function pickDesktopLyricsView(state: AppSettings): DesktopLyricsViewSettings {
   return {
     fontFamily: state.desktopLyricsFontFamily,
@@ -79,7 +78,6 @@ function pickDesktopLyricsView(state: AppSettings): DesktopLyricsViewSettings {
     color: state.desktopLyricsColor,
     activeColor: state.desktopLyricsActiveColor,
     lineMode: state.desktopLyricsLineMode,
-    widthPercent: clampDesktopLyricsWidth(state.desktopLyricsWidth),
   };
 }
 
@@ -95,14 +93,6 @@ function postSettingsToLyrics() {
 function clampDesktopLyricsFontSize(value: number) {
   if (!Number.isFinite(value)) return DESKTOP_LYRICS_FONT_SIZE_MIN;
   return Math.min(DESKTOP_LYRICS_FONT_SIZE_MAX, Math.max(DESKTOP_LYRICS_FONT_SIZE_MIN, Math.round(value)));
-}
-
-function clampDesktopLyricsWidth(value: number) {
-  if (!Number.isFinite(value)) return DESKTOP_LYRICS_WIDTH_DEFAULT;
-  return Math.min(
-    DESKTOP_LYRICS_WIDTH_MAX,
-    Math.max(DESKTOP_LYRICS_WIDTH_MIN, Math.round(value / DESKTOP_LYRICS_WIDTH_STEP) * DESKTOP_LYRICS_WIDTH_STEP),
-  );
 }
 
 function handleMessageFromLyrics(command: DesktopLyricsCommand) {
@@ -246,9 +236,11 @@ export function startDesktopLyricsController() {
     return () => {};
   }
 
-  const apply = (enabled: boolean, locked: boolean) => {
+  const apply = (enabled: boolean, locked: boolean, width: number) => {
     window.electron.setDesktopLyricsVisible(enabled);
     window.electron.setDesktopLyricsLocked(locked);
+    // 窗口宽度即「一行最多占多少屏幕」，铺满整屏会把一条透明横带留在桌面上
+    window.electron.setDesktopLyricsWidth(width);
 
     if (enabled) {
       startDesktopLyricsMainSync();
@@ -259,17 +251,18 @@ export function startDesktopLyricsController() {
 
   // 水合可能早于本 effect 执行，此时没有"变化"可订阅，按当前值补一次（创建窗口是幂等的）
   if (useSettings.persist.hasHydrated()) {
-    const { desktopLyricsEnabled, desktopLyricsLocked } = useSettings.getState();
-    apply(desktopLyricsEnabled, desktopLyricsLocked);
+    const { desktopLyricsEnabled, desktopLyricsLocked, desktopLyricsWidth } = useSettings.getState();
+    apply(desktopLyricsEnabled, desktopLyricsLocked, desktopLyricsWidth);
   }
 
   const unsubscribe = useSettings.subscribe((state, prevState) => {
     const enabledChanged = state.desktopLyricsEnabled !== prevState.desktopLyricsEnabled;
     const lockedChanged = state.desktopLyricsLocked !== prevState.desktopLyricsLocked;
-    if (!enabledChanged && !lockedChanged) {
+    const widthChanged = state.desktopLyricsWidth !== prevState.desktopLyricsWidth;
+    if (!enabledChanged && !lockedChanged && !widthChanged) {
       return;
     }
-    apply(state.desktopLyricsEnabled, state.desktopLyricsLocked);
+    apply(state.desktopLyricsEnabled, state.desktopLyricsLocked, state.desktopLyricsWidth);
   });
 
   return () => {

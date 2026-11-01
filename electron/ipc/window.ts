@@ -1,6 +1,11 @@
 import { BrowserWindow, ipcMain } from "electron";
 
-import { setDesktopLyricsInteractive, setDesktopLyricsLocked, setDesktopLyricsVisible } from "../desktop-lyrics";
+import {
+  setDesktopLyricsInteractive,
+  setDesktopLyricsLocked,
+  setDesktopLyricsVisible,
+  setDesktopLyricsWidth,
+} from "../desktop-lyrics";
 import { applyMiniPlayerBackdrop, createMiniPlayer, destroyMiniPlayer, miniPlayer } from "../mini-player";
 import { channel } from "./channel";
 
@@ -58,6 +63,11 @@ export function registerWindowHandlers({ getMainWindow }) {
 
   ipcMain.handle(channel.desktopLyrics.setLocked, (_, locked: boolean) => {
     setDesktopLyricsLocked(locked);
+  });
+
+  // 一行歌词最多占多少屏幕宽度：直接改窗口宽度，窗口即歌词栏
+  ipcMain.handle(channel.desktopLyrics.setWidth, (_, percent: number) => {
+    setDesktopLyricsWidth(percent);
   });
 
   ipcMain.handle(channel.desktopLyrics.setInteractive, (_, interactive: boolean) => {

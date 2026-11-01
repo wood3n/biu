@@ -407,6 +407,27 @@ button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"])
   background-clip: text;
 }
 
+/* 一行的横向裁切框：窗口宽度就是用户设的「一行最多占多少屏幕」，
+   句子超出时在这里断掉。断口不能是硬边——窗口悬浮在桌面中间，
+   一条整齐切平的横线比阴影本身更难看，所以两侧 32px（正好是留白宽度）
+   用遮罩把文字和柔光一起渐隐掉。
+   遮罩只覆盖本元素的边框盒，纵向会超出这个盒子（overflow-y 保持 visible），
+   所以用 -my-8/py-8 把盒子上下各撑开 32px，让字下那圈柔光落在遮罩范围内。 */
+.desktop-lyrics-row {
+  padding-top: 32px;
+  padding-bottom: 32px;
+  margin-top: -32px;
+  margin-bottom: -32px;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    rgb(0 0 0 / 35%) 10px,
+    black 32px,
+    black calc(100% - 32px),
+    rgb(0 0 0 / 35%) calc(100% - 10px),
+    transparent 100%
+  );
+}
 
 .desktop-lyrics-toolbar {
   border-radius: 9999px;

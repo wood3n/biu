@@ -182,6 +182,8 @@ const api: ElectronAPI = {
   setDesktopLyricsVisible: visible => ipcRenderer.invoke(channel.desktopLyrics.setVisible, visible),
   // 桌面歌词锁定：锁定后整条鼠标穿透
   setDesktopLyricsLocked: locked => ipcRenderer.invoke(channel.desktopLyrics.setLocked, locked),
+  // 桌面歌词一行最大宽度（屏幕宽度百分比）：改的是窗口自身宽度
+  setDesktopLyricsWidth: percent => ipcRenderer.invoke(channel.desktopLyrics.setWidth, percent),
   // 指针是否落在歌词胶囊上：未锁定时临时取消鼠标穿透
   setDesktopLyricsInteractive: interactive => ipcRenderer.invoke(channel.desktopLyrics.setInteractive, interactive),
   // 悬浮窗底板：把模式报给主进程，由窗口材质/窗口底色承担（跟随主窗口设置页）

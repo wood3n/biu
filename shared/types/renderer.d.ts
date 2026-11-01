@@ -87,6 +87,8 @@ declare global {
     setDesktopLyricsVisible: (visible: boolean) => Promise<void>;
     /** 桌面歌词锁定开关（锁定后整条鼠标穿透） */
     setDesktopLyricsLocked: (locked: boolean) => Promise<void>;
+    /** 桌面歌词一行最大宽度（占屏幕工作区的百分比），改的是窗口宽度 */
+    setDesktopLyricsWidth: (percent: number) => Promise<void>;
     /** 指针是否落在歌词胶囊上（未锁定时用于临时取消鼠标穿透） */
     setDesktopLyricsInteractive: (interactive: boolean) => Promise<void>;
     /** 最小化窗口 */
