@@ -459,6 +459,46 @@ CDP `Page.captureScreenshot` 只有网页层，拍不到系统材质；PowerShel
 
 **验证**: 注入与组件同 DOM 的样例行（灰底 `rgb(120,120,120)`、44px、进度固定 50%），CDP 截图后按列统计：左半 `green=3098 dark=3927`、右半 `white=2742 dark=3054`，两半的暗色描边/柔光像素量级一致，跨接缝的逐列最暗值连续（18~45）没有跳回背景 120 的断口。真实播放态复查（`心は誰にも見えないのだから，`，735px 行、分界 200.655px）截图肉眼确认绿/白两半投影都完整。
 
+### 2026-11-01（第七阶段）: 桌面歌词一行最大宽度 + 横向留白
+
+**问题**: 长歌词一行能撑到 `max-w-[96vw]`，等于占满整屏；而且文字一直顶到裁切框边上，`0 8px 22px` 那层柔光向左右各要约 24px，只有 8px 留白 → 光被裁切框切平（纵向刚修过，横向是同一个毛病的另一半）。
+
+**实现** (`shared/types/app-setting.d.ts`, `shared/settings/app-settings.ts`, `src/store/settings.ts`, `src/common/utils/desktop-lyrics.ts`, `src/pages/desktop-lyrics/index.tsx`, `src/pages/settings/desktop-lyrics-settings.tsx`)：
+- 新设置 `desktopLyricsWidth`（占屏幕宽度百分比，`30–95` 步进 5，默认 `70`）。上限刻意不到 100%：裁切框必须整个留在窗口内，否则柔光被窗口边缘切掉（透明窗画不到窗外）
+- 常量与 `clampDesktopLyricsWidth()` 放在 `desktop-lyrics.ts`，和字号一套；`widthPercent` 进 `DesktopLyricsViewSettings`，仍然只有主窗口写盘、整包镜像推给歌词条
+- 行容器：`max-w-[96vw]` → `style.maxWidth = window.innerWidth * widthPercent / 100`，`-mx-2/px-2` → `-mx-8/px-8`（`SHADOW_GUTTER = 32`）
+- **溢出判定要跟着改**：`clientWidth` 含左右留白，比较式改成 `width > container.clientWidth - SHADOW_GUTTER * 2 + 1`，否则文字可以先糊到留白区里才起跑马灯
+- 设置页「桌面歌词」tab 新增「最大宽度」滑块（`显示` 分组，字号那行提示语不再承诺「超出屏幕」）
+- 注意 `src/pages/settings/index.tsx` 的 `useSystemSettingsForm` 是逐字段列举的：新设置要在解构、`useShallow` 选择器、`defaultValues` 三处都加，只加类型不会出现在表单里
+
+**验证**（CDP，端口每次重启都变）：
+- 1600px 屏 + 默认 70% → 裁切框 `max-width: 1120px`、padding 32px、`overflow: clip/visible`，735px 的句子不滚动且整框居中（590…1010 之类的位置随句长变化）
+- 注入 `.overflow-x-clip{max-width:420px!important}` 压窄（比改内联样式可靠，分支切换不丢）→ 1.5 秒后起跑马灯：`marquee-scroll 18.375s linear infinite`、实测 `-42px/s`、轨道 1550px = 两份 735 + 两份 40px 间隔
+- 设置页滑块（原生 `input[type=range]`，用 `HTMLInputElement` 的 value setter + `input` 事件驱动）改到 95% → 歌词条 `max-width` 实时变 1520px，改回 70% → 1120px；`init` 命令回来的镜像包确认含 `widthPercent`
+- 主窗口热更新后 `pickDesktopLyricsView` 会引用到旧 chunk 里没有的 `clampDesktopLyricsWidth`（`ReferenceError`，设置镜像整条断掉）→ 必须 reload 主窗口；`Runtime.enable` 会把重载前的历史报错重新打一遍，看日志要区分「本次连接新抛的」和「缓冲里的旧的」
+
+
+### 2026-11-01（第八阶段）: 频谱与背景虚化降 GPU + 动画帧率上限
+
+**问题**: 用户实测（GTX 1660）频谱吃 10% GPU、背景虚化吃 30%。
+
+**根因**:
+- `filter: blur()` 在 Blink 里不是「糊一次存成贴图」，而是 render pass 上的**着色器操作**，那一层每帧被画就每帧重跑一遍高斯；元素按 1.15 倍全屏尺寸光栅化，A/B 两层还同时挂着（换歌交叉淡入），直接翻倍。`transition: filter` 另加 700ms 的主线程重新光栅化，`will-change: filter` 把实时渲染面一直留着。
+- 频谱的 `shadowBlur` 是**按 `fill()` 生效**的：Skia 把形状 alpha 画进离屏表面对象再跑高斯，所以逐根柱子设阴影 = 每帧约 400 遍（200 柱 × 柱体+亮点）离屏高斯。
+- `requestAnimationFrame` 按显示器刷新率发帧，144Hz 屏上面这些每帧代码每秒真跑 144 遍。Chromium/Electron 没有受支持的全局最大帧率开关（`--disable-frame-rate-limit` 只能去限制），所以门控只能做在 JS 侧。
+
+**实现**:
+- `src/common/audio/frame-rate.ts`：`ANIMATION_FPS_OPTIONS`（30/60/90/120/144）、`normalizeAnimationFps()`（把磁盘上的非法值回落到最近档位，否则下拉框显示空、间隔算不出正数）、`getFrameIntervalMs()`
+- 新设置 `animationFps`（默认 60），设置页放在**外观**分组末尾，提示语「限制视觉特效帧率，降低 GPU 使用率」；频谱（`audio-waveform`）与节拍循环（`beat-stream`）都在 rAF 回调里按时间门控
+- 频谱 `draw()`：柱体合并进一条 `Path2D`、顶部亮点合并进另一条，每帧带阴影的 `fill()` 从 ~400 次降到 2 次；渐变 `fireGradient` 与 `freqData` 缓冲区提到帧外（原来每帧 `createLinearGradient` + `new Uint8Array`）
+- 背景糊图：`BG_SHRINK = 9`，图层按 1/9 尺寸渲染再用 `transform: scale()` 放大回去——缩小本身等效大半径模糊，放大是合成器的双线性插值不花钱，着色器像素 ÷81；`blur` 半径同步除以 9，删掉 `transition: filter` 与 `will-change: filter`，交叉淡入只留 wrapper 的 `opacity`（可合成）
+- `beat-detector.ts` 的能量回看窗口原本按**帧数**定义（`historySize = 45`），改帧率后检测行为会漂移 → 改成按时间（`HISTORY_MS = 700`），配 `timeHistory` 裁剪；裁剪比较 `timeHistory[1]` 而非 `[0]`，留一个越界样本窗口跨度才可能真正覆盖到 700ms
+
+**验证**: 真 Chromium 里对高频噪点图做新旧 A/B，糊图与频谱肉眼无差别；tsc 基线 125→125（改动文件零报错）、eslint、prettier 干净；节拍检测 A/B 仿真：新实现 30~144fps 下 onset 数量与 ~700ms 窗口稳定，旧的在低帧率下首个 onset 从 1500ms 提前到 500ms。**GPU% 未测**——开发机是无显卡虚拟机，SwiftShader 软栅格把 GPU 开销记成 CPU，此处数字无意义，需在 1660 上复测。若虚化仍高，先看 DevTools → Layers 那层的纹理尺寸：若仍按全屏光栅化说明 Blink 吃进了 scale，就得换成主进程取封面 + canvas 一次性预糊（顺带绕开 hdslb 封面的 `crossOrigin` CORS 不确定性）。
+
+**已知未动**: 跑马灯 `marquee-lights` 用 keyframes 动 `left/top/width/height`（~308 个元素、每帧全视口 layout + paint）与全屏播放器 7 个 `backdrop-blur-2xl` 底板按用户要求「暂时不动」，这是 45% 里剩下的最大一笔。
+
+
 1. **不要在渲染进程直接访问 Node API** — 通过 `window.electron.*` IPC 调用
 2. **新增 IPC 通道** — 在 `electron/ipc/channel.ts` 定义，`electron/ipc/` 下注册处理器，`preload.ts` 暴露，`shared/types/renderer.d.ts` 声明类型
 3. **新增设置项** — 在 `shared/types/app-setting.d.ts` 添加字段，`shared/settings/app-settings.ts` 添加默认值，`src/store/settings.ts` 的 `partialize` 中添加持久化
