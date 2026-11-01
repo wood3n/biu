@@ -154,7 +154,7 @@ pnpm knip             # 检查未使用的代码
 ### Marquee 滚动
 
 - **通用组件**: `src/components/marquee-text/index.tsx` — 溢出检测 + 动态速度 + 无缝循环
-- **跑马灯光带**: `src/components/marquee-lights/index.tsx` — BPM 联动 + EMA 平滑
+- **跑马灯光带**: `src/components/marquee-lights/index.tsx` — 一块 canvas 贴边跑灯带，`renderer.ts` 画、`trail-path.ts` 算走线，BPM 联动 + EMA 平滑
 - **迷你播放器**: `src/pages/mini-player/index.tsx` 中有独立的 MarqueeText 实现
 
 ### 迷你播放器
@@ -498,7 +498,7 @@ CDP `Page.captureScreenshot` 只有网页层，拍不到系统材质；PowerShel
 
 **验证**: 真 Chromium 里对高频噪点图做新旧 A/B，糊图与频谱肉眼无差别；tsc 基线 125→125（改动文件零报错）、eslint、prettier 干净；节拍检测 A/B 仿真：新实现 30~144fps 下 onset 数量与 ~700ms 窗口稳定，旧的在低帧率下首个 onset 从 1500ms 提前到 500ms。**GPU% 未测**——开发机是无显卡虚拟机，SwiftShader 软栅格把 GPU 开销记成 CPU，此处数字无意义，需在 1660 上复测。若虚化仍高，先看 DevTools → Layers 那层的纹理尺寸：若仍按全屏光栅化说明 Blink 吃进了 scale，就得换成主进程取封面 + canvas 一次性预糊（顺带绕开 hdslb 封面的 `crossOrigin` CORS 不确定性）。
 
-**已知未动**: 跑马灯 `marquee-lights` 用 keyframes 动 `left/top/width/height`（~308 个元素、每帧全视口 layout + paint）与全屏播放器 7 个 `backdrop-blur-2xl` 底板按用户要求「暂时不动」，这是 45% 里剩下的最大一笔。
+**已知未动**: 跑马灯 `marquee-lights` 用 keyframes 动 `left/top/width/height`（~308 个元素、每帧全视口 layout + paint）与全屏播放器 7 个 `backdrop-blur-2xl` 底板按用户要求「暂时不动」，这是 45% 里剩下的最大一笔。（→ 第十阶段已处理：跑马灯改合成器 transform 动画，收起态面板与被盖住的导航栏/播放栏不再参与绘制；播放器内 4 个可见胶囊的模糊仍保留，等用户确认外观取舍。）
 
 ### 2026-11-01（第九阶段）: 歌词条窗口即歌词栏，断口改渐隐
 
@@ -517,8 +517,96 @@ CDP `Page.captureScreenshot` 只有网页层，拍不到系统材质；PowerShel
 - 1600 工作区 + 70% → `window.innerWidth = 1184`（=1120+64）；30% → 544 且 735px 的句子起跑马灯（`anim: marquee-scroll`、轨道 1550px = 两份 735 + 两份 40 间隔）；95% → 1584 不越界。截图确认左右两端是渐隐不是硬边
 - 完整链路实测走**设置页滑块**：`#/settings` → 「桌面歌词」tab → 那个 `min=30 max=95` 的原生 `input[type=range]`（HeroUI 的 `aria-label` 不在 input 上，靠 min/max 认）用 `HTMLInputElement` value setter + `input`/`change` 事件驱动到 45 → 歌词条 `innerWidth` 实时变 784，改回 70 → 1184
 - 纵向：`textBottom = 204`、窗口 244 → 字下 40px，柔光 30px 完整留在窗内
-- 悬停工具条：合成一次命中 `mousemove` 让工具条出现（`108..132`，在文字上方不被遮罩区压到），再合成一次窗外移动收回穿透态
+- 悬停工具条：合成一次命中 `mousemove` 让工具条出现（`108..132`，在文字上方不被遮罩区压到），再合成一次窗外移动收回穿透态 —— **这条验证是假的**：`new MouseEvent()` 只走页面内派发，绕过了操作系统的热区判定，真机上工具条从来没出现过。见第十阶段。
 - 质量门：eslint 改动文件 0 error、stylelint 干净、tsc 无新增错误（仓库存量 5 条与本阶段无关）、vitest 11/11
+
+### 2026-11-01（第十阶段）: 歌词条上色逐帧推进、工具条真实可点、跑马灯与玻璃面板降 GPU
+
+三个用户反馈：播放界面仍有 35-38% GPU；歌词条已唱/未唱「一顿一顿像 PPT，最后跟不上」；「上面的悬浮条点不了」。
+
+#### 1. 已唱/未唱从 3.5Hz 改成逐帧（`src/pages/desktop-lyrics/index.tsx`、`src/app.css`、`src/common/utils/mini-player.ts`）
+
+**实测根因**：上色边界只能等主窗口推快照，而快照来自 `audio.ontimeupdate`。CDP 里用 `MutationObserver` 数歌词条 `--fill` 节点的 style 变更：**3.48 次/秒，平均间隔 276.5ms（238~303ms），每跳 31px**。人眼看就是幻灯片，而且边界恒落后半拍到一拍。
+
+**修复**：
+- 快照到达时锚定时钟 `{ baseMs, anchor: performance.now(), playing, rate, durationMs }`，歌词条本地用 `requestAnimationFrame` 按 `(now - anchor) × rate` 外推，钳到 `durationMs`。Blink 的 `timeupdate` 只有约 4Hz，两次推送之间由本窗口补全，换行/暂停/拖动都以最新一包为准（不会累积漂移，误差上限从 ~276ms 降到一帧）
+- 分界不再经过 React：`.desktop-lyrics-text--fill` 的渐变写进 `app.css`，用 `calc(var(--lyric-active-frac) * var(--lyric-text-w))` 定位。rAF 每帧只 `setProperty` 一个自定义属性（不重排、不重新渲染），`--lyric-text-w` 仍由 React 在换行/换字号时写一次
+- 新增 `useLayoutEffect` 在每次提交后立刻刷一次分界，避免换行那一帧闪出上一句的进度
+- `rate` 进 `MiniPlayerMainStateSnapshot`（倍速 0.5~2.0 时外推要按它换算），并把 `rate` 加进主窗口 `usePlayList.subscribe` 的浅比较，改倍速立刻重推
+- 帧率沿用共享设置 `animationFps`（用户已设 30）：歌词条自己不写设置，所以把 `animationFps` 加进 `DesktopLyricsViewSettings` 镜像包
+- 删掉 `lineProgress` / `lyricOffset` state，改由时钟统一算
+
+**验证**（同一首歌、同一台机器，只改实现）：更新次数 3.48/s → **46.9/s**，p50 间隔 276.5ms → **22.4ms**，每步位移 31px → **均值 0.73px / 最大 2.38px**。截图确认绿/白分界、描边柔光都正常（`frac 0.9616 × 210px = 201.936px`，computed `background-image` 里能读到解析后的 px）。
+
+#### 2. 工具条点不了：Windows 上 `forward: true` 根本不转发（`electron/desktop-lyrics.ts`、`electron/ipc/{channel,window}.ts`、`electron/preload.ts`、`shared/types/renderer.d.ts`）
+
+**实测**：用 PowerShell `SetCursorPos` 把**真实光标**扫过歌词条，渲染进程 `mousemove` 监听收到 **0 个事件**。单独写最小 Electron 复现窗（transparent + frameless + screen-saver 置顶 + `setIgnoreMouseEvents(true,{forward:true})`）同样是 0，把 `focusable` 改成 true 也是 0 —— 结论：Electron 38 / Windows 上这条路彻底不通，所以第九阶段那次「合成 mousemove 让工具条出现」的验证从来没测到真链路。
+另一个隔离实验证明**点击本身没问题**：同样的窗口只要 `setIgnoreMouseEvents(false)`，`focusable:false` 状态下 4 次真实左键全部拿到 `mousedown/mouseup/click`（含 `-webkit-app-region: drag` 父层 + `no-drag` 子层的组合）。
+
+**改成主进程轮询**：
+- 渲染层按真实排版上报命中矩形（行的 `getBoundingClientRect()` + `HIT_PADDING 10`，上方再预留 `TOOLBAR_RESERVE 32` 给工具条，因为工具条只在命中时才渲染，判定必须提前算进去），新 IPC `desktop-lyrics:set-hit-rect`；矩形只覆盖那一行字，不覆盖整条窗口，桌面点击仍然穿透
+- 主进程 `setInterval(pollHit, 60)`：`screen.getCursorScreenPoint() - win.getBounds()` 与上报矩形比较，命中才 `setIgnoreMouseEvents(false)`，并通过 `desktop-lyrics:hit` 事件把结果推回渲染层驱动工具条显示；锁定或窗口销毁时停表并强制穿透。CSS px 与 DIP 在缩放 100% 下 1:1，窗口无缩放控件
+- 删掉 `setDesktopLyricsInteractive` 整条链路（channel/handler/preload/类型）
+
+**第二个坑（真正的「点不了」）**：改成轮询后真实点击能到达页面，但事件 target 是 `DIV.desktop-lyrics-row` —— 第九阶段为了把柔光装进遮罩盒子给行加了 `margin-top: -32px`，于是**每一行的盒子向上盖住了工具条那一条**，行在 DOM 里更靠后所以吃下命中测试。工具条加 `relative z-10` 抬一层。
+
+**验证**（全部真实输入）：光标移到 (800,580) → 工具条出现且 pill 带上 `window-drag`；点 (936,526) → 事件 target 变成 `svg`，主窗口 `暂停 → 播放` 标签翻转、再点回 `暂停`；光标移出到 (800,120) → 工具条消失（穿透恢复）。
+
+#### 3. 播放界面 GPU：跑马灯改合成器动画 + 看不见的玻璃不再每帧糊
+
+**跑马灯**（`src/components/marquee-lights/index.tsx`）：`@keyframes marquee-lit` 原来动 `left/top/width/height`，192 个块按显示器刷新率每帧触发布局 + 绘制，且每块挂 3 层 `box-shadow`（Skia 按 fill 走离屏高斯）—— 这是第八阶段记在「已知未动」里的最大一笔。改成只动 `transform: translate() rotate()`：
+- 块的自然盒子钉在 `(0,0)` 的 `block×thickness`，位置全靠 translate；竖边要占 `[L, L+t]×[T, T+b]`，所以绕中心 `rotate(90deg)` 后平移量补 `(t-b)/2` 与 `(b-t)/2`。每个关键帧都写 `rotate()`（横边写 `rotate(0deg)`），保证函数列表一致、按分量插值
+- 主窗口 `block=thickness=8` 是正方形，转角旋转等于无形；小窗 `8×2` 细条靠旋转就地转竖
+- 闪光块的 WAAPI 从 `transform: scale()` 换成独立属性 `scale`，否则会把绕圈用的 transform 整个覆盖掉
+- `will-change: left, top` → `will-change: transform`
+- **几何等价验证**：在真页面里把旧关键帧再注入一层（同名后者覆盖），对同一 `animation-delay` 采样 17 个相位比 `getBoundingClientRect()` → **0 处偏差**；另写独立 340×80 页面按 `8×2` 与 `8×8` 各测 13 个相位 → 只有 `99.9%→100%` 那 0.1% 的转角间隙不同（旧的是把盒子从 2px 插值成 8px，新的是转 90°），约 4ms，属实现差异不是缺陷
+- **代价验证**：CDP `Performance.getMetrics` 的累计计数，A/B 各 6 秒 —— 每动画帧 `LayoutCount` 从 **1.15 降到 0.30**（旧版基本每帧一次全文档布局），布局耗时从 100ms/6s 降到 <100ms 分辨率以下。像素级重绘与 GPU% 这台无显卡 VM 测不出意义，需在 1660 上复测
+
+**看不见的玻璃**（`src/components/full-screen-player/index.tsx`、`src/layout/index.tsx`、`src/common/hooks/use-full-screen-covered.ts`）：全屏播放器打开时枚举 `backdrop-filter` 元素，发现每帧在糊的总面积 2.17M px（视口的 2.7 倍），其中：
+- 评论面板 768k px 的 `blur(40px) saturate(1.5)`、播放列表/分集列表 134k+118k 的 `blur(12px)` —— 三者都处于 `opacity-0` 收起态，根本看不见
+- 导航栏 65k + 播放栏 83k 的 `blur(40px)` —— 被不透明抽屉整个盖住
+  收起态的三个面板在关闭分支加 `invisible`；`transition-all` 已经覆盖 `visibility`（离散属性在过渡末尾才翻转），所以滑出动画照旧，结束后才不绘制。导航栏/播放栏用 `useFullScreenCovered()`：打开 450ms（入场动画之后）才给布局子树加 `invisible`，关闭时立刻去掉，避免抽屉滑上来时看见底下闪一下。跑马灯在布局子树之外，不受影响
+- **验证**：收起态下面板与导航栏/播放栏的 `visibility` 为 `hidden`，逐帧模糊面积 **1.21M px → 46.9k px**（只剩播放器里 4 个真正可见的小胶囊）；点左箭头开播放列表 → 该面板 `visibility: visible`、`opacity: 1`，未开的另一个仍是 `hidden`；截图确认跑马灯、歌词高亮、毛玻璃面板外观无变化
+- **仍未动**：抽屉遮罩那层 `backdrop-filter: opacity(0.5)`（960k px 的渲染面，但只是 opacity 不是高斯）；播放器内 4 个可见胶囊的 `blur(40px)`（糊的对象本来就是虚化的封面，降半径或去掉几乎看不出来，属外观取舍，等用户点头）
+
+#### 4. 本阶段验证手法（覆盖窗交互只能这么测）
+
+- `setIgnoreMouseEvents` 的真伪只能用**操作系统级输入**测：PowerShell `Add-Type` 调 `user32!SetCursorPos` + `mouse_event`，再用 CDP 读页面里的 `__ev` 事件计数。`-File mouse.ps1` 每次启动约 1s，一次一条命令会让动作落在测试窗口退出之后 —— 要把整串 `move;click;move;click` 交给同一个 `seq.ps1 -Pairs "x,y;..."` 进程跑
+- 窗口坐标换算：歌词条 `frame:false` 且无缩放，`window.screenX/screenY` 与 `BrowserWindow.getBounds()` 一致，页面 CSS px 即 DIP，`screenX + rect.left` 就是屏幕坐标
+- 主窗口最小化时 `document.visibilityState === "hidden"`、rAF 完全停发（0 帧/s），任何逐帧测量前必须先用 `user32!ShowWindow(hwnd, SW_RESTORE)` 还原；`GetWindowTextW` 的 P/Invoke 必须写 `CharSet = CharSet.Unicode`，否则中文标题只回一个字符
+- 质量门：eslint 改动文件 0 error（2 条 `exhaustive-deps` warning 与原文件同性质）、stylelint 干净、prettier 干净、tsc 125 → 125（改动文件零报错）、vitest 11/11
+
+### 2026-11-01（第十一阶段）: 跑马灯改 canvas 渲染 + 贴边灯带造型
+
+两个要求：① 降开销；② 造型老土，要像 Xbox/PS5 那样贴着边缘的光带。
+
+#### 1. 从「几百个 span」改成一块 canvas（`src/components/marquee-lights/{index,renderer,trail-path}.ts`）
+
+**旧实现的账**：第十阶段把关键帧从 `left/top/width/height` 换成 transform，布局抖动没了，但每条光带仍是 ~200 个 span，各自 `will-change: transform` 一个合成图层、每块挂三层 `box-shadow`（Skia 按 fill 走离屏高斯），而且**每帧一次全文档 style recalc**。A/B 实测（同一台机器、同一 1600×900 视口、各 8 秒）：旧 501 次 recalc / 样式耗时 880ms / 主线程 task 2310ms；新 **0 次 recalc / task 1110ms** —— 主线程忙时砍掉一半，逐帧样式重算整条消失，rAF 帧率 62.6 → 64。
+
+**新架构**：
+- `trail-path.ts`：圆角矩形走线的**弧长参数化**（四直边 + 四圆弧，`pointAt(distance, out)`）。按弧长取点，过弯才是连续转弯而不是四段直角硬折；纯函数，`tests/marquee-trail-path.test.ts` 8 条测闭合、负距取模、折线逼近弧长、点不越内缩框
+- `renderer.ts`：一条 canvas。辉光用**预糊贴图**（64 个色相分桶的径向渐变小 canvas）`drawImage`，绝不用 `shadowBlur`（频谱那次的教训：按 fill 生效 = 每帧几百遍高斯）；全程 `globalCompositeOperation = "lighter"`，交叠处自然过曝成白
+- 每帧只擦光带碰得到的四条边（`clearStrips`），画面中央既不绘制也不 memset；`devicePixelRatio` 上限 1.5；采样点按 `dist = trail·(i/n)^1.3` 幂律分布，头密尾疏，同样视觉长度只要几十个采样
+- 帧率走共享设置 `animationFps`（`getFrameIntervalMs()`）；暂停 / `prefers-reduced-motion` / `document.hidden` 直接停 rAF，只留一圈暗底环 —— 不发帧就是真零开销
+- 节拍不再碰 DOM：`handleBeat` 只写 ref（pulse 抬到能量值，帧间按 `exp(-dt / (beatMs·0.45))` 连续衰减），旧实现每拍要 `querySelectorAll` 再给 60 多个元素各挂一条 WAAPI 动画 —— 那是阶跃，不是呼吸
+
+**踩过的三个坑**：
+- **画成一串珠子**：芯线按 alpha 切成十几段分别 stroke，段与段共用端点，`lineCap: "round"` 让每个分段点被叠画两次，相加模式下变成亮疙瘩。沿最外一行量「本点 − 左右 8px 均值」的凸起列数：圆头 59 列，改 `butt` 后 43 列（残余是分段折线本身的斜率拐点，3px 线上肉眼看不出；峰值 +83 是光带头部，本来就该亮）。**段内一次 stroke 才是连续线**
+- **擦除带比光还窄 → 攒出一条透明环**（用户截图指出「光影内部还是有个透明的环」）。每帧只擦四条边各 `inset + glow` ≈ 12px，可外层浅光贴图实际画到 `glow·2.85` ≈ 29px —— 擦不到的那一圈逐帧相加，攒成一圈亮环，环的内边界正好是一条圆角硬线，环和芯线之间反而是干净的透明带。量法：沿顶边往下取一列 alpha，修复前每列都在第 12 行从 0 跳到 187~248（正台阶），修复后 `clearBand = inset + glow·3.6` 单调衰减到 0、全程没有正台阶。**凡是「只擦一部分」的画布，擦除范围必须 ≥ 最外层图元的实际铺展半径**
+- **`canvas.width = 同值` 也会清位图**：改圆角只走 `resize()`，若每次都给 width/height 赋值，拖圆角滑块时每帧闪一次空白。加「尺寸真变了才写」的判断
+
+#### 2. 造型：贴边的灯缝，不是浮在中间的光带
+
+第一版按 `inset = thickness/2 + glow·0.5` 内缩，光带离边有一截，被判「不贴边」。改成 **`inset = thickness / 2`**：芯线正好铺满最外一圈像素，辉光向外那半被窗口边界吃掉、向内那半散进画面 —— 和手柄灯缝一样亮在最外沿。走线圆角取 `radius - inset`，与窗口同心。芯线再分两层：外层彩色（`hsla(h,100%,54~78%)`，头部偏白）+ 头部 30% 再压一条近白细线，才是「灯珠点亮」的白芯彩晕；大半径浅光只在头部 55% 铺，尾部铺了就是看得见的雾。
+props 换掉 `block/gap/armBlocks` 这套像素块参数，改成 `thickness / bandCount / trailRatio`。第一轮给了主窗口 3px·3 条·0.18 圈、小窗 2.5px·2 条·0.32 圈，用户判「太小没氛围感，但也别整太大」→ 现值 **主窗口 4px·3 条·0.2 圈、小窗 3px·2 条·0.34 圈**，同时把外层浅光的贴图半径系数 3.4→4、铺展 1.9→2.1、底环 alpha 0.13→0.17：向内透光从约 17px 提到约 40px，芯线只粗 1px，仍是贴在最外沿的一条线。
+
+**验证**（这台 VM 没网，B 站播放拉不起来，所以分两层测）：
+- 渲染层：`esbuild` 把 `renderer.ts` 原样打成 ESM，在真 Chromium 里跑同一个模块 —— 1600×900 冻结帧：最外一圈设备像素 **99.2% 有光**、峰值 alpha 255、色相 12 个桶全命中、画面中央 0 像素被画；3 倍放大截图确认是连续亮线不是珠子
+- 集成层：`pnpm dev` 起真应用（**HMR 在这个环境是坏的**：`ws://localhost/rsbuild-hmr` 连不上，改完代码必须 `Page.reload` 才生效）。主窗口 1200×800 → canvas 1200×800、旧 DOM 节点 0、残留 `<style>` 0；暂停态最外圈 99% 亮 / 峰值 alpha 41（就是那条暗底环）
+- 播放链路：`audio` 是 detached 的 `new Audio()`，DOM 里抓不到 → 用 `Page.addScriptToEvaluateOnNewDocument` 劫持 `window.Audio` 拿到实例，再 `dispatchEvent(new Event('play'))`（`play-list.ts` 里 `audio.onplay = () => set({ isPlaying: true })`）→ 合成播放态下 litPx 11948 → 38080、edgeMaxAlpha 41 → 255。小窗 `mode="listen"` 单独开起来量：340×80、最外圈 92.9%（圆角外那几个点本就不该亮）
+- 质量门：eslint 0 error、prettier 干净、tsc 125 → 125（改动文件零报错）、vitest 11 → 19（新增 8 条走线几何测试）
+- **待用户实测**：GPU% 在这台无显卡 VM 上没意义。旧版另有一笔本处测不到的开销 —— 200 多个合成图层 + 每块三层阴影的光栅化，在真 GPU 上才是大头
 
 
 1. **不要在渲染进程直接访问 Node API** — 通过 `window.electron.*` IPC 调用
