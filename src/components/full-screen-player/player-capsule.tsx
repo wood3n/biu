@@ -32,7 +32,7 @@ const PlayerCapsule = ({ compact = false }: { compact?: boolean }) => {
   return (
     <div
       className={clsx(
-        "window-no-drag flex items-center gap-2 rounded-full border border-white/12 bg-black/25 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)] backdrop-blur-2xl",
+        "window-no-drag flex items-center gap-2 rounded-full border border-white/12 bg-black/25 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)] backdrop-blur-xl",
         compact ? "px-2 py-1 pr-3" : "px-4 py-2 pr-6",
       )}
     >

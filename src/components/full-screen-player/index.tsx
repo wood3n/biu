@@ -287,7 +287,7 @@ const FullScreenPlayer = () => {
               <div
                 className={`absolute top-0 right-0 left-0 z-20 flex w-full items-center justify-between gap-2 px-4 py-4 transition-opacity duration-200 ${isUiVisible ? "opacity-100" : "pointer-events-none opacity-0"}`}
               >
-                <div className="window-no-drag flex items-center space-x-2 rounded-full border border-white/12 bg-black/25 py-1 pr-3 pl-1 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)] backdrop-blur-2xl">
+                <div className="window-no-drag flex items-center space-x-2 rounded-full border border-white/12 bg-black/25 py-1 pr-3 pl-1 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)] backdrop-blur-xl">
                   <IconButton title="关闭弹窗" onPress={onClose} className="text-white">
                     <RiArrowDownSLine size={24} />
                   </IconButton>
@@ -313,7 +313,7 @@ const FullScreenPlayer = () => {
                 {/* 封面关闭时：播放器胶囊紧贴窗口控制按钮右侧 */}
                 <div className="flex items-center gap-2">
                   {!isLocal && !showCover && <PlayerCapsule compact />}
-                  <div className="window-no-drag flex items-center rounded-full border border-white/12 bg-black/25 px-1 backdrop-blur-2xl">
+                  <div className="window-no-drag flex items-center rounded-full border border-white/12 bg-black/25 px-1 backdrop-blur-xl">
                     {platform === "linux" || platform === "windows" ? <WindowAction /> : null}
                   </div>
                 </div>
