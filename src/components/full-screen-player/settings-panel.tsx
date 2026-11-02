@@ -92,7 +92,8 @@ const FullScreenPlayerSettingsPanel = () => {
   useEffect(() => {
     if (!values || typeof values !== "object") return;
     const sanitizeLyricsColor = (v?: string) => (isHex(v) ? v! : "#ffffff");
-    const sanitizeSpectrumColor = (v?: string) => (isHex(v) ? v! : "#ffffff");
+    // 频谱的 "currentColor" 是内置火焰渐变的哨兵值，不是非法值
+    const sanitizeSpectrumColor = (v?: string) => (isHex(v) ? v! : "currentColor");
     const sanitizeBackgroundColor = (v?: string) => (isHex(v) ? v! : "#ffffff");
     const id = window.setTimeout(() => {
       update({
@@ -175,7 +176,11 @@ const FullScreenPlayerSettingsPanel = () => {
                     >
                       <div
                         className="h-7 w-10 rounded-full border border-white/20"
-                        style={{ backgroundColor: isHex(v) ? v : undefined }}
+                        style={
+                          isHex(v)
+                            ? { backgroundColor: v }
+                            : { backgroundImage: "linear-gradient(to top, #ff6a33, #ffab55, #ffe45c, #fffbe8)" }
+                        }
                       />
                     </ColorPicker>
                   </>

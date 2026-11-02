@@ -63,11 +63,12 @@ const AudioWaveform = ({ width = 56, height = 56, barCount = 40, barColor = "cur
 
     // shadowBlur 是按 fill 生效的：逐根柱子设阴影等于每帧跑几百遍离屏高斯。
     // 柱体合并成一条 path、顶部亮点合并成另一条，一整帧只做两次带阴影的 fill
+    // 背景压暗了一档，火焰渐变整体提亮约 10% 亮度（色相不动），柱体才不会被背景吃掉
     const fireGradient = ctx.createLinearGradient(0, height, 0, 0);
-    fireGradient.addColorStop(0, "#ff4500");
-    fireGradient.addColorStop(0.3, "#ff8c00");
-    fireGradient.addColorStop(0.6, "#ffd700");
-    fireGradient.addColorStop(1, "#ffffe0");
+    fireGradient.addColorStop(0, "#ff6a33");
+    fireGradient.addColorStop(0.3, "#ffab55");
+    fireGradient.addColorStop(0.6, "#ffe45c");
+    fireGradient.addColorStop(1, "#fffbe8");
     const useCustomColor = barColor !== "currentColor";
 
     let freqData: Uint8Array<ArrayBuffer> | null = null;
@@ -115,14 +116,14 @@ const AudioWaveform = ({ width = 56, height = 56, barCount = 40, barColor = "cur
         }
       }
 
-      ctx.shadowColor = useCustomColor ? barColor : "#ff6600";
+      ctx.shadowColor = useCustomColor ? barColor : "#ff8c42";
       ctx.shadowBlur = 8;
       ctx.fillStyle = useCustomColor ? barColor : fireGradient;
       ctx.fill(bars);
 
       if (hasTip) {
         ctx.shadowBlur = 4;
-        ctx.fillStyle = "rgba(255, 255, 224, 0.8)";
+        ctx.fillStyle = "rgba(255, 252, 232, 0.85)";
         ctx.fill(tips);
       }
       ctx.shadowBlur = 0;

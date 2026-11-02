@@ -22,7 +22,8 @@ const defaultSettings: FullScreenPlayerSettingsState = {
   showCover: true,
   showBlurredBackground: true,
   backgroundColor: undefined,
-  spectrumColor: "#ffffff",
+  // "currentColor" 是频谱内置火焰渐变的哨兵值，不是 CSS 关键字
+  spectrumColor: "currentColor",
   lyricsColor: "#ffffff",
 };
 
