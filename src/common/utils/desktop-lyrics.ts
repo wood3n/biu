@@ -33,6 +33,8 @@ export interface DesktopLyricsViewSettings {
   lineMode: "single" | "double";
   /** 上色边界的推进帧率：歌词条自己不写设置，只能靠这包镜像拿到当前档位 */
   animationFps: number;
+  /** 假名注音开关，来自主界面（同一个设置） */
+  furigana: boolean;
 }
 
 /** 歌词条自身不写设置（多窗口各持一份内存 store，写盘会互相覆盖），所有改动都交给主窗口落盘 */
@@ -82,6 +84,8 @@ function pickDesktopLyricsView(state: AppSettings): DesktopLyricsViewSettings {
     activeColor: state.desktopLyricsActiveColor,
     lineMode: state.desktopLyricsLineMode,
     animationFps: normalizeAnimationFps(state.animationFps),
+    /** 假名注音跟主界面同一个开关；歌词条自己还要判一遍是不是日语歌词 */
+    furigana: state.showLyricsFurigana,
   };
 }
 

@@ -18,6 +18,7 @@ import IconButton from "../icon-button";
 import LyricsSearchModal from "../lyrics-search-modal";
 import FontSizeControl from "./font-size-control";
 import { getLyricsAuto } from "./get-lyrics";
+import { isJapaneseLyrics } from "./kana";
 import OffsetControl from "./offset-control";
 import UtilityControls from "./utility-controls";
 
@@ -36,37 +37,6 @@ const DEFAULT_FONT_SIZE = 20;
 const DEFAULT_OFFSET = 0;
 
 /** 检测字符是否为假名（平假名 / 片假名 / 半角片假名） */
-const isKana = (char: string): boolean => {
-  const code = char.codePointAt(0);
-  if (code === undefined) return false;
-  // 平假名 U+3040-U+309F
-  if (code >= 0x3040 && code <= 0x309f) return true;
-  // 片假名 U+30A0-U+30FF
-  if (code >= 0x30a0 && code <= 0x30ff) return true;
-  // 半角片假名 U+FF65-U+FF9F
-  if (code >= 0xff65 && code <= 0xff9f) return true;
-  return false;
-};
-
-/** 判断歌词是否为日语：假名占比 ≥ 15% 视为日语 */
-const isJapaneseLyrics = (lyrics: LyricLine[]): boolean => {
-  if (!lyrics.length) return false;
-
-  let kanaCount = 0;
-  let totalCount = 0;
-
-  for (const line of lyrics) {
-    for (const char of line.text) {
-      if (/\s/.test(char)) continue;
-      totalCount++;
-      if (isKana(char)) kanaCount++;
-    }
-  }
-
-  if (totalCount === 0) return false;
-  return kanaCount / totalCount >= 0.15;
-};
-
 const Lyrics = ({
   color,
   centered,

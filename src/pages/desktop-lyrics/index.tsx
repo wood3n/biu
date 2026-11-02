@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import {
   RiCloseLine,
@@ -24,6 +24,7 @@ import {
   DESKTOP_LYRICS_FONT_SIZE_STEP,
 } from "@/common/utils/desktop-lyrics";
 import { getLyricsAuto, parseLrcToLines } from "@/components/lyrics/get-lyrics";
+import { isJapaneseLyrics } from "@/components/lyrics/kana";
 import MarqueeText from "@/components/marquee-text";
 import { useSettings } from "@/store/settings";
 import { StoreNameMap } from "@shared/store";
@@ -71,13 +72,21 @@ const ToolbarButton = ({
  * 量出一行歌词的真实宽度。容器会被窗口宽度夹住并裁掉溢出，
  * 读不到完整文字宽度，所以用同样式的不透明探针元素单独测。
  */
-const measureLyricWidth = (container: HTMLElement, text: string, fontSize: number, fontFamily: string) => {
+const measureLyricWidth = (
+  container: HTMLElement,
+  text: string,
+  fontSize: number,
+  fontFamily: string,
+  html?: string,
+) => {
   const probe = document.createElement("span");
-  probe.className = "desktop-lyrics-text";
+  probe.className = "desktop-lyrics-text [&_rt]:text-[0.5em] [&_rt]:font-normal";
   probe.style.cssText = "position:absolute;top:0;left:0;visibility:hidden;white-space:nowrap;";
   probe.style.fontSize = `${fontSize}px`;
   probe.style.fontFamily = fontFamily;
-  probe.textContent = text;
+  // 注音的 rt 常常比被注的字还宽，量纯文本会让上色分界和滚动距离都算短
+  if (html) probe.innerHTML = html;
+  else probe.textContent = text;
   container.appendChild(probe);
   const width = probe.offsetWidth;
   container.removeChild(probe);
@@ -103,6 +112,7 @@ const LyricLineCopy = ({
   activeColor,
   current,
   textWidth,
+  html,
 }: {
   text: string;
   fontSize: number;
@@ -111,15 +121,20 @@ const LyricLineCopy = ({
   activeColor: string;
   current: boolean;
   textWidth: number;
+  /** 假名注音的 ruby 片段；没有时按纯文本渲染 */
+  html?: string;
 }) => {
   const fontStyle = { fontSize, fontFamily };
+  const body = html ? { dangerouslySetInnerHTML: { __html: html } } : { children: text };
 
   if (!current) {
     return (
       <div className="relative">
-        <span className="desktop-lyrics-text block whitespace-nowrap" style={{ ...fontStyle, color }}>
-          {text}
-        </span>
+        <span
+          className="desktop-lyrics-text block whitespace-nowrap [&_rt]:text-[0.5em] [&_rt]:font-normal"
+          style={{ ...fontStyle, color }}
+          {...body}
+        />
       </div>
     );
   }
@@ -133,12 +148,16 @@ const LyricLineCopy = ({
 
   return (
     <div className="relative">
-      <span className="desktop-lyrics-text desktop-lyrics-text--halo block whitespace-nowrap" style={fontStyle}>
-        {text}
-      </span>
-      <span className="desktop-lyrics-text desktop-lyrics-text--fill whitespace-nowrap" style={fillStyle}>
-        {text}
-      </span>
+      <span
+        className="desktop-lyrics-text desktop-lyrics-text--halo block whitespace-nowrap [&_rt]:text-[0.5em] [&_rt]:font-normal"
+        style={fontStyle}
+        {...body}
+      />
+      <span
+        className="desktop-lyrics-text desktop-lyrics-text--fill whitespace-nowrap [&_rt]:text-[0.5em] [&_rt]:font-normal"
+        style={fillStyle}
+        {...body}
+      />
     </div>
   );
 };
@@ -155,6 +174,7 @@ const LyricLineView = ({
   color,
   activeColor,
   current,
+  html,
 }: {
   text: string;
   fontSize: number;
@@ -162,6 +182,7 @@ const LyricLineView = ({
   color: string;
   activeColor: string;
   current: boolean;
+  html?: string;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [textWidth, setTextWidth] = useState(0);
@@ -173,7 +194,7 @@ const LyricLineView = ({
     if (!container) return;
 
     const measure = () => {
-      const width = measureLyricWidth(container, text, fontSize, fontFamily);
+      const width = measureLyricWidth(container, text, fontSize, fontFamily, html);
       // clientWidth 含左右留白，可写的文字宽度要把它扣掉
       setTextWidth(width);
       setOverflowW(Math.max(0, width - (container.clientWidth - SHADOW_GUTTER * 2)));
@@ -184,9 +205,9 @@ const LyricLineView = ({
     const ro = new ResizeObserver(measure);
     ro.observe(container);
     return () => ro.disconnect();
-  }, [text, fontSize, fontFamily]);
+  }, [text, fontSize, fontFamily, html]);
 
-  const copyProps = { text, fontSize, fontFamily, color, activeColor, current, textWidth };
+  const copyProps = { text, fontSize, fontFamily, color, activeColor, current, textWidth, html };
 
   return (
     <div
@@ -226,6 +247,7 @@ const DesktopLyrics = () => {
       activeColor: s.desktopLyricsActiveColor,
       lineMode: s.desktopLyricsLineMode,
       animationFps: normalizeAnimationFps(s.animationFps),
+      furigana: s.showLyricsFurigana,
     })),
   );
 
@@ -233,7 +255,7 @@ const DesktopLyrics = () => {
   // 两个窗口各持一份内存 settings，歌词条直接写盘会把主窗口的旧值覆盖回去
   const [local, setLocal] = useState<DesktopLyricsViewSettings | null>(null);
   const view = local ?? persisted;
-  const { fontFamily, fontSize, locked, color, activeColor, lineMode, animationFps } = view;
+  const { fontFamily, fontSize, locked, color, activeColor, lineMode, animationFps, furigana } = view;
 
   const [snapshot, setSnapshot] = useState<MiniPlayerMainStateSnapshot | null>(null);
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
@@ -471,20 +493,59 @@ const DesktopLyrics = () => {
   const ownerName = snapshot?.ownerName;
   const titleLabel = title ? (ownerName ? `${title} - ${ownerName}` : title) : "";
 
+  /**
+   * 假名注音：跟主界面同一个开关（镜像推过来），转换走主进程那个 kuroshiro 子进程。
+   * 只取当前句和下一句，按行文本缓存在本窗口；空串表示「转换失败」，不再重试。
+   */
+  const isJapanese = useMemo(() => isJapaneseLyrics(lyrics), [lyrics]);
+  const furiganaRef = useRef<Record<string, string>>({});
+  const [furiganaMap, setFuriganaMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    furiganaRef.current = {};
+    setFuriganaMap({});
+  }, [title]);
+
+  useEffect(() => {
+    if (!furigana || !isJapanese) return;
+    const missing = [activeLine, nextLine].filter(line => line && !(line in furiganaRef.current));
+    if (!missing.length) return;
+    let cancelled = false;
+    missing.forEach(line => {
+      void window.electron.addFurigana(line).then(
+        html => {
+          if (cancelled) return;
+          furiganaRef.current[line] = html;
+          setFuriganaMap({ ...furiganaRef.current });
+        },
+        () => {
+          if (cancelled) return;
+          furiganaRef.current[line] = "";
+          setFuriganaMap({ ...furiganaRef.current });
+        },
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [furigana, isJapanese, activeLine, nextLine]);
+
   // 双行：当前句与下一句各占一行，行位置由当前句序号的奇偶决定。
   // 换行时高亮只是从一行移到另一行，下一句原地变成当前句，文字不会上下跳动。
   const isDouble = lineMode === "double" && Boolean(activeLine) && Boolean(nextLine);
-  const rows = isDouble
-    ? activeLyricIndex % 2 === 0
-      ? [
-          { line: activeLine, current: true },
-          { line: nextLine, current: false },
-        ]
-      : [
-          { line: nextLine, current: false },
-          { line: activeLine, current: true },
-        ]
-    : [{ line: text, current: true }];
+  const rows = (
+    isDouble
+      ? activeLyricIndex % 2 === 0
+        ? [
+            { line: activeLine, current: true },
+            { line: nextLine, current: false },
+          ]
+        : [
+            { line: nextLine, current: false },
+            { line: activeLine, current: true },
+          ]
+      : [{ line: text, current: true }]
+  ).map(row => ({ ...row, html: furiganaMap[row.line] || undefined }));
 
   // 无播放内容时整条留空，不画出可见矩形
   if (!title) return null;
@@ -573,6 +634,7 @@ const DesktopLyrics = () => {
             color={color}
             activeColor={activeColor}
             current={row.current}
+            html={row.html}
           />
         ))}
       </div>
