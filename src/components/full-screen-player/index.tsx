@@ -30,16 +30,6 @@ import FullScreenPlayerSettingsPanel from "./settings-panel";
 
 const platform = window.electron.getPlatform();
 
-/**
- * 背景糊图的降采样倍率。
- * filter: blur 在合成里是 render pass 上的着色器，按元素自身尺寸每帧重跑，全屏尺寸下就是每帧一遍整屏高斯。
- * 先把元素缩到 1/BG_SHRINK 再放大回去，缩样本身已等效大半径模糊，着色器只需处理 1/81 的像素。
- */
-const BG_SHRINK = 9;
-
-/** 糊图外扩，避免模糊后的透明边缘露出来 */
-const BG_OVERSCAN = 1.15;
-
 const FullScreenPlayer = () => {
   const isOpen = useModalStore(s => s.isFullScreenPlayerOpen);
   const close = useModalStore(s => s.closeFullScreenPlayer);
@@ -169,11 +159,14 @@ const FullScreenPlayer = () => {
   };
 
   const coverSrc = playItem?.pageCover || playItem?.cover;
-  const { effectsProfile, bgLayerA, bgLayerB, activeBgLayer, cssVars } = useGlassmorphism(
+  const { effectsProfile, bgLayerA, bgLayerB, activeBgLayer, cssVars, blurredCover } = useGlassmorphism(
     coverSrc,
     primaryColor,
     isOpen,
   );
+  /** 换歌交叉淡入时两层各自对应一张预先糊好的小图，渲染路径里没有 filter: blur */
+  const blurredA = blurredCover(bgLayerA.coverSrc);
+  const blurredB = blurredCover(bgLayerB.coverSrc);
 
   const computedForegroundHex = useMemo(() => {
     if (showBlurredBackground) return undefined;
@@ -252,18 +245,10 @@ const FullScreenPlayer = () => {
                       willChange: "opacity",
                     }}
                   >
-                    {bgLayerA.coverSrc && (
+                    {blurredA && (
                       <div
-                        className="absolute top-0 left-0 bg-cover bg-center"
-                        style={{
-                          width: `${100 / BG_SHRINK}%`,
-                          height: `${100 / BG_SHRINK}%`,
-                          transform: `scale(${BG_SHRINK * BG_OVERSCAN})`,
-                          transformOrigin: "top left",
-                          backgroundImage: `url(${bgLayerA.coverSrc})`,
-                          filter: `blur(${(effectsProfile.blurPx / BG_SHRINK).toFixed(2)}px)`,
-                          opacity: 0.92,
-                        }}
+                        className="absolute inset-0 bg-cover bg-center"
+                        style={{ backgroundImage: `url(${blurredA})`, opacity: 0.92 }}
                       />
                     )}
                     <div
@@ -282,18 +267,10 @@ const FullScreenPlayer = () => {
                       willChange: "opacity",
                     }}
                   >
-                    {bgLayerB.coverSrc && (
+                    {blurredB && (
                       <div
-                        className="absolute top-0 left-0 bg-cover bg-center"
-                        style={{
-                          width: `${100 / BG_SHRINK}%`,
-                          height: `${100 / BG_SHRINK}%`,
-                          transform: `scale(${BG_SHRINK * BG_OVERSCAN})`,
-                          transformOrigin: "top left",
-                          backgroundImage: `url(${bgLayerB.coverSrc})`,
-                          filter: `blur(${(effectsProfile.blurPx / BG_SHRINK).toFixed(2)}px)`,
-                          opacity: 0.92,
-                        }}
+                        className="absolute inset-0 bg-cover bg-center"
+                        style={{ backgroundImage: `url(${blurredB})`, opacity: 0.92 }}
                       />
                     )}
                     <div

@@ -4,7 +4,6 @@ export type Rgb = { r: number; g: number; b: number };
 
 export type GlassEffectsProfile = {
   enableFullEffects: boolean;
-  blurPx: number;
   transitionMs: number;
 };
 
@@ -122,6 +121,46 @@ async function extractDominantColorFromImage(src: string): Promise<Rgb> {
   });
 }
 
+/**
+ * 糊图缓存：封面 URL → 一张 64px 的 data URL。
+ *
+ * 背景虚化原来靠 CSS `filter: blur()` + 缩小再放大实现，但 Blink 会按**合成后**的尺寸光栅化那一层
+ * （实测两张 1471×1005 的图层），缩放并没省到像素。改成一次成图：加载封面时缩到 64px 并糊掉，
+ * 渲染路径里只剩一张被拉伸的小贴图，没有任何着色器。
+ */
+const blurCache = new Map<string, string>();
+
+async function buildBlurredCover(src: string): Promise<void> {
+  if (blurCache.has(src)) return;
+
+  await new Promise<void>(resolve => {
+    const img = new window.Image();
+    img.crossOrigin = "anonymous";
+    img.decoding = "async";
+    img.referrerPolicy = "no-referrer";
+    img.onload = () => {
+      const size = 64;
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        // 缩样本身就是大半径模糊，再糊 2px 是为了放大后不留双线性插值的棱角
+        ctx.filter = "blur(2px)";
+        ctx.drawImage(img, 0, 0, size, size);
+        try {
+          blurCache.set(src, canvas.toDataURL("image/jpeg", 0.7));
+        } catch {
+          // 跨域封面会污染画布，拿不到就不画糊图，还有渐变兜底
+        }
+      }
+      resolve();
+    };
+    img.onerror = () => resolve();
+    img.src = src;
+  });
+}
+
 function getEffectsProfile(): GlassEffectsProfile {
   const deviceMemory = navigator?.deviceMemory;
   const cores = navigator?.hardwareConcurrency;
@@ -134,7 +173,6 @@ function getEffectsProfile(): GlassEffectsProfile {
   const enableFullEffects = !reduceMotion && !lowEnd;
   return {
     enableFullEffects,
-    blurPx: enableFullEffects ? 12 : 8,
     transitionMs: reduceMotion ? 0 : 700,
   };
 }
@@ -178,6 +216,19 @@ export function useGlassmorphism(coverSrc: string | undefined, fallbackHex: stri
       cancelled = true;
     };
   }, [coverSrc, fallbackHex, enabled]);
+
+  // 糊图在缓存里，算好了需要再渲染一次才看得到
+  const [, bumpBlurTick] = useState(0);
+  useEffect(() => {
+    if (!enabled || !coverSrc || blurCache.has(coverSrc)) return;
+    let cancelled = false;
+    void buildBlurredCover(coverSrc).then(() => {
+      if (!cancelled) bumpBlurTick(v => v + 1);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [coverSrc, enabled]);
 
   const effectsProfile = useMemo(() => getEffectsProfile(), []);
 
@@ -233,5 +284,7 @@ export function useGlassmorphism(coverSrc: string | undefined, fallbackHex: stri
     bgLayerB,
     activeBgLayer,
     cssVars,
+    /** 取那张一次性糊好的背景图；还没算出来时是 null，此时只留渐变 */
+    blurredCover: (src: string | undefined): string | null => (src ? (blurCache.get(src) ?? null) : null),
   };
 }
