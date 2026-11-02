@@ -128,22 +128,37 @@ async function extractDominantColorFromImage(src: string): Promise<Rgb> {
  * （实测两张 1471×1005 的图层），缩放并没省到像素。改成一次成图：渲染路径里只剩一张被拉伸的小贴图，
  * 没有任何着色器。
  *
- * 长边取 256 而不是 64：64 放大到全屏只剩色块，看不出构图。模糊半径按小图算，
- * 放大后约等于 50px 的高斯 —— 够糊，但人物的位置、明暗关系还在。
+ * 编码用 PNG 不用 JPEG：三张真实封面量过，JPEG 在小图上留下的 8×8 网格会跟着放大成看得见的方格 ——
+ * 256 长边 q0.72 时块在屏上是 40px、色度边界梯度是块内的 1.6~2.4 倍（色度还单独降采样，所以是「色块」
+ * 而不是「马赛克」）；把长边翻倍、质量提到 0.97 只能把比值压到 1.6~2.7，网格还在。PNG 无损，
+ * 边界/内部梯度比 1.00，网格彻底没有，代价是 384 长边约 70~90KB（同尺寸 JPEG q0.97 约 14KB）。
+ * 长边取 384 而不是 512：糊图上的细节本来就由模糊半径决定，放大后的等效高斯两者都是约 36px，
+ * 512 只是白白多花 60KB。
  */
 const blurCache = new Map<string, string>();
 
-/** 糊图长边（px） */
-const BLUR_LONG_EDGE = 256;
+/** 缓存条数上限：封面 URL 会随歌单一直变，不清掉就是只进不出的内存 */
+const BLUR_CACHE_MAX = 12;
 
-/** 小图上的模糊半径（px）：放大到全屏约等于 50px 高斯 */
-const BLUR_PX = 7;
+/** 糊图长边（px） */
+const BLUR_LONG_EDGE = 384;
+
+/** 小图上的模糊半径（px）：放大到全屏约等于 36px 高斯 */
+const BLUR_PX = 11;
 
 /**
  * 外扩比例：canvas 边缘约 3 倍半径内会衰减成透明，直接铺满就是一圈暗角。
  * 先多画一圈，让衰减落在画布外。
  */
 const BLUR_OVERSCAN = 1 + (BLUR_PX * 7) / BLUR_LONG_EDGE;
+
+function cacheBlurredCover(src: string, url: string) {
+  blurCache.set(src, url);
+  if (blurCache.size > BLUR_CACHE_MAX) {
+    const oldest = blurCache.keys().next().value;
+    if (oldest !== undefined && oldest !== src) blurCache.delete(oldest);
+  }
+}
 
 async function buildBlurredCover(src: string): Promise<void> {
   if (blurCache.has(src)) return;
@@ -171,7 +186,7 @@ async function buildBlurredCover(src: string): Promise<void> {
           const oh = ch * BLUR_OVERSCAN;
           ctx.drawImage(img, (cw - ow) / 2, (ch - oh) / 2, ow, oh);
           try {
-            blurCache.set(src, canvas.toDataURL("image/jpeg", 0.72));
+            cacheBlurredCover(src, canvas.toDataURL("image/png"));
           } catch {
             // 跨域封面会污染画布，拿不到就不画糊图，还有纯色兜底
           }
@@ -267,7 +282,7 @@ export function useGlassmorphism(coverSrc: string | undefined, fallbackHex: stri
   const glowL = useMemo(() => getRelativeLuminance(glowRgb), [glowRgb]);
   const glassAlpha = glowL > 0.65 ? 0.24 : 0.34;
   // 压暗只到「字读得清」为止：再深就把糊图压成一块纯色，看不出构图了
-  const overlayAlpha = glowL > 0.7 ? 0.45 : 0.55;
+  const overlayAlpha = glowL > 0.7 ? 0.5 : 0.6;
 
   const gradientBackground = useMemo(() => buildGradientBackground(glowRgb, overlayAlpha), [glowRgb, overlayAlpha]);
 
