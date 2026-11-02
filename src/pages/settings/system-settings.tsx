@@ -248,7 +248,7 @@ export const SystemSettingsTab = ({
       <div className="flex w-full items-center justify-between">
         <div className="mr-6 space-y-1">
           <div className="text-medium font-medium">动画帧率上限</div>
-          <div className="text-sm text-zinc-500">灯带、频谱、桌面歌词每秒最多画几帧，选 30 最省显卡</div>
+          <div className="text-sm text-zinc-500">限制视觉特效帧率，降低 GPU 使用率</div>
         </div>
         <div className="w-[180px]">
           <Controller
