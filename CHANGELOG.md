@@ -20,6 +20,10 @@
 - **跑马灯改 canvas 渲染，光带贴窗口边缘**：原来是 ~200 个 span 各自绕窗口跑 transform 动画、每块挂三层 `box-shadow`，每帧一次全文档样式重算。改成一整块 canvas：弧长参数化的圆角矩形走线 + 预先糊好的辉光贴图 + `lighter` 相加，每帧只擦光带碰得到的四条边。A/B（同机 1600×900 各 8 秒）：逐帧样式重算 501 次 → 0，主线程忙碌 2310ms → 1110ms；暂停 / `prefers-reduced-motion` / 页面不可见直接停帧 ([9498bc6](https://github.com/xRetia/biu/commit/9498bc6))
 - **背景虚化改成一次性糊好的封面小图**：CSS `filter: blur()` 那一层会被按**合成后**的尺寸光栅化（图层树里是两张 1471×1005，比视口还大），缩小再放大并没省到像素。改为加载封面时按原图比例出一张 256 长边、约 4KB 的糊图当背景，渲染路径里不再有着色器；顺带去掉两处暗角（画布边缘的透明衰减、以及渐隐到边的 radial-gradient 压色层） ([ef306fe](https://github.com/xRetia/biu/commit/ef306fe), [74baea6](https://github.com/xRetia/biu/commit/74baea6))
 - **看不见的玻璃不再每帧糊**：全屏播放器打开时，处于收起态的评论/播放列表/分集面板加 `invisible`，被不透明抽屉整个盖住的导航栏与播放栏在入场动画结束后才去掉，逐帧模糊面积 1.21M px → 46.9k px ([05e0587](https://github.com/xRetia/biu/commit/05e0587))
+- **播放器抽屉遮罩整层去掉**：播放器是 `size="full"` 的 Drawer，内容不透明铺满视口，但 HeroUI 仍给它配了一层 `backdrop-filter` 的整屏 960000px 拷贝层，完全被盖住还每帧参与合成。改 `backdrop="none"` 后可见 backdrop-filter 层总面积 1014288 → 54288 px ([6149e53](https://github.com/xRetia/biu/commit/6149e53))
+- **播放器玻璃胶囊模糊半径 40 → 24**：胶囊背后本来就是一张预糊好的封面，再糊 40px 是二次模糊。冻住逐帧循环后 A/B 截图（同一帧背景、只改半径）像素平均差 0.26/255、最大差 2，肉眼不可辨；backdrop-filter 按半径平方计费且背景一变就重跑，采样面积 206624 → 138016 px，合计约省 4 倍 ([407a5a7](https://github.com/xRetia/biu/commit/407a5a7))
+- **背景糊图改 PNG 无损**：糊图上的色块是 JPEG 的锅，不是分辨率不够。三张真实封面在小图原生分辨率上量 8×8 网格台阶：256 长边 q0.72 的色度边界/内部梯度比 1.64~2.40，块放大到屏上是 40px；长边翻倍 + 质量 0.97 也只压到 1.62~2.71。PNG 是 0.99~1.03，网格彻底消失。取 384 长边 + 模糊 11px（放大后等效高斯与旧值一致），约 76KB 一张，并给缓存加 12 条上限（原来只进不出） ([82f329b](https://github.com/xRetia/biu/commit/82f329b))
+- **频谱默认颜色提亮**：背景压暗一档后，火焰渐变四段色相不动、各提约 10 亮度，辉光同步提亮；实测条带平均亮度 72.6 → 79.7、辉光 49.9 → 62.4。设置面板不再把内置渐变的哨兵值当非法值洗成白色 ([2be9cb6](https://github.com/xRetia/biu/commit/2be9cb6))
 - **桌面歌词已唱/未唱改逐帧推进**：分界原来只能等主窗口约 4Hz 的播放进度快照，看着像幻灯片。改为本窗口锚定时钟后按时间外推，分界写进 CSS 自定义属性、不经过 React：更新次数 3.48 次/秒 → 46.9 次/秒，平均间隔 276.5ms → 22.4ms，每步位移 31px → 均值 0.73px ([ef2fa36](https://github.com/xRetia/biu/commit/ef2fa36))
 - **AppImage 改用默认压缩**，Linux 启动更快（cherry-pick 自 FreezeNovo/biu，已注明来源） ([404d52c](https://github.com/xRetia/biu/commit/404d52c))
 
