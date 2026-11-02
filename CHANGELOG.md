@@ -20,11 +20,18 @@ AIGC:
 - **桌面歌词**：播放条右侧新增「词」开关，独立置顶透明窗显示当前歌词。8 方向描边 + 双层柔光保证压在任意桌面上都可读，已唱部分按行内进度逐字换色；指针移到歌词上才出现悬停工具条（歌名跑马灯 + 上一曲/播放暂停/下一曲 + 锁定/字号/关闭），默认整体鼠标穿透不挡桌面点击 ([3dfeac1](https://github.com/xRetia/biu/commit/3dfeac1))
 - **桌面歌词设置**单独成 tab：字体、字号、未唱/已唱颜色、单双行、一行最大宽度。双行显示当前句与下一句，两行上下位置由当前句奇偶轮换，换行时高亮只是「跳」到另一行、文字不上下跳动 ([3dfeac1](https://github.com/xRetia/biu/commit/3dfeac1), [e412a73](https://github.com/xRetia/biu/commit/e412a73))
 - **悬浮窗重做**：改用 Windows 系统亚克力材质（DWM 合成，糊的是此刻窗口后面的真实画面），底板可选透明模糊 / 纯色浅 / 纯色深三档跟随主窗口；封面改圆形贴合面板左端半圆，去掉用不到的进度条 ([3dfeac1](https://github.com/xRetia/biu/commit/3dfeac1))
+- **桌面歌词显示假名注音**：跟主界面同一个开关同步（不新增设置项），歌词条自己判是不是日语歌词，只转换当前句与下一句并按行缓存。注音跟着它被注的那个字一起换色 —— 已唱部分的注音一起变绿 ([0c46401](https://github.com/xRetia/biu/commit/0c46401))
+- **全屏播放器设置弹窗右上角关闭按钮**：原来只隐藏了 HeroUI 默认那颗，只能点遮罩或按 Esc；现在补一颗与播放器内其他玻璃胶囊同材质的圆片 ([05e0587](https://github.com/xRetia/biu/commit/05e0587))
 
 ### 🔥 功能优化
 
 - **频谱与背景虚化降 GPU**：频谱柱体合并进单条 Path2D，每帧带阴影的 fill 从约 400 次降到 2 次；封面背景糊图按 1/9 尺寸渲染再放大，着色器像素除以 81，并去掉 `transition: filter` 与 `will-change` ([3dfeac1](https://github.com/xRetia/biu/commit/3dfeac1))
 - **新增「动画帧率上限」设置**（30/60/90/120/144，默认 60）：频谱与节拍特效在 rAF 回调里按时间门控，144Hz 屏上不再把同一帧代码白跑 144 遍 ([3dfeac1](https://github.com/xRetia/biu/commit/3dfeac1))
+- **跑马灯改 canvas 渲染，光带贴窗口边缘**：原来是 ~200 个 span 各自绕窗口跑 transform 动画、每块挂三层 `box-shadow`，每帧一次全文档样式重算。改成一整块 canvas：弧长参数化的圆角矩形走线 + 预先糊好的辉光贴图 + `lighter` 相加，每帧只擦光带碰得到的四条边。A/B（同机 1600×900 各 8 秒）：逐帧样式重算 501 次 → 0，主线程忙碌 2310ms → 1110ms；暂停 / `prefers-reduced-motion` / 页面不可见直接停帧 ([9498bc6](https://github.com/xRetia/biu/commit/9498bc6))
+- **背景虚化改成一次性糊好的封面小图**：CSS `filter: blur()` 那一层会被按**合成后**的尺寸光栅化（图层树里是两张 1471×1005，比视口还大），缩小再放大并没省到像素。改为加载封面时按原图比例出一张 256 长边、约 4KB 的糊图当背景，渲染路径里不再有着色器；顺带去掉两处暗角（画布边缘的透明衰减、以及渐隐到边的 radial-gradient 压色层） ([ef306fe](https://github.com/xRetia/biu/commit/ef306fe), [74baea6](https://github.com/xRetia/biu/commit/74baea6))
+- **看不见的玻璃不再每帧糊**：全屏播放器打开时，处于收起态的评论/播放列表/分集面板加 `invisible`，被不透明抽屉整个盖住的导航栏与播放栏在入场动画结束后才去掉，逐帧模糊面积 1.21M px → 46.9k px ([05e0587](https://github.com/xRetia/biu/commit/05e0587))
+- **桌面歌词已唱/未唱改逐帧推进**：分界原来只能等主窗口约 4Hz 的播放进度快照，看着像幻灯片。改为本窗口锚定时钟后按时间外推，分界写进 CSS 自定义属性、不经过 React：更新次数 3.48 次/秒 → 46.9 次/秒，平均间隔 276.5ms → 22.4ms，每步位移 31px → 均值 0.73px ([ef2fa36](https://github.com/xRetia/biu/commit/ef2fa36))
+- **AppImage 改用默认压缩**，Linux 启动更快（cherry-pick 自 FreezeNovo/biu，已注明来源） ([404d52c](https://github.com/xRetia/biu/commit/404d52c))
 
 ### 🩹 修复问题
 
@@ -32,6 +39,11 @@ AIGC:
 - **桌面歌词投影被方框切平**：已唱换色不再用「克隆一份按进度裁切」，改为描边层 + 上色层两层叠加，任何一层都不被裁切 ([3dfeac1](https://github.com/xRetia/biu/commit/3dfeac1))
 - **桌面歌词一行占满整屏**：窗口宽度就是用户设的一行上限（30~95%）+ 两侧柔光留白，一行两端改硬裁切为遮罩渐隐；窗口下缘留白提高到 40px，字下那圈柔光不再被窗口边缘切掉 ([e412a73](https://github.com/xRetia/biu/commit/e412a73))
 - **播放条「词」字小一圈**：13px 的汉字墨迹高 12px，旁边图标 15.6px，改为 16px 且不加字重 ([a90a7de](https://github.com/xRetia/biu/commit/a90a7de))
+- **桌面歌词跑马灯不再循环跑**：旧做法是静止 1.5 秒后起一条 `infinite` 循环动画，时长按「文字宽度 ÷ 固定速度」算，与真实演唱进度无关，会出现「已唱都走完了、字还没滚到」。现在位移直接由已唱比例换算，与上色层同一个时钟，必然同起同止；到尾端最后一个字正好停在右侧渐隐区之前 ([cada19c](https://github.com/xRetia/biu/commit/cada19c))
+- **工具条出现时短歌词不居中**：药丸宽度取最宽的孩子，工具条一出现就把整条撑宽，而歌词行左对齐 —— 几个字的歌词会贴在大条左边。改为按溢出量选对齐，实测偏移 -86.3px → 0 ([da450d1](https://github.com/xRetia/biu/commit/da450d1))
+- **桌面歌词工具条点不了**：Windows 上 `setIgnoreMouseEvents(true, { forward: true })` 实测完全不转发鼠标事件（真实光标扫过去收到 0 个）。改为渲染层上报命中矩形、主进程按 60ms 轮询真实光标，命中才取消穿透；并改成「页面报矩形 → 主进程答状态」的握手，修掉页面重载后工具条叫不出来的问题 ([ef2fa36](https://github.com/xRetia/biu/commit/ef2fa36), [516ab24](https://github.com/xRetia/biu/commit/516ab24))
+- **全屏播放器里窗口拖不动**：为了省掉导航栏那层 `backdrop-blur` 把主界面子树置 `invisible`，但 `invisible` 的元素不参与命中测试，窗口拖拽区正是从那里来的。改为导航栏继续绘制、只摘掉 backdrop-filter ([c539e68](https://github.com/xRetia/biu/commit/c539e68))
+- **迷你播放器三个控制按钮贴在一起**：上一首/播放/下一首只隔 2px，视觉上挨着，改为 6px ([9498bc6](https://github.com/xRetia/biu/commit/9498bc6))
 
 ## v2.4.0-xretia
 
