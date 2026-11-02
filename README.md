@@ -18,24 +18,54 @@
 
 <table>
   <tr>
-    <td width="50%" align="center"><img src="./screenshots/fullscreen.png" alt="全屏播放器：左封面右歌词，底部实时频谱" width="100%" /></td>
-    <td width="50%" align="center"><img src="./screenshots/home.png" alt="首页推荐：每日推荐与音乐 / 鬼畜分区" width="100%" /></td>
+    <td width="50%" align="center">
+      <img src="./screenshots/fullscreen.png" alt="全屏播放器" width="100%" />
+      <br /><sub>全屏播放器 · 左封面右歌词，底部实时频谱</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="./screenshots/home.png" alt="首页推荐" width="100%" />
+      <br /><sub>首页推荐 · 每日推荐与音乐 / 鬼畜分区</sub>
+    </td>
   </tr>
   <tr>
-    <td width="50%" align="center"><img src="./screenshots/player.png" alt="播放页：歌词逐行聚焦，当前行放大" width="100%" /></td>
-    <td width="50%" align="center"><img src="./screenshots/player-comment.png" alt="评论面板：楼中楼、图片放大" width="100%" /></td>
+    <td width="50%" align="center">
+      <img src="./screenshots/player.png" alt="播放页" width="100%" />
+      <br /><sub>播放页 · 歌词逐行聚焦，当前行放大</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="./screenshots/player-comment.png" alt="评论面板" width="100%" />
+      <br /><sub>评论面板 · 楼中楼、图片放大、一键跳转</sub>
+    </td>
   </tr>
   <tr>
-    <td width="50%" align="center"><img src="./screenshots/playlist.png" alt="播放列表：毛玻璃抽屉，支持搜索" width="100%" /></td>
-    <td width="50%" align="center"><img src="./screenshots/search.png" alt="搜索：结果列表与右键操作" width="100%" /></td>
+    <td width="50%" align="center">
+      <img src="./screenshots/playlist.png" alt="播放列表" width="100%" />
+      <br /><sub>播放列表 · 毛玻璃抽屉，支持搜索</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="./screenshots/search.png" alt="搜索" width="100%" />
+      <br /><sub>搜索 · 结果列表与右键操作</sub>
+    </td>
   </tr>
   <tr>
-    <td width="50%" align="center"><img src="./screenshots/miniplayer.png" alt="迷你播放器：亚克力胶囊与实时歌词" width="100%" /></td>
-    <td width="50%" align="center"><img src="./screenshots/space.png" alt="个人空间：收藏夹、稍后再看、历史" width="100%" /></td>
+    <td width="50%" align="center">
+      <img src="./screenshots/miniplayer.png" alt="迷你播放器" width="100%" />
+      <br /><sub>迷你播放器 · 亚克力胶囊与实时歌词</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="./screenshots/space.png" alt="个人空间" width="100%" />
+      <br /><sub>个人空间 · 收藏夹、稍后再看、历史</sub>
+    </td>
   </tr>
   <tr>
-    <td width="50%" align="center"><img src="./screenshots/download.png" alt="下载管理：视频与音频提取、断点续传" width="100%" /></td>
-    <td width="50%" align="center"><img src="./screenshots/bbp-favorite.png" alt="BBPlayer 共享歌单：与手机端互通" width="100%" /></td>
+    <td width="50%" align="center">
+      <img src="./screenshots/download.png" alt="下载管理" width="100%" />
+      <br /><sub>下载管理 · 视频与音频提取、断点续传</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="./screenshots/bbp-favorite.png" alt="BBPlayer 共享歌单" width="100%" />
+      <br /><sub>BBPlayer 共享歌单 · 与手机端互通</sub>
+    </td>
   </tr>
 </table>
 
