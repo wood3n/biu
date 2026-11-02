@@ -1,8 +1,8 @@
 # Changelog
 
-## v3.0.0-xretia
+## v3.0.1-xretia
 
-[compare changes](https://github.com/xRetia/biu/compare/v2.4.0-xretia...v3.0.0-xretia)
+[compare changes](https://github.com/xRetia/biu/compare/v2.4.0-xretia...v3.0.1-xretia)
 
 这一版的重点是性能优化和桌面歌词。
 

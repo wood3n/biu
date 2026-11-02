@@ -1177,7 +1177,7 @@
             </svg>
             <span id="dlLabel">下载最新版本</span>
           </a>
-          <p class="ver" id="ver" aria-label="当前版本 v3.0.0，最新版">
+          <p class="ver" id="ver" aria-label="当前版本 v3.0.1，最新版">
             <span class="ver-label" aria-hidden="true">当前版本</span>
             <span class="ver-num" id="verNum" aria-hidden="true"></span>
             <span class="ver-latest" aria-hidden="true">最新版</span>
@@ -1430,7 +1430,7 @@
               <tr>
                 <td><span class="os">Linux</span></td>
                 <td>
-                  <code>Biu-&lt;version&gt;-linux-x64.AppImage</code>
+                  <code>Biu-&lt;version&gt;-linux-x86_64.AppImage</code>
                   <div class="note"><code>chmod +x</code> 后直接运行</div>
                 </td>
                 <td>
@@ -1591,19 +1591,65 @@ pnpm test       # Vitest</pre
         if (e.target === box) box.close();
       });
 
-      // 下载按钮按当前系统写清楚该点哪个，取不到就留通用文案
-      const ua = navigator.userAgent;
-      const label = document.getElementById("dlLabel");
-      if (/Windows/i.test(ua)) label.textContent = "Windows 版下载";
-      else if (/Mac|iPhone|iPad/i.test(ua) && !/Android/i.test(ua)) label.textContent = "macOS 版下载";
-      else if (/Linux/i.test(ua) && !/Android/i.test(ua)) label.textContent = "Linux 版下载";
-      else if (/Android/i.test(ua)) label.textContent = "下载桌面版";
+      // 下载按钮：按当前系统和架构直接指向对应安装包，点一下就开始下载
+      (() => {
+        const VERSION = "3.0.1-xretia";
+        const BASE = `https://github.com/xRetia/biu/releases/download/v${VERSION}`;
+        const btn = document.getElementById("dlBtn");
+        const label = document.getElementById("dlLabel");
+        const ua = navigator.userAgent;
+        const isAndroid = /Android/i.test(ua);
+        const isIOS = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+        const os = isAndroid || isIOS || /CrOS/i.test(ua)
+          ? ""
+          : /Windows/i.test(ua)
+            ? "windows"
+            : /Mac/i.test(ua)
+              ? "mac"
+              : /Linux/i.test(ua)
+                ? "linux"
+                : "";
 
-      // 版本号：滚动到 3.0.0
+        const pick = arch => {
+          if (os === "windows") return { file: `Biu-${VERSION}-win-setup-${arch}.exe`, text: "Windows" };
+          if (os === "mac") return { file: `Biu-${VERSION}-mac-${arch}.dmg`, text: "macOS" };
+          // AppImage 的架构名是 x86_64 / arm64，和 Windows / macOS 的 x64 不一致
+          if (os === "linux") {
+            return { file: `Biu-${VERSION}-linux-${arch === "x64" ? "x86_64" : arch}.AppImage`, text: "Linux" };
+          }
+          return null;
+        };
+
+        // 先按各平台主流架构挂上链接，保证立即可点；拿到真实架构后再改
+        let arch = os === "mac" ? "arm64" : "x64";
+        const apply = () => {
+          const target = pick(arch);
+          if (!target) {
+            label.textContent = "下载桌面版";
+            return;
+          }
+          btn.href = `${BASE}/${target.file}`;
+          label.textContent = `${target.text} 版下载（${arch}）`;
+        };
+        apply();
+
+        navigator.userAgentData
+          ?.getHighEntropyValues?.(["architecture"])
+          .then(({ architecture }) => {
+            const real = architecture === "arm" ? "arm64" : architecture === "x86" ? "x64" : "";
+            if (real && real !== arch) {
+              arch = real;
+              apply();
+            }
+          })
+          .catch(() => {});
+      })();
+
+      // 版本号：滚动到 3.0.1
       (() => {
         const box = document.getElementById("verNum");
         if (!box) return;
-        const target = "3.0.0";
+        const target = "3.0.1";
         const rows = "0123456789"
           .repeat(3)
           .split("")
