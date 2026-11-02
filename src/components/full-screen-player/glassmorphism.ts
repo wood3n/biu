@@ -122,13 +122,28 @@ async function extractDominantColorFromImage(src: string): Promise<Rgb> {
 }
 
 /**
- * 糊图缓存：封面 URL → 一张 64px 的 data URL。
+ * 糊图缓存：封面 URL → 一张按原图比例的糊图 data URL。
  *
  * 背景虚化原来靠 CSS `filter: blur()` + 缩小再放大实现，但 Blink 会按**合成后**的尺寸光栅化那一层
- * （实测两张 1471×1005 的图层），缩放并没省到像素。改成一次成图：加载封面时缩到 64px 并糊掉，
- * 渲染路径里只剩一张被拉伸的小贴图，没有任何着色器。
+ * （实测两张 1471×1005 的图层），缩放并没省到像素。改成一次成图：渲染路径里只剩一张被拉伸的小贴图，
+ * 没有任何着色器。
+ *
+ * 长边取 256 而不是 64：64 放大到全屏只剩色块，看不出构图。模糊半径按小图算，
+ * 放大后约等于 50px 的高斯 —— 够糊，但人物的位置、明暗关系还在。
  */
 const blurCache = new Map<string, string>();
+
+/** 糊图长边（px） */
+const BLUR_LONG_EDGE = 256;
+
+/** 小图上的模糊半径（px）：放大到全屏约等于 50px 高斯 */
+const BLUR_PX = 7;
+
+/**
+ * 外扩比例：canvas 边缘约 3 倍半径内会衰减成透明，直接铺满就是一圈暗角。
+ * 先多画一圈，让衰减落在画布外。
+ */
+const BLUR_OVERSCAN = 1 + (BLUR_PX * 7) / BLUR_LONG_EDGE;
 
 async function buildBlurredCover(src: string): Promise<void> {
   if (blurCache.has(src)) return;
@@ -139,19 +154,27 @@ async function buildBlurredCover(src: string): Promise<void> {
     img.decoding = "async";
     img.referrerPolicy = "no-referrer";
     img.onload = () => {
-      const size = 64;
-      const canvas = document.createElement("canvas");
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        // 缩样本身就是大半径模糊，再糊 2px 是为了放大后不留双线性插值的棱角
-        ctx.filter = "blur(2px)";
-        ctx.drawImage(img, 0, 0, size, size);
-        try {
-          blurCache.set(src, canvas.toDataURL("image/jpeg", 0.7));
-        } catch {
-          // 跨域封面会污染画布，拿不到就不画糊图，还有渐变兜底
+      const iw = img.naturalWidth || img.width;
+      const ih = img.naturalHeight || img.height;
+      if (iw > 0 && ih > 0) {
+        // 保持原图比例，别把封面压成方图
+        const scale = BLUR_LONG_EDGE / Math.max(iw, ih);
+        const cw = Math.max(1, Math.round(iw * scale));
+        const ch = Math.max(1, Math.round(ih * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = cw;
+        canvas.height = ch;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.filter = `blur(${BLUR_PX}px)`;
+          const ow = cw * BLUR_OVERSCAN;
+          const oh = ch * BLUR_OVERSCAN;
+          ctx.drawImage(img, (cw - ow) / 2, (ch - oh) / 2, ow, oh);
+          try {
+            blurCache.set(src, canvas.toDataURL("image/jpeg", 0.72));
+          } catch {
+            // 跨域封面会污染画布，拿不到就不画糊图，还有纯色兜底
+          }
         }
       }
       resolve();
@@ -177,11 +200,14 @@ function getEffectsProfile(): GlassEffectsProfile {
   };
 }
 
+/**
+ * 背景上的两层压色：一层均匀主色偏 + 一层黑。
+ *
+ * 不用 radial-gradient —— 它从中心渐隐到边缘，四角就比中间暗一块，正是「暗角」。
+ * 现在糊图自己承担画面，这里只负责把对比度压下来让字读得清，整幅是平的。
+ */
 function buildGradientBackground(glowRgb: Rgb, overlayAlpha: number) {
-  return `radial-gradient(1100px circle at 50% 18%, rgb(${glowRgb.r} ${glowRgb.g} ${glowRgb.b} / 0.42), transparent 62%),
-radial-gradient(900px circle at 14% 86%, rgb(${glowRgb.r} ${glowRgb.g} ${glowRgb.b} / 0.22), transparent 58%),
-radial-gradient(900px circle at 86% 92%, rgb(${glowRgb.r} ${glowRgb.g} ${glowRgb.b} / 0.16), transparent 60%),
-rgb(0 0 0 / ${overlayAlpha})`;
+  return `rgb(${glowRgb.r} ${glowRgb.g} ${glowRgb.b} / 0.18), rgb(0 0 0 / ${overlayAlpha})`;
 }
 
 export function useGlassmorphism(coverSrc: string | undefined, fallbackHex: string, enabled: boolean = true) {
@@ -240,7 +266,8 @@ export function useGlassmorphism(coverSrc: string | undefined, fallbackHex: stri
 
   const glowL = useMemo(() => getRelativeLuminance(glowRgb), [glowRgb]);
   const glassAlpha = glowL > 0.65 ? 0.24 : 0.34;
-  const overlayAlpha = glowL > 0.7 ? 0.62 : 0.72;
+  // 压暗只到「字读得清」为止：再深就把糊图压成一块纯色，看不出构图了
+  const overlayAlpha = glowL > 0.7 ? 0.45 : 0.55;
 
   const gradientBackground = useMemo(() => buildGradientBackground(glowRgb, overlayAlpha), [glowRgb, overlayAlpha]);
 
