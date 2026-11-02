@@ -203,6 +203,7 @@ const FullScreenPlayer = () => {
       onClose={close}
       placement="bottom"
       size="full"
+      backdrop="none"
       radius="none"
       isDismissable={false}
       hideCloseButton
