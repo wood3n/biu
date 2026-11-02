@@ -1,0 +1,965 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Biu · 把 B 站变成你的桌面音乐库</title>
+    <meta
+      name="description"
+      content="Biu 是基于哔哩哔哩公开接口的跨平台桌面音乐播放器：全屏歌词、假名注音、桌面歌词、迷你播放器、实时频谱、无损音频下载，Windows / macOS / Linux。"
+    />
+    <meta name="theme-color" content="#0a0c14" />
+    <meta property="og:title" content="Biu 音乐播放器" />
+    <meta property="og:description" content="把 B 站变成你的桌面音乐库" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./screenshots/fullscreen.png" />
+    <link rel="icon" href="./screenshots/logo.svg" />
+    <style>
+      :root {
+        --ink: #101423;
+        --ink-2: #4c566e;
+        --ink-3: #7d879c;
+        --paper: #f6f7fb;
+        --line: rgb(16 20 35 / 10%);
+        --pink: #f56ee2;
+        --blue: #2c95ff;
+        --cyan: #01e3f8;
+        --violet: #7b5cff;
+        --maxw: 1180px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font:
+          16px/1.8 system-ui,
+          -apple-system,
+          "Segoe UI",
+          "PingFang SC",
+          "Hiragino Sans GB",
+          "Microsoft YaHei",
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      img {
+        max-width: 100%;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      code {
+        font:
+          0.88em/1.7 ui-monospace,
+          SFMono-Regular,
+          Consolas,
+          monospace;
+        padding: 0.12em 0.42em;
+        border-radius: 6px;
+        background: rgb(16 20 35 / 7%);
+      }
+
+      .wrap {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 0 24px;
+        width: 100%;
+      }
+
+      /* ============ 极光主视觉 ============ */
+      .hero {
+        position: relative;
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        color: #fff;
+        overflow: clip;
+        isolation: isolate;
+        background: #0a0c14;
+      }
+
+      /* 竖向光带：底色是多层极光渐变，上面叠一层窄条重复渐变，形成「灯带」的条纹质感 */
+      .aurora {
+        position: absolute;
+        inset: -12% -8%;
+        z-index: -2;
+        background:
+          radial-gradient(58% 46% at 12% 8%, rgb(44 149 255 / 90%), transparent 68%),
+          radial-gradient(52% 44% at 42% 4%, rgb(1 227 248 / 78%), transparent 66%),
+          radial-gradient(56% 48% at 72% 12%, rgb(123 92 255 / 88%), transparent 68%),
+          radial-gradient(60% 50% at 96% 30%, rgb(245 110 226 / 72%), transparent 70%),
+          radial-gradient(70% 55% at 26% 96%, rgb(255 168 120 / 55%), transparent 72%),
+          linear-gradient(180deg, #0a0c14, #131a2e 55%, #1b1430);
+        animation: drift 26s ease-in-out infinite alternate;
+      }
+
+      .aurora::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(90deg, rgb(255 255 255 / 7%) 0 6px, rgb(255 255 255 / 0%) 6px 26px);
+        mix-blend-mode: soft-light;
+      }
+
+      @keyframes drift {
+        to {
+          transform: translate3d(-3%, 2%, 0) scale(1.06);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .aurora {
+          animation: none;
+        }
+      }
+
+      /* 顶部一条会走光的细线，就是应用里那条贴边灯带 */
+      .edge-light {
+        position: absolute;
+        inset: 0 0 auto;
+        height: 3px;
+        z-index: 3;
+        background: linear-gradient(90deg, var(--pink), var(--blue), var(--cyan), var(--pink));
+        background-size: 300% 100%;
+        animation: slide 16s linear infinite;
+      }
+
+      @keyframes slide {
+        to {
+          background-position: 300% 0;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .edge-light {
+          animation: none;
+        }
+      }
+
+      header {
+        position: relative;
+        z-index: 2;
+        padding: 26px 0 0;
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+
+      .brand svg {
+        width: 30px;
+        height: 30px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 22px;
+        margin-left: auto;
+        font-size: 14.5px;
+        color: rgb(255 255 255 / 82%);
+      }
+
+      .nav-links a:hover {
+        color: #fff;
+      }
+
+      @media (width < 760px) {
+        .nav-links a:not(.keep) {
+          display: none;
+        }
+      }
+
+      .hero-body {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 40px 0 26px;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(64px, 15vw, 168px);
+        line-height: 0.95;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        text-shadow: 0 8px 60px rgb(0 0 0 / 35%);
+      }
+
+      .hero .slogan {
+        margin: 18px 0 0;
+        font-size: clamp(17px, 2.6vw, 26px);
+        font-weight: 300;
+        letter-spacing: 0.04em;
+        color: rgb(255 255 255 / 92%);
+      }
+
+      .hero .desc {
+        margin: 14px auto 0;
+        max-width: 560px;
+        font-size: 14.5px;
+        color: rgb(255 255 255 / 70%);
+      }
+
+      .dl {
+        margin-top: 38px;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 17px 34px;
+        border-radius: 999px;
+        background: #fff;
+        color: #101423;
+        font-size: clamp(17px, 2.4vw, 21px);
+        font-weight: 650;
+        box-shadow: 0 24px 60px -20px rgb(0 0 0 / 55%);
+        transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease;
+      }
+
+      .dl:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 30px 70px -22px rgb(0 0 0 / 60%);
+      }
+
+      .dl svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      .ver {
+        margin-top: 16px;
+        font-size: 14px;
+        color: rgb(255 255 255 / 78%);
+        min-height: 1.2em;
+      }
+
+      .more {
+        margin-top: 6px;
+        font-size: 14.5px;
+        color: #fff;
+        border-bottom: 1px solid rgb(255 255 255 / 40%);
+        padding-bottom: 2px;
+      }
+
+      .more:hover {
+        border-color: #fff;
+      }
+
+      .platforms {
+        display: flex;
+        gap: clamp(18px, 4vw, 44px);
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 40px 0 8px;
+        font-size: 15px;
+        color: rgb(255 255 255 / 85%);
+      }
+
+      .platforms span {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .platforms svg {
+        width: 19px;
+        height: 19px;
+        fill: currentColor;
+        opacity: 0.9;
+      }
+
+      /* 产品图：从主视觉底部浮出来 */
+      .hero-shot {
+        position: relative;
+        z-index: 1;
+        margin: 0 auto;
+        width: min(1080px, calc(100% - 48px));
+      }
+
+      .hero-shot img {
+        display: block;
+        width: 100%;
+        border-radius: 16px 16px 0 0;
+        border: 1px solid rgb(255 255 255 / 22%);
+        border-bottom: 0;
+        box-shadow: 0 -10px 80px -30px rgb(0 0 0 / 60%);
+      }
+
+      /* ============ 下面的内容区 ============ */
+      .band {
+        padding: clamp(64px, 9vw, 108px) 0;
+      }
+
+      .band.alt {
+        background: #fff;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .eyebrow {
+        font-size: 13px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-3);
+        margin: 0 0 10px;
+      }
+
+      h2.big {
+        margin: 0 0 12px;
+        font-size: clamp(28px, 4.6vw, 44px);
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        font-weight: 750;
+      }
+
+      .lead {
+        margin: 0 0 44px;
+        max-width: 640px;
+        color: var(--ink-2);
+      }
+
+      /* 功能：两列大字列表，不用卡片 */
+      .feats {
+        display: grid;
+        gap: 0 48px;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      }
+
+      .feat {
+        padding: 26px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .feat h3 {
+        margin: 0 0 8px;
+        font-size: 19px;
+        font-weight: 650;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .feat p {
+        margin: 0;
+        color: var(--ink-2);
+        font-size: 15px;
+      }
+
+      .mark {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        flex: none;
+        background: var(--blue);
+      }
+
+      .mark.p {
+        background: var(--pink);
+      }
+
+      .mark.c {
+        background: var(--cyan);
+      }
+
+      .mark.v {
+        background: var(--violet);
+      }
+
+      /* 截图：横向吸附滚动，窄屏也好看 */
+      .strip {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: min(420px, 82vw);
+        gap: 18px;
+        overflow-x: auto;
+        padding-bottom: 14px;
+        scroll-snap-type: x mandatory;
+      }
+
+      .strip button {
+        all: unset;
+        cursor: zoom-in;
+        scroll-snap-align: start;
+        display: block;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: #0d1017;
+      }
+
+      .strip button:focus-visible {
+        outline: 2px solid var(--blue);
+        outline-offset: 3px;
+      }
+
+      .strip img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        object-fit: cover;
+        object-position: top left;
+      }
+
+      .strip figcaption {
+        display: block;
+        padding: 10px 14px;
+        font-size: 13.5px;
+        color: var(--ink-2);
+        background: #fff;
+      }
+
+      .strip {
+        scrollbar-width: thin;
+      }
+
+      /* 下载表 */
+      .table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fff;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 620px;
+        font-size: 15px;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+
+      th {
+        font-size: 12.5px;
+        letter-spacing: 0.08em;
+        color: var(--ink-3);
+        background: rgb(16 20 35 / 3%);
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .os {
+        font-weight: 650;
+      }
+
+      .note {
+        font-size: 13.5px;
+        color: var(--ink-3);
+      }
+
+      /* 两栏：上手 + 开发 */
+      .cols {
+        display: grid;
+        gap: 40px;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      }
+
+      ol.steps {
+        margin: 0;
+        padding-left: 24px;
+        display: grid;
+        gap: 12px;
+        color: var(--ink-2);
+      }
+
+      ol.steps b {
+        color: var(--ink);
+      }
+
+      pre {
+        margin: 0;
+        padding: 20px;
+        border-radius: 14px;
+        background: #12162a;
+        color: #dfe6f5;
+        overflow-x: auto;
+        font:
+          13.5px/1.85 ui-monospace,
+          SFMono-Regular,
+          Consolas,
+          monospace;
+      }
+
+      /* FAQ */
+      details {
+        border-top: 1px solid var(--line);
+        padding: 4px 0;
+      }
+
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 16.5px;
+        list-style: none;
+        padding: 18px 0;
+        display: flex;
+        gap: 12px;
+        align-items: baseline;
+      }
+
+      summary::-webkit-details-marker {
+        display: none;
+      }
+
+      summary::before {
+        content: "+";
+        color: var(--blue);
+        font-weight: 700;
+        width: 1em;
+      }
+
+      details[open] summary::before {
+        content: "−";
+      }
+
+      details p {
+        margin: 0 0 20px 1.9em;
+        color: var(--ink-2);
+        font-size: 15px;
+      }
+
+      /* 页脚 */
+      footer {
+        background: #0a0c14;
+        color: rgb(255 255 255 / 62%);
+        padding: 54px 0 44px;
+        font-size: 14px;
+      }
+
+      footer .foot-links {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+        color: #fff;
+      }
+
+      footer p {
+        margin: 0 0 10px;
+        max-width: 760px;
+      }
+
+      /* 灯箱 */
+      dialog#lightbox {
+        margin: auto;
+        max-width: min(1160px, 94vw);
+        padding: 0;
+        border: 0;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #0d1017;
+        color: var(--ink-2);
+      }
+
+      dialog#lightbox::backdrop {
+        background: rgb(6 8 14 / 82%);
+      }
+
+      dialog#lightbox img {
+        display: block;
+        width: 100%;
+        max-height: 76vh;
+        object-fit: contain;
+      }
+
+      dialog#lightbox p {
+        margin: 0;
+        padding: 11px 16px;
+        font-size: 13.5px;
+        background: #fff;
+        color: var(--ink-2);
+      }
+    </style>
+  </head>
+
+  <body>
+    <section class="hero">
+      <div class="aurora" aria-hidden="true"></div>
+      <div class="edge-light" aria-hidden="true"></div>
+
+      <header>
+        <div class="wrap nav">
+          <a class="brand" href="./index.html">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M7.17157 2.75737L10.414 5.99948H13.585L16.8284 2.75737C17.219 2.36685 17.8521 2.36685 18.2426 2.75737C18.6332 3.1479 18.6332 3.78106 18.2426 4.17158L16.414 5.99948L18.5 6.00001C20.433 6.00001 22 7.56701 22 9.50001V17.5C22 19.433 20.433 21 18.5 21H5.5C3.567 21 2 19.433 2 17.5V9.50001C2 7.56701 3.567 6.00001 5.5 6.00001L7.585 5.99948L5.75736 4.17158C5.36684 3.78106 5.36684 3.1479 5.75736 2.75737C6.14788 2.36685 6.78105 2.36685 7.17157 2.75737ZM18.5 8.00001H5.5C4.7203 8.00001 4.07955 8.5949 4.00687 9.35555L4 9.50001V17.5C4 18.2797 4.59489 18.9205 5.35554 18.9931L5.5 19H18.5C19.2797 19 19.9204 18.4051 19.9931 17.6445L20 17.5V9.50001C20 8.67158 19.3284 8.00001 18.5 8.00001Z"
+                fill="#17C964"
+              />
+              <path
+                d="M15.1767 12.643C15.8229 13.0316 15.8229 13.9684 15.1766 14.357L10.9158 16.9189C10.2493 17.3197 9.40048 16.8396 9.40049 16.0619L9.40059 10.9379C9.4006 10.1602 10.2494 9.68015 10.9159 10.0809L15.1767 12.643Z"
+                fill="#17C964"
+              />
+            </svg>
+            <span>Biu</span>
+          </a>
+          <nav class="nav-links" aria-label="站内导航">
+            <a href="#features">功能</a>
+            <a href="#shots">截图</a>
+            <a href="#download">下载</a>
+            <a href="#start">上手</a>
+            <a href="#faq">答疑</a>
+            <a class="keep" href="https://github.com/xRetia/biu">GitHub</a>
+          </nav>
+        </div>
+      </header>
+
+      <div class="hero-body">
+        <div class="wrap">
+          <h1>Biu</h1>
+          <p class="slogan">把 B 站变成你的桌面音乐库</p>
+          <p class="desc">
+            每日推荐、收藏夹、私人
+            FM、无损音频，配上全屏歌词、假名注音、桌面歌词和迷你播放器。非官方项目，与哔哩哔哩无关联。
+          </p>
+          <a class="dl" href="https://github.com/xRetia/biu/releases/latest" id="dlBtn">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 20h16" />
+            </svg>
+            <span id="dlLabel">下载最新版本</span>
+          </a>
+          <p class="ver" id="ver"></p>
+          <a class="more" href="#download">其他平台与架构</a>
+          <div class="platforms">
+            <span
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M3 5.5 11 4.6v7.1H3v-6.2Zm0 13 8-.9v-3.1H3v4Zm9-.9 8 1.1V11.7H12v5.9Zm0-12.9 8-1.1V11H12V4.7Z"
+                /></svg
+              >Windows</span
+            >
+            <span
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M16.4 12.6c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.6.8-3.3.8-.7 0-1.7-.8-2.8-.8-1.5 0-2.8.8-3.6 2.2-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.6 2.2 2.7 2.1 1.1 0 1.5-.7 2.7-.7 1.2 0 1.6.7 2.8.7 1.2 0 1.9-1 2.6-2 .8-1.2 1.2-2.3 1.2-2.3s-2.1-.8-2.1-3.5ZM14.6 5.6c.6-.7 1-1.6.9-2.6-.9 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.5 1 .1 2-.5 2.5-1.2Z"
+                /></svg
+              >macOS</span
+            >
+            <span
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 2c-2 2.7-2.6 5.6-2 8.3-.9 1-1.6 2.2-1.9 3.6-.4 1.9-.7 3.2-1.6 4.1-.6.6-.6 1.6 0 2.2.5.5 1.3.6 2 .3-.2.8.2 1.4.9 1.6.8.2 1.5-.3 1.7-1.1.4.5 1 .8 1.7.8h.4c.7 0 1.3-.3 1.7-.8.2.8.9 1.3 1.7 1.1.7-.2 1.1-.8.9-1.6.7.3 1.5.2 2-.3.6-.6.6-1.6 0-2.2-.9-.9-1.2-2.2-1.6-4.1-.3-1.4-1-2.6-1.9-3.6.6-2.7 0-5.6-2-8.3 0 0-.6 1-1.6 1.7C12.6 3 12 2 12 2Z"
+                /></svg
+              >Linux</span
+            >
+            <span>· x64 / arm64</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-shot">
+        <img src="./screenshots/fullscreen.png" alt="Biu 全屏播放器：左侧封面，右侧逐行歌词，底部实时频谱与进度条" />
+      </div>
+    </section>
+
+    <section class="band" id="features">
+      <div class="wrap">
+        <p class="eyebrow">Features</p>
+        <h2 class="big">把「在电脑上看歌词听歌」这件事做透了</h2>
+        <p class="lead">所有功能都围着同一个场景：开着歌单干活，屏幕上随时看得见词、控得住播放。</p>
+        <div class="feats">
+          <div class="feat">
+            <h3><i class="mark"></i>全屏播放器</h3>
+            <p>左封面右歌词的沉浸界面，逐行聚焦滚动、当前行放大高亮；评论直接在右侧翻，支持楼中楼与图片放大。</p>
+          </div>
+          <div class="feat">
+            <h3><i class="mark p"></i>日文歌词假名注音</h3>
+            <p>自动标注振假名，可开关、可调字号。桌面歌词也跟着显示注音，已唱部分的注音一起换色。</p>
+          </div>
+          <div class="feat">
+            <h3><i class="mark c"></i>桌面歌词</h3>
+            <p>独立置顶透明窗，压在任意桌面上都读得清；默认鼠标穿透不挡点击，指针落到歌词上才出现控制工具条。</p>
+          </div>
+          <div class="feat">
+            <h3><i class="mark v"></i>迷你播放器</h3>
+            <p>一颗贴着屏幕边缘的小胶囊：实时歌词、溢出自动滚动，Windows 11 用系统亚克力材质，占用极低。</p>
+          </div>
+          <div class="feat">
+            <h3><i class="mark c"></i>毛玻璃与主题</h3>
+            <p>侧边栏、播放列表、右键菜单、弹窗统一主题感知的毛玻璃；浅色 / 深色 / 跟随系统，主色和圆角可自定义。</p>
+          </div>
+          <div class="feat">
+            <h3><i class="mark"></i>实时频谱与贴边灯带</h3>
+            <p>音频频谱跟着音乐跳，窗口边缘还有一条随节拍走的七彩灯带。特效有独立的帧率上限，不白吃显卡。</p>
+          </div>
+          <div class="feat">
+            <h3><i class="mark p"></i>无损音质与下载</h3>
+            <p>优先拉取更高码率音频（Hi-Res / FLAC），支持视频与音频提取下载、收藏夹批量下载、断点续传。</p>
+          </div>
+          <div class="feat">
+            <h3><i class="mark v"></i>BBPlayer 共享歌单</h3>
+            <p>与手机端 BBPlayer 收藏夹双向兼容、云端同步，电脑上建的歌单手机直接能听。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band alt" id="shots">
+      <div class="wrap">
+        <p class="eyebrow">Gallery</p>
+        <h2 class="big">长这样</h2>
+        <p class="lead">左右滑动，点任意一张看大图。</p>
+        <div class="strip" id="strip"></div>
+      </div>
+    </section>
+
+    <section class="band" id="download">
+      <div class="wrap">
+        <p class="eyebrow">Download</p>
+        <h2 class="big">选对文件就行</h2>
+        <p class="lead">
+          全部产物在 <a href="https://github.com/xRetia/biu/releases/latest">GitHub Releases</a>。文件名里的
+          <code>x64</code> 是 Intel / AMD 机器，<code>arm64</code> 是 Apple 芯片、骁龙本和多数 ARM 设备。
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>系统</th>
+                <th>推荐</th>
+                <th>什么时候选别的</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="os">Windows 10 / 11</span></td>
+                <td>
+                  <code>Biu-&lt;version&gt;-win-setup-x64.exe</code>
+                  <div class="note">NSIS 安装包，带开始菜单与自动更新</div>
+                </td>
+                <td>不想装、或没有管理员权限 → <code>win-portable</code>（免安装，但应用内更新受限，需手动替换）</td>
+              </tr>
+              <tr>
+                <td><span class="os">macOS 12+</span></td>
+                <td>
+                  <code>Biu-&lt;version&gt;-mac-arm64.dmg</code>
+                  <div class="note">Apple 芯片；Intel 机器选 <code>mac-x64.dmg</code></div>
+                </td>
+                <td>脚本 / CI 分发 → <code>.zip</code>；首次打开被拦就在「系统设置 → 隐私与安全性」里允许</td>
+              </tr>
+              <tr>
+                <td><span class="os">Linux</span></td>
+                <td>
+                  <code>Biu-&lt;version&gt;-linux-x64.AppImage</code>
+                  <div class="note"><code>chmod +x</code> 后直接运行</div>
+                </td>
+                <td>
+                  习惯包管理器 → <code>.deb</code> / <code>.rpm</code>；Arch 用户 → AUR
+                  <a href="https://aur.archlinux.org/packages/biu-bin"><code>biu-bin</code></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note" style="margin-top: 14px">
+          <code>latest.yml</code> 与 <code>*.blockmap</code> 是自动更新的辅助文件，手动下载时不用管。
+        </p>
+      </div>
+    </section>
+
+    <section class="band alt" id="start">
+      <div class="wrap cols">
+        <div>
+          <p class="eyebrow">Getting started</p>
+          <h2 class="big">三分钟上手</h2>
+          <ol class="steps">
+            <li><b>装好并打开。</b>装完第一次启动会问是否允许来源，允许即可。</li>
+            <li>
+              <b>登录 B 站。</b
+              >左下角头像处用密码或短信登录，走极验风控。不登录也能用每日推荐、搜索和本地音乐，只是拿不到收藏夹与历史。
+            </li>
+            <li><b>点一首歌。</b>双击封面或点左下角进入全屏播放器。</li>
+            <li><b>要边干活边看词？</b>播放栏右侧点「词」开桌面歌词；想要小窗就点迷你播放器。</li>
+            <li><b>顺手的事。</b>播放栏上滚轮直接调音量，全局快捷键可以脱离窗口切歌。</li>
+          </ol>
+        </div>
+        <div>
+          <p class="eyebrow">For developers</p>
+          <h2 class="big">从源码跑</h2>
+          <p class="lead">需要 Node <code>22.17.1</code> 与 pnpm <code>10.24.0</code>。</p>
+          <pre>
+git clone https://github.com/xRetia/biu
+cd biu
+pnpm install
+pnpm dev        # 起开发服务器并拉起 Electron
+pnpm build      # 产出各平台安装包
+pnpm test       # Vitest</pre
+          >
+          <p class="note" style="margin-top: 14px">
+            代码规范：ESLint 9 + Prettier + Stylelint；提交信息走约定式（<code>feat:</code> / <code>fix:</code>），husky
+            + commitlint 会拦。欢迎提 Issue 与 PR，详见 <a href="./README.md">README</a>。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="faq">
+      <div class="wrap">
+        <p class="eyebrow">FAQ</p>
+        <h2 class="big">常见问题</h2>
+        <div style="margin-top: 22px">
+          <details>
+            <summary>某些歌放不出来，或者音质只有 128K？</summary>
+            <p>
+              更高码率（Hi-Res、无损）取决于账号权限，需要登录，部分还要大会员。整段无法播放时先试试切歌或重新解析。
+            </p>
+          </details>
+          <details>
+            <summary>歌词不对，或者根本没有歌词？</summary>
+            <p>
+              歌词是多来源自动匹配的（B
+              站字幕、Netease、lrclib），匹配不到就留空。可以在歌词面板手动搜索并缓存，缓存后本机固定用这一份。
+            </p>
+          </details>
+          <details>
+            <summary>日文歌没有假名注音？</summary>
+            <p>
+              按假名占比判定：歌词里假名少于 15% 视为非日语，开关会置灰。转换在主进程离线完成，首次要等词典加载几秒。
+            </p>
+          </details>
+          <details>
+            <summary>桌面歌词挡住了桌面上的按钮？</summary>
+            <p>
+              它默认整体鼠标穿透，只有指针落在歌词上时才短暂接收点击。工具条点不到就先动一下鼠标——命中判定靠真实光标位置轮询。
+            </p>
+          </details>
+          <details>
+            <summary>很吃显卡吗？</summary>
+            <p>
+              特效都做了帧率门控：设置里有「动画帧率上限」（30/60/90/120/144，默认
+              60），频谱、背景虚化和边缘灯带都受它约束；暂停时灯带直接停帧。
+            </p>
+          </details>
+          <details>
+            <summary>能商用吗？</summary>
+            <p>不能。项目采用 PolyForm Noncommercial 1.0.0，禁止销售、收费服务、广告变现、商业集成等任何商业用途。</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <div class="foot-links">
+          <a href="https://github.com/xRetia/biu">GitHub</a>
+          <a href="https://github.com/xRetia/biu/releases">发布</a>
+          <a href="./CHANGELOG.md">更新日志</a>
+          <a href="./LICENSE">许可证</a>
+          <a href="https://github.com/SocialSisterYi/bilibili-API-collect">接口资料</a>
+        </div>
+        <p>
+          本项目仅供学习与研究，与哔哩哔哩无官方关联，不使用其商标；数据来自用户调用的公开接口与个人账户授权。使用时请遵守
+          Bilibili《用户协议》《社区规则》及相关法律法规，不要绕过登录 / 会员权限或 DRM 进行批量抓取。
+        </p>
+        <p>
+          感谢
+          <a href="https://github.com/SocialSisterYi/bilibili-API-collect">bilibili-API-collect</a> 的接口整理（CC-BY-NC
+          4.0），以及 <a href="https://github.com/cjlworld">@cjlworld</a> 维护的 AUR 软件包。
+        </p>
+        <p>Electron + React + TypeScript · PolyForm-Noncommercial-1.0.0</p>
+      </div>
+    </footer>
+
+    <dialog id="lightbox" aria-label="截图预览">
+      <img alt="" />
+      <p></p>
+    </dialog>
+
+    <script>
+      const SHOTS = [
+        ["home.png", "首页推荐：每日推荐与音乐 / 鬼畜分区"],
+        ["player.png", "播放页：歌词逐行聚焦，当前行放大"],
+        ["fullscreen.png", "全屏播放器：左封面右歌词，底部频谱"],
+        ["player-comment.png", "评论面板：楼中楼、图片放大、一键跳转"],
+        ["miniplayer.png", "迷你播放器：亚克力胶囊 + 实时歌词"],
+        ["playlist.png", "播放列表：毛玻璃抽屉，支持搜索"],
+        ["search.png", "搜索：结果列表与右键操作"],
+        ["download.png", "下载管理：视频与音频提取、断点续传"],
+        ["bbp-favorite.png", "BBPlayer 共享歌单：与手机端互通"],
+        ["space.png", "个人空间：收藏夹、稍后再看、历史"],
+      ];
+
+      const strip = document.getElementById("strip");
+      for (const [file, caption] of SHOTS) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.innerHTML =
+          `<img src="./screenshots/${file}" alt="${caption}" loading="lazy" />` + `<figcaption>${caption}</figcaption>`;
+        btn.addEventListener("click", () => showShot(file, caption));
+        strip.append(btn);
+      }
+
+      const box = document.getElementById("lightbox");
+      function showShot(file, caption) {
+        const img = box.querySelector("img");
+        img.src = `./screenshots/${file}`;
+        img.alt = caption;
+        box.querySelector("p").textContent = caption;
+        box.showModal();
+      }
+      box.addEventListener("click", e => {
+        if (e.target === box) box.close();
+      });
+
+      // 下载按钮按当前系统写清楚该点哪个，取不到就留通用文案
+      const ua = navigator.userAgent;
+      const label = document.getElementById("dlLabel");
+      if (/Windows/i.test(ua)) label.textContent = "Windows 版下载";
+      else if (/Mac|iPhone|iPad/i.test(ua) && !/Android/i.test(ua)) label.textContent = "macOS 版下载";
+      else if (/Linux/i.test(ua) && !/Android/i.test(ua)) label.textContent = "Linux 版下载";
+      else if (/Android/i.test(ua)) label.textContent = "下载桌面版";
+
+      // 版本号取 GitHub Releases；离线或被拦就什么都不显示
+      fetch("https://api.github.com/repos/xRetia/biu/releases/latest")
+        .then(r => (r.ok ? r.json() : null))
+        .then(rel => {
+          if (!rel || !rel.tag_name) return;
+          const day = rel.published_at ? String(rel.published_at).slice(0, 10) : "";
+          document.getElementById("ver").textContent = `${rel.tag_name.replace(/^v/, " ")} ${day}`;
+        })
+        .catch(() => {});
+    </script>
+  </body>
+</html>
