@@ -645,6 +645,42 @@ props 换掉 `block/gap/armBlocks` 这套像素块参数，改成 `thickness / b
 
 **验证**（真应用，合成播放态；注音转换走主进程 kuroshiro 子进程，首次要等词典）：单行 `rtCount=4`、`--lyric-text-w=424px`（含 ruby）；双行截图确认两行都有注音、已唱部分的注音一起变绿。**踩的坑**：只改磁盘上的 `app-settings.json` 不会通知主窗口（electron-store 没有 `onDidChange`），镜像仍是旧值 —— 必须 `Page.reload` 主窗口才看得到新设置，第一次量双行就是这么量成单行的。
 
+### 2026-11-02（第十四阶段）: 悬浮窗黑胶封面、主控键配色、非 Win11 底板
+
+#### 1. 封面改成一枚会转的小黑胶 (`src/pages/mini-player/index.tsx`, `src/app.css`)
+
+- `.mini-cover` 60px 圆盘：黑色径向底 + 外圈 1px 亮边；`.vinyl-label` 内缩 5px 装封面（即唱片标），`animation: vinyl-spin 9s linear infinite`，**暂停用 `animation-play-state: paused` 而不是摘掉动画**，重新播放时角度接着走、不回跳
+- `.vinyl-groove` 用 `repeating-radial-gradient` 画细纹，再用 `mask-image: radial-gradient(... 24px, #000 25px)` 只留唱片标之外那 5px 黑边；`.vinyl-gloss` 是**不跟着转**的 conic 高光，记录转动
+- 中间**不放中心孔/黑点**（用户明确要求去掉）：封面就是完整的一张圆图
+- 窗口从 340×80 加到 340×88、封面 52→60、面板 padding 与封面/文字间距统一 14px：52px 的唱片在 80 高面板里太小，放大后右列要重新排（见第 4 节）
+- `prefers-reduced-motion` 下直接不转
+- 封面图参数从 `672w_378h_1c` 改成 `192w_192h_1c`：圆标要方图，52px 也不需要 672 宽
+
+#### 2. 主控键改成主色实心 (`src/pages/mini-player/index.tsx`)
+
+原来是与底板同色的磨砂白片（暗底上图标还是前景色），和主界面 / 全屏播放器的播放键都不一致。改为 `variant="solid" color="primary"` + `text-white`，删掉整套 `.mini-key` 样式。实测计算色 `rgb(90, 158, 124)`（默认主色 `#5a9e7c`）、图标白色。
+
+#### 3. 非 Win11 的亚克力替代 (`electron/system-material.ts`, `electron/mini-player.ts`, `src/app.css`)
+
+`backgroundMaterial` 只有 Win11（build ≥ 22000）有，之前代码却把所有 `win32` 都当支持，Win10 上等于把页面贴在了一块没有材质的窗口上。现在分三档：
+- `acrylic`（Win11）：`transparent: false` + `backgroundMaterial: "acrylic"`，原样
+- `vibrancy`（macOS）：`transparent: false` + `vibrancy: "under-window"` + `visualEffectState: "active"`，和亚克力同样要求窗口 opaque；切纯色时 `setVibrancy(null)`
+- `none`（Win10 / Linux）：`transparent: true`，窗口底色始终透明，底板整块交给页面
+- 主进程把 `?material=none|system` 带进 `loadFile` 的 query，渲染层据此给面板加 `.mini-panel--css`：这个类负责 10px 圆角（系统不会给 Win10/Linux 圆角）与亚克力替身 —— 接近不透明的磨砂渐变（`97%`/`96%`），并把 `--heroui-foreground` 按 `.dark` 钉死。**不能继续沿用 20% 色调**：透明窗口后面没有材质，桌面会直接透上来
+
+**验证**（真应用 + CDP 注入播放态与本地封面）：`?material=system`、面板 340×88、封面落在 (14,14) 60×60、`.vinyl-label` 50×50、`animation-play-state: running`，600ms 内 transform 从 36° 转到 79°；暂停后两次采样 transform 完全一致、`aria-label=播放`；主控键 `rgb(90, 158, 124)`、图标 `rgb(255,255,255)`。替身面板：加上 `.mini-panel--css` 后 `border-radius: 10px`、`overflow: hidden`、底板为 97% 白渐变、封面/播放键坐标不变（14/193），截图文字清晰。macOS / Win10 / Linux 本机无法实跑，只做到类型与参数层面的覆盖。
+
+#### 4. 悬停晃动 + 右列上下空白 (`src/pages/mini-player/index.tsx`)
+
+**问题一（晃动）**: 鼠标移进面板后，上行从歌词换成「歌名 - 歌手」，字号 15 的歌词行高与 13 的歌名行高不同（实测 18.75 → 19.5），把下面的整排按钮顶了 0.375px；同时跑马灯在 1 秒后开始滚，视觉上像整块控件在抖。
+**修法**: 上行包一层固定 `h-5` + `items-center`，两套文案都装进同一个 20px 盒子里，行高再怎么变都不影响后面的兄弟节点。
+
+**问题二（上下公摊）**: 原先是 `py-3.5` + 右列内容自然高度 + 两行间距 8，右列整体垂直居中后在标题上方和控件下方各留一截空白，用户看着像「公摊面积」。
+**修法**: 右列 `flex h-full flex-col justify-between py-3.5`：标题贴面板上沿留白、控件贴下沿留白，多出来的空间全部落在两行之间。于是标题顶 ≈ 唱片顶（y=14）、控件底 = 唱片底（y=74），上下左右四边的留白都是 14px。
+
+**验证**（CDP 合成 hover，逐 50ms 采样 20 帧）：`before` 与 hover 全程 `info [14,20]`、`play [46,28,193]` 完全一致，零位移；控件底 46+28=74 与唱片底 14+60=74 对齐。
+
+
 
 1. **不要在渲染进程直接访问 Node API** — 通过 `window.electron.*` IPC 调用
 2. **新增 IPC 通道** — 在 `electron/ipc/channel.ts` 定义，`electron/ipc/` 下注册处理器，`preload.ts` 暴露，`shared/types/renderer.d.ts` 声明类型

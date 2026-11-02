@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { appSettingsStore } from "./store";
+import { getDesktopMaterial } from "./system-material";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,7 +13,7 @@ let miniPlayer: BrowserWindow | null = null;
 
 /** 悬浮窗面板尺寸：窗口 = 面板，材质/底色直接铺满，不再内嵌一层 CSS 胶囊 */
 const PANEL_WIDTH = 340;
-const PANEL_HEIGHT = 80;
+const PANEL_HEIGHT = 88;
 
 /** 纯色底板对应的窗口底色（深色不是纯黑，压住屏幕边缘更舒服） */
 const SOLID_BACKGROUND: Record<"light" | "dark", string> = {
@@ -20,8 +21,8 @@ const SOLID_BACKGROUND: Record<"light" | "dark", string> = {
   dark: "#1A1A1E",
 };
 
-/** Windows 以外没有 DWM 材质，底板交回 CSS 画 */
-const supportsSystemMaterial = process.platform === "win32";
+/** 桌面实时材质：Win11 亚克力 / macOS vibrancy，其余平台（Win10、Linux）没有 */
+const desktopMaterial = getDesktopMaterial();
 
 /**
  * 切换悬浮窗底板。
@@ -30,18 +31,33 @@ const supportsSystemMaterial = process.platform === "win32";
  * 代价是材质只能按窗口矩形（带系统圆角）整块画 —— 于是面板就是窗口本身，
  * 不再往里嵌一层胶囊，否则就是「矩形材质里贴了一颗药丸」。
  * 材质必须 `transparent: false` 才拿得到，纯色模式则关掉材质、用窗口实色底。
+ *
+ * Win10 / Linux 没有任何系统材质，窗口保持透明，底板由页面画（见 .mini-panel--css）：
+ * 一层接近不透明的磨砂渐变，否则桌面会直接透过 20% 的亚克力色调，字根本读不清。
  */
 export function applyMiniPlayerBackdrop(mode: MiniPlayerBackdrop) {
-  if (!miniPlayer || miniPlayer.isDestroyed() || !supportsSystemMaterial) return;
+  if (!miniPlayer || miniPlayer.isDestroyed()) return;
 
-  if (mode === "acrylic") {
+  if (mode === "acrylic" && desktopMaterial === "acrylic") {
     miniPlayer.setBackgroundMaterial("acrylic");
     miniPlayer.setBackgroundColor("#00000000");
     return;
   }
 
   miniPlayer.setBackgroundMaterial("none");
-  miniPlayer.setBackgroundColor(SOLID_BACKGROUND[mode]);
+
+  if (process.platform === "darwin") {
+    // 纯色底板下必须摘掉 vibrancy，否则实色下面还糊着桌面
+    miniPlayer.setVibrancy(mode === "acrylic" ? "under-window" : null);
+  }
+
+  if (desktopMaterial === "none") {
+    // 没有材质的窗口始终透明，纯色底板也交给页面画，四角才能是圆的
+    miniPlayer.setBackgroundColor("#00000000");
+    return;
+  }
+
+  miniPlayer.setBackgroundColor(mode === "acrylic" ? "#00000000" : SOLID_BACKGROUND[mode]);
 }
 
 /** 读取持久化的底板模式，窗口创建时就按它设置，避免开机先闪一下亚克力 */
@@ -66,11 +82,13 @@ const createMiniPlayer = () => {
     center: true,
     // 隐藏窗口标题栏和窗口按钮
     frame: false,
-    // 透明窗口拿不到系统材质，所以 Windows 上必须 transparent: false，
-    // 页面透明处透出材质；其它平台没有 DWM 材质，仍按逐像素透明由 CSS 画底板
-    transparent: !supportsSystemMaterial,
-    backgroundColor: backdrop === "acrylic" ? "#00000000" : SOLID_BACKGROUND[backdrop],
-    backgroundMaterial: supportsSystemMaterial && backdrop === "acrylic" ? "acrylic" : "none",
+    // 系统材质（Win11 亚克力 / macOS vibrancy）必须 opaque 才拿得到；
+    // 没有材质的平台保持逐像素透明，由页面自己把底板画出来
+    transparent: desktopMaterial === "none",
+    backgroundColor: desktopMaterial === "none" || backdrop === "acrylic" ? "#00000000" : SOLID_BACKGROUND[backdrop],
+    backgroundMaterial: desktopMaterial === "acrylic" && backdrop === "acrylic" ? "acrylic" : "none",
+    vibrancy: desktopMaterial === "vibrancy" && backdrop === "acrylic" ? "under-window" : undefined,
+    visualEffectState: desktopMaterial === "vibrancy" && backdrop === "acrylic" ? "active" : undefined,
     titleBarOverlay: false,
     alwaysOnTop: true,
     skipTaskbar: true,
@@ -110,7 +128,11 @@ const createMiniPlayer = () => {
   }
 
   const indexPath = path.resolve(__dirname, "../dist/web/index.html");
-  miniPlayer.loadFile(indexPath, { hash: "mini-player" });
+  // 把「这块窗口有没有系统材质」告诉页面：有就只叠薄薄一层色调，没有才画整块底板
+  miniPlayer.loadFile(indexPath, {
+    hash: "mini-player",
+    query: { material: desktopMaterial === "none" ? "none" : "system" },
+  });
 };
 
 const destroyMiniPlayer = () => {

@@ -238,11 +238,12 @@ button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"])
 /* ============================================================
  * 悬浮窗面板：底板铺满整个窗口，窗口本身就是面板
  *
- * 底板模式由主进程落到窗口上：acrylic 用 DWM 系统材质（糊的是「此刻」窗口后面的真实
- * 画面，天然实时、我们这边零开销），light/dark 把窗口底色设成实色。
- * 系统材质只能按窗口矩形（带 Win11 默认圆角）整块绘制，所以 CSS 不再往材质里嵌一颗胶囊
+ * 底板模式由主进程落到窗口上：Win11 用 DWM 亚克力、macOS 用 vibrancy（糊的都是「此刻」
+ * 窗口后面的真实画面，天然实时、我们这边零开销），light/dark 把窗口底色设成实色。
+ * 系统材质只能按窗口矩形（带系统圆角）整块绘制，所以 CSS 不再往材质里嵌一颗胶囊
  * —— 那等于在矩形上贴了颗药丸。这里只补一层色调，保证歌词压在任何桌面上都可读。
  * 轮廓交给系统窗口阴影：CSS 外投影画不出窗口边界，只会在四角留脏影。
+ * Win10 / Linux 没有系统材质，窗口保持透明，整块底板改由 .mini-panel--css 自己画。
  * ============================================================ */
 
 .mini-panel {
@@ -287,68 +288,102 @@ button[data-slot="trigger"][aria-haspopup="listbox"]:not([aria-expanded="true"])
   background-color: #1a1a1e;
 }
 
-/* 封面：面板是圆角矩形，封面跟着做圆角方块，不再强行切成正圆 */
+/* 无系统材质（Win10 / Linux）：整块底板由页面画，四角也得自己圆 */
+.mini-panel--css {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* 亚克力在无材质平台上的替身：接近不透明的磨砂渐变。
+   透明窗口底下没有任何东西可糊，继续用 20% 色调会让桌面直接透上来，字读不清 */
+.mini-panel--css.mini-panel--acrylic {
+  --heroui-foreground: 240 6% 12%;
+
+  background: linear-gradient(160deg, rgb(252 252 254 / 97%), rgb(236 237 242 / 96%));
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 70%);
+}
+
+.dark .mini-panel--css.mini-panel--acrylic {
+  --heroui-foreground: 240 12% 96%;
+
+  background: linear-gradient(160deg, rgb(42 42 48 / 97%), rgb(20 20 24 / 96%));
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 14%);
+}
+
+/* 封面做成一枚小唱片：黑色盘托 + 中间圆形封面 + 不跟着转的高光 */
 .mini-cover {
-  border-radius: 12px;
-  outline: 1px solid rgb(255 255 255 / 40%);
-  outline-offset: -1px;
-  box-shadow:
-    0 2px 6px -2px rgb(0 0 0 / 30%),
-    inset 0 0 0 1px rgb(0 0 0 / 8%);
-}
-
-.dark .mini-cover {
-  outline-color: rgb(255 255 255 / 16%);
-}
-
-/* 主控播放键：与底板同材质的浅色圆片（比实心强调色更贴近玻璃质感） */
-.mini-key {
   border-radius: 9999px;
-  background-color: rgb(255 255 255 / 58%);
+  background: radial-gradient(circle at 50% 45%, #26262c 0 72%, #101014 84%, #232329 100%);
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 80%),
-    inset 0 0 0 1px rgb(255 255 255 / 40%);
-  transition: background-color 160ms ease-out;
+    0 3px 8px -3px rgb(0 0 0 / 55%),
+    inset 0 0 0 1px rgb(255 255 255 / 16%),
+    inset 0 1px 2px rgb(255 255 255 / 22%);
 }
 
-.mini-key:hover {
-  background-color: rgb(255 255 255 / 76%);
+/* 旋转的唱片标：留 5px 黑边，暂停时冻在当前角度 */
+.vinyl-label {
+  position: absolute;
+  inset: 5px;
+  overflow: hidden;
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 12%);
+  animation: vinyl-spin 9s linear infinite;
+  animation-play-state: paused;
+  will-change: transform;
 }
 
-.dark .mini-key {
-  background-color: rgb(255 255 255 / 14%);
+.vinyl-label--playing {
+  animation-play-state: running;
+}
+
+/* 黑边上的细密纹路：遮罩只留下唱片标之外那一圈 */
+.vinyl-groove {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: repeating-radial-gradient(circle at 50% 50%, rgb(255 255 255 / 9%) 0 0.5px, rgb(0 0 0 / 0%) 0.5px 2px);
+  mask-image: radial-gradient(circle at 50% 50%, transparent 0 24px, #000 25px);
+  pointer-events: none;
+}
+
+/* 固定高光：不跟着唱片转，转动才看得出来 */
+.vinyl-gloss {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 200deg at 50% 50%,
+    rgb(255 255 255 / 0%) 0deg,
+    rgb(255 255 255 / 20%) 24deg,
+    rgb(255 255 255 / 0%) 56deg,
+    rgb(255 255 255 / 0%) 176deg,
+    rgb(255 255 255 / 10%) 204deg,
+    rgb(255 255 255 / 0%) 236deg
+  );
+  pointer-events: none;
+}
+
+@keyframes vinyl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vinyl-label {
+    animation: none;
+  }
+}
+
+/* 主控播放键：跟主界面一致，实心主色圆片 + 白图标 */
+.mini-play {
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 22%),
-    inset 0 0 0 1px rgb(255 255 255 / 12%);
-}
-
-.dark .mini-key:hover {
-  background-color: rgb(255 255 255 / 24%);
-}
-
-/* 纯色底板的文字色由底板决定，主控键也得跟着底板的深浅走，而不是全局主题：
-   浅色底板 + 暗色主题时，默认那层暗磨砂片会整块融进底板里看不见。
-   多带一个 .mini-panel 是为了压过上面 .dark .mini-key:hover */
-.mini-panel.mini-panel--light .mini-key {
-  background-color: rgb(255 255 255 / 74%);
-  box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 92%),
-    inset 0 0 0 1px rgb(255 255 255 / 60%);
-}
-
-.mini-panel.mini-panel--dark .mini-key {
-  background-color: rgb(255 255 255 / 16%);
-  box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 24%),
-    inset 0 0 0 1px rgb(255 255 255 / 12%);
-}
-
-.mini-panel.mini-panel--light .mini-key:hover {
-  background-color: rgb(255 255 255 / 92%);
-}
-
-.mini-panel.mini-panel--dark .mini-key:hover {
-  background-color: rgb(255 255 255 / 26%);
+    0 2px 6px -2px hsl(var(--heroui-primary) / 45%),
+    inset 0 1px 0 rgb(255 255 255 / 22%);
 }
 
 /* 歌词换行：自下而上淡入 */

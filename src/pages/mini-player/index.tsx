@@ -29,7 +29,9 @@ const PlayModeList = getPlayModeList(16);
 
 /** 面板圆角：与 Win11 窗口圆角同量级，光带跟着贴着面板轮廓走 */
 const PANEL_RADIUS = 10;
-const COVER_SIZE = 52;
+
+/** 有没有系统材质由主进程按平台判定（Win11 亚克力 / macOS vibrancy），没有时底板整块由页面画 */
+const HAS_SYSTEM_MATERIAL = new URLSearchParams(window.location.search).get("material") !== "none";
 
 /** 底板模式 -> 底板色调样式（材质本身由主进程设在窗口上，见 app.css .mini-panel--*） */
 const BACKDROP_CLASSES: Record<MiniPlayerBackdrop, string> = {
@@ -128,32 +130,37 @@ const MarqueeText = memo(({ text, className }: { text: string; className?: strin
 
 const CoverView = memo(() => {
   const cover = usePlayState(s => s.cover);
-  if (cover) {
-    return (
-      <div className="mini-cover relative size-13 flex-shrink-0 overflow-hidden">
-        <Image
-          removeWrapper
-          radius="none"
-          src={cover}
-          width={COVER_SIZE}
-          height={COVER_SIZE}
-          params="672w_378h_1c.avif"
-          loading="eager"
-          decoding="async"
-          style={{
-            transform: "translateZ(0)",
-            backfaceVisibility: "hidden",
-            willChange: "transform",
-            contain: "paint",
-          }}
-        />
-      </div>
-    );
-  }
-  // 无封面时显示 logo 占位
+  const isPlaying = usePlayState(s => s.isPlaying);
+
   return (
-    <div className="mini-cover flex size-13 flex-shrink-0 items-center justify-center bg-black/8 dark:bg-white/10">
-      <LogoIcon className="text-foreground/35 size-6" />
+    // 黑胶唱片：黑色盘托 + 中间圆形封面（唱片标）+ 固定高光，封面随播放旋转
+    <div className="mini-cover relative size-15 flex-shrink-0">
+      <div className={clx("vinyl-label", isPlaying && "vinyl-label--playing")}>
+        {cover ? (
+          <Image
+            removeWrapper
+            radius="none"
+            src={cover}
+            params="192w_192h_1c.avif"
+            loading="eager"
+            decoding="async"
+            className="size-full"
+            style={{
+              transform: "translateZ(0)",
+              backfaceVisibility: "hidden",
+              willChange: "transform",
+              contain: "paint",
+            }}
+          />
+        ) : (
+          // 无封面时显示 logo 占位
+          <div className="flex size-full items-center justify-center bg-white/10">
+            <LogoIcon className="text-foreground/35 size-6" />
+          </div>
+        )}
+      </div>
+      <span aria-hidden className="vinyl-groove" />
+      <span aria-hidden className="vinyl-gloss" />
     </div>
   );
 });
@@ -369,14 +376,19 @@ const MiniPlayer = () => {
       />
       {/* 底板铺满整个窗口：材质/实色由主进程设在窗口上，这里只叠色调（见 app.css .mini-panel*） */}
       <div
-        className={clx("mini-panel flex h-full w-full items-center gap-3 px-3", BACKDROP_CLASSES[backdrop])}
+        className={clx(
+          "mini-panel flex h-full w-full items-center gap-3.5 px-3.5",
+          BACKDROP_CLASSES[backdrop],
+          !HAS_SYSTEM_MATERIAL && "mini-panel--css",
+        )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         <CoverView />
-        {/* 右栏：上行歌词、下行控件，整列吃掉封面之外的全部宽度（沿用原版上下结构） */}
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <div className="flex min-h-0 items-center justify-center overflow-hidden">
+        {/* 右栏：上行歌词、下行控件；行高填满面板，标题贴顶、控件贴底，
+            两块之间的空隙由 justify-between 分配，不在上下留一圈无用的空白 */}
+        <div className="flex h-full min-w-0 flex-1 flex-col justify-between py-3.5">
+          <div className="flex h-5 items-center justify-center overflow-hidden">
             <InfoView
               title={title}
               ownerName={ownerName}
@@ -414,12 +426,14 @@ const MiniPlayer = () => {
                 isDisabled={!title}
                 isIconOnly
                 size="sm"
-                variant="light"
+                variant="solid"
+                color="primary"
+                radius="full"
                 disableAnimation
                 onPress={() => {
                   togglePlay();
                 }}
-                className="window-no-drag mini-key text-foreground/85 hover:text-primary! size-7 min-w-7 rounded-full text-[13px] dark:text-white/90"
+                className="window-no-drag mini-play size-7 min-w-7 text-white"
                 aria-label={isPlaying ? "暂停" : "播放"}
               >
                 {isPlaying ? <RiPauseFill size={13} /> : <RiPlayFill size={14} />}
