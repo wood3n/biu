@@ -1,14 +1,3 @@
----
-AIGC:
-  ContentProducer: '001191110102MAD55U9H0F10002'
-  ContentPropagator: '001191110102MAD55U9H0F10002'
-  Label: '1'
-  ProduceID: 'c0abb984-4e84-445f-a57a-380cf106b8d9'
-  PropagateID: 'c0abb984-4e84-445f-a57a-380cf106b8d9'
-  ReservedCode1: '50cf5e0a-c33b-49d8-a416-e014c2a4f9d4'
-  ReservedCode2: '50cf5e0a-c33b-49d8-a416-e014c2a4f9d4'
----
-
 # Changelog
 
 ## v3.0.0-xretia
