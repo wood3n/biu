@@ -44,16 +44,20 @@ const Layout = () => {
     >
       <div className="flex h-full flex-col">
         <MarqueeLights />
-        {/* 全屏播放器把这里整个盖住了：动画结束后整棵子树不再参与绘制（含导航栏/播放栏两层 backdrop-blur） */}
-        <div className={`flex min-h-0 w-full flex-1 ${fullScreenCovered ? "invisible" : ""}`}>
+        <div className="flex min-h-0 w-full flex-1">
           <SideNav />
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-            {/* 毛玻璃导航栏：absolute 悬浮于内容之上，内容可滚动穿过其下方 */}
+            {/* 毛玻璃导航栏：absolute 悬浮于内容之上，内容可滚动穿过其下方。
+                播放器盖住时只摘掉它的 backdrop-filter（见 Navbar 的 covered），
+                元素本身继续绘制 —— 它是窗口的拖拽区之一。 */}
             <div className="absolute inset-x-0 top-0 z-40 h-16">
-              <Navbar />
+              <Navbar covered={fullScreenCovered} />
             </div>
+            {/* 页面内容与播放栏在抽屉底下完全看不见，动画结束后整棵子树不再参与绘制 */}
             <div
-              className={`main-content relative flex min-h-0 flex-1 flex-col overflow-hidden ${playbarCollapsed ? "playbar-collapsed" : ""}`}
+              className={`main-content relative flex min-h-0 flex-1 flex-col overflow-hidden ${
+                playbarCollapsed ? "playbar-collapsed" : ""
+              } ${fullScreenCovered ? "invisible" : ""}`}
             >
               <div className="min-h-0 flex-1">
                 <Outlet />

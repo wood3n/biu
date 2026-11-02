@@ -15,7 +15,7 @@ import UserFeed from "./user-feed";
 
 const platform = window.electron.getPlatform();
 
-const LayoutNavbar = () => {
+const LayoutNavbar = ({ covered = false }: { covered?: boolean }) => {
   const user = useUser(s => s.user);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
@@ -26,7 +26,10 @@ const LayoutNavbar = () => {
     <div
       className={clx(
         "flex h-full items-center justify-between pr-2 pl-4",
-        "bg-background/70 border-b border-white/10 backdrop-blur-2xl backdrop-saturate-150 dark:border-white/5",
+        "bg-background/70 border-b border-white/10 dark:border-white/5",
+        // 全屏播放器盖住时这层看不见了，但仍要绘制：窗口拖拽区是按绘制块算出来的，
+        // 整棵子树 invisible 掉就没有拖拽区（实测窗口拖不动）。省掉的只是那层整屏 backdrop-filter。
+        !covered && "backdrop-blur-2xl backdrop-saturate-150",
         {
           "window-drag": !isNoDrag,
           "window-no-drag": isNoDrag,
