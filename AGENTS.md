@@ -632,6 +632,19 @@ props 换掉 `block/gap/armBlocks` 这套像素块参数，改成 `thickness / b
 
 **测歌词条的固定手法**：主窗口和歌词条是两套 webContents，`/json/list` 里两个 target 的 url 只差 hash，用 `includes` 匹配会连错（我这样量错过一次）—— 要先按 `url ===` 精确匹配。窗口尺寸可用 `Emulation.setDeviceMetricsOverride` 撑成 1600×900，但**改完 `electron/` 会重启 Electron、端口每次都变**，要重读 `DevToolsActivePort`。
 
+### 2026-11-02（第十三阶段）: 歌词条跟主界面同步显示假名注音
+
+**偏移本来就是同步的**（`postDesktopLyricsOffset` → 歌词条 `offsetRef`），缺的只有注音。
+
+- `isKana` / `isJapaneseLyrics` 从 `src/components/lyrics/index.tsx` 提到 `src/components/lyrics/kana.ts`，两处共用（歌词条也要判「是不是日语」，否则中文歌白跑一次转换）
+- `DesktopLyricsViewSettings` 多一个 `furigana`，取全局 `showLyricsFurigana` —— **不新增设置项**，歌词条跟着主界面那个开关走
+- 歌词条按行缓存注音 HTML（`furiganaRef`），只取当前句 + 下一句；转换失败记一条空串，不再重试；换歌清空
+- `measureLyricWidth` 的探针要带上 ruby 标记：`rt` 常比被注的字宽，量纯文本会让上色分界和滚动距离都算短
+- 两层（描边层 + 上色层）都渲染同一份 ruby HTML，所以 `background-clip: text` 的渐变会把注音一起换色 —— 注跟着它注的那个字变绿，正是想要的
+- 窗口高度**没动**：注音落在 `.desktop-lyrics-row` 那 32px 上留白里，双行实测下行的 ruby 不压上行的字
+
+**验证**（真应用，合成播放态；注音转换走主进程 kuroshiro 子进程，首次要等词典）：单行 `rtCount=4`、`--lyric-text-w=424px`（含 ruby）；双行截图确认两行都有注音、已唱部分的注音一起变绿。**踩的坑**：只改磁盘上的 `app-settings.json` 不会通知主窗口（electron-store 没有 `onDidChange`），镜像仍是旧值 —— 必须 `Page.reload` 主窗口才看得到新设置，第一次量双行就是这么量成单行的。
+
 
 1. **不要在渲染进程直接访问 Node API** — 通过 `window.electron.*` IPC 调用
 2. **新增 IPC 通道** — 在 `electron/ipc/channel.ts` 定义，`electron/ipc/` 下注册处理器，`preload.ts` 暴露，`shared/types/renderer.d.ts` 声明类型
